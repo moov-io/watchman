@@ -1,0 +1,40 @@
+language: go
+sudo: true
+services:
+  - docker
+env:
+  matrix:
+    - GO111MODULE=auto
+matrix:
+  # allow_failures:
+  #   - os: windows
+  include:
+    - os: linux
+      go: 1.11.x
+      cache:
+        directories:
+          - "/home/travis/.cache/go-build" # GOCACHE
+    - os: osx
+      go: 1.11.x
+      cache:
+        directories:
+          - "/Users/travis/Library/Caches/go-build" # GOCACHE
+before_install:
+  - go get -u github.com/client9/misspell/cmd/misspell
+  - go get -u golang.org/x/lint/golint
+  - go get github.com/fzipp/gocyclo
+  - go get -u honnef.co/go/tools/cmd/megacheck
+  - go get golang.org/x/tools/cmd/cover
+before_script:
+  - GOFILES=$(find . -type f -name '*.go' | grep -v vendor)
+script:
+  # Just check gofmt on linux, it's the fastest builder
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then test -z $(gofmt -s -l $GOFILES); fi
+  - go test ./... -race -coverprofile=coverage.txt -covermode=atomic
+  - misspell -error -locale US $GOFILES
+  - gocyclo -over 20 $GOFILES
+  - golint -set_exit_status $GOFILES
+  - megacheck ./...
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+  # - make docker # We don't have a Dockerfile to build, yet
