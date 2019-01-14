@@ -12,13 +12,15 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/go-kit/kit/log"
 )
 
 var (
 	esDockerImage = "elasticsearch:6.5.4"
 )
 
-func NewElasticsearch() (*elasticsearch, error) {
+func NewElasticsearch(logger log.Logger) (*elasticsearch, error) {
 	cmd := exec.Command("docker", "run", "-d", "-p", "9200:9200", "-p", "9300:9300", esDockerImage)
 
 	var stdout bytes.Buffer
@@ -27,13 +29,13 @@ func NewElasticsearch() (*elasticsearch, error) {
 	cmd.Stderr = &stderr
 
 	go func() {
-		if err := cmd.Run(); err != nil {
-			fmt.Printf("ERROR: %v\n", err)
+		if err := cmd.Run(); err != nil && logger != nil {
+			logger.Log("elasticsearch", fmt.Sprintf("ERROR: %v\n", err))
 		}
 	}()
 
 	es := &elasticsearch{}
-	if err := checkES(es); err != nil {
+	if err := checkES(logger, es); err != nil {
 		return es, err
 	}
 	es.dockerId = strings.TrimSpace(stdout.String())
@@ -69,8 +71,10 @@ func (es *elasticsearch) ping() chan error {
 	return out
 }
 
-func checkES(es *elasticsearch) error {
-	fmt.Println("Waiting for Elasticsearch to be healthy...")
+func checkES(logger log.Logger, es *elasticsearch) error {
+	if logger != nil {
+		logger.Log("elasticsearch", "Waiting for Elasticsearch to be healthy...")
+	}
 	ticker := time.After(60 * time.Second)
 	for {
 		select {
@@ -86,8 +90,11 @@ func checkES(es *elasticsearch) error {
 	}
 }
 
-func (es *elasticsearch) Stop() error {
+func (es *elasticsearch) Stop(logger log.Logger) error {
 	if es.dockerId != "" {
+		if logger != nil {
+			logger.Log("elasticsearch", fmt.Sprintf("shutting down Elasticsearch (Docker container ID: %s)", es.ID()))
+		}
 		return exec.Command("docker", "kill", es.dockerId).Run()
 	}
 	return nil

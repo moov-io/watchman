@@ -6,27 +6,23 @@ package ofac
 
 import (
 	"fmt"
-	"os/exec"
 	"runtime"
 	"testing"
+
+	"github.com/moov-io/base/docker"
 )
 
-func isDockerEnabled() bool {
-	bin, err := exec.LookPath("docker")
-	return bin != "" && err == nil // 'docker' was found on PATH
-}
-
 func TestElasticsearch(t *testing.T) {
-	if !isDockerEnabled() {
+	if !docker.Enabled() {
 		t.Skip(fmt.Sprintf("docker wasn't found on %s", runtime.GOOS))
 	}
 
-	es, err := NewElasticsearch()
+	es, err := NewElasticsearch(nil)
 	if err != nil {
 		t.Fatalf("%#v", err)
 	}
 	defer func() {
-		if err := es.Stop(); err != nil {
+		if err := es.Stop(nil); err != nil {
 			t.Fatalf("%#v", err)
 		}
 	}()
