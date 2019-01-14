@@ -29,7 +29,7 @@ func NewElasticsearch(logger log.Logger) (*elasticsearch, error) {
 	cmd.Stderr = &stderr
 
 	go func() {
-		if err := cmd.Run(); err != nil {
+		if err := cmd.Run(); err != nil && logger != nil {
 			logger.Log("elasticsearch", fmt.Sprintf("ERROR: %v\n", err))
 		}
 	}()
@@ -72,7 +72,9 @@ func (es *elasticsearch) ping() chan error {
 }
 
 func checkES(logger log.Logger, es *elasticsearch) error {
-	logger.Log("elasticsearch", "Waiting for Elasticsearch to be healthy...")
+	if logger != nil {
+		logger.Log("elasticsearch", "Waiting for Elasticsearch to be healthy...")
+	}
 	ticker := time.After(60 * time.Second)
 	for {
 		select {

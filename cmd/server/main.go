@@ -5,19 +5,25 @@
 package main
 
 import (
+	"context"
+	"crypto/tls"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/moov-io/base/admin"
 	"github.com/moov-io/base/docker"
+	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/base/http/bind"
 	"github.com/moov-io/base/k8s"
 	"github.com/moov-io/ofac"
 
 	"github.com/go-kit/kit/log"
+	"github.com/gorilla/mux"
 )
 
 var (
@@ -43,6 +49,35 @@ func main() {
 		errs <- fmt.Errorf("%s", <-c)
 	}()
 
+	// Setup business HTTP routes
+	router := mux.NewRouter()
+	moovhttp.AddCORSHandler(router)
+	addPingRoute(router)
+
+	// Start business HTTP server
+	readTimeout, _ := time.ParseDuration("30s")
+	writTimeout, _ := time.ParseDuration("30s")
+	idleTimeout, _ := time.ParseDuration("60s")
+
+	serve := &http.Server{
+		Addr:    *httpAddr,
+		Handler: router,
+		TLSConfig: &tls.Config{
+			InsecureSkipVerify:       false,
+			PreferServerCipherSuites: true,
+			MinVersion:               tls.VersionTLS12,
+		},
+		ReadTimeout:  readTimeout,
+		WriteTimeout: writTimeout,
+		IdleTimeout:  idleTimeout,
+	}
+	shutdownServer := func() {
+		if err := serve.Shutdown(context.TODO()); err != nil {
+			logger.Log("shutdown", err)
+		}
+	}
+
+	// Start Admin server (with Prometheus metrics)
 	adminServer := admin.NewServer(*adminAddr)
 	go func() {
 		logger.Log("admin", fmt.Sprintf("listening on %s", adminServer.BindAddr()))
@@ -64,7 +99,23 @@ func main() {
 		logger.Log("main", fmt.Sprintf("ES is up and running! (Docker container ID: %s)", es.ID()))
 	}
 
+	go func() {
+		logger.Log("transport", "HTTP", "addr", *httpAddr)
+		errs <- serve.ListenAndServe()
+		// TODO(adam): support TLS
+		// func (srv *Server) ListenAndServeTLS(certFile, keyFile string) error
+	}()
+
 	if err := <-errs; err != nil {
+		shutdownServer()
 		logger.Log("exit", err)
 	}
+}
+
+func addPingRoute(r *mux.Router) {
+	r.Methods("GET").Path("/ping").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("PONG"))
+	})
 }

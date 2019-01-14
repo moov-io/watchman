@@ -6,7 +6,6 @@ package ofac
 
 import (
 	"fmt"
-	"os/exec"
 	"runtime"
 	"testing"
 
@@ -18,12 +17,12 @@ func TestElasticsearch(t *testing.T) {
 		t.Skip(fmt.Sprintf("docker wasn't found on %s", runtime.GOOS))
 	}
 
-	es, err := NewElasticsearch()
+	es, err := NewElasticsearch(nil)
 	if err != nil {
 		t.Fatalf("%#v", err)
 	}
 	defer func() {
-		if err := es.Stop(); err != nil {
+		if err := es.Stop(nil); err != nil {
 			t.Fatalf("%#v", err)
 		}
 	}()

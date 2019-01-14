@@ -5,7 +5,7 @@ require (
 	github.com/go-logfmt/logfmt v0.4.0 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/gorilla/context v1.1.1 // indirect
-	github.com/gorilla/mux v1.6.2 // indirect
+	github.com/gorilla/mux v1.6.2
 	github.com/moov-io/base v0.4.1-0.20190114215742-ba0b73326a69
 	github.com/prometheus/client_golang v0.9.2 // indirect
 )
