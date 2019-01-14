@@ -37,4 +37,4 @@ script:
   - megacheck ./...
 after_success:
   - bash <(curl -s https://codecov.io/bash)
-  # - make docker # We don't have a Dockerfile to build, yet
+  - make docker # We don't have a Dockerfile to build, yet
