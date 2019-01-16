@@ -41,9 +41,9 @@ func TestSDNCommentsCSVFileRead(t *testing.T) {
 	r := Reader{}
 
 	r.FileName = "test/testdata/sdn_comments.csv"
-	 if err := r.Read(); err != nil {
-		 t.Errorf("%T: %s", err, err)
-	 }
+	if err := r.Read(); err != nil {
+		t.Errorf("%T: %s", err, err)
+	}
 }
 
 // TestInvalidFileExtension validates the file extension is csv
@@ -91,7 +91,6 @@ func TestSDNCSVFileHit(t *testing.T) {
 		t.Errorf("%s", "the check missed a specially designated name")
 	}
 }
-
 
 // TestSDNCSVFileJSON tests reading an OFAC Specially Designated National CSV File and formatting to JSON
 func TestSDNCSVFileJSON(t *testing.T) {
