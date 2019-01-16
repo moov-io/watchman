@@ -1,6 +1,7 @@
 package ofac
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 )
@@ -10,9 +11,7 @@ func TestAddressCSVFileRead(t *testing.T) {
 	r := Reader{}
 
 	r.FileName = "test/testdata/add.csv"
-	err := r.Read()
-
-	if err != nil {
+	if err := r.Read(); err != nil {
 		t.Errorf("%T: %s", err, err)
 	}
 }
@@ -22,9 +21,7 @@ func TestAlternateIDCSVFileRead(t *testing.T) {
 	r := Reader{}
 
 	r.FileName = "test/testdata/alt.csv"
-	err := r.Read()
-
-	if err != nil {
+	if err := r.Read(); err != nil {
 		t.Errorf("%T: %s", err, err)
 	}
 }
@@ -34,9 +31,7 @@ func TestSDNCSVFileRead(t *testing.T) {
 	r := Reader{}
 
 	r.FileName = "test/testdata/sdn.csv"
-	err := r.Read()
-
-	if err != nil {
+	if err := r.Read(); err != nil {
 		t.Errorf("%T: %s", err, err)
 	}
 }
@@ -46,11 +41,9 @@ func TestSDNCommentsCSVFileRead(t *testing.T) {
 	r := Reader{}
 
 	r.FileName = "test/testdata/sdn_comments.csv"
-	err := r.Read()
-
-	if err != nil {
-		t.Errorf("%T: %s", err, err)
-	}
+	 if err := r.Read(); err != nil {
+		 t.Errorf("%T: %s", err, err)
+	 }
 }
 
 // TestInvalidFileExtension validates the file extension is csv
@@ -97,4 +90,20 @@ func TestSDNCSVFileHit(t *testing.T) {
 	if !hit {
 		t.Errorf("%s", "the check missed a specially designated name")
 	}
+}
+
+
+// TestSDNCSVFileJSON tests reading an OFAC Specially Designated National CSV File and formatting to JSON
+func TestSDNCSVFileJSON(t *testing.T) {
+	r := Reader{}
+
+	r.FileName = "test/testdata/sdn.csv"
+	if err := r.Read(); err != nil {
+		t.Errorf("%T: %s", err, err)
+	}
+
+	if _, err := json.Marshal(r.SDNArray); err != nil {
+		t.Errorf("%T: %s", err, err)
+	}
+
 }
