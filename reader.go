@@ -14,12 +14,6 @@ import (
 const (
 	// csvFile is an OFAC CSVfile
 	csvFile = ".csv"
-	// delFile is an OFAC @ delimited file
-	delFile = ".del"
-	// pipFile is an OFAC | delimited file
-	pipFile = ".pip"
-	// fixedFieldFile is an OFAC fixed field file
-	fixedFieldFile = ".ff"
 	// xmlFile is an OFAC XML file
 	xmlFile = ".xml"
 
@@ -68,26 +62,12 @@ type Reader struct {
 	errors base.ErrorList
 }
 
-// ToDo: Remove .del, .pip, .ff?
-
 func (r *Reader) Read() error {
 	ext := filepath.Ext(r.FileName)
 
 	switch ext {
 	case csvFile:
 		if err := r.csvFile(); err != nil {
-			return err
-		}
-	case delFile:
-		if err := r.delFile(); err != nil {
-			return err
-		}
-	case fixedFieldFile:
-		if err := r.ffFile(); err != nil {
-			return err
-		}
-	case pipFile:
-		if err := r.pipFile(); err != nil {
 			return err
 		}
 	case xmlFile:
@@ -104,8 +84,6 @@ func (r *Reader) Read() error {
 
 // csvFile parses an SDN, Address, AlternateID, SDN_Comments OFAC CSV file
 func (r *Reader) csvFile() error {
-	// ToDo: Consider calling all csv*File amd sorting into 1 struct
-
 	if strings.Contains(r.FileName, addressFile) {
 		if err := r.csvAddressFile(); err != nil {
 			return err
@@ -276,21 +254,6 @@ func replaceNull(s []string) []string {
 		}
 	}
 	return s
-}
-
-// delFile parses an SDN, Address, AlternateID, SDN_Comments OFAC '@' delimited file
-func (r *Reader) delFile() error {
-	return nil
-}
-
-// ffFile parses an SDN, Address, AlternateID, SDN_Comments OFAC fixed field file
-func (r *Reader) ffFile() error {
-	return nil
-}
-
-// pipFile parses anSDN, Address, AlternateID, SDN_Comments OFAC '|' delimited file
-func (r *Reader) pipFile() error {
-	return nil
 }
 
 // xmlFile parses an SDN, Address, AlternateID, SDN_Comments OFAC XML file
