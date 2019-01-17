@@ -67,7 +67,7 @@ func TestCustomer_addNameWatch(t *testing.T) {
 	req := httptest.NewRequest("POST", "/customers/watch?name=foo", nil)
 	req.Header.Set("x-user-id", "test")
 
-	addCustomerWatch(nil)(w, req)
+	addCustomerNameWatch(nil)(w, req)
 	w.Flush()
 
 	if w.Code != http.StatusOK {
