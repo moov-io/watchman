@@ -28,7 +28,7 @@ func addSearchRoutes(logger log.Logger, r *mux.Router) {
 	r.Methods("POST").Path("/search/address").HandlerFunc(searchByAddress(logger))
 	r.Methods("POST").Path("/search/name").HandlerFunc(searchByName(logger))
 	r.Methods("POST").Path("/search/alt").HandlerFunc(searchByAltName(logger))
-	// r.Methods("POST").Path("/search/company").HandlerFunc(searchByAddress())
+	// r.Methods("POST").Path("/search/company").HandlerFunc(searchByAddress()) // TODO
 }
 
 type addressSearchRequest struct {
