@@ -129,10 +129,7 @@ func TestInvalidAlternateIDCSVFile(t *testing.T) {
 
 	r.FileName = "invalid/alt.csv"
 	if err := r.Read(); err != nil {
-		if e, ok := err.(*os.PathError); ok {
-			if !strings.Contains(e.Error(), "The system cannot find the path specified") {
-				t.Errorf("%T: %s", err, err)
-			}
+		if _, ok := err.(*os.PathError); ok {
 		} else {
 			t.Errorf("%T: %s", err, err)
 		}
@@ -145,10 +142,7 @@ func TestInvalidSDNCSVFile(t *testing.T) {
 	r := Reader{}
 	r.FileName = "invalid/sdn.csv"
 	if err := r.Read(); err != nil {
-		if e, ok := err.(*os.PathError); ok {
-			if !strings.Contains(e.Error(), "The system cannot find the path specified") {
-				t.Errorf("%T: %s", err, err)
-			}
+		if _, ok := err.(*os.PathError); ok {
 		} else {
 			t.Errorf("%T: %s", err, err)
 		}
@@ -160,10 +154,7 @@ func TestInvalidSDNCommentsCSVFile(t *testing.T) {
 	r := Reader{}
 	r.FileName = "invalid/sdn_comments.csv"
 	if err := r.Read(); err != nil {
-		if e, ok := err.(*os.PathError); ok {
-			if !strings.Contains(e.Error(), "The system cannot find the path specified") {
-				t.Errorf("%T: %s", err, err)
-			}
+		if _, ok := err.(*os.PathError); ok {
 		} else {
 			t.Errorf("%T: %s", err, err)
 		}
