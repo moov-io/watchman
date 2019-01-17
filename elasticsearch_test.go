@@ -16,6 +16,9 @@ func TestElasticsearch(t *testing.T) {
 	if !docker.Enabled() {
 		t.Skip(fmt.Sprintf("docker wasn't found on %s", runtime.GOOS))
 	}
+	if testing.Short() {
+		t.Skip("skipping expensive Elasticsearch test in short mode")
+	}
 
 	es, err := NewElasticsearch(nil)
 	if err != nil {
