@@ -113,10 +113,7 @@ func TestInvalidAddressCSVFile(t *testing.T) {
 
 	r.FileName = "invalid/add.csv"
 	if err := r.Read(); err != nil {
-		if e, ok := err.(*os.PathError); ok {
-			if !strings.Contains(e.Error(), "The system cannot find the path specified") {
-				t.Errorf("%T: %s", err, err)
-			}
+		if _, ok := err.(*os.PathError); ok {
 		} else {
 			t.Errorf("%T: %s", err, err)
 		}
