@@ -1,3 +1,7 @@
+// Copyright 2018 The Moov Authors
+// Use of this source code is governed by an Apache License
+// license that can be found in the LICENSE file.
+
 package ofac
 
 // ToDo: NON-SDN List, Consolidated List - They appear to have the same format. Other list?
