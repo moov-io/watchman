@@ -9,7 +9,7 @@ package main
 // POST /companies/:id/watch
 // - monitor company by id
 
-// POST /companies/name/:name/watch
+// POST /companies/watch?name=...
 // - monitor company by name, reparsed on each search
 
 // GET /companies/:id
@@ -21,5 +21,5 @@ package main
 // DELETE /companies/:id/watch
 // - stop watching company
 
-// DELETE /companies/name/:name/watch
-// - stop watching companies name
+// DELETE /companies/watch/:watchId
+// - stop watching company by watchId
