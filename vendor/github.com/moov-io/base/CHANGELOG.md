@@ -1,3 +1,15 @@
+## v0.5.0 (Released 2019-01-17)
+
+BUG FIXES
+
+- http: don't panic if nil idempotent.Recorder is passed to ResponseWriter
+
+ADDITIONS
+
+- http/bind: Add [OFAC](https://github.com/moov-io/ofac) and [GL](https://github.com/moov-io/gl) services
+- k8s: Add [`Inside()`](https://godoc.org/github.com/moov-io/base/k8s#Inside) for cluster awareness.
+- docker: Add [`Enabled()`](https://godoc.org/github.com/moov-io/base/docker#Enabled) for compatability checks.
+
 ## v0.4.0 (Released 2019-01-11)
 
 BREAKING CHANGES

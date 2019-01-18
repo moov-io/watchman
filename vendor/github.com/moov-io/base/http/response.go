@@ -103,8 +103,10 @@ func (w *ResponseWriter) ensureHeaders(rec idempotent.Recorder) error {
 		}
 		return ErrNoUserId
 	}
-	if _, seen := idempotent.FromRequest(w.request, rec); seen {
-		return idempotent.ErrSeenBefore
+	if rec != nil {
+		if _, seen := idempotent.FromRequest(w.request, rec); seen {
+			return idempotent.ErrSeenBefore
+		}
 	}
 	return nil
 }
