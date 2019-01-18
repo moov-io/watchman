@@ -7,6 +7,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
 
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/ofac"
@@ -15,24 +16,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// POST /search/address
-// - Search for address records matching the given search criteria.
-
-// POST /search/name?k=v
-// - fuzzy name search
-// - See: https://github.com/moov-io/ofac/issues/6
-
-// POST /search/alt?k=v
-// - fuzzy alternate name search
-
-// POST /search/company?k=v
-// - fuzzy company name search
-
 func addSearchRoutes(logger log.Logger, r *mux.Router) {
-	r.Methods("POST").Path("/search/address").HandlerFunc(searchByAddress(logger))
-	r.Methods("POST").Path("/search/name").HandlerFunc(searchByName(logger))
-	r.Methods("POST").Path("/search/alt").HandlerFunc(searchByAltName(logger))
-	// r.Methods("POST").Path("/search/company").HandlerFunc(searchByAddress()) // TODO
+	r.Methods("GET").Path("/search/address").HandlerFunc(searchByAddress(logger)) // TODO(adam): GET's ?
+	r.Methods("GET").Path("/search/name").HandlerFunc(searchByName(logger))
+	r.Methods("GET").Path("/search/alt").HandlerFunc(searchByAltName(logger))
+	// r.Methods("GET").Path("/search/company").HandlerFunc(searchByAddress()) // TODO
 }
 
 type addressSearchRequest struct {
@@ -44,6 +32,17 @@ type addressSearchRequest struct {
 	Country    string `json:"country"`
 }
 
+func readAddressSearchRequest(u *url.URL) addressSearchRequest {
+	return addressSearchRequest{
+		Address:    u.Query().Get("address"),
+		City:       u.Query().Get("city"),
+		State:      u.Query().Get("state"),
+		Providence: u.Query().Get("providence"),
+		Zip:        u.Query().Get("zip"),
+		Country:    u.Query().Get("country"),
+	}
+}
+
 func searchByAddress(logger log.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w, err := wrapResponseWriter(logger, w, r)
@@ -51,12 +50,7 @@ func searchByAddress(logger log.Logger) http.HandlerFunc {
 			return
 		}
 
-		var req addressSearchRequest
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			moovhttp.Problem(w, err)
-			return
-		}
-		// TODO: do something with req
+		_ = readAddressSearchRequest(r.URL) // TODO(adam): do something with req
 
 		w.WriteHeader(http.StatusOK)
 

@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"strings"
+	"net/url"
 	"testing"
 
 	"github.com/moov-io/ofac"
@@ -16,9 +16,32 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func TestSearch__addressSearchRequest(t *testing.T) {
+	u, _ := url.Parse("https://moov.io/search?address=add&city=new+york&state=ny&providence=prov&zip=44433&country=usa")
+	req := readAddressSearchRequest(u)
+	if req.Address != "add" {
+		t.Errorf("req.Address=%s", req.Address)
+	}
+	if req.City != "new york" {
+		t.Errorf("req.City=%s", req.City)
+	}
+	if req.State != "ny" {
+		t.Errorf("req.State=%s", req.State)
+	}
+	if req.Providence != "prov" {
+		t.Errorf("req.Providence=%s", req.Providence)
+	}
+	if req.Zip != "44433" {
+		t.Errorf("req.Zip=%s", req.Zip)
+	}
+	if req.Country != "usa" {
+		t.Errorf("req.Country=%s", req.Country)
+	}
+}
+
 func TestSearch__Address(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("POST", "/search/address", strings.NewReader("{}")) // TODO(adam): include body later
+	req := httptest.NewRequest("GET", "/search/address?address=111+N+scott+st", nil)
 	req.Header.Set("x-user-id", "test")
 
 	router := mux.NewRouter()
@@ -44,7 +67,7 @@ func TestSearch__Address(t *testing.T) {
 
 func TestSearch__Name(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("POST", "/search/name", strings.NewReader("{}")) // TODO(adam): include body later
+	req := httptest.NewRequest("GET", "/search/name", nil)
 	req.Header.Set("x-user-id", "test")
 
 	router := mux.NewRouter()
@@ -70,7 +93,7 @@ func TestSearch__Name(t *testing.T) {
 
 func TestSearch__AltName(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("POST", "/search/alt", strings.NewReader("{}")) // TODO(adam): include body later
+	req := httptest.NewRequest("GET", "/search/alt", nil)
 	req.Header.Set("x-user-id", "test")
 
 	router := mux.NewRouter()
