@@ -1,7 +1,3 @@
-// Copyright 2018 The Moov Authors
-// Use of this source code is governed by an Apache License
-// license that can be found in the LICENSE file.
-
 package ofac
 
 import (
@@ -18,8 +14,6 @@ import (
 const (
 	// csvFile is an OFAC CSVfile
 	csvFile = ".csv"
-	// xmlFile is an OFAC XML file
-	xmlFile = ".xml"
 
 	// addressFile is an OFAC Specially Designated National (SDN) address File
 	addressFile = "add.csv"
@@ -72,10 +66,6 @@ func (r *Reader) Read() error {
 	switch ext {
 	case csvFile:
 		if err := r.csvFile(); err != nil {
-			return err
-		}
-	case xmlFile:
-		if err := r.xmlFile(); err != nil {
 			return err
 		}
 	default:
@@ -258,9 +248,4 @@ func replaceNull(s []string) []string {
 		}
 	}
 	return s
-}
-
-// xmlFile parses an SDN, Address, AlternateID, SDN_Comments OFAC XML file
-func (r *Reader) xmlFile() error {
-	return nil
 }
