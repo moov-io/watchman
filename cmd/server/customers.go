@@ -68,28 +68,28 @@ func getCustomer(logger log.Logger) http.HandlerFunc {
 		customer := Customer{
 			ID: "13ou1fohfkajfah", // "random"
 			SDN: &ofac.SDN{
-				EntityID: "2676",
-				SDNName:  "AL ZAWAHIRI, Dr. Ayman",
+				EntityID: "306",
+				SDNName:  "BANCO NACIONAL DE CUBA",
 				SDNType:  "individual",
-				Program:  "SDGT] [SDT",
-				Title:    "Operational and Military Leader of JIHAD GROUP",
-				Remarks:  "DOB 19 Jun 1951; POB Giza, Egypt; Passport 1084010 (Egypt); alt. Passport 19820215; Operational and Military Leader of JIHAD GROUP.",
+				Program:  "CUBA",
+				Title:    "",
+				Remarks:  "a.k.a. 'BNC'.",
 			},
 			Addresses: []*ofac.Address{
 				{
-					EntityID:                    "173",
-					AddressID:                   "129",
-					Address:                     "Ibex House, The Minories",
-					CityStateProvincePostalCode: "London EC3N 1DY",
-					Country:                     "United Kingdom",
+					EntityID:                    "306",
+					AddressID:                   "201",
+					Address:                     "Dai-Ichi Bldg. 6th Floor, 10-2 Nihombashi, 2-chome, Chuo-ku",
+					CityStateProvincePostalCode: "Tokyo 103",
+					Country:                     "Japan",
 				},
 			},
 			Alts: []*ofac.AlternateIdentity{
 				{
-					EntityID:      "559",
-					AlternateID:   "481",
+					EntityID:      "306",
+					AlternateID:   "220",
 					AlternateType: "aka",
-					AlternateName: "CIMEX",
+					AlternateName: "NATIONAL BANK OF CUBA",
 				},
 			},
 		}
