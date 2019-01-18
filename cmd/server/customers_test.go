@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gorilla/mux"
 )
 
 func TestCustomer_get(t *testing.T) {
@@ -16,7 +18,9 @@ func TestCustomer_get(t *testing.T) {
 	req := httptest.NewRequest("GET", "/customers/foo", nil)
 	req.Header.Set("x-user-id", "test")
 
-	getCustomer(nil)(w, req)
+	router := mux.NewRouter()
+	addCustomerRoutes(nil, router)
+	router.ServeHTTP(w, req)
 	w.Flush()
 
 	if w.Code != http.StatusOK {
@@ -46,7 +50,9 @@ func TestCustomer_addWatch(t *testing.T) {
 	req := httptest.NewRequest("POST", "/customers/foo/watch", nil)
 	req.Header.Set("x-user-id", "test")
 
-	addCustomerWatch(nil)(w, req)
+	router := mux.NewRouter()
+	addCustomerRoutes(nil, router)
+	router.ServeHTTP(w, req)
 	w.Flush()
 
 	if w.Code != http.StatusOK {
@@ -67,7 +73,9 @@ func TestCustomer_addNameWatch(t *testing.T) {
 	req := httptest.NewRequest("POST", "/customers/watch?name=foo", nil)
 	req.Header.Set("x-user-id", "test")
 
-	addCustomerNameWatch(nil)(w, req)
+	router := mux.NewRouter()
+	addCustomerRoutes(nil, router)
+	router.ServeHTTP(w, req)
 	w.Flush()
 
 	if w.Code != http.StatusOK {
@@ -88,7 +96,9 @@ func TestCustomer_update(t *testing.T) {
 	req := httptest.NewRequest("PUT", "/customers/foo", nil)
 	req.Header.Set("x-user-id", "test")
 
-	updateCustomer(nil)(w, req)
+	router := mux.NewRouter()
+	addCustomerRoutes(nil, router)
+	router.ServeHTTP(w, req)
 	w.Flush()
 
 	if w.Code != http.StatusOK {
@@ -101,7 +111,9 @@ func TestCustomer_removeWatch(t *testing.T) {
 	req := httptest.NewRequest("DELETE", "/customers/foo/watch", nil)
 	req.Header.Set("x-user-id", "test")
 
-	removeCustomerWatch(nil)(w, req)
+	router := mux.NewRouter()
+	addCustomerRoutes(nil, router)
+	router.ServeHTTP(w, req)
 	w.Flush()
 
 	if w.Code != http.StatusOK {
@@ -114,7 +126,9 @@ func TestCustomer_removeNameWatch(t *testing.T) {
 	req := httptest.NewRequest("DELETE", "/customers/watch/foo", nil)
 	req.Header.Set("x-user-id", "test")
 
-	removeCustomerNameWatch(nil)(w, req)
+	router := mux.NewRouter()
+	addCustomerRoutes(nil, router)
+	router.ServeHTTP(w, req)
 	w.Flush()
 
 	if w.Code != http.StatusOK {

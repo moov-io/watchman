@@ -12,6 +12,8 @@ import (
 	"testing"
 
 	"github.com/moov-io/ofac"
+
+	"github.com/gorilla/mux"
 )
 
 func TestSearch__Address(t *testing.T) {
@@ -19,7 +21,9 @@ func TestSearch__Address(t *testing.T) {
 	req := httptest.NewRequest("POST", "/search/address", strings.NewReader("{}")) // TODO(adam): include body later
 	req.Header.Set("x-user-id", "test")
 
-	searchByAddress(nil)(w, req)
+	router := mux.NewRouter()
+	addSearchRoutes(nil, router)
+	router.ServeHTTP(w, req)
 	w.Flush()
 
 	if w.Code != http.StatusOK {
@@ -43,7 +47,9 @@ func TestSearch__Name(t *testing.T) {
 	req := httptest.NewRequest("POST", "/search/name", strings.NewReader("{}")) // TODO(adam): include body later
 	req.Header.Set("x-user-id", "test")
 
-	searchByName(nil)(w, req)
+	router := mux.NewRouter()
+	addSearchRoutes(nil, router)
+	router.ServeHTTP(w, req)
 	w.Flush()
 
 	if w.Code != http.StatusOK {
@@ -67,7 +73,9 @@ func TestSearch__AltName(t *testing.T) {
 	req := httptest.NewRequest("POST", "/search/alt", strings.NewReader("{}")) // TODO(adam): include body later
 	req.Header.Set("x-user-id", "test")
 
-	searchByAltName(nil)(w, req)
+	router := mux.NewRouter()
+	addSearchRoutes(nil, router)
+	router.ServeHTTP(w, req)
 	w.Flush()
 
 	if w.Code != http.StatusOK {
