@@ -30,12 +30,12 @@ func init() {
 	}
 }
 
-// ofacDownloader will download and cache OFAC files in a temp directory.
+// Downloader will download and cache OFAC files in a temp directory.
 //
 // If HTTP is nil then http.DefaultClient will be used (which has NO timeouts).
 //
 // See: https://www.treasury.gov/resource-center/sanctions/SDN-List/Pages/sdn_data.aspx
-type ofacDownloader struct {
+type Downloader struct {
 	HTTP *http.Client
 }
 
@@ -43,7 +43,7 @@ type ofacDownloader struct {
 // returned and an error otherwise.
 //
 // Callers are expected to cleanup the temp directory.
-func (dl *ofacDownloader) getFiles() (string, error) {
+func (dl *Downloader) GetFiles() (string, error) {
 	if dl.HTTP == nil {
 		dl.HTTP = http.DefaultClient
 	}

@@ -10,9 +10,9 @@ import (
 	"testing"
 )
 
-func TestOFACDownloader(t *testing.T) {
-	dl := ofacDownloader{}
-	dir, err := dl.getFiles()
+func TestDownloader(t *testing.T) {
+	dl := Downloader{}
+	dir, err := dl.GetFiles()
 	if err != nil {
 		t.Fatal(err)
 	}
