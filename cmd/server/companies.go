@@ -15,7 +15,7 @@ package main
 // GET /companies/:id
 // - get company information and matches
 
-// POST /companies/:id
+// PUT /companies/:id
 // - mark company as blocked or unblocked
 
 // DELETE /companies/:id/watch
