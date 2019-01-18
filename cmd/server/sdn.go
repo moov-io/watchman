@@ -15,15 +15,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// GET /sdn/:id/addresses
-// - get addresses for a given SDN
-
-// GET /sdn/:id/alternateNames
-// - get alternate names for a given SDN
-
-// GET /sdn/:id
-// - get SDN information
-
 func addSDNRoutes(logger log.Logger, r *mux.Router) {
 	r.Methods("GET").Path("/sdn/{id}/addresses").HandlerFunc(getSDNAddresses(logger))
 	r.Methods("GET").Path("/sdn/{id}/alts").HandlerFunc(getSDNAltNames(logger))

@@ -15,24 +15,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// GET /customers/:id
-// - get customer information and matches
-
-// POST /customers/watch?name=...
-// - monitor customer by name, re-parse on each search
-
-// POST /customers/:id/watch
-// - monitor customer
-
-// PUT /customers/:id
-// - mark customer as blocked or unblocked
-
-// DELETE /customers/:id/watch
-// - stop watching customer
-
-// DELETE /customers/watch?name=...
-// - stop watching customer name
-
 type Customer struct {
 	ID        string                    `json:"id"`
 	SDN       *ofac.SDN                 `json:"sdn"`
