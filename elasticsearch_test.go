@@ -22,16 +22,24 @@ func TestElasticsearch(t *testing.T) {
 
 	es, err := NewElasticsearch(nil)
 	if err != nil {
-		t.Fatalf("%#v", err)
+		t.Fatal(err)
 	}
 	defer func() {
 		if err := es.Stop(nil); err != nil {
-			t.Fatalf("%#v", err)
+			t.Fatal(err)
 		}
 	}()
 
 	// Check we can ping
 	if err := <-es.ping(); err != nil {
-		t.Fatalf("%#v", err)
+		t.Fatal(err)
+	}
+	if err := es.Ping(); err != nil {
+		t.Fatal(err)
+	}
+
+	// Grab Docker container ID
+	if id := es.ID(); id == "" {
+		t.Fatal("no docker container ID found")
 	}
 }
