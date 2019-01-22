@@ -12,6 +12,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"sync"
 	"syscall"
 	"time"
 
@@ -92,16 +94,42 @@ func main() {
 	}()
 	defer adminServer.Shutdown()
 
-	// Start Elasticsearch for local dev if Docker exists
-	if !k8s.Inside() && docker.Enabled() {
-		es, err := ofac.NewElasticsearch(logger)
-		if err != nil {
-			fmt.Printf("ERROR: %v\n", err)
-		}
-		defer es.Stop(logger)
-		logger.Log("main", fmt.Sprintf("ES is up and running! (Docker container ID: %s)", es.ID()))
-	}
+	wg := sync.WaitGroup{}
 
+	// Start Elasticsearch for local dev if Docker exists
+	var es *ofac.Elasticsearch
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		db, err := startElasticsearch(logger)
+		if err != nil {
+			panic(fmt.Sprintf("ERROR: starting elasticsearch: %v", err))
+		}
+		es = db
+	}()
+	defer func() {
+		if es != nil {
+			es.Stop(logger)
+		}
+	}()
+
+	// Download OFAC data
+	var reader *ofac.Reader
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		r, err := getAndParseOFACData()
+		if err != nil {
+			panic(err.Error())
+		}
+		reader = r
+	}()
+	logger.Log("main", fmt.Sprintf("OFAC data downloaded and parsed: Addresses=%d AltNames=%d SDNs=%d", len(reader.AddressArray), len(reader.AlternateIdentityArray), len(reader.SDNArray)))
+
+	// Block until startup processes are finished
+	wg.Wait()
+
+	// Start business logic HTTP server
 	go func() {
 		logger.Log("transport", "HTTP", "addr", *httpAddr)
 		errs <- serve.ListenAndServe()
@@ -109,6 +137,7 @@ func main() {
 		// func (srv *Server) ListenAndServeTLS(certFile, keyFile string) error
 	}()
 
+	// Block/Wait for an error
 	if err := <-errs; err != nil {
 		shutdownServer()
 		logger.Log("exit", err)
@@ -121,4 +150,39 @@ func addPingRoute(r *mux.Router) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("PONG"))
 	})
+}
+
+func startElasticsearch(logger log.Logger) (*ofac.Elasticsearch, error) {
+	if !k8s.Inside() && docker.Enabled() {
+		es, err := ofac.NewElasticsearch(logger)
+		if err != nil {
+			return nil, err
+		}
+		logger.Log("main", fmt.Sprintf("ES is up and running! (Docker container ID: %s)", es.ID()))
+		return es, nil
+	}
+	return nil, nil
+}
+
+func getAndParseOFACData() (*ofac.Reader, error) {
+	dir, err := (&ofac.Downloader{}).GetFiles()
+	if err != nil {
+		return nil, fmt.Errorf("ERROR: downloading OFAC data: %v", err)
+	}
+
+	// Parse each OFAC file
+	r := &ofac.Reader{}
+	r.FileName = filepath.Join(dir, "add.csv")
+	if err := r.Read(); err != nil {
+		return nil, fmt.Errorf("ERROR: reading add.csv: %v", err)
+	}
+	r.FileName = filepath.Join(dir, "alt.csv")
+	if err := r.Read(); err != nil {
+		return nil, fmt.Errorf("ERROR: reading alt.csv: %v", err)
+	}
+	r.FileName = filepath.Join(dir, "sdn.csv")
+	if err := r.Read(); err != nil {
+		return nil, fmt.Errorf("ERROR: reading sdn.csv: %v", err)
+	}
+	return r, nil
 }

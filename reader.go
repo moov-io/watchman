@@ -8,6 +8,7 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -115,27 +116,28 @@ func (r *Reader) csvAddressFile() error {
 	defer f.Close()
 
 	// Read File into a Variable
-	lines, err := csv.NewReader(f).ReadAll()
-	if err != nil {
-		return err
-	}
-
-	// Loop through lines & turn into object
-	for _, csvLine := range lines {
-		//csvLine := replaceNull(csvLine)
-
-		a := Address{
-			EntityID:                    csvLine[0],
-			AddressID:                   csvLine[1],
-			Address:                     csvLine[2],
-			CityStateProvincePostalCode: csvLine[3],
-			Country:                     csvLine[4],
-			AddressRemarks:              csvLine[5],
+	reader := csv.NewReader(f)
+	for {
+		record, err := reader.Read()
+		if err != nil && err == csv.ErrFieldCount {
+			continue
 		}
-		/*		fmt.Println(a.EntityID + " " + a.AddressID + " " + a.Address + " " + a.CityStateProvincePostalCode + " " +
-				a.Country + " " + a.AddressRemarks)*/
+		if err == io.EOF { // TODO(Adam): add max line count break here also
+			break
+		}
+		if len(record) != 6 {
+			continue
+		}
 
-		r.AddressArray = append(r.AddressArray, a)
+		addr := Address{
+			EntityID:                    record[0],
+			AddressID:                   record[1],
+			Address:                     record[2],
+			CityStateProvincePostalCode: record[3],
+			Country:                     record[4],
+			AddressRemarks:              record[5],
+		}
+		r.AddressArray = append(r.AddressArray, addr)
 	}
 	return nil
 }
@@ -149,26 +151,27 @@ func (r *Reader) csvAlternateIdentityFile() error {
 	defer f.Close()
 
 	// Read File into a Variable
-	lines, err := csv.NewReader(f).ReadAll()
-	if err != nil {
-		return err
-	}
-
-	// Loop through lines & turn into object
-	for _, csvLine := range lines {
-		//csvLine := replaceNull(csvLine)
+	reader := csv.NewReader(f)
+	for {
+		record, err := reader.Read()
+		if err != nil && err == csv.ErrFieldCount {
+			continue
+		}
+		if err == io.EOF { // TODO(adam)
+			break
+		}
+		if len(record) != 5 {
+			continue
+		}
 
 		alt := AlternateIdentity{
-			EntityID:         csvLine[0],
-			AlternateID:      csvLine[1],
-			AlternateType:    csvLine[2],
-			AlternateName:    csvLine[3],
-			AlternateRemarks: csvLine[4],
+			EntityID:         record[0],
+			AlternateID:      record[1],
+			AlternateType:    record[2],
+			AlternateName:    record[3],
+			AlternateRemarks: record[4],
 		}
-		//fmt.Println(alt.EntityID + " " + alt.AlternateID + " " + alt.AlternateType + " " + alt.AlternateName + " " + alt.AlternateRemarks)
-
 		r.AlternateIdentityArray = append(r.AlternateIdentityArray, alt)
-
 	}
 	return nil
 }
@@ -182,33 +185,33 @@ func (r *Reader) csvSDNFile() error {
 	defer f.Close()
 
 	// Read File into a Variable
-	lines, err := csv.NewReader(f).ReadAll()
-	if err != nil {
-		return err
-	}
-
-	// Loop through lines & turn into object
-	for _, csvLine := range lines {
-		//csvLine := replaceNull(csvLine)
+	reader := csv.NewReader(f)
+	for {
+		record, err := reader.Read()
+		if err != nil && err == csv.ErrFieldCount {
+			continue
+		}
+		if err == io.EOF { // TODO(Adam): add max line count break here also
+			break
+		}
+		if len(record) != 12 {
+			continue
+		}
 
 		sdn := SDN{
-			EntityID:               csvLine[0],
-			SDNName:                csvLine[1],
-			SDNType:                csvLine[2],
-			Program:                csvLine[3],
-			Title:                  csvLine[4],
-			CallSign:               csvLine[5],
-			VesselType:             csvLine[6],
-			Tonnage:                csvLine[7],
-			GrossRegisteredTonnage: csvLine[8],
-			VesselFlag:             csvLine[9],
-			VesselOwner:            csvLine[10],
-			Remarks:                csvLine[11],
+			EntityID:               record[0],
+			SDNName:                record[1],
+			SDNType:                record[2],
+			Program:                record[3],
+			Title:                  record[4],
+			CallSign:               record[5],
+			VesselType:             record[6],
+			Tonnage:                record[7],
+			GrossRegisteredTonnage: record[8],
+			VesselFlag:             record[9],
+			VesselOwner:            record[10],
+			Remarks:                record[11],
 		}
-		/*		fmt.Println(sdn.EntityID + " " + sdn.SDNName + " " + sdn.SDNType + " " + sdn.Program + " " + sdn.Title + " " +
-				sdn.CallSign + " " + sdn.VesselType + " " + sdn.Tonnage + " " + sdn.GrossRegisteredTonnage + " " +
-				sdn.VesselFlag + " " + sdn.VesselOwner + " " + sdn.Remarks)*/
-
 		r.SDNArray = append(r.SDNArray, sdn)
 	}
 	return nil

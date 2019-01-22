@@ -20,7 +20,8 @@ var (
 	esDockerImage = "elasticsearch:6.5.4"
 )
 
-func NewElasticsearch(logger log.Logger) (*elasticsearch, error) {
+// NewElasticsearch will launch and monitor a Docker container of Elasticsearch
+func NewElasticsearch(logger log.Logger) (es *Elasticsearch, err error) {
 	cmd := exec.Command("docker", "run", "-d", "-p", "9200:9200", "-p", "9300:9300", esDockerImage)
 
 	var stdout bytes.Buffer
@@ -29,12 +30,12 @@ func NewElasticsearch(logger log.Logger) (*elasticsearch, error) {
 	cmd.Stderr = &stderr
 
 	go func() {
-		if err := cmd.Run(); err != nil && logger != nil {
+		if err = cmd.Run(); err != nil && logger != nil {
 			logger.Log("elasticsearch", fmt.Sprintf("ERROR: %v\n", err))
 		}
 	}()
 
-	es := &elasticsearch{}
+	es = &Elasticsearch{}
 	if err := checkES(logger, es); err != nil {
 		return es, err
 	}
@@ -42,18 +43,28 @@ func NewElasticsearch(logger log.Logger) (*elasticsearch, error) {
 	return es, nil
 }
 
-type elasticsearch struct {
+// Elasticsearch wraps a docker container of Elasticsearch
+type Elasticsearch struct { // TODO(adam): move into internal/ package?
 	dockerId string
 }
 
-func (es *elasticsearch) ID() string {
+// ID returns the docker ID for the running container
+func (es *Elasticsearch) ID() string {
 	if utf8.RuneCountInString(es.dockerId) > 12 {
 		return es.dockerId[:12]
 	}
 	return ""
 }
 
-func (es *elasticsearch) ping() chan error {
+// Ping checks if Elasticsearch is up and running.
+func (es *Elasticsearch) Ping() error {
+	if es != nil {
+		return <-es.ping()
+	}
+	return nil
+}
+
+func (es *Elasticsearch) ping() chan error {
 	out := make(chan error, 1)
 
 	// HTTP check (port 9200)
@@ -71,7 +82,7 @@ func (es *elasticsearch) ping() chan error {
 	return out
 }
 
-func checkES(logger log.Logger, es *elasticsearch) error {
+func checkES(logger log.Logger, es *Elasticsearch) error {
 	if logger != nil {
 		logger.Log("elasticsearch", "Waiting for Elasticsearch to be healthy...")
 	}
@@ -90,7 +101,11 @@ func checkES(logger log.Logger, es *elasticsearch) error {
 	}
 }
 
-func (es *elasticsearch) Stop(logger log.Logger) error {
+// Stop will shutdown the Elasticsearch docker container
+func (es *Elasticsearch) Stop(logger log.Logger) error {
+	if es == nil {
+		return nil
+	}
 	if es.dockerId != "" {
 		if logger != nil {
 			logger.Log("elasticsearch", fmt.Sprintf("shutting down Elasticsearch (Docker container ID: %s)", es.ID()))
