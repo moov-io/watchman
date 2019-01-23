@@ -163,7 +163,7 @@ func (r *Reader) csvAlternateIdentityFile() error {
 		if len(record) != 5 {
 			continue
 		}
-
+		record = replaceNull(record)
 		alt := AlternateIdentity{
 			EntityID:         record[0],
 			AlternateID:      record[1],
@@ -197,7 +197,7 @@ func (r *Reader) csvSDNFile() error {
 		if len(record) != 12 {
 			continue
 		}
-
+		record = replaceNull(record)
 		sdn := SDN{
 			EntityID:               record[0],
 			SDNName:                record[1],
@@ -234,13 +234,10 @@ func (r *Reader) csvSDNCommentsFile() error {
 	// Loop through lines & turn into object
 	for _, csvLine := range lines {
 		csvLine := replaceNull(csvLine)
-
 		sdnComments := SDNComments{
 			EntityID:        csvLine[0],
 			RemarksExtended: csvLine[1],
 		}
-		//fmt.Println(sdnComments.EntityID + " " + sdnComments.RemarksExtended)
-
 		r.SDNCommentsArray = append(r.SDNCommentsArray, sdnComments)
 	}
 	return nil
