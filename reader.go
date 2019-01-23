@@ -53,14 +53,14 @@ func (r *Reader) parseError(err error) error {
 type Reader struct {
 	// FileName is the name of the file
 	FileName string `json:"fileName"`
-	// AddressArray returns an array of OFAC Specially Designated National Addresses
-	AddressArray []Address `json:"addressArray"`
-	// AddressArray returns an array of OFAC Specially Designated National Alternate Identity
-	AlternateIdentityArray []AlternateIdentity `json:"alternateIdentityArray"`
-	// SDNArray returns an array of OFAC Specially Designated Nationals
-	SDNArray []SDN `json:"sdnArray"`
-	// SDNCommentsArray returns an array of OFAC Specially Designated National Comments
-	SDNCommentsArray []SDNComments `json:"sdnCommentsArray"`
+	// Addresses returns an array of OFAC Specially Designated National Addresses
+	Addresses []Address `json:"address"`
+	// AlternateIdentities returns an array of OFAC Specially Designated National Alternate Identity
+	AlternateIdentities []AlternateIdentity `json:"alternateIdentity"`
+	// SDNs returns an array of OFAC Specially Designated Nationals
+	SDNs []SDN `json:"sdn"`
+	// SDNComments returns an array of OFAC Specially Designated National Comments
+	SDNComments []SDNComments `json:"sdnComments"`
 	// errors holds each error encountered when attempting to parse the file
 	errors base.ErrorList
 }
@@ -137,7 +137,7 @@ func (r *Reader) csvAddressFile() error {
 			Country:                     record[4],
 			AddressRemarks:              record[5],
 		}
-		r.AddressArray = append(r.AddressArray, addr)
+		r.Addresses = append(r.Addresses, addr)
 	}
 	return nil
 }
@@ -171,7 +171,7 @@ func (r *Reader) csvAlternateIdentityFile() error {
 			AlternateName:    record[3],
 			AlternateRemarks: record[4],
 		}
-		r.AlternateIdentityArray = append(r.AlternateIdentityArray, alt)
+		r.AlternateIdentities = append(r.AlternateIdentities, alt)
 	}
 	return nil
 }
@@ -212,7 +212,7 @@ func (r *Reader) csvSDNFile() error {
 			VesselOwner:            record[10],
 			Remarks:                record[11],
 		}
-		r.SDNArray = append(r.SDNArray, sdn)
+		r.SDNs = append(r.SDNs, sdn)
 	}
 	return nil
 }
@@ -238,7 +238,7 @@ func (r *Reader) csvSDNCommentsFile() error {
 			EntityID:        csvLine[0],
 			RemarksExtended: csvLine[1],
 		}
-		r.SDNCommentsArray = append(r.SDNCommentsArray, sdnComments)
+		r.SDNComments = append(r.SDNComments, sdnComments)
 	}
 	return nil
 }

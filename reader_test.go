@@ -87,7 +87,7 @@ func TestSDNCSVFileHit(t *testing.T) {
 	}
 
 	hit := false
-	for _, sdn := range r.SDNArray {
+	for _, sdn := range r.SDNs {
 		if sdn.SDNName == "HAWATMA, Nayif" {
 			hit = true
 		}
@@ -106,7 +106,7 @@ func TestSDNCSVFileJSON(t *testing.T) {
 		t.Errorf("%T: %s", err, err)
 	}
 
-	if _, err := json.Marshal(r.SDNArray); err != nil {
+	if _, err := json.Marshal(r.SDNs); err != nil {
 		t.Errorf("%T: %s", err, err)
 	}
 }

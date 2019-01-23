@@ -94,7 +94,7 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-	logger.Log("main", fmt.Sprintf("OFAC data downloaded and parsed: Addresses=%d AltNames=%d SDNs=%d", len(reader.AddressArray), len(reader.AlternateIdentityArray), len(reader.SDNArray)))
+	logger.Log("main", fmt.Sprintf("OFAC data downloaded and parsed: Addresses=%d AltNames=%d SDNs=%d", len(reader.Addresses), len(reader.AlternateIdentities), len(reader.SDNs)))
 
 	// Add /search HTTP routes now what we have an ofac.Reader
 	addSearchRoutes(logger, router, reader)

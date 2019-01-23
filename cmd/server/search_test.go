@@ -57,7 +57,7 @@ func TestSearch__Address(t *testing.T) {
 	req.Header.Set("x-user-id", "test")
 
 	reader := &ofac.Reader{
-		AddressArray: []ofac.Address{
+		Addresses: []ofac.Address{
 			{ // Real OFAC entry -- 173,129,"Ibex House, The Minories","London EC3N 1DY","United Kingdom",-0-
 				EntityID:                    "173",
 				AddressID:                   "129",
@@ -95,7 +95,7 @@ func TestSearch__Name(t *testing.T) {
 	req.Header.Set("x-user-id", "test")
 
 	reader := &ofac.Reader{
-		SDNArray: []ofac.SDN{
+		SDNs: []ofac.SDN{
 			{ // Real OFAC entry
 				EntityID: "2676",
 				SDNName:  "AL ZAWAHIRI, Dr. Ayman",
@@ -134,7 +134,7 @@ func TestSearch__AltName(t *testing.T) {
 	req.Header.Set("x-user-id", "test")
 
 	reader := &ofac.Reader{
-		AlternateIdentityArray: []ofac.AlternateIdentity{
+		AlternateIdentities: []ofac.AlternateIdentity{
 			{ // Real OFAC entry
 				EntityID:      "559",
 				AlternateID:   "481",

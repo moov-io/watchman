@@ -84,8 +84,8 @@ func search(logger log.Logger, reader *ofac.Reader) http.HandlerFunc {
 func searchByAddress(logger log.Logger, reader *ofac.Reader, req addressSearchRequest) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var answers []ofac.Address
-		for i := range reader.AddressArray {
-			add := reader.AddressArray[i]
+		for i := range reader.Addresses {
+			add := reader.Addresses[i]
 			if strings.Contains(add.Address, req.Address) {
 				answers = append(answers, add)
 			}
@@ -101,8 +101,8 @@ func searchByAddress(logger log.Logger, reader *ofac.Reader, req addressSearchRe
 func searchByName(logger log.Logger, reader *ofac.Reader, nameSlug string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var answers []ofac.SDN // TODO(adam): pointers on ofac.Reader.SDNArray also
-		for i := range reader.SDNArray {
-			sdn := reader.SDNArray[i]
+		for i := range reader.SDNs {
+			sdn := reader.SDNs[i]
 			if strings.Contains(sdn.SDNName, nameSlug) {
 				answers = append(answers, sdn)
 			}
@@ -118,8 +118,8 @@ func searchByName(logger log.Logger, reader *ofac.Reader, nameSlug string) http.
 func searchByAltName(logger log.Logger, reader *ofac.Reader, altSlug string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var answers []*ofac.AlternateIdentity
-		for i := range reader.AlternateIdentityArray {
-			alt := reader.AlternateIdentityArray[i]
+		for i := range reader.AlternateIdentities {
+			alt := reader.AlternateIdentities[i]
 			if strings.Contains(alt.AlternateName, altSlug) {
 				answers = append(answers, &alt)
 			}
