@@ -6,8 +6,10 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/url"
+	"strings"
 
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/ofac"
@@ -16,11 +18,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func addSearchRoutes(logger log.Logger, r *mux.Router) {
-	r.Methods("GET").Path("/search/address").HandlerFunc(searchByAddress(logger)) // TODO(adam): GET's ?
-	r.Methods("GET").Path("/search/name").HandlerFunc(searchByName(logger))
-	r.Methods("GET").Path("/search/alt").HandlerFunc(searchByAltName(logger))
-	// r.Methods("GET").Path("/search/company").HandlerFunc(searchByAddress()) // TODO
+var (
+	errNoSearchParams = errors.New("missing search parameter(s)")
+)
+
+func addSearchRoutes(logger log.Logger, r *mux.Router, reader *ofac.Reader) {
+	r.Methods("GET").Path("/search").HandlerFunc(search(logger, reader))
 }
 
 type addressSearchRequest struct {
@@ -30,6 +33,11 @@ type addressSearchRequest struct {
 	Providence string `json:"providence"`
 	Zip        string `json:"zip"`
 	Country    string `json:"country"`
+}
+
+func (req addressSearchRequest) empty() bool {
+	return req.Address == "" && req.City == "" && req.State == "" &&
+		req.Providence == "" && req.Zip == "" && req.Country == ""
 }
 
 func readAddressSearchRequest(u *url.URL) addressSearchRequest {
@@ -43,80 +51,81 @@ func readAddressSearchRequest(u *url.URL) addressSearchRequest {
 	}
 }
 
-func searchByAddress(logger log.Logger) http.HandlerFunc {
+func search(logger log.Logger, reader *ofac.Reader) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w, err := wrapResponseWriter(logger, w, r)
 		if err != nil {
 			return
 		}
 
-		_ = readAddressSearchRequest(r.URL) // TODO(adam): do something with req
-
-		w.WriteHeader(http.StatusOK)
-
-		addresses := []*ofac.Address{
-			{ // Real OFAC entry -- 173,129,"Ibex House, The Minories","London EC3N 1DY","United Kingdom",-0-
-				EntityID:                    "173",
-				AddressID:                   "129",
-				Address:                     "Ibex House, The Minories",
-				CityStateProvincePostalCode: "London EC3N 1DY",
-				Country:                     "United Kingdom",
-			},
-		}
-		if err := json.NewEncoder(w).Encode(addresses); err != nil {
-			moovhttp.Problem(w, err) // TODO(adam): JSON errors should moovhttp.InternalError (wrapped, see auth's http.go)
+		// Search by Name // TODO(adam): handle multiple?
+		if name := r.URL.Query().Get("name"); name != "" {
+			searchByName(logger, reader, name)(w, r)
 			return
 		}
+
+		// Search by Alt Name
+		if alt := r.URL.Query().Get("altName"); alt != "" {
+			searchByAltName(logger, reader, alt)(w, r)
+			return
+		}
+
+		// Search Addresses
+		if req := readAddressSearchRequest(r.URL); !req.empty() {
+			searchByAddress(logger, reader, req)(w, r)
+			return
+		}
+
+		// Fallback if no search params were found
+		moovhttp.Problem(w, errNoSearchParams)
 	}
 }
 
-func searchByName(logger log.Logger) http.HandlerFunc {
+func searchByAddress(logger log.Logger, reader *ofac.Reader, req addressSearchRequest) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w, err := wrapResponseWriter(logger, w, r)
-		if err != nil {
-			return
+		var answers []ofac.Address
+		for i := range reader.AddressArray {
+			add := reader.AddressArray[i]
+			if strings.Contains(add.Address, req.Address) {
+				answers = append(answers, add)
+			}
 		}
-
-		// ?name=foo // TODO(adam): grab from *http.Request
-
 		w.WriteHeader(http.StatusOK)
-
-		sdns := []*ofac.SDN{
-			{ // Real OFAC entry
-				EntityID: "2676",
-				SDNName:  "AL ZAWAHIRI, Dr. Ayman",
-				SDNType:  "individual",
-				Program:  "SDGT] [SDT",
-				Title:    "Operational and Military Leader of JIHAD GROUP",
-				Remarks:  "DOB 19 Jun 1951; POB Giza, Egypt; Passport 1084010 (Egypt); alt. Passport 19820215; Operational and Military Leader of JIHAD GROUP.",
-			},
-		}
-		if err := json.NewEncoder(w).Encode(sdns); err != nil {
+		if err := json.NewEncoder(w).Encode(answers); err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}
 	}
 }
 
-func searchByAltName(logger log.Logger) http.HandlerFunc {
+func searchByName(logger log.Logger, reader *ofac.Reader, nameSlug string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w, err := wrapResponseWriter(logger, w, r)
-		if err != nil {
-			return
+		var answers []ofac.SDN // TODO(adam): pointers on ofac.Reader.SDNArray also
+		for i := range reader.SDNArray {
+			sdn := reader.SDNArray[i]
+			if strings.Contains(sdn.SDNName, nameSlug) {
+				answers = append(answers, sdn)
+			}
 		}
 		w.WriteHeader(http.StatusOK)
-
-		// ?name=foo
-
-		alts := []*ofac.AlternateIdentity{
-			{ // Real OFAC entry
-				EntityID:      "559",
-				AlternateID:   "481",
-				AlternateType: "aka",
-				AlternateName: "CIMEX",
-			},
+		if err := json.NewEncoder(w).Encode(answers); err != nil {
+			moovhttp.Problem(w, err)
+			return
 		}
-		if err := json.NewEncoder(w).Encode(alts); err != nil {
+	}
+}
+
+func searchByAltName(logger log.Logger, reader *ofac.Reader, altSlug string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var answers []*ofac.AlternateIdentity
+		for i := range reader.AlternateIdentityArray {
+			alt := reader.AlternateIdentityArray[i]
+			if strings.Contains(alt.AlternateName, altSlug) {
+				answers = append(answers, &alt)
+			}
+		}
+		w.WriteHeader(http.StatusOK)
+		if err := json.NewEncoder(w).Encode(answers); err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}
