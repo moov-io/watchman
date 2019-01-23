@@ -54,13 +54,13 @@ type Reader struct {
 	// FileName is the name of the file
 	FileName string `json:"fileName"`
 	// Addresses returns an array of OFAC Specially Designated National Addresses
-	Addresses []Address `json:"address"`
+	Addresses []*Address `json:"address"`
 	// AlternateIdentities returns an array of OFAC Specially Designated National Alternate Identity
-	AlternateIdentities []AlternateIdentity `json:"alternateIdentity"`
+	AlternateIdentities []*AlternateIdentity `json:"alternateIdentity"`
 	// SDNs returns an array of OFAC Specially Designated Nationals
-	SDNs []SDN `json:"sdn"`
+	SDNs []*SDN `json:"sdn"`
 	// SDNComments returns an array of OFAC Specially Designated National Comments
-	SDNComments []SDNComments `json:"sdnComments"`
+	SDNComments []*SDNComments `json:"sdnComments"`
 	// errors holds each error encountered when attempting to parse the file
 	errors base.ErrorList
 }
@@ -129,7 +129,7 @@ func (r *Reader) csvAddressFile() error {
 			continue
 		}
 
-		addr := Address{
+		addr := &Address{
 			EntityID:                    record[0],
 			AddressID:                   record[1],
 			Address:                     record[2],
@@ -164,7 +164,7 @@ func (r *Reader) csvAlternateIdentityFile() error {
 			continue
 		}
 		record = replaceNull(record)
-		alt := AlternateIdentity{
+		alt := &AlternateIdentity{
 			EntityID:         record[0],
 			AlternateID:      record[1],
 			AlternateType:    record[2],
@@ -198,7 +198,7 @@ func (r *Reader) csvSDNFile() error {
 			continue
 		}
 		record = replaceNull(record)
-		sdn := SDN{
+		sdn := &SDN{
 			EntityID:               record[0],
 			SDNName:                record[1],
 			SDNType:                record[2],
@@ -234,7 +234,7 @@ func (r *Reader) csvSDNCommentsFile() error {
 	// Loop through lines & turn into object
 	for _, csvLine := range lines {
 		csvLine := replaceNull(csvLine)
-		sdnComments := SDNComments{
+		sdnComments := &SDNComments{
 			EntityID:        csvLine[0],
 			RemarksExtended: csvLine[1],
 		}
