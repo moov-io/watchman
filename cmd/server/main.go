@@ -96,8 +96,15 @@ func main() {
 	}
 	logger.Log("main", fmt.Sprintf("OFAC data downloaded and parsed: Addresses=%d AltNames=%d SDNs=%d", len(reader.Addresses), len(reader.AlternateIdentities), len(reader.SDNs)))
 
+	// Wrap ofac.Reader with searcher
+	searcher := &searcher{
+		SDNs:      precomputeSDNs(reader.SDNs),
+		Addresses: precomputeAddresses(reader.Addresses),
+		Alts:      precomputeAlts(reader.AlternateIdentities),
+	}
+
 	// Add /search HTTP routes now what we have an ofac.Reader
-	addSearchRoutes(logger, router, reader)
+	addSearchRoutes(logger, router, searcher)
 
 	// Start business logic HTTP server
 	go func() {
