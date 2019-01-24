@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	// csvFile is an OFAC CSVfile
+	// csvFile is an OFAC CSV file
 	csvFile = ".csv"
 
 	// addressFile is an OFAC Specially Designated National (SDN) address File
@@ -233,26 +233,11 @@ func (r *Reader) csvSDNCommentsFile() error {
 
 	// Loop through lines & turn into object
 	for _, csvLine := range lines {
-		csvLine := replaceNull(csvLine)
-
 		sdnComments := SDNComments{
 			EntityID:        csvLine[0],
 			RemarksExtended: csvLine[1],
 		}
-		//fmt.Println(sdnComments.EntityID + " " + sdnComments.RemarksExtended)
-
 		r.SDNCommentsArray = append(r.SDNCommentsArray, sdnComments)
 	}
 	return nil
-}
-
-// replaceNull replaces a CSV field that contain -0- with "".  Null values for all four formats consist of "-0-"
-// (ASCII characters 45, 48, 45).
-func replaceNull(s []string) []string {
-	for i := 0; i < len(s); i++ {
-		if strings.Contains(s[i], "-0-") {
-			s[i] = ""
-		}
-	}
-	return s
 }
