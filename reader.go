@@ -241,3 +241,14 @@ func (r *Reader) csvSDNCommentsFile() error {
 	}
 	return nil
 }
+
+// replaceNull replaces a CSV field that contain -0- with "".  Null values for all four formats consist of "-0-"
+// (ASCII characters 45, 48, 45).
+func replaceNull(s []string) []string {
+	for i := 0; i < len(s); i++ {
+		if strings.Contains(s[i], "-0-") {
+			s[i] = ""
+		}
+	}
+	return s
+}
