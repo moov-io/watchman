@@ -53,11 +53,11 @@ func TestSearch__addressSearchRequest(t *testing.T) {
 
 func TestSearch__Address(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/search?address=Ibex+House", nil)
+	req := httptest.NewRequest("GET", "/search?address=Ibex", nil)
 	req.Header.Set("x-user-id", "test")
 
-	reader := &ofac.Reader{
-		Addresses: []*ofac.Address{
+	searcher := &searcher{
+		Addresses: precomputeAddresses([]*ofac.Address{
 			{ // Real OFAC entry -- 173,129,"Ibex House, The Minories","London EC3N 1DY","United Kingdom",-0-
 				EntityID:                    "173",
 				AddressID:                   "129",
@@ -65,11 +65,11 @@ func TestSearch__Address(t *testing.T) {
 				CityStateProvincePostalCode: "London EC3N 1DY",
 				Country:                     "United Kingdom",
 			},
-		},
+		}),
 	}
 
 	router := mux.NewRouter()
-	addSearchRoutes(nil, router, reader)
+	addSearchRoutes(nil, router, searcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -94,8 +94,8 @@ func TestSearch__Name(t *testing.T) {
 	req := httptest.NewRequest("GET", "/search?name=ZAWAHIRI", nil)
 	req.Header.Set("x-user-id", "test")
 
-	reader := &ofac.Reader{
-		SDNs: []*ofac.SDN{
+	searcher := &searcher{
+		SDNs: precomputeSDNs([]*ofac.SDN{
 			{ // Real OFAC entry
 				EntityID: "2676",
 				SDNName:  "AL ZAWAHIRI, Dr. Ayman",
@@ -104,11 +104,11 @@ func TestSearch__Name(t *testing.T) {
 				Title:    "Operational and Military Leader of JIHAD GROUP",
 				Remarks:  "DOB 19 Jun 1951; POB Giza, Egypt; Passport 1084010 (Egypt); alt. Passport 19820215; Operational and Military Leader of JIHAD GROUP.",
 			},
-		},
+		}),
 	}
 
 	router := mux.NewRouter()
-	addSearchRoutes(nil, router, reader)
+	addSearchRoutes(nil, router, searcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -133,19 +133,19 @@ func TestSearch__AltName(t *testing.T) {
 	req := httptest.NewRequest("GET", "/search?altName=CIMEX", nil)
 	req.Header.Set("x-user-id", "test")
 
-	reader := &ofac.Reader{
-		AlternateIdentities: []*ofac.AlternateIdentity{
+	searcher := &searcher{
+		Alts: precomputeAlts([]*ofac.AlternateIdentity{
 			{ // Real OFAC entry
 				EntityID:      "559",
 				AlternateID:   "481",
 				AlternateType: "aka",
 				AlternateName: "CIMEX",
 			},
-		},
+		}),
 	}
 
 	router := mux.NewRouter()
-	addSearchRoutes(nil, router, reader)
+	addSearchRoutes(nil, router, searcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 

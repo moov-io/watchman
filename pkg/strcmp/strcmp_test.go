@@ -82,9 +82,9 @@ func TestSoundex(t *testing.T) {
 
 	// Static tests
 	cases := []test{
-		test{"Adam", "Bob", 0.25},
-		test{"Euler", "Ellery", 1.0},
-		test{"Lloyd", "Ladd", 1.0},
+		{"Adam", "Bob", 0.25},
+		{"Euler", "Ellery", 1.0},
+		{"Lloyd", "Ladd", 1.0},
 	}
 	for i := range cases {
 		score := Soundex(cases[i].a, cases[i].b)
