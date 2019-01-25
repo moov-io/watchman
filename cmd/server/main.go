@@ -124,6 +124,18 @@ func main() {
 	// Add /search HTTP routes now what we have an ofac.Reader
 	addSearchRoutes(logger, router, searcher)
 
+	// Add admin server OFAC data refresh endpoint
+	adminServer.AddHandler("/ofac/refresh", func(w http.ResponseWriter, r *http.Request) {
+		logger.Log("main", "admin: refreshing OFAC data")
+		if err := searcher.refreshData(); err != nil {
+			logger.Log("main", fmt.Sprintf("ERROR: admin: problem refreshing OFAC data: %v", err))
+			w.WriteHeader(http.StatusOK)
+		} else {
+			logger.Log("main", "admin: finished OFAC data refresh")
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	})
+
 	// Start business logic HTTP server
 	go func() {
 		logger.Log("transport", "HTTP", "addr", *httpAddr)

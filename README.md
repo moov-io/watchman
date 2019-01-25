@@ -22,3 +22,10 @@ OFAC computes string similarity using the Levenshtein algorithm and can match se
 | `ALT_SIMILARITY` | Ratio of Levenshtein distance for two strings to be considered equal. | 0.85 |
 | `NAME_SIMILARITY` | Ratio of Levenshtein distance for two strings to be considered equal. | 0.85 |
 | `OFAC_DATA_REFRESH` | Interval for OFAC data redownload and reparse. | 12h |
+
+
+### OFAC Data
+
+#### Refresh
+
+OFAC supports a one-off re-download and refresh of OFAC data from the federal website, simply issue a request like: `curl -v http://a.b.c.d:9094/ofac/refresh`. The response will be `200 OK` only if successful and an errors will be logged to stdout.
