@@ -167,17 +167,29 @@ func precompute(s string) []string {
 func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchRequest) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		hasAddress := req.Address != ""
-		reqAdd := strings.ToLower(req.Address)
+		reqAdds := strings.Fields(strings.ToLower(req.Address))
 
 		var answer []*ofac.Address
 		for i := range searcher.Addresses {
 			add := searcher.Addresses[i]
 			if hasAddress {
+				// Count matches for collection if over threshold
+				matches := 0
 				for k := range add.address {
-					if strings.Contains(add.address[k], reqAdd) {
-						answer = append(answer, add.Address)
+					for j := range reqAdds {
+						if strings.Contains(add.address[k], reqAdds[j]) {
+							matches++
+						}
 					}
 				}
+				// If over 25% of words from query match (via strings.Contains not full string equality) save as an address.
+				// This is arbitrary, but given the following examples only one partial word match is required:
+				//  123 Scott Ave
+				//  1600 N Penn St
+				if (float64(matches) / float64(len(add.address))) >= 0.25 {
+					answer = append(answer, add.Address)
+				}
+				continue
 			}
 		}
 

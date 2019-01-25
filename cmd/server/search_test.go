@@ -87,6 +87,24 @@ func TestSearch__Address(t *testing.T) {
 	if addresses[0].EntityID != "173" {
 		t.Errorf("got %#v", addresses[0])
 	}
+
+	// Search with more data in ?address=...
+	w = httptest.NewRecorder()
+	req.URL.Query().Set("address", "ibex+the")
+	addSearchRoutes(nil, router, searcher)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusOK {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+	addresses = nil
+	if err := json.NewDecoder(w.Body).Decode(&addresses); err != nil {
+		t.Fatal(err)
+	}
+	if len(addresses) != 1 {
+		t.Fatalf("got %#v", addresses)
+	}
 }
 
 func TestSearch__Name(t *testing.T) {
