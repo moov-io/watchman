@@ -208,8 +208,8 @@ func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchReq
 
 func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.HandlerFunc { // TODO(Adam): split nameSlug
 	return func(w http.ResponseWriter, r *http.Request) {
-		nameSlug = strings.ToLower(nameSlug)
-		if nameSlug == "" {
+		nameSlugs := strings.Fields(strings.ToLower(nameSlug))
+		if len(nameSlugs) == 0 {
 			moovhttp.Problem(w, errNoSearchParams)
 			return
 		}
@@ -217,10 +217,18 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 		var answers []*ofac.SDN
 		for i := range searcher.SDNs {
 			sdn := searcher.SDNs[i]
+
+			// Count matches for nameSlugs fields
+			matches := 0
 			for k := range sdn.name {
-				if strings.Contains(sdn.name[k], nameSlug) {
-					answers = append(answers, sdn.SDN)
+				for j := range nameSlugs {
+					if strings.Contains(sdn.name[k], nameSlugs[j]) {
+						matches++
+					}
 				}
+			}
+			if matches > 0 {
+				answers = append(answers, sdn.SDN)
 			}
 		}
 
@@ -234,8 +242,8 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 
 func searchByAltName(logger log.Logger, searcher *searcher, altSlug string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		altSlug = strings.ToLower(altSlug)
-		if altSlug == "" {
+		altSlugs := strings.Fields(strings.ToLower(altSlug))
+		if len(altSlugs) == 0 {
 			moovhttp.Problem(w, errNoSearchParams)
 			return
 		}
@@ -243,10 +251,17 @@ func searchByAltName(logger log.Logger, searcher *searcher, altSlug string) http
 		var answers []*ofac.AlternateIdentity
 		for i := range searcher.Alts {
 			alt := searcher.Alts[i]
+
+			matches := 0
 			for k := range alt.name {
-				if strings.Contains(alt.name[k], altSlug) {
-					answers = append(answers, alt.AlternateIdentity)
+				for j := range altSlugs {
+					if strings.Contains(alt.name[k], altSlugs[j]) {
+						matches++
+					}
 				}
+			}
+			if matches > 0 {
+				answers = append(answers, alt.AlternateIdentity)
 			}
 		}
 
