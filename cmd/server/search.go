@@ -10,11 +10,13 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
+	"strconv"
 	"strings"
 
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/ofac"
-	// "github.com/moov-io/ofac/pkg/strcmp"
+	"github.com/moov-io/ofac/pkg/strcmp"
 
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
@@ -22,7 +24,32 @@ import (
 
 var (
 	errNoSearchParams = errors.New("missing search parameter(s)")
+
+	nameSimilarity    float64 = 0.85
+	altSimilarity     float64 = 0.85
+	addressSimilarity float64 = 0.85
 )
+
+func init() {
+	if v := os.Getenv("NAME_SIMILARITY"); v != "" {
+		f, _ := strconv.ParseFloat(v, 64)
+		if f > 0 {
+			nameSimilarity = f
+		}
+	}
+	if v := os.Getenv("ALT_SIMILARITY"); v != "" {
+		f, _ := strconv.ParseFloat(v, 64)
+		if f > 0 {
+			altSimilarity = f
+		}
+	}
+	if v := os.Getenv("ADDRESS_SIMILARITY"); v != "" {
+		f, _ := strconv.ParseFloat(v, 64)
+		if f > 0 {
+			addressSimilarity = f
+		}
+	}
+}
 
 func addSearchRoutes(logger log.Logger, r *mux.Router, searcher *searcher) {
 	r.Methods("GET").Path("/search").HandlerFunc(search(logger, searcher))
@@ -177,7 +204,7 @@ func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchReq
 				matches := 0
 				for k := range add.address {
 					for j := range reqAdds {
-						if strings.Contains(add.address[k], reqAdds[j]) {
+						if strcmp.Levenshtein(add.address[k], reqAdds[j]) > addressSimilarity {
 							matches++
 						}
 					}
@@ -222,7 +249,7 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 			matches := 0
 			for k := range sdn.name {
 				for j := range nameSlugs {
-					if strings.Contains(sdn.name[k], nameSlugs[j]) {
+					if strcmp.Levenshtein(sdn.name[k], nameSlugs[j]) > nameSimilarity {
 						matches++
 					}
 				}
@@ -255,7 +282,7 @@ func searchByAltName(logger log.Logger, searcher *searcher, altSlug string) http
 			matches := 0
 			for k := range alt.name {
 				for j := range altSlugs {
-					if strings.Contains(alt.name[k], altSlugs[j]) {
+					if strcmp.Levenshtein(alt.name[k], altSlugs[j]) > altSimilarity {
 						matches++
 					}
 				}
