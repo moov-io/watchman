@@ -8,26 +8,22 @@ import (
 	"testing"
 )
 
-func TestDownloadAndParse(t *testing.T) {
+func TestSearcher__refreshData(t *testing.T) {
 	if testing.Short() {
 		return
 	}
 
-	reader, err := getAndParseOFACData()
-	if err != nil {
+	s := &searcher{}
+	if err := s.refreshData(); err != nil {
 		t.Fatal(err)
 	}
-	if reader == nil {
-		t.Fatal("nil ofac.Reader")
-	}
-
-	if len(reader.Addresses) == 0 {
+	if len(s.Addresses) == 0 {
 		t.Errorf("empty Addresses")
 	}
-	if len(reader.AlternateIdentities) == 0 {
-		t.Errorf("empty AlternateIdentities")
+	if len(s.Alts) == 0 {
+		t.Errorf("empty Alts")
 	}
-	if len(reader.SDNs) == 0 {
+	if len(s.SDNs) == 0 {
 		t.Errorf("empty SDNs")
 	}
 }

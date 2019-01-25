@@ -21,3 +21,4 @@ OFAC computes string similarity using the Levenshtein algorithm and can match se
 | `ADDRESS_SIMILARITY` | Ratio of Levenshtein distance for two strings to be considered equal. | 0.85 |
 | `ALT_SIMILARITY` | Ratio of Levenshtein distance for two strings to be considered equal. | 0.85 |
 | `NAME_SIMILARITY` | Ratio of Levenshtein distance for two strings to be considered equal. | 0.85 |
+| `OFAC_DATA_REFRESH` | Interval for OFAC data redownload and reparse. | 12h |

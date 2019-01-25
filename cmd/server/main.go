@@ -12,7 +12,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"syscall"
 	"time"
 
@@ -28,6 +27,8 @@ import (
 var (
 	httpAddr  = flag.String("http.addr", bind.HTTP("ofac"), "HTTP listen address")
 	adminAddr = flag.String("admin.addr", bind.Admin("ofac"), "Admin HTTP listen address")
+
+	ofacDataRefreshInterval = 12 * time.Hour
 )
 
 func main() {
@@ -89,19 +90,36 @@ func main() {
 		}
 	}()
 	defer adminServer.Shutdown()
-	// Download OFAC data
-	reader, err := getAndParseOFACData()
-	if err != nil {
-		panic(err.Error())
-	}
-	logger.Log("main", fmt.Sprintf("OFAC data downloaded and parsed: Addresses=%d AltNames=%d SDNs=%d", len(reader.Addresses), len(reader.AlternateIdentities), len(reader.SDNs)))
 
-	// Wrap ofac.Reader with searcher
-	searcher := &searcher{
-		SDNs:      precomputeSDNs(reader.SDNs),
-		Addresses: precomputeAddresses(reader.Addresses),
-		Alts:      precomputeAlts(reader.AlternateIdentities),
+	// Override OFAC data refresh interval (if set)
+	if v := os.Getenv("OFAC_DATA_REFRESH"); v != "" {
+		dur, _ := time.ParseDuration(v)
+		if dur > 0 {
+			ofacDataRefreshInterval = dur
+			logger.Log("main", fmt.Sprintf("Setting OFAC data refresh interval to %v", ofacDataRefreshInterval))
+		}
 	}
+
+	// Start our searcher (and downloader)
+	searcher := &searcher{
+		logger: logger,
+	}
+	if err := searcher.refreshData(); err != nil {
+		logger.Log("main", fmt.Sprintf("ERROR: failed to download/parse initial OFAC data: %v", err))
+		os.Exit(1)
+	}
+	go func() {
+		for {
+			time.Sleep(ofacDataRefreshInterval)
+			if err := searcher.refreshData(); err != nil {
+				logger.Log("main", fmt.Sprintf("ERROR: refreshing OFAC data: %v", err))
+			} else {
+				searcher.RLock()
+				logger.Log("main", fmt.Sprintf("OFAC data refreshed - Addresses=%d AltNames=%d SDNs=%d", len(searcher.Addresses), len(searcher.Alts), len(searcher.SDNs)))
+				searcher.RUnlock()
+			}
+		}
+	}()
 
 	// Add /search HTTP routes now what we have an ofac.Reader
 	addSearchRoutes(logger, router, searcher)
@@ -127,27 +145,4 @@ func addPingRoute(r *mux.Router) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("PONG"))
 	})
-}
-
-func getAndParseOFACData() (*ofac.Reader, error) {
-	dir, err := (&ofac.Downloader{}).GetFiles()
-	if err != nil {
-		return nil, fmt.Errorf("ERROR: downloading OFAC data: %v", err)
-	}
-
-	// Parse each OFAC file
-	r := &ofac.Reader{}
-	r.FileName = filepath.Join(dir, "add.csv")
-	if err := r.Read(); err != nil {
-		return nil, fmt.Errorf("ERROR: reading add.csv: %v", err)
-	}
-	r.FileName = filepath.Join(dir, "alt.csv")
-	if err := r.Read(); err != nil {
-		return nil, fmt.Errorf("ERROR: reading alt.csv: %v", err)
-	}
-	r.FileName = filepath.Join(dir, "sdn.csv")
-	if err := r.Read(); err != nil {
-		return nil, fmt.Errorf("ERROR: reading sdn.csv: %v", err)
-	}
-	return r, nil
 }
