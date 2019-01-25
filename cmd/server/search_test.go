@@ -16,6 +16,32 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func TestSearch__extractSearchLimit(t *testing.T) {
+	// Too high, fallback to hard max
+	req := httptest.NewRequest("GET", "/?limit=1000", nil)
+	if limit := extractSearchLimit(req); limit != hardResultsLimit {
+		t.Errorf("got limit of %d", limit)
+	}
+
+	// No limit, use default
+	req = httptest.NewRequest("GET", "/", nil)
+	if limit := extractSearchLimit(req); limit != softResultsLimit {
+		t.Errorf("got limit of %d", limit)
+	}
+
+	// Between soft and hard max
+	req = httptest.NewRequest("GET", "/?limit=25", nil)
+	if limit := extractSearchLimit(req); limit != 25 {
+		t.Errorf("got limit of %d", limit)
+	}
+
+	// Lower than soft max
+	req = httptest.NewRequest("GET", "/?limit=1", nil)
+	if limit := extractSearchLimit(req); limit != 1 {
+		t.Errorf("got limit of %d", limit)
+	}
+}
+
 func TestSearch__addressSearchRequest(t *testing.T) {
 	u, _ := url.Parse("https://moov.io/search?address=add&city=new+york&state=ny&providence=prov&zip=44433&country=usa")
 	req := readAddressSearchRequest(u)
