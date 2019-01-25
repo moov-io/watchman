@@ -87,7 +87,7 @@ func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 			return
 		}
 
-		// Search by Name // TODO(adam): handle multiple?
+		// Search by Name
 		if name := strings.TrimSpace(r.URL.Query().Get("name")); name != "" {
 			if logger != nil {
 				logger.Log("search", fmt.Sprintf("searching SDN names for %s", name))
@@ -219,11 +219,6 @@ func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchReq
 				continue
 			}
 		}
-
-		// score := strcmp.Levenshtein(add.Address, req.Address)
-		// if score > .75 {
-		// 	acc.add(add)
-		// }
 
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(answer); err != nil {
