@@ -21,13 +21,13 @@ func TestDownloadAndParse(t *testing.T) {
 		t.Fatal("nil ofac.Reader")
 	}
 
-	if len(reader.AddressArray) == 0 {
-		t.Errorf("empty AddressArray")
+	if len(reader.Addresses) == 0 {
+		t.Errorf("empty Addresses")
 	}
-	if len(reader.AlternateIdentityArray) == 0 {
-		t.Errorf("empty AlternateIdentityArray")
+	if len(reader.AlternateIdentities) == 0 {
+		t.Errorf("empty AlternateIdentities")
 	}
-	if len(reader.SDNArray) == 0 {
-		t.Errorf("empty SDNArray")
+	if len(reader.SDNs) == 0 {
+		t.Errorf("empty SDNs")
 	}
 }

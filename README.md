@@ -8,3 +8,16 @@ moov-io/ofac
 [![Apache 2 licensed](https://img.shields.io/badge/license-Apache2-blue.svg)](https://raw.githubusercontent.com/moov-io/ofac/master/LICENSE)
 
 *project is under active development and is not production ready*
+
+
+### Configuration
+
+**Search Similarity Metrics**
+
+OFAC computes string similarity using the Levenshtein algorithm and can match sensitivity can be configured with environment variables.
+
+| Environmental Variable | Description | Default |
+|-----|-----|-----|
+| `ADDRESS_SIMILARITY` | Ratio of Levenshtein distance for two strings to be considered equal. | 0.85 |
+| `ALT_SIMILARITY` | Ratio of Levenshtein distance for two strings to be considered equal. | 0.85 |
+| `NAME_SIMILARITY` | Ratio of Levenshtein distance for two strings to be considered equal. | 0.85 |

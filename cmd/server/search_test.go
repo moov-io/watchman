@@ -37,15 +37,46 @@ func TestSearch__addressSearchRequest(t *testing.T) {
 	if req.Country != "usa" {
 		t.Errorf("req.Country=%s", req.Country)
 	}
+	if req.empty() {
+		t.Error("req is not empty")
+	}
+
+	req = addressSearchRequest{}
+	if !req.empty() {
+		t.Error("req is empty now")
+	}
+	req.Address = "1600 1st St"
+	if req.empty() {
+		t.Error("req is not empty now")
+	}
 }
 
 func TestSearch__Address(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/search/address?address=111+N+scott+st", nil)
+	req := httptest.NewRequest("GET", "/search?address=Ibex", nil)
 	req.Header.Set("x-user-id", "test")
 
+	searcher := &searcher{
+		Addresses: precomputeAddresses([]*ofac.Address{
+			{ // Real OFAC entry -- 173,129,"Ibex House, The Minories","London EC3N 1DY","United Kingdom",-0-
+				EntityID:                    "173",
+				AddressID:                   "129",
+				Address:                     "Ibex House, The Minories",
+				CityStateProvincePostalCode: "London EC3N 1DY",
+				Country:                     "United Kingdom",
+			},
+			{ // 735,447,"Piarco Airport","Port au Prince","Haiti",-0-
+				EntityID:                    "735",
+				AddressID:                   "447",
+				Address:                     "Piarco Airport",
+				CityStateProvincePostalCode: "Port au Prince",
+				Country:                     "Haiti",
+			},
+		}),
+	}
+
 	router := mux.NewRouter()
-	addSearchRoutes(nil, router)
+	addSearchRoutes(nil, router, searcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -63,15 +94,101 @@ func TestSearch__Address(t *testing.T) {
 	if addresses[0].EntityID != "173" {
 		t.Errorf("got %#v", addresses[0])
 	}
+
+	// Search with more data in ?address=...
+	w = httptest.NewRecorder()
+	req.URL.Query().Set("address", "ibex+the")
+	addSearchRoutes(nil, router, searcher)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusOK {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+	addresses = nil
+	if err := json.NewDecoder(w.Body).Decode(&addresses); err != nil {
+		t.Fatal(err)
+	}
+	if len(addresses) != 1 {
+		t.Fatalf("got %#v", addresses)
+	}
 }
 
 func TestSearch__Name(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/search/name", nil)
+	req := httptest.NewRequest("GET", "/search?name=ZAWAHIRI", nil)
 	req.Header.Set("x-user-id", "test")
 
+	searcher := &searcher{
+		SDNs: precomputeSDNs([]*ofac.SDN{
+			{ // Real OFAC entry
+				EntityID: "2676",
+				SDNName:  "AL ZAWAHIRI, Dr. Ayman",
+				SDNType:  "individual",
+				Program:  "SDGT] [SDT",
+				Title:    "Operational and Military Leader of JIHAD GROUP",
+				Remarks:  "DOB 19 Jun 1951; POB Giza, Egypt; Passport 1084010 (Egypt); alt. Passport 19820215; Operational and Military Leader of JIHAD GROUP.",
+			},
+			{
+				EntityID: "2681",
+				SDNName:  "HAWATMA, Nayif",
+				SDNType:  "individual",
+				Program:  "SDT",
+				Title:    "Secretary General of DEMOCRATIC FRONT FOR THE LIBERATION OF PALESTINE - HAWATMEH FACTION",
+				Remarks:  "DOB 1933; Secretary General of DEMOCRATIC FRONT FOR THE LIBERATION OF PALESTINE - HAWATMEH FACTION.",
+			},
+		}),
+	}
+
 	router := mux.NewRouter()
-	addSearchRoutes(nil, router)
+	addSearchRoutes(nil, router, searcher)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusOK {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+
+	var names []*ofac.SDN
+	if err := json.NewDecoder(w.Body).Decode(&names); err != nil {
+		t.Fatal(err)
+	}
+	if len(names) != 1 {
+		t.Fatalf("got %#v", names)
+	}
+	if names[0].EntityID != "2676" {
+		t.Errorf("got %#v", names[0])
+	}
+}
+
+func TestSearch__NameMultiple(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/search?name=al+ayman", nil)
+	req.Header.Set("x-user-id", "test")
+
+	searcher := &searcher{
+		SDNs: precomputeSDNs([]*ofac.SDN{
+			{ // Real OFAC entry
+				EntityID: "2676",
+				SDNName:  "AL ZAWAHIRI, Dr. Ayman",
+				SDNType:  "individual",
+				Program:  "SDGT] [SDT",
+				Title:    "Operational and Military Leader of JIHAD GROUP",
+				Remarks:  "DOB 19 Jun 1951; POB Giza, Egypt; Passport 1084010 (Egypt); alt. Passport 19820215; Operational and Military Leader of JIHAD GROUP.",
+			},
+			{
+				EntityID: "2681",
+				SDNName:  "HAWATMA, Nayif",
+				SDNType:  "individual",
+				Program:  "SDT",
+				Title:    "Secretary General of DEMOCRATIC FRONT FOR THE LIBERATION OF PALESTINE - HAWATMEH FACTION",
+				Remarks:  "DOB 1933; Secretary General of DEMOCRATIC FRONT FOR THE LIBERATION OF PALESTINE - HAWATMEH FACTION.",
+			},
+		}),
+	}
+
+	router := mux.NewRouter()
+	addSearchRoutes(nil, router, searcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -93,11 +210,28 @@ func TestSearch__Name(t *testing.T) {
 
 func TestSearch__AltName(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/search/alt", nil)
+	req := httptest.NewRequest("GET", "/search?altName=CIMEX", nil)
 	req.Header.Set("x-user-id", "test")
 
+	searcher := &searcher{
+		Alts: precomputeAlts([]*ofac.AlternateIdentity{
+			{ // Real OFAC entry
+				EntityID:      "559",
+				AlternateID:   "481",
+				AlternateType: "aka",
+				AlternateName: "CIMEX",
+			},
+			{
+				EntityID:      "4691",
+				AlternateID:   "3887",
+				AlternateType: "aka",
+				AlternateName: "A.I.C. SOGO KENKYUSHO",
+			},
+		}),
+	}
+
 	router := mux.NewRouter()
-	addSearchRoutes(nil, router)
+	addSearchRoutes(nil, router, searcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -113,6 +247,49 @@ func TestSearch__AltName(t *testing.T) {
 		t.Fatalf("got %#v", alts)
 	}
 	if alts[0].EntityID != "559" {
+		t.Errorf("got %#v", alts[0])
+	}
+}
+
+func TestSearch__AltNameMultiple(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/search?altName=SOGO+kenkyusho", nil)
+	req.Header.Set("x-user-id", "test")
+
+	searcher := &searcher{
+		Alts: precomputeAlts([]*ofac.AlternateIdentity{
+			{ // Real OFAC entry
+				EntityID:      "559",
+				AlternateID:   "481",
+				AlternateType: "aka",
+				AlternateName: "CIMEX",
+			},
+			{
+				EntityID:      "4691",
+				AlternateID:   "3887",
+				AlternateType: "aka",
+				AlternateName: "A.I.C. SOGO KENKYUSHO",
+			},
+		}),
+	}
+
+	router := mux.NewRouter()
+	addSearchRoutes(nil, router, searcher)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusOK {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+
+	var alts []*ofac.AlternateIdentity
+	if err := json.NewDecoder(w.Body).Decode(&alts); err != nil {
+		t.Fatal(err)
+	}
+	if len(alts) != 1 {
+		t.Fatalf("got %#v", alts)
+	}
+	if alts[0].EntityID != "4691" {
 		t.Errorf("got %#v", alts[0])
 	}
 }

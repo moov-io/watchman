@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	// csvFile is an OFAC CSV file
+	// csvFile is an OFAC CSVfile
 	csvFile = ".csv"
 
 	// addressFile is an OFAC Specially Designated National (SDN) address File
@@ -53,14 +53,14 @@ func (r *Reader) parseError(err error) error {
 type Reader struct {
 	// FileName is the name of the file
 	FileName string `json:"fileName"`
-	// AddressArray returns an array of OFAC Specially Designated National Addresses
-	AddressArray []Address `json:"addressArray"`
-	// AddressArray returns an array of OFAC Specially Designated National Alternate Identity
-	AlternateIdentityArray []AlternateIdentity `json:"alternateIdentityArray"`
-	// SDNArray returns an array of OFAC Specially Designated Nationals
-	SDNArray []SDN `json:"sdnArray"`
-	// SDNCommentsArray returns an array of OFAC Specially Designated National Comments
-	SDNCommentsArray []SDNComments `json:"sdnCommentsArray"`
+	// Addresses returns an array of OFAC Specially Designated National Addresses
+	Addresses []*Address `json:"address"`
+	// AlternateIdentities returns an array of OFAC Specially Designated National Alternate Identity
+	AlternateIdentities []*AlternateIdentity `json:"alternateIdentity"`
+	// SDNs returns an array of OFAC Specially Designated Nationals
+	SDNs []*SDN `json:"sdn"`
+	// SDNComments returns an array of OFAC Specially Designated National Comments
+	SDNComments []*SDNComments `json:"sdnComments"`
 	// errors holds each error encountered when attempting to parse the file
 	errors base.ErrorList
 }
@@ -129,7 +129,7 @@ func (r *Reader) csvAddressFile() error {
 			continue
 		}
 
-		addr := Address{
+		addr := &Address{
 			EntityID:                    record[0],
 			AddressID:                   record[1],
 			Address:                     record[2],
@@ -137,7 +137,7 @@ func (r *Reader) csvAddressFile() error {
 			Country:                     record[4],
 			AddressRemarks:              record[5],
 		}
-		r.AddressArray = append(r.AddressArray, addr)
+		r.Addresses = append(r.Addresses, addr)
 	}
 	return nil
 }
@@ -163,15 +163,15 @@ func (r *Reader) csvAlternateIdentityFile() error {
 		if len(record) != 5 {
 			continue
 		}
-
-		alt := AlternateIdentity{
+		record = replaceNull(record)
+		alt := &AlternateIdentity{
 			EntityID:         record[0],
 			AlternateID:      record[1],
 			AlternateType:    record[2],
 			AlternateName:    record[3],
 			AlternateRemarks: record[4],
 		}
-		r.AlternateIdentityArray = append(r.AlternateIdentityArray, alt)
+		r.AlternateIdentities = append(r.AlternateIdentities, alt)
 	}
 	return nil
 }
@@ -197,8 +197,8 @@ func (r *Reader) csvSDNFile() error {
 		if len(record) != 12 {
 			continue
 		}
-
-		sdn := SDN{
+		record = replaceNull(record)
+		sdn := &SDN{
 			EntityID:               record[0],
 			SDNName:                record[1],
 			SDNType:                record[2],
@@ -212,7 +212,7 @@ func (r *Reader) csvSDNFile() error {
 			VesselOwner:            record[10],
 			Remarks:                record[11],
 		}
-		r.SDNArray = append(r.SDNArray, sdn)
+		r.SDNs = append(r.SDNs, sdn)
 	}
 	return nil
 }
@@ -233,11 +233,23 @@ func (r *Reader) csvSDNCommentsFile() error {
 
 	// Loop through lines & turn into object
 	for _, csvLine := range lines {
-		sdnComments := SDNComments{
+		csvLine := replaceNull(csvLine)
+		sdnComments := &SDNComments{
 			EntityID:        csvLine[0],
 			RemarksExtended: csvLine[1],
 		}
-		r.SDNCommentsArray = append(r.SDNCommentsArray, sdnComments)
+		r.SDNComments = append(r.SDNComments, sdnComments)
 	}
 	return nil
+}
+
+// replaceNull replaces a CSV field that contain -0- with "".  Null values for all four formats consist of "-0-"
+// (ASCII characters 45, 48, 45).
+func replaceNull(s []string) []string {
+	for i := 0; i < len(s); i++ {
+		if strings.Contains(s[i], "-0-") {
+			s[i] = ""
+		}
+	}
+	return s
 }

@@ -87,7 +87,7 @@ func TestSDNCSVFileHit(t *testing.T) {
 	}
 
 	hit := false
-	for _, sdn := range r.SDNArray {
+	for _, sdn := range r.SDNs {
 		if sdn.SDNName == "HAWATMA, Nayif" {
 			hit = true
 		}
@@ -106,7 +106,7 @@ func TestSDNCSVFileJSON(t *testing.T) {
 		t.Errorf("%T: %s", err, err)
 	}
 
-	if _, err := json.Marshal(r.SDNArray); err != nil {
+	if _, err := json.Marshal(r.SDNs); err != nil {
 		t.Errorf("%T: %s", err, err)
 	}
 }
@@ -218,5 +218,20 @@ func TestParseError(t *testing.T) {
 
 	if e := r.parseError(err); e != nil {
 		t.Errorf("%T: %s", e, e)
+	}
+}
+
+func TestReplaceNull(t *testing.T) {
+	ans := replaceNull(nil)
+	if ans != nil {
+		t.Errorf("Got %v", ans)
+	}
+	ans = replaceNull([]string{" -0-"})
+	if len(ans) != 1 || ans[0] != "" {
+		t.Errorf("Got %v", ans)
+	}
+	ans = replaceNull([]string{"foo", " -0-"})
+	if len(ans) != 2 || ans[0] != "foo" || ans[1] != "" {
+		t.Errorf("Got %v", ans)
 	}
 }
