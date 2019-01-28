@@ -28,6 +28,8 @@ var (
 	nameSimilarity    float64 = 0.85
 	altSimilarity     float64 = 0.85
 	addressSimilarity float64 = 0.85
+
+	softResultsLimit, hardResultsLimit = 10, 100
 )
 
 func init() {
@@ -191,10 +193,25 @@ func precompute(s string) []string {
 	return strings.Fields(strings.ToLower(s))
 }
 
+func extractSearchLimit(r *http.Request) int {
+	limit := softResultsLimit
+	if v := r.URL.Query().Get("limit"); v != "" {
+		n, _ := strconv.Atoi(v)
+		if n > 0 {
+			limit = n
+		}
+	}
+	if limit > hardResultsLimit {
+		limit = hardResultsLimit
+	}
+	return limit
+}
+
 func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchRequest) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		hasAddress := req.Address != ""
 		reqAdds := strings.Fields(strings.ToLower(req.Address))
+		limit := extractSearchLimit(r)
 
 		var answer []*ofac.Address
 		for i := range searcher.Addresses {
@@ -218,6 +235,11 @@ func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchReq
 				}
 				continue
 			}
+
+			// Break if at results limit
+			if len(answer) > limit {
+				break
+			}
 		}
 
 		w.WriteHeader(http.StatusOK)
@@ -236,6 +258,8 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 			return
 		}
 
+		limit := extractSearchLimit(r)
+
 		var answers []*ofac.SDN
 		for i := range searcher.SDNs {
 			sdn := searcher.SDNs[i]
@@ -251,6 +275,11 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 			}
 			if matches > 0 {
 				answers = append(answers, sdn.SDN)
+			}
+
+			// Break if at result limit
+			if len(answers) > limit {
+				break
 			}
 		}
 
@@ -270,6 +299,8 @@ func searchByAltName(logger log.Logger, searcher *searcher, altSlug string) http
 			return
 		}
 
+		limit := extractSearchLimit(r)
+
 		var answers []*ofac.AlternateIdentity
 		for i := range searcher.Alts {
 			alt := searcher.Alts[i]
@@ -284,6 +315,11 @@ func searchByAltName(logger log.Logger, searcher *searcher, altSlug string) http
 			}
 			if matches > 0 {
 				answers = append(answers, alt.AlternateIdentity)
+			}
+
+			// Break if at result limit
+			if len(answers) > limit {
+				break
 			}
 		}
 
