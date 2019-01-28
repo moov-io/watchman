@@ -92,13 +92,6 @@ func main() {
 	defer adminServer.Shutdown()
 
 	// Override OFAC data refresh interval (if set)
-	if v := os.Getenv("OFAC_DATA_REFRESH"); v != "" {
-		dur, _ := time.ParseDuration(v)
-		if dur > 0 {
-			ofacDataRefreshInterval = dur
-			logger.Log("main", fmt.Sprintf("Setting OFAC data refresh interval to %v", ofacDataRefreshInterval))
-		}
-	}
 
 	// Start our searcher (and downloader)
 	searcher := &searcher{
@@ -109,6 +102,8 @@ func main() {
 		os.Exit(1)
 	}
 	go func() {
+		// Override refresh interval if set
+		ofacDataRefreshInterval = getOFACRefreshInterval(logger, os.Getenv("OFAC_DATA_REFRESH"))
 		for {
 			time.Sleep(ofacDataRefreshInterval)
 			if err := searcher.refreshData(); err != nil {
@@ -157,4 +152,18 @@ func addPingRoute(r *mux.Router) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("PONG"))
 	})
+}
+
+// env is the value from an environmental variable
+func getOFACRefreshInterval(logger log.Logger, env string) time.Duration {
+	if env != "" {
+		dur, _ := time.ParseDuration(env)
+		if dur > 0 {
+			if logger != nil {
+				logger.Log("main", fmt.Sprintf("Setting OFAC data refresh interval to %v", dur))
+			}
+			return dur
+		}
+	}
+	return ofacDataRefreshInterval
 }
