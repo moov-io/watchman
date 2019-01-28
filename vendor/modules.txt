@@ -23,7 +23,7 @@ github.com/hashicorp/golang-lru/simplelru
 github.com/kr/logfmt
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
 github.com/matttproud/golang_protobuf_extensions/pbutil
-# github.com/moov-io/base v0.5.0
+# github.com/moov-io/base v0.6.0
 github.com/moov-io/base
 github.com/moov-io/base/admin
 github.com/moov-io/base/http
@@ -36,11 +36,11 @@ github.com/prometheus/client_golang/prometheus/promhttp
 github.com/prometheus/client_golang/prometheus/internal
 # github.com/prometheus/client_model v0.0.0-20190115171406-56726106282f
 github.com/prometheus/client_model/go
-# github.com/prometheus/common v0.0.0-20190107103113-2998b132700a
+# github.com/prometheus/common v0.1.0
 github.com/prometheus/common/expfmt
 github.com/prometheus/common/model
 github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg
-# github.com/prometheus/procfs v0.0.0-20190104112138-b1a0a9a36d74
+# github.com/prometheus/procfs v0.0.0-20190117184657-bf6a532e95b1
 github.com/prometheus/procfs
 github.com/prometheus/procfs/nfs
 github.com/prometheus/procfs/xfs

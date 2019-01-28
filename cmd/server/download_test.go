@@ -8,26 +8,32 @@ import (
 	"testing"
 )
 
-func TestDownloadAndParse(t *testing.T) {
+func TestSearcher__refreshInterval(t *testing.T) {
+	if v := getOFACRefreshInterval(nil, ""); v.String() != "12h0m0s" {
+		t.Errorf("Got %v", v)
+	}
+	// override
+	if v := getOFACRefreshInterval(nil, "60s"); v.String() != "1m0s" {
+		t.Errorf("Got %v", v)
+	}
+}
+
+func TestSearcher__refreshData(t *testing.T) {
 	if testing.Short() {
 		return
 	}
 
-	reader, err := getAndParseOFACData()
-	if err != nil {
+	s := &searcher{}
+	if err := s.refreshData(); err != nil {
 		t.Fatal(err)
 	}
-	if reader == nil {
-		t.Fatal("nil ofac.Reader")
-	}
-
-	if len(reader.Addresses) == 0 {
+	if len(s.Addresses) == 0 {
 		t.Errorf("empty Addresses")
 	}
-	if len(reader.AlternateIdentities) == 0 {
-		t.Errorf("empty AlternateIdentities")
+	if len(s.Alts) == 0 {
+		t.Errorf("empty Alts")
 	}
-	if len(reader.SDNs) == 0 {
+	if len(s.SDNs) == 0 {
 		t.Errorf("empty SDNs")
 	}
 }

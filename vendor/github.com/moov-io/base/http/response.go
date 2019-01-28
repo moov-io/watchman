@@ -45,7 +45,7 @@ func (w *ResponseWriter) WriteHeader(code int) {
 
 	// Record route timing
 	diff := time.Since(w.start)
-	if w.metric != nil {
+	if w != nil && w.metric != nil {
 		w.metric.Observe(diff.Seconds())
 	}
 
