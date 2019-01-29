@@ -1,0 +1,390 @@
+openapi: 3.0.2
+info:
+  description: OFAC (Office of Foreign Assets Control) API is designed to facilitate the enforcement of US government economic sanctions programs required by federal law. This project implements a modern REST HTTP API for companies and organizations to obey federal law and use OFAC data in their applications.
+  version: v1
+  title: OFAC API
+  contact:
+    url: https://github.com/moov-io/ofac
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: http://localhost:8084
+    description: Local development
+
+tags:
+  - name: Customers
+    description: An individual or group which the US government enforces economic sanctions against.
+  - name: Companies
+    description: A corporation or group which the US government enforces economic sanctions against.
+  - name: SDN
+    description: Specially Designated National which the US government enforces economic sanctions against.
+  - name: OFAC Search
+    description: Search OFAC record by metadata or names
+
+paths:
+  # Customer Endpoints
+  /customers/{customerId}:
+    get:
+      tags:
+        - Customers
+      summary: Get information about a customer, addresses, alternate names, and their SDN metadata.
+      operationId: getCustomer
+      parameters:
+        - $ref: '#/components/parameters/requestId'
+        - name: customerId
+          in: path
+          description: Customer ID
+          required: true
+          schema:
+            type: string
+            example: c3cf0f66
+      responses:
+        '200':
+          description: Customer and associated metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+    put:
+      tags:
+        - Customers
+      summary: Update a Customer's status to add or remove a manual block.
+      operationId: updateCustomerStatus
+      parameters:
+        - $ref: '#/components/parameters/requestId'
+        - name: customerId
+          in: path
+          description: Customer ID
+          required: true
+          schema:
+            type: string
+            example: c3cf0f66
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomerStatus'
+      responses:
+        '200':
+          description: Customer status updated
+  /customers/{customerId}/watch:
+    post:
+      tags:
+        - Customers
+      summary: Add OFAC watch on a Customer
+      operationId: addCustomerWatch
+      parameters:
+        - $ref: '#/components/parameters/requestId'
+        - name: customerId
+          in: path
+          description: Customer ID
+          required: true
+          schema:
+            type: string
+            example: c3cf0f66
+      responses:
+        '200':
+          description: Customer watch added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Watch'
+        '404':
+          description: Customer not found
+    delete:
+      tags:
+        - Customers
+      summary: Remove customer watch
+      operationId: removeCustomerWatch
+      parameters:
+        - $ref: '#/components/parameters/requestId'
+        - name: customerId
+          in: path
+          description: Customer ID
+          required: true
+          schema:
+            type: string
+            example: c3cf0f66
+      responses:
+        '200':
+          description: Customer watch removed
+  /customers/watch:
+    post:
+      tags:
+        - Customers
+      summary: Add customer watch by name
+      operationId: addCustomerNameWatch
+      parameters:
+        - $ref: '#/components/parameters/requestId'
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+            example: Jane Smith
+      responses:
+        '200':
+          description: Customer watch applied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Watch'
+  /customers/watch/{watchId}:
+    delete:
+      tags:
+        - Customers
+      summary: Remove a Customer name watch
+      operationId: removeCustomerNameWatch
+      parameters:
+        - $ref: '#/components/parameters/requestId'
+        - name: watchId
+          in: path
+          description: Customer watch ID
+          required: true
+          schema:
+            type: string
+            example: 0c5e215c
+        - name: name
+          in: query
+          description: Customer or Company name watch
+          required: true
+          schema:
+            type: string
+            example: Jane Smith
+      responses:
+        '200':
+          description: Company or Customer watch removed
+
+  # Company endpoints
+
+  # SDN Endpoints
+  /sdn/{sdnId}:
+    get:
+      tags:
+        - SDN
+      summary: Specially designated national
+      operationId: getSDN
+      parameters:
+        - $ref: '#/components/parameters/requestId'
+        - in: path
+          name: sdnId
+          required: true
+          description: SDN ID
+          schema:
+            type: string
+            example: 564dd7d1
+      responses:
+        '200':
+          description: SDN metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SDN'
+  /sdn/{sdnId}/alts:
+    get:
+      tags:
+        - SDN
+      summary: Get alternate names for a given SDN
+      operationId: getSDNAltNames
+      parameters:
+        - $ref: '#/components/parameters/requestId'
+        - in: path
+          name: sdnId
+          description: SDN ID
+          required: true
+          schema:
+            type: string
+            example: 564dd7d1
+      responses:
+        '200':
+          description: SDN alternate names
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SDNAltNames'
+  /sdn/{sdnId}/addresses:
+    get:
+      tags:
+        - SDN
+      summary: Get addresses for a given SDN
+      operationId: getSDNAddresses
+      parameters:
+        - $ref: '#/components/parameters/requestId'
+        - in: path
+          name: sdnId
+          description: SDN ID
+          required: true
+          schema:
+            type: string
+            example: 564dd7d1
+      responses:
+        '200':
+          description: SDN addresses
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Addresses'
+  # Search Endpoint
+  /search:
+    get:
+      tags:
+        - OFAC Search
+      summary: Search SDN names and metadata
+      operationId: searchSDNs
+      parameters:
+        - $ref: '#/components/parameters/requestId'
+        - name: name
+          in: query
+          schema:
+            type: string
+            example: Jane Smith
+          description: Name which could correspond to a human on the SDN list
+        - name: address
+          in: query
+          schema:
+            type: string
+            example: 123 83rd Ave
+          description: Phsical address which could correspond to a human on the SDN list
+        - name: altName
+          in: query
+          schema:
+            type: string
+            example: Jane Smith
+          description: Alternate name which could correspond to a human on the SDN list
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            example: 25
+          description: Maximum results returned by a search
+      responses:
+        '200':
+          description: SDNs returned from a search
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Search'
+
+components:
+  schemas:
+    Customer:
+      description: OFAC Customer and metadata
+      properties:
+        id:
+          description: OFAC Customer ID
+          type: string
+          example: 9574756b
+        SDN:
+          $ref: '#/components/schemas/SDN'
+        Addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+        Alts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Alt'
+    SDN:
+      description: Specially designated national from OFAC list
+      properties:
+        EntityID:
+          type: string
+          example: 1231
+        SDNName:
+          type: string
+          example: BANCO NACIONAL DE CUBA
+        SDNType:
+          type: string
+          example: individual
+        Program:
+          type: string
+          example: CUBA
+        Title:
+          type: string
+          example: Title of an individual
+        Remarks:
+          type: string
+          example: Remarks on SDN and often additional information about the SDN
+    Addresses:
+      type: array
+      items:
+        $ref: '#/components/schemas/Address'
+    Address:
+      description: Physical address from OFAC list
+      properties:
+        EntityID:
+          type: string
+          example: 2112
+        AddressID:
+          type: string
+          example: 201
+        Address:
+          type: string
+          example: 123 73th St
+        CityStateProvincePostalCode:
+          type: string
+          example: Tokyo 103
+        Country:
+          type: string
+          example: Japan
+    SDNAltNames:
+      type: array
+      items:
+        $ref: '#/components/schemas/Alt'
+    Alt:
+      description: Alternate name from OFAC list
+      properties:
+        EntityID:
+          type: string
+          example: 306
+        AlternateID:
+          type: string
+          example: 220
+        AlternateType:
+          type: string
+          example: aka
+        AlternateName:
+          type: string
+          example: NATIONAL BANK OF CUBA
+    UpdateCustomerStatus:
+      description: Request body to update a customers status.
+      properties:
+        status:
+          description: manual customer sanction status
+          type: string
+          enum:
+            - Blocked
+            - Default
+    Search:
+      description: Search results containing SDNs, alternate names and/or addreses
+      properties:
+        SDNs:
+          type: array
+          items:
+            $ref: '#/components/schemas/SDN'
+        altNames:
+          type: array
+          items:
+            $ref: '#/components/schemas/Alt'
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+    Watch:
+      description: Customer or Company watch
+      properties:
+        id:
+          description: Object representing a customer or company watch
+          type: string
+          example: 08ddba92
+  parameters:
+    requestId:
+      in: header
+      name: X-Request-Id
+      description: Optional Request ID allows application developer to trace requests through the systems logs
+      schema:
+        type: string
+        example: 94c825ee
