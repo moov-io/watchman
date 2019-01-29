@@ -6,7 +6,9 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
+	"strings"
 
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/ofac"
@@ -29,7 +31,7 @@ type customerWatchResponse struct {
 
 func addCustomerRoutes(logger log.Logger, r *mux.Router) {
 	r.Methods("GET").Path("/customers/{id}").HandlerFunc(getCustomer(logger))
-	r.Methods("PUT").Path("/customers/{id}").HandlerFunc(updateCustomer(logger))
+	r.Methods("PUT").Path("/customers/{id}").HandlerFunc(updateCustomerStatus(logger))
 
 	r.Methods("POST").Path("/customers/{id}/watch").HandlerFunc(addCustomerWatch(logger))
 	r.Methods("DELETE").Path("/customers/{id}/watch").HandlerFunc(removeCustomerWatch(logger))
@@ -116,13 +118,35 @@ func addCustomerWatch(logger log.Logger) http.HandlerFunc {
 	}
 }
 
-func updateCustomer(logger log.Logger) http.HandlerFunc {
+type customerStatusRequest struct {
+	// Status represents a manual 'Blocked' value for a customer.
+	Status string `json:"status"` // TODO(adam): better name for Default ?
+}
+
+func updateCustomerStatus(logger log.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w, err := wrapResponseWriter(logger, w, r)
 		if err != nil {
 			return
 		}
-		w.WriteHeader(http.StatusOK) // TODO
+
+		var req customerStatusRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			moovhttp.Problem(w, err)
+			return
+		}
+		req.Status = strings.ToLower(strings.TrimSpace(req.Status))
+		switch req.Status {
+		case "blocked":
+			// update customer status to blocked
+		default:
+			if req.Status == "" {
+				moovhttp.Problem(w, errors.New("no status provided"))
+				return
+			}
+			// remove blocked from customer status
+		}
+		w.WriteHeader(http.StatusOK)
 	}
 }
 
