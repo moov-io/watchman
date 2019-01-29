@@ -209,6 +209,12 @@ func extractSearchLimit(r *http.Request) int {
 	return limit
 }
 
+type searchResponse struct {
+	SDNs      []*ofac.SDN               `json:"SDNs"`
+	AltNames  []*ofac.AlternateIdentity `json:"altNames"`
+	Addresses []*ofac.Address           `json:"addresses"`
+}
+
 func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchRequest) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		searcher.RLock()
@@ -218,7 +224,7 @@ func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchReq
 		reqAdds := strings.Fields(strings.ToLower(req.Address))
 		limit := extractSearchLimit(r)
 
-		var answer []*ofac.Address
+		var answers []*ofac.Address
 		for i := range searcher.Addresses {
 			add := searcher.Addresses[i]
 			if hasAddress {
@@ -236,19 +242,19 @@ func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchReq
 				//  123 Scott Ave
 				//  1600 N Penn St
 				if (float64(matches) / float64(len(add.address))) >= 0.25 {
-					answer = append(answer, add.Address)
+					answers = append(answers, add.Address)
 				}
 				continue
 			}
 
 			// Break if at results limit
-			if len(answer) > limit {
+			if len(answers) > limit {
 				break
 			}
 		}
 
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(answer); err != nil {
+		if err := json.NewEncoder(w).Encode(&searchResponse{Addresses: answers}); err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}
@@ -292,7 +298,7 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 		}
 
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(answers); err != nil {
+		if err := json.NewEncoder(w).Encode(&searchResponse{SDNs: answers}); err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}
@@ -335,7 +341,7 @@ func searchByAltName(logger log.Logger, searcher *searcher, altSlug string) http
 		}
 
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(answers); err != nil {
+		if err := json.NewEncoder(w).Encode(&searchResponse{AltNames: answers}); err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}

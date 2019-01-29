@@ -110,15 +110,15 @@ func TestSearch__Address(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	var addresses []*ofac.Address
-	if err := json.NewDecoder(w.Body).Decode(&addresses); err != nil {
+	var wrapper searchResponse
+	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
 		t.Fatal(err)
 	}
-	if len(addresses) != 1 {
-		t.Fatalf("got %#v", addresses)
+	if len(wrapper.Addresses) != 1 {
+		t.Fatalf("got %#v", wrapper.Addresses)
 	}
-	if addresses[0].EntityID != "173" {
-		t.Errorf("got %#v", addresses[0])
+	if wrapper.Addresses[0].EntityID != "173" {
+		t.Errorf("got %#v", wrapper.Addresses[0])
 	}
 
 	// Search with more data in ?address=...
@@ -131,12 +131,12 @@ func TestSearch__Address(t *testing.T) {
 	if w.Code != http.StatusOK {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
-	addresses = nil
-	if err := json.NewDecoder(w.Body).Decode(&addresses); err != nil {
+	wrapper.Addresses = nil
+	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
 		t.Fatal(err)
 	}
-	if len(addresses) != 1 {
-		t.Fatalf("got %#v", addresses)
+	if len(wrapper.Addresses) != 1 {
+		t.Fatalf("got %#v", wrapper.Addresses)
 	}
 }
 
@@ -175,15 +175,15 @@ func TestSearch__Name(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	var names []*ofac.SDN
-	if err := json.NewDecoder(w.Body).Decode(&names); err != nil {
+	var wrapper searchResponse
+	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
 		t.Fatal(err)
 	}
-	if len(names) != 1 {
-		t.Fatalf("got %#v", names)
+	if len(wrapper.SDNs) != 1 {
+		t.Fatalf("got %#v", wrapper.SDNs)
 	}
-	if names[0].EntityID != "2676" {
-		t.Errorf("got %#v", names[0])
+	if wrapper.SDNs[0].EntityID != "2676" {
+		t.Errorf("got %#v", wrapper.SDNs[0])
 	}
 }
 
@@ -222,15 +222,15 @@ func TestSearch__NameMultiple(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	var names []*ofac.SDN
-	if err := json.NewDecoder(w.Body).Decode(&names); err != nil {
+	var wrapper searchResponse
+	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
 		t.Fatal(err)
 	}
-	if len(names) != 1 {
-		t.Fatalf("got %#v", names)
+	if len(wrapper.SDNs) != 1 {
+		t.Fatalf("got %#v", wrapper.SDNs)
 	}
-	if names[0].EntityID != "2676" {
-		t.Errorf("got %#v", names[0])
+	if wrapper.SDNs[0].EntityID != "2676" {
+		t.Errorf("got %#v", wrapper.SDNs[0])
 	}
 }
 
@@ -265,15 +265,15 @@ func TestSearch__AltName(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	var alts []*ofac.AlternateIdentity
-	if err := json.NewDecoder(w.Body).Decode(&alts); err != nil {
+	var wrapper searchResponse
+	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
 		t.Fatal(err)
 	}
-	if len(alts) != 1 {
-		t.Fatalf("got %#v", alts)
+	if len(wrapper.AltNames) != 1 {
+		t.Fatalf("got %#v", wrapper.AltNames)
 	}
-	if alts[0].EntityID != "559" {
-		t.Errorf("got %#v", alts[0])
+	if wrapper.AltNames[0].EntityID != "559" {
+		t.Errorf("got %#v", wrapper.AltNames[0])
 	}
 }
 
@@ -308,14 +308,14 @@ func TestSearch__AltNameMultiple(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	var alts []*ofac.AlternateIdentity
-	if err := json.NewDecoder(w.Body).Decode(&alts); err != nil {
+	var wrapper searchResponse
+	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
 		t.Fatal(err)
 	}
-	if len(alts) != 1 {
-		t.Fatalf("got %#v", alts)
+	if len(wrapper.AltNames) != 1 {
+		t.Fatalf("got %#v", wrapper.AltNames)
 	}
-	if alts[0].EntityID != "4691" {
-		t.Errorf("got %#v", alts[0])
+	if wrapper.AltNames[0].EntityID != "4691" {
+		t.Errorf("got %#v", wrapper.AltNames[0])
 	}
 }
