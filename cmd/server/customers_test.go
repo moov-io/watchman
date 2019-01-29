@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gorilla/mux"
@@ -93,7 +94,9 @@ func TestCustomer_addNameWatch(t *testing.T) {
 
 func TestCustomer_update(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("PUT", "/customers/foo", nil)
+
+	body := strings.NewReader(`{"status": "Blocked"}`)
+	req := httptest.NewRequest("PUT", "/customers/foo", body)
 	req.Header.Set("x-user-id", "test")
 
 	router := mux.NewRouter()
@@ -103,6 +106,22 @@ func TestCustomer_update(t *testing.T) {
 
 	if w.Code != http.StatusOK {
 		t.Errorf("bogus status code: %d", w.Code)
+	}
+}
+
+func TestCustomer_updateNoBody(t *testing.T) {
+	w := httptest.NewRecorder()
+
+	req := httptest.NewRequest("PUT", "/customers/foo", nil)
+	req.Header.Set("x-user-id", "test")
+
+	router := mux.NewRouter()
+	addCustomerRoutes(nil, router)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("expected %d but got: %d", http.StatusBadRequest, w.Code)
 	}
 }
 
