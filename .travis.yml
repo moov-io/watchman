@@ -26,7 +26,7 @@ before_install:
   - go get -u honnef.co/go/tools/cmd/staticcheck
   - go get golang.org/x/tools/cmd/cover
 before_script:
-  - GOFILES=$(find . -type f -name '*.go' | grep -v vendor)
+  - GOFILES=$(find . -type f -name '*.go' | grep -v vendor | grep -v client)
 script:
   # Just check gofmt on linux, it's the fastest builder
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then test -z $(gofmt -s -l $GOFILES); fi
@@ -34,7 +34,7 @@ script:
   - misspell -error -locale US $GOFILES
   - gocyclo -over 20 $GOFILES
   - golint -set_exit_status $GOFILES
-  - staticcheck ./...
+  - staticcheck ./cmd/*/*.go ./pkg/*/*.go *.go
 after_success:
   - bash <(curl -s https://codecov.io/bash) -X fix
   - make docker # We don't have a Dockerfile to build, yet
