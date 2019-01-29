@@ -1,13 +1,13 @@
 openapi: 3.0.2
 info:
-  description: TODO
-  version: "v1"
-  title: "OFAC API"
+  description: OFAC (Office of Foreign Assets Control) API is designed to facilitate the enforcement of US government economic sanctions programs required by federal law. This project implements a modern REST HTTP API for companies and organizations to obey federal law and use OFAC data in their applications.
+  version: v1
+  title: OFAC API
   contact:
-    url: "https://github.com/moov-io/ofac"
+    url: https://github.com/moov-io/ofac
   license:
-    name: "Apache 2.0"
-    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
 
 servers:
   - url: http://localhost:8084
@@ -21,6 +21,7 @@ tags:
   - name: SDN
     description: Specially Designated National which the US government enforces economic sanctions against.
   - name: OFAC Search
+    description: Search OFAC record by metadata or names
 
 paths:
   # Customer Endpoints
@@ -226,7 +227,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Addresses'
-        # TODO: more response types
   # Search Endpoint
   /search:
     get:
@@ -304,10 +304,10 @@ components:
           example: CUBA
         Title:
           type: string
-          example: TODO
+          example: Title of an individual
         Remarks:
           type: string
-          example: TODO
+          example: Remarks on SDN and often additional information about the SDN
     Addresses:
       type: array
       items:
@@ -359,7 +359,7 @@ components:
             - Blocked
             - Default
     Search:
-      description: TODO
+      description: Search results containing SDNs, alternate names and/or addreses
       properties:
         SDNs:
           type: array
@@ -385,6 +385,6 @@ components:
       in: header
       name: X-Request-Id
       description: Optional Request ID allows application developer to trace requests through the systems logs
-      example: 94c825ee
       schema:
         type: string
+        example: 94c825ee
