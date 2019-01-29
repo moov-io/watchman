@@ -13,3 +13,8 @@ coverage.html
 *.out
 
 /bin/
+
+# Generated files
+.tmp/
+openapi.yaml
+openapi-generator*jar

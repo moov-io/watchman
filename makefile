@@ -8,6 +8,21 @@ build:
 	go build github.com/moov-io/ofac
 	CGO_ENABLED=0 go build -o ./bin/server github.com/moov-io/ofac/cmd/server
 
+.PHONY: client
+client:
+# Versions from https://github.com/OpenAPITools/openapi-generator/releases
+	@chmod +x ./openapi-generator
+	@rm -rf ./client
+	OPENAPI_GENERATOR_VERSION=4.0.0-beta ./openapi-generator generate -i openapi.yaml -g go -o ./client
+	go fmt ./client
+	go build github.com/moov-io/ofac/client
+	go test ./client
+
+.PHONY: clean
+clean:
+	@rm -rf client/
+	@rm -f openapi-generator-cli-*.jar
+
 docker:
 	docker build --pull -t moov/ofac:$(VERSION) -f Dockerfile .
 	docker tag moov/ofac:$(VERSION) moov/ofac:latest
