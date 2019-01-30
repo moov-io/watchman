@@ -76,6 +76,11 @@ func TestCustomers__id(t *testing.T) {
 		}
 	})
 	router.ServeHTTP(w, req)
+
+	// Don't pass req through mux so mux.Vars finds nothing
+	if v := getCustomerId(w, req); v != "" {
+		t.Errorf("expected empty, but got %q", v)
+	}
 }
 
 func TestCustomer_get(t *testing.T) {

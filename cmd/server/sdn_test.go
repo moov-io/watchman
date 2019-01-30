@@ -92,6 +92,11 @@ func TestSDN__id(t *testing.T) {
 		}
 	})
 	router.ServeHTTP(w, req)
+
+	// Don't pass req through mux so mux.Vars finds nothing
+	if v := getSDNId(w, req); v != "" {
+		t.Errorf("expected empty, but got %q", v)
+	}
 }
 
 func TestSDN__Address(t *testing.T) {
