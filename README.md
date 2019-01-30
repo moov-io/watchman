@@ -22,6 +22,7 @@ OFAC computes string similarity using the Levenshtein algorithm and can match se
 | `ALT_SIMILARITY` | Ratio of Levenshtein distance for two strings to be considered equal. | 0.85 |
 | `NAME_SIMILARITY` | Ratio of Levenshtein distance for two strings to be considered equal. | 0.85 |
 | `OFAC_DATA_REFRESH` | Interval for OFAC data redownload and reparse. | 12h |
+| `SQLITE_DB_PATH`| Local filepath location for the paygate SQLite database. | `ofac.db` |
 
 
 ### OFAC Data
