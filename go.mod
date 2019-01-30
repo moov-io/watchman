@@ -9,6 +9,7 @@ require (
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/mux v1.6.2
 	github.com/hashicorp/golang-lru v0.5.0 // indirect
+	github.com/mattn/go-sqlite3 v1.10.0
 	github.com/moov-io/base v0.6.0
 	github.com/prometheus/client_golang v0.9.2
 	github.com/prometheus/client_model v0.0.0-20190115171406-56726106282f // indirect
