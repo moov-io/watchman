@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	errNoCustomerId = errors.New("no customerId found in path")
+	errNoCustomerId = errors.New("no customerId found")
 )
 
 type Customer struct {
@@ -33,12 +33,12 @@ type customerWatchResponse struct {
 	WatchID string `json:"watchId"`
 }
 
-func addCustomerRoutes(logger log.Logger, r *mux.Router, searcher *searcher) {
+func addCustomerRoutes(logger log.Logger, r *mux.Router, searcher *searcher, repo *sqliteWatchRepository) {
 	r.Methods("GET").Path("/customers/{customerId}").HandlerFunc(getCustomer(logger, searcher))
 	r.Methods("PUT").Path("/customers/{customerId}").HandlerFunc(updateCustomerStatus(logger, searcher))
 
-	r.Methods("POST").Path("/customers/{customerId}/watch").HandlerFunc(addCustomerWatch(logger, searcher))
-	r.Methods("DELETE").Path("/customers/{customerId}/watch").HandlerFunc(removeCustomerWatch(logger, searcher))
+	r.Methods("POST").Path("/customers/{customerId}/watch").HandlerFunc(addCustomerWatch(logger, searcher, repo))
+	r.Methods("DELETE").Path("/customers/{customerId}/watch").HandlerFunc(removeCustomerWatch(logger, searcher, repo))
 
 	r.Methods("POST").Path("/customers/watch").HandlerFunc(addCustomerNameWatch(logger, searcher))
 	r.Methods("DELETE").Path("/customers/watch/{watchId}").HandlerFunc(removeCustomerNameWatch(logger, searcher))
@@ -106,16 +106,27 @@ func addCustomerNameWatch(logger log.Logger, searcher *searcher) http.HandlerFun
 	}
 }
 
-func addCustomerWatch(logger log.Logger, searcher *searcher) http.HandlerFunc {
+func addCustomerWatch(logger log.Logger, searcher *searcher, repo *sqliteWatchRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w, err := wrapResponseWriter(logger, w, r)
 		if err != nil {
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
+		var req watchRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			moovhttp.Problem(w, err)
+			return
+		}
 
-		if err := json.NewEncoder(w).Encode(customerWatchResponse{"cust-watch"}); err != nil {
+		customerId := getCustomerId(w, r)
+		watchId, err := repo.addCustomerWatch(customerId, req)
+		if err != nil {
+			moovhttp.Problem(w, err)
+			return
+		}
+
+		if err := json.NewEncoder(w).Encode(customerWatchResponse{watchId}); err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}
@@ -154,13 +165,21 @@ func updateCustomerStatus(logger log.Logger, searcher *searcher) http.HandlerFun
 	}
 }
 
-func removeCustomerWatch(logger log.Logger, searcher *searcher) http.HandlerFunc {
+func removeCustomerWatch(logger log.Logger, searcher *searcher, repo *sqliteWatchRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w, err := wrapResponseWriter(logger, w, r)
 		if err != nil {
 			return
 		}
-		w.WriteHeader(http.StatusOK) // TODO
+		watchId := getWatchId(w, r)
+		if watchId == "" {
+			return
+		}
+		if err := repo.removeCustomerWatch(watchId); err != nil {
+			moovhttp.Problem(w, err)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
 	}
 }
 

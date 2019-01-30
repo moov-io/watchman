@@ -134,8 +134,11 @@ func main() {
 		}
 	}()
 
+	// Setup Database wrappers
+	watchRepo := &sqliteWatchRepository{db, logger}
+
 	// Add searcher for HTTP routes
-	addCustomerRoutes(logger, router, searcher)
+	addCustomerRoutes(logger, router, searcher, watchRepo)
 	addSDNRoutes(logger, router, searcher)
 	addSearchRoutes(logger, router, searcher)
 
