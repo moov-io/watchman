@@ -49,3 +49,26 @@ func TestCustomerWatch(t *testing.T) {
 		t.Errorf("expected no error: %v", err)
 	}
 }
+
+func TestCustomerNameWatch(t *testing.T) {
+	repo := createTestCustomerWatchRepository(t)
+
+	if err := repo.removeCustomerNameWatch(base.ID()); err != nil {
+		t.Errorf("expected no error: %v", err)
+	}
+
+	// Add
+	name := base.ID()
+	watchId, err := repo.addCustomerNameWatch(name, "https://moov.io")
+	if err != nil {
+		t.Errorf("name=%q got error: %v", name, err)
+	}
+	if watchId == "" {
+		t.Error("empty watchId")
+	}
+
+	// Remove
+	if err := repo.removeCustomerNameWatch(watchId); err != nil {
+		t.Errorf("expected no error: %v", err)
+	}
+}

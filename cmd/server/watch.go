@@ -88,16 +88,37 @@ func (r sqliteWatchRepository) removeCustomerWatch(watchId string) error {
 	defer stmt.Close()
 
 	_, err = stmt.Exec(time.Now(), watchId)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
-func (r sqliteWatchRepository) addCustomerNameWatch(name string) (string, error) {
-	return "", nil
+func (r sqliteWatchRepository) addCustomerNameWatch(name string, webhook string) (string, error) {
+	query := `insert or ignore into customer_name_watches (id, name, webhook, created_at) values (?, ?, ?, ?);`
+	stmt, err := r.db.Prepare(query)
+	if err != nil {
+		return "", err
+	}
+	defer stmt.Close()
+
+	id := base.ID()
+	_, err = stmt.Exec(id, name, webhook, time.Now())
+	if err != nil {
+		return "", err
+	}
+	return id, nil
 }
 
 func (r sqliteWatchRepository) removeCustomerNameWatch(watchId string) error {
-	return nil
+	if watchId == "" {
+		return errNoWatchId
+	}
+
+	query := `update customer_name_watches set deleted_at = ? where id = ? and deleted_at is null`
+	stmt, err := r.db.Prepare(query)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(time.Now(), watchId)
+	return err
 }
