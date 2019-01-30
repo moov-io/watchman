@@ -131,6 +131,56 @@ type searcher struct {
 	logger log.Logger
 }
 
+func (s *searcher) FindAddresses(limit int, f func(*Address) bool) []*ofac.Address {
+	s.RLock()
+	defer s.RUnlock()
+
+	var out []*ofac.Address
+	for i := range s.Addresses {
+		// Break if at results limit
+		if len(out) > limit {
+			break
+		}
+		// Check filter func
+		if f(s.Addresses[i]) {
+			out = append(out, s.Addresses[i].Address)
+		}
+	}
+	return out
+}
+
+func (s *searcher) FindAlts(limit int, f func(alt *Alt) bool) []*ofac.AlternateIdentity {
+	s.RLock()
+	defer s.RUnlock()
+
+	var out []*ofac.AlternateIdentity
+	for i := range s.Alts {
+		if len(out) > limit {
+			break
+		}
+		if f(s.Alts[i]) {
+			out = append(out, s.Alts[i].AlternateIdentity)
+		}
+	}
+	return out
+}
+
+func (s *searcher) FindSDNs(limit int, f func(*SDN) bool) []*ofac.SDN {
+	s.RLock()
+	defer s.RUnlock()
+
+	var out []*ofac.SDN
+	for i := range s.SDNs {
+		if len(out) > limit {
+			break
+		}
+		if f(s.SDNs[i]) {
+			out = append(out, s.SDNs[i].SDN)
+		}
+	}
+	return out
+}
+
 // SDN is ofac.SDN wrapped with precomputed search metadata
 type SDN struct {
 	SDN *ofac.SDN
@@ -217,41 +267,34 @@ type searchResponse struct {
 
 func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchRequest) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		searcher.RLock()
-		defer searcher.RUnlock()
-
 		hasAddress := req.Address != ""
 		reqAdds := strings.Fields(strings.ToLower(req.Address))
 		limit := extractSearchLimit(r)
 
-		var answers []*ofac.Address
-		for i := range searcher.Addresses {
-			add := searcher.Addresses[i]
-			if hasAddress {
-				// Count matches for collection if over threshold
-				matches := 0
-				for k := range add.address {
-					for j := range reqAdds {
-						if strcmp.Levenshtein(add.address[k], reqAdds[j]) > addressSimilarity {
-							matches++
-						}
+		if !hasAddress {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		answers := searcher.FindAddresses(limit, func(add *Address) bool {
+			// Count matches for collection if over threshold
+			matches := 0
+			for k := range add.address {
+				for j := range reqAdds {
+					if strcmp.Levenshtein(add.address[k], reqAdds[j]) > addressSimilarity {
+						matches++
 					}
 				}
-				// If over 25% of words from query match (via strings.Contains not full string equality) save as an address.
-				// This is arbitrary, but given the following examples only one partial word match is required:
-				//  123 Scott Ave
-				//  1600 N Penn St
-				if (float64(matches) / float64(len(add.address))) >= 0.25 {
-					answers = append(answers, add.Address)
-				}
-				continue
 			}
-
-			// Break if at results limit
-			if len(answers) > limit {
-				break
+			// If over 25% of words from query match (via strings.Contains not full string equality) save as an address.
+			// This is arbitrary, but given the following examples only one partial word match is required:
+			//  123 Scott Ave
+			//  1600 N Penn St
+			if (float64(matches) / float64(len(add.address))) >= 0.25 {
+				return true
 			}
-		}
+			return false
+		})
 
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(&searchResponse{Addresses: answers}); err != nil {
@@ -271,34 +314,19 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 
 		limit := extractSearchLimit(r)
 
-		searcher.RLock()
-		defer searcher.RUnlock()
-
-		var answers []*ofac.SDN
-		for i := range searcher.SDNs {
-			sdn := searcher.SDNs[i]
-
-			// Count matches for nameSlugs fields
-			matches := 0
+		sdns := searcher.FindSDNs(limit, func(sdn *SDN) bool {
 			for k := range sdn.name {
 				for j := range nameSlugs {
 					if strcmp.Levenshtein(sdn.name[k], nameSlugs[j]) > nameSimilarity {
-						matches++
+						return true
 					}
 				}
 			}
-			if matches > 0 {
-				answers = append(answers, sdn.SDN)
-			}
-
-			// Break if at result limit
-			if len(answers) > limit {
-				break
-			}
-		}
+			return false
+		})
 
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(&searchResponse{SDNs: answers}); err != nil {
+		if err := json.NewEncoder(w).Encode(&searchResponse{SDNs: sdns}); err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}
@@ -315,33 +343,19 @@ func searchByAltName(logger log.Logger, searcher *searcher, altSlug string) http
 
 		limit := extractSearchLimit(r)
 
-		searcher.RLock()
-		defer searcher.RUnlock()
-
-		var answers []*ofac.AlternateIdentity
-		for i := range searcher.Alts {
-			alt := searcher.Alts[i]
-
-			matches := 0
+		alts := searcher.FindAlts(limit, func(alt *Alt) bool {
 			for k := range alt.name {
 				for j := range altSlugs {
 					if strcmp.Levenshtein(alt.name[k], altSlugs[j]) > altSimilarity {
-						matches++
+						return true
 					}
 				}
 			}
-			if matches > 0 {
-				answers = append(answers, alt.AlternateIdentity)
-			}
-
-			// Break if at result limit
-			if len(answers) > limit {
-				break
-			}
-		}
+			return false
+		})
 
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(&searchResponse{AltNames: answers}); err != nil {
+		if err := json.NewEncoder(w).Encode(&searchResponse{AltNames: alts}); err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}

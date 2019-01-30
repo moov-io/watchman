@@ -17,6 +17,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var (
+	errNoCustomerId = errors.New("no customerId found in path")
+)
+
 type Customer struct {
 	ID        string                    `json:"id"`
 	SDN       *ofac.SDN                 `json:"sdn"`
@@ -29,62 +33,62 @@ type customerWatchResponse struct {
 	WatchID string `json:"watchId"`
 }
 
-func addCustomerRoutes(logger log.Logger, r *mux.Router) {
-	r.Methods("GET").Path("/customers/{id}").HandlerFunc(getCustomer(logger))
-	r.Methods("PUT").Path("/customers/{id}").HandlerFunc(updateCustomerStatus(logger))
+func addCustomerRoutes(logger log.Logger, r *mux.Router, searcher *searcher) {
+	r.Methods("GET").Path("/customers/{customerId}").HandlerFunc(getCustomer(logger, searcher))
+	r.Methods("PUT").Path("/customers/{customerId}").HandlerFunc(updateCustomerStatus(logger, searcher))
 
-	r.Methods("POST").Path("/customers/{id}/watch").HandlerFunc(addCustomerWatch(logger))
-	r.Methods("DELETE").Path("/customers/{id}/watch").HandlerFunc(removeCustomerWatch(logger))
+	r.Methods("POST").Path("/customers/{customerId}/watch").HandlerFunc(addCustomerWatch(logger, searcher))
+	r.Methods("DELETE").Path("/customers/{customerId}/watch").HandlerFunc(removeCustomerWatch(logger, searcher))
 
-	r.Methods("POST").Path("/customers/watch").HandlerFunc(addCustomerNameWatch(logger))
-	r.Methods("DELETE").Path("/customers/watch/{watchId}").HandlerFunc(removeCustomerNameWatch(logger))
+	r.Methods("POST").Path("/customers/watch").HandlerFunc(addCustomerNameWatch(logger, searcher))
+	r.Methods("DELETE").Path("/customers/watch/{watchId}").HandlerFunc(removeCustomerNameWatch(logger, searcher))
 }
 
-func getCustomer(logger log.Logger) http.HandlerFunc {
+func getCustomerId(w http.ResponseWriter, r *http.Request) string {
+	v, ok := mux.Vars(r)["customerId"]
+	if !ok || v == "" {
+		moovhttp.Problem(w, errNoCustomerId)
+		return ""
+	}
+	return v
+}
+
+func getCustomer(logger log.Logger, searcher *searcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w, err := wrapResponseWriter(logger, w, r)
 		if err != nil {
 			return
 		}
+		id := getCustomerId(w, r)
+		limit := extractSearchLimit(r)
 
-		w.WriteHeader(http.StatusOK)
+		sdns := searcher.FindSDNs(1, func(sdn *SDN) bool {
+			return sdn.SDN.EntityID == id
+		})
+		if len(sdns) != 1 {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
 
+		// Find customer and linked data
 		customer := Customer{
-			ID: "13ou1fohfkajfah", // "random"
-			SDN: &ofac.SDN{
-				EntityID: "306",
-				SDNName:  "BANCO NACIONAL DE CUBA",
-				SDNType:  "individual",
-				Program:  "CUBA",
-				Title:    "",
-				Remarks:  "a.k.a. 'BNC'.",
-			},
-			Addresses: []*ofac.Address{
-				{
-					EntityID:                    "306",
-					AddressID:                   "201",
-					Address:                     "Dai-Ichi Bldg. 6th Floor, 10-2 Nihombashi, 2-chome, Chuo-ku",
-					CityStateProvincePostalCode: "Tokyo 103",
-					Country:                     "Japan",
-				},
-			},
-			Alts: []*ofac.AlternateIdentity{
-				{
-					EntityID:      "306",
-					AlternateID:   "220",
-					AlternateType: "aka",
-					AlternateName: "NATIONAL BANK OF CUBA",
-				},
-			},
+			ID:  id,
+			SDN: sdns[0],
+			Addresses: searcher.FindAddresses(limit, func(add *Address) bool {
+				return add.Address.EntityID == id
+			}),
+			Alts: searcher.FindAlts(limit, func(alt *Alt) bool {
+				return alt.AlternateIdentity.EntityID == id
+			}),
 		}
 		if err := json.NewEncoder(w).Encode(customer); err != nil {
-			moovhttp.Problem(w, err) // TODO(adam): replace with wrapped moovhttp.InternalError
+			moovhttp.Problem(w, err)
 			return
 		}
 	}
 }
 
-func addCustomerNameWatch(logger log.Logger) http.HandlerFunc {
+func addCustomerNameWatch(logger log.Logger, searcher *searcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w, err := wrapResponseWriter(logger, w, r)
 		if err != nil {
@@ -102,7 +106,7 @@ func addCustomerNameWatch(logger log.Logger) http.HandlerFunc {
 	}
 }
 
-func addCustomerWatch(logger log.Logger) http.HandlerFunc {
+func addCustomerWatch(logger log.Logger, searcher *searcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w, err := wrapResponseWriter(logger, w, r)
 		if err != nil {
@@ -123,7 +127,7 @@ type customerStatusRequest struct {
 	Status string `json:"status"` // TODO(adam): better name for Default ?
 }
 
-func updateCustomerStatus(logger log.Logger) http.HandlerFunc {
+func updateCustomerStatus(logger log.Logger, searcher *searcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w, err := wrapResponseWriter(logger, w, r)
 		if err != nil {
@@ -150,7 +154,7 @@ func updateCustomerStatus(logger log.Logger) http.HandlerFunc {
 	}
 }
 
-func removeCustomerWatch(logger log.Logger) http.HandlerFunc {
+func removeCustomerWatch(logger log.Logger, searcher *searcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w, err := wrapResponseWriter(logger, w, r)
 		if err != nil {
@@ -160,7 +164,7 @@ func removeCustomerWatch(logger log.Logger) http.HandlerFunc {
 	}
 }
 
-func removeCustomerNameWatch(logger log.Logger) http.HandlerFunc {
+func removeCustomerNameWatch(logger log.Logger, searcher *searcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w, err := wrapResponseWriter(logger, w, r)
 		if err != nil {

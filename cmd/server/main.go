@@ -53,8 +53,6 @@ func main() {
 	router := mux.NewRouter()
 	moovhttp.AddCORSHandler(router)
 	addPingRoute(router)
-	addCustomerRoutes(logger, router)
-	addSDNRoutes(logger, router)
 
 	// Start business HTTP server
 	readTimeout, _ := time.ParseDuration("30s")
@@ -116,7 +114,9 @@ func main() {
 		}
 	}()
 
-	// Add /search HTTP routes now what we have an ofac.Reader
+	// Add searcher for HTTP routes
+	addCustomerRoutes(logger, router, searcher)
+	addSDNRoutes(logger, router, searcher)
 	addSearchRoutes(logger, router, searcher)
 
 	// Add admin server OFAC data refresh endpoint

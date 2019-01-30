@@ -11,16 +11,85 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/moov-io/ofac"
+
 	"github.com/gorilla/mux"
 )
 
+var (
+	customerSearcher = &searcher{
+		SDNs: precomputeSDNs([]*ofac.SDN{
+			{
+				EntityID: "306",
+				SDNName:  "BANCO NACIONAL DE CUBA",
+				SDNType:  "individual",
+				Program:  "CUBA",
+				Title:    "",
+				Remarks:  "a.k.a. 'BNC'.",
+			},
+		}),
+		Addresses: precomputeAddresses([]*ofac.Address{
+			{
+				EntityID:                    "306",
+				AddressID:                   "201",
+				Address:                     "Dai-Ichi Bldg. 6th Floor, 10-2 Nihombashi, 2-chome, Chuo-ku",
+				CityStateProvincePostalCode: "Tokyo 103",
+				Country:                     "Japan",
+			},
+		}),
+		Alts: precomputeAlts([]*ofac.AlternateIdentity{
+			{
+				EntityID:      "306",
+				AlternateID:   "220",
+				AlternateType: "aka",
+				AlternateName: "NATIONAL BANK OF CUBA",
+			},
+		}),
+	}
+)
+
+func TestCustomers__id(t *testing.T) {
+	router := mux.NewRouter()
+
+	// Happy path
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/customers/random-cust-id", nil)
+	router.Methods("GET").Path("/customers/{customerId}").HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
+		if v := getCustomerId(w, r); v != "random-cust-id" {
+			t.Errorf("got %s", v)
+		}
+		if w.Code != http.StatusOK {
+			t.Errorf("got status code %d", w.Code)
+		}
+	})
+	router.ServeHTTP(w, req)
+
+	// Unhappy case
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest("GET", "/customers", nil)
+	router.Methods("GET").Path("/customers/{customerId}").HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
+		if v := getCustomerId(w, req); v != "" {
+			t.Errorf("didn't expect customerId, got %s", v)
+		}
+		if w.Code != http.StatusBadRequest {
+			t.Errorf("got status code %d", w.Code)
+		}
+	})
+	router.ServeHTTP(w, req)
+
+	// Don't pass req through mux so mux.Vars finds nothing
+	if v := getCustomerId(w, req); v != "" {
+		t.Errorf("expected empty, but got %q", v)
+	}
+}
+
 func TestCustomer_get(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/customers/foo", nil)
+	req := httptest.NewRequest("GET", "/customers/306", nil)
 	req.Header.Set("x-user-id", "test")
 
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router)
+	addCustomerRoutes(nil, router, customerSearcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -52,7 +121,7 @@ func TestCustomer_addWatch(t *testing.T) {
 	req.Header.Set("x-user-id", "test")
 
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router)
+	addCustomerRoutes(nil, router, customerSearcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -75,7 +144,7 @@ func TestCustomer_addNameWatch(t *testing.T) {
 	req.Header.Set("x-user-id", "test")
 
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router)
+	addCustomerRoutes(nil, router, customerSearcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -100,7 +169,7 @@ func TestCustomer_update(t *testing.T) {
 	req.Header.Set("x-user-id", "test")
 
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router)
+	addCustomerRoutes(nil, router, customerSearcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -116,7 +185,7 @@ func TestCustomer_updateNoBody(t *testing.T) {
 	req.Header.Set("x-user-id", "test")
 
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router)
+	addCustomerRoutes(nil, router, customerSearcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -131,7 +200,7 @@ func TestCustomer_removeWatch(t *testing.T) {
 	req.Header.Set("x-user-id", "test")
 
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router)
+	addCustomerRoutes(nil, router, customerSearcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -146,7 +215,7 @@ func TestCustomer_removeNameWatch(t *testing.T) {
 	req.Header.Set("x-user-id", "test")
 
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router)
+	addCustomerRoutes(nil, router, customerSearcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
