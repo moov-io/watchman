@@ -37,4 +37,5 @@ script:
   - staticcheck ./cmd/*/*.go ./pkg/*/*.go *.go
 after_success:
   - bash <(curl -s https://codecov.io/bash) -X fix
-  - make docker # We don't have a Dockerfile to build, yet
+  - make client
+  - make docker
