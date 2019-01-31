@@ -145,6 +145,24 @@ func TestCustomer_addWatch(t *testing.T) {
 	}
 }
 
+func TestCustomer_addWatchNoBody(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("POST", "/customers/foo/watch", nil)
+	req.Header.Set("x-user-id", "test")
+
+	repo := createTestCustomerWatchRepository(t)
+	defer repo.close()
+
+	router := mux.NewRouter()
+	addCustomerRoutes(nil, router, customerSearcher, repo)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+}
+
 func TestCustomer_addNameWatch(t *testing.T) {
 	w := httptest.NewRecorder()
 	body := strings.NewReader(`{"webhook": "https://moov.io"}`)
@@ -169,6 +187,38 @@ func TestCustomer_addNameWatch(t *testing.T) {
 	}
 	if watch.WatchID == "" {
 		t.Error("empty watch.WatchID")
+	}
+}
+
+func TestCustomer_addCustomerNameWatchNoBody(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("POST", "/customers/watch?name=foo", nil)
+	req.Header.Set("x-user-id", "test")
+
+	repo := createTestCustomerWatchRepository(t)
+	defer repo.close()
+
+	router := mux.NewRouter()
+	addCustomerRoutes(nil, router, customerSearcher, repo)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+
+	// reset
+	w = httptest.NewRecorder()
+	if w.Code != http.StatusOK {
+		t.Errorf("bad state reset: %d", w.Code)
+	}
+
+	req.URL.Query().Set("name", "")
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("bogus status code: %d", w.Code)
 	}
 }
 
