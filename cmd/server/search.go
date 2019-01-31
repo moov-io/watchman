@@ -304,7 +304,7 @@ func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchReq
 	}
 }
 
-func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.HandlerFunc { // TODO(Adam): split nameSlug
+func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		nameSlugs := strings.Fields(strings.ToLower(nameSlug))
 		if len(nameSlugs) == 0 {
