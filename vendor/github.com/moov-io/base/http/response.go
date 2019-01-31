@@ -67,7 +67,7 @@ func (w *ResponseWriter) WriteHeader(code int) {
 	}
 }
 
-// Wrap returns a ResponseWriter usable by applications. No parts of the request are inspected.
+// Wrap returns a ResponseWriter usable by applications. No parts of the Request are inspected or ResponseWriter modified.
 func Wrap(logger log.Logger, m metrics.Histogram, w http.ResponseWriter, r *http.Request) *ResponseWriter {
 	now := time.Now()
 	return &ResponseWriter{
