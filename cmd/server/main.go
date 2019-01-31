@@ -109,8 +109,6 @@ func main() {
 	}()
 	defer adminServer.Shutdown()
 
-	// Override OFAC data refresh interval (if set)
-
 	// Start our searcher (and downloader)
 	searcher := &searcher{
 		logger: logger,
