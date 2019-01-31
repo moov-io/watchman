@@ -38,7 +38,7 @@ type watchRepository interface {
 	// addCustomerWatch takes a customerId (EntityID), creates a watch and
 	// returns the watchId.
 	addCustomerWatch(customerId string) (string, error)
-	removeCustomerWatch(watchId string) error
+	removeCustomerWatch(customerId string, watchId string) error
 
 	// addCustomerNameWatch takes a customerId (EntityID), creates a watch and
 	// returns the watchId.
@@ -75,19 +75,19 @@ func (r sqliteWatchRepository) addCustomerWatch(customerId string, params watchR
 	return id, nil
 }
 
-func (r sqliteWatchRepository) removeCustomerWatch(watchId string) error {
+func (r sqliteWatchRepository) removeCustomerWatch(customerId string, watchId string) error {
 	if watchId == "" {
 		return errNoWatchId
 	}
 
-	query := `update customer_watches set deleted_at = ? where id = ? and deleted_at is null`
+	query := `update customer_watches set deleted_at = ? where customer_id = ? and id = ? and deleted_at is null`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(time.Now(), watchId)
+	_, err = stmt.Exec(time.Now(), customerId, watchId)
 	return err
 }
 

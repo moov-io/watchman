@@ -29,11 +29,10 @@ func createTestCustomerWatchRepository(t *testing.T) *sqliteWatchRepository {
 func TestCustomerWatch(t *testing.T) {
 	repo := createTestCustomerWatchRepository(t)
 
-	if err := repo.removeCustomerWatch(base.ID()); err != nil {
+	customerId := base.ID()
+	if err := repo.removeCustomerWatch(customerId, base.ID()); err != nil {
 		t.Errorf("expected no error: %v", err)
 	}
-
-	customerId := base.ID()
 
 	// add watch, then remove
 	watchId, err := repo.addCustomerWatch(customerId, watchRequest{Webhook: "https://moov.io"})
@@ -45,7 +44,7 @@ func TestCustomerWatch(t *testing.T) {
 	}
 
 	// remove
-	if err := repo.removeCustomerWatch(watchId); err != nil {
+	if err := repo.removeCustomerWatch(customerId, watchId); err != nil {
 		t.Errorf("expected no error: %v", err)
 	}
 }

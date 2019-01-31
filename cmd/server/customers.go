@@ -39,7 +39,7 @@ func addCustomerRoutes(logger log.Logger, r *mux.Router, searcher *searcher, rep
 	r.Methods("PUT").Path("/customers/{customerId}").HandlerFunc(updateCustomerStatus(logger, searcher))
 
 	r.Methods("POST").Path("/customers/{customerId}/watch").HandlerFunc(addCustomerWatch(logger, searcher, repo))
-	r.Methods("DELETE").Path("/customers/{customerId}/watch").HandlerFunc(removeCustomerWatch(logger, searcher, repo))
+	r.Methods("DELETE").Path("/customers/{customerId}/watch/{watchId}").HandlerFunc(removeCustomerWatch(logger, searcher, repo))
 
 	r.Methods("POST").Path("/customers/watch").HandlerFunc(addCustomerNameWatch(logger, searcher, repo))
 	r.Methods("DELETE").Path("/customers/watch/{watchId}").HandlerFunc(removeCustomerNameWatch(logger, searcher, repo))
@@ -186,11 +186,11 @@ func removeCustomerWatch(logger log.Logger, searcher *searcher, repo *sqliteWatc
 		if err != nil {
 			return
 		}
-		watchId := getWatchId(w, r)
-		if watchId == "" {
+		customerId, watchId := getCustomerId(w, r), getWatchId(w, r)
+		if customerId == "" || watchId == "" {
 			return
 		}
-		if err := repo.removeCustomerWatch(watchId); err != nil {
+		if err := repo.removeCustomerWatch(customerId, watchId); err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}

@@ -326,7 +326,7 @@ func (a *CustomersApiService) GetCustomer(ctx context.Context, customerId string
 /*
 CustomersApiService Remove a Customer name watch
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param watchId Customer watch ID
+ * @param watchId Watch ID, used to identify a specific watch
  * @param name Customer or Company name watch
  * @param optional nil or *RemoveCustomerNameWatchOpts - Optional Parameters:
  * @param "XRequestId" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
@@ -405,6 +405,7 @@ func (a *CustomersApiService) RemoveCustomerNameWatch(ctx context.Context, watch
 CustomersApiService Remove customer watch
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param customerId Customer ID
+ * @param watchId Watch ID, used to identify a specific watch
  * @param optional nil or *RemoveCustomerWatchOpts - Optional Parameters:
  * @param "XRequestId" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
 */
@@ -413,7 +414,7 @@ type RemoveCustomerWatchOpts struct {
 	XRequestId optional.String
 }
 
-func (a *CustomersApiService) RemoveCustomerWatch(ctx context.Context, customerId string, localVarOptionals *RemoveCustomerWatchOpts) (*http.Response, error) {
+func (a *CustomersApiService) RemoveCustomerWatch(ctx context.Context, customerId string, watchId string, localVarOptionals *RemoveCustomerWatchOpts) (*http.Response, error) {
 	var (
 		localVarHttpMethod   = strings.ToUpper("Delete")
 		localVarPostBody     interface{}
@@ -423,8 +424,9 @@ func (a *CustomersApiService) RemoveCustomerWatch(ctx context.Context, customerI
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/customers/{customerId}/watch"
+	localVarPath := a.client.cfg.BasePath + "/customers/{customerId}/watch/{watchId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"customerId"+"}", fmt.Sprintf("%v", customerId), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"watchId"+"}", fmt.Sprintf("%v", watchId), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}

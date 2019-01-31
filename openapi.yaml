@@ -100,6 +100,7 @@ paths:
                 $ref: '#/components/schemas/Watch'
         '404':
           description: Customer not found
+  /customers/{customerId}/watch/{watchId}:
     delete:
       tags:
         - Customers
@@ -114,6 +115,13 @@ paths:
           schema:
             type: string
             example: c3cf0f66
+        - name: watchId
+          in: path
+          description: Watch ID, used to identify a specific watch
+          required: true
+          schema:
+            type: string
+            example: 0c5e215c
       responses:
         '200':
           description: Customer watch removed
@@ -154,7 +162,7 @@ paths:
         - $ref: '#/components/parameters/requestId'
         - name: watchId
           in: path
-          description: Customer watch ID
+          description: Watch ID, used to identify a specific watch
           required: true
           schema:
             type: string

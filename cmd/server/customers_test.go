@@ -213,7 +213,7 @@ func TestCustomer_updateNoBody(t *testing.T) {
 
 func TestCustomer_removeWatch(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("DELETE", "/customers/watch/foo", nil)
+	req := httptest.NewRequest("DELETE", "/customers/foo/watch/watch-id", nil)
 	req.Header.Set("x-user-id", "test")
 
 	repo := createTestCustomerWatchRepository(t)
@@ -231,8 +231,7 @@ func TestCustomer_removeWatch(t *testing.T) {
 
 func TestCustomer_removeNameWatch(t *testing.T) {
 	w := httptest.NewRecorder()
-	body := strings.NewReader(`{"webhook": "https://moov.io"}`)
-	req := httptest.NewRequest("DELETE", "/customers/watch/foo", body)
+	req := httptest.NewRequest("DELETE", "/customers/watch/foo", nil)
 	req.Header.Set("x-user-id", "test")
 
 	repo := createTestCustomerWatchRepository(t)

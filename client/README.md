@@ -35,7 +35,7 @@ Class | Method | HTTP request | Description
 *CustomersApi* | [**AddCustomerWatch**](docs/CustomersApi.md#addcustomerwatch) | **Post** /customers/{customerId}/watch | Add OFAC watch on a Customer
 *CustomersApi* | [**GetCustomer**](docs/CustomersApi.md#getcustomer) | **Get** /customers/{customerId} | Get information about a customer, addresses, alternate names, and their SDN metadata.
 *CustomersApi* | [**RemoveCustomerNameWatch**](docs/CustomersApi.md#removecustomernamewatch) | **Delete** /customers/watch/{watchId} | Remove a Customer name watch
-*CustomersApi* | [**RemoveCustomerWatch**](docs/CustomersApi.md#removecustomerwatch) | **Delete** /customers/{customerId}/watch | Remove customer watch
+*CustomersApi* | [**RemoveCustomerWatch**](docs/CustomersApi.md#removecustomerwatch) | **Delete** /customers/{customerId}/watch/{watchId} | Remove customer watch
 *CustomersApi* | [**UpdateCustomerStatus**](docs/CustomersApi.md#updatecustomerstatus) | **Put** /customers/{customerId} | Update a Customer&#39;s status to add or remove a manual block.
 *OFACSearchApi* | [**SearchSDNs**](docs/OFACSearchApi.md#searchsdns) | **Get** /search | Search SDN names and metadata
 *SDNApi* | [**GetSDN**](docs/SDNApi.md#getsdn) | **Get** /sdn/{sdnId} | Specially designated national
