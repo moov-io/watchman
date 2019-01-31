@@ -129,6 +129,7 @@ func (r *Reader) csvAddressFile() error {
 			continue
 		}
 
+		record = replaceNull(record)
 		addr := &Address{
 			EntityID:                    record[0],
 			AddressID:                   record[1],
@@ -247,9 +248,7 @@ func (r *Reader) csvSDNCommentsFile() error {
 // (ASCII characters 45, 48, 45).
 func replaceNull(s []string) []string {
 	for i := 0; i < len(s); i++ {
-		if strings.Contains(s[i], "-0-") {
-			s[i] = ""
-		}
+		s[i] = strings.TrimSpace(strings.Replace(s[i], "-0-", "", -1))
 	}
 	return s
 }
