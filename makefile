@@ -6,7 +6,7 @@ build:
 	go fmt ./...
 	@mkdir -p ./bin/
 	go build github.com/moov-io/ofac
-	CGO_ENABLED=0 go build -o ./bin/server github.com/moov-io/ofac/cmd/server
+	CGO_ENABLED=1 go build -o ./bin/server github.com/moov-io/ofac/cmd/server
 
 .PHONY: client
 client:
