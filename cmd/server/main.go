@@ -22,6 +22,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
+	"github.com/mattn/go-sqlite3"
 )
 
 var (
@@ -47,6 +48,25 @@ func main() {
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
 		errs <- fmt.Errorf("%s", <-c)
+	}()
+
+	// Setup SQLite database
+	if sqliteVersion, _, _ := sqlite3.Version(); sqliteVersion != "" {
+		logger.Log("main", fmt.Sprintf("sqlite version %s", sqliteVersion))
+	}
+	db, err := createSqliteConnection(logger, getSqlitePath())
+	if err != nil {
+		logger.Log("main", err)
+		os.Exit(1)
+	}
+	if err := migrate(logger, db); err != nil {
+		logger.Log("main", err)
+		os.Exit(1)
+	}
+	defer func() {
+		if err := db.Close(); err != nil {
+			logger.Log("main", err)
+		}
 	}()
 
 	// Setup business HTTP routes
@@ -114,8 +134,11 @@ func main() {
 		}
 	}()
 
+	// Setup Database wrappers
+	watchRepo := &sqliteWatchRepository{db, logger}
+
 	// Add searcher for HTTP routes
-	addCustomerRoutes(logger, router, searcher)
+	addCustomerRoutes(logger, router, searcher, watchRepo)
 	addSDNRoutes(logger, router, searcher)
 	addSearchRoutes(logger, router, searcher)
 

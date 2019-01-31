@@ -8,12 +8,12 @@ Method | HTTP request | Description
 [**AddCustomerWatch**](CustomersApi.md#AddCustomerWatch) | **Post** /customers/{customerId}/watch | Add OFAC watch on a Customer
 [**GetCustomer**](CustomersApi.md#GetCustomer) | **Get** /customers/{customerId} | Get information about a customer, addresses, alternate names, and their SDN metadata.
 [**RemoveCustomerNameWatch**](CustomersApi.md#RemoveCustomerNameWatch) | **Delete** /customers/watch/{watchId} | Remove a Customer name watch
-[**RemoveCustomerWatch**](CustomersApi.md#RemoveCustomerWatch) | **Delete** /customers/{customerId}/watch | Remove customer watch
+[**RemoveCustomerWatch**](CustomersApi.md#RemoveCustomerWatch) | **Delete** /customers/{customerId}/watch/{watchId} | Remove customer watch
 [**UpdateCustomerStatus**](CustomersApi.md#UpdateCustomerStatus) | **Put** /customers/{customerId} | Update a Customer&#39;s status to add or remove a manual block.
 
 
 # **AddCustomerNameWatch**
-> Watch AddCustomerNameWatch(ctx, name, optional)
+> Watch AddCustomerNameWatch(ctx, name, watchRequest, optional)
 Add customer watch by name
 
 ### Required Parameters
@@ -22,6 +22,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
   **name** | **string**|  | 
+  **watchRequest** | [**WatchRequest**](WatchRequest.md)|  | 
  **optional** | ***AddCustomerNameWatchOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
@@ -30,6 +31,7 @@ Optional parameters are passed through a pointer to a AddCustomerNameWatchOpts s
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
+
  **xRequestId** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
 
 ### Return type
@@ -42,13 +44,13 @@ No authorization required
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **AddCustomerWatch**
-> Watch AddCustomerWatch(ctx, customerId, optional)
+> Watch AddCustomerWatch(ctx, customerId, watchRequest, optional)
 Add OFAC watch on a Customer
 
 ### Required Parameters
@@ -57,6 +59,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
   **customerId** | **string**| Customer ID | 
+  **watchRequest** | [**WatchRequest**](WatchRequest.md)|  | 
  **optional** | ***AddCustomerWatchOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
@@ -64,6 +67,7 @@ Optional parameters are passed through a pointer to a AddCustomerWatchOpts struc
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+
 
  **xRequestId** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
 
@@ -77,7 +81,7 @@ No authorization required
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -126,7 +130,7 @@ Remove a Customer name watch
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-  **watchId** | **string**| Customer watch ID | 
+  **watchId** | **string**| Watch ID, used to identify a specific watch | 
   **name** | **string**| Customer or Company name watch | 
  **optional** | ***RemoveCustomerNameWatchOpts** | optional parameters | nil if no parameters
 
@@ -155,7 +159,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **RemoveCustomerWatch**
-> RemoveCustomerWatch(ctx, customerId, optional)
+> RemoveCustomerWatch(ctx, customerId, watchId, optional)
 Remove customer watch
 
 ### Required Parameters
@@ -164,6 +168,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
   **customerId** | **string**| Customer ID | 
+  **watchId** | **string**| Watch ID, used to identify a specific watch | 
  **optional** | ***RemoveCustomerWatchOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
@@ -171,6 +176,7 @@ Optional parameters are passed through a pointer to a RemoveCustomerWatchOpts st
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+
 
  **xRequestId** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
 

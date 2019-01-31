@@ -85,6 +85,12 @@ paths:
           schema:
             type: string
             example: c3cf0f66
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WatchRequest'
       responses:
         '200':
           description: Customer watch added
@@ -94,6 +100,7 @@ paths:
                 $ref: '#/components/schemas/Watch'
         '404':
           description: Customer not found
+  /customers/{customerId}/watch/{watchId}:
     delete:
       tags:
         - Customers
@@ -108,6 +115,13 @@ paths:
           schema:
             type: string
             example: c3cf0f66
+        - name: watchId
+          in: path
+          description: Watch ID, used to identify a specific watch
+          required: true
+          schema:
+            type: string
+            example: 0c5e215c
       responses:
         '200':
           description: Customer watch removed
@@ -125,6 +139,12 @@ paths:
           schema:
             type: string
             example: Jane Smith
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WatchRequest'
       responses:
         '200':
           description: Customer watch applied
@@ -142,7 +162,7 @@ paths:
         - $ref: '#/components/parameters/requestId'
         - name: watchId
           in: path
-          description: Customer watch ID
+          description: Watch ID, used to identify a specific watch
           required: true
           schema:
             type: string
@@ -380,6 +400,13 @@ components:
           description: Object representing a customer or company watch
           type: string
           example: 08ddba92
+    WatchRequest:
+      description: Webhook or other means of notification on search criteria. OFAC will make a POST request with a body of the customer (SDN, AltNames, and Address).
+      properties:
+        webhook:
+          description: HTTPS url for webhook on search match
+          type: string
+          example: https://api.example.com/ofac/webhook
   parameters:
     requestId:
       in: header

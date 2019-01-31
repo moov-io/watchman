@@ -88,8 +88,11 @@ func TestCustomer_get(t *testing.T) {
 	req := httptest.NewRequest("GET", "/customers/306", nil)
 	req.Header.Set("x-user-id", "test")
 
+	repo := createTestCustomerWatchRepository(t)
+	defer repo.close()
+
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router, customerSearcher)
+	addCustomerRoutes(nil, router, customerSearcher, repo)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -117,11 +120,15 @@ func TestCustomer_get(t *testing.T) {
 
 func TestCustomer_addWatch(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("POST", "/customers/foo/watch", nil)
+	body := strings.NewReader(`{"webhook": "https://moov.io"}`)
+	req := httptest.NewRequest("POST", "/customers/foo/watch", body)
 	req.Header.Set("x-user-id", "test")
 
+	repo := createTestCustomerWatchRepository(t)
+	defer repo.close()
+
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router, customerSearcher)
+	addCustomerRoutes(nil, router, customerSearcher, repo)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -138,13 +145,35 @@ func TestCustomer_addWatch(t *testing.T) {
 	}
 }
 
-func TestCustomer_addNameWatch(t *testing.T) {
+func TestCustomer_addWatchNoBody(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("POST", "/customers/watch?name=foo", nil)
+	req := httptest.NewRequest("POST", "/customers/foo/watch", nil)
 	req.Header.Set("x-user-id", "test")
 
+	repo := createTestCustomerWatchRepository(t)
+	defer repo.close()
+
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router, customerSearcher)
+	addCustomerRoutes(nil, router, customerSearcher, repo)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+}
+
+func TestCustomer_addNameWatch(t *testing.T) {
+	w := httptest.NewRecorder()
+	body := strings.NewReader(`{"webhook": "https://moov.io"}`)
+	req := httptest.NewRequest("POST", "/customers/watch?name=foo", body)
+	req.Header.Set("x-user-id", "test")
+
+	repo := createTestCustomerWatchRepository(t)
+	defer repo.close()
+
+	router := mux.NewRouter()
+	addCustomerRoutes(nil, router, customerSearcher, repo)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -158,6 +187,38 @@ func TestCustomer_addNameWatch(t *testing.T) {
 	}
 	if watch.WatchID == "" {
 		t.Error("empty watch.WatchID")
+	}
+}
+
+func TestCustomer_addCustomerNameWatchNoBody(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("POST", "/customers/watch?name=foo", nil)
+	req.Header.Set("x-user-id", "test")
+
+	repo := createTestCustomerWatchRepository(t)
+	defer repo.close()
+
+	router := mux.NewRouter()
+	addCustomerRoutes(nil, router, customerSearcher, repo)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+
+	// reset
+	w = httptest.NewRecorder()
+	if w.Code != http.StatusOK {
+		t.Errorf("bad state reset: %d", w.Code)
+	}
+
+	req.URL.Query().Set("name", "")
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("bogus status code: %d", w.Code)
 	}
 }
 
@@ -168,8 +229,11 @@ func TestCustomer_update(t *testing.T) {
 	req := httptest.NewRequest("PUT", "/customers/foo", body)
 	req.Header.Set("x-user-id", "test")
 
+	repo := createTestCustomerWatchRepository(t)
+	defer repo.close()
+
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router, customerSearcher)
+	addCustomerRoutes(nil, router, customerSearcher, repo)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -184,8 +248,11 @@ func TestCustomer_updateNoBody(t *testing.T) {
 	req := httptest.NewRequest("PUT", "/customers/foo", nil)
 	req.Header.Set("x-user-id", "test")
 
+	repo := createTestCustomerWatchRepository(t)
+	defer repo.close()
+
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router, customerSearcher)
+	addCustomerRoutes(nil, router, customerSearcher, repo)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -196,11 +263,14 @@ func TestCustomer_updateNoBody(t *testing.T) {
 
 func TestCustomer_removeWatch(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("DELETE", "/customers/foo/watch", nil)
+	req := httptest.NewRequest("DELETE", "/customers/foo/watch/watch-id", nil)
 	req.Header.Set("x-user-id", "test")
 
+	repo := createTestCustomerWatchRepository(t)
+	defer repo.close()
+
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router, customerSearcher)
+	addCustomerRoutes(nil, router, customerSearcher, repo)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -214,8 +284,11 @@ func TestCustomer_removeNameWatch(t *testing.T) {
 	req := httptest.NewRequest("DELETE", "/customers/watch/foo", nil)
 	req.Header.Set("x-user-id", "test")
 
+	repo := createTestCustomerWatchRepository(t)
+	defer repo.close()
+
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router, customerSearcher)
+	addCustomerRoutes(nil, router, customerSearcher, repo)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
