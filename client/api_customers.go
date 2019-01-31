@@ -30,6 +30,7 @@ type CustomersApiService service
 CustomersApiService Add customer watch by name
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param name
+ * @param watchRequest
  * @param optional nil or *AddCustomerNameWatchOpts - Optional Parameters:
  * @param "XRequestId" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
 @return Watch
@@ -39,7 +40,7 @@ type AddCustomerNameWatchOpts struct {
 	XRequestId optional.String
 }
 
-func (a *CustomersApiService) AddCustomerNameWatch(ctx context.Context, name string, localVarOptionals *AddCustomerNameWatchOpts) (Watch, *http.Response, error) {
+func (a *CustomersApiService) AddCustomerNameWatch(ctx context.Context, name string, watchRequest WatchRequest, localVarOptionals *AddCustomerNameWatchOpts) (Watch, *http.Response, error) {
 	var (
 		localVarHttpMethod   = strings.ToUpper("Post")
 		localVarPostBody     interface{}
@@ -58,7 +59,7 @@ func (a *CustomersApiService) AddCustomerNameWatch(ctx context.Context, name str
 
 	localVarQueryParams.Add("name", parameterToString(name, ""))
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{}
+	localVarHttpContentTypes := []string{"application/json"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -77,6 +78,8 @@ func (a *CustomersApiService) AddCustomerNameWatch(ctx context.Context, name str
 	if localVarOptionals != nil && localVarOptionals.XRequestId.IsSet() {
 		localVarHeaderParams["X-Request-Id"] = parameterToString(localVarOptionals.XRequestId.Value(), "")
 	}
+	// body params
+	localVarPostBody = &watchRequest
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -127,6 +130,7 @@ func (a *CustomersApiService) AddCustomerNameWatch(ctx context.Context, name str
 CustomersApiService Add OFAC watch on a Customer
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param customerId Customer ID
+ * @param watchRequest
  * @param optional nil or *AddCustomerWatchOpts - Optional Parameters:
  * @param "XRequestId" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
 @return Watch
@@ -136,7 +140,7 @@ type AddCustomerWatchOpts struct {
 	XRequestId optional.String
 }
 
-func (a *CustomersApiService) AddCustomerWatch(ctx context.Context, customerId string, localVarOptionals *AddCustomerWatchOpts) (Watch, *http.Response, error) {
+func (a *CustomersApiService) AddCustomerWatch(ctx context.Context, customerId string, watchRequest WatchRequest, localVarOptionals *AddCustomerWatchOpts) (Watch, *http.Response, error) {
 	var (
 		localVarHttpMethod   = strings.ToUpper("Post")
 		localVarPostBody     interface{}
@@ -155,7 +159,7 @@ func (a *CustomersApiService) AddCustomerWatch(ctx context.Context, customerId s
 	localVarFormParams := url.Values{}
 
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{}
+	localVarHttpContentTypes := []string{"application/json"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -174,6 +178,8 @@ func (a *CustomersApiService) AddCustomerWatch(ctx context.Context, customerId s
 	if localVarOptionals != nil && localVarOptionals.XRequestId.IsSet() {
 		localVarHeaderParams["X-Request-Id"] = parameterToString(localVarOptionals.XRequestId.Value(), "")
 	}
+	// body params
+	localVarPostBody = &watchRequest
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return localVarReturnValue, nil, err

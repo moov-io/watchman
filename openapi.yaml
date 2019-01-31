@@ -89,7 +89,7 @@ paths:
         required: true
         content:
           application/json:
-            schmea:
+            schema:
               $ref: '#/components/schemas/WatchRequest'
       responses:
         '200':
@@ -135,7 +135,7 @@ paths:
         required: true
         content:
           application/json:
-            schmea:
+            schema:
               $ref: '#/components/schemas/WatchRequest'
       responses:
         '200':

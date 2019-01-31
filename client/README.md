@@ -52,6 +52,7 @@ Class | Method | HTTP request | Description
  - [Search](docs/Search.md)
  - [UpdateCustomerStatus](docs/UpdateCustomerStatus.md)
  - [Watch](docs/Watch.md)
+ - [WatchRequest](docs/WatchRequest.md)
 
 
 ## Documentation For Authorization
