@@ -60,4 +60,22 @@ func TestDownload_record(t *testing.T) {
 	if err := repo.recordStats(stats); err != nil {
 		t.Fatal(err)
 	}
+
+	downloads, err := repo.latestDownloads(5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(downloads) != 1 {
+		t.Errorf("got %d downloads", len(downloads))
+	}
+	dl := downloads[0]
+	if dl.SDNs != stats.SDNs {
+		t.Errorf("dl.SDNs=%d stats.SDNs=%d", dl.SDNs, stats.SDNs)
+	}
+	if dl.Alts != stats.Alts {
+		t.Errorf("dl.Alts=%d stats.Alts=%d", dl.Alts, stats.Alts)
+	}
+	if dl.Addresses != stats.Addresses {
+		t.Errorf("dl.Addresses=%d stats.Addresses=%d", dl.Addresses, stats.Addresses)
+	}
 }
