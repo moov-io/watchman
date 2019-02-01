@@ -5,23 +5,18 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
-	"net/url"
 	"os"
 	"strconv"
 	"strings"
 	"sync"
 	"unicode/utf8"
 
-	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/ofac"
 	"github.com/moov-io/ofac/pkg/strcmp"
 
 	"github.com/go-kit/kit/log"
-	"github.com/gorilla/mux"
 )
 
 var (
@@ -52,74 +47,6 @@ func init() {
 		if f > 0 {
 			addressSimilarity = f
 		}
-	}
-}
-
-func addSearchRoutes(logger log.Logger, r *mux.Router, searcher *searcher) {
-	r.Methods("GET").Path("/search").HandlerFunc(search(logger, searcher))
-}
-
-type addressSearchRequest struct {
-	Address    string `json:"address"`
-	City       string `json:"city"`
-	State      string `json:"state"`
-	Providence string `json:"providence"`
-	Zip        string `json:"zip"`
-	Country    string `json:"country"`
-}
-
-func (req addressSearchRequest) empty() bool {
-	return req.Address == "" && req.City == "" && req.State == "" &&
-		req.Providence == "" && req.Zip == "" && req.Country == ""
-}
-
-func readAddressSearchRequest(u *url.URL) addressSearchRequest {
-	return addressSearchRequest{
-		Address:    strings.ToLower(strings.TrimSpace(u.Query().Get("address"))),
-		City:       strings.ToLower(strings.TrimSpace(u.Query().Get("city"))),
-		State:      strings.ToLower(strings.TrimSpace(u.Query().Get("state"))),
-		Providence: strings.ToLower(strings.TrimSpace(u.Query().Get("providence"))),
-		Zip:        strings.ToLower(strings.TrimSpace(u.Query().Get("zip"))),
-		Country:    strings.ToLower(strings.TrimSpace(u.Query().Get("country"))),
-	}
-}
-
-func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w, err := wrapResponseWriter(logger, w, r)
-		if err != nil {
-			return
-		}
-
-		// Search by Name
-		if name := strings.TrimSpace(r.URL.Query().Get("name")); name != "" {
-			if logger != nil {
-				logger.Log("search", fmt.Sprintf("searching SDN names for %s", name))
-			}
-			searchByName(logger, searcher, name)(w, r)
-			return
-		}
-
-		// Search by Alt Name
-		if alt := strings.TrimSpace(r.URL.Query().Get("altName")); alt != "" {
-			if logger != nil {
-				logger.Log("search", fmt.Sprintf("searching SDN alt names for %s", alt))
-			}
-			searchByAltName(logger, searcher, alt)(w, r)
-			return
-		}
-
-		// Search Addresses
-		if req := readAddressSearchRequest(r.URL); !req.empty() {
-			if logger != nil {
-				logger.Log("search", fmt.Sprintf("searching address for %#v", req))
-			}
-			searchByAddress(logger, searcher, req)(w, r)
-			return
-		}
-
-		// Fallback if no search params were found
-		moovhttp.Problem(w, errNoSearchParams)
 	}
 }
 
@@ -266,106 +193,51 @@ type searchResponse struct {
 	Addresses []*ofac.Address           `json:"addresses"`
 }
 
-func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchRequest) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		hasAddress := req.Address != ""
-		reqAdds := strings.Fields(strings.ToLower(req.Address))
-		limit := extractSearchLimit(r)
-
-		if !hasAddress {
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		answers := searcher.FindAddresses(limit, func(add *Address) bool {
-			// Count matches for collection if over threshold
-			matches := 0
-			for k := range add.address {
-				for j := range reqAdds {
-					if strcmp.Levenshtein(add.address[k], reqAdds[j]) > addressSimilarity {
-						matches++
-					}
-				}
+// addressMatches returns a bool which represents if addressParts matches a given Address.
+//
+// An Address contains precomputed data to speed up searches and addressParts is split along
+// word boundries.
+func addressMatches(addressParts []string, inc *Address) bool {
+	// Count matches for collection if over threshold
+	matches := 0
+	for k := range inc.address {
+		for j := range addressParts {
+			if strcmp.Levenshtein(inc.address[k], addressParts[j]) > addressSimilarity {
+				matches++
 			}
-			// If over 25% of words from query match (via strings.Contains not full string equality) save as an address.
-			// This is arbitrary, but given the following examples only one partial word match is required:
-			//  123 Scott Ave
-			//  1600 N Penn St
-			if (float64(matches) / float64(len(add.address))) >= 0.25 {
+			return false
+		}
+	}
+	// If over 25% of words from query match (via strings.Contains not full string equality) save as an address.
+	// This is arbitrary, but given the following examples only one partial word match is required:
+	//  123 Scott Ave
+	//  1600 N Penn St
+	if (float64(matches) / float64(len(inc.address))) >= 0.25 {
+		return true
+	}
+	return false
+}
+
+// nameMatches returns a bool representing if nameParts (name split on word boundries) matches a given SDN.
+func nameMatches(nameParts []string, inc *SDN) bool {
+	for k := range inc.name {
+		for j := range nameParts {
+			if strcmp.Levenshtein(inc.name[k], nameParts[j]) > nameSimilarity {
 				return true
 			}
-			return false
-		})
-
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(&searchResponse{Addresses: answers}); err != nil {
-			moovhttp.Problem(w, err)
-			return
 		}
 	}
+	return false
 }
 
-func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		nameSlugs := strings.Fields(strings.ToLower(nameSlug))
-		if len(nameSlugs) == 0 {
-			moovhttp.Problem(w, errNoSearchParams)
-			return
-		}
-
-		limit := extractSearchLimit(r)
-
-		sdns := searcher.FindSDNs(limit, func(sdn *SDN) bool {
-			for k := range nameSlugs {
-				if utf8.RuneCountInString(nameSlugs[k]) <= 3 {
-					// Skip short names: Mr, AL ..., etc
-					continue
-				}
-				for j := range sdn.name {
-					if strcmp.Levenshtein(sdn.name[j], nameSlugs[k]) > nameSimilarity {
-						return true
-					}
-				}
+// altMatches returns a bool representing if altParts (alt name split on word boundries) matches a given ofac.AlternateIdentity.
+func altMatches(altParts []string, inc *Alt) bool {
+	for k := range inc.name {
+		for j := range altParts {
+			if strcmp.Levenshtein(inc.name[k], altParts[j]) > altSimilarity {
+				return true
 			}
-			return false
-		})
-
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(&searchResponse{SDNs: sdns}); err != nil {
-			moovhttp.Problem(w, err)
-			return
 		}
 	}
-}
-
-func searchByAltName(logger log.Logger, searcher *searcher, altSlug string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		altSlugs := strings.Fields(strings.ToLower(altSlug))
-		if len(altSlugs) == 0 {
-			moovhttp.Problem(w, errNoSearchParams)
-			return
-		}
-
-		limit := extractSearchLimit(r)
-
-		alts := searcher.FindAlts(limit, func(alt *Alt) bool {
-			for k := range alt.name {
-				for j := range altSlugs {
-					if strcmp.Levenshtein(alt.name[k], altSlugs[j]) > altSimilarity {
-						return true
-					}
-				}
-			}
-			return false
-		})
-
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(&searchResponse{AltNames: alts}); err != nil {
-			moovhttp.Problem(w, err)
-			return
-		}
-	}
+	return false
 }
