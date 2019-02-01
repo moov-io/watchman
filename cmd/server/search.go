@@ -296,6 +296,7 @@ func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchReq
 			return false
 		})
 
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(&searchResponse{Addresses: answers}); err != nil {
 			moovhttp.Problem(w, err)
@@ -325,6 +326,7 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 			return false
 		})
 
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(&searchResponse{SDNs: sdns}); err != nil {
 			moovhttp.Problem(w, err)
@@ -354,6 +356,7 @@ func searchByAltName(logger log.Logger, searcher *searcher, altSlug string) http
 			return false
 		})
 
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(&searchResponse{AltNames: alts}); err != nil {
 			moovhttp.Problem(w, err)
