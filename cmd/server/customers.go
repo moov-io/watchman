@@ -113,8 +113,12 @@ func addCustomerNameWatch(logger log.Logger, searcher *searcher, repo *sqliteWat
 			moovhttp.Problem(w, err)
 			return
 		}
-
-		watchId, err := repo.addCustomerNameWatch(name, req.Webhook)
+		webhook, err := validateWebhook(req.Webhook)
+		if err != nil {
+			moovhttp.Problem(w, err)
+			return
+		}
+		watchId, err := repo.addCustomerNameWatch(name, webhook)
 		if err != nil {
 			moovhttp.Problem(w, err)
 			return
