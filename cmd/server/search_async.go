@@ -6,11 +6,22 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strconv"
 )
 
 var (
 	watchResearchBatchSize = 100
 )
+
+func init() {
+	if v := os.Getenv("WEBHOOK_BATCH_SIZE"); v != "" {
+		d, _ := strconv.Atoi(v)
+		if d > 0 {
+			watchResearchBatchSize = d
+		}
+	}
+}
 
 func (s *searcher) spawnResearching(watchRepo watchRepository, updates chan *downloadStats) {
 	for {
