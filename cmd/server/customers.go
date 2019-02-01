@@ -82,6 +82,8 @@ func getCustomer(logger log.Logger, searcher *searcher) http.HandlerFunc {
 				return alt.AlternateIdentity.EntityID == id
 			}),
 		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(customer); err != nil {
 			moovhttp.Problem(w, err)
 			return
@@ -114,6 +116,8 @@ func addCustomerNameWatch(logger log.Logger, searcher *searcher, repo *sqliteWat
 			return
 		}
 
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(customerWatchResponse{watchId}); err != nil {
 			moovhttp.Problem(w, err)
 			return
@@ -141,6 +145,8 @@ func addCustomerWatch(logger log.Logger, searcher *searcher, repo *sqliteWatchRe
 			return
 		}
 
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(customerWatchResponse{watchId}); err != nil {
 			moovhttp.Problem(w, err)
 			return

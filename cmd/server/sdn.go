@@ -47,6 +47,8 @@ func getSDNAddresses(logger log.Logger, searcher *searcher) http.HandlerFunc {
 		addresses := searcher.FindAddresses(limit, func(add *Address) bool {
 			return add.Address.EntityID == id
 		})
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(addresses); err != nil {
 			moovhttp.Problem(w, err) // TODO(adam): JSON errors should moovhttp.InternalError (wrapped, see auth's http.go)
 			return
@@ -67,6 +69,8 @@ func getSDNAltNames(logger log.Logger, searcher *searcher) http.HandlerFunc {
 		alts := searcher.FindAlts(limit, func(alt *Alt) bool {
 			return alt.AlternateIdentity.EntityID == id
 		})
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(alts); err != nil {
 			moovhttp.Problem(w, err)
 			return
@@ -92,6 +96,8 @@ func getSDN(logger log.Logger, searcher *searcher) http.HandlerFunc {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(sdns[0]); err != nil {
 			moovhttp.Problem(w, err)
 			return
