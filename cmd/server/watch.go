@@ -37,12 +37,13 @@ type watchRequest struct {
 type watchRepository interface {
 	// addCustomerWatch takes a customerId (EntityID), creates a watch and
 	// returns the watchId.
-	addCustomerWatch(customerId string) (string, error)
+	addCustomerWatch(customerId string, params watchRequest) (string, error)
 	removeCustomerWatch(customerId string, watchId string) error
 
-	// addCustomerNameWatch takes a customerId (EntityID), creates a watch and
-	// returns the watchId.
-	addCustomerNameWatch(name string) (string, error)
+	getWatchesCursor(batchSize int) *watchCursor
+
+	// addCustomerNameWatch takes a customerId (EntityID), creates a watch and returns the watchId.
+	addCustomerNameWatch(name string, webhook string) (string, error)
 	removeCustomerNameWatch(watchId string) error
 }
 
@@ -51,11 +52,18 @@ type sqliteWatchRepository struct {
 	logger log.Logger
 }
 
-func (r sqliteWatchRepository) close() error {
+func (r *sqliteWatchRepository) close() error {
 	return r.db.Close()
 }
 
-func (r sqliteWatchRepository) addCustomerWatch(customerId string, params watchRequest) (string, error) {
+func (r *sqliteWatchRepository) getWatchesCursor(batchSize int) *watchCursor {
+	return &watchCursor{
+		batchSize: batchSize,
+		db:        r.db,
+	}
+}
+
+func (r *sqliteWatchRepository) addCustomerWatch(customerId string, params watchRequest) (string, error) {
 	if customerId == "" {
 		return "", errNoCustomerId
 	}
@@ -75,7 +83,7 @@ func (r sqliteWatchRepository) addCustomerWatch(customerId string, params watchR
 	return id, nil
 }
 
-func (r sqliteWatchRepository) removeCustomerWatch(customerId string, watchId string) error {
+func (r *sqliteWatchRepository) removeCustomerWatch(customerId string, watchId string) error {
 	if watchId == "" {
 		return errNoWatchId
 	}
@@ -91,7 +99,7 @@ func (r sqliteWatchRepository) removeCustomerWatch(customerId string, watchId st
 	return err
 }
 
-func (r sqliteWatchRepository) addCustomerNameWatch(name string, webhook string) (string, error) {
+func (r *sqliteWatchRepository) addCustomerNameWatch(name string, webhook string) (string, error) {
 	query := `insert or ignore into customer_name_watches (id, name, webhook, created_at) values (?, ?, ?, ?);`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
@@ -107,7 +115,7 @@ func (r sqliteWatchRepository) addCustomerNameWatch(name string, webhook string)
 	return id, nil
 }
 
-func (r sqliteWatchRepository) removeCustomerNameWatch(watchId string) error {
+func (r *sqliteWatchRepository) removeCustomerNameWatch(watchId string) error {
 	if watchId == "" {
 		return errNoWatchId
 	}
@@ -121,4 +129,53 @@ func (r sqliteWatchRepository) removeCustomerNameWatch(watchId string) error {
 
 	_, err = stmt.Exec(time.Now(), watchId)
 	return err
+}
+
+type watch struct {
+	id, customerId string
+	webhook        string
+}
+
+type watchCursor struct {
+	batchSize int
+	db        *sql.DB
+
+	// newerThan represents the minimum (oldest) created_at value
+	// to return in the batch.
+	//
+	// This value starts at "zero time" (an empty time.Time) and progresses
+	// towards time.Now() with each batch by being set to the batch's newest time.
+	newerThan time.Time
+}
+
+func (cur *watchCursor) Next() ([]watch, error) {
+	query := `select id, customer_id, webhook, created_at from customer_watches where created_at > ? order by created_at asc limit ?`
+	stmt, err := cur.db.Prepare(query)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(cur.newerThan, cur.batchSize)
+	if err != nil {
+		return nil, err
+	}
+
+	max := cur.newerThan
+
+	var watches []watch
+	for rows.Next() {
+		var createdAt time.Time
+		var watch watch
+		if err := rows.Scan(&watch.id, &watch.customerId, &watch.webhook, &createdAt); err == nil {
+			watches = append(watches, watch)
+		}
+		if createdAt.After(max) {
+			// advance max to newest time
+			max = createdAt
+		}
+	}
+	cur.newerThan = max
+
+	return watches, nil
 }
