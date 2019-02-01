@@ -6,15 +6,26 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"path/filepath"
 	"time"
 
+	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/ofac"
 
 	"github.com/go-kit/kit/log"
+	"github.com/gorilla/mux"
 )
+
+type Download struct {
+	Timestamp time.Time `json:"timestamp"`
+	SDNs      int       `json:"SDNs"`
+	Alts      int       `json:"altNames"`
+	Addresses int       `json:"addresses"`
+}
 
 type downloadStats struct {
 	SDNs      int `json:"SDNs"`
@@ -73,7 +84,33 @@ func (s *searcher) refreshData() (*downloadStats, error) {
 	return stats, nil
 }
 
+func addDownloadRoutes(logger log.Logger, r *mux.Router, repo downloadRepository) {
+	r.Methods("GET").Path("/downloads").HandlerFunc(getLatestDownloads(logger, repo))
+}
+
+func getLatestDownloads(logger log.Logger, repo downloadRepository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w, err := wrapResponseWriter(logger, w, r)
+		if err != nil {
+			return
+		}
+		limit := extractSearchLimit(r)
+		downloads, err := repo.latestDownloads(limit)
+		if err != nil {
+			moovhttp.Problem(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		if err := json.NewEncoder(w).Encode(downloads); err != nil {
+			moovhttp.Problem(w, err)
+			return
+		}
+	}
+}
+
 type downloadRepository interface {
+	latestDownloads(limit int) ([]Download, error)
 	recordStats(stats *downloadStats) error
 }
 
@@ -100,4 +137,28 @@ func (r *sqliteDownloadRepository) recordStats(stats *downloadStats) error {
 
 	_, err = stmt.Exec(time.Now(), stats.SDNs, stats.Alts, stats.Addresses)
 	return err
+}
+
+func (r *sqliteDownloadRepository) latestDownloads(limit int) ([]Download, error) {
+	query := `select downloaded_at, sdns, alt_names, addresses from ofac_download_stats order by downloaded_at desc limit ?;`
+	stmt, err := r.db.Prepare(query)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var downloads []Download
+	for rows.Next() {
+		var dl Download
+		if err := rows.Scan(&dl.Timestamp, &dl.SDNs, &dl.Alts, &dl.Addresses); err == nil {
+			downloads = append(downloads, dl)
+		}
+	}
+	return downloads, nil
 }

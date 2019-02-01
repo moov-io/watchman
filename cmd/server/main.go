@@ -110,6 +110,10 @@ func main() {
 	}()
 	defer adminServer.Shutdown()
 
+	// Setup download repository
+	downloadRepo := &sqliteDownloadRepository{db, logger}
+	defer downloadRepo.close()
+
 	// Start our searcher (and downloader)
 	searcher := &searcher{
 		logger: logger,
@@ -118,6 +122,7 @@ func main() {
 		logger.Log("main", fmt.Sprintf("ERROR: failed to download/parse initial OFAC data: %v", err))
 		os.Exit(1)
 	} else {
+		downloadRepo.recordStats(stats)
 		logger.Log("main", fmt.Sprintf("OFAC data refreshed - Addresses=%d AltNames=%d SDNs=%d", stats.Addresses, stats.Alts, stats.SDNs))
 	}
 	go func() {
@@ -129,6 +134,7 @@ func main() {
 			if err != nil {
 				logger.Log("main", fmt.Sprintf("ERROR: refreshing OFAC data: %v", err))
 			} else {
+				downloadRepo.recordStats(stats)
 				searcher.RLock()
 				logger.Log("main", fmt.Sprintf("OFAC data refreshed - Addresses=%d AltNames=%d SDNs=%d", stats.Addresses, stats.Alts, stats.SDNs))
 				searcher.RUnlock()
@@ -143,6 +149,7 @@ func main() {
 	addCustomerRoutes(logger, router, searcher, watchRepo)
 	addSDNRoutes(logger, router, searcher)
 	addSearchRoutes(logger, router, searcher)
+	addDownloadRoutes(logger, router, downloadRepo)
 
 	// Add admin server OFAC data refresh endpoint
 	adminServer.AddHandler("/ofac/refresh", func(w http.ResponseWriter, r *http.Request) {
@@ -151,6 +158,7 @@ func main() {
 			logger.Log("main", fmt.Sprintf("ERROR: admin: problem refreshing OFAC data: %v", err))
 			w.WriteHeader(http.StatusInternalServerError)
 		} else {
+			downloadRepo.recordStats(stats)
 			logger.Log("main", fmt.Sprintf("admin: finished OFAC data refresh - Addresses=%d AltNames=%d SDNs=%d", stats.Addresses, stats.Alts, stats.SDNs))
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(stats)
