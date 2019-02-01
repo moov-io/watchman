@@ -33,6 +33,23 @@ type downloadStats struct {
 	Addresses int `json:"addresses"`
 }
 
+func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo downloadRepository) {
+	for {
+		time.Sleep(interval)
+		stats, err := s.refreshData()
+		if err != nil {
+			if s.logger != nil {
+				s.logger.Log("main", fmt.Sprintf("ERROR: refreshing OFAC data: %v", err))
+			}
+		} else {
+			downloadRepo.recordStats(stats)
+			if s.logger != nil {
+				s.logger.Log("main", fmt.Sprintf("OFAC data refreshed - Addresses=%d AltNames=%d SDNs=%d", stats.Addresses, stats.Alts, stats.SDNs))
+			}
+		}
+	}
+}
+
 func (s *searcher) refreshData() (*downloadStats, error) {
 	if s.logger != nil {
 		s.logger.Log("download", "Starting refresh of OFAC data")

@@ -7,7 +7,6 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"net/http"
@@ -125,22 +124,12 @@ func main() {
 		downloadRepo.recordStats(stats)
 		logger.Log("main", fmt.Sprintf("OFAC data refreshed - Addresses=%d AltNames=%d SDNs=%d", stats.Addresses, stats.Alts, stats.SDNs))
 	}
-	go func() {
-		// Override refresh interval if set
-		ofacDataRefreshInterval = getOFACRefreshInterval(logger, os.Getenv("OFAC_DATA_REFRESH"))
-		for {
-			time.Sleep(ofacDataRefreshInterval)
-			stats, err := searcher.refreshData()
-			if err != nil {
-				logger.Log("main", fmt.Sprintf("ERROR: refreshing OFAC data: %v", err))
-			} else {
-				downloadRepo.recordStats(stats)
-				searcher.RLock()
-				logger.Log("main", fmt.Sprintf("OFAC data refreshed - Addresses=%d AltNames=%d SDNs=%d", stats.Addresses, stats.Alts, stats.SDNs))
-				searcher.RUnlock()
-			}
-		}
-	}()
+	// Override refresh interval if set
+	ofacDataRefreshInterval = getOFACRefreshInterval(logger, os.Getenv("OFAC_DATA_REFRESH"))
+	go searcher.periodicDataRefresh(ofacDataRefreshInterval, downloadRepo)
+
+	// Add manual OFAC data refresh endpoint
+	adminServer.AddHandler(manualRefreshPath, manualRefreshHandler(logger, searcher, downloadRepo))
 
 	// Setup Database wrappers
 	watchRepo := &sqliteWatchRepository{db, logger}
@@ -150,20 +139,6 @@ func main() {
 	addSDNRoutes(logger, router, searcher)
 	addSearchRoutes(logger, router, searcher)
 	addDownloadRoutes(logger, router, downloadRepo)
-
-	// Add admin server OFAC data refresh endpoint
-	adminServer.AddHandler("/ofac/refresh", func(w http.ResponseWriter, r *http.Request) {
-		logger.Log("main", "admin: refreshing OFAC data")
-		if stats, err := searcher.refreshData(); err != nil {
-			logger.Log("main", fmt.Sprintf("ERROR: admin: problem refreshing OFAC data: %v", err))
-			w.WriteHeader(http.StatusInternalServerError)
-		} else {
-			downloadRepo.recordStats(stats)
-			logger.Log("main", fmt.Sprintf("admin: finished OFAC data refresh - Addresses=%d AltNames=%d SDNs=%d", stats.Addresses, stats.Alts, stats.SDNs))
-			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(stats)
-		}
-	})
 
 	// Start business logic HTTP server
 	go func() {
