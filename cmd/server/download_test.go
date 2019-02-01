@@ -5,9 +5,13 @@
 package main
 
 import (
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/go-kit/kit/log"
+	"github.com/gorilla/mux"
 )
 
 func TestSearcher__refreshInterval(t *testing.T) {
@@ -77,5 +81,34 @@ func TestDownload_record(t *testing.T) {
 	}
 	if dl.Addresses != stats.Addresses {
 		t.Errorf("dl.Addresses=%d stats.Addresses=%d", dl.Addresses, stats.Addresses)
+	}
+}
+
+func TestDownload_route(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/downloads", nil)
+	req.Header.Set("x-user-id", "test")
+
+	repo := createTestDownloadRepository(t)
+	defer repo.close()
+
+	// save a record
+	repo.recordStats(&downloadStats{1, 421, 1511})
+
+	router := mux.NewRouter()
+	addDownloadRoutes(nil, router, repo)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusOK {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+
+	var downloads []Download
+	if err := json.NewDecoder(w.Body).Decode(&downloads); err != nil {
+		t.Error(err)
+	}
+	if len(downloads) != 1 {
+		t.Errorf("got %d downloads: %v", len(downloads), downloads)
 	}
 }
