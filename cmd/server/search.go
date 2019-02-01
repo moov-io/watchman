@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"unicode/utf8"
 
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/ofac"
@@ -26,9 +27,9 @@ import (
 var (
 	errNoSearchParams = errors.New("missing search parameter(s)")
 
-	nameSimilarity    float64 = 0.85
-	altSimilarity     float64 = 0.85
-	addressSimilarity float64 = 0.85
+	nameSimilarity    float64 = 0.90
+	altSimilarity     float64 = 0.90
+	addressSimilarity float64 = 0.90
 
 	softResultsLimit, hardResultsLimit = 10, 100
 )
@@ -316,9 +317,13 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 		limit := extractSearchLimit(r)
 
 		sdns := searcher.FindSDNs(limit, func(sdn *SDN) bool {
-			for k := range sdn.name {
-				for j := range nameSlugs {
-					if strcmp.Levenshtein(sdn.name[k], nameSlugs[j]) > nameSimilarity {
+			for k := range nameSlugs {
+				if utf8.RuneCountInString(nameSlugs[k]) <= 3 {
+					// Skip short names: Mr, AL ..., etc
+					continue
+				}
+				for j := range sdn.name {
+					if strcmp.Levenshtein(sdn.name[j], nameSlugs[k]) > nameSimilarity {
 						return true
 					}
 				}
