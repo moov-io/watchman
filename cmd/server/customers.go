@@ -54,6 +54,25 @@ func getCustomerId(w http.ResponseWriter, r *http.Request) string {
 	return v
 }
 
+func getCustomerById(id string, searcher *searcher) *Customer {
+	sdns := searcher.FindSDNs(1, func(sdn *SDN) bool {
+		return sdn.SDN.EntityID == id
+	})
+	if len(sdns) != 1 {
+		return nil
+	}
+	return &Customer{
+		ID:  id,
+		SDN: sdns[0],
+		Addresses: searcher.FindAddresses(100, func(add *Address) bool {
+			return add.Address.EntityID == id
+		}),
+		Alts: searcher.FindAlts(100, func(alt *Alt) bool {
+			return alt.AlternateIdentity.EntityID == id
+		}),
+	}
+}
+
 func getCustomer(logger log.Logger, searcher *searcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w, err := wrapResponseWriter(logger, w, r)
@@ -61,26 +80,13 @@ func getCustomer(logger log.Logger, searcher *searcher) http.HandlerFunc {
 			return
 		}
 		id := getCustomerId(w, r)
-		limit := extractSearchLimit(r)
-
-		sdns := searcher.FindSDNs(1, func(sdn *SDN) bool {
-			return sdn.SDN.EntityID == id
-		})
-		if len(sdns) != 1 {
-			w.WriteHeader(http.StatusNotFound)
+		if id == "" {
 			return
 		}
-
-		// Find customer and linked data
-		customer := Customer{
-			ID:  id,
-			SDN: sdns[0],
-			Addresses: searcher.FindAddresses(limit, func(add *Address) bool {
-				return add.Address.EntityID == id
-			}),
-			Alts: searcher.FindAlts(limit, func(alt *Alt) bool {
-				return alt.AlternateIdentity.EntityID == id
-			}),
+		customer := getCustomerById(id, searcher)
+		if customer == nil {
+			w.WriteHeader(http.StatusNotFound)
+			return
 		}
 		if err := json.NewEncoder(w).Encode(customer); err != nil {
 			moovhttp.Problem(w, err)
