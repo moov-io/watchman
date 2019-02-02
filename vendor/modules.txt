@@ -53,6 +53,8 @@ github.com/prometheus/procfs/internal/util
 github.com/rickar/cal
 # github.com/xrash/smetrics v0.0.0-20170218160415-a3153f7040e9
 github.com/xrash/smetrics
+# go4.org v0.0.0-20181109185143-00e24f1b2599
+go4.org/syncutil
 # golang.org/x/net v0.0.0-20190108225652-1e06a53dbb7e
 golang.org/x/net/context/ctxhttp
 golang.org/x/net/context

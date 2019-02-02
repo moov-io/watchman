@@ -5,13 +5,21 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
 	"time"
+
+	"go4.org/syncutil"
 )
 
 var (
+	// webhookGate is a goroutine-safe throttler designed to only allow N
+	// goroutines to run at any given time.
+	webhookGate = syncutil.NewGate(10)
+
 	webhookHTTPClient = &http.Client{
 		Timeout: 10 * time.Second,
 		Transport: &http.Transport{
@@ -27,6 +35,33 @@ var (
 	}
 )
 
+func callWebhook(id string, customer *Customer, webhook string) error {
+	webhook, err := validateWebhook(webhook)
+	if err != nil {
+		return err
+	}
+
+	var body bytes.Buffer
+	if err := json.NewEncoder(&body).Encode(customer); err != nil {
+		return fmt.Errorf("problem creating JSON for webhook %s: %v", id, err)
+	}
+	req, err := http.NewRequest("POST", webhook, &body)
+	if err != nil {
+		return fmt.Errorf("unknown error with webhook %s: %v", id, err)
+	}
+
+	// Guard HTTP calls in-flight
+	webhookGate.Start()
+	defer webhookGate.Done()
+
+	resp, err := webhookHTTPClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("HTTP problem with webhook %s: %v", id, err)
+	}
+	resp.Body.Close()
+	return nil
+}
+
 // validateWebhook performs some basic checks against the incoming webhook and
 // returns a normalized value.
 //
@@ -35,7 +70,7 @@ var (
 func validateWebhook(raw string) (string, error) {
 	u, err := url.Parse(raw)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("%s is not a valid URL: %v", raw, err)
 	}
 	if u.Scheme != "https" {
 		return "", fmt.Errorf("%s is not an HTTPS url", u.String())
