@@ -205,7 +205,6 @@ func addressMatches(addressParts []string, inc *Address) bool {
 			if strcmp.Levenshtein(inc.address[k], addressParts[j]) > addressSimilarity {
 				matches++
 			}
-			return false
 		}
 	}
 	// If over 25% of words from query match (via strings.Contains not full string equality) save as an address.

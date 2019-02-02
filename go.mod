@@ -17,5 +17,6 @@ require (
 	github.com/prometheus/procfs v0.0.0-20190117184657-bf6a532e95b1 // indirect
 	github.com/rickar/cal v1.0.0 // indirect
 	github.com/xrash/smetrics v0.0.0-20170218160415-a3153f7040e9
+	go4.org v0.0.0-20181109185143-00e24f1b2599
 	golang.org/x/oauth2 v0.0.0-20190115181402-5dab4167f31c
 )

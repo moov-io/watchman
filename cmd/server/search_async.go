@@ -40,8 +40,12 @@ func (s *searcher) spawnResearching(watchRepo watchRepository, updates chan *dow
 						// TODO(adam): remove watch?
 						s.logger.Log("search", fmt.Sprintf("async: customer %v not found for watchId=%q", watches[i].customerId, watches[i].id))
 					}
-					// TODO(adam): fire webhook
+
 					s.logger.Log("search", fmt.Sprintf("async: watch for customer %s found", watches[i].customerId))
+
+					if err := callWebhook(watches[i].id, customer, watches[i].webhook); err != nil {
+						s.logger.Log("search", fmt.Sprintf("async: %v", err))
+					}
 				}
 			}
 
