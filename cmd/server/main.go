@@ -109,28 +109,27 @@ func main() {
 	}()
 	defer adminServer.Shutdown()
 
+	// Setup download repository
+	downloadRepo := &sqliteDownloadRepository{db, logger}
+	defer downloadRepo.close()
+
 	// Start our searcher (and downloader)
 	searcher := &searcher{
 		logger: logger,
 	}
-	if err := searcher.refreshData(); err != nil {
+	if stats, err := searcher.refreshData(); err != nil {
 		logger.Log("main", fmt.Sprintf("ERROR: failed to download/parse initial OFAC data: %v", err))
 		os.Exit(1)
+	} else {
+		downloadRepo.recordStats(stats)
+		logger.Log("main", fmt.Sprintf("OFAC data refreshed - Addresses=%d AltNames=%d SDNs=%d", stats.Addresses, stats.Alts, stats.SDNs))
 	}
-	go func() {
-		// Override refresh interval if set
-		ofacDataRefreshInterval = getOFACRefreshInterval(logger, os.Getenv("OFAC_DATA_REFRESH"))
-		for {
-			time.Sleep(ofacDataRefreshInterval)
-			if err := searcher.refreshData(); err != nil {
-				logger.Log("main", fmt.Sprintf("ERROR: refreshing OFAC data: %v", err))
-			} else {
-				searcher.RLock()
-				logger.Log("main", fmt.Sprintf("OFAC data refreshed - Addresses=%d AltNames=%d SDNs=%d", len(searcher.Addresses), len(searcher.Alts), len(searcher.SDNs)))
-				searcher.RUnlock()
-			}
-		}
-	}()
+	// Override refresh interval if set
+	ofacDataRefreshInterval = getOFACRefreshInterval(logger, os.Getenv("OFAC_DATA_REFRESH"))
+	go searcher.periodicDataRefresh(ofacDataRefreshInterval, downloadRepo)
+
+	// Add manual OFAC data refresh endpoint
+	adminServer.AddHandler(manualRefreshPath, manualRefreshHandler(logger, searcher, downloadRepo))
 
 	// Setup Database wrappers
 	watchRepo := &sqliteWatchRepository{db, logger}
@@ -140,18 +139,7 @@ func main() {
 	addCustomerRoutes(logger, router, searcher, watchRepo)
 	addSDNRoutes(logger, router, searcher)
 	addSearchRoutes(logger, router, searcher)
-
-	// Add admin server OFAC data refresh endpoint
-	adminServer.AddHandler("/ofac/refresh", func(w http.ResponseWriter, r *http.Request) {
-		logger.Log("main", "admin: refreshing OFAC data")
-		if err := searcher.refreshData(); err != nil {
-			logger.Log("main", fmt.Sprintf("ERROR: admin: problem refreshing OFAC data: %v", err))
-			w.WriteHeader(http.StatusOK)
-		} else {
-			logger.Log("main", "admin: finished OFAC data refresh")
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-	})
+	addDownloadRoutes(logger, router, downloadRepo)
 
 	// Start business logic HTTP server
 	go func() {
