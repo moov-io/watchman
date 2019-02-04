@@ -15,12 +15,18 @@ var (
 )
 
 func init() {
-	if v := os.Getenv("WEBHOOK_BATCH_SIZE"); v != "" {
-		d, _ := strconv.Atoi(v)
-		if d > 0 {
-			watchResearchBatchSize = d
-		}
+	watchResearchBatchSize = readWebhookBatchSize(os.Getenv("WEBHOOK_BATCH_SIZE"))
+}
+
+func readWebhookBatchSize(str string) int {
+	if str == "" {
+		return watchResearchBatchSize
 	}
+	d, _ := strconv.Atoi(str)
+	if d > 0 {
+		return d
+	}
+	return watchResearchBatchSize
 }
 
 func (s *searcher) spawnResearching(watchRepo watchRepository, updates chan *downloadStats) {
@@ -34,7 +40,7 @@ func (s *searcher) spawnResearching(watchRepo watchRepository, updates chan *dow
 				if len(watches) == 0 {
 					break
 				}
-				for i := range watches { // .id, .customerId, .webhook
+				for i := range watches {
 					customer := getCustomerById(watches[i].customerId, s)
 					if customer == nil {
 						// TODO(adam): remove watch?
