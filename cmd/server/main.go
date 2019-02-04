@@ -125,15 +125,17 @@ func main() {
 		logger.Log("main", fmt.Sprintf("OFAC data refreshed - Addresses=%d AltNames=%d SDNs=%d", stats.Addresses, stats.Alts, stats.SDNs))
 	}
 
-	// Setup Watch database wrapper
+	// Setup Watch and Webhook database wrapper
 	watchRepo := &sqliteWatchRepository{db, logger}
 	defer watchRepo.close()
+	webhookRepo := &sqliteWebhookRepository{db}
+	defer webhookRepo.close()
 
 	// Setup periodic download and re-search
 	updates := make(chan *downloadStats)
 	ofacDataRefreshInterval = getOFACRefreshInterval(logger, os.Getenv("OFAC_DATA_REFRESH"))
 	go searcher.periodicDataRefresh(ofacDataRefreshInterval, downloadRepo, updates)
-	go searcher.spawnResearching(watchRepo, updates)
+	go searcher.spawnResearching(watchRepo, webhookRepo, updates)
 
 	// Add manual OFAC data refresh endpoint
 	adminServer.AddHandler(manualRefreshPath, manualRefreshHandler(logger, searcher, downloadRepo))

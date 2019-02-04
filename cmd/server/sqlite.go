@@ -23,6 +23,9 @@ var (
 
 		// OFAC download stats
 		`create table if not exists ofac_download_stats(downloaded_at datetime, sdns, alt_names, addresses);`,
+
+		// Webhook stats
+		`create table if not exists webhook_stats(watch_id string, attempted_at datetime, status);`,
 	}
 )
 
