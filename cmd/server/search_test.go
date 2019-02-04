@@ -189,7 +189,7 @@ func TestSearch__Name(t *testing.T) {
 
 func TestSearch__NameMultiple(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/search?name=al+ayman", nil)
+	req := httptest.NewRequest("GET", "/search?name=ZAWAH+ayman", nil)
 	req.Header.Set("x-user-id", "test")
 
 	searcher := &searcher{
