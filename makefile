@@ -1,12 +1,19 @@
 VERSION := $(shell grep -Eo '(v[0-9]+[\.][0-9]+[\.][0-9]+(-[a-zA-Z0-9]*)?)' version.go)
 
-.PHONY: build docker release
+.PHONY: build build-server build-example docker release check
 
-build:
-	go fmt ./...
-	@mkdir -p ./bin/
+build: check build-server build-example
+
+build-server:
 	go build github.com/moov-io/ofac
 	CGO_ENABLED=1 go build -o ./bin/server github.com/moov-io/ofac/cmd/server
+
+build-example:
+	CGO_ENABLED=0 go build -o ./bin/example github.com/moov-io/ofac/example
+
+check:
+	go fmt ./...
+	@mkdir -p ./bin/
 
 .PHONY: client
 client:
@@ -23,9 +30,13 @@ clean:
 	@rm -rf client/
 	@rm -f openapi-generator-cli-*.jar
 
-docker:
+docker: clean
+# Main OFAC server Docker image
 	docker build --pull -t moov/ofac:$(VERSION) -f Dockerfile .
 	docker tag moov/ofac:$(VERSION) moov/ofac:latest
+# OFAC Example Docker image
+	docker build --pull -t moov/ofac-example:$(VERSION) -f Dockerfile-example .
+	docker tag moov/ofac-example:$(VERSION) moov/ofac-example:latest
 
 release: docker AUTHORS
 	go vet ./...
@@ -34,6 +45,7 @@ release: docker AUTHORS
 
 release-push:
 	docker push moov/ofac:$(VERSION)
+	docker push moov/ofac-example:$(VERSION)
 
 .PHONY: cover-test cover-web
 cover-test:
