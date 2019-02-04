@@ -28,7 +28,8 @@ var (
 			MaxConnsPerHost:     100,
 			IdleConnTimeout:     1 * time.Minute,
 		},
-		// never follow a redirect
+		// never follow a redirect as it could lead to a DoS or us being redirected
+		// to an unexpected location.
 		CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
 			return http.ErrUseLastResponse
 		},
