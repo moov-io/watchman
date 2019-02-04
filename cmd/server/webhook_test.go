@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/moov-io/base"
 )
@@ -124,7 +125,20 @@ func TestWebhook_call(t *testing.T) {
 	// execute webhook with arbitrary Customer
 	cust := getCustomerById("306", customerSearcher) // from customers_test.go
 
-	if err := callWebhook(base.ID(), cust, server.URL); err != nil {
+	if _, err := callWebhook(base.ID(), cust, server.URL); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestWebhook_record(t *testing.T) {
+	db, err := createTestSqliteDB()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.close()
+
+	repo := sqliteWebhookRepository{db.db}
+	if err := repo.recordWebhook(base.ID(), time.Now(), 200); err != nil {
 		t.Fatal(err)
 	}
 }

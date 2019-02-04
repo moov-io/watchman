@@ -6,6 +6,7 @@ package main
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -37,19 +38,20 @@ var (
 )
 
 // callWebhook will encode Customer as JSON and make a POST request to the provided webhook url.
-func callWebhook(watchId string, customer *Customer, webhook string) error {
+// Returned is the HTTP status code.
+func callWebhook(watchId string, customer *Customer, webhook string) (int, error) {
 	webhook, err := validateWebhook(webhook)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	var body bytes.Buffer
 	if err := json.NewEncoder(&body).Encode(customer); err != nil {
-		return fmt.Errorf("problem creating JSON for watch %s: %v", watchId, err)
+		return 0, fmt.Errorf("problem creating JSON for watch %s: %v", watchId, err)
 	}
 	req, err := http.NewRequest("POST", webhook, &body)
 	if err != nil {
-		return fmt.Errorf("unknown error with watch %s: %v", watchId, err)
+		return 0, fmt.Errorf("unknown error with watch %s: %v", watchId, err)
 	}
 
 	// Guard HTTP calls in-flight
@@ -58,13 +60,13 @@ func callWebhook(watchId string, customer *Customer, webhook string) error {
 
 	resp, err := webhookHTTPClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("HTTP problem with watch %s: %v", watchId, err)
+		return resp.StatusCode, fmt.Errorf("HTTP problem with watch %s: %v", watchId, err)
 	}
 	resp.Body.Close()
 	if resp.StatusCode > 299 || resp.StatusCode < 200 {
-		return fmt.Errorf("callWebhook: bogus status code: %d", resp.StatusCode)
+		return resp.StatusCode, fmt.Errorf("callWebhook: bogus status code: %d", resp.StatusCode)
 	}
-	return nil
+	return resp.StatusCode, nil
 }
 
 // validateWebhook performs some basic checks against the incoming webhook and
@@ -81,4 +83,28 @@ func validateWebhook(raw string) (string, error) {
 		return "", fmt.Errorf("%s is not an HTTPS url", u.String())
 	}
 	return u.String(), nil
+}
+
+type webhookRepository interface {
+	recordWebhook(watchId string, attemptedAt time.Time, status int) error
+}
+
+type sqliteWebhookRepository struct {
+	db *sql.DB
+}
+
+func (r *sqliteWebhookRepository) close() error {
+	return r.db.Close()
+}
+
+func (r *sqliteWebhookRepository) recordWebhook(watchId string, attemptedAt time.Time, status int) error {
+	query := `insert into webhook_stats (watch_id, attempted_at, status) values (?, ?, ?);`
+	stmt, err := r.db.Prepare(query)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(watchId, attemptedAt, status)
+	return err
 }
