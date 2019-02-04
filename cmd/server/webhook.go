@@ -35,7 +35,9 @@ var (
 	}
 )
 
-func callWebhook(id string, customer *Customer, webhook string) error {
+
+// callWebhook will encode Customer as JSON and make a POST request to the provided webhook url.
+func callWebhook(watchId string, customer *Customer, webhook string) error {
 	webhook, err := validateWebhook(webhook)
 	if err != nil {
 		return err
@@ -43,11 +45,11 @@ func callWebhook(id string, customer *Customer, webhook string) error {
 
 	var body bytes.Buffer
 	if err := json.NewEncoder(&body).Encode(customer); err != nil {
-		return fmt.Errorf("problem creating JSON for webhook %s: %v", id, err)
+		return fmt.Errorf("problem creating JSON for watch %s: %v", watchId, err)
 	}
 	req, err := http.NewRequest("POST", webhook, &body)
 	if err != nil {
-		return fmt.Errorf("unknown error with webhook %s: %v", id, err)
+		return fmt.Errorf("unknown error with watch %s: %v", watchId, err)
 	}
 
 	// Guard HTTP calls in-flight
@@ -56,9 +58,12 @@ func callWebhook(id string, customer *Customer, webhook string) error {
 
 	resp, err := webhookHTTPClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("HTTP problem with webhook %s: %v", id, err)
+		return fmt.Errorf("HTTP problem with watch %s: %v", watchId, err)
 	}
 	resp.Body.Close()
+	if resp.StatusCode > 299 || resp.StatusCode < 200 {
+		return fmt.Errorf("callWebhook: bogus status code: %d", resp.StatusCode)
+	}
 	return nil
 }
 

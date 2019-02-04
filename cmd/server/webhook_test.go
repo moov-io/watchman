@@ -6,13 +6,33 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/moov-io/base"
 )
 
 var (
+	// customerWebhook reads a Customer in JSON from the incoming request and replies
+	// with the Customer.ID
+	customerWebhook = func(w http.ResponseWriter, r *http.Request) {
+		var cust Customer
+		if err := json.NewDecoder(r.Body).Decode(&cust); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+		} else {
+			if cust.ID == "" {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(cust.ID))
+		}
+	}
+
 	redirect = func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Location", "https://example.com")
 		w.WriteHeader(http.StatusMovedPermanently)
@@ -79,5 +99,32 @@ func TestWebhook_validate(t *testing.T) {
 	}
 	if out != "" {
 		t.Errorf("out=%q", out)
+	}
+}
+
+func TestWebhook_call(t *testing.T) {
+	if testing.Short() {
+		return
+	}
+
+	server := httptest.NewTLSServer(http.HandlerFunc(customerWebhook))
+	defer server.Close()
+
+	// override to add test TLS certificate
+	if tr, ok := webhookHTTPClient.Transport.(*http.Transport); ok {
+		if ctr, ok := server.Client().Transport.(*http.Transport); ok {
+			tr.TLSClientConfig.RootCAs = ctr.TLSClientConfig.RootCAs
+		} else {
+			t.Errorf("unknown server.Client().Transport type: %T", server.Client().Transport)
+		}
+	} else {
+		t.Fatalf("%T %#v", webhookHTTPClient.Transport, webhookHTTPClient.Transport)
+	}
+
+	// execute webhook with arbitrary Customer
+	cust := getCustomerById("306", customerSearcher) // from customers_test.go
+
+	if err := callWebhook(base.ID(), cust, server.URL); err != nil {
+		t.Fatal(err)
 	}
 }
