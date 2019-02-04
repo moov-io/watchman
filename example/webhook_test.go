@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/moov-io/ofac"
@@ -65,6 +66,33 @@ func TestWebhookRoute(t *testing.T) {
 	w.Flush()
 
 	if w.Code != http.StatusOK {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+}
+
+func TestWebhookRoute__bad(t *testing.T) {
+	logger := log.NewNopLogger()
+
+	router := mux.NewRouter()
+	addWebhookRoute(logger, router)
+
+	// no body
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("POST", "/ofac", nil)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+
+	// malformed body (wrong JSON)
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest("POST", "/ofac", strings.NewReader(`{"thing": "other-object"}`))
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusBadRequest {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 }

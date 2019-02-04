@@ -31,7 +31,7 @@ func addWebhookRoute(logger log.Logger, r *mux.Router) {
 			logger.Log("webhook", fmt.Sprintf("problem reading request: %v", err))
 
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
-			w.WriteHeader(http.StatusInternalServerError)
+			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(fmt.Sprintf(`{"error": "%s"}`, err)))
 			return
 		}
