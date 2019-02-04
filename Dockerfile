@@ -1,16 +1,15 @@
-FROM golang:1.11-alpine as builder
+FROM golang:1.11-stretch as builder
 WORKDIR /go/src/github.com/moov-io/ofac
-RUN apk add -U make
-RUN adduser -D -g '' --shell /bin/false moov
+RUN apt-get update && apt-get install make gcc g++
 COPY . .
 RUN make build
-USER moov
 
-FROM scratch
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+FROM debian:9
+RUN apt-get update && apt-get install -y ca-certificates
+
 COPY --from=builder /go/src/github.com/moov-io/ofac/bin/server /bin/server
-COPY --from=builder /etc/passwd /etc/passwd
-USER moov
+# USER moov # TODO(adam): non-root users
+
 EXPOSE 8080
 EXPOSE 9090
 ENTRYPOINT ["/bin/server"]
