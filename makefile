@@ -30,7 +30,7 @@ clean:
 	@rm -rf client/
 	@rm -f openapi-generator-cli-*.jar
 
-docker: clean
+docker:
 # Main OFAC server Docker image
 	docker build --pull -t moov/ofac:$(VERSION) -f Dockerfile .
 	docker tag moov/ofac:$(VERSION) moov/ofac:latest
