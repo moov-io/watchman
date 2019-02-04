@@ -45,15 +45,15 @@ func (s *searcher) spawnResearching(watchRepo watchRepository, webhookRepo webho
 					customer := getCustomerById(watches[i].customerId, s)
 					if customer == nil {
 						// TODO(adam): remove watch?
-						s.logger.Log("search", fmt.Sprintf("async: customer %v not found for watchId=%q", watches[i].customerId, watches[i].id))
+						s.logger.Log("search", fmt.Sprintf("async: watch %s customer %v not found", watches[i].id, watches[i].customerId))
 					}
 
-					s.logger.Log("search", fmt.Sprintf("async: watch for customer %s found", watches[i].customerId))
+					s.logger.Log("search", fmt.Sprintf("async: watch %s for customer %s found", watches[i].id, watches[i].customerId))
 
 					now := time.Now()
 					status, err := callWebhook(watches[i].id, customer, watches[i].webhook)
 					if err != nil {
-						s.logger.Log("search", fmt.Sprintf("async: %v", err))
+						s.logger.Log("search", fmt.Errorf("async: problem writing watch (%s) webhook status: %v", watches[i].id, err))
 					}
 					if err := webhookRepo.recordWebhook(watches[i].id, now, status); err != nil {
 						s.logger.Log("search", fmt.Errorf("async: problem writing watch (%s) webhook status: %v", watches[i].id, err))
