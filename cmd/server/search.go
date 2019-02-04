@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"unicode/utf8"
 
 	"github.com/moov-io/ofac"
 	"github.com/moov-io/ofac/pkg/strcmp"
