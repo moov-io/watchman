@@ -76,7 +76,7 @@ func TestWatchCursor(t *testing.T) {
 	repo := createTestCustomerWatchRepository(t)
 	defer repo.close()
 
-	cur := &watchCursor{batchSize: 2, db: repo.db}
+	cur := repo.getWatchesCursor(2) // batchSize
 
 	// insert some watches
 	watchId1, _ := repo.addCustomerWatch(base.ID(), watchRequest{Webhook: "https://moov.io/1"})
