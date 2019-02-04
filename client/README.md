@@ -37,6 +37,7 @@ Class | Method | HTTP request | Description
 *CustomersApi* | [**RemoveCustomerNameWatch**](docs/CustomersApi.md#removecustomernamewatch) | **Delete** /customers/watch/{watchId} | Remove a Customer name watch
 *CustomersApi* | [**RemoveCustomerWatch**](docs/CustomersApi.md#removecustomerwatch) | **Delete** /customers/{customerId}/watch/{watchId} | Remove customer watch
 *CustomersApi* | [**UpdateCustomerStatus**](docs/CustomersApi.md#updatecustomerstatus) | **Put** /customers/{customerId} | Update a Customer&#39;s status to add or remove a manual block.
+*DownloadsApi* | [**GetLatestDownloads**](docs/DownloadsApi.md#getlatestdownloads) | **Get** /downloads | Return list of recent re-downloads of OFAC data
 *OFACSearchApi* | [**SearchSDNs**](docs/OFACSearchApi.md#searchsdns) | **Get** /search | Search SDN names and metadata
 *SDNApi* | [**GetSDN**](docs/SDNApi.md#getsdn) | **Get** /sdn/{sdnId} | Specially designated national
 *SDNApi* | [**GetSDNAddresses**](docs/SDNApi.md#getsdnaddresses) | **Get** /sdn/{sdnId}/addresses | Get addresses for a given SDN
@@ -48,6 +49,7 @@ Class | Method | HTTP request | Description
  - [Address](docs/Address.md)
  - [Alt](docs/Alt.md)
  - [Customer](docs/Customer.md)
+ - [Download](docs/Download.md)
  - [Sdn](docs/Sdn.md)
  - [Search](docs/Search.md)
  - [UpdateCustomerStatus](docs/UpdateCustomerStatus.md)

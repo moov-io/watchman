@@ -288,6 +288,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/Search'
 
+  # Downloads endpoint
+  /downloads:
+    get:
+      tags:
+        - Downloads
+      summary: Return list of recent re-downloads of OFAC data
+      operationId: getLatestDownloads
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            example: 25
+          description: Maximum results returned by a search
+      responses:
+        '200':
+          description: Recent timestamps and counts of parsed objects
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Downloads'
+
 components:
   schemas:
     Customer:
@@ -407,6 +429,26 @@ components:
           description: HTTPS url for webhook on search match
           type: string
           example: https://api.example.com/ofac/webhook
+    Downloads:
+      type: array
+      items:
+        $ref: '#/components/schemas/Download'
+    Download:
+      description: TODO
+      properties:
+        SDNs:
+          type: integer
+          example: 7414
+        altNames:
+          type: integer
+          example: 9729
+        addresses:
+          type: integer
+          example: 11747
+        timestamp:
+          type: string
+          format: date-time
+          example: 2006-01-02T15:04:05Z07:00
   parameters:
     requestId:
       in: header
