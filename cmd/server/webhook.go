@@ -36,7 +36,6 @@ var (
 	}
 )
 
-
 // callWebhook will encode Customer as JSON and make a POST request to the provided webhook url.
 func callWebhook(watchId string, customer *Customer, webhook string) error {
 	webhook, err := validateWebhook(webhook)
