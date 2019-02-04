@@ -149,7 +149,7 @@ type watchCursor struct {
 }
 
 func (cur *watchCursor) Next() ([]watch, error) {
-	query := `select id, customer_id, webhook, created_at from customer_watches where created_at > ? order by created_at asc limit ?`
+	query := `select id, customer_id, webhook, created_at from customer_watches where created_at > ? and deleted_at is null order by created_at asc limit ?`
 	stmt, err := cur.db.Prepare(query)
 	if err != nil {
 		return nil, err
