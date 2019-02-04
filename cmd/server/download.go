@@ -33,7 +33,9 @@ type downloadStats struct {
 	Addresses int `json:"addresses"`
 }
 
-func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo downloadRepository) {
+// periodicDataRefresh will forever block for interval's duration and then download and reparse the OFAC data.
+// Download stats are recorded as part of a successful re-download and parse.
+func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo downloadRepository, updates chan *downloadStats) {
 	for {
 		time.Sleep(interval)
 		stats, err := s.refreshData()
@@ -46,10 +48,13 @@ func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo down
 			if s.logger != nil {
 				s.logger.Log("main", fmt.Sprintf("OFAC data refreshed - Addresses=%d AltNames=%d SDNs=%d", stats.Addresses, stats.Alts, stats.SDNs))
 			}
+			updates <- stats // send stats for re-search and watch notifications
 		}
 	}
 }
 
+// refreshData reaches out to the OFAC website to download the latest files and then runs ofac.Reader to
+// parse and index data for searches.
 func (s *searcher) refreshData() (*downloadStats, error) {
 	if s.logger != nil {
 		s.logger.Log("download", "Starting refresh of OFAC data")

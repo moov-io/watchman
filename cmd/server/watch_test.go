@@ -71,3 +71,44 @@ func TestCustomerNameWatch(t *testing.T) {
 		t.Errorf("expected no error: %v", err)
 	}
 }
+
+func TestWatchCursor(t *testing.T) {
+	repo := createTestCustomerWatchRepository(t)
+	defer repo.close()
+
+	cur := repo.getWatchesCursor(2) // batchSize
+
+	// insert some watches
+	watchId1, _ := repo.addCustomerWatch(base.ID(), watchRequest{Webhook: "https://moov.io/1"})
+	watchId2, _ := repo.addCustomerWatch(base.ID(), watchRequest{Webhook: "https://moov.io/2"})
+	watchId3, _ := repo.addCustomerWatch(base.ID(), watchRequest{Webhook: "https://moov.io/3"})
+
+	// get first batch (should have 2 watches)
+	firstBatch, err := cur.Next()
+	if len(firstBatch) != 2 || err != nil {
+		t.Fatalf("len(firstBatch)=%d expected 2, err=%v", len(firstBatch), err)
+	}
+	for i := range firstBatch {
+		switch firstBatch[i].id {
+		case watchId1:
+			if firstBatch[i].webhook != "https://moov.io/1" {
+				t.Errorf("watch %#v didn't match", firstBatch[i])
+			}
+		case watchId2:
+			if firstBatch[i].webhook != "https://moov.io/2" {
+				t.Errorf("watch %#v didn't match", firstBatch[i])
+			}
+		default:
+			t.Errorf("unknown watch: %v", firstBatch[i])
+		}
+	}
+
+	// second batch (should only have watchId3)
+	secondBatch, err := cur.Next()
+	if len(secondBatch) != 1 || err != nil {
+		t.Fatalf("len(secondBatch)=%d expected 1, err=%v", len(secondBatch), err)
+	}
+	if secondBatch[0].id != watchId3 || secondBatch[0].webhook != "https://moov.io/3" {
+		t.Errorf("unknown watch: %v", secondBatch[0])
+	}
+}
