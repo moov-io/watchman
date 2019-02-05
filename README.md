@@ -9,6 +9,38 @@ moov-io/ofac
 
 *project is under active development and is not production ready*
 
+OFAC is an HTTP API and Go library to download, parse and serve OFAC sanction data for applications and humans. Also supported is an async webhook notification service to initiate processes on remote systems connected with OFAC.
+
+To get started using OFAC download our [Docker image](https://hub.docker.com/r/moov/ofac/tags) or [the latest release](https://github.com/moov-io/ofac/releases).
+
+```
+$ docker run -p 8084:8084 -p 9094:9094 -it moov/ofac:v0.2.0
+ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting ofac server version v0.2.0"
+...
+
+$ curl -s localhost:8084/search?name=...
+{
+  "SDNs": [
+    {
+      "entityID": "...",
+      "sdnName": "...",
+      "sdnType": "...",
+      "program": "...",
+      "title": "...",
+      "callSign": "...",
+      "vesselType": "...",
+      "tonnage": "...",
+      "grossRegisteredTonnage": "...",
+      "vesselFlag": "...",
+      "vesselOwner": "...",
+      "remarks": "..."
+    }
+  ],
+  "altNames": null,
+  "addresses": null
+}
+```
+
 
 ### Configuration
 
@@ -25,6 +57,14 @@ OFAC computes string similarity using the Levenshtein algorithm and can match se
 | `SQLITE_DB_PATH`| Local filepath location for the paygate SQLite database. | `ofac.db` |
 | `WEBHOOK_BATCH_SIZE` | How many watches to read from database per batch of async searches. | 100 |
 
+
+### Features
+
+- Download data on startup
+  - admin endpoint to [manually refresh OFAC data](docs/runbook.md#force-ofac-data-refresh)
+- Index data for searches
+- async searches and notifications (webhooks)
+- Library to download and parse OFAC files
 
 ### OFAC Data
 
