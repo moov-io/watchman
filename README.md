@@ -57,7 +57,6 @@ OFAC computes string similarity using the Levenshtein algorithm and can match se
 | `SQLITE_DB_PATH`| Local filepath location for the paygate SQLite database. | `ofac.db` |
 | `WEBHOOK_BATCH_SIZE` | How many watches to read from database per batch of async searches. | 100 |
 
-
 ### Features
 
 - Download data on startup
@@ -65,6 +64,12 @@ OFAC computes string similarity using the Levenshtein algorithm and can match se
 - Index data for searches
 - async searches and notifications (webhooks)
 - Library to download and parse OFAC files
+
+#### Webhook Notifications
+
+When OFAC sends a [webhook](https://en.wikipedia.org/wiki/Webhook) to your application the body will contain a [JSON representation of the Customer model](https://godoc.org/github.com/moov-io/ofac/client#Customer) as the body to a POST request. You can see an [example in Go](example/webhook.go).
+
+An `Authorization` header will also be sent with the `authToken` provided when setting up the watch. Clients should verify this token to ensure authenticated communicated.
 
 ## Links
 
