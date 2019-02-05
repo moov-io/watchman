@@ -425,10 +425,17 @@ components:
     WatchRequest:
       description: Webhook or other means of notification on search criteria. OFAC will make a POST request with a body of the customer (SDN, AltNames, and Address).
       properties:
+        authToken:
+          description: Private token supplied by clients to be used for authenticating webhooks.
+          type: string
+          example: 75d0384b-a105-4048-9fce-91a280ce7337
         webhook:
           description: HTTPS url for webhook on search match
           type: string
           example: https://api.example.com/ofac/webhook
+      required:
+        - authToken
+        - webhook
     Downloads:
       type: array
       items:

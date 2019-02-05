@@ -18,6 +18,7 @@ import (
 )
 
 var (
+	errNoAuthToken  = errors.New("no authToken provided for webhook")
 	errNoCustomerId = errors.New("no customerId found")
 	errNoNameParam  = errors.New("no name parameter found")
 )
@@ -110,12 +111,16 @@ func addCustomerNameWatch(logger log.Logger, searcher *searcher, repo *sqliteWat
 			moovhttp.Problem(w, err)
 			return
 		}
+		if req.AuthToken == "" {
+			moovhttp.Problem(w, errNoAuthToken)
+			return
+		}
 		webhook, err := validateWebhook(req.Webhook)
 		if err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}
-		watchId, err := repo.addCustomerNameWatch(name, webhook)
+		watchId, err := repo.addCustomerNameWatch(name, webhook, req.AuthToken)
 		if err != nil {
 			moovhttp.Problem(w, err)
 			return
@@ -139,6 +144,16 @@ func addCustomerWatch(logger log.Logger, searcher *searcher, repo *sqliteWatchRe
 			moovhttp.Problem(w, err)
 			return
 		}
+		if req.AuthToken == "" {
+			moovhttp.Problem(w, errNoAuthToken)
+			return
+		}
+		webhook, err := validateWebhook(req.Webhook)
+		if err != nil {
+			moovhttp.Problem(w, err)
+			return
+		}
+		req.Webhook = webhook
 
 		customerId := getCustomerId(w, r)
 		watchId, err := repo.addCustomerWatch(customerId, req)

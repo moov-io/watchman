@@ -31,7 +31,8 @@ func getWatchId(w http.ResponseWriter, r *http.Request) string {
 }
 
 type watchRequest struct {
-	Webhook string `json:"webhook"`
+	AuthToken string `json:"authToken"`
+	Webhook   string `json:"webhook"`
 }
 
 type watchRepository interface {
@@ -43,7 +44,7 @@ type watchRepository interface {
 	getWatchesCursor(batchSize int) *watchCursor
 
 	// addCustomerNameWatch takes a customerId (EntityID), creates a watch and returns the watchId.
-	addCustomerNameWatch(name string, webhook string) (string, error)
+	addCustomerNameWatch(name string, webhook string, authToken string) (string, error)
 	removeCustomerNameWatch(watchId string) error
 }
 
@@ -69,14 +70,14 @@ func (r *sqliteWatchRepository) addCustomerWatch(customerId string, params watch
 	}
 	id := base.ID()
 
-	query := `insert or ignore into customer_watches (id, customer_id, webhook, created_at) values (?, ?, ?, ?)`
+	query := `insert or ignore into customer_watches (id, customer_id, webhook, auth_token, created_at) values (?, ?, ?, ?, ?)`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return "", err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(id, customerId, params.Webhook, time.Now())
+	_, err = stmt.Exec(id, customerId, params.Webhook, params.AuthToken, time.Now())
 	if err != nil {
 		return "", err
 	}
@@ -99,8 +100,8 @@ func (r *sqliteWatchRepository) removeCustomerWatch(customerId string, watchId s
 	return err
 }
 
-func (r *sqliteWatchRepository) addCustomerNameWatch(name string, webhook string) (string, error) {
-	query := `insert or ignore into customer_name_watches (id, name, webhook, created_at) values (?, ?, ?, ?);`
+func (r *sqliteWatchRepository) addCustomerNameWatch(name string, webhook string, authToken string) (string, error) {
+	query := `insert or ignore into customer_name_watches (id, name, webhook, auth_token, created_at) values (?, ?, ?, ?, ?);`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return "", err
@@ -108,7 +109,7 @@ func (r *sqliteWatchRepository) addCustomerNameWatch(name string, webhook string
 	defer stmt.Close()
 
 	id := base.ID()
-	_, err = stmt.Exec(id, name, webhook, time.Now())
+	_, err = stmt.Exec(id, name, webhook, authToken, time.Now())
 	if err != nil {
 		return "", err
 	}
@@ -134,6 +135,7 @@ func (r *sqliteWatchRepository) removeCustomerNameWatch(watchId string) error {
 type watch struct {
 	id, customerId string
 	webhook        string
+	authToken      string
 }
 
 type watchCursor struct {
@@ -149,7 +151,7 @@ type watchCursor struct {
 }
 
 func (cur *watchCursor) Next() ([]watch, error) {
-	query := `select id, customer_id, webhook, created_at from customer_watches where created_at > ? and deleted_at is null order by created_at asc limit ?`
+	query := `select id, customer_id, webhook, auth_token, created_at from customer_watches where created_at > ? and deleted_at is null order by created_at asc limit ?`
 	stmt, err := cur.db.Prepare(query)
 	if err != nil {
 		return nil, err
@@ -167,7 +169,7 @@ func (cur *watchCursor) Next() ([]watch, error) {
 	for rows.Next() {
 		var createdAt time.Time
 		var watch watch
-		if err := rows.Scan(&watch.id, &watch.customerId, &watch.webhook, &createdAt); err == nil {
+		if err := rows.Scan(&watch.id, &watch.customerId, &watch.webhook, &watch.authToken, &createdAt); err == nil {
 			watches = append(watches, watch)
 		}
 		if createdAt.After(max) {
