@@ -4,6 +4,14 @@
 
 package ofac
 
+import (
+	"fmt"
+)
+
+func init() {
+	fmt.Println("code change to start CI")
+}
+
 // ToDo: NON-SDN List, Consolidated List - They appear to have the same format. Other list?
 
 // SDN is a specially Designated National
