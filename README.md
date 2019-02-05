@@ -14,8 +14,8 @@ OFAC is an HTTP API and Go library to download, parse and serve OFAC sanction da
 To get started using OFAC download our [Docker image](https://hub.docker.com/r/moov/ofac/tags) or [the latest release](https://github.com/moov-io/ofac/releases).
 
 ```
-$ docker run -p 8084:8084 -p 9094:9094 -it moov/ofac:v0.2.0
-ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting ofac server version v0.2.0"
+$ docker run -p 8084:8084 -p 9094:9094 -it moov/ofac:v0.2.1
+ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting ofac server version v0.2.1"
 ...
 
 $ curl -s localhost:8084/search?name=...
