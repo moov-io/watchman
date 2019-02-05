@@ -36,10 +36,8 @@ func getSDNId(w http.ResponseWriter, r *http.Request) string {
 
 func getSDNAddresses(logger log.Logger, searcher *searcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w, err := wrapResponseWriter(logger, w, r)
-		if err != nil {
-			return
-		}
+		w = wrapResponseWriter(logger, w, r)
+
 		id, limit := getSDNId(w, r), extractSearchLimit(r)
 		if id == "" {
 			return
@@ -58,10 +56,8 @@ func getSDNAddresses(logger log.Logger, searcher *searcher) http.HandlerFunc {
 
 func getSDNAltNames(logger log.Logger, searcher *searcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w, err := wrapResponseWriter(logger, w, r)
-		if err != nil {
-			return
-		}
+		w = wrapResponseWriter(logger, w, r)
+
 		id, limit := getSDNId(w, r), extractSearchLimit(r)
 		if id == "" {
 			return
@@ -80,10 +76,7 @@ func getSDNAltNames(logger log.Logger, searcher *searcher) http.HandlerFunc {
 
 func getSDN(logger log.Logger, searcher *searcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w, err := wrapResponseWriter(logger, w, r)
-		if err != nil {
-			return
-		}
+		w = wrapResponseWriter(logger, w, r)
 
 		id := getSDNId(w, r)
 		if id == "" {

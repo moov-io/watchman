@@ -112,10 +112,8 @@ func addDownloadRoutes(logger log.Logger, r *mux.Router, repo downloadRepository
 
 func getLatestDownloads(logger log.Logger, repo downloadRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w, err := wrapResponseWriter(logger, w, r)
-		if err != nil {
-			return
-		}
+		w = wrapResponseWriter(logger, w, r)
+
 		limit := extractSearchLimit(r)
 		downloads, err := repo.latestDownloads(limit)
 		if err != nil {

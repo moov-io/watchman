@@ -76,10 +76,7 @@ func getCustomerById(id string, searcher *searcher) *Customer {
 
 func getCustomer(logger log.Logger, searcher *searcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w, err := wrapResponseWriter(logger, w, r)
-		if err != nil {
-			return
-		}
+		w = wrapResponseWriter(logger, w, r)
 		id := getCustomerId(w, r)
 		if id == "" {
 			return
@@ -100,10 +97,7 @@ func getCustomer(logger log.Logger, searcher *searcher) http.HandlerFunc {
 
 func addCustomerNameWatch(logger log.Logger, searcher *searcher, repo *sqliteWatchRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w, err := wrapResponseWriter(logger, w, r)
-		if err != nil {
-			return
-		}
+		w = wrapResponseWriter(logger, w, r)
 
 		name := r.URL.Query().Get("name")
 		if name == "" {
@@ -138,10 +132,7 @@ func addCustomerNameWatch(logger log.Logger, searcher *searcher, repo *sqliteWat
 
 func addCustomerWatch(logger log.Logger, searcher *searcher, repo *sqliteWatchRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w, err := wrapResponseWriter(logger, w, r)
-		if err != nil {
-			return
-		}
+		w = wrapResponseWriter(logger, w, r)
 
 		var req watchRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -172,10 +163,7 @@ type customerStatusRequest struct {
 
 func updateCustomerStatus(logger log.Logger, searcher *searcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w, err := wrapResponseWriter(logger, w, r)
-		if err != nil {
-			return
-		}
+		w = wrapResponseWriter(logger, w, r)
 
 		var req customerStatusRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -199,10 +187,8 @@ func updateCustomerStatus(logger log.Logger, searcher *searcher) http.HandlerFun
 
 func removeCustomerWatch(logger log.Logger, searcher *searcher, repo *sqliteWatchRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w, err := wrapResponseWriter(logger, w, r)
-		if err != nil {
-			return
-		}
+		w = wrapResponseWriter(logger, w, r)
+
 		customerId, watchId := getCustomerId(w, r), getWatchId(w, r)
 		if customerId == "" || watchId == "" {
 			return
@@ -217,10 +203,8 @@ func removeCustomerWatch(logger log.Logger, searcher *searcher, repo *sqliteWatc
 
 func removeCustomerNameWatch(logger log.Logger, searcher *searcher, repo *sqliteWatchRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w, err := wrapResponseWriter(logger, w, r)
-		if err != nil {
-			return
-		}
+		w = wrapResponseWriter(logger, w, r)
+
 		watchId := getWatchId(w, r)
 		if watchId == "" {
 			return

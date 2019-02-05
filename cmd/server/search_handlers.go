@@ -48,10 +48,7 @@ func readAddressSearchRequest(u *url.URL) addressSearchRequest {
 
 func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w, err := wrapResponseWriter(logger, w, r)
-		if err != nil {
-			return
-		}
+		w = wrapResponseWriter(logger, w, r)
 
 		// Search by Name
 		if name := strings.TrimSpace(r.URL.Query().Get("name")); name != "" {
