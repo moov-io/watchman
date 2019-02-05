@@ -1,15 +1,20 @@
-# \CustomersApi
+# \OFACApi
 
 All URIs are relative to *http://localhost:8084*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**AddCustomerNameWatch**](CustomersApi.md#AddCustomerNameWatch) | **Post** /customers/watch | Add customer watch by name
-[**AddCustomerWatch**](CustomersApi.md#AddCustomerWatch) | **Post** /customers/{customerId}/watch | Add OFAC watch on a Customer
-[**GetCustomer**](CustomersApi.md#GetCustomer) | **Get** /customers/{customerId} | Get information about a customer, addresses, alternate names, and their SDN metadata.
-[**RemoveCustomerNameWatch**](CustomersApi.md#RemoveCustomerNameWatch) | **Delete** /customers/watch/{watchId} | Remove a Customer name watch
-[**RemoveCustomerWatch**](CustomersApi.md#RemoveCustomerWatch) | **Delete** /customers/{customerId}/watch/{watchId} | Remove customer watch
-[**UpdateCustomerStatus**](CustomersApi.md#UpdateCustomerStatus) | **Put** /customers/{customerId} | Update a Customer&#39;s status to add or remove a manual block.
+[**AddCustomerNameWatch**](OFACApi.md#AddCustomerNameWatch) | **Post** /customers/watch | Add customer watch by name
+[**AddCustomerWatch**](OFACApi.md#AddCustomerWatch) | **Post** /customers/{customerId}/watch | Add OFAC watch on a Customer
+[**GetCustomer**](OFACApi.md#GetCustomer) | **Get** /customers/{customerId} | Get information about a customer, addresses, alternate names, and their SDN metadata.
+[**GetLatestDownloads**](OFACApi.md#GetLatestDownloads) | **Get** /downloads | Return list of recent re-downloads of OFAC data
+[**GetSDN**](OFACApi.md#GetSDN) | **Get** /sdn/{sdnId} | Specially designated national
+[**GetSDNAddresses**](OFACApi.md#GetSDNAddresses) | **Get** /sdn/{sdnId}/addresses | Get addresses for a given SDN
+[**GetSDNAltNames**](OFACApi.md#GetSDNAltNames) | **Get** /sdn/{sdnId}/alts | Get alternate names for a given SDN
+[**RemoveCustomerNameWatch**](OFACApi.md#RemoveCustomerNameWatch) | **Delete** /customers/watch/{watchId} | Remove a Customer name watch
+[**RemoveCustomerWatch**](OFACApi.md#RemoveCustomerWatch) | **Delete** /customers/{customerId}/watch/{watchId} | Remove customer watch
+[**SearchSDNs**](OFACApi.md#SearchSDNs) | **Get** /search | Search SDN names and metadata
+[**UpdateCustomerStatus**](OFACApi.md#UpdateCustomerStatus) | **Put** /customers/{customerId} | Update a Customer&#39;s status to add or remove a manual block.
 
 
 # **AddCustomerNameWatch**
@@ -21,7 +26,7 @@ Add customer watch by name
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-  **name** | **string**|  | 
+  **name** | **string**| Individual name used to match and send watch notifications | 
   **watchRequest** | [**WatchRequest**](WatchRequest.md)|  | 
  **optional** | ***AddCustomerNameWatchOpts** | optional parameters | nil if no parameters
 
@@ -121,6 +126,144 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **GetLatestDownloads**
+> []Download GetLatestDownloads(ctx, optional)
+Return list of recent re-downloads of OFAC data
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+ **optional** | ***GetLatestDownloadsOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+Optional parameters are passed through a pointer to a GetLatestDownloadsOpts struct
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **limit** | **optional.Int32**| Maximum results returned by a search | 
+
+### Return type
+
+[**[]Download**](Download.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **GetSDN**
+> Sdn GetSDN(ctx, sdnId, optional)
+Specially designated national
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+  **sdnId** | **string**| SDN ID | 
+ **optional** | ***GetSDNOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+Optional parameters are passed through a pointer to a GetSDNOpts struct
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **xRequestId** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+
+### Return type
+
+[**Sdn**](SDN.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **GetSDNAddresses**
+> []Address GetSDNAddresses(ctx, sdnId, optional)
+Get addresses for a given SDN
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+  **sdnId** | **string**| SDN ID | 
+ **optional** | ***GetSDNAddressesOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+Optional parameters are passed through a pointer to a GetSDNAddressesOpts struct
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **xRequestId** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+
+### Return type
+
+[**[]Address**](Address.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **GetSDNAltNames**
+> []Alt GetSDNAltNames(ctx, sdnId, optional)
+Get alternate names for a given SDN
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+  **sdnId** | **string**| SDN ID | 
+ **optional** | ***GetSDNAltNamesOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+Optional parameters are passed through a pointer to a GetSDNAltNamesOpts struct
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **xRequestId** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+
+### Return type
+
+[**[]Alt**](Alt.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **RemoveCustomerNameWatch**
 > RemoveCustomerNameWatch(ctx, watchId, name, optional)
 Remove a Customer name watch
@@ -192,6 +335,43 @@ No authorization required
 
  - **Content-Type**: Not defined
  - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **SearchSDNs**
+> Search SearchSDNs(ctx, optional)
+Search SDN names and metadata
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+ **optional** | ***SearchSDNsOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+Optional parameters are passed through a pointer to a SearchSDNsOpts struct
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **xRequestId** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+ **name** | **optional.String**| Name which could correspond to a human on the SDN list | 
+ **address** | **optional.String**| Phsical address which could correspond to a human on the SDN list | 
+ **altName** | **optional.String**| Alternate name which could correspond to a human on the SDN list | 
+ **limit** | **optional.Int32**| Maximum results returned by a search | 
+
+### Return type
+
+[**Search**](Search.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

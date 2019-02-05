@@ -31,17 +31,17 @@ All URIs are relative to *http://localhost:8084*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*CustomersApi* | [**AddCustomerNameWatch**](docs/CustomersApi.md#addcustomernamewatch) | **Post** /customers/watch | Add customer watch by name
-*CustomersApi* | [**AddCustomerWatch**](docs/CustomersApi.md#addcustomerwatch) | **Post** /customers/{customerId}/watch | Add OFAC watch on a Customer
-*CustomersApi* | [**GetCustomer**](docs/CustomersApi.md#getcustomer) | **Get** /customers/{customerId} | Get information about a customer, addresses, alternate names, and their SDN metadata.
-*CustomersApi* | [**RemoveCustomerNameWatch**](docs/CustomersApi.md#removecustomernamewatch) | **Delete** /customers/watch/{watchId} | Remove a Customer name watch
-*CustomersApi* | [**RemoveCustomerWatch**](docs/CustomersApi.md#removecustomerwatch) | **Delete** /customers/{customerId}/watch/{watchId} | Remove customer watch
-*CustomersApi* | [**UpdateCustomerStatus**](docs/CustomersApi.md#updatecustomerstatus) | **Put** /customers/{customerId} | Update a Customer&#39;s status to add or remove a manual block.
-*DownloadsApi* | [**GetLatestDownloads**](docs/DownloadsApi.md#getlatestdownloads) | **Get** /downloads | Return list of recent re-downloads of OFAC data
-*OFACSearchApi* | [**SearchSDNs**](docs/OFACSearchApi.md#searchsdns) | **Get** /search | Search SDN names and metadata
-*SDNApi* | [**GetSDN**](docs/SDNApi.md#getsdn) | **Get** /sdn/{sdnId} | Specially designated national
-*SDNApi* | [**GetSDNAddresses**](docs/SDNApi.md#getsdnaddresses) | **Get** /sdn/{sdnId}/addresses | Get addresses for a given SDN
-*SDNApi* | [**GetSDNAltNames**](docs/SDNApi.md#getsdnaltnames) | **Get** /sdn/{sdnId}/alts | Get alternate names for a given SDN
+*OFACApi* | [**AddCustomerNameWatch**](docs/OFACApi.md#addcustomernamewatch) | **Post** /customers/watch | Add customer watch by name
+*OFACApi* | [**AddCustomerWatch**](docs/OFACApi.md#addcustomerwatch) | **Post** /customers/{customerId}/watch | Add OFAC watch on a Customer
+*OFACApi* | [**GetCustomer**](docs/OFACApi.md#getcustomer) | **Get** /customers/{customerId} | Get information about a customer, addresses, alternate names, and their SDN metadata.
+*OFACApi* | [**GetLatestDownloads**](docs/OFACApi.md#getlatestdownloads) | **Get** /downloads | Return list of recent re-downloads of OFAC data
+*OFACApi* | [**GetSDN**](docs/OFACApi.md#getsdn) | **Get** /sdn/{sdnId} | Specially designated national
+*OFACApi* | [**GetSDNAddresses**](docs/OFACApi.md#getsdnaddresses) | **Get** /sdn/{sdnId}/addresses | Get addresses for a given SDN
+*OFACApi* | [**GetSDNAltNames**](docs/OFACApi.md#getsdnaltnames) | **Get** /sdn/{sdnId}/alts | Get alternate names for a given SDN
+*OFACApi* | [**RemoveCustomerNameWatch**](docs/OFACApi.md#removecustomernamewatch) | **Delete** /customers/watch/{watchId} | Remove a Customer name watch
+*OFACApi* | [**RemoveCustomerWatch**](docs/OFACApi.md#removecustomerwatch) | **Delete** /customers/{customerId}/watch/{watchId} | Remove customer watch
+*OFACApi* | [**SearchSDNs**](docs/OFACApi.md#searchsdns) | **Get** /search | Search SDN names and metadata
+*OFACApi* | [**UpdateCustomerStatus**](docs/OFACApi.md#updatecustomerstatus) | **Put** /customers/{customerId} | Update a Customer&#39;s status to add or remove a manual block.
 
 
 ## Documentation For Models

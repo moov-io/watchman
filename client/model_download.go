@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// TODO
+// Metadata and stats about downloaded OFAC data
 type Download struct {
 	SDNs      int32     `json:"SDNs,omitempty"`
 	AltNames  int32     `json:"altNames,omitempty"`
