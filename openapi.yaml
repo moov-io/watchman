@@ -14,21 +14,15 @@ servers:
     description: Local development
 
 tags:
-  - name: Customers
-    description: An individual or group which the US government enforces economic sanctions against.
-  - name: Companies
-    description: A corporation or group which the US government enforces economic sanctions against.
-  - name: SDN
-    description: Specially Designated National which the US government enforces economic sanctions against.
-  - name: OFAC Search
-    description: Search OFAC record by metadata or names
+  - name: OFAC
+    description: Endpoints for searching individuals and corporations which US government enforces economic sanctions against and adding webhook notifications for search criteria.
 
 paths:
   # Customer Endpoints
   /customers/{customerId}:
     get:
       tags:
-        - Customers
+        - OFAC
       summary: Get information about a customer, addresses, alternate names, and their SDN metadata.
       operationId: getCustomer
       parameters:
@@ -49,7 +43,7 @@ paths:
                 $ref: '#/components/schemas/Customer'
     put:
       tags:
-        - Customers
+        - OFAC
       summary: Update a Customer's status to add or remove a manual block.
       operationId: updateCustomerStatus
       parameters:
@@ -73,7 +67,7 @@ paths:
   /customers/{customerId}/watch:
     post:
       tags:
-        - Customers
+        - OFAC
       summary: Add OFAC watch on a Customer
       operationId: addCustomerWatch
       parameters:
@@ -103,7 +97,7 @@ paths:
   /customers/{customerId}/watch/{watchId}:
     delete:
       tags:
-        - Customers
+        - OFAC
       summary: Remove customer watch
       operationId: removeCustomerWatch
       parameters:
@@ -128,7 +122,7 @@ paths:
   /customers/watch:
     post:
       tags:
-        - Customers
+        - OFAC
       summary: Add customer watch by name
       operationId: addCustomerNameWatch
       parameters:
@@ -136,6 +130,7 @@ paths:
         - name: name
           in: query
           required: true
+          description: Individual name used to match and send watch notifications
           schema:
             type: string
             example: Jane Smith
@@ -155,7 +150,7 @@ paths:
   /customers/watch/{watchId}:
     delete:
       tags:
-        - Customers
+        - OFAC
       summary: Remove a Customer name watch
       operationId: removeCustomerNameWatch
       parameters:
@@ -184,7 +179,7 @@ paths:
   /sdn/{sdnId}:
     get:
       tags:
-        - SDN
+        - OFAC
       summary: Specially designated national
       operationId: getSDN
       parameters:
@@ -206,7 +201,7 @@ paths:
   /sdn/{sdnId}/alts:
     get:
       tags:
-        - SDN
+        - OFAC
       summary: Get alternate names for a given SDN
       operationId: getSDNAltNames
       parameters:
@@ -228,7 +223,7 @@ paths:
   /sdn/{sdnId}/addresses:
     get:
       tags:
-        - SDN
+        - OFAC
       summary: Get addresses for a given SDN
       operationId: getSDNAddresses
       parameters:
@@ -251,7 +246,7 @@ paths:
   /search:
     get:
       tags:
-        - OFAC Search
+        - OFAC
       summary: Search SDN names and metadata
       operationId: searchSDNs
       parameters:
@@ -292,7 +287,7 @@ paths:
   /downloads:
     get:
       tags:
-        - Downloads
+        - OFAC
       summary: Return list of recent re-downloads of OFAC data
       operationId: getLatestDownloads
       parameters:
@@ -434,7 +429,7 @@ components:
       items:
         $ref: '#/components/schemas/Download'
     Download:
-      description: TODO
+      description: Metadata and stats about downloaded OFAC data
       properties:
         SDNs:
           type: integer
