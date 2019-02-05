@@ -18,7 +18,19 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
 )
+
+var (
+	lastOFACDataRefreshSuccess = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "last_ofac_data_refresh_success",
+		Help: "Unix timestamp of when OFAC data was last refreshed successfully",
+	}, nil)
+)
+
+func init() {
+	prometheus.MustRegister(lastOFACDataRefreshSuccess)
+}
 
 type Download struct {
 	Timestamp time.Time `json:"timestamp"`
@@ -102,6 +114,9 @@ func (s *searcher) refreshData() (*downloadStats, error) {
 	if s.logger != nil {
 		s.logger.Log("download", "Finished refresh of OFAC data")
 	}
+
+	// record successful data refresh
+	lastOFACDataRefreshSuccess.WithLabelValues().Set(float64(time.Now().Unix()))
 
 	return stats, nil
 }
