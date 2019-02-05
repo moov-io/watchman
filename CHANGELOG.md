@@ -1,3 +1,9 @@
+## v0.2.1 (Released 2019-02-04)
+
+IMPROVEMENTS
+
+- Stop expecting `X-User-Id` header to be present (and non-empty)
+
 ## v0.2.0 (Released 2019-02-04)
 
 IMPROVEMENTS
