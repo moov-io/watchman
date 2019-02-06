@@ -20,7 +20,7 @@ client:
 # Versions from https://github.com/OpenAPITools/openapi-generator/releases
 	@chmod +x ./openapi-generator
 	@rm -rf ./client
-	OPENAPI_GENERATOR_VERSION=4.0.0-beta ./openapi-generator generate -i openapi.yaml -g go -o ./client
+	OPENAPI_GENERATOR_VERSION=4.0.0-beta2 ./openapi-generator generate -i openapi.yaml -g go -o ./client
 	go fmt ./client
 	go build github.com/moov-io/ofac/client
 	go test ./client
