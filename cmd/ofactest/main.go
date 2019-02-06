@@ -43,11 +43,19 @@ func main() {
 		},
 	}
 
+	// Read OAuth token and set on conf
+	accessToken := GetOAuthToken(OAuthTokenStorageFilepath)
+	if accessToken == "" {
+		log.Fatalf("[FAILURE] no OAuth token found, run moov/apitest locally")
+	} else {
+		conf.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", accessToken))
+	}
+
 	// Setup OFAC API client
-	api := moov.NewAPIClient(conf)
+	api, ctx := moov.NewAPIClient(conf), context.TODO()
 
 	// Ping OFAC
-	resp, err := api.OFACApi.Ping(context.TODO())
+	resp, err := api.OFACApi.Ping(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -56,5 +64,12 @@ func main() {
 		log.Printf("[FAILURE] ping error (stats code: %d): %v", resp.StatusCode, err)
 	} else {
 		log.Println("[SUCCESS] ping OFAC")
+	}
+
+	// Search queries
+	if err := searchSDNs(ctx, api); err != nil {
+		log.Fatalf("[FAILURE] %v", err)
+	} else {
+		log.Println("[SUCCESS] search queries passed")
 	}
 }
