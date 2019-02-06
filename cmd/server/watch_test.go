@@ -58,7 +58,7 @@ func TestCustomerNameWatch(t *testing.T) {
 
 	// Add
 	name := base.ID()
-	watchId, err := repo.addCustomerNameWatch(name, "https://moov.io")
+	watchId, err := repo.addCustomerNameWatch(name, "https://moov.io", "authToken")
 	if err != nil {
 		t.Errorf("name=%q got error: %v", name, err)
 	}

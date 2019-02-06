@@ -51,7 +51,7 @@ func (s *searcher) spawnResearching(watchRepo watchRepository, webhookRepo webho
 					s.logger.Log("search", fmt.Sprintf("async: watch %s for customer %s found", watches[i].id, watches[i].customerId))
 
 					now := time.Now()
-					status, err := callWebhook(watches[i].id, customer, watches[i].webhook)
+					status, err := callWebhook(watches[i].id, customer, watches[i].webhook, watches[i].authToken)
 					if err != nil {
 						s.logger.Log("search", fmt.Errorf("async: problem writing watch (%s) webhook status: %v", watches[i].id, err))
 					}

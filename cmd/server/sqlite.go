@@ -18,8 +18,8 @@ var (
 	// migrations holds all our SQL migrations to be done (in order)
 	migrations = []string{
 		// Customers
-		`create table if not exists customer_watches(id primary key, customer_id, webhook, created_at datetime, deleted_at datetime);`,
-		`create table if not exists customer_name_watches(id primary key, name, webhook, created_at datetime, deleted_at datetime);`,
+		`create table if not exists customer_watches(id primary key, customer_id, webhook, auth_token, created_at datetime, deleted_at datetime);`,
+		`create table if not exists customer_name_watches(id primary key, name, webhook, auth_token, created_at datetime, deleted_at datetime);`,
 
 		// OFAC download stats
 		`create table if not exists ofac_download_stats(downloaded_at datetime, sdns, alt_names, addresses);`,

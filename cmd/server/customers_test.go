@@ -120,7 +120,7 @@ func TestCustomer_get(t *testing.T) {
 
 func TestCustomer_addWatch(t *testing.T) {
 	w := httptest.NewRecorder()
-	body := strings.NewReader(`{"webhook": "https://moov.io"}`)
+	body := strings.NewReader(`{"webhook": "https://moov.io", "authToken": "foo"}`)
 	req := httptest.NewRequest("POST", "/customers/foo/watch", body)
 	req.Header.Set("x-user-id", "test")
 
@@ -163,9 +163,31 @@ func TestCustomer_addWatchNoBody(t *testing.T) {
 	}
 }
 
+func TestCustomer_addWatchMissingAuthToken(t *testing.T) {
+	repo := createTestCustomerWatchRepository(t)
+	defer repo.close()
+
+	body := strings.NewReader(`{"webhook": "https://moov.io", "authToken": ""}`)
+
+	req := httptest.NewRequest("POST", "/customers/foo/watch", body)
+	req.Header.Set("x-user-id", "test")
+
+	w := httptest.NewRecorder()
+
+	// Setup test HTTP server
+	router := mux.NewRouter()
+	addCustomerRoutes(nil, router, customerSearcher, repo)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+}
+
 func TestCustomer_addNameWatch(t *testing.T) {
 	w := httptest.NewRecorder()
-	body := strings.NewReader(`{"webhook": "https://moov.io"}`)
+	body := strings.NewReader(`{"webhook": "https://moov.io", "authToken": "foo"}`)
 	req := httptest.NewRequest("POST", "/customers/watch?name=foo", body)
 	req.Header.Set("x-user-id", "test")
 

@@ -39,7 +39,7 @@ var (
 
 // callWebhook will encode Customer as JSON and make a POST request to the provided webhook url.
 // Returned is the HTTP status code.
-func callWebhook(watchId string, customer *Customer, webhook string) (int, error) {
+func callWebhook(watchId string, customer *Customer, webhook string, authToken string) (int, error) {
 	webhook, err := validateWebhook(webhook)
 	if err != nil {
 		return 0, err
@@ -52,6 +52,9 @@ func callWebhook(watchId string, customer *Customer, webhook string) (int, error
 	req, err := http.NewRequest("POST", webhook, &body)
 	if err != nil {
 		return 0, fmt.Errorf("unknown error with watch %s: %v", watchId, err)
+	}
+	if authToken != "" {
+		req.Header.Set("Authorization", authToken)
 	}
 
 	// Guard HTTP calls in-flight
