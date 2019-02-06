@@ -48,8 +48,8 @@ Class | Method | HTTP request | Description
 
  - [Address](docs/Address.md)
  - [Alt](docs/Alt.md)
- - [Customer](docs/Customer.md)
  - [Download](docs/Download.md)
+ - [OfacCustomer](docs/OfacCustomer.md)
  - [Sdn](docs/Sdn.md)
  - [Search](docs/Search.md)
  - [UpdateCustomerStatus](docs/UpdateCustomerStatus.md)

@@ -1,4 +1,4 @@
-# Customer
+# OfacCustomer
 
 ## Properties
 Name | Type | Description | Notes

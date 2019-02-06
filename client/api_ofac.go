@@ -232,21 +232,21 @@ OFACApiService Get information about a customer, addresses, alternate names, and
  * @param customerId Customer ID
  * @param optional nil or *GetCustomerOpts - Optional Parameters:
  * @param "XRequestId" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
-@return Customer
+@return OfacCustomer
 */
 
 type GetCustomerOpts struct {
 	XRequestId optional.String
 }
 
-func (a *OFACApiService) GetCustomer(ctx context.Context, customerId string, localVarOptionals *GetCustomerOpts) (Customer, *http.Response, error) {
+func (a *OFACApiService) GetCustomer(ctx context.Context, customerId string, localVarOptionals *GetCustomerOpts) (OfacCustomer, *http.Response, error) {
 	var (
 		localVarHttpMethod   = strings.ToUpper("Get")
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  Customer
+		localVarReturnValue  OfacCustomer
 	)
 
 	// create path and map variables
@@ -299,7 +299,7 @@ func (a *OFACApiService) GetCustomer(ctx context.Context, customerId string, loc
 			error: localVarHttpResponse.Status,
 		}
 		if localVarHttpResponse.StatusCode == 200 {
-			var v Customer
+			var v OfacCustomer
 			err = a.client.decode(&v, localVarBody, localVarHttpResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()

@@ -40,7 +40,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Customer'
+                $ref: '#/components/schemas/OFACCustomer'
     put:
       tags:
         - OFAC
@@ -307,7 +307,7 @@ paths:
 
 components:
   schemas:
-    Customer:
+    OFACCustomer:
       description: OFAC Customer and metadata
       properties:
         id:

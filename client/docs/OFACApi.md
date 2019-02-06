@@ -92,7 +92,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **GetCustomer**
-> Customer GetCustomer(ctx, customerId, optional)
+> OfacCustomer GetCustomer(ctx, customerId, optional)
 Get information about a customer, addresses, alternate names, and their SDN metadata.
 
 ### Required Parameters
@@ -113,7 +113,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**Customer**](Customer.md)
+[**OfacCustomer**](OFACCustomer.md)
 
 ### Authorization
 
