@@ -38,6 +38,7 @@ Class | Method | HTTP request | Description
 *OFACApi* | [**GetSDN**](docs/OFACApi.md#getsdn) | **Get** /sdn/{sdnId} | Specially designated national
 *OFACApi* | [**GetSDNAddresses**](docs/OFACApi.md#getsdnaddresses) | **Get** /sdn/{sdnId}/addresses | Get addresses for a given SDN
 *OFACApi* | [**GetSDNAltNames**](docs/OFACApi.md#getsdnaltnames) | **Get** /sdn/{sdnId}/alts | Get alternate names for a given SDN
+*OFACApi* | [**Ping**](docs/OFACApi.md#ping) | **Get** /ping | Ping the OFAC service to check if running
 *OFACApi* | [**RemoveCustomerNameWatch**](docs/OFACApi.md#removecustomernamewatch) | **Delete** /customers/watch/{watchId} | Remove a Customer name watch
 *OFACApi* | [**RemoveCustomerWatch**](docs/OFACApi.md#removecustomerwatch) | **Delete** /customers/{customerId}/watch/{watchId} | Remove customer watch
 *OFACApi* | [**SearchSDNs**](docs/OFACApi.md#searchsdns) | **Get** /search | Search SDN names and metadata

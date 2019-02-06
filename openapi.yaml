@@ -18,6 +18,16 @@ tags:
     description: Endpoints for searching individuals and corporations which US government enforces economic sanctions against and adding webhook notifications for search criteria.
 
 paths:
+  /ping:
+    get:
+      tags:
+        - OFAC
+      summary: Ping the OFAC service to check if running
+      operationId: ping
+      responses:
+        '200':
+          description: Service is running properly
+
   # Customer Endpoints
   /customers/{customerId}:
     get:

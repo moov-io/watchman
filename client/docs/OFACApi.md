@@ -11,6 +11,7 @@ Method | HTTP request | Description
 [**GetSDN**](OFACApi.md#GetSDN) | **Get** /sdn/{sdnId} | Specially designated national
 [**GetSDNAddresses**](OFACApi.md#GetSDNAddresses) | **Get** /sdn/{sdnId}/addresses | Get addresses for a given SDN
 [**GetSDNAltNames**](OFACApi.md#GetSDNAltNames) | **Get** /sdn/{sdnId}/alts | Get alternate names for a given SDN
+[**Ping**](OFACApi.md#Ping) | **Get** /ping | Ping the OFAC service to check if running
 [**RemoveCustomerNameWatch**](OFACApi.md#RemoveCustomerNameWatch) | **Delete** /customers/watch/{watchId} | Remove a Customer name watch
 [**RemoveCustomerWatch**](OFACApi.md#RemoveCustomerWatch) | **Delete** /customers/{customerId}/watch/{watchId} | Remove customer watch
 [**SearchSDNs**](OFACApi.md#SearchSDNs) | **Get** /search | Search SDN names and metadata
@@ -261,6 +262,28 @@ No authorization required
 
  - **Content-Type**: Not defined
  - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **Ping**
+> Ping(ctx, )
+Ping the OFAC service to check if running
+
+### Required Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
