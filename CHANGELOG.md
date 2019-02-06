@@ -1,3 +1,13 @@
+## v0.3.0 (Unreleased)
+
+CHANGES
+
+- Require `authToken` when creating a Watch (webhook notification)
+
+ADDITIONS
+
+- Added `last_ofac_data_refresh_success` Prometheus metric
+
 ## v0.2.1 (Released 2019-02-04)
 
 IMPROVEMENTS
