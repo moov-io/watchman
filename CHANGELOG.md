@@ -7,6 +7,7 @@ CHANGES
 ADDITIONS
 
 - Added `last_ofac_data_refresh_success` Prometheus metric
+- `cmd/ofactest`: for testing OFAC HTTP endpoints
 
 ## v0.2.1 (Released 2019-02-04)
 
