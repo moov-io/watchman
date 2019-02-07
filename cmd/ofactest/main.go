@@ -2,6 +2,16 @@
 // Use of this source code is governed by an Apache License
 // license that can be found in the LICENSE file.
 
+// ofactest is a cli tool used for testing the Moov OFAC service.
+//
+// With no arguments the contaier runs tests against the production API.
+// This tool requires an OAuth token provided by github.com/moov-io/api written
+// to the local disk, but running apitest first will write this token.
+//
+// TODO(adam): central library for write/read of OAuth tokens
+//
+// ofactest is not a stable tool. Please contact Moov developers if you intend to use this tool,
+// otherwise we might change the tool (or remove it) without notice.
 package main
 
 import (
