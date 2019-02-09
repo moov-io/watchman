@@ -2,9 +2,6 @@
 github.com/antihax/optional
 # github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973
 github.com/beorn7/perks/quantile
-# github.com/docker/docker v1.13.1
-github.com/docker/docker/pkg/namesgenerator
-github.com/docker/docker/pkg/random
 # github.com/go-kit/kit v0.8.0
 github.com/go-kit/kit/log
 github.com/go-kit/kit/metrics/prometheus
