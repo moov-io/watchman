@@ -42,9 +42,9 @@ func getSDNAddresses(logger log.Logger, searcher *searcher) http.HandlerFunc {
 		if id == "" {
 			return
 		}
-		addresses := searcher.FindAddresses(limit, func(add *Address) bool {
-			return add.Address.EntityID == id
-		})
+
+		addresses := searcher.FindAddresses(limit, id)
+
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(addresses); err != nil {
@@ -62,9 +62,9 @@ func getSDNAltNames(logger log.Logger, searcher *searcher) http.HandlerFunc {
 		if id == "" {
 			return
 		}
-		alts := searcher.FindAlts(limit, func(alt *Alt) bool {
-			return alt.AlternateIdentity.EntityID == id
-		})
+
+		alts := searcher.FindAlts(limit, id)
+
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(alts); err != nil {
@@ -82,16 +82,14 @@ func getSDN(logger log.Logger, searcher *searcher) http.HandlerFunc {
 		if id == "" {
 			return
 		}
-		sdns := searcher.FindSDNs(1, func(s *SDN) bool {
-			return s.SDN.EntityID == id
-		})
-		if len(sdns) != 1 {
+		sdn := searcher.FindSDN(id)
+		if sdn == nil {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(sdns[0]); err != nil {
+		if err := json.NewEncoder(w).Encode(sdn); err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}

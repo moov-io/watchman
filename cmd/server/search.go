@@ -5,49 +5,24 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"sync"
 
 	"github.com/moov-io/ofac"
-	"github.com/moov-io/ofac/pkg/strcmp"
 
 	"github.com/go-kit/kit/log"
+	"github.com/xrash/smetrics"
 )
 
 var (
 	errNoSearchParams = errors.New("missing search parameter(s)")
 
-	nameSimilarity    float64 = 0.90
-	altSimilarity     float64 = 0.90
-	addressSimilarity float64 = 0.90
-
 	softResultsLimit, hardResultsLimit = 10, 100
 )
-
-func init() {
-	if v := os.Getenv("NAME_SIMILARITY"); v != "" {
-		f, _ := strconv.ParseFloat(v, 64)
-		if f > 0 {
-			nameSimilarity = f
-		}
-	}
-	if v := os.Getenv("ALT_SIMILARITY"); v != "" {
-		f, _ := strconv.ParseFloat(v, 64)
-		if f > 0 {
-			altSimilarity = f
-		}
-	}
-	if v := os.Getenv("ADDRESS_SIMILARITY"); v != "" {
-		f, _ := strconv.ParseFloat(v, 64)
-		if f > 0 {
-			addressSimilarity = f
-		}
-	}
-}
 
 type searcher struct {
 	SDNs         []*SDN
@@ -58,25 +33,56 @@ type searcher struct {
 	logger log.Logger
 }
 
-func (s *searcher) FindAddresses(limit int, f func(*Address) bool) []*ofac.Address {
+func (s *searcher) FindAddresses(limit int, id string) []*ofac.Address {
 	s.RLock()
 	defer s.RUnlock()
 
 	var out []*ofac.Address
 	for i := range s.Addresses {
-		// Break if at results limit
 		if len(out) > limit {
 			break
 		}
-		// Check filter func
-		if f(s.Addresses[i]) {
+		if s.Addresses[i].Address.EntityID == id {
 			out = append(out, s.Addresses[i].Address)
 		}
 	}
 	return out
 }
 
-func (s *searcher) FindAlts(limit int, f func(alt *Alt) bool) []*ofac.AlternateIdentity {
+func (s *searcher) TopAddresses(limit int, add string) []Address {
+	add = precompute(add)
+
+	s.RLock()
+	defer s.RUnlock()
+
+	if len(s.Addresses) == 0 {
+		return nil
+	}
+	xs := newLargest(limit)
+
+	for i := range s.Addresses {
+		xs.add(&item{
+			value:  s.Addresses[i],
+			weight: jaroWrinkler(s.Addresses[i].address, add),
+		})
+	}
+
+	out := make([]Address, 0)
+	for i := range xs.items {
+		if v := xs.items[i]; v != nil {
+			aa, ok := v.value.(*Address)
+			if !ok {
+				continue // TODO(adam): log
+			}
+			address := *aa
+			address.match = v.weight
+			out = append(out, address)
+		}
+	}
+	return out
+}
+
+func (s *searcher) FindAlts(limit int, id string) []*ofac.AlternateIdentity {
 	s.RLock()
 	defer s.RUnlock()
 
@@ -85,24 +91,87 @@ func (s *searcher) FindAlts(limit int, f func(alt *Alt) bool) []*ofac.AlternateI
 		if len(out) > limit {
 			break
 		}
-		if f(s.Alts[i]) {
+		if s.Alts[i].AlternateIdentity.EntityID == id {
 			out = append(out, s.Alts[i].AlternateIdentity)
 		}
 	}
 	return out
 }
 
-func (s *searcher) FindSDNs(limit int, f func(*SDN) bool) []*ofac.SDN {
+func (s *searcher) TopAltNames(limit int, alt string) []Alt {
+	alt = precompute(alt)
+
 	s.RLock()
 	defer s.RUnlock()
 
-	var out []*ofac.SDN
-	for i := range s.SDNs {
-		if len(out) > limit {
-			break
+	if len(s.Alts) == 0 {
+		return nil
+	}
+	xs := newLargest(limit)
+
+	for i := range s.Alts {
+		xs.add(&item{
+			value:  s.Alts[i],
+			weight: jaroWrinkler(s.Alts[i].name, alt),
+		})
+	}
+
+	out := make([]Alt, 0)
+	for i := range xs.items {
+		if v := xs.items[i]; v != nil {
+			aa, ok := v.value.(*Alt)
+			if !ok {
+				continue // TODO(adam): log
+			}
+			alt := *aa
+			alt.match = v.weight
+			out = append(out, alt)
 		}
-		if f(s.SDNs[i]) {
-			out = append(out, s.SDNs[i].SDN)
+	}
+	return out
+}
+
+func (s *searcher) FindSDN(id string) *ofac.SDN {
+	s.RLock()
+	defer s.RUnlock()
+
+	for i := range s.SDNs {
+		if s.SDNs[i].SDN.EntityID == id {
+			return s.SDNs[i].SDN
+		}
+	}
+	return nil
+}
+
+func (s *searcher) TopSDNs(limit int, name string) []SDN {
+	name = precompute(name)
+
+	s.RLock()
+	defer s.RUnlock()
+
+	if len(s.SDNs) == 0 {
+		return nil
+	}
+	xs := newLargest(limit)
+
+	for i := range s.SDNs {
+		xs.add(&item{
+			value:  s.SDNs[i],
+			weight: jaroWrinkler(s.SDNs[i].name, name),
+			// TODO(adam): fixup other types to lowercase precompute
+		})
+	}
+
+	out := make([]SDN, 0)
+	for i := range xs.items {
+		if v := xs.items[i]; v != nil {
+			ss, ok := v.value.(*SDN)
+			if !ok {
+				continue // TODO(adam): log
+			}
+			sdn := *ss // deref for a copy
+			sdn.match = v.weight
+			out = append(out, sdn)
 		}
 	}
 	return out
@@ -112,8 +181,21 @@ func (s *searcher) FindSDNs(limit int, f func(*SDN) bool) []*ofac.SDN {
 type SDN struct {
 	SDN *ofac.SDN
 
-	// name is precomputed as lowercase'd and split on words
-	name []string
+	// match holds the match ratio for an SDN in search results
+	match float64
+
+	// name is precomputed for speed
+	name string
+}
+
+func (s SDN) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		*ofac.SDN
+		Match float64 `json:"match"`
+	}{
+		s.SDN,
+		s.match,
+	})
 }
 
 func precomputeSDNs(sdns []*ofac.SDN) []*SDN {
@@ -131,8 +213,20 @@ func precomputeSDNs(sdns []*ofac.SDN) []*SDN {
 type Address struct {
 	Address *ofac.Address
 
-	// precomputed (lowercase and split) fields for speed
-	address, citystate, country []string
+	match float64 // match %
+
+	// precomputed fields for speed
+	address, citystate, country string
+}
+
+func (a Address) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		*ofac.Address
+		Match float64 `json:"match"`
+	}{
+		a.Address,
+		a.match,
+	})
 }
 
 func precomputeAddresses(adds []*ofac.Address) []*Address {
@@ -152,8 +246,20 @@ func precomputeAddresses(adds []*ofac.Address) []*Address {
 type Alt struct {
 	AlternateIdentity *ofac.AlternateIdentity
 
-	// name is precomputed (lowercase and split) for speed
-	name []string
+	match float64 // match %
+
+	// name is precomputed for speed
+	name string
+}
+
+func (a Alt) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		*ofac.AlternateIdentity
+		Match float64 `json:"match"`
+	}{
+		a.AlternateIdentity,
+		a.match,
+	})
 }
 
 func precomputeAlts(alts []*ofac.AlternateIdentity) []*Alt {
@@ -167,9 +273,13 @@ func precomputeAlts(alts []*ofac.AlternateIdentity) []*Alt {
 	return out
 }
 
-// precompute will split s on white space and lowercase each substring
-func precompute(s string) []string {
-	return strings.Fields(strings.ToLower(s))
+var (
+	punctuationReplacer = strings.NewReplacer(".", "", ",", "", "-", "", "  ", " ")
+)
+
+// precompute will lowercase each substring and remove punctuation
+func precompute(s string) string {
+	return strings.ToLower(punctuationReplacer.Replace(s))
 }
 
 func extractSearchLimit(r *http.Request) int {
@@ -186,56 +296,6 @@ func extractSearchLimit(r *http.Request) int {
 	return limit
 }
 
-type searchResponse struct {
-	SDNs      []*ofac.SDN               `json:"SDNs"`
-	AltNames  []*ofac.AlternateIdentity `json:"altNames"`
-	Addresses []*ofac.Address           `json:"addresses"`
-}
-
-// addressMatches returns a bool which represents if addressParts matches a given Address.
-//
-// An Address contains precomputed data to speed up searches and addressParts is split along
-// word boundries.
-func addressMatches(addressParts []string, inc *Address) bool {
-	// Count matches for collection if over threshold
-	matches := 0
-	for k := range inc.address {
-		for j := range addressParts {
-			if strcmp.Levenshtein(inc.address[k], addressParts[j]) > addressSimilarity {
-				matches++
-			}
-		}
-	}
-	// If over 25% of words from query match (via strings.Contains not full string equality) save as an address.
-	// This is arbitrary, but given the following examples only one partial word match is required:
-	//  123 Scott Ave
-	//  1600 N Penn St
-	if (float64(matches) / float64(len(inc.address))) >= 0.25 {
-		return true
-	}
-	return false
-}
-
-// nameMatches returns a bool representing if nameParts (name split on word boundries) matches a given SDN.
-func nameMatches(nameParts []string, inc *SDN) bool {
-	for k := range inc.name {
-		for j := range nameParts {
-			if strcmp.Levenshtein(inc.name[k], nameParts[j]) > nameSimilarity {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-// altMatches returns a bool representing if altParts (alt name split on word boundries) matches a given ofac.AlternateIdentity.
-func altMatches(altParts []string, inc *Alt) bool {
-	for k := range inc.name {
-		for j := range altParts {
-			if strcmp.Levenshtein(inc.name[k], altParts[j]) > altSimilarity {
-				return true
-			}
-		}
-	}
-	return false
+func jaroWrinkler(s1, s2 string) float64 {
+	return smetrics.JaroWinkler(s1, s2, 0.7, 4)
 }

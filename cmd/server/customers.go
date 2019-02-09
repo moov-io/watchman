@@ -57,21 +57,15 @@ func getCustomerId(w http.ResponseWriter, r *http.Request) string {
 
 // getCustomerId returns an SDN and any addresses or alt names by the entity id provided.
 func getCustomerById(id string, searcher *searcher) *Customer {
-	sdns := searcher.FindSDNs(1, func(sdn *SDN) bool {
-		return sdn.SDN.EntityID == id
-	})
-	if len(sdns) != 1 {
+	sdn := searcher.FindSDN(id)
+	if sdn == nil {
 		return nil
 	}
 	return &Customer{
-		ID:  id,
-		SDN: sdns[0],
-		Addresses: searcher.FindAddresses(100, func(add *Address) bool {
-			return add.Address.EntityID == id
-		}),
-		Alts: searcher.FindAlts(100, func(alt *Alt) bool {
-			return alt.AlternateIdentity.EntityID == id
-		}),
+		ID:        id,
+		SDN:       sdn,
+		Addresses: searcher.FindAddresses(100, id),
+		Alts:      searcher.FindAlts(100, id),
 	}
 }
 
