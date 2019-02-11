@@ -44,7 +44,7 @@ type Address struct {
 	Address string `json:"address"`
 	// CityStateProvincePostalCode is the city, state/province, zip/postal code for the address of the
 	// specially designated national
-	CityStateProvincePostalCode string `json:"CityStateProvincePostalCode"`
+	CityStateProvincePostalCode string `json:"cityStateProvincePostalCode"`
 	// Country is the country for the address of the specially designated national
 	Country string `json:"country"`
 	//AddressRemarks (Add_remarks) is remarks on the address

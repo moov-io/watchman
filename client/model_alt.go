@@ -11,8 +11,9 @@ package openapi
 
 // Alternate name from OFAC list
 type Alt struct {
-	EntityID      string `json:"EntityID,omitempty"`
-	AlternateID   string `json:"AlternateID,omitempty"`
-	AlternateType string `json:"AlternateType,omitempty"`
-	AlternateName string `json:"AlternateName,omitempty"`
+	EntityID      string  `json:"entityID,omitempty"`
+	AlternateID   string  `json:"alternateID,omitempty"`
+	AlternateType string  `json:"alternateType,omitempty"`
+	AlternateName string  `json:"alternateName,omitempty"`
+	Match         float32 `json:"match,omitempty"`
 }

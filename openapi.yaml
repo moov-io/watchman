@@ -337,23 +337,26 @@ components:
     SDN:
       description: Specially designated national from OFAC list
       properties:
-        EntityID:
+        entityID:
           type: string
           example: 1231
-        SDNName:
+        sdnName:
           type: string
           example: BANCO NACIONAL DE CUBA
-        SDNType:
+        sdnType:
           type: string
           example: individual
-        Program:
+        program:
           type: string
           example: CUBA
-        Title:
+        title:
           type: string
           example: Title of an individual
-        Remarks:
+        remarks:
           type: string
+        match:
+          type: number
+          example: 0.91
           example: Remarks on SDN and often additional information about the SDN
     Addresses:
       type: array
@@ -362,21 +365,24 @@ components:
     Address:
       description: Physical address from OFAC list
       properties:
-        EntityID:
+        entityID:
           type: string
           example: 2112
-        AddressID:
+        addressID:
           type: string
           example: 201
-        Address:
+        address:
           type: string
           example: 123 73th St
-        CityStateProvincePostalCode:
+        cityStateProvincePostalCode:
           type: string
           example: Tokyo 103
-        Country:
+        country:
           type: string
           example: Japan
+        match:
+          type: number
+          example: 0.91
     SDNAltNames:
       type: array
       items:
@@ -384,18 +390,21 @@ components:
     Alt:
       description: Alternate name from OFAC list
       properties:
-        EntityID:
+        entityID:
           type: string
           example: 306
-        AlternateID:
+        alternateID:
           type: string
           example: 220
-        AlternateType:
+        alternateType:
           type: string
           example: aka
-        AlternateName:
+        alternateName:
           type: string
           example: NATIONAL BANK OF CUBA
+        match:
+          type: number
+          example: 0.91
     UpdateCustomerStatus:
       description: Request body to update a customers status.
       properties:
