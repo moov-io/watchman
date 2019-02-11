@@ -5,16 +5,95 @@
 package main
 
 import (
-	"encoding/json"
-	"net/http"
+	"math"
 	"net/http/httptest"
 	"net/url"
 	"testing"
 
 	"github.com/moov-io/ofac"
-
-	"github.com/gorilla/mux"
 )
+
+var (
+	addressSearcher = &searcher{
+		Addresses: precomputeAddresses([]*ofac.Address{
+			{
+				EntityID:                    "173",
+				AddressID:                   "129",
+				Address:                     "Ibex House, The Minories",
+				CityStateProvincePostalCode: "London EC3N 1DY",
+				Country:                     "United Kingdom",
+			},
+			{
+				EntityID:                    "735",
+				AddressID:                   "447",
+				Address:                     "Piarco Airport",
+				CityStateProvincePostalCode: "Port au Prince",
+				Country:                     "Haiti",
+			},
+		}),
+	}
+	altSearcher = &searcher{
+		Alts: precomputeAlts([]*ofac.AlternateIdentity{
+			{ // Real OFAC entry
+				EntityID:      "559",
+				AlternateID:   "481",
+				AlternateType: "aka",
+				AlternateName: "CIMEX",
+			},
+			{
+				EntityID:      "4691",
+				AlternateID:   "3887",
+				AlternateType: "aka",
+				AlternateName: "A.I.C. SOGO KENKYUSHO",
+			},
+		}),
+	}
+	sdnSearcher = &searcher{
+		SDNs: precomputeSDNs([]*ofac.SDN{
+			{
+				EntityID: "2676",
+				SDNName:  "AL ZAWAHIRI, Dr. Ayman",
+				SDNType:  "individual",
+				Program:  "SDGT] [SDT",
+				Title:    "Operational and Military Leader of JIHAD GROUP",
+				Remarks:  "DOB 19 Jun 1951; POB Giza, Egypt; Passport 1084010 (Egypt); alt. Passport 19820215; Operational and Military Leader of JIHAD GROUP.",
+			},
+			{
+				EntityID: "2681",
+				SDNName:  "HAWATMA, Nayif",
+				SDNType:  "individual",
+				Program:  "SDT",
+				Title:    "Secretary General of DEMOCRATIC FRONT FOR THE LIBERATION OF PALESTINE - HAWATMEH FACTION",
+				Remarks:  "DOB 1933; Secretary General of DEMOCRATIC FRONT FOR THE LIBERATION OF PALESTINE - HAWATMEH FACTION.",
+			},
+		}),
+	}
+)
+
+func TestJaroWrinkler(t *testing.T) {
+	cases := []struct {
+		s1, s2 string
+		match  float64
+	}{
+		{"WEI, Zhao", "WEI, Zhao", 1.0},
+	}
+
+	for _, v := range cases {
+		eql(t, jaroWrinkler(v.s1, v.s2), v.match)
+	}
+}
+
+func eql(t *testing.T, x, y float64) {
+	t.Helper()
+	if math.Abs(x-y) > 0.01 {
+		t.Errorf("%.3f != %.3f", x, y)
+	}
+}
+
+func TestEql(t *testing.T) {
+	eql(t, 0.1, 0.1)
+	eql(t, 0.0001, 0.00002)
+}
 
 func TestSearch__extractSearchLimit(t *testing.T) {
 	// Too high, fallback to hard max
@@ -77,245 +156,62 @@ func TestSearch__addressSearchRequest(t *testing.T) {
 	}
 }
 
-func TestSearch__Address(t *testing.T) {
-	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/search?address=Ibex", nil)
-	req.Header.Set("x-user-id", "test")
-
-	searcher := &searcher{
-		Addresses: precomputeAddresses([]*ofac.Address{
-			{ // Real OFAC entry -- 173,129,"Ibex House, The Minories","London EC3N 1DY","United Kingdom",-0-
-				EntityID:                    "173",
-				AddressID:                   "129",
-				Address:                     "Ibex House, The Minories",
-				CityStateProvincePostalCode: "London EC3N 1DY",
-				Country:                     "United Kingdom",
-			},
-			{ // 735,447,"Piarco Airport","Port au Prince","Haiti",-0-
-				EntityID:                    "735",
-				AddressID:                   "447",
-				Address:                     "Piarco Airport",
-				CityStateProvincePostalCode: "Port au Prince",
-				Country:                     "Haiti",
-			},
-		}),
+func TestSearch__FindAddresses(t *testing.T) {
+	addresses := addressSearcher.FindAddresses(1, "173")
+	if v := len(addresses); v != 1 {
+		t.Fatalf("len(addresses)=%d", v)
 	}
-
-	router := mux.NewRouter()
-	addSearchRoutes(nil, router, searcher)
-	router.ServeHTTP(w, req)
-	w.Flush()
-
-	if w.Code != http.StatusOK {
-		t.Errorf("bogus status code: %d", w.Code)
-	}
-
-	var wrapper searchResponse
-	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
-		t.Fatal(err)
-	}
-	if len(wrapper.Addresses) != 1 {
-		t.Fatalf("got %#v", wrapper.Addresses)
-	}
-	if wrapper.Addresses[0].EntityID != "173" {
-		t.Errorf("got %#v", wrapper.Addresses[0])
-	}
-
-	// Search with more data in ?address=...
-	w = httptest.NewRecorder()
-	req.URL.Query().Set("address", "ibex+the")
-	addSearchRoutes(nil, router, searcher)
-	router.ServeHTTP(w, req)
-	w.Flush()
-
-	if w.Code != http.StatusOK {
-		t.Errorf("bogus status code: %d", w.Code)
-	}
-	wrapper.Addresses = nil
-	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
-		t.Fatal(err)
-	}
-	if len(wrapper.Addresses) != 1 {
-		t.Fatalf("got %#v", wrapper.Addresses)
+	if addresses[0].EntityID != "173" {
+		t.Errorf("got %#v", addresses[0])
 	}
 }
 
-func TestSearch__Name(t *testing.T) {
-	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/search?name=ZAWAHIRI", nil)
-	req.Header.Set("x-user-id", "test")
-
-	searcher := &searcher{
-		SDNs: precomputeSDNs([]*ofac.SDN{
-			{ // Real OFAC entry
-				EntityID: "2676",
-				SDNName:  "AL ZAWAHIRI, Dr. Ayman",
-				SDNType:  "individual",
-				Program:  "SDGT] [SDT",
-				Title:    "Operational and Military Leader of JIHAD GROUP",
-				Remarks:  "DOB 19 Jun 1951; POB Giza, Egypt; Passport 1084010 (Egypt); alt. Passport 19820215; Operational and Military Leader of JIHAD GROUP.",
-			},
-			{
-				EntityID: "2681",
-				SDNName:  "HAWATMA, Nayif",
-				SDNType:  "individual",
-				Program:  "SDT",
-				Title:    "Secretary General of DEMOCRATIC FRONT FOR THE LIBERATION OF PALESTINE - HAWATMEH FACTION",
-				Remarks:  "DOB 1933; Secretary General of DEMOCRATIC FRONT FOR THE LIBERATION OF PALESTINE - HAWATMEH FACTION.",
-			},
-		}),
+func TestSearch__TopAddresses(t *testing.T) {
+	addresses := addressSearcher.TopAddresses(1, "Piarco Air")
+	if len(addresses) == 0 {
+		t.Fatal("empty Addresses")
 	}
-
-	router := mux.NewRouter()
-	addSearchRoutes(nil, router, searcher)
-	router.ServeHTTP(w, req)
-	w.Flush()
-
-	if w.Code != http.StatusOK {
-		t.Errorf("bogus status code: %d", w.Code)
-	}
-
-	var wrapper searchResponse
-	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
-		t.Fatal(err)
-	}
-	if len(wrapper.SDNs) != 1 {
-		t.Fatalf("got %#v", wrapper.SDNs)
-	}
-	if wrapper.SDNs[0].EntityID != "2676" {
-		t.Errorf("got %#v", wrapper.SDNs[0])
+	if addresses[0].Address.EntityID != "735" {
+		t.Errorf("%#v", addresses[0].Address)
 	}
 }
 
-func TestSearch__NameMultiple(t *testing.T) {
-	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/search?name=ZAWAH+ayman", nil)
-	req.Header.Set("x-user-id", "test")
-
-	searcher := &searcher{
-		SDNs: precomputeSDNs([]*ofac.SDN{
-			{ // Real OFAC entry
-				EntityID: "2676",
-				SDNName:  "AL ZAWAHIRI, Dr. Ayman",
-				SDNType:  "individual",
-				Program:  "SDGT] [SDT",
-				Title:    "Operational and Military Leader of JIHAD GROUP",
-				Remarks:  "DOB 19 Jun 1951; POB Giza, Egypt; Passport 1084010 (Egypt); alt. Passport 19820215; Operational and Military Leader of JIHAD GROUP.",
-			},
-			{
-				EntityID: "2681",
-				SDNName:  "HAWATMA, Nayif",
-				SDNType:  "individual",
-				Program:  "SDT",
-				Title:    "Secretary General of DEMOCRATIC FRONT FOR THE LIBERATION OF PALESTINE - HAWATMEH FACTION",
-				Remarks:  "DOB 1933; Secretary General of DEMOCRATIC FRONT FOR THE LIBERATION OF PALESTINE - HAWATMEH FACTION.",
-			},
-		}),
+func TestSearch__FindAlts(t *testing.T) {
+	alts := altSearcher.FindAlts(1, "559")
+	if v := len(alts); v != 1 {
+		t.Fatalf("len(alts)=%d", v)
 	}
-
-	router := mux.NewRouter()
-	addSearchRoutes(nil, router, searcher)
-	router.ServeHTTP(w, req)
-	w.Flush()
-
-	if w.Code != http.StatusOK {
-		t.Errorf("bogus status code: %d", w.Code)
-	}
-
-	var wrapper searchResponse
-	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
-		t.Fatal(err)
-	}
-	if len(wrapper.SDNs) != 1 {
-		t.Fatalf("got %#v", wrapper.SDNs)
-	}
-	if wrapper.SDNs[0].EntityID != "2676" {
-		t.Errorf("got %#v", wrapper.SDNs[0])
+	if alts[0].EntityID != "559" {
+		t.Errorf("got %#v", alts[0])
 	}
 }
 
-func TestSearch__AltName(t *testing.T) {
-	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/search?altName=CIMEX", nil)
-	req.Header.Set("x-user-id", "test")
-
-	searcher := &searcher{
-		Alts: precomputeAlts([]*ofac.AlternateIdentity{
-			{ // Real OFAC entry
-				EntityID:      "559",
-				AlternateID:   "481",
-				AlternateType: "aka",
-				AlternateName: "CIMEX",
-			},
-			{
-				EntityID:      "4691",
-				AlternateID:   "3887",
-				AlternateType: "aka",
-				AlternateName: "A.I.C. SOGO KENKYUSHO",
-			},
-		}),
+func TestSearch__TopAlts(t *testing.T) {
+	alts := altSearcher.TopAltNames(1, "SOGO KENKYUSHO")
+	if len(alts) == 0 {
+		t.Fatal("empty AltNames")
 	}
-
-	router := mux.NewRouter()
-	addSearchRoutes(nil, router, searcher)
-	router.ServeHTTP(w, req)
-	w.Flush()
-
-	if w.Code != http.StatusOK {
-		t.Errorf("bogus status code: %d", w.Code)
-	}
-
-	var wrapper searchResponse
-	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
-		t.Fatal(err)
-	}
-	if len(wrapper.AltNames) != 1 {
-		t.Fatalf("got %#v", wrapper.AltNames)
-	}
-	if wrapper.AltNames[0].EntityID != "559" {
-		t.Errorf("got %#v", wrapper.AltNames[0])
+	if alts[0].AlternateIdentity.EntityID != "4691" {
+		t.Errorf("%#v", alts[0].AlternateIdentity)
 	}
 }
 
-func TestSearch__AltNameMultiple(t *testing.T) {
-	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/search?altName=SOGO+kenkyusho", nil)
-	req.Header.Set("x-user-id", "test")
-
-	searcher := &searcher{
-		Alts: precomputeAlts([]*ofac.AlternateIdentity{
-			{ // Real OFAC entry
-				EntityID:      "559",
-				AlternateID:   "481",
-				AlternateType: "aka",
-				AlternateName: "CIMEX",
-			},
-			{
-				EntityID:      "4691",
-				AlternateID:   "3887",
-				AlternateType: "aka",
-				AlternateName: "A.I.C. SOGO KENKYUSHO",
-			},
-		}),
+func TestSearch__FindSDN(t *testing.T) {
+	sdn := sdnSearcher.FindSDN("2676")
+	if sdn == nil {
+		t.Fatal("nil SDN")
 	}
-
-	router := mux.NewRouter()
-	addSearchRoutes(nil, router, searcher)
-	router.ServeHTTP(w, req)
-	w.Flush()
-
-	if w.Code != http.StatusOK {
-		t.Errorf("bogus status code: %d", w.Code)
+	if sdn.EntityID != "2676" {
+		t.Errorf("got %#v", sdn)
 	}
+}
 
-	var wrapper searchResponse
-	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
-		t.Fatal(err)
+func TestSearch__TopSDNs(t *testing.T) {
+	sdns := sdnSearcher.TopSDNs(1, "AL ZAWAHIRI")
+	if len(sdns) == 0 {
+		t.Fatal("empty SDNs")
 	}
-	if len(wrapper.AltNames) != 1 {
-		t.Fatalf("got %#v", wrapper.AltNames)
-	}
-	if wrapper.AltNames[0].EntityID != "4691" {
-		t.Errorf("got %#v", wrapper.AltNames[0])
+	if sdns[0].SDN.EntityID != "2676" {
+		t.Errorf("%#v", sdns[0].SDN)
 	}
 }

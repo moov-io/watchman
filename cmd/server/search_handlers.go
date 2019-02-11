@@ -82,24 +82,26 @@ func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 	}
 }
 
+type searchResponse struct {
+	SDNs      []SDN     `json:"SDNs"`
+	AltNames  []Alt     `json:"altNames"`
+	Addresses []Address `json:"addresses"`
+}
+
 func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchRequest) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		hasAddress := req.Address != ""
-		reqAdds := strings.Fields(strings.ToLower(req.Address))
-
+		reqAdd := strings.TrimSpace(req.Address)
+		hasAddress := reqAdd != ""
 		if !hasAddress {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		limit := extractSearchLimit(r)
-		answers := searcher.FindAddresses(limit, func(add *Address) bool {
-			return addressMatches(reqAdds, add)
-		})
+		addresses := searcher.TopAddresses(extractSearchLimit(r), reqAdd)
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(&searchResponse{Addresses: answers}); err != nil {
+		if err := json.NewEncoder(w).Encode(&searchResponse{Addresses: addresses}); err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}
@@ -108,16 +110,13 @@ func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchReq
 
 func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		nameSlugs := strings.Fields(strings.ToLower(nameSlug))
-		if len(nameSlugs) == 0 {
+		nameSlug = strings.TrimSpace(nameSlug)
+		if nameSlug == "" {
 			moovhttp.Problem(w, errNoSearchParams)
 			return
 		}
 
-		limit := extractSearchLimit(r)
-		sdns := searcher.FindSDNs(limit, func(sdn *SDN) bool {
-			return nameMatches(nameSlugs, sdn)
-		})
+		sdns := searcher.TopSDNs(extractSearchLimit(r), nameSlug)
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
@@ -130,16 +129,13 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 
 func searchByAltName(logger log.Logger, searcher *searcher, altSlug string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		altSlugs := strings.Fields(strings.ToLower(altSlug))
-		if len(altSlugs) == 0 {
+		altSlug = strings.TrimSpace(altSlug)
+		if altSlug == "" {
 			moovhttp.Problem(w, errNoSearchParams)
 			return
 		}
 
-		limit := extractSearchLimit(r)
-		alts := searcher.FindAlts(limit, func(alt *Alt) bool {
-			return altMatches(altSlugs, alt)
-		})
+		alts := searcher.TopAltNames(extractSearchLimit(r), altSlug)
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
