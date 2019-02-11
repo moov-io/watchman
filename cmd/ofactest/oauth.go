@@ -7,23 +7,23 @@ package main
 import (
 	"bytes"
 	"io/ioutil"
-	"os"
-	"path/filepath"
+
+	"github.com/moov-io/api/pkg/moovoauth"
 )
 
-var (
-	OAuthTokenStorageFilepath = filepath.Join(os.Getenv("HOME"), ".moov/api/oauth/access-token")
-)
-
-// TODO(adam): windows, os.UserHomeDir in Go 1.12
-
-// GetOAuthToken will read a Moov API OAuth token from disk and return it
+// getOAuthToken will read a Moov API OAuth token from disk and return it
 //
 // See github.com/moov-io/api's cmd/apitest for OAuth token writing to disk
-func GetOAuthToken(path string) string {
+func getOAuthToken() string {
+	path := moovoauth.TokenFilepath()
+	if path == "" {
+		return ""
+	}
+
 	bs, err := ioutil.ReadFile(path)
 	if err != nil {
 		return ""
 	}
+
 	return string(bytes.TrimSpace(bs))
 }

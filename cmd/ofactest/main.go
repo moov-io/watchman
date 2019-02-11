@@ -58,7 +58,7 @@ func main() {
 	log.Printf("[INFO] using %s for address", conf.BasePath)
 
 	// Read OAuth token and set on conf
-	accessToken := GetOAuthToken(OAuthTokenStorageFilepath)
+	accessToken := getOAuthToken()
 	if accessToken == "" {
 		log.Fatal("[FAILURE] no OAuth token found, run moov/apitest locally")
 	} else {
