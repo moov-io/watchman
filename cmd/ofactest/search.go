@@ -33,6 +33,11 @@ func searchSDNs(ctx context.Context, api *moov.APIClient) error {
 		return err
 	}
 
+	// Load Customer
+	if err := loadCustomer(ctx, api, search.SDNs[0].EntityID); err != nil {
+		return err
+	}
+
 	// Alt Name
 	search, resp, err = api.OFACApi.SearchSDNs(ctx, &moov.SearchSDNsOpts{
 		AltName: optional.NewString("alh"),
