@@ -140,8 +140,11 @@ func main() {
 	// Add manual OFAC data refresh endpoint
 	adminServer.AddHandler(manualRefreshPath, manualRefreshHandler(logger, searcher, downloadRepo))
 
+	custRepo := &sqliteCustomerRepository{db}
+	defer custRepo.close()
+
 	// Add searcher for HTTP routes
-	addCustomerRoutes(logger, router, searcher, watchRepo)
+	addCustomerRoutes(logger, router, searcher, custRepo, watchRepo)
 	addSDNRoutes(logger, router, searcher)
 	addSearchRoutes(logger, router, searcher)
 	addDownloadRoutes(logger, router, downloadRepo)

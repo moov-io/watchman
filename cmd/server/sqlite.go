@@ -17,9 +17,13 @@ import (
 var (
 	// migrations holds all our SQL migrations to be done (in order)
 	migrations = []string{
-		// Customers
+		// Customer watches
 		`create table if not exists customer_watches(id primary key, customer_id, webhook, auth_token, created_at datetime, deleted_at datetime);`,
 		`create table if not exists customer_name_watches(id primary key, name, webhook, auth_token, created_at datetime, deleted_at datetime);`,
+
+		// Customer blocks
+		`create table if not exists customer_blocks(customer_id, user_id, created_at datetime, deleted_at datetime);`,
+		`create unique index customer_blocks_idx on customer_blocks(customer_id, user_id);`,
 
 		// OFAC download stats
 		`create table if not exists ofac_download_stats(downloaded_at datetime, sdns, alt_names, addresses);`,

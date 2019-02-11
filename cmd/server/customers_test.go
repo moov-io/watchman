@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/moov-io/base"
 	"github.com/moov-io/ofac"
 
 	"github.com/gorilla/mux"
@@ -47,6 +48,16 @@ var (
 		}),
 	}
 )
+
+func createTestCustomerRepository(t *testing.T) *sqliteCustomerRepository {
+	t.Helper()
+
+	db, err := createTestSqliteDB()
+	if err != nil {
+		t.Fatal(err)
+	}
+	return &sqliteCustomerRepository{db.db}
+}
 
 func TestCustomers__id(t *testing.T) {
 	router := mux.NewRouter()
@@ -88,11 +99,13 @@ func TestCustomer_get(t *testing.T) {
 	req := httptest.NewRequest("GET", "/customers/306", nil)
 	req.Header.Set("x-user-id", "test")
 
-	repo := createTestCustomerWatchRepository(t)
-	defer repo.close()
+	custRepo := createTestCustomerRepository(t)
+	defer custRepo.close()
+	watchRepo := createTestCustomerWatchRepository(t)
+	defer watchRepo.close()
 
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router, customerSearcher, repo)
+	addCustomerRoutes(nil, router, customerSearcher, custRepo, watchRepo)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -124,11 +137,13 @@ func TestCustomer_addWatch(t *testing.T) {
 	req := httptest.NewRequest("POST", "/customers/foo/watch", body)
 	req.Header.Set("x-user-id", "test")
 
-	repo := createTestCustomerWatchRepository(t)
-	defer repo.close()
+	custRepo := createTestCustomerRepository(t)
+	defer custRepo.close()
+	watchRepo := createTestCustomerWatchRepository(t)
+	defer watchRepo.close()
 
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router, customerSearcher, repo)
+	addCustomerRoutes(nil, router, customerSearcher, custRepo, watchRepo)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -150,11 +165,11 @@ func TestCustomer_addWatchNoBody(t *testing.T) {
 	req := httptest.NewRequest("POST", "/customers/foo/watch", nil)
 	req.Header.Set("x-user-id", "test")
 
-	repo := createTestCustomerWatchRepository(t)
-	defer repo.close()
+	watchRepo := createTestCustomerWatchRepository(t)
+	defer watchRepo.close()
 
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router, customerSearcher, repo)
+	addCustomerRoutes(nil, router, customerSearcher, nil, watchRepo)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -164,8 +179,10 @@ func TestCustomer_addWatchNoBody(t *testing.T) {
 }
 
 func TestCustomer_addWatchMissingAuthToken(t *testing.T) {
-	repo := createTestCustomerWatchRepository(t)
-	defer repo.close()
+	custRepo := createTestCustomerRepository(t)
+	defer custRepo.close()
+	watchRepo := createTestCustomerWatchRepository(t)
+	defer watchRepo.close()
 
 	body := strings.NewReader(`{"webhook": "https://moov.io", "authToken": ""}`)
 
@@ -176,7 +193,7 @@ func TestCustomer_addWatchMissingAuthToken(t *testing.T) {
 
 	// Setup test HTTP server
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router, customerSearcher, repo)
+	addCustomerRoutes(nil, router, customerSearcher, custRepo, watchRepo)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -191,11 +208,13 @@ func TestCustomer_addNameWatch(t *testing.T) {
 	req := httptest.NewRequest("POST", "/customers/watch?name=foo", body)
 	req.Header.Set("x-user-id", "test")
 
-	repo := createTestCustomerWatchRepository(t)
-	defer repo.close()
+	custRepo := createTestCustomerRepository(t)
+	defer custRepo.close()
+	watchRepo := createTestCustomerWatchRepository(t)
+	defer watchRepo.close()
 
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router, customerSearcher, repo)
+	addCustomerRoutes(nil, router, customerSearcher, custRepo, watchRepo)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -217,11 +236,13 @@ func TestCustomer_addCustomerNameWatchNoBody(t *testing.T) {
 	req := httptest.NewRequest("POST", "/customers/watch?name=foo", nil)
 	req.Header.Set("x-user-id", "test")
 
-	repo := createTestCustomerWatchRepository(t)
-	defer repo.close()
+	custRepo := createTestCustomerRepository(t)
+	defer custRepo.close()
+	watchRepo := createTestCustomerWatchRepository(t)
+	defer watchRepo.close()
 
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router, customerSearcher, repo)
+	addCustomerRoutes(nil, router, customerSearcher, custRepo, watchRepo)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -244,23 +265,89 @@ func TestCustomer_addCustomerNameWatchNoBody(t *testing.T) {
 	}
 }
 
-func TestCustomer_update(t *testing.T) {
+func TestCustomer_updateBlocked(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	body := strings.NewReader(`{"status": "Blocked"}`)
 	req := httptest.NewRequest("PUT", "/customers/foo", body)
 	req.Header.Set("x-user-id", "test")
 
-	repo := createTestCustomerWatchRepository(t)
-	defer repo.close()
+	custRepo := createTestCustomerRepository(t)
+	defer custRepo.close()
+	watchRepo := createTestCustomerWatchRepository(t)
+	defer watchRepo.close()
 
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router, customerSearcher, repo)
+	addCustomerRoutes(nil, router, customerSearcher, custRepo, watchRepo)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
 	if w.Code != http.StatusOK {
 		t.Errorf("bogus status code: %d", w.Code)
+	}
+}
+
+func TestCustomer_updateUnblocked(t *testing.T) {
+	w := httptest.NewRecorder()
+
+	body := strings.NewReader(`{"status": "unblock"}`)
+	req := httptest.NewRequest("PUT", "/customers/foo", body)
+	req.Header.Set("x-user-id", "test")
+
+	custRepo := createTestCustomerRepository(t)
+	defer custRepo.close()
+	watchRepo := createTestCustomerWatchRepository(t)
+	defer watchRepo.close()
+
+	router := mux.NewRouter()
+	addCustomerRoutes(nil, router, customerSearcher, custRepo, watchRepo)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusOK {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+}
+
+func TestCustomer_updateUnknown(t *testing.T) {
+	w := httptest.NewRecorder()
+
+	body := strings.NewReader(`{"status": "unknown"}`) // has status, but not blocked or unblocked
+	req := httptest.NewRequest("PUT", "/customers/foo", body)
+	req.Header.Set("x-user-id", "test")
+
+	custRepo := createTestCustomerRepository(t)
+	defer custRepo.close()
+	watchRepo := createTestCustomerWatchRepository(t)
+	defer watchRepo.close()
+
+	router := mux.NewRouter()
+	addCustomerRoutes(nil, router, customerSearcher, custRepo, watchRepo)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+}
+
+func TestCustomer_updateNoUserId(t *testing.T) {
+	w := httptest.NewRecorder()
+
+	req := httptest.NewRequest("PUT", "/customers/foo", nil)
+
+	custRepo := createTestCustomerRepository(t)
+	defer custRepo.close()
+	watchRepo := createTestCustomerWatchRepository(t)
+	defer watchRepo.close()
+
+	router := mux.NewRouter()
+	addCustomerRoutes(nil, router, customerSearcher, custRepo, watchRepo)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("expected %d but got: %d", http.StatusBadRequest, w.Code)
 	}
 }
 
@@ -270,11 +357,13 @@ func TestCustomer_updateNoBody(t *testing.T) {
 	req := httptest.NewRequest("PUT", "/customers/foo", nil)
 	req.Header.Set("x-user-id", "test")
 
-	repo := createTestCustomerWatchRepository(t)
-	defer repo.close()
+	custRepo := createTestCustomerRepository(t)
+	defer custRepo.close()
+	watchRepo := createTestCustomerWatchRepository(t)
+	defer watchRepo.close()
 
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router, customerSearcher, repo)
+	addCustomerRoutes(nil, router, customerSearcher, custRepo, watchRepo)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -288,11 +377,13 @@ func TestCustomer_removeWatch(t *testing.T) {
 	req := httptest.NewRequest("DELETE", "/customers/foo/watch/watch-id", nil)
 	req.Header.Set("x-user-id", "test")
 
-	repo := createTestCustomerWatchRepository(t)
-	defer repo.close()
+	custRepo := createTestCustomerRepository(t)
+	defer custRepo.close()
+	watchRepo := createTestCustomerWatchRepository(t)
+	defer watchRepo.close()
 
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router, customerSearcher, repo)
+	addCustomerRoutes(nil, router, customerSearcher, custRepo, watchRepo)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -306,15 +397,79 @@ func TestCustomer_removeNameWatch(t *testing.T) {
 	req := httptest.NewRequest("DELETE", "/customers/watch/foo", nil)
 	req.Header.Set("x-user-id", "test")
 
-	repo := createTestCustomerWatchRepository(t)
-	defer repo.close()
+	custRepo := createTestCustomerRepository(t)
+	defer custRepo.close()
+	watchRepo := createTestCustomerWatchRepository(t)
+	defer watchRepo.close()
 
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router, customerSearcher, repo)
+	addCustomerRoutes(nil, router, customerSearcher, custRepo, watchRepo)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
 	if w.Code != http.StatusOK {
 		t.Errorf("bogus status code: %d", w.Code)
+	}
+}
+
+func TestCustomerRepository(t *testing.T) {
+	repo := createTestCustomerRepository(t)
+	defer repo.close()
+
+	customerId, userId := base.ID(), base.ID()
+
+	blocked, err := repo.isCustomerBlocked(customerId, userId)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if blocked {
+		t.Errorf("unknown customer shouldn't be blocked")
+	}
+
+	// block customer
+	if err := repo.addCustomerBlock(customerId, userId); err != nil {
+		t.Errorf("addCustomerBlock: shouldn't error, but got %v", err)
+	}
+
+	// verify
+	blocked, err = repo.isCustomerBlocked(customerId, userId)
+	if err != nil {
+		t.Error(err)
+	}
+	if !blocked {
+		t.Errorf("customer=%s should be blocked", customerId)
+	}
+
+	// unblock
+	if err := repo.removeCustomerBlock(customerId, userId); err != nil {
+		t.Error(err)
+	}
+	blocked, err = repo.isCustomerBlocked(customerId, userId)
+	if err != nil {
+		t.Error(err)
+	}
+	if blocked {
+		t.Errorf("customer shouldn't be blocked anymore")
+	}
+}
+
+func TestCustomerRepository__edgeCases(t *testing.T) {
+	repo := createTestCustomerRepository(t)
+	defer repo.close()
+
+	blocked, err := repo.isCustomerBlocked("", "userId")
+	if blocked {
+		t.Error("empty customerId shouldn't be blocked")
+	}
+	if err == nil {
+		t.Error("should have returned error")
+	}
+
+	blocked, err = repo.isCustomerBlocked("customerId", "")
+	if blocked {
+		t.Error("shouldn't be blocked as it's not possible to have overrides with an empty userId")
+	}
+	if err != nil {
+		t.Error("no userId is okay")
 	}
 }

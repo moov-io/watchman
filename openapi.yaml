@@ -413,7 +413,7 @@ components:
           type: string
           enum:
             - Blocked
-            - Default
+            - Unblocked
     Search:
       description: Search results containing SDNs, alternate names and/or addreses
       properties:

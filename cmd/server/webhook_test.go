@@ -123,7 +123,7 @@ func TestWebhook_call(t *testing.T) {
 	}
 
 	// execute webhook with arbitrary Customer
-	cust := getCustomerById("306", customerSearcher) // from customers_test.go
+	cust, _ := getCustomerById("306", "", customerSearcher, nil) // from customers_test.go
 
 	if _, err := callWebhook(base.ID(), cust, server.URL, "authToken"); err != nil {
 		t.Fatal(err)
