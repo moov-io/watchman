@@ -42,8 +42,7 @@ func (s *searcher) spawnResearching(watchRepo watchRepository, webhookRepo webho
 					break
 				}
 				for i := range watches {
-					// TODO(adam): This request doesn't have the userId, so what should we do here?
-					customer, _ := getCustomerById(watches[i].customerId, "", s, nil)
+					customer, _ := getCustomerById(watches[i].customerId, s, nil)
 					if customer == nil {
 						// TODO(adam): remove watch?
 						s.logger.Log("search", fmt.Sprintf("async: watch %s customer %v not found", watches[i].id, watches[i].customerId))

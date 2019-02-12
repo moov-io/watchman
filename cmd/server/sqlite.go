@@ -22,8 +22,7 @@ var (
 		`create table if not exists customer_name_watches(id primary key, name, webhook, auth_token, created_at datetime, deleted_at datetime);`,
 
 		// Customer blocks
-		`create table if not exists customer_blocks(customer_id, user_id, created_at datetime, deleted_at datetime);`,
-		`create unique index customer_blocks_idx on customer_blocks(customer_id, user_id);`,
+		`create table if not exists customer_status(customer_id, user_id, note, status, created_at datetime, deleted_at datetime);`,
 
 		// OFAC download stats
 		`create table if not exists ofac_download_stats(downloaded_at datetime, sdns, alt_names, addresses);`,

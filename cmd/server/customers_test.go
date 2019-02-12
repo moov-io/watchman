@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/moov-io/base"
 	"github.com/moov-io/ofac"
@@ -265,10 +266,10 @@ func TestCustomer_addCustomerNameWatchNoBody(t *testing.T) {
 	}
 }
 
-func TestCustomer_updateBlocked(t *testing.T) {
+func TestCustomer_updateUnsafe(t *testing.T) {
 	w := httptest.NewRecorder()
 
-	body := strings.NewReader(`{"status": "Blocked"}`)
+	body := strings.NewReader(`{"status": "unsafe"}`)
 	req := httptest.NewRequest("PUT", "/customers/foo", body)
 	req.Header.Set("x-user-id", "test")
 
@@ -287,10 +288,10 @@ func TestCustomer_updateBlocked(t *testing.T) {
 	}
 }
 
-func TestCustomer_updateUnblocked(t *testing.T) {
+func TestCustomer_updateException(t *testing.T) {
 	w := httptest.NewRecorder()
 
-	body := strings.NewReader(`{"status": "unblock"}`)
+	body := strings.NewReader(`{"status": "exception"}`)
 	req := httptest.NewRequest("PUT", "/customers/foo", body)
 	req.Header.Set("x-user-id", "test")
 
@@ -418,58 +419,63 @@ func TestCustomerRepository(t *testing.T) {
 
 	customerId, userId := base.ID(), base.ID()
 
-	blocked, err := repo.isCustomerBlocked(customerId, userId)
+	status, err := repo.getCustomerStatus(customerId)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if blocked {
-		t.Errorf("unknown customer shouldn't be blocked")
+	if status != nil {
+		t.Fatal("should give nil CustomerStatus")
 	}
 
 	// block customer
-	if err := repo.addCustomerBlock(customerId, userId); err != nil {
+	status = &CustomerStatus{UserId: userId, Status: Unsafe, CreatedAt: time.Now()}
+	if err := repo.upsertCustomerStatus(customerId, status); err != nil {
 		t.Errorf("addCustomerBlock: shouldn't error, but got %v", err)
 	}
+	status = nil
 
 	// verify
-	blocked, err = repo.isCustomerBlocked(customerId, userId)
+	status, err = repo.getCustomerStatus(customerId)
 	if err != nil {
 		t.Error(err)
 	}
-	if !blocked {
-		t.Errorf("customer=%s should be blocked", customerId)
+	if status == nil {
+		t.Errorf("empty CustomerStatus")
+	}
+	if status.UserId == "" || string(status.Status) == "" {
+		t.Errorf("invalid CustomerStatus: %#v", status)
+	}
+	if status.Status != Unsafe {
+		t.Errorf("status.Status=%v", status.Status)
 	}
 
 	// unblock
-	if err := repo.removeCustomerBlock(customerId, userId); err != nil {
-		t.Error(err)
+	status = &CustomerStatus{UserId: userId, Status: Exception, CreatedAt: time.Now()}
+	if err := repo.upsertCustomerStatus(customerId, status); err != nil {
+		t.Errorf("addCustomerBlock: shouldn't error, but got %v", err)
 	}
-	blocked, err = repo.isCustomerBlocked(customerId, userId)
+	status = nil
+
+	status, err = repo.getCustomerStatus(customerId)
 	if err != nil {
 		t.Error(err)
 	}
-	if blocked {
-		t.Errorf("customer shouldn't be blocked anymore")
+	if status == nil {
+		t.Errorf("empty CustomerStatus")
 	}
-}
+	if status.UserId == "" || string(status.Status) == "" {
+		t.Errorf("invalid CustomerStatus: %#v", status)
+	}
+	if status.Status != Exception {
+		t.Errorf("status.Status=%v", status.Status)
+	}
 
-func TestCustomerRepository__edgeCases(t *testing.T) {
-	repo := createTestCustomerRepository(t)
-	defer repo.close()
-
-	blocked, err := repo.isCustomerBlocked("", "userId")
-	if blocked {
-		t.Error("empty customerId shouldn't be blocked")
+	// edgae case
+	status, err = repo.getCustomerStatus("")
+	if status != nil {
+		t.Error("empty customerId shouldn return nil status")
 	}
 	if err == nil {
-		t.Error("should have returned error")
-	}
-
-	blocked, err = repo.isCustomerBlocked("customerId", "")
-	if blocked {
-		t.Error("shouldn't be blocked as it's not possible to have overrides with an empty userId")
-	}
-	if err != nil {
-		t.Error("no userId is okay")
+		t.Error("but an error should be returned")
 	}
 }
