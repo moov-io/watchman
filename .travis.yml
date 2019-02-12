@@ -6,14 +6,17 @@ env:
   matrix:
     - GO111MODULE=auto
 matrix:
-  # allow_failures:
-  #   - os: windows
+  allow_failures:
+    # - os: windows
+    - go: 1.12rc1
   include:
     - os: linux
       go: 1.11.x
       cache:
         directories:
           - "/home/travis/.cache/go-build" # GOCACHE
+    - os: linux
+      go: 1.12rc1
     - os: osx
       go: 1.11.x
       cache:
