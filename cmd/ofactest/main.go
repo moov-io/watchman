@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/moov-io/ofac"
@@ -58,11 +59,10 @@ func main() {
 	log.Printf("[INFO] using %s for address", conf.BasePath)
 
 	// Read OAuth token and set on conf
-	accessToken := getOAuthToken()
-	if accessToken == "" {
-		log.Fatal("[FAILURE] no OAuth token found, run moov/apitest locally")
+	if v := os.Getenv("OAUTH_TOKEN"); v != "" {
+		conf.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", v))
 	} else {
-		conf.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", accessToken))
+		log.Fatal("[FAILURE] no OAuth token provided")
 	}
 
 	// Setup OFAC API client
