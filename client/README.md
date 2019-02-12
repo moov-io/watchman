@@ -51,6 +51,7 @@ Class | Method | HTTP request | Description
  - [Alt](docs/Alt.md)
  - [Download](docs/Download.md)
  - [OfacCustomer](docs/OfacCustomer.md)
+ - [OfacCustomerStatus](docs/OfacCustomerStatus.md)
  - [Sdn](docs/Sdn.md)
  - [Search](docs/Search.md)
  - [UpdateCustomerStatus](docs/UpdateCustomerStatus.md)

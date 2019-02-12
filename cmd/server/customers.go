@@ -42,7 +42,7 @@ type CustomerBlockStatus string
 
 const (
 	// Unsafe customers have been manually marked to block all transactions with
-	Unsafe    CustomerBlockStatus = "unsafe"
+	Unsafe CustomerBlockStatus = "unsafe"
 	// Exception customers have been manually marked to allow transactions with
 	Exception CustomerBlockStatus = "exception"
 )
