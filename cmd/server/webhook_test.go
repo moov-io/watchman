@@ -122,9 +122,14 @@ func TestWebhook_call(t *testing.T) {
 		t.Fatalf("%T %#v", webhookHTTPClient.Transport, webhookHTTPClient.Transport)
 	}
 
-	// execute webhook with arbitrary Customer
-	cust, _ := getCustomerById("306", customerSearcher, nil) // from customers_test.go
+	custRepo := createTestCustomerRepository(t)
+	defer custRepo.close()
 
+	// execute webhook with arbitrary Customer
+	cust, err := getCustomerById("306", customerSearcher, custRepo) // from customers_test.go
+	if cust == nil {
+		t.Fatalf("nil Customer: %v", err)
+	}
 	if _, err := callWebhook(base.ID(), cust, server.URL, "authToken"); err != nil {
 		t.Fatal(err)
 	}
