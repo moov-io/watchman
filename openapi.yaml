@@ -54,7 +54,7 @@ paths:
     put:
       tags:
         - OFAC
-      summary: Update a Customer's status to add or remove a manual block.
+      summary: Update a Customer's sanction status to always block or always allow transactions.
       operationId: updateCustomerStatus
       parameters:
         - $ref: '#/components/parameters/requestId'
@@ -324,16 +324,39 @@ components:
           description: OFAC Customer ID
           type: string
           example: 9574756b
-        SDN:
+        sdn:
           $ref: '#/components/schemas/SDN'
-        Addresses:
+        addresses:
           type: array
           items:
             $ref: '#/components/schemas/Address'
-        Alts:
+        alts:
           type: array
           items:
             $ref: '#/components/schemas/Alt'
+        status:
+          $ref: '#/components/schemas/OFACCustomerStatus'
+    OFACCustomerStatus:
+      description: Status properties of an OFAC Customer
+      properties:
+        userId:
+          description: User ID provided when updating status
+          type: string
+          example: 349661f9
+        note:
+          description: Optional note from updating status
+          type: string
+          example: 'Incorrect match'
+        status:
+          description: Manually applied status for OFAC Customer
+          type: string
+          enum:
+            - unsafe
+            - exception
+        createdAt:
+          type: string
+          format: date-time
+          example: 2006-01-02T15:04:05Z07:00
     SDN:
       description: Specially designated national from OFAC list
       properties:
@@ -409,11 +432,13 @@ components:
       description: Request body to update a customers status.
       properties:
         status:
-          description: manual customer sanction status
+          description: manual override of customer/SDN sanction status
           type: string
           enum:
-            - Blocked
-            - Default
+            - unsafe
+            - exception
+      required:
+        - status
     Search:
       description: Search results containing SDNs, alternate names and/or addreses
       properties:

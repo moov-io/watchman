@@ -1045,7 +1045,7 @@ func (a *OFACApiService) SearchSDNs(ctx context.Context, localVarOptionals *Sear
 }
 
 /*
-OFACApiService Update a Customer's status to add or remove a manual block.
+OFACApiService Update a Customer's sanction status to always block or always allow transactions.
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param customerId Customer ID
  * @param updateCustomerStatus

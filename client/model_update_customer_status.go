@@ -11,6 +11,6 @@ package openapi
 
 // Request body to update a customers status.
 type UpdateCustomerStatus struct {
-	// manual customer sanction status
-	Status string `json:"status,omitempty"`
+	// manual override of customer/SDN sanction status
+	Status string `json:"status"`
 }

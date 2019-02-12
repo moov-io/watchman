@@ -42,7 +42,7 @@ Class | Method | HTTP request | Description
 *OFACApi* | [**RemoveCustomerNameWatch**](docs/OFACApi.md#removecustomernamewatch) | **Delete** /customers/watch/{watchId} | Remove a Customer name watch
 *OFACApi* | [**RemoveCustomerWatch**](docs/OFACApi.md#removecustomerwatch) | **Delete** /customers/{customerId}/watch/{watchId} | Remove customer watch
 *OFACApi* | [**SearchSDNs**](docs/OFACApi.md#searchsdns) | **Get** /search | Search SDN names and metadata
-*OFACApi* | [**UpdateCustomerStatus**](docs/OFACApi.md#updatecustomerstatus) | **Put** /customers/{customerId} | Update a Customer&#39;s status to add or remove a manual block.
+*OFACApi* | [**UpdateCustomerStatus**](docs/OFACApi.md#updatecustomerstatus) | **Put** /customers/{customerId} | Update a Customer&#39;s sanction status to always block or always allow transactions.
 
 
 ## Documentation For Models
@@ -51,6 +51,7 @@ Class | Method | HTTP request | Description
  - [Alt](docs/Alt.md)
  - [Download](docs/Download.md)
  - [OfacCustomer](docs/OfacCustomer.md)
+ - [OfacCustomerStatus](docs/OfacCustomerStatus.md)
  - [Sdn](docs/Sdn.md)
  - [Search](docs/Search.md)
  - [UpdateCustomerStatus](docs/UpdateCustomerStatus.md)
