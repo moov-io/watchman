@@ -279,7 +279,11 @@ var (
 
 // precompute will lowercase each substring and remove punctuation
 func precompute(s string) string {
-	return strings.ToLower(punctuationReplacer.Replace(s))
+	return chomp(strings.ToLower(punctuationReplacer.Replace(s)))
+}
+
+func chomp(s string) string {
+	return strings.Replace(s, " ", "", -1)
 }
 
 func extractSearchLimit(r *http.Request) int {
@@ -296,6 +300,11 @@ func extractSearchLimit(r *http.Request) int {
 	return limit
 }
 
+// jaroWrinkler runs the similarly named algorithm over the two input strings.
+// For more details see https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance
+//
+// Right now s1 is assumes to have been passed through `chomp(..)` already and so this
+// func only calls `chomp` for s2.
 func jaroWrinkler(s1, s2 string) float64 {
-	return smetrics.JaroWinkler(s1, s2, 0.7, 4)
+	return smetrics.JaroWinkler(s1, chomp(s2), 0.7, 4)
 }

@@ -29,7 +29,7 @@ func TestSearch__Address(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.88`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.89`) {
 		t.Errorf("%#v", v)
 	}
 
@@ -85,7 +85,7 @@ func TestSearch__AltName(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.759`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.783`) {
 		t.Error(v)
 	}
 

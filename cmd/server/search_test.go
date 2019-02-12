@@ -5,12 +5,15 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"net/http/httptest"
 	"net/url"
 	"testing"
 
 	"github.com/moov-io/ofac"
+
+	"github.com/go-kit/kit/log"
 )
 
 var (
@@ -76,10 +79,14 @@ func TestJaroWrinkler(t *testing.T) {
 		match  float64
 	}{
 		{"WEI, Zhao", "WEI, Zhao", 1.0},
+		// make sure jaroWrinkler is communative
+		{"jane doe", "jan lahore", 0.69},
+		{"jan lahore", "jane doe", 0.69},
 	}
 
 	for _, v := range cases {
-		eql(t, jaroWrinkler(v.s1, v.s2), v.match)
+		// need to call chomp on s1, see jaroWrinkler doc
+		eql(t, jaroWrinkler(chomp(v.s1), v.s2), v.match)
 	}
 }
 
@@ -93,6 +100,37 @@ func eql(t *testing.T, x, y float64) {
 func TestEql(t *testing.T) {
 	eql(t, 0.1, 0.1)
 	eql(t, 0.0001, 0.00002)
+}
+
+// TestSearch_liveData will download the real OFAC data and run searches against the corpus.
+// This test is designed to tweak match percents and results.
+func TestSearch_liveData(t *testing.T) {
+	if testing.Short() {
+		return
+	}
+	searcher := &searcher{
+		logger: log.NewNopLogger(),
+	}
+	if stats, err := searcher.refreshData(); err != nil {
+		t.Fatal(err)
+	} else {
+		searcher.logger.Log("liveData", fmt.Sprintf("stats: %#v", stats))
+	}
+
+	cases := []struct {
+		name  string
+		match float64 // top match %
+	}{
+		{"Jane Doe", 0.765}, // matches 'jan lahore'
+	}
+	for i := range cases {
+		sdns := searcher.TopSDNs(1, cases[i].name)
+		if len(sdns) == 0 {
+			t.Errorf("name=%q got no results", cases[i].name)
+		}
+		fmt.Printf("%q matches %q at %.2f\n", cases[i].name, sdns[0].name, sdns[0].match)
+		eql(t, sdns[0].match, cases[i].match)
+	}
 }
 
 func TestSearch__extractSearchLimit(t *testing.T) {
