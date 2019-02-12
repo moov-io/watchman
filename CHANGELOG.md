@@ -1,4 +1,11 @@
-## v0.3.0 (Unreleased)
+## v0.4.0 (Released 2019-02-12)
+
+ADDITIONS
+
+- Added `"match": 0.91` as a percent of SDN name match to parameter.
+- Support setting a customer to `unsafe` or `exception` status.
+
+## v0.3.0 (Released 2019-02-07)
 
 CHANGES
 
