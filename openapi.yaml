@@ -357,7 +357,7 @@ components:
         match:
           type: number
           example: 0.91
-          example: Remarks on SDN and often additional information about the SDN
+          description: Remarks on SDN and often additional information about the SDN
     Addresses:
       type: array
       items:
