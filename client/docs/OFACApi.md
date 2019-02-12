@@ -15,7 +15,7 @@ Method | HTTP request | Description
 [**RemoveCustomerNameWatch**](OFACApi.md#RemoveCustomerNameWatch) | **Delete** /customers/watch/{watchId} | Remove a Customer name watch
 [**RemoveCustomerWatch**](OFACApi.md#RemoveCustomerWatch) | **Delete** /customers/{customerId}/watch/{watchId} | Remove customer watch
 [**SearchSDNs**](OFACApi.md#SearchSDNs) | **Get** /search | Search SDN names and metadata
-[**UpdateCustomerStatus**](OFACApi.md#UpdateCustomerStatus) | **Put** /customers/{customerId} | Update a Customer&#39;s status to add or remove a manual block.
+[**UpdateCustomerStatus**](OFACApi.md#UpdateCustomerStatus) | **Put** /customers/{customerId} | Update a Customer&#39;s sanction status to always block or always allow transactions.
 
 
 # **AddCustomerNameWatch**
@@ -400,7 +400,7 @@ No authorization required
 
 # **UpdateCustomerStatus**
 > UpdateCustomerStatus(ctx, customerId, updateCustomerStatus, optional)
-Update a Customer's status to add or remove a manual block.
+Update a Customer's sanction status to always block or always allow transactions.
 
 ### Required Parameters
 

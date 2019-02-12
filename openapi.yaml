@@ -54,7 +54,7 @@ paths:
     put:
       tags:
         - OFAC
-      summary: Update a Customer's status to add or remove a manual block.
+      summary: Update a Customer's sanction status to always block or always allow transactions.
       operationId: updateCustomerStatus
       parameters:
         - $ref: '#/components/parameters/requestId'
@@ -409,11 +409,13 @@ components:
       description: Request body to update a customers status.
       properties:
         status:
-          description: manual customer sanction status
+          description: manual override of customer/SDN sanction status
           type: string
           enum:
-            - Blocked
-            - Unblocked
+            - unsafe
+            - exception
+      required:
+        - status
     Search:
       description: Search results containing SDNs, alternate names and/or addreses
       properties:

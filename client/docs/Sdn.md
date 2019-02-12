@@ -9,7 +9,7 @@ Name | Type | Description | Notes
 **Program** | **string** |  | [optional] 
 **Title** | **string** |  | [optional] 
 **Remarks** | **string** |  | [optional] 
-**Match** | **float32** |  | [optional] 
+**Match** | **float32** | Remarks on SDN and often additional information about the SDN | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

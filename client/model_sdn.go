@@ -11,11 +11,12 @@ package openapi
 
 // Specially designated national from OFAC list
 type Sdn struct {
-	EntityID string  `json:"entityID,omitempty"`
-	SdnName  string  `json:"sdnName,omitempty"`
-	SdnType  string  `json:"sdnType,omitempty"`
-	Program  string  `json:"program,omitempty"`
-	Title    string  `json:"title,omitempty"`
-	Remarks  string  `json:"remarks,omitempty"`
-	Match    float32 `json:"match,omitempty"`
+	EntityID string `json:"entityID,omitempty"`
+	SdnName  string `json:"sdnName,omitempty"`
+	SdnType  string `json:"sdnType,omitempty"`
+	Program  string `json:"program,omitempty"`
+	Title    string `json:"title,omitempty"`
+	Remarks  string `json:"remarks,omitempty"`
+	// Remarks on SDN and often additional information about the SDN
+	Match float32 `json:"match,omitempty"`
 }
