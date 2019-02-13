@@ -12,7 +12,7 @@ import (
 	"github.com/go-kit/kit/log"
 )
 
-func createTestCustomerWatchRepository(t *testing.T) *sqliteWatchRepository {
+func createTestWatchRepository(t *testing.T) *sqliteWatchRepository {
 	t.Helper()
 
 	db, err := createTestSqliteDB()
@@ -27,7 +27,7 @@ func createTestCustomerWatchRepository(t *testing.T) *sqliteWatchRepository {
 }
 
 func TestCustomerWatch(t *testing.T) {
-	repo := createTestCustomerWatchRepository(t)
+	repo := createTestWatchRepository(t)
 
 	customerId := base.ID()
 	if err := repo.removeCustomerWatch(customerId, base.ID()); err != nil {
@@ -49,8 +49,31 @@ func TestCustomerWatch(t *testing.T) {
 	}
 }
 
+func TestCompanyWatch(t *testing.T) {
+	repo := createTestWatchRepository(t)
+
+	companyId := base.ID()
+	if err := repo.removeCompanyWatch(companyId, base.ID()); err != nil {
+		t.Errorf("expected no error: %v", err)
+	}
+
+	// add watch, then remove
+	watchId, err := repo.addCompanyWatch(companyId, watchRequest{Webhook: "https://moov.io"})
+	if err != nil {
+		t.Errorf("companyId=%q got error: %v", companyId, err)
+	}
+	if watchId == "" {
+		t.Error("empty watchId")
+	}
+
+	// remove
+	if err := repo.removeCompanyWatch(companyId, watchId); err != nil {
+		t.Errorf("expected no error: %v", err)
+	}
+}
+
 func TestCustomerNameWatch(t *testing.T) {
-	repo := createTestCustomerWatchRepository(t)
+	repo := createTestWatchRepository(t)
 
 	if err := repo.removeCustomerNameWatch(base.ID()); err != nil {
 		t.Errorf("expected no error: %v", err)
@@ -73,10 +96,10 @@ func TestCustomerNameWatch(t *testing.T) {
 }
 
 func TestWatchCursor(t *testing.T) {
-	repo := createTestCustomerWatchRepository(t)
+	repo := createTestWatchRepository(t)
 	defer repo.close()
 
-	cur := repo.getWatchesCursor(2) // batchSize
+	cur := repo.getWatchesCursor(4) // batchSize is divided in half to equally grab customer and company watches
 
 	// insert some watches
 	watchId1, _ := repo.addCustomerWatch(base.ID(), watchRequest{Webhook: "https://moov.io/1"})

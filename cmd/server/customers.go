@@ -22,7 +22,7 @@ import (
 
 var (
 	errNoAuthToken  = errors.New("no authToken provided for webhook")
-	errNoCustomerId = errors.New("no customerId found")
+	errNoCustomerId = errors.New("no Customer ID found")
 	errNoNameParam  = errors.New("no name parameter found")
 	errNoUserId     = errors.New("no userId (X-User-Id header) found")
 )
@@ -41,10 +41,10 @@ type Customer struct {
 type CustomerBlockStatus string
 
 const (
-	// Unsafe customers have been manually marked to block all transactions with
-	Unsafe CustomerBlockStatus = "unsafe"
-	// Exception customers have been manually marked to allow transactions with
-	Exception CustomerBlockStatus = "exception"
+	// CustomerUnsafe customers have been manually marked to block all transactions with
+	CustomerUnsafe CustomerBlockStatus = "unsafe"
+	// CustomerException customers have been manually marked to allow transactions with
+	CustomerException CustomerBlockStatus = "exception"
 )
 
 // CustomerStatus represents a userId's manual override of an SDN
@@ -54,6 +54,8 @@ type CustomerStatus struct {
 	Status    CustomerBlockStatus `json:"block"`
 	CreatedAt time.Time           `json:"createdAt"`
 }
+
+// TODO(adam): try out endpoints w/ curl, make sure it works okay-ish
 
 type customerWatchResponse struct {
 	WatchID string `json:"watchId"`
@@ -79,22 +81,22 @@ func getCustomerId(w http.ResponseWriter, r *http.Request) string {
 	return v
 }
 
-// getCustomerId returns an SDN and any addresses or alt names by the entity id provided.
+// getCustomerId returns an SDN for an individual and any addresses or alt names by the entity id provided.a
 func getCustomerById(id string, searcher *searcher, custRepo customerRepository) (*Customer, error) {
 	sdn := searcher.FindSDN(id)
 	if sdn == nil {
 		return nil, fmt.Errorf("Customer %s not found", id)
 	}
+	if !strings.EqualFold(sdn.SDNType, "individual") {
+		// SDN wasn't an individual, so don't return it for method that only returns individuals
+		return nil, nil
+	}
 	if custRepo == nil {
 		return nil, errors.New("nil customerRepository provided - logic bug")
 	}
-	var err error
-	var status *CustomerStatus
-	if custRepo != nil {
-		status, err = custRepo.getCustomerStatus(sdn.EntityID)
-		if err != nil {
-			return nil, fmt.Errorf("problem reading Customer=%s block status: %v", id, err)
-		}
+	status, err := custRepo.getCustomerStatus(sdn.EntityID)
+	if err != nil {
+		return nil, fmt.Errorf("problem reading Customer=%s block status: %v", id, err)
 	}
 	return &Customer{
 		ID:        id,
@@ -275,7 +277,7 @@ func updateCustomerStatus(logger log.Logger, searcher *searcher, custRepo custom
 
 		status := CustomerBlockStatus(strings.ToLower(strings.TrimSpace(req.Status)))
 		switch status {
-		case Unsafe, Exception:
+		case CustomerUnsafe, CustomerException:
 			custStatus := &CustomerStatus{
 				UserId:    userId,
 				Note:      req.Notes,

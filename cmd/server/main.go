@@ -131,19 +131,23 @@ func main() {
 	webhookRepo := &sqliteWebhookRepository{db}
 	defer webhookRepo.close()
 
+	// Setup company / customer repositories
+	companyRepo := &sqliteCompanyRepository{db}
+	defer companyRepo.close()
+	custRepo := &sqliteCustomerRepository{db}
+	defer custRepo.close()
+
 	// Setup periodic download and re-search
 	updates := make(chan *downloadStats)
 	ofacDataRefreshInterval = getOFACRefreshInterval(logger, os.Getenv("OFAC_DATA_REFRESH"))
 	go searcher.periodicDataRefresh(ofacDataRefreshInterval, downloadRepo, updates)
-	go searcher.spawnResearching(watchRepo, webhookRepo, updates)
+	go searcher.spawnResearching(companyRepo, custRepo, watchRepo, webhookRepo, updates)
 
 	// Add manual OFAC data refresh endpoint
 	adminServer.AddHandler(manualRefreshPath, manualRefreshHandler(logger, searcher, downloadRepo))
 
-	custRepo := &sqliteCustomerRepository{db}
-	defer custRepo.close()
-
 	// Add searcher for HTTP routes
+	addCompanyRoutes(logger, router, searcher, companyRepo, watchRepo)
 	addCustomerRoutes(logger, router, searcher, custRepo, watchRepo)
 	addSDNRoutes(logger, router, searcher)
 	addSearchRoutes(logger, router, searcher)
