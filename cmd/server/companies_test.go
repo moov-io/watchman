@@ -19,6 +19,8 @@ import (
 )
 
 var (
+	// companySearcher is a searcher instance with one company entity contained. It's designed to be used
+	// in tests that expect a non-individual SDN.
 	companySearcher = &searcher{
 		SDNs: precomputeSDNs([]*ofac.SDN{
 			{
@@ -90,6 +92,21 @@ func TestCompanies__id(t *testing.T) {
 	// Don't pass req through mux so mux.Vars finds nothing
 	if v := getCompanyId(w, req); v != "" {
 		t.Errorf("expected empty, but got %q", v)
+	}
+}
+
+func TestCompany_getById(t *testing.T) {
+	repo := createTestCompanyRepository(t)
+	defer repo.close()
+
+	// make sure we only return SDNType != "individual"
+	// We do this by proviing a searcher with individual results
+	company, err := getCompanyById("306", customerSearcher, repo)
+	if company != nil {
+		t.Fatalf("expected no Company, but got %#v", company)
+	}
+	if err != nil {
+		t.Fatalf("expected no error, but got %#v", err)
 	}
 }
 

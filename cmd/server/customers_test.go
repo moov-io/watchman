@@ -19,6 +19,8 @@ import (
 )
 
 var (
+	// customerSearcher is a searcher instance with one individual entity contained. It's designed to be used
+	// in tests that expect an individual SDN.
 	customerSearcher = &searcher{
 		SDNs: precomputeSDNs([]*ofac.SDN{
 			{
@@ -92,6 +94,21 @@ func TestCustomers__id(t *testing.T) {
 	// Don't pass req through mux so mux.Vars finds nothing
 	if v := getCustomerId(w, req); v != "" {
 		t.Errorf("expected empty, but got %q", v)
+	}
+}
+
+func TestCustomer_getById(t *testing.T) {
+	repo := createTestCustomerRepository(t)
+	defer repo.close()
+
+	// make sure we only return SDNType == "individual"
+	// We do this by proviing a searcher with non-individual results
+	cust, err := getCustomerById("21206", companySearcher, repo)
+	if cust != nil {
+		t.Fatalf("expected no Customer, but got %#v", cust)
+	}
+	if err != nil {
+		t.Fatalf("expected no error, but got %#v", err)
 	}
 }
 
