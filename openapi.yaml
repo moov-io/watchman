@@ -367,6 +367,7 @@ components:
           type: string
           example: BANCO NACIONAL DE CUBA
         sdnType:
+          description: SDN's typically represent an individual (customer) or trust/company/organization. OFAC endpoints refer to customers or companies as different entities, but underlying both is the same SDN metadata.
           type: string
           example: individual
         program:
