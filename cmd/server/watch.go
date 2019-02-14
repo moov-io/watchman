@@ -219,12 +219,13 @@ type watchCursor struct {
 	batchSize int
 	db        *sql.DB
 
-	// newerThan represents the minimum (oldest) created_at value
-	// to return in the batch.
+	// customerNewerThan and companyNewerThan represent the minimum (oldest) created_at
+	// value to return in the batch.
 	//
-	// This value starts at "zero time" (an empty time.Time) and progresses
+	// These values start at "zero time" (an empty time.Time) and progresses
 	// towards time.Now() with each batch by being set to the batch's newest time.
-	newerThan time.Time
+	customerNewerThan time.Time
+	companyNewerThan  time.Time
 }
 
 func (cur *watchCursor) Next() ([]watch, error) {
@@ -247,12 +248,12 @@ func (cur *watchCursor) getCompanyBatch() ([]watch, error) {
 	}
 	defer stmt.Close()
 
-	rows, err := stmt.Query(cur.newerThan, cur.batchSize/2)
+	rows, err := stmt.Query(cur.companyNewerThan, cur.batchSize/2)
 	if err != nil {
 		return nil, err
 	}
 
-	max := cur.newerThan
+	max := cur.companyNewerThan
 
 	var watches []watch
 	for rows.Next() {
@@ -266,7 +267,7 @@ func (cur *watchCursor) getCompanyBatch() ([]watch, error) {
 			max = createdAt
 		}
 	}
-	cur.newerThan = max
+	cur.companyNewerThan = max
 
 	return watches, nil
 }
@@ -279,12 +280,12 @@ func (cur *watchCursor) getCustomerBatch() ([]watch, error) {
 	}
 	defer stmt.Close()
 
-	rows, err := stmt.Query(cur.newerThan, cur.batchSize/2)
+	rows, err := stmt.Query(cur.customerNewerThan, cur.batchSize/2)
 	if err != nil {
 		return nil, err
 	}
 
-	max := cur.newerThan
+	max := cur.customerNewerThan
 
 	var watches []watch
 	for rows.Next() {
@@ -298,7 +299,7 @@ func (cur *watchCursor) getCustomerBatch() ([]watch, error) {
 			max = createdAt
 		}
 	}
-	cur.newerThan = max
+	cur.customerNewerThan = max
 
 	return watches, nil
 }
