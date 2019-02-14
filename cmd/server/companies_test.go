@@ -147,6 +147,21 @@ func TestCompany_get(t *testing.T) {
 	}
 }
 
+func TestCompany_EmptyHTTP(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/companies/foo", nil)
+
+	companyRepo := createTestCompanyRepository(t)
+	defer companyRepo.close()
+
+	getCompany(nil, companySearcher, companyRepo)(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+}
+
 func TestCompany_addWatch(t *testing.T) {
 	w := httptest.NewRecorder()
 	body := strings.NewReader(`{"webhook": "https://moov.io", "authToken": "foo"}`)
