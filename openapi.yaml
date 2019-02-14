@@ -425,6 +425,9 @@ components:
         alternateName:
           type: string
           example: NATIONAL BANK OF CUBA
+        alternateRemarks:
+          type: string
+          example: Extra information
         match:
           type: number
           example: 0.91

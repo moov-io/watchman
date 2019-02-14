@@ -58,11 +58,11 @@ type AlternateIdentity struct {
 	// AlternateID (alt_num) is the unique record identifier for the alternate identity
 	AlternateID string `json:"alternateID"`
 	// AlternateIdentityType (alt_type) is the type of alternate identity (aka, fka, nka)
-	AlternateType string `json:"alternateIDType"`
+	AlternateType string `json:"alternateType"`
 	// AlternateIdentityName (alt_name) is the alternate identity name of the specially designated national
-	AlternateName string `json:"alternateIDName"`
+	AlternateName string `json:"alternateName"`
 	// AlternateIdentityRemarks (alt_remarks) is remarks on alternate identity of the specially designated national
-	AlternateRemarks string `json:"alternateIDRemarks"`
+	AlternateRemarks string `json:"alternateRemarks"`
 }
 
 // SDNComments is OFAC SDN Additional Comments
