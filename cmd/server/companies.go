@@ -164,10 +164,7 @@ func getCompany(logger log.Logger, searcher *searcher, companyRepo companyReposi
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(company); err != nil {
-			moovhttp.Problem(w, err)
-			return
-		}
+		json.NewEncoder(w).Encode(company)
 	}
 }
 
@@ -252,10 +249,7 @@ func addCompanyWatch(logger log.Logger, searcher *searcher, repo watchRepository
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(companyWatchResponse{watchId}); err != nil {
-			moovhttp.Problem(w, err)
-			return
-		}
+		json.NewEncoder(w).Encode(companyWatchResponse{watchId})
 	}
 }
 
@@ -307,10 +301,7 @@ func addCompanyNameWatch(logger log.Logger, searcher *searcher, repo watchReposi
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(companyWatchResponse{watchId}); err != nil {
-			moovhttp.Problem(w, err)
-			return
-		}
+		json.NewEncoder(w).Encode(companyWatchResponse{watchId})
 	}
 }
 
