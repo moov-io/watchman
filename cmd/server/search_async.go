@@ -45,25 +45,20 @@ func (s *searcher) spawnResearching(companyRepo companyRepository, custRepo cust
 				}
 				for i := range watches {
 					var body *bytes.Buffer
+					var err error
 
+					// Load up JSON body for webhook request
 					if watches[i].companyId != "" {
 						s.logger.Log("search", fmt.Sprintf("async: watch %s for company %s found", watches[i].id, watches[i].companyId))
-						b, err := getCompanyBody(s, watches[i].id, watches[i].companyId, companyRepo)
-						if err != nil {
-							s.logger.Log("search", err.Error())
-							continue
-						}
-						body = b
+						body, err = getCompanyBody(s, watches[i].id, watches[i].companyId, companyRepo)
 					}
-
 					if watches[i].customerId != "" {
 						s.logger.Log("search", fmt.Sprintf("async: watch %s for customer %s found", watches[i].id, watches[i].customerId))
-						b, err := getCustomerBody(s, watches[i].id, watches[i].customerId, custRepo)
-						if err != nil {
-							s.logger.Log("search", err.Error())
-							continue
-						}
-						body = b
+						body, err = getCustomerBody(s, watches[i].id, watches[i].customerId, custRepo)
+					}
+					if err != nil {
+						s.logger.Log("search", fmt.Sprintf("async: watch %s: %v", watches[i].id, err))
+						continue // skip to next watch
 					}
 
 					// Send HTTP webhook
