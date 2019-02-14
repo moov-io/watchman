@@ -5,6 +5,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
@@ -30,7 +32,7 @@ func readWebhookBatchSize(str string) int {
 	return watchResearchBatchSize
 }
 
-func (s *searcher) spawnResearching(watchRepo watchRepository, webhookRepo webhookRepository, updates chan *downloadStats) {
+func (s *searcher) spawnResearching(companyRepo companyRepository, custRepo customerRepository, watchRepo watchRepository, webhookRepo webhookRepository, updates chan *downloadStats) {
 	for {
 		select {
 		case <-updates:
@@ -42,16 +44,26 @@ func (s *searcher) spawnResearching(watchRepo watchRepository, webhookRepo webho
 					break
 				}
 				for i := range watches {
-					customer, _ := getCustomerById(watches[i].customerId, s, nil)
-					if customer == nil {
-						// TODO(adam): remove watch?
-						s.logger.Log("search", fmt.Sprintf("async: watch %s customer %v not found", watches[i].id, watches[i].customerId))
+					var body *bytes.Buffer
+					var err error
+
+					// Load up JSON body for webhook request
+					if watches[i].companyId != "" {
+						s.logger.Log("search", fmt.Sprintf("async: watch %s for company %s found", watches[i].id, watches[i].companyId))
+						body, err = getCompanyBody(s, watches[i].id, watches[i].companyId, companyRepo)
+					}
+					if watches[i].customerId != "" {
+						s.logger.Log("search", fmt.Sprintf("async: watch %s for customer %s found", watches[i].id, watches[i].customerId))
+						body, err = getCustomerBody(s, watches[i].id, watches[i].customerId, custRepo)
+					}
+					if err != nil {
+						s.logger.Log("search", fmt.Sprintf("async: watch %s: %v", watches[i].id, err))
+						continue // skip to next watch
 					}
 
-					s.logger.Log("search", fmt.Sprintf("async: watch %s for customer %s found", watches[i].id, watches[i].customerId))
-
+					// Send HTTP webhook
 					now := time.Now()
-					status, err := callWebhook(watches[i].id, customer, watches[i].webhook, watches[i].authToken)
+					status, err := callWebhook(watches[i].id, body, watches[i].webhook, watches[i].authToken)
 					if err != nil {
 						s.logger.Log("search", fmt.Errorf("async: problem writing watch (%s) webhook status: %v", watches[i].id, err))
 					}
@@ -63,4 +75,28 @@ func (s *searcher) spawnResearching(watchRepo watchRepository, webhookRepo webho
 
 		}
 	}
+}
+
+func getCustomerBody(s *searcher, watchId string, customerId string, repo customerRepository) (*bytes.Buffer, error) {
+	customer, _ := getCustomerById(customerId, s, repo)
+	if customer == nil {
+		return nil, fmt.Errorf("async: watch %s customer %v not found", watchId, customerId)
+	}
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(customer); err != nil {
+		return nil, fmt.Errorf("problem creating JSON for customer watch %s: %v", watchId, err)
+	}
+	return &buf, nil
+}
+
+func getCompanyBody(s *searcher, watchId string, companyId string, repo companyRepository) (*bytes.Buffer, error) {
+	company, _ := getCompanyById(companyId, s, repo)
+	if company == nil {
+		return nil, fmt.Errorf("async: watch %s company %v not found", watchId, companyId)
+	}
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(company); err != nil {
+		return nil, fmt.Errorf("problem creating JSON for company watch %s: %v", watchId, err)
+	}
+	return &buf, nil
 }

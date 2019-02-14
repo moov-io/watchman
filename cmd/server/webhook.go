@@ -7,7 +7,6 @@ package main
 import (
 	"bytes"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -37,19 +36,16 @@ var (
 	}
 )
 
-// callWebhook will encode Customer as JSON and make a POST request to the provided webhook url.
+// callWebhook will take `body` as JSON and make a POST request to the provided webhook url.
 // Returned is the HTTP status code.
-func callWebhook(watchId string, customer *Customer, webhook string, authToken string) (int, error) {
+func callWebhook(watchId string, body *bytes.Buffer, webhook string, authToken string) (int, error) {
 	webhook, err := validateWebhook(webhook)
 	if err != nil {
 		return 0, err
 	}
 
-	var body bytes.Buffer
-	if err := json.NewEncoder(&body).Encode(customer); err != nil {
-		return 0, fmt.Errorf("problem creating JSON for watch %s: %v", watchId, err)
-	}
-	req, err := http.NewRequest("POST", webhook, &body)
+	// Setup HTTP request
+	req, err := http.NewRequest("POST", webhook, body)
 	if err != nil {
 		return 0, fmt.Errorf("unknown error with watch %s: %v", watchId, err)
 	}

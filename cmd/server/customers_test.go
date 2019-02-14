@@ -19,6 +19,8 @@ import (
 )
 
 var (
+	// customerSearcher is a searcher instance with one individual entity contained. It's designed to be used
+	// in tests that expect an individual SDN.
 	customerSearcher = &searcher{
 		SDNs: precomputeSDNs([]*ofac.SDN{
 			{
@@ -95,6 +97,21 @@ func TestCustomers__id(t *testing.T) {
 	}
 }
 
+func TestCustomer_getById(t *testing.T) {
+	repo := createTestCustomerRepository(t)
+	defer repo.close()
+
+	// make sure we only return SDNType == "individual"
+	// We do this by proviing a searcher with non-individual results
+	cust, err := getCustomerById("21206", companySearcher, repo)
+	if cust != nil {
+		t.Fatalf("expected no Customer, but got %#v", cust)
+	}
+	if err != nil {
+		t.Fatalf("expected no error, but got %#v", err)
+	}
+}
+
 func TestCustomer_get(t *testing.T) {
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/customers/306", nil)
@@ -102,7 +119,7 @@ func TestCustomer_get(t *testing.T) {
 
 	custRepo := createTestCustomerRepository(t)
 	defer custRepo.close()
-	watchRepo := createTestCustomerWatchRepository(t)
+	watchRepo := createTestWatchRepository(t)
 	defer watchRepo.close()
 
 	router := mux.NewRouter()
@@ -132,6 +149,21 @@ func TestCustomer_get(t *testing.T) {
 	}
 }
 
+func TestCustomer_EmptyHTTP(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/customers/foo", nil)
+
+	customerRepo := createTestCustomerRepository(t)
+	defer customerRepo.close()
+
+	getCustomer(nil, customerSearcher, customerRepo)(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+}
+
 func TestCustomer_addWatch(t *testing.T) {
 	w := httptest.NewRecorder()
 	body := strings.NewReader(`{"webhook": "https://moov.io", "authToken": "foo"}`)
@@ -140,7 +172,7 @@ func TestCustomer_addWatch(t *testing.T) {
 
 	custRepo := createTestCustomerRepository(t)
 	defer custRepo.close()
-	watchRepo := createTestCustomerWatchRepository(t)
+	watchRepo := createTestWatchRepository(t)
 	defer watchRepo.close()
 
 	router := mux.NewRouter()
@@ -166,7 +198,7 @@ func TestCustomer_addWatchNoBody(t *testing.T) {
 	req := httptest.NewRequest("POST", "/customers/foo/watch", nil)
 	req.Header.Set("x-user-id", "test")
 
-	watchRepo := createTestCustomerWatchRepository(t)
+	watchRepo := createTestWatchRepository(t)
 	defer watchRepo.close()
 
 	router := mux.NewRouter()
@@ -182,7 +214,7 @@ func TestCustomer_addWatchNoBody(t *testing.T) {
 func TestCustomer_addWatchMissingAuthToken(t *testing.T) {
 	custRepo := createTestCustomerRepository(t)
 	defer custRepo.close()
-	watchRepo := createTestCustomerWatchRepository(t)
+	watchRepo := createTestWatchRepository(t)
 	defer watchRepo.close()
 
 	body := strings.NewReader(`{"webhook": "https://moov.io", "authToken": ""}`)
@@ -211,7 +243,7 @@ func TestCustomer_addNameWatch(t *testing.T) {
 
 	custRepo := createTestCustomerRepository(t)
 	defer custRepo.close()
-	watchRepo := createTestCustomerWatchRepository(t)
+	watchRepo := createTestWatchRepository(t)
 	defer watchRepo.close()
 
 	router := mux.NewRouter()
@@ -239,7 +271,7 @@ func TestCustomer_addCustomerNameWatchNoBody(t *testing.T) {
 
 	custRepo := createTestCustomerRepository(t)
 	defer custRepo.close()
-	watchRepo := createTestCustomerWatchRepository(t)
+	watchRepo := createTestWatchRepository(t)
 	defer watchRepo.close()
 
 	router := mux.NewRouter()
@@ -275,7 +307,7 @@ func TestCustomer_updateUnsafe(t *testing.T) {
 
 	custRepo := createTestCustomerRepository(t)
 	defer custRepo.close()
-	watchRepo := createTestCustomerWatchRepository(t)
+	watchRepo := createTestWatchRepository(t)
 	defer watchRepo.close()
 
 	router := mux.NewRouter()
@@ -297,7 +329,7 @@ func TestCustomer_updateException(t *testing.T) {
 
 	custRepo := createTestCustomerRepository(t)
 	defer custRepo.close()
-	watchRepo := createTestCustomerWatchRepository(t)
+	watchRepo := createTestWatchRepository(t)
 	defer watchRepo.close()
 
 	router := mux.NewRouter()
@@ -319,7 +351,7 @@ func TestCustomer_updateUnknown(t *testing.T) {
 
 	custRepo := createTestCustomerRepository(t)
 	defer custRepo.close()
-	watchRepo := createTestCustomerWatchRepository(t)
+	watchRepo := createTestWatchRepository(t)
 	defer watchRepo.close()
 
 	router := mux.NewRouter()
@@ -339,7 +371,7 @@ func TestCustomer_updateNoUserId(t *testing.T) {
 
 	custRepo := createTestCustomerRepository(t)
 	defer custRepo.close()
-	watchRepo := createTestCustomerWatchRepository(t)
+	watchRepo := createTestWatchRepository(t)
 	defer watchRepo.close()
 
 	router := mux.NewRouter()
@@ -360,7 +392,7 @@ func TestCustomer_updateNoBody(t *testing.T) {
 
 	custRepo := createTestCustomerRepository(t)
 	defer custRepo.close()
-	watchRepo := createTestCustomerWatchRepository(t)
+	watchRepo := createTestWatchRepository(t)
 	defer watchRepo.close()
 
 	router := mux.NewRouter()
@@ -380,7 +412,7 @@ func TestCustomer_removeWatch(t *testing.T) {
 
 	custRepo := createTestCustomerRepository(t)
 	defer custRepo.close()
-	watchRepo := createTestCustomerWatchRepository(t)
+	watchRepo := createTestWatchRepository(t)
 	defer watchRepo.close()
 
 	router := mux.NewRouter()
@@ -400,7 +432,7 @@ func TestCustomer_removeNameWatch(t *testing.T) {
 
 	custRepo := createTestCustomerRepository(t)
 	defer custRepo.close()
-	watchRepo := createTestCustomerWatchRepository(t)
+	watchRepo := createTestWatchRepository(t)
 	defer watchRepo.close()
 
 	router := mux.NewRouter()
@@ -428,7 +460,7 @@ func TestCustomerRepository(t *testing.T) {
 	}
 
 	// block customer
-	status = &CustomerStatus{UserId: userId, Status: Unsafe, CreatedAt: time.Now()}
+	status = &CustomerStatus{UserId: userId, Status: CustomerUnsafe, CreatedAt: time.Now()}
 	if err := repo.upsertCustomerStatus(customerId, status); err != nil {
 		t.Errorf("addCustomerBlock: shouldn't error, but got %v", err)
 	}
@@ -445,12 +477,12 @@ func TestCustomerRepository(t *testing.T) {
 	if status.UserId == "" || string(status.Status) == "" {
 		t.Errorf("invalid CustomerStatus: %#v", status)
 	}
-	if status.Status != Unsafe {
+	if status.Status != CustomerUnsafe {
 		t.Errorf("status.Status=%v", status.Status)
 	}
 
 	// unblock
-	status = &CustomerStatus{UserId: userId, Status: Exception, CreatedAt: time.Now()}
+	status = &CustomerStatus{UserId: userId, Status: CustomerException, CreatedAt: time.Now()}
 	if err := repo.upsertCustomerStatus(customerId, status); err != nil {
 		t.Errorf("addCustomerBlock: shouldn't error, but got %v", err)
 	}
@@ -466,7 +498,7 @@ func TestCustomerRepository(t *testing.T) {
 	if status.UserId == "" || string(status.Status) == "" {
 		t.Errorf("invalid CustomerStatus: %#v", status)
 	}
-	if status.Status != Exception {
+	if status.Status != CustomerException {
 		t.Errorf("status.Status=%v", status.Status)
 	}
 
