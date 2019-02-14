@@ -8,88 +8,79 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	moov "github.com/moov-io/ofac/client"
 
 	"github.com/antihax/optional"
 )
 
-func searchSDNs(ctx context.Context, api *moov.APIClient) error {
-	// Name
+// searchByName will attempt OFAC searches for the provided name and then load the SDN metadata
+// associated to the company/organization or individual.
+func searchByName(ctx context.Context, api *moov.APIClient, name string) (*moov.Sdn, error) {
 	search, resp, err := api.OFACApi.SearchSDNs(ctx, &moov.SearchSDNsOpts{
-		Name:  optional.NewString("alh"),
-		Limit: optional.NewInt32(5),
+		Name:  optional.NewString(name),
+		Limit: optional.NewInt32(2),
 	})
 	if err != nil {
-		return fmt.Errorf("searchSDNs: name search: %v", err)
+		return nil, fmt.Errorf("searchByName: %v", err)
 	}
 	defer resp.Body.Close()
+
 	if len(search.SDNs) == 0 {
-		return errors.New("searchSDNs: no SDNs found")
+		return nil, fmt.Errorf("searchByName: found no SDNs for %q", name)
 	}
 
-	// Load SDN
-	if err := loadSDN(ctx, api, search.SDNs[0].EntityID); err != nil {
-		return err
+	// Find Customer or company
+	if strings.EqualFold(search.SDNs[0].SdnType, "individual") {
+		if err := getCustomer(ctx, api, search.SDNs[0].EntityID); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := getCompany(ctx, api, search.SDNs[0].EntityID); err != nil {
+			return nil, err
+		}
 	}
+	return &search.SDNs[0], nil
+}
 
-	// Load Customer
-	if err := loadCustomer(ctx, api, search.SDNs[0].EntityID); err != nil {
-		return err
-	}
-
-	// Alt Name
-	search, resp, err = api.OFACApi.SearchSDNs(ctx, &moov.SearchSDNsOpts{
-		AltName: optional.NewString("alh"),
-		Limit:   optional.NewInt32(5),
+// searchByAltName will attempt OFAC searches and retrieval of all alt names associated to the first result
+// for the provided altName and error if none are found.
+func searchByAltName(ctx context.Context, api *moov.APIClient, alt string) error {
+	search, resp, err := api.OFACApi.SearchSDNs(ctx, &moov.SearchSDNsOpts{
+		AltName: optional.NewString(alt),
+		Limit:   optional.NewInt32(2),
 	})
 	if err != nil {
-		return fmt.Errorf("searchSDNs: AltName search: %v", err)
+		return fmt.Errorf("searchByAltName: %v", err)
 	}
 	defer resp.Body.Close()
+
 	if len(search.AltNames) == 0 {
-		return errors.New("searchSDNs: no alt names found")
+		return fmt.Errorf("searchByAltName: found no AltNames for %q", alt)
 	}
+	return getSDNAltNames(ctx, api, search.AltNames[0].EntityID)
+}
 
-	// Load AltNames
-	if err := loadAltNames(ctx, api, search.AltNames[0].EntityID); err != nil {
-		return err
-	}
-
-	// Address
-	search, resp, err = api.OFACApi.SearchSDNs(ctx, &moov.SearchSDNsOpts{
-		Address: optional.NewString("St"),
-		Limit:   optional.NewInt32(5),
+// searchByAddress will attempt OFAC searches and retrieval of all addresses associated to the first result
+// for the provided address and error if none are found.
+func searchByAddress(ctx context.Context, api *moov.APIClient, address string) error {
+	search, resp, err := api.OFACApi.SearchSDNs(ctx, &moov.SearchSDNsOpts{
+		Address: optional.NewString(address),
+		Limit:   optional.NewInt32(2),
 	})
 	if err != nil {
-		return fmt.Errorf("searchSDNs: Address search: %v", err)
+		return fmt.Errorf("searchByAddress: %v", err)
 	}
 	defer resp.Body.Close()
+
 	if len(search.Addresses) == 0 {
-		return errors.New("searchSDNs: no addresses found")
+		return fmt.Errorf("searchByAddress: found no Addresses for %q", address)
 	}
-
-	// Load Address
-	if err := loadAddresses(ctx, api, search.Addresses[0].EntityID); err != nil {
-		return err
-	}
-
-	return nil
+	return getSDNAddresses(ctx, api, search.Addresses[0].EntityID)
 }
 
-func loadSDN(ctx context.Context, api *moov.APIClient, id string) error {
-	sdn, resp, err := api.OFACApi.GetSDN(ctx, id, nil)
-	if err != nil {
-		return fmt.Errorf("loadSDN: %v", err)
-	}
-	defer resp.Body.Close()
-	if sdn.EntityID != id {
-		return fmt.Errorf("loadSDN: wrong SDN: expected %s but got %s", id, sdn.EntityID)
-	}
-	return nil
-}
-
-func loadAddresses(ctx context.Context, api *moov.APIClient, id string) error {
+func getSDNAddresses(ctx context.Context, api *moov.APIClient, id string) error {
 	addr, resp, err := api.OFACApi.GetSDNAddresses(ctx, id, nil)
 	if err != nil {
 		return fmt.Errorf("loadAddresses: %v", err)
@@ -104,7 +95,7 @@ func loadAddresses(ctx context.Context, api *moov.APIClient, id string) error {
 	return nil
 }
 
-func loadAltNames(ctx context.Context, api *moov.APIClient, id string) error {
+func getSDNAltNames(ctx context.Context, api *moov.APIClient, id string) error {
 	alt, resp, err := api.OFACApi.GetSDNAltNames(ctx, id, nil)
 	if err != nil {
 		return fmt.Errorf("loadAltNames: %v", err)
@@ -119,7 +110,7 @@ func loadAltNames(ctx context.Context, api *moov.APIClient, id string) error {
 	return nil
 }
 
-func loadCustomer(ctx context.Context, api *moov.APIClient, id string) error {
+func getCustomer(ctx context.Context, api *moov.APIClient, id string) error {
 	cust, resp, err := api.OFACApi.GetCustomer(ctx, id, nil)
 	if err != nil {
 		return fmt.Errorf("loadCustomer: %v", err)
@@ -127,6 +118,18 @@ func loadCustomer(ctx context.Context, api *moov.APIClient, id string) error {
 	defer resp.Body.Close()
 	if cust.Id != id {
 		return fmt.Errorf("loadCustomer: wrong Customer: expected %s but got %s", id, cust.Id)
+	}
+	return nil
+}
+
+func getCompany(ctx context.Context, api *moov.APIClient, id string) error {
+	company, resp, err := api.OFACApi.GetCompany(ctx, id, nil)
+	if err != nil {
+		return fmt.Errorf("loadCompany: %v", err)
+	}
+	defer resp.Body.Close()
+	if company.Id != id {
+		return fmt.Errorf("loadCompany: wrong Company: expected %s but got %s", id, company.Id)
 	}
 	return nil
 }
