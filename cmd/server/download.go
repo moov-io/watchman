@@ -32,6 +32,8 @@ func init() {
 	prometheus.MustRegister(lastOFACDataRefreshSuccess)
 }
 
+// Download holds counts for each type of OFAC data parsed from files and a
+// timestamp of when the download happened.
 type Download struct {
 	Timestamp time.Time `json:"timestamp"`
 	SDNs      int       `json:"SDNs"`
@@ -93,7 +95,7 @@ func (s *searcher) refreshData() (*downloadStats, error) {
 		return nil, fmt.Errorf("ERROR: reading sdn.csv: %v", err)
 	}
 
-	// Precompute new data
+	// Precompute new data once for slight performance win
 	sdns := precomputeSDNs(r.SDNs)
 	adds := precomputeAddresses(r.Addresses)
 	alts := precomputeAlts(r.AlternateIdentities)

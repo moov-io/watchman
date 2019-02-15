@@ -72,7 +72,7 @@ func (s *searcher) TopAddresses(limit int, add string) []Address {
 		if v := xs.items[i]; v != nil {
 			aa, ok := v.value.(*Address)
 			if !ok {
-				continue // TODO(adam): log
+				continue
 			}
 			address := *aa
 			address.match = v.weight
@@ -121,7 +121,7 @@ func (s *searcher) TopAltNames(limit int, alt string) []Alt {
 		if v := xs.items[i]; v != nil {
 			aa, ok := v.value.(*Alt)
 			if !ok {
-				continue // TODO(adam): log
+				continue
 			}
 			alt := *aa
 			alt.match = v.weight
@@ -158,7 +158,6 @@ func (s *searcher) TopSDNs(limit int, name string) []SDN {
 		xs.add(&item{
 			value:  s.SDNs[i],
 			weight: jaroWrinkler(s.SDNs[i].name, name),
-			// TODO(adam): fixup other types to lowercase precompute
 		})
 	}
 
@@ -167,7 +166,7 @@ func (s *searcher) TopSDNs(limit int, name string) []SDN {
 		if v := xs.items[i]; v != nil {
 			ss, ok := v.value.(*SDN)
 			if !ok {
-				continue // TODO(adam): log
+				continue
 			}
 			sdn := *ss // deref for a copy
 			sdn.match = v.weight

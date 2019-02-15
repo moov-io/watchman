@@ -35,6 +35,8 @@ type watchRequest struct {
 	Webhook   string `json:"webhook"`
 }
 
+// watchRepository holds information about each company and/or customer that another service wants notifications
+// for every time we re-download OFAC data.
 type watchRepository interface {
 	// getWatchesCursor returns a watchCursor which traverses both customer and company watches
 	getWatchesCursor(batchSize int) *watchCursor
@@ -228,6 +230,7 @@ type watchCursor struct {
 	companyNewerThan  time.Time
 }
 
+// Next returns a batch of watches that will be sent off to their respective webhook URL.
 func (cur *watchCursor) Next() ([]watch, error) {
 	companyWatches, err := cur.getCompanyBatch()
 	if err != nil {

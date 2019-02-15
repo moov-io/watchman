@@ -56,7 +56,6 @@ type companyWatchResponse struct {
 	WatchID string `json:"watchId"`
 }
 
-// TODO(adam): companyRepo and watchRepo
 func addCompanyRoutes(logger log.Logger, r *mux.Router, searcher *searcher, companyRepo companyRepository, watchRepo *sqliteWatchRepository) {
 	r.Methods("GET").Path("/companies/{companyId}").HandlerFunc(getCompany(logger, searcher, companyRepo))
 	r.Methods("PUT").Path("/companies/{companyId}").HandlerFunc(updateCompanyStatus(logger, searcher, companyRepo))
@@ -102,6 +101,8 @@ func getCompanyById(id string, searcher *searcher, repo companyRepository) (*Com
 	}, nil
 }
 
+// companyRepository holds the current status (i.e. unsafe or exception) for a given company and
+// is expected to save metadata about each time the status is changed.
 type companyRepository interface {
 	getCompanyStatus(companyId string) (*CompanyStatus, error)
 	upsertCompanyStatus(companyId string, status *CompanyStatus) error

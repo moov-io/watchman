@@ -48,7 +48,7 @@ func getSDNAddresses(logger log.Logger, searcher *searcher) http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(addresses); err != nil {
-			moovhttp.Problem(w, err) // TODO(adam): JSON errors should moovhttp.InternalError (wrapped, see auth's http.go)
+			moovhttp.Problem(w, err)
 			return
 		}
 	}

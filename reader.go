@@ -49,7 +49,7 @@ func (r *Reader) parseError(err error) error {
 	}
 }
 
-// Reader reads records from a CSV file.
+// Reader reads OFAC records from a CSV file and populates the associated arrays.
 //
 // For more details on the raw OFAC files see https://docs.moov.io/en/latest/ofac/file-structure/
 type Reader struct {
@@ -67,6 +67,7 @@ type Reader struct {
 	errors base.ErrorList
 }
 
+// Read will consume the file at r.FileName and attempt to parse it was a CSV OFAC file.
 func (r *Reader) Read() error {
 	ext := filepath.Ext(r.FileName)
 

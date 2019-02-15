@@ -55,8 +55,6 @@ type CustomerStatus struct {
 	CreatedAt time.Time           `json:"createdAt"`
 }
 
-// TODO(adam): try out endpoints w/ curl, make sure it works okay-ish
-
 type customerWatchResponse struct {
 	WatchID string `json:"watchId"`
 }
@@ -107,6 +105,8 @@ func getCustomerById(id string, searcher *searcher, custRepo customerRepository)
 	}, nil
 }
 
+// customerRepository holds the current status (i.e. unsafe or exception) for a given customer
+// (individual) and is expected to save metadata about each time the status is changed.
 type customerRepository interface {
 	getCustomerStatus(customerId string) (*CustomerStatus, error)
 	upsertCustomerStatus(customerId string, status *CustomerStatus) error

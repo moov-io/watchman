@@ -32,6 +32,8 @@ func readWebhookBatchSize(str string) int {
 	return watchResearchBatchSize
 }
 
+// spawnResearching will block and select on updates for when to re-inspect all watches setup.
+// Since watches are used to post OFAC data via webhooks they are used as catalysts in other systems.
 func (s *searcher) spawnResearching(companyRepo companyRepository, custRepo customerRepository, watchRepo watchRepository, webhookRepo webhookRepository, updates chan *downloadStats) {
 	for {
 		select {
@@ -77,6 +79,7 @@ func (s *searcher) spawnResearching(companyRepo companyRepository, custRepo cust
 	}
 }
 
+// getCustomerBody returns the JSON encoded form of a given customer by their EntityID
 func getCustomerBody(s *searcher, watchId string, customerId string, repo customerRepository) (*bytes.Buffer, error) {
 	customer, _ := getCustomerById(customerId, s, repo)
 	if customer == nil {
@@ -89,6 +92,7 @@ func getCustomerBody(s *searcher, watchId string, customerId string, repo custom
 	return &buf, nil
 }
 
+// getCompanyBody returns the JSON encoded form of a given customer by their EntityID
 func getCompanyBody(s *searcher, watchId string, companyId string, repo companyRepository) (*bytes.Buffer, error) {
 	company, _ := getCompanyById(companyId, s, repo)
 	if company == nil {
