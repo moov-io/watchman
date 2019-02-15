@@ -51,6 +51,7 @@ OFAC computes string similarity using the Levenshtein algorithm and can match se
 | Environmental Variable | Description | Default |
 |-----|-----|-----|
 | `OFAC_DATA_REFRESH` | Interval for OFAC data redownload and reparse. | 12h |
+| `OFAC_DOWNLOAD_TEMPLATE` | HTTP address for downloading raw OFAC files. | (OFAC website) |
 | `SQLITE_DB_PATH`| Local filepath location for the paygate SQLite database. | `ofac.db` |
 | `WEBHOOK_BATCH_SIZE` | How many watches to read from database per batch of async searches. | 100 |
 
