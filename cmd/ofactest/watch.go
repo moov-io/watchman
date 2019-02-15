@@ -12,10 +12,10 @@ import (
 	moov "github.com/moov-io/ofac/client"
 )
 
-func addCompanyWatch(ctx context.Context, api *moov.APIClient, id string) error {
+func addCompanyWatch(ctx context.Context, api *moov.APIClient, id string, webhook string) error {
 	_, resp, err := api.OFACApi.AddCompanyWatch(ctx, id, moov.WatchRequest{
 		AuthToken: base.ID(),
-		Webhook:   "https://moov.io/ofac",
+		Webhook:   webhook,
 	}, nil)
 	if err != nil {
 		return fmt.Errorf("addCompanyWatch: %v", err)
@@ -24,10 +24,10 @@ func addCompanyWatch(ctx context.Context, api *moov.APIClient, id string) error 
 	return nil
 }
 
-func addCustomerWatch(ctx context.Context, api *moov.APIClient, id string) error {
+func addCustomerWatch(ctx context.Context, api *moov.APIClient, id string, webhook string) error {
 	_, resp, err := api.OFACApi.AddCustomerWatch(ctx, id, moov.WatchRequest{
 		AuthToken: base.ID(),
-		Webhook:   "https://moov.io/ofac",
+		Webhook:   webhook,
 	}, nil)
 	if err != nil {
 		return fmt.Errorf("addCustomerWatch: %v", err)

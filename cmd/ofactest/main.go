@@ -47,6 +47,7 @@ var (
 
 	flagApiAddress = flag.String("address", defaultApiAddress, "Moov API address")
 	flagLocal      = flag.Bool("local", false, "Use local HTTP addresses")
+	flagWebhook    = flag.String("webhook", "https://moov.io/ofac", "Secure HTTP address for webhooks")
 )
 
 func main() {
@@ -122,13 +123,13 @@ func main() {
 
 	// Add watch on the SDN
 	if strings.EqualFold(sdn.SdnType, "individual") {
-		if err := addCustomerWatch(ctx, api, sdn.EntityID); err != nil {
+		if err := addCustomerWatch(ctx, api, sdn.EntityID, *flagWebhook); err != nil {
 			log.Fatalf("[FAILURE] problem adding customer watch: %v", err)
 		} else {
 			log.Printf("[SUCCESS] added customer=%s watch", sdn.EntityID)
 		}
 	} else {
-		if err := addCompanyWatch(ctx, api, sdn.EntityID); err != nil {
+		if err := addCompanyWatch(ctx, api, sdn.EntityID, *flagWebhook); err != nil {
 			log.Fatalf("[FAILURE] problem adding company watch: %v", err)
 		} else {
 			log.Printf("[SUCCESS] added company=%s watch", sdn.EntityID)
