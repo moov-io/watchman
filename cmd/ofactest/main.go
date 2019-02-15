@@ -24,6 +24,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/moov-io/base/http/bind"
 	"github.com/moov-io/ofac"
 	moov "github.com/moov-io/ofac/client"
 
@@ -34,6 +35,7 @@ var (
 	defaultApiAddress = "https://api.moov.io"
 
 	flagApiAddress = flag.String("address", defaultApiAddress, "Moov API address")
+	flagLocal      = flag.Bool("local", false, "Use local HTTP addresses")
 )
 
 func main() {
@@ -43,11 +45,21 @@ func main() {
 	log.Printf("Starting moov/ofactest %s", ofac.Version)
 
 	conf := moov.NewConfiguration()
-	if v := *flagApiAddress; v == defaultApiAddress {
-		conf.BasePath = v + "/v1/ofac"
+	if *flagLocal {
+		// If '-local and -address <foo>' use <foo>
+		if addr := *flagApiAddress; addr != defaultApiAddress {
+			conf.BasePath = addr
+		} else {
+			conf.BasePath = "http://localhost" + bind.HTTP("ofac")
+		}
 	} else {
-		conf.BasePath = v
+		if v := *flagApiAddress; v == defaultApiAddress {
+			conf.BasePath = v + "/v1/ofac"
+		} else {
+			conf.BasePath = *flagApiAddress
+		}
 	}
+
 	conf.UserAgent = fmt.Sprintf("moov/ofactest:%s", ofac.Version)
 	conf.HTTPClient = &http.Client{
 		Timeout: 10 * time.Second,
@@ -62,7 +74,9 @@ func main() {
 	if v := os.Getenv("OAUTH_TOKEN"); v != "" {
 		conf.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", v))
 	} else {
-		log.Fatal("[FAILURE] no OAuth token provided")
+		if local := *flagLocal; !local {
+			log.Fatal("[FAILURE] no OAuth token provided")
+		}
 	}
 
 	// Setup OFAC API client
