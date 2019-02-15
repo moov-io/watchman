@@ -5,8 +5,11 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/moov-io/ofac"
@@ -20,30 +23,55 @@ type Customer struct {
 	SDN       *ofac.SDN                 `json:"sdn"`
 	Addresses []*ofac.Address           `json:"addresses"`
 	Alts      []*ofac.AlternateIdentity `json:"alts"`
-	Comments  []*ofac.SDNComments       `json:"comments"`
+}
+
+type Company struct {
+	ID        string                    `json:"id,omitempty"`
+	SDN       *ofac.SDN                 `json:"sdn"`
+	Addresses []*ofac.Address           `json:"addresses"`
+	Alts      []*ofac.AlternateIdentity `json:"alts"`
 }
 
 func addWebhookRoute(logger log.Logger, r *mux.Router) {
 	r.Methods("POST").Path("/ofac").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var cust Customer
-
-		if err := json.NewDecoder(r.Body).Decode(&cust); err != nil {
+		bs, err := ioutil.ReadAll(io.LimitReader(r.Body, 5*1024*1024))
+		if err != nil {
 			logger.Log("webhook", fmt.Sprintf("problem reading request: %v", err))
 
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(fmt.Sprintf(`{"error": "%s"}`, err)))
-			return
 		}
-		if cust.ID == "" {
-			logger.Log("webhook", "malformed webhook request")
 
-			w.Header().Set("Content-Type", "application/json; charset=utf-8")
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(`{"error": "malformed Customer JSON"}`))
+		if cust := readCustomer(bytes.NewReader(bs)); cust != nil {
+			logger.Log("webhook", fmt.Sprintf("got webhook for Customer %s", cust.ID))
+			w.WriteHeader(http.StatusOK)
 			return
 		}
-		logger.Log("webhook", fmt.Sprintf("got webhook for Customer %s", cust.ID))
-		w.WriteHeader(http.StatusOK)
+		if company := readCompany(bytes.NewReader(bs)); company != nil {
+			logger.Log("webhook", fmt.Sprintf("got webhook for Company %s", company.ID))
+			w.WriteHeader(http.StatusOK)
+		}
+
+		logger.Log("webhook", "malformed webhook request")
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`{"error": "malformed JSON"}`))
 	})
+}
+
+func readCustomer(r io.Reader) *Customer {
+	var cust Customer
+	if err := json.NewDecoder(r).Decode(&cust); err != nil || cust.ID == "" {
+		return nil
+	}
+	return &cust
+}
+
+func readCompany(r io.Reader) *Company {
+	var company Company
+	if err := json.NewDecoder(r).Decode(&company); err != nil || company.ID == "" {
+		return nil
+	}
+	return &company
 }
