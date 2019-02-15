@@ -28,3 +28,7 @@ To change where the SQLite database is stored on disk set `SQLITE_DB_PATH` as an
 ### Webhook batch processing size
 
 The size of each batch of watches to be processed (and their webhook called) can be adjusted with `WEBHOOK_BATCH_SIZE=100`. This is intended for performance improvements by using a larger batch size.
+
+### Alert on stale OFAC data
+
+We have an [example Prometheus alert](https://github.com/moov-io/infra/blob/07829c4842ef0c9d1824022e3e454dc7fb325469/lib/infra/14-prometheus-ofac-rules.yml#L9-L18) for being notified of stale OFAC data. This helps discover issues incase download or parsing fails.
