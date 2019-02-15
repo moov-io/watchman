@@ -25,14 +25,6 @@ You should make the following files available at the new endpoint: `add.csv`, `a
 
 To change where the SQLite database is stored on disk set `SQLITE_DB_PATH` as an environmental variable.
 
-### Change name and/or address matching threshold
-
-To adjust how sensitive search results are to their queries the following values can be modified, lower values indicate more results are included. By default all values are `0.90`.
-
-- `NAME_SIMILARITY`: Similarity required for SDN name searches
-- `ALT_SIMILARITY`: Similarity required for alternate name searches
-- `ADDRESS_SIMILARITY`: Similarity required for address searches
-
 ### Webhook batch processing size
 
 The size of each batch of watches to be processed (and their webhook called) can be adjusted with `WEBHOOK_BATCH_SIZE=100`. This is intended for performance improvements by using a larger batch size.
