@@ -13,7 +13,8 @@ import (
 )
 
 func addCompanyWatch(ctx context.Context, api *moov.APIClient, id string, webhook string) error {
-	_, resp, err := api.OFACApi.AddCompanyWatch(ctx, id, moov.WatchRequest{
+	// add watch
+	watch, resp, err := api.OFACApi.AddCompanyWatch(ctx, id, moov.WatchRequest{
 		AuthToken: base.ID(),
 		Webhook:   webhook,
 	}, nil)
@@ -21,17 +22,32 @@ func addCompanyWatch(ctx context.Context, api *moov.APIClient, id string, webhoo
 		return fmt.Errorf("addCompanyWatch: %v", err)
 	}
 	defer resp.Body.Close()
+
+	// cleanup watch
+	resp, err = api.OFACApi.RemoveCompanyWatch(ctx, id, watch.WatchId, nil)
+	if err != nil {
+		return fmt.Errorf("addCompanyWatch: remove: %v", err)
+	}
+	resp.Body.Close()
 	return nil
 }
 
 func addCustomerWatch(ctx context.Context, api *moov.APIClient, id string, webhook string) error {
-	_, resp, err := api.OFACApi.AddCustomerWatch(ctx, id, moov.WatchRequest{
+	// add watch
+	watch, resp, err := api.OFACApi.AddCustomerWatch(ctx, id, moov.WatchRequest{
 		AuthToken: base.ID(),
 		Webhook:   webhook,
 	}, nil)
 	if err != nil {
-		return fmt.Errorf("addCustomerWatch: %v", err)
+		return fmt.Errorf("addCustomerWatch: add: %v", err)
 	}
-	defer resp.Body.Close()
+	resp.Body.Close()
+
+	// cleanup watch
+	resp, err = api.OFACApi.RemoveCustomerWatch(ctx, id, watch.WatchId, nil)
+	if err != nil {
+		return fmt.Errorf("addCustomerWatch: remove: %v", err)
+	}
+	resp.Body.Close()
 	return nil
 }
