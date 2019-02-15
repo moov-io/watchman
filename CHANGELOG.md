@@ -1,3 +1,9 @@
+## v0.5.1 (Unreleased)
+
+BUG FIXES
+
+- `cmd/ofactest`, `client`: fix Watch create JSON and cleanup ofactest watches
+
 ## v0.5.0 (Released 2019-02-15)
 
 ADDITIONS
