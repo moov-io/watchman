@@ -1,3 +1,20 @@
+## v0.5.0 (Released 2019-02-15)
+
+ADDITIONS
+
+- Add Company routes, persistence, client code, and watches
+- `cmd/ofactest`: add -local and -webhook flags
+- `cmd/ofactest`: read optional search query parameter
+
+IMPROVEMENTS
+
+- Ignore whitespace in string similarity
+- `example`: Read Company or Customer JSON from webhook
+
+BUG FIXES
+
+- Fix capitalization of various JSON properties
+
 ## v0.4.0 (Released 2019-02-12)
 
 ADDITIONS
