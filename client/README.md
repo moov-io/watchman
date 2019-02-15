@@ -31,17 +31,23 @@ All URIs are relative to *http://localhost:8084*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+*OFACApi* | [**AddCompanyNameWatch**](docs/OFACApi.md#addcompanynamewatch) | **Post** /companies/watch | Add customer watch by name
+*OFACApi* | [**AddCompanyWatch**](docs/OFACApi.md#addcompanywatch) | **Post** /companies/{companyId}/watch | Add OFAC watch on a Company
 *OFACApi* | [**AddCustomerNameWatch**](docs/OFACApi.md#addcustomernamewatch) | **Post** /customers/watch | Add customer watch by name
 *OFACApi* | [**AddCustomerWatch**](docs/OFACApi.md#addcustomerwatch) | **Post** /customers/{customerId}/watch | Add OFAC watch on a Customer
+*OFACApi* | [**GetCompany**](docs/OFACApi.md#getcompany) | **Get** /companies/{companyId} | Get information about a company, trust or organization such as addresses, alternate names, and remarks.
 *OFACApi* | [**GetCustomer**](docs/OFACApi.md#getcustomer) | **Get** /customers/{customerId} | Get information about a customer, addresses, alternate names, and their SDN metadata.
 *OFACApi* | [**GetLatestDownloads**](docs/OFACApi.md#getlatestdownloads) | **Get** /downloads | Return list of recent re-downloads of OFAC data
 *OFACApi* | [**GetSDN**](docs/OFACApi.md#getsdn) | **Get** /sdn/{sdnId} | Specially designated national
 *OFACApi* | [**GetSDNAddresses**](docs/OFACApi.md#getsdnaddresses) | **Get** /sdn/{sdnId}/addresses | Get addresses for a given SDN
 *OFACApi* | [**GetSDNAltNames**](docs/OFACApi.md#getsdnaltnames) | **Get** /sdn/{sdnId}/alts | Get alternate names for a given SDN
 *OFACApi* | [**Ping**](docs/OFACApi.md#ping) | **Get** /ping | Ping the OFAC service to check if running
+*OFACApi* | [**RemoveCompanyNameWatch**](docs/OFACApi.md#removecompanynamewatch) | **Delete** /companies/watch/{watchId} | Remove a Company name watch
+*OFACApi* | [**RemoveCompanyWatch**](docs/OFACApi.md#removecompanywatch) | **Delete** /companies/{companyId}/watch/{watchId} | Remove company watch
 *OFACApi* | [**RemoveCustomerNameWatch**](docs/OFACApi.md#removecustomernamewatch) | **Delete** /customers/watch/{watchId} | Remove a Customer name watch
 *OFACApi* | [**RemoveCustomerWatch**](docs/OFACApi.md#removecustomerwatch) | **Delete** /customers/{customerId}/watch/{watchId} | Remove customer watch
 *OFACApi* | [**SearchSDNs**](docs/OFACApi.md#searchsdns) | **Get** /search | Search SDN names and metadata
+*OFACApi* | [**UpdateCompanyStatus**](docs/OFACApi.md#updatecompanystatus) | **Put** /companies/{companyId} | Update a Companies sanction status to always block or always allow transactions.
 *OFACApi* | [**UpdateCustomerStatus**](docs/OFACApi.md#updatecustomerstatus) | **Put** /customers/{customerId} | Update a Customer&#39;s sanction status to always block or always allow transactions.
 
 
@@ -50,10 +56,13 @@ Class | Method | HTTP request | Description
  - [Address](docs/Address.md)
  - [Alt](docs/Alt.md)
  - [Download](docs/Download.md)
+ - [OfacCompany](docs/OfacCompany.md)
+ - [OfacCompanyStatus](docs/OfacCompanyStatus.md)
  - [OfacCustomer](docs/OfacCustomer.md)
  - [OfacCustomerStatus](docs/OfacCustomerStatus.md)
  - [Sdn](docs/Sdn.md)
  - [Search](docs/Search.md)
+ - [UpdateCompanyStatus](docs/UpdateCompanyStatus.md)
  - [UpdateCustomerStatus](docs/UpdateCustomerStatus.md)
  - [Watch](docs/Watch.md)
  - [WatchRequest](docs/WatchRequest.md)

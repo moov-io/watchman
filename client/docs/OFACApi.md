@@ -4,19 +4,99 @@ All URIs are relative to *http://localhost:8084*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**AddCompanyNameWatch**](OFACApi.md#AddCompanyNameWatch) | **Post** /companies/watch | Add customer watch by name
+[**AddCompanyWatch**](OFACApi.md#AddCompanyWatch) | **Post** /companies/{companyId}/watch | Add OFAC watch on a Company
 [**AddCustomerNameWatch**](OFACApi.md#AddCustomerNameWatch) | **Post** /customers/watch | Add customer watch by name
 [**AddCustomerWatch**](OFACApi.md#AddCustomerWatch) | **Post** /customers/{customerId}/watch | Add OFAC watch on a Customer
+[**GetCompany**](OFACApi.md#GetCompany) | **Get** /companies/{companyId} | Get information about a company, trust or organization such as addresses, alternate names, and remarks.
 [**GetCustomer**](OFACApi.md#GetCustomer) | **Get** /customers/{customerId} | Get information about a customer, addresses, alternate names, and their SDN metadata.
 [**GetLatestDownloads**](OFACApi.md#GetLatestDownloads) | **Get** /downloads | Return list of recent re-downloads of OFAC data
 [**GetSDN**](OFACApi.md#GetSDN) | **Get** /sdn/{sdnId} | Specially designated national
 [**GetSDNAddresses**](OFACApi.md#GetSDNAddresses) | **Get** /sdn/{sdnId}/addresses | Get addresses for a given SDN
 [**GetSDNAltNames**](OFACApi.md#GetSDNAltNames) | **Get** /sdn/{sdnId}/alts | Get alternate names for a given SDN
 [**Ping**](OFACApi.md#Ping) | **Get** /ping | Ping the OFAC service to check if running
+[**RemoveCompanyNameWatch**](OFACApi.md#RemoveCompanyNameWatch) | **Delete** /companies/watch/{watchId} | Remove a Company name watch
+[**RemoveCompanyWatch**](OFACApi.md#RemoveCompanyWatch) | **Delete** /companies/{companyId}/watch/{watchId} | Remove company watch
 [**RemoveCustomerNameWatch**](OFACApi.md#RemoveCustomerNameWatch) | **Delete** /customers/watch/{watchId} | Remove a Customer name watch
 [**RemoveCustomerWatch**](OFACApi.md#RemoveCustomerWatch) | **Delete** /customers/{customerId}/watch/{watchId} | Remove customer watch
 [**SearchSDNs**](OFACApi.md#SearchSDNs) | **Get** /search | Search SDN names and metadata
+[**UpdateCompanyStatus**](OFACApi.md#UpdateCompanyStatus) | **Put** /companies/{companyId} | Update a Companies sanction status to always block or always allow transactions.
 [**UpdateCustomerStatus**](OFACApi.md#UpdateCustomerStatus) | **Put** /customers/{customerId} | Update a Customer&#39;s sanction status to always block or always allow transactions.
 
+
+# **AddCompanyNameWatch**
+> Watch AddCompanyNameWatch(ctx, name, watchRequest, optional)
+Add customer watch by name
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+  **name** | **string**| Company name used to match and send watch notifications | 
+  **watchRequest** | [**WatchRequest**](WatchRequest.md)|  | 
+ **optional** | ***AddCompanyNameWatchOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+Optional parameters are passed through a pointer to a AddCompanyNameWatchOpts struct
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **xRequestId** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+
+### Return type
+
+[**Watch**](Watch.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **AddCompanyWatch**
+> Watch AddCompanyWatch(ctx, companyId, watchRequest, optional)
+Add OFAC watch on a Company
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+  **companyId** | **string**| Company ID | 
+  **watchRequest** | [**WatchRequest**](WatchRequest.md)|  | 
+ **optional** | ***AddCompanyWatchOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+Optional parameters are passed through a pointer to a AddCompanyWatchOpts struct
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **xRequestId** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+
+### Return type
+
+[**Watch**](Watch.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **AddCustomerNameWatch**
 > Watch AddCustomerNameWatch(ctx, name, watchRequest, optional)
@@ -88,6 +168,41 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **GetCompany**
+> OfacCompany GetCompany(ctx, companyId, optional)
+Get information about a company, trust or organization such as addresses, alternate names, and remarks.
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+  **companyId** | **string**| Company ID | 
+ **optional** | ***GetCompanyOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+Optional parameters are passed through a pointer to a GetCompanyOpts struct
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **xRequestId** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+
+### Return type
+
+[**OfacCompany**](OFACCompany.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -287,6 +402,80 @@ No authorization required
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **RemoveCompanyNameWatch**
+> RemoveCompanyNameWatch(ctx, watchId, name, optional)
+Remove a Company name watch
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+  **watchId** | **string**| Watch ID, used to identify a specific watch | 
+  **name** | **string**| Company name watch | 
+ **optional** | ***RemoveCompanyNameWatchOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+Optional parameters are passed through a pointer to a RemoveCompanyNameWatchOpts struct
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **xRequestId** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **RemoveCompanyWatch**
+> RemoveCompanyWatch(ctx, companyId, watchId, optional)
+Remove company watch
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+  **companyId** | **string**| Company ID | 
+  **watchId** | **string**| Watch ID, used to identify a specific watch | 
+ **optional** | ***RemoveCompanyWatchOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+Optional parameters are passed through a pointer to a RemoveCompanyWatchOpts struct
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **xRequestId** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **RemoveCustomerNameWatch**
 > RemoveCustomerNameWatch(ctx, watchId, name, optional)
 Remove a Customer name watch
@@ -395,6 +584,43 @@ No authorization required
 
  - **Content-Type**: Not defined
  - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **UpdateCompanyStatus**
+> UpdateCompanyStatus(ctx, companyId, updateCompanyStatus, optional)
+Update a Companies sanction status to always block or always allow transactions.
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+  **companyId** | **string**| Company ID | 
+  **updateCompanyStatus** | [**UpdateCompanyStatus**](UpdateCompanyStatus.md)|  | 
+ **optional** | ***UpdateCompanyStatusOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+Optional parameters are passed through a pointer to a UpdateCompanyStatusOpts struct
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **xRequestId** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

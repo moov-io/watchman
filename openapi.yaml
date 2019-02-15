@@ -28,6 +28,161 @@ paths:
         '200':
           description: Service is running properly
 
+  # Company Endpoints
+  /companies/{companyId}:
+    get:
+      tags:
+        - OFAC
+      summary: Get information about a company, trust or organization such as addresses, alternate names, and remarks.
+      operationId: getCompany
+      parameters:
+        - $ref: '#/components/parameters/requestId'
+        - name: companyId
+          in: path
+          description: Company ID
+          required: true
+          schema:
+            type: string
+            example: 1d1c824a
+      responses:
+        '200':
+          description: Customer and associated metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OFACCompany'
+    put:
+      tags:
+        - OFAC
+      summary: Update a Companies sanction status to always block or always allow transactions.
+      operationId: updateCompanyStatus
+      parameters:
+        - $ref: '#/components/parameters/requestId'
+        - name: companyId
+          in: path
+          description: Company ID
+          required: true
+          schema:
+            type: string
+            example: 8d49fd61
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCompanyStatus'
+      responses:
+        '200':
+          description: Customer status updated
+  /companies/{companyId}/watch:
+    post:
+      tags:
+        - OFAC
+      summary: Add OFAC watch on a Company
+      operationId: addCompanyWatch
+      parameters:
+        - $ref: '#/components/parameters/requestId'
+        - name: companyId
+          in: path
+          description: Company ID
+          required: true
+          schema:
+            type: string
+            example: c3cf0f66
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WatchRequest'
+      responses:
+        '200':
+          description: Company watch added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Watch'
+        '404':
+          description: Company not found
+  /companies/{companyId}/watch/{watchId}:
+    delete:
+      tags:
+        - OFAC
+      summary: Remove company watch
+      operationId: removeCompanyWatch
+      parameters:
+        - $ref: '#/components/parameters/requestId'
+        - name: companyId
+          in: path
+          description: Company ID
+          required: true
+          schema:
+            type: string
+            example: c3cf0f66
+        - name: watchId
+          in: path
+          description: Watch ID, used to identify a specific watch
+          required: true
+          schema:
+            type: string
+            example: 0c5e215c
+      responses:
+        '200':
+          description: Company watch removed
+  /companies/watch:
+    post:
+      tags:
+        - OFAC
+      summary: Add customer watch by name
+      operationId: addCompanyNameWatch
+      parameters:
+        - $ref: '#/components/parameters/requestId'
+        - name: name
+          in: query
+          required: true
+          description: Company name used to match and send watch notifications
+          schema:
+            type: string
+            example: Jane Smith
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WatchRequest'
+      responses:
+        '200':
+          description: Company watch applied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Watch'
+  /companies/watch/{watchId}:
+    delete:
+      tags:
+        - OFAC
+      summary: Remove a Company name watch
+      operationId: removeCompanyNameWatch
+      parameters:
+        - $ref: '#/components/parameters/requestId'
+        - name: watchId
+          in: path
+          description: Watch ID, used to identify a specific watch
+          required: true
+          schema:
+            type: string
+            example: 0c5e215c
+        - name: name
+          in: query
+          description: Company name watch
+          required: true
+          schema:
+            type: string
+            example: Jane Smith
+      responses:
+        '200':
+          description: Company watch removed
+
   # Customer Endpoints
   /customers/{customerId}:
     get:
@@ -183,8 +338,6 @@ paths:
         '200':
           description: Company or Customer watch removed
 
-  # Company endpoints
-
   # SDN Endpoints
   /sdn/{sdnId}:
     get:
@@ -317,6 +470,46 @@ paths:
 
 components:
   schemas:
+    OFACCompany:
+      description: OFAC Company and metadata
+      properties:
+        id:
+          description: OFAC Company ID
+          type: string
+          example: 9574756b
+        sdn:
+          $ref: '#/components/schemas/SDN'
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+        alts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Alt'
+        status:
+          $ref: '#/components/schemas/OFACCompanyStatus'
+    OFACCompanyStatus:
+      description: Status properties of an OFAC Company
+      properties:
+        userId:
+          description: User ID provided when updating status
+          type: string
+          example: 349661f9
+        note:
+          description: Optional note from updating status
+          type: string
+          example: 'Incorrect match'
+        status:
+          description: Manually applied status for OFAC Company
+          type: string
+          enum:
+            - unsafe
+            - exception
+        createdAt:
+          type: string
+          format: date-time
+          example: 2006-01-02T15:04:05Z07:00
     OFACCustomer:
       description: OFAC Customer and metadata
       properties:
@@ -432,6 +625,17 @@ components:
         match:
           type: number
           example: 0.91
+    UpdateCompanyStatus:
+      description: Request body to update a company status.
+      properties:
+        status:
+          description: manual override of company/SDN sanction status
+          type: string
+          enum:
+            - unsafe
+            - exception
+      required:
+        - status
     UpdateCustomerStatus:
       description: Request body to update a customers status.
       properties:
