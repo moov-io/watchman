@@ -50,6 +50,8 @@ func (r *Reader) parseError(err error) error {
 }
 
 // Reader reads records from a CSV file.
+//
+// For more details on the raw OFAC files see https://docs.moov.io/en/latest/ofac/file-structure/
 type Reader struct {
 	// FileName is the name of the file
 	FileName string `json:"fileName"`

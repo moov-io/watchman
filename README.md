@@ -7,7 +7,7 @@ moov-io/ofac
 [![Go Report Card](https://goreportcard.com/badge/github.com/moov-io/ofac)](https://goreportcard.com/report/github.com/moov-io/ofac)
 [![Apache 2 licensed](https://img.shields.io/badge/license-Apache2-blue.svg)](https://raw.githubusercontent.com/moov-io/ofac/master/LICENSE)
 
-OFAC is an HTTP API and Go library to download, parse and serve OFAC sanction data for applications and humans. Also supported is an async webhook notification service to initiate processes on remote systems connected with OFAC.
+OFAC is an HTTP API and Go library to download, [parse and serve OFAC sanction data](https://docs.moov.io/en/latest/ofac/file-structure/) for applications and humans. Also supported is an async webhook notification service to initiate processes on remote systems connected with OFAC.
 
 To get started using OFAC download our [Docker image](https://hub.docker.com/r/moov/ofac/tags) or [the latest release](https://github.com/moov-io/ofac/releases).
 
