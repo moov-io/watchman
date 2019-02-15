@@ -8,7 +8,17 @@
 // This tool requires an OAuth token provided by github.com/moov-io/api written
 // to the local disk, but running apitest first will write this token.
 //
-// TODO(adam): central library for write/read of OAuth tokens
+// This tool can be used to query with custom searches:
+//  $ go install ./cmd/ofactest
+//  $ ofactest -local moh
+//  2019/02/14 23:37:44.432334 main.go:44: Starting moov/ofactest v0.4.1-dev
+//  2019/02/14 23:37:44.432366 main.go:60: [INFO] using http://localhost:8084 for address
+//  2019/02/14 23:37:44.434534 main.go:76: [SUCCESS] ping
+//  2019/02/14 23:37:44.435204 main.go:83: [SUCCESS] last download was: 3h45m58s ago
+//  2019/02/14 23:37:44.440230 main.go:96: [SUCCESS] name search passed, query="moh"
+//  2019/02/14 23:37:44.441506 main.go:104: [SUCCESS] added customer=24032 watch
+//  2019/02/14 23:37:44.445473 main.go:118: [SUCCESS] alt name search passed
+//  2019/02/14 23:37:44.449367 main.go:123: [SUCCESS] address search passed
 //
 // ofactest is not a stable tool. Please contact Moov developers if you intend to use this tool,
 // otherwise we might change the tool (or remove it) without notice.
@@ -22,6 +32,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/moov-io/base/http/bind"
@@ -96,11 +107,44 @@ func main() {
 		log.Printf("[SUCCESS] last download was: %v ago", time.Since(when).Truncate(1*time.Second))
 	}
 
+	query := "alh" // string that matches a lot of OFAC records
+	if v := flag.Arg(0); v != "" {
+		query = v
+	}
+
 	// Search queries
-	if err := searchSDNs(ctx, api); err != nil {
-		log.Fatalf("[FAILURE] %v", err)
+	sdn, err := searchByName(ctx, api, query)
+	if err != nil {
+		log.Fatalf("[FAILURE] problem searching SDNs: %v", err)
 	} else {
-		log.Println("[SUCCESS] search queries passed")
+		log.Printf("[SUCCESS] name search passed, query=%q", query)
+	}
+
+	// Add watch on the SDN
+	if strings.EqualFold(sdn.SdnType, "individual") {
+		if err := addCustomerWatch(ctx, api, sdn.EntityID); err != nil {
+			log.Fatalf("[FAILURE] problem adding customer watch: %v", err)
+		} else {
+			log.Printf("[SUCCESS] added customer=%s watch", sdn.EntityID)
+		}
+	} else {
+		if err := addCompanyWatch(ctx, api, sdn.EntityID); err != nil {
+			log.Fatalf("[FAILURE] problem adding company watch: %v", err)
+		} else {
+			log.Printf("[SUCCESS] added company=%s watch", sdn.EntityID)
+		}
+	}
+
+	// Load alt names and addresses
+	if err := searchByAltName(ctx, api, query); err != nil {
+		log.Fatalf("[FAILURE] problem searching Alt Names: %v", err)
+	} else {
+		log.Println("[SUCCESS] alt name search passed")
+	}
+	if err := searchByAddress(ctx, api, "St"); err != nil {
+		log.Fatalf("[FAILURE] problem searching addresses: %v", err)
+	} else {
+		log.Println("[SUCCESS] address search passed")
 	}
 }
 
