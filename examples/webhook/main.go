@@ -31,7 +31,7 @@ func main() {
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 	logger = log.With(logger, "caller", log.DefaultCaller)
 
-	logger.Log("startup", fmt.Sprintf("Starting moov/ofac-example:%s", ofac.Version))
+	logger.Log("startup", fmt.Sprintf("Starting moov/ofac-webhook-example:%s", ofac.Version))
 
 	// Listen for application termination.
 	errs := make(chan error)

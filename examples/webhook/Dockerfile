@@ -3,7 +3,7 @@ WORKDIR /go/src/github.com/moov-io/ofac
 RUN apk add -U make
 RUN adduser -D -g '' --shell /bin/false moov
 COPY . .
-RUN make build-example
+RUN make build-examples
 USER moov
 
 FROM scratch

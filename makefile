@@ -1,15 +1,15 @@
 VERSION := $(shell grep -Eo '(v[0-9]+[\.][0-9]+[\.][0-9]+(-[a-zA-Z0-9]*)?)' version.go)
 
-.PHONY: build build-server build-example docker release check
+.PHONY: build build-server build-examples docker release check
 
-build: check build-server build-example
+build: check build-server build-examples
 
 build-server:
 	go build github.com/moov-io/ofac
 	CGO_ENABLED=1 go build -o ./bin/server github.com/moov-io/ofac/cmd/server
 
-build-example:
-	CGO_ENABLED=0 go build -o ./bin/example github.com/moov-io/ofac/example
+build-examples:
+	CGO_ENABLED=0 go build -o ./bin/webhook-example github.com/moov-io/ofac/examples/webhook
 
 check:
 	go fmt ./...
@@ -35,8 +35,8 @@ docker:
 	docker build --pull -t moov/ofac:$(VERSION) -f Dockerfile .
 	docker tag moov/ofac:$(VERSION) moov/ofac:latest
 # OFAC Example Docker image
-	docker build --pull -t moov/ofac-example:$(VERSION) -f Dockerfile-example .
-	docker tag moov/ofac-example:$(VERSION) moov/ofac-example:latest
+	docker build --pull -t moov/ofac-webhook-example:$(VERSION) -f ./examples/webhook/Dockerfile .
+	docker tag moov/ofac-webhook-example:$(VERSION) moov/ofac-webhook-example:latest
 
 release: docker AUTHORS
 	go vet ./...
@@ -45,7 +45,7 @@ release: docker AUTHORS
 
 release-push:
 	docker push moov/ofac:$(VERSION)
-	docker push moov/ofac-example:$(VERSION)
+	docker push moov/ofac-webhook-example:$(VERSION)
 
 .PHONY: cover-test cover-web
 cover-test:
