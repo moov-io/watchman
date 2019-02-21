@@ -57,20 +57,7 @@ func main() {
 	log.Printf("Starting moov/ofactest %s", ofac.Version)
 
 	conf := moov.NewConfiguration()
-	if *flagLocal {
-		// If '-local and -address <foo>' use <foo>
-		if addr := *flagApiAddress; addr != defaultApiAddress {
-			conf.BasePath = addr
-		} else {
-			conf.BasePath = "http://localhost" + bind.HTTP("ofac")
-		}
-	} else {
-		if v := *flagApiAddress; v == defaultApiAddress {
-			conf.BasePath = v + "/v1/ofac"
-		} else {
-			conf.BasePath = *flagApiAddress
-		}
-	}
+	conf.BasePath = getBasePath(*flagApiAddress, *flagLocal)
 
 	conf.UserAgent = fmt.Sprintf("moov/ofactest:%s", ofac.Version)
 	conf.HTTPClient = &http.Client{
@@ -146,6 +133,25 @@ func main() {
 		log.Fatalf("[FAILURE] problem searching addresses: %v", err)
 	} else {
 		log.Println("[SUCCESS] address search passed")
+	}
+}
+
+// getBasePath reads flagLocal and flagApiAddress to compute the HTTP address used for connecting with OFAC.
+func getBasePath(address string, local bool) string {
+	if local {
+		// If '-local and -address <foo>' use <foo>
+		if address != defaultApiAddress {
+			return strings.TrimSuffix(address, "/")
+		} else {
+			return "http://localhost" + bind.HTTP("ofac")
+		}
+	} else {
+		address = strings.TrimSuffix(address, "/")
+		// -address isn't changed, so assume Moov's API (needs extra path added)
+		if address == defaultApiAddress {
+			return address + "/v1/ofac"
+		}
+		return address
 	}
 }
 
