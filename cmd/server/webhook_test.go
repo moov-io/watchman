@@ -143,6 +143,8 @@ func TestWebhook_record(t *testing.T) {
 	defer db.close()
 
 	repo := sqliteWebhookRepository{db.db}
+	defer repo.close()
+
 	if err := repo.recordWebhook(base.ID(), time.Now(), 200); err != nil {
 		t.Fatal(err)
 	}
