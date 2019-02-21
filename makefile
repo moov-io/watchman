@@ -2,12 +2,15 @@ VERSION := $(shell grep -Eo '(v[0-9]+[\.][0-9]+[\.][0-9]+(-[a-zA-Z0-9]*)?)' vers
 
 .PHONY: build build-server build-examples docker release check
 
-build: check build-server build-examples
+build: check build-server build-ofactest build-examples
 
 build-server:
 	CGO_ENABLED=1 go build -o ./bin/server github.com/moov-io/ofac/cmd/server
 
-build-examples: build-search-example build-webhook-example
+build-ofactest:
+	CGO_ENABLED=0 go build -o ./bin/ofactest github.com/moov-io/ofac/cmd/ofactest
+
+build-examples: build-webhook-example
 
 build-webhook-example:
 	CGO_ENABLED=0 go build -o ./bin/webhook-example github.com/moov-io/ofac/examples/webhook
@@ -35,6 +38,9 @@ docker:
 # Main OFAC server Docker image
 	docker build --pull -t moov/ofac:$(VERSION) -f Dockerfile .
 	docker tag moov/ofac:$(VERSION) moov/ofac:latest
+# ofactest image
+	docker build --pull -t moov/ofactest:$(VERSION) -f ./cmd/ofactest/Dockerfile .
+	docker tag moov/ofactest:$(VERSION) moov/ofactest:latest
 # webhook example
 	docker build --pull -t moov/ofac-webhook-example:$(VERSION) -f ./examples/webhook/Dockerfile .
 	docker tag moov/ofac-webhook-example:$(VERSION) moov/ofac-webhook-example:latest
