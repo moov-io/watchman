@@ -5,7 +5,6 @@ VERSION := $(shell grep -Eo '(v[0-9]+[\.][0-9]+[\.][0-9]+(-[a-zA-Z0-9]*)?)' vers
 build: check build-server build-examples
 
 build-server:
-	go build github.com/moov-io/ofac
 	CGO_ENABLED=1 go build -o ./bin/server github.com/moov-io/ofac/cmd/server
 
 build-examples:
