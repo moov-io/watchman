@@ -1,4 +1,4 @@
-## v0.5.1 (Unreleased)
+## v0.5.1 (Released 2019-02-21)
 
 BUG FIXES
 
