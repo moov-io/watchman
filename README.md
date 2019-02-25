@@ -9,7 +9,7 @@ moov-io/ofac
 
 Office of Foreign Asset Control (OFAC) is an HTTP API and Go library to download, [parse and serve United States OFAC sanction data](https://docs.moov.io/en/latest/ofac/file-structure/) for applications and humans. Also supported is an async webhook notification service to initiate processes on remote systems connected with OFAC.
 
-To get started using OFAC download [the latest release](https://github.com/moov-io/ofac/releases) or our [Docker image](https://hub.docker.com/r/moov/ofac/tags).
+To get started using OFAC download [the latest release](https://github.com/moov-io/ofac/releases) or our [Docker image](https://hub.docker.com/r/moov/ofac/tags). We also have a [demo OFAC instance](https://moov.io/ofac/) as part of Moov's demo environment.
 
 ```
 $ docker run -p 8084:8084 -p 9094:9094 -it moov/ofac:v0.5.2
