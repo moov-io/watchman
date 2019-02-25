@@ -67,7 +67,7 @@ An `Authorization` header will also be sent with the `authToken` provided when s
 
 ## Getting Help
 
-We maintain a [runbook for common issues](docs/runbook.md) and configuration options.
+We maintain a [runbook for common issues](docs/runbook.md) and configuration options. Also, if you've encountered a security issue please contact us at [`security@moov.io`](mailto:security@moov.io).
 
  channel | info
  ------- | -------
