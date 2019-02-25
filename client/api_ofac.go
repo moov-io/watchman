@@ -621,7 +621,7 @@ func (a *OFACApiService) GetCustomer(ctx context.Context, customerId string, loc
 }
 
 /*
-OFACApiService Return list of recent re-downloads of OFAC data
+OFACApiService Return list of recent downloads of OFAC data
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *GetLatestDownloadsOpts - Optional Parameters:
  * @param "Limit" (optional.Int32) -  Maximum results returned by a search

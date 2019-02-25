@@ -10,7 +10,7 @@ Method | HTTP request | Description
 [**AddCustomerWatch**](OFACApi.md#AddCustomerWatch) | **Post** /customers/{customerId}/watch | Add OFAC watch on a Customer
 [**GetCompany**](OFACApi.md#GetCompany) | **Get** /companies/{companyId} | Get information about a company, trust or organization such as addresses, alternate names, and remarks.
 [**GetCustomer**](OFACApi.md#GetCustomer) | **Get** /customers/{customerId} | Get information about a customer, addresses, alternate names, and their SDN metadata.
-[**GetLatestDownloads**](OFACApi.md#GetLatestDownloads) | **Get** /downloads | Return list of recent re-downloads of OFAC data
+[**GetLatestDownloads**](OFACApi.md#GetLatestDownloads) | **Get** /downloads | Return list of recent downloads of OFAC data
 [**GetSDN**](OFACApi.md#GetSDN) | **Get** /sdn/{sdnId} | Specially designated national
 [**GetSDNAddresses**](OFACApi.md#GetSDNAddresses) | **Get** /sdn/{sdnId}/addresses | Get addresses for a given SDN
 [**GetSDNAltNames**](OFACApi.md#GetSDNAltNames) | **Get** /sdn/{sdnId}/alts | Get alternate names for a given SDN
@@ -244,7 +244,7 @@ No authorization required
 
 # **GetLatestDownloads**
 > []Download GetLatestDownloads(ctx, optional)
-Return list of recent re-downloads of OFAC data
+Return list of recent downloads of OFAC data
 
 ### Required Parameters
 

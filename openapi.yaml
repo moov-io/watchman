@@ -451,7 +451,7 @@ paths:
     get:
       tags:
         - OFAC
-      summary: Return list of recent re-downloads of OFAC data
+      summary: Return list of recent downloads of OFAC data
       operationId: getLatestDownloads
       parameters:
         - name: limit
