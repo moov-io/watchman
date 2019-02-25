@@ -67,6 +67,8 @@ An `Authorization` header will also be sent with the `authToken` provided when s
 
 ## Getting Help
 
+We maintain a [runbook for common issues](docs/runbook.md) and configuration options.
+
  channel | info
  ------- | -------
  [Project Documentation](https://docs.moov.io/en/latest/) | Our project documentation available online.
