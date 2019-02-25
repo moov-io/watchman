@@ -55,6 +55,7 @@ deploy:
   on:
     repo: moov-io/ofac
     tags: true
+    go: 1.11.x
   skip_cleanup: true
 after_deploy:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
