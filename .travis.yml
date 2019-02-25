@@ -1,45 +1,55 @@
 language: go
 sudo: true
 services:
-  - docker
+- docker
 env:
   matrix:
-    - GO111MODULE=auto
+  - GO111MODULE=auto
 matrix:
   allow_failures:
-    # - os: windows
-    - go: 1.12rc1
+  - go: 1.12rc1
   include:
-    - os: linux
-      go: 1.11.x
-      cache:
-        directories:
-          - "/home/travis/.cache/go-build" # GOCACHE
-    - os: linux
-      go: 1.12rc1
-    - os: osx
-      go: 1.11.x
-      cache:
-        directories:
-          - "/Users/travis/Library/Caches/go-build" # GOCACHE
+  - os: linux
+    go: 1.11.x
+    cache:
+      directories:
+      - "/home/travis/.cache/go-build"
+  - os: linux
+    go: 1.12rc1
+  - os: osx
+    go: 1.11.x
+    cache:
+      directories:
+      - "/Users/travis/Library/Caches/go-build"
 before_install:
-  - go get -u github.com/client9/misspell/cmd/misspell
-  - go get -u golang.org/x/lint/golint
-  - go get github.com/fzipp/gocyclo
-  - go get -u honnef.co/go/tools/cmd/staticcheck
-  - go get golang.org/x/tools/cmd/cover
+- go get -u github.com/client9/misspell/cmd/misspell
+- go get -u golang.org/x/lint/golint
+- go get github.com/fzipp/gocyclo
+- go get -u honnef.co/go/tools/cmd/staticcheck
+- go get golang.org/x/tools/cmd/cover
 before_script:
-  - GOFILES=$(find . -type f -name '*.go' | grep -v vendor | grep -v client)
+- GOFILES=$(find . -type f -name '*.go' | grep -v vendor | grep -v client)
 script:
-  # Just check gofmt on linux, it's the fastest builder
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then test -z $(gofmt -s -l $GOFILES); fi
-  - go test ./... -race -coverprofile=coverage.txt -covermode=atomic
-  - misspell -error -locale US $GOFILES
-  - gocyclo -over 20 $GOFILES
-  - golint -set_exit_status $GOFILES
-  - staticcheck ./cmd/*/*.go ./pkg/*/*.go *.go
+# Just check gofmt on linux, it's the fastest builder
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then test -z $(gofmt -s -l $GOFILES); fi
+- go test ./... -race -coverprofile=coverage.txt -covermode=atomic
+- misspell -error -locale US $GOFILES
+- gocyclo -over 20 $GOFILES
+- golint -set_exit_status $GOFILES
+- staticcheck ./cmd/*/*.go ./pkg/*/*.go *.go
 after_success:
-  - bash <(curl -s https://codecov.io/bash) -X fix
-  - make
-  - make client
-  - make docker
+- bash <(curl -s https://codecov.io/bash) -X fix
+- make
+- make client
+- make docker
+deploy:
+  provider: releases
+  api_key:
+    secure: lPJQJFPgzw0eAZwG6A5yG3hMVrkuAeXhZy0wcWpOHWH/Ten2uDPo0hm4W5aoeTLi0ABEL9YWeheZRtq5BY9sxNBZLoGf4duz9q4Nc+WvrJT7dIEaynbK1ou2ycHPU35VX3FY6wdcCBPxcDVNQiKHgreXpY6IbcBj8iDWYaaz945INoN+8LAkceyeonrm7AeqeS2jEmdbxlOAHxGFh2mgP2XylLAIKrWe/tvOEPvn7Hz/EIjTJE7K5+j+UhNFFUd+VtcN8I/qyPrs9IoleIKrU9lx1RcrXA0EPDt+bXFzc233Uwa5lYBsj3mtI1imriCEy9ByA8CEBwYOxa9KQPendkGlwqGrKn3bjDXKuBKM7nsiJWG4uHUABMQGBVDXGXcOJnDsmcaR69sCrNxFWed8R4YpYC/QLZkNVPnw4E08dQ9gaw83I6mUW01/qeFczgDd/HDjhNRB1o6/y4Jb5kPVTRYiQ8p+suAmhPfmIUOKlSjwBTB95LisrWtEud66tzfkV9XdKvuxh0FYdlIGDhexcUEME7ZkYo5gelDPmX4V5NagBmKd+9Y+xYAsqCE/Z3Vy0DWRyGZYZGxWcQ5+8M0XlYrPqBP6saDALM8XI+apNuLa3KKzozS5s4G2F9vSVyFHOS+uhOnAz6gftrL9t6g2E9KHiN43tf2JhNrsVNqZbEs=
+  file:
+    - ./bin/ofac-linux-amd64
+    - ./bin/ofac-darwin-amd64
+    - ./bin/ofac-amd64.exe
+  on:
+    repo: moov-io/ofac
+    tags: true
