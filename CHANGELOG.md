@@ -1,3 +1,9 @@
+## v0.6.0 (Unreleased)
+
+IMPROVEMENTS
+
+- Setup automated releases of binaries and Docker image
+
 ## v0.5.2 (Released 2019-02-21)
 
 ADDITIONS
