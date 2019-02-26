@@ -1,3 +1,4 @@
+PLATFORM=$(shell uname -s | tr '[:upper:]' '[:lower:]')
 VERSION := $(shell grep -Eo '(v[0-9]+[\.][0-9]+[\.][0-9]+(-[a-zA-Z0-9]*)?)' version.go)
 
 .PHONY: build build-server build-examples docker release check
@@ -35,9 +36,11 @@ clean:
 	@rm -f openapi-generator-cli-*.jar
 
 dist: clean client build
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./bin/ofac-linux-amd64
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o ./bin/ofac-darwin-amd64
-	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o ./bin/ofac-amd64.exe
+ifeq ($(OS),Windows_NT)
+	CGO_ENABLED=1 GOOS=windows go build -o bin/ofac-windows-amd64.exe github.com/moov-io/ofac/cmd/server
+else
+	CGO_ENABLED=1 GOOS=$(PLATFORM) go build -o bin/ofac-$(PLATFORM)-amd64 github.com/moov-io/ofac/cmd/server
+endif
 
 docker:
 # Main OFAC server Docker image
