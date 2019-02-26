@@ -7,22 +7,22 @@ env:
   - GO111MODULE=auto
 matrix:
   allow_failures:
-  - go: 1.12rc1
+  - go: master
   include:
   - os: linux
-    go: 1.11.x
+    go: 1.12.x
     cache:
       directories:
       - "/home/travis/.cache/go-build"
   - os: linux
-    go: 1.12rc1
+    go: master
   - os: osx
-    go: 1.11.x
+    go: 1.12.x
     cache:
       directories:
       - "/Users/travis/Library/Caches/go-build"
   # - os: windows
-  #   go: 1.11.x
+  #   go: 1.12.x
 before_install:
 - GO111MODULE=off go get -u github.com/client9/misspell/cmd/misspell
 - GO111MODULE=off go get -u golang.org/x/lint/golint
@@ -57,7 +57,7 @@ deploy:
   on:
     repo: moov-io/ofac
     tags: true
-    go: 1.11.x
+    go: 1.12.x
   skip_cleanup: true
 after_deploy:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
