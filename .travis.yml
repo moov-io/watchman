@@ -24,11 +24,11 @@ matrix:
   - os: windows
     go: 1.11.x
 before_install:
-- go get -u github.com/client9/misspell/cmd/misspell
-- go get -u golang.org/x/lint/golint
-- go get github.com/fzipp/gocyclo
-- go get -u honnef.co/go/tools/cmd/staticcheck
-- go get golang.org/x/tools/cmd/cover
+- GO111MODULE=off go get -u github.com/client9/misspell/cmd/misspell
+- GO111MODULE=off go get -u golang.org/x/lint/golint
+- GO111MODULE=off go get github.com/fzipp/gocyclo
+- GO111MODULE=off go get -u honnef.co/go/tools/cmd/staticcheck
+- GO111MODULE=off go get golang.org/x/tools/cmd/cover
 before_script:
 - GOFILES=$(find . -type f -name '*.go' | grep -v vendor | grep -v client)
 script:
