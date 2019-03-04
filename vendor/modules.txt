@@ -13,7 +13,7 @@ github.com/go-logfmt/logfmt
 github.com/golang/protobuf/proto
 # github.com/gorilla/mux v1.7.0
 github.com/gorilla/mux
-# github.com/hashicorp/golang-lru v0.5.0
+# github.com/hashicorp/golang-lru v0.5.1
 github.com/hashicorp/golang-lru
 github.com/hashicorp/golang-lru/simplelru
 # github.com/kr/logfmt v0.0.0-20140226030751-b84e30acd515
@@ -39,7 +39,7 @@ github.com/prometheus/client_model/go
 github.com/prometheus/common/expfmt
 github.com/prometheus/common/model
 github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg
-# github.com/prometheus/procfs v0.0.0-20190219184716-e4d4a2206da0
+# github.com/prometheus/procfs v0.0.0-20190228175808-bbced9601137
 github.com/prometheus/procfs
 github.com/prometheus/procfs/iostats
 github.com/prometheus/procfs/nfs
@@ -51,10 +51,10 @@ github.com/rickar/cal
 github.com/xrash/smetrics
 # go4.org v0.0.0-20190218023631-ce4c26f7be8e
 go4.org/syncutil
-# golang.org/x/net v0.0.0-20190213061140-3a22650c66bd
+# golang.org/x/net v0.0.0-20190304005336-16b79f2e4e95
 golang.org/x/net/context/ctxhttp
 golang.org/x/net/context
-# golang.org/x/oauth2 v0.0.0-20190220154721-9b3c75971fc9
+# golang.org/x/oauth2 v0.0.0-20190227165946-e64efc72b421
 golang.org/x/oauth2
 golang.org/x/oauth2/internal
 # google.golang.org/appengine v1.4.0
