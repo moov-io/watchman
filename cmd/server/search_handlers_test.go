@@ -44,6 +44,45 @@ func TestSearch__Address(t *testing.T) {
 	}
 }
 
+func TestSearch__NameAndAltName(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/search?limit=1&q=Air+I", nil)
+
+	s := &searcher{
+		Alts:      altSearcher.Alts,
+		SDNs:      sdnSearcher.SDNs,
+		Addresses: addressSearcher.Addresses,
+	}
+
+	router := mux.NewRouter()
+	addSearchRoutes(nil, router, s)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusOK {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+
+	// read response body
+	var wrapper struct {
+		SDNs      []*ofac.SDN               `json:"SDNs"`
+		AltNames  []*ofac.AlternateIdentity `json:"altNames"`
+		Addresses []*ofac.Address           `json:"addresses"`
+	}
+	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
+		t.Fatal(err)
+	}
+	if wrapper.SDNs[0].EntityID != "2676" {
+		t.Errorf("%#v", wrapper.SDNs[0])
+	}
+	if wrapper.AltNames[0].EntityID != "4691" {
+		t.Errorf("%#v", wrapper.AltNames[0].EntityID)
+	}
+	if wrapper.Addresses[0].EntityID != "735" {
+		t.Errorf("%#v", wrapper.Addresses[0].EntityID)
+	}
+}
+
 func TestSearch__Name(t *testing.T) {
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/search?name=AL+ZAWAHIRI&limit=1", nil)
