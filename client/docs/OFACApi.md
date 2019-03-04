@@ -567,9 +567,10 @@ Optional parameters are passed through a pointer to a SearchSDNsOpts struct
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **xRequestId** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
- **name** | **optional.String**| Name which could correspond to a human on the SDN list | 
- **address** | **optional.String**| Phsical address which could correspond to a human on the SDN list | 
- **altName** | **optional.String**| Alternate name which could correspond to a human on the SDN list | 
+ **q** | **optional.String**| Search across Name, Alt Names, and Address fields for all SDN entries. Entries may be returned in all response sub-objects. | 
+ **name** | **optional.String**| Name which could correspond to a human on the SDN list. Only SDN results will be returned. | 
+ **address** | **optional.String**| Phsical address which could correspond to a human on the SDN list. Only Address results will be returned. | 
+ **altName** | **optional.String**| Alternate name which could correspond to a human on the SDN list. Only Alt name results will be returned. | 
  **limit** | **optional.Int32**| Maximum results returned by a search | 
 
 ### Return type

@@ -1387,15 +1387,17 @@ OFACApiService Search SDN names and metadata
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *SearchSDNsOpts - Optional Parameters:
  * @param "XRequestId" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
- * @param "Name" (optional.String) -  Name which could correspond to a human on the SDN list
- * @param "Address" (optional.String) -  Phsical address which could correspond to a human on the SDN list
- * @param "AltName" (optional.String) -  Alternate name which could correspond to a human on the SDN list
+ * @param "Q" (optional.String) -  Search across Name, Alt Names, and Address fields for all SDN entries. Entries may be returned in all response sub-objects.
+ * @param "Name" (optional.String) -  Name which could correspond to a human on the SDN list. Only SDN results will be returned.
+ * @param "Address" (optional.String) -  Phsical address which could correspond to a human on the SDN list. Only Address results will be returned.
+ * @param "AltName" (optional.String) -  Alternate name which could correspond to a human on the SDN list. Only Alt name results will be returned.
  * @param "Limit" (optional.Int32) -  Maximum results returned by a search
 @return Search
 */
 
 type SearchSDNsOpts struct {
 	XRequestId optional.String
+	Q          optional.String
 	Name       optional.String
 	Address    optional.String
 	AltName    optional.String
@@ -1419,6 +1421,9 @@ func (a *OFACApiService) SearchSDNs(ctx context.Context, localVarOptionals *Sear
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if localVarOptionals != nil && localVarOptionals.Q.IsSet() {
+		localVarQueryParams.Add("q", parameterToString(localVarOptionals.Q.Value(), ""))
+	}
 	if localVarOptionals != nil && localVarOptionals.Name.IsSet() {
 		localVarQueryParams.Add("name", parameterToString(localVarOptionals.Name.Value(), ""))
 	}
