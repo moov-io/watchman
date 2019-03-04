@@ -50,6 +50,15 @@ func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w = wrapResponseWriter(logger, w, r)
 
+		// Search over all fields
+		if q := strings.TrimSpace(r.URL.Query().Get("q")); q != "" {
+			if logger != nil {
+				logger.Log("search", fmt.Sprintf("searching all names and address for %s", q))
+			}
+			searchByNameAndAltName(logger, searcher, q)(w, r)
+			return
+		}
+
 		// Search by Name
 		if name := strings.TrimSpace(r.URL.Query().Get("name")); name != "" {
 			if logger != nil {
@@ -102,6 +111,29 @@ func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchReq
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(&searchResponse{Addresses: addresses}); err != nil {
+			moovhttp.Problem(w, err)
+			return
+		}
+	}
+}
+
+func searchByNameAndAltName(logger log.Logger, searcher *searcher, name string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		name = strings.TrimSpace(name)
+		if name == "" {
+			moovhttp.Problem(w, errNoSearchParams)
+			return
+		}
+
+		limit := extractSearchLimit(r)
+		response := &searchResponse{
+			SDNs:      searcher.TopSDNs(limit, name),
+			AltNames:  searcher.TopAltNames(limit, name),
+			Addresses: searcher.TopAddresses(limit, name),
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		if err := json.NewEncoder(w).Encode(response); err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}
