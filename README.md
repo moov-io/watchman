@@ -87,6 +87,7 @@ Note: This project uses Go Modules, which requires Go 1.11 or higher, but we shi
 
 - [Sanctions Search Page](https://sanctionssearch.ofac.treas.gov/)
 - [Subscribe for OFAC updates](https://service.govdelivery.com/accounts/USTREAS/subscriber/new)
+- [When should I call the OFAC Hotline?](https://www.treasury.gov/resource-center/faqs/Sanctions/Pages/directions.aspx)
 
 ## License
 
