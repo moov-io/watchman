@@ -18,4 +18,5 @@ require (
 	go4.org v0.0.0-20190218023631-ce4c26f7be8e
 	golang.org/x/net v0.0.0-20190304005336-16b79f2e4e95 // indirect
 	golang.org/x/oauth2 v0.0.0-20190227165946-e64efc72b421
+	golang.org/x/text v0.3.0
 )

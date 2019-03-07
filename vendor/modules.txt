@@ -57,6 +57,9 @@ golang.org/x/net/context
 # golang.org/x/oauth2 v0.0.0-20190227165946-e64efc72b421
 golang.org/x/oauth2
 golang.org/x/oauth2/internal
+# golang.org/x/text v0.3.0
+golang.org/x/text/transform
+golang.org/x/text/unicode/norm
 # google.golang.org/appengine v1.4.0
 google.golang.org/appengine/urlfetch
 google.golang.org/appengine/internal
