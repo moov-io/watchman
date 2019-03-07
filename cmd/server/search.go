@@ -11,11 +11,14 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"unicode"
 
 	"github.com/moov-io/ofac"
 
 	"github.com/go-kit/kit/log"
 	"github.com/xrash/smetrics"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
 )
 
 var (
@@ -277,8 +280,21 @@ var (
 )
 
 // precompute will lowercase each substring and remove punctuation
+//
+// This function is called on every record from the flat files and all
+// search requests (i.e. HTTP and searcher.TopNNNs methods).
+// See: https://godoc.org/golang.org/x/text/unicode/norm#Form
 func precompute(s string) string {
-	return chomp(strings.ToLower(punctuationReplacer.Replace(s)))
+	trimmed := chomp(strings.ToLower(punctuationReplacer.Replace(s)))
+
+	// UTF-8 normalization
+	t := transform.Chain(norm.NFD, transform.RemoveFunc(isMn), norm.NFC)
+	result, _, _ := transform.String(t, trimmed)
+	return result
+}
+
+func isMn(r rune) bool {
+	return unicode.Is(unicode.Mn, r) // Mn: nonspacing marks
 }
 
 func chomp(s string) string {

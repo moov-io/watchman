@@ -78,28 +78,53 @@ func TestJaroWrinkler(t *testing.T) {
 		s1, s2 string
 		match  float64
 	}{
+		{"wei, zhao", "wei, Zhao", 0.950},
 		{"WEI, Zhao", "WEI, Zhao", 1.0},
 		// make sure jaroWrinkler is communative
 		{"jane doe", "jan lahore", 0.69},
 		{"jan lahore", "jane doe", 0.69},
+		// example cases
+		{"maduro moros, nicolas", "maduro moros, nicolas", 1.0},
+		{"maduro moros, nicolas", "nicolas maduro", 0.512},
+		{"nicolas maduro moros", "nicolás maduro", 0.855},
+		{"nicolas, maduro moros", "nicolas maduro", 0.891},
+		{"nicolas, maduro moros", "nicolás maduro", 0.881},
 	}
 
 	for _, v := range cases {
-		// need to call chomp on s1, see jaroWrinkler doc
-		eql(t, jaroWrinkler(chomp(v.s1), v.s2), v.match)
+		// Only need to call chomp on s1, see jaroWrinkler doc
+		eql(t, fmt.Sprintf("%s vs %s", v.s1, v.s2), jaroWrinkler(chomp(v.s1), v.s2), v.match)
 	}
 }
 
-func eql(t *testing.T, x, y float64) {
+func eql(t *testing.T, desc string, x, y float64) {
 	t.Helper()
 	if math.Abs(x-y) > 0.01 {
-		t.Errorf("%.3f != %.3f", x, y)
+		t.Errorf("%s: %.3f != %.3f", desc, x, y)
 	}
 }
 
 func TestEql(t *testing.T) {
-	eql(t, 0.1, 0.1)
-	eql(t, 0.0001, 0.00002)
+	eql(t, "", 0.1, 0.1)
+	eql(t, "", 0.0001, 0.00002)
+}
+
+// TestSearch_precompute ensures we are trimming and UTF-8 normalizing strings
+// as expected. This is needed since our datafiles are normalized for us.
+func TestSearch_precompute(t *testing.T) {
+	cases := []struct {
+		input, expected string
+	}{
+		{"nicolás maduro", "nicolasmaduro"},
+		{"Delcy Rodríguez", "delcyrodriguez"},
+		{"Raúl Castro", "raulcastro"},
+	}
+	for i := range cases {
+		guess := precompute(cases[i].input)
+		if guess != cases[i].expected {
+			t.Errorf("precompute(%q)=%q expected %q", cases[i].input, guess, cases[i].expected)
+		}
+	}
 }
 
 // TestSearch_liveData will download the real OFAC data and run searches against the corpus.
@@ -129,7 +154,7 @@ func TestSearch_liveData(t *testing.T) {
 			t.Errorf("name=%q got no results", cases[i].name)
 		}
 		fmt.Printf("%q matches %q at %.2f\n", cases[i].name, sdns[0].name, sdns[0].match)
-		eql(t, sdns[0].match, cases[i].match)
+		eql(t, "", sdns[0].match, cases[i].match)
 	}
 }
 
