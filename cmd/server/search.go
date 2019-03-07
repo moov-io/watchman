@@ -7,7 +7,9 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -205,10 +207,32 @@ func precomputeSDNs(sdns []*ofac.SDN) []*SDN {
 	for i := range sdns {
 		out[i] = &SDN{
 			SDN:  sdns[i],
-			name: precompute(sdns[i].SDNName),
+			name: precompute(reorderSDNName(sdns[i].SDNName, sdns[i].SDNType)),
 		}
 	}
 	return out
+}
+
+var (
+	surnamePrecedes = regexp.MustCompile(`(,\s?[a-zA-Z]*)$`)
+)
+
+// reorderSDNName will take a given SDN name and if it matches a specific pattern where
+// the first name is placed after the last name (surname) to return a string where the first name
+// preceedes the last.
+//
+// Example:
+// SDN EntityID: 19147 has 'FELIX B. MADURO S.A.'
+// SDN EntityID: 22790 has 'MADURO MOROS, Nicolas'
+func reorderSDNName(name string, tpe string) string {
+	if !strings.EqualFold(tpe, "individual") {
+		return name // only reorder individual names
+	}
+	if v := surnamePrecedes.FindString(name); v == "" {
+		return name // no match on 'Doe, John'
+	} else {
+		return strings.TrimSpace(fmt.Sprintf("%s %s", strings.TrimPrefix(v, ","), strings.TrimSuffix(name, v)))
+	}
 }
 
 // Address is ofac.Address wrapped with precomputed search metadata

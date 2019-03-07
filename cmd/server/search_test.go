@@ -127,6 +127,24 @@ func TestSearch_precompute(t *testing.T) {
 	}
 }
 
+func TestSearch_reorderSDNName(t *testing.T) {
+	cases := []struct {
+		input, expected string
+	}{
+		{"Jane Doe", "Jane Doe"},                         // control
+		{"Jane, Doe Other", "Jane, Doe Other"},           // made up name to make sure we don't clobber ,'s in the middle of a name
+		{"FELIX B. MADURO S.A.", "FELIX B. MADURO S.A."}, // keep .'s in a name
+		{"MADURO MOROS, Nicolas", "Nicolas MADURO MOROS"},
+		{"IBRAHIM, Sadr", "Sadr IBRAHIM"},
+	}
+	for i := range cases {
+		guess := reorderSDNName(cases[i].input, "individual")
+		if guess != cases[i].expected {
+			t.Errorf("reorderSDNName(%q)=%q expected %q", cases[i].input, guess, cases[i].expected)
+		}
+	}
+}
+
 // TestSearch_liveData will download the real OFAC data and run searches against the corpus.
 // This test is designed to tweak match percents and results.
 func TestSearch_liveData(t *testing.T) {
@@ -146,15 +164,14 @@ func TestSearch_liveData(t *testing.T) {
 		name  string
 		match float64 // top match %
 	}{
-		{"Jane Doe", 0.765}, // matches 'jan lahore'
+		{"Nicolas MADURO", 0.944},
 	}
 	for i := range cases {
 		sdns := searcher.TopSDNs(1, cases[i].name)
 		if len(sdns) == 0 {
 			t.Errorf("name=%q got no results", cases[i].name)
 		}
-		fmt.Printf("%q matches %q at %.2f\n", cases[i].name, sdns[0].name, sdns[0].match)
-		eql(t, "", sdns[0].match, cases[i].match)
+		eql(t, fmt.Sprintf("%q (SDN=%s) matches %q ", cases[i].name, sdns[0].SDN.EntityID, sdns[0].name), sdns[0].match, cases[i].match)
 	}
 }
 
