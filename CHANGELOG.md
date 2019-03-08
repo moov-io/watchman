@@ -1,3 +1,21 @@
+## v0.7.0 (Unreleased)
+
+TODO(adam): this should probably be v0.7.0
+
+ADDITIONS
+
+- cmd/server: support GET /search?q=... for searching SDN names, alt names, and address field
+
+IMPROVEMENTS
+
+- cmd/server: set CORS headers in ping route
+- cmd/server: UTF-8 normalize names during pre-computation
+- cmd/server: re-order SDN names where surname precedes "first name"
+
+BUILD
+
+- Update to Go 1.12
+
 ## v0.6.0 (Released 2019-02-26)
 
 IMPROVEMENTS
