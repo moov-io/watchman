@@ -308,6 +308,7 @@ var (
 // This function is called on every record from the flat files and all
 // search requests (i.e. HTTP and searcher.TopNNNs methods).
 // See: https://godoc.org/golang.org/x/text/unicode/norm#Form
+// See: https://withblue.ink/2019/03/11/why-you-need-to-normalize-unicode-strings.html
 func precompute(s string) string {
 	trimmed := chomp(strings.ToLower(punctuationReplacer.Replace(s)))
 
