@@ -1,4 +1,5 @@
 language: go
+dist: xenial
 sudo: true
 services:
 - docker
