@@ -255,6 +255,7 @@ func (cur *watchCursor) getCompanyBatch() ([]watch, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	max := cur.companyNewerThan
 
@@ -287,6 +288,7 @@ func (cur *watchCursor) getCustomerBatch() ([]watch, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	max := cur.customerNewerThan
 
