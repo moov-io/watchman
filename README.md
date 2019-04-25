@@ -12,8 +12,16 @@ Office of Foreign Asset Control (OFAC) is an HTTP API and Go library to download
 To get started using OFAC download [the latest release](https://github.com/moov-io/ofac/releases) or our [Docker image](https://hub.docker.com/r/moov/ofac/tags). We also have a [demo OFAC instance](https://moov.io/ofac/) as part of Moov's demo environment.
 
 ```
-$ docker run -p 8084:8084 -p 9094:9094 -it moov/ofac:v0.5.2
-ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting ofac server version v0.5.2"
+# Run as a binary
+$ wget https://github.com/moov-io/ofac/releases/download/v0.6.0/ofac-darwin-amd64
+$ chmod +x ofac-darwin-amd64
+$ ./ofac-darwin-amd64
+ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting ofac server version v0.6.0"
+...
+
+# Run as a Docker image
+$ docker run -p 8084:8084 -p 9094:9094 -it moov/ofac:v0.6.0
+ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting ofac server version v0.6.0"
 ...
 
 $ curl -s localhost:8084/search?name=...
