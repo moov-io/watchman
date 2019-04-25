@@ -1,6 +1,4 @@
-## v0.7.0 (Unreleased)
-
-TODO(adam): this should probably be v0.7.0
+## v0.7.0 (Released 2019-04-25)
 
 ADDITIONS
 
@@ -11,6 +9,11 @@ IMPROVEMENTS
 - cmd/server: set CORS headers in ping route
 - cmd/server: UTF-8 normalize names during pre-computation
 - cmd/server: re-order SDN names where surname precedes "first name"
+- cmd/server: support -log.format=json
+
+BUG FIXES
+
+- cmd/server: add missing database/sql Rows.Close()
 
 BUILD
 
