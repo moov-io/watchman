@@ -24,6 +24,7 @@ $ docker run -p 8084:8084 -p 9094:9094 -it moov/ofac:v0.6.0
 ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting ofac server version v0.6.0"
 ...
 
+# Perform a basic search
 $ curl -s localhost:8084/search?name=...
 {
   "SDNs": [
