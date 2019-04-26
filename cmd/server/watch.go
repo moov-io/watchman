@@ -39,7 +39,7 @@ type watchRequest struct {
 // for every time we re-download OFAC data.
 type watchRepository interface {
 	// getWatchesCursor returns a watchCursor which traverses both customer and company watches
-	getWatchesCursor(batchSize int) *watchCursor
+	getWatchesCursor(logger log.Logger, batchSize int) *watchCursor
 
 	// Company watches
 	addCompanyWatch(companyId string, params watchRequest) (string, error)
@@ -63,10 +63,11 @@ func (r *sqliteWatchRepository) close() error {
 	return r.db.Close()
 }
 
-func (r *sqliteWatchRepository) getWatchesCursor(batchSize int) *watchCursor {
+func (r *sqliteWatchRepository) getWatchesCursor(logger log.Logger, batchSize int) *watchCursor {
 	return &watchCursor{
 		batchSize: batchSize,
 		db:        r.db,
+		logger:    logger,
 	}
 }
 
@@ -211,39 +212,65 @@ func (r *sqliteWatchRepository) removeCustomerNameWatch(watchId string) error {
 }
 
 type watch struct {
-	id                    string
-	customerId, companyId string
-	webhook               string
-	authToken             string
+	id                       string
+	customerId, customerName string
+	companyId, companyName   string
+	webhook                  string
+	authToken                string
 }
 
 type watchCursor struct {
 	batchSize int
 	db        *sql.DB
 
-	// customerNewerThan and companyNewerThan represent the minimum (oldest) created_at
-	// value to return in the batch.
+	logger log.Logger
+
+	// '*NewerThan' values represent the minimum (oldest) created_at value to return in the batch.
 	//
-	// These values start at "zero time" (an empty time.Time) and progresses
-	// towards time.Now() with each batch by being set to the batch's newest time.
-	customerNewerThan time.Time
-	companyNewerThan  time.Time
+	// These values start at "zero time" (an empty time.Time) and progresses towards time.Now()
+	// with each batch by being set to the batch's newest time.
+	customerNewerThan, customerNameNewerThan time.Time
+	companyNewerThan, companyNameNewerThan   time.Time
 }
 
 // Next returns a batch of watches that will be sent off to their respective webhook URL.
 func (cur *watchCursor) Next() ([]watch, error) {
-	companyWatches, err := cur.getCompanyBatch()
-	if err != nil {
-		return nil, err
+	var watches []watch
+	limit := cur.batchSize / 4 // 4 SQL queries
+	if cur.batchSize < 4 {
+		limit = 1 // return one if batchSize is invalid
 	}
-	customerWatches, err := cur.getCustomerBatch()
+
+	// Companies
+	companyWatches, err := cur.getCompanyBatch(limit)
 	if err != nil {
-		return nil, err
+		cur.logger.Log("watchCursor", "problem reading company watches", "error", err)
 	}
-	return append(companyWatches, customerWatches...), nil
+	watches = append(watches, companyWatches...)
+
+	companyNameWatches, err := cur.getCompanyNameBatch(limit)
+	if err != nil {
+		cur.logger.Log("watchCursor", "problem reading company name watches", "error", err)
+	}
+	watches = append(watches, companyNameWatches...)
+
+	// Customers
+	customerWatches, err := cur.getCustomerBatch(limit)
+	if err != nil {
+		cur.logger.Log("watchCursor", "problem reading customer watches", "error", err)
+	}
+	watches = append(watches, customerWatches...)
+
+	customerNameWatches, err := cur.getCustomerNameBatch(limit)
+	if err != nil {
+		cur.logger.Log("watchCursor", "problem reading customer name watches", "error", err)
+	}
+	watches = append(watches, customerNameWatches...)
+
+	return watches, nil
 }
 
-func (cur *watchCursor) getCompanyBatch() ([]watch, error) {
+func (cur *watchCursor) getCompanyBatch(limit int) ([]watch, error) {
 	query := `select id, company_id, webhook, auth_token, created_at from company_watches where created_at > ? and deleted_at is null order by created_at asc limit ?`
 	stmt, err := cur.db.Prepare(query)
 	if err != nil {
@@ -251,7 +278,7 @@ func (cur *watchCursor) getCompanyBatch() ([]watch, error) {
 	}
 	defer stmt.Close()
 
-	rows, err := stmt.Query(cur.companyNewerThan, cur.batchSize/2)
+	rows, err := stmt.Query(cur.companyNewerThan, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -276,7 +303,40 @@ func (cur *watchCursor) getCompanyBatch() ([]watch, error) {
 	return watches, nil
 }
 
-func (cur *watchCursor) getCustomerBatch() ([]watch, error) {
+func (cur *watchCursor) getCompanyNameBatch(limit int) ([]watch, error) {
+	query := `select id, name, webhook, auth_token, created_at from company_name_watches where created_at > ? and deleted_at is null order by created_at asc limit ?`
+	stmt, err := cur.db.Prepare(query)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(cur.companyNameNewerThan, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	max := cur.companyNameNewerThan
+
+	var watches []watch
+	for rows.Next() {
+		var createdAt time.Time
+		var watch watch
+		if err := rows.Scan(&watch.id, &watch.companyName, &watch.webhook, &watch.authToken, &createdAt); err == nil {
+			watches = append(watches, watch)
+		}
+		if createdAt.After(max) {
+			// advance max to newest time
+			max = createdAt
+		}
+	}
+	cur.companyNameNewerThan = max
+
+	return watches, nil
+}
+
+func (cur *watchCursor) getCustomerBatch(limit int) ([]watch, error) {
 	query := `select id, customer_id, webhook, auth_token, created_at from customer_watches where created_at > ? and deleted_at is null order by created_at asc limit ?`
 	stmt, err := cur.db.Prepare(query)
 	if err != nil {
@@ -284,7 +344,7 @@ func (cur *watchCursor) getCustomerBatch() ([]watch, error) {
 	}
 	defer stmt.Close()
 
-	rows, err := stmt.Query(cur.customerNewerThan, cur.batchSize/2)
+	rows, err := stmt.Query(cur.customerNewerThan, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -305,6 +365,39 @@ func (cur *watchCursor) getCustomerBatch() ([]watch, error) {
 		}
 	}
 	cur.customerNewerThan = max
+
+	return watches, nil
+}
+
+func (cur *watchCursor) getCustomerNameBatch(limit int) ([]watch, error) {
+	query := `select id, name, webhook, auth_token, created_at from customer_name_watches where created_at > ? and deleted_at is null order by created_at asc limit ?`
+	stmt, err := cur.db.Prepare(query)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(cur.customerNameNewerThan, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	max := cur.customerNameNewerThan
+
+	var watches []watch
+	for rows.Next() {
+		var createdAt time.Time
+		var watch watch
+		if err := rows.Scan(&watch.id, &watch.customerName, &watch.webhook, &watch.authToken, &createdAt); err == nil {
+			watches = append(watches, watch)
+		}
+		if createdAt.After(max) {
+			// advance max to newest time
+			max = createdAt
+		}
+	}
+	cur.customerNameNewerThan = max
 
 	return watches, nil
 }

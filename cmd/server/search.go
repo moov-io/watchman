@@ -141,7 +141,7 @@ func (s *searcher) FindSDN(id string) *ofac.SDN {
 	defer s.RUnlock()
 
 	for i := range s.SDNs {
-		if s.SDNs[i].SDN.EntityID == id {
+		if s.SDNs[i].EntityID == id {
 			return s.SDNs[i].SDN
 		}
 	}
@@ -183,7 +183,7 @@ func (s *searcher) TopSDNs(limit int, name string) []SDN {
 
 // SDN is ofac.SDN wrapped with precomputed search metadata
 type SDN struct {
-	SDN *ofac.SDN
+	*ofac.SDN
 
 	// match holds the match ratio for an SDN in search results
 	match float64

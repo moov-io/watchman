@@ -36,6 +36,7 @@ type Customer struct {
 	Comments  []*ofac.SDNComments       `json:"comments"`
 	// Metadata
 	Status *CustomerStatus `json:"status"`
+	Match  float64         `json:"match,omitempty"`
 }
 
 type CustomerBlockStatus string

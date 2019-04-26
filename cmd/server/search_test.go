@@ -171,7 +171,7 @@ func TestSearch_liveData(t *testing.T) {
 		if len(sdns) == 0 {
 			t.Errorf("name=%q got no results", cases[i].name)
 		}
-		eql(t, fmt.Sprintf("%q (SDN=%s) matches %q ", cases[i].name, sdns[0].SDN.EntityID, sdns[0].name), sdns[0].match, cases[i].match)
+		eql(t, fmt.Sprintf("%q (SDN=%s) matches %q ", cases[i].name, sdns[0].EntityID, sdns[0].name), sdns[0].match, cases[i].match)
 	}
 }
 
@@ -291,7 +291,7 @@ func TestSearch__TopSDNs(t *testing.T) {
 	if len(sdns) == 0 {
 		t.Fatal("empty SDNs")
 	}
-	if sdns[0].SDN.EntityID != "2676" {
+	if sdns[0].EntityID != "2676" {
 		t.Errorf("%#v", sdns[0].SDN)
 	}
 }

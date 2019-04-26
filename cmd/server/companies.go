@@ -33,6 +33,7 @@ type Company struct {
 	Comments  []*ofac.SDNComments       `json:"comments"`
 	// Metadata
 	Status *CompanyStatus `json:"status"`
+	Match  float64        `json:"match,omitempty"`
 }
 
 type CompanyBlockStatus string
