@@ -1,6 +1,7 @@
 # OfacCompany
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** | OFAC Company ID | [optional] 

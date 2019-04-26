@@ -1,6 +1,7 @@
 # UpdateCompanyStatus
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Status** | **string** | manual override of company/SDN sanction status | 

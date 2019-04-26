@@ -1,6 +1,7 @@
 # Download
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **SDNs** | **int32** |  | [optional] 

@@ -1,6 +1,7 @@
 # OfacCompanyStatus
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **UserId** | **string** | User ID provided when updating status | [optional] 

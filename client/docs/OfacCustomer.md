@@ -1,6 +1,7 @@
 # OfacCustomer
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** | OFAC Customer ID | [optional] 

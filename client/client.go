@@ -33,8 +33,8 @@ import (
 )
 
 var (
-	jsonCheck = regexp.MustCompile("(?i:[application|text]/json)")
-	xmlCheck  = regexp.MustCompile("(?i:[application|text]/xml)")
+	jsonCheck = regexp.MustCompile(`(?i:(?:application|text)/(?:vnd\.[^;]+\+)?json)`)
+	xmlCheck  = regexp.MustCompile(`(?i:(?:application|text)/xml)`)
 )
 
 // APIClient manages communication with the OFAC API API vv1
@@ -313,12 +313,17 @@ func (c *APIClient) prepareRequest(
 }
 
 func (c *APIClient) decode(v interface{}, b []byte, contentType string) (err error) {
-	if strings.Contains(contentType, "application/xml") {
+	if s, ok := v.(*string); ok {
+		*s = string(b)
+		return nil
+	}
+	if xmlCheck.MatchString(contentType) {
 		if err = xml.Unmarshal(b, v); err != nil {
 			return err
 		}
 		return nil
-	} else if strings.Contains(contentType, "application/json") {
+	}
+	if jsonCheck.MatchString(contentType) {
 		if err = json.Unmarshal(b, v); err != nil {
 			return err
 		}

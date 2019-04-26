@@ -13,7 +13,8 @@ For more information, please visit [https://github.com/moov-io/ofac](https://git
 ## Installation
 
 Install the following dependencies:
-```
+
+```shell
 go get github.com/stretchr/testify/assert
 go get golang.org/x/oauth2
 go get golang.org/x/net/context
@@ -21,6 +22,7 @@ go get github.com/antihax/optional
 ```
 
 Put the package under your project folder and add the following in import:
+
 ```golang
 import "./openapi"
 ```
@@ -31,7 +33,7 @@ All URIs are relative to *http://localhost:8084*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*OFACApi* | [**AddCompanyNameWatch**](docs/OFACApi.md#addcompanynamewatch) | **Post** /companies/watch | Add customer watch by name
+*OFACApi* | [**AddCompanyNameWatch**](docs/OFACApi.md#addcompanynamewatch) | **Post** /companies/watch | Add company watch by name
 *OFACApi* | [**AddCompanyWatch**](docs/OFACApi.md#addcompanywatch) | **Post** /companies/{companyId}/watch | Add OFAC watch on a Company
 *OFACApi* | [**AddCustomerNameWatch**](docs/OFACApi.md#addcustomernamewatch) | **Post** /customers/watch | Add customer watch by name
 *OFACApi* | [**AddCustomerWatch**](docs/OFACApi.md#addcustomerwatch) | **Post** /customers/{customerId}/watch | Add OFAC watch on a Customer
@@ -69,6 +71,7 @@ Class | Method | HTTP request | Description
 
 
 ## Documentation For Authorization
+
  Endpoints do not require authorization.
 
 

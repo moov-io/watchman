@@ -1,6 +1,7 @@
 # Alt
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **EntityID** | **string** |  | [optional] 

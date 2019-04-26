@@ -1,6 +1,7 @@
 # Watch
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **WatchId** | **string** | Object representing a customer or company watch | [optional] 

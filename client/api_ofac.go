@@ -27,7 +27,7 @@ var (
 type OFACApiService service
 
 /*
-OFACApiService Add customer watch by name
+OFACApiService Add company watch by name
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param name Company name used to match and send watch notifications
  * @param watchRequest
