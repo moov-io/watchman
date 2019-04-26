@@ -74,13 +74,15 @@ When OFAC sends a [webhook](https://en.wikipedia.org/wiki/Webhook) to your appli
 
 An `Authorization` header will also be sent with the `authToken` provided when setting up the watch. Clients should verify this token to ensure authenticated communicated.
 
+Webhook notifications are ran after the OFAC data is successfully refreshed, which is determined by the `OFAC_DATA_REFRESH` environmental variable.
+
 ##### Watching a specific Customer or Company by ID
 
 OFAC supports sending a webhook periodically when a specific [Company](https://api.moov.io/#operation/addCompanyWatch) or [Customer](https://api.moov.io/#operation/addCustomerWatch) is to be watched. This is designed to update another system about an OFAC entry's sanction status.
 
 ##### Watching a customer or company name
 
-OFAC supports sending a webhook periodically with a free-form name of a [Company](https://api.moov.io/#operation/addCompanyNameWatch) or [Customer](https://api.moov.io/#operation/addCustomerNameWatch). This allows external applications to be notified when an entity matching that name is added to the OFAC list.
+OFAC supports sending a webhook periodically with a free-form name of a [Company](https://api.moov.io/#operation/addCompanyNameWatch) or [Customer](https://api.moov.io/#operation/addCustomerNameWatch). This allows external applications to be notified when an entity matching that name is added to the OFAC list. The match percentage will be included in the JSON payload.
 
 ## Getting Help
 
