@@ -23,6 +23,7 @@ type Customer struct {
 	SDN       *ofac.SDN                 `json:"sdn"`
 	Addresses []*ofac.Address           `json:"addresses"`
 	Alts      []*ofac.AlternateIdentity `json:"alts"`
+	Match float64 `json:"match,omitempty"`
 }
 
 type Company struct {
@@ -30,6 +31,7 @@ type Company struct {
 	SDN       *ofac.SDN                 `json:"sdn"`
 	Addresses []*ofac.Address           `json:"addresses"`
 	Alts      []*ofac.AlternateIdentity `json:"alts"`
+	Match float64 `json:"match,omitempty"`
 }
 
 func addWebhookRoute(logger log.Logger, r *mux.Router) {
@@ -44,12 +46,12 @@ func addWebhookRoute(logger log.Logger, r *mux.Router) {
 		}
 
 		if cust := readCustomer(bytes.NewReader(bs)); cust != nil {
-			logger.Log("webhook", fmt.Sprintf("got webhook for Customer %s", cust.ID))
+			logger.Log("webhook", fmt.Sprintf("got webhook for Customer %s (%s) match=%.2f", cust.ID, cust.SDN.SDNName, cust.Match))
 			w.WriteHeader(http.StatusOK)
 			return
 		}
 		if company := readCompany(bytes.NewReader(bs)); company != nil {
-			logger.Log("webhook", fmt.Sprintf("got webhook for Company %s", company.ID))
+			logger.Log("webhook", fmt.Sprintf("got webhook for Company %s (%s) match=%.2f", company.ID, company.SDN.SDNName, company.Match))
 			w.WriteHeader(http.StatusOK)
 		}
 

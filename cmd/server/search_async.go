@@ -59,7 +59,7 @@ func (s *searcher) spawnResearching(logger log.Logger, companyRepo companyReposi
 						body, err = getCustomerBody(s, watches[i].id, watches[i].customerId, 1.0, custRepo)
 
 					case watches[i].customerName != "":
-						s.logger.Log("search", fmt.Sprintf("async: name watch %q for customer %s found", watches[i].id, watches[i].customerName))
+						s.logger.Log("search", fmt.Sprintf("async: name watch '%s' for customer %s found", watches[i].customerName, watches[i].id))
 						sdns := s.TopSDNs(5, watches[i].customerName) // TODO(adam): need to include .match on JSON blob
 						for i := range sdns {
 							if strings.EqualFold(sdns[i].SDNType, "individual") {
@@ -73,7 +73,7 @@ func (s *searcher) spawnResearching(logger log.Logger, companyRepo companyReposi
 						body, err = getCompanyBody(s, watches[i].id, watches[i].companyId, 1.0, companyRepo)
 
 					case watches[i].companyName != "":
-						s.logger.Log("search", fmt.Sprintf("async: name watch %q for company %s found", watches[i].id, watches[i].companyName))
+						s.logger.Log("search", fmt.Sprintf("async: name watch '%s' for company %s found", watches[i].companyName, watches[i].id))
 						sdns := s.TopSDNs(5, watches[i].companyName) // TODO(adam): need to include .match on JSON blob
 						for i := range sdns {
 							if !strings.EqualFold(sdns[i].SDNType, "individual") {
