@@ -27,7 +27,7 @@ var (
 type OFACApiService service
 
 /*
-OFACApiService Add company watch by name
+OFACApiService Add company watch by name. The match percentage will be included in the webhook's JSON payload.
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param name Company name used to match and send watch notifications
  * @param watchRequest
@@ -227,7 +227,7 @@ func (a *OFACApiService) AddCompanyWatch(ctx context.Context, companyId string, 
 }
 
 /*
-OFACApiService Add customer watch by name
+OFACApiService Add customer watch by name. The match percentage will be included in the webhook's JSON payload.
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param name Individual name used to match and send watch notifications
  * @param watchRequest

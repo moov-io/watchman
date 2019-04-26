@@ -4,9 +4,9 @@ All URIs are relative to *http://localhost:8084*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**AddCompanyNameWatch**](OFACApi.md#AddCompanyNameWatch) | **Post** /companies/watch | Add company watch by name
+[**AddCompanyNameWatch**](OFACApi.md#AddCompanyNameWatch) | **Post** /companies/watch | Add company watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
 [**AddCompanyWatch**](OFACApi.md#AddCompanyWatch) | **Post** /companies/{companyId}/watch | Add OFAC watch on a Company
-[**AddCustomerNameWatch**](OFACApi.md#AddCustomerNameWatch) | **Post** /customers/watch | Add customer watch by name
+[**AddCustomerNameWatch**](OFACApi.md#AddCustomerNameWatch) | **Post** /customers/watch | Add customer watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
 [**AddCustomerWatch**](OFACApi.md#AddCustomerWatch) | **Post** /customers/{customerId}/watch | Add OFAC watch on a Customer
 [**GetCompany**](OFACApi.md#GetCompany) | **Get** /companies/{companyId} | Get information about a company, trust or organization such as addresses, alternate names, and remarks.
 [**GetCustomer**](OFACApi.md#GetCustomer) | **Get** /customers/{customerId} | Get information about a customer, addresses, alternate names, and their SDN metadata.
@@ -28,7 +28,7 @@ Method | HTTP request | Description
 ## AddCompanyNameWatch
 
 > Watch AddCompanyNameWatch(ctx, name, watchRequest, optional)
-Add company watch by name
+Add company watch by name. The match percentage will be included in the webhook's JSON payload.
 
 ### Required Parameters
 
@@ -116,7 +116,7 @@ No authorization required
 ## AddCustomerNameWatch
 
 > Watch AddCustomerNameWatch(ctx, name, watchRequest, optional)
-Add customer watch by name
+Add customer watch by name. The match percentage will be included in the webhook's JSON payload.
 
 ### Required Parameters
 
