@@ -46,7 +46,7 @@ paths:
             example: 1d1c824a
       responses:
         '200':
-          description: Customer and associated metadata
+          description: Company and associated metadata
           content:
             application/json:
               schema:
@@ -73,7 +73,7 @@ paths:
               $ref: '#/components/schemas/UpdateCompanyStatus'
       responses:
         '200':
-          description: Customer status updated
+          description: Company status updated
   /companies/{companyId}/watch:
     post:
       tags:
@@ -133,7 +133,7 @@ paths:
     post:
       tags:
         - OFAC
-      summary: Add customer watch by name
+      summary: Add company watch by name
       operationId: addCompanyNameWatch
       parameters:
         - $ref: '#/components/parameters/requestId'
@@ -676,7 +676,7 @@ components:
           type: string
           example: 08ddba92
     WatchRequest:
-      description: Webhook or other means of notification on search criteria. OFAC will make a POST request with a body of the customer (SDN, AltNames, and Address).
+      description: Webhook or other means of notification on search criteria. OFAC will make a POST request with a body of the customer or company (SDN, AltNames, and Address).
       properties:
         authToken:
           description: Private token supplied by clients to be used for authenticating webhooks.
