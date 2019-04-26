@@ -23,7 +23,7 @@ type Customer struct {
 	SDN       *ofac.SDN                 `json:"sdn"`
 	Addresses []*ofac.Address           `json:"addresses"`
 	Alts      []*ofac.AlternateIdentity `json:"alts"`
-	Match float64 `json:"match,omitempty"`
+	Match     float64                   `json:"match,omitempty"`
 }
 
 type Company struct {
@@ -31,7 +31,7 @@ type Company struct {
 	SDN       *ofac.SDN                 `json:"sdn"`
 	Addresses []*ofac.Address           `json:"addresses"`
 	Alts      []*ofac.AlternateIdentity `json:"alts"`
-	Match float64 `json:"match,omitempty"`
+	Match     float64                   `json:"match,omitempty"`
 }
 
 func addWebhookRoute(logger log.Logger, r *mux.Router) {
