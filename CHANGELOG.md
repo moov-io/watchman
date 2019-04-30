@@ -1,3 +1,18 @@
+## v0.8.0 (Unreleased)
+
+BREAKING CHANGES
+
+- api: Rename 'searchSDNs' to 'search' to reflect capability of other search capabilities
+
+ADDITIONS
+
+- api: Added Company routes and generated client code
+- cmd/server: async: send webhooks on company/customer name watches (with match %)
+
+BUG FIXES
+
+- cmd/server: return database/sql Rows.Err
+
 ## v0.7.0 (Released 2019-04-25)
 
 ADDITIONS
