@@ -197,5 +197,5 @@ func (r *sqliteDownloadRepository) latestDownloads(limit int) ([]Download, error
 			downloads = append(downloads, dl)
 		}
 	}
-	return downloads, nil
+	return downloads, rows.Err()
 }

@@ -300,7 +300,7 @@ func (cur *watchCursor) getCompanyBatch(limit int) ([]watch, error) {
 	}
 	cur.companyNewerThan = max
 
-	return watches, nil
+	return watches, rows.Err()
 }
 
 func (cur *watchCursor) getCompanyNameBatch(limit int) ([]watch, error) {
@@ -333,7 +333,7 @@ func (cur *watchCursor) getCompanyNameBatch(limit int) ([]watch, error) {
 	}
 	cur.companyNameNewerThan = max
 
-	return watches, nil
+	return watches, rows.Err()
 }
 
 func (cur *watchCursor) getCustomerBatch(limit int) ([]watch, error) {
@@ -366,7 +366,7 @@ func (cur *watchCursor) getCustomerBatch(limit int) ([]watch, error) {
 	}
 	cur.customerNewerThan = max
 
-	return watches, nil
+	return watches, rows.Err()
 }
 
 func (cur *watchCursor) getCustomerNameBatch(limit int) ([]watch, error) {
@@ -399,5 +399,5 @@ func (cur *watchCursor) getCustomerNameBatch(limit int) ([]watch, error) {
 	}
 	cur.customerNameNewerThan = max
 
-	return watches, nil
+	return watches, rows.Err()
 }
