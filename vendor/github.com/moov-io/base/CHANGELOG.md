@@ -1,3 +1,23 @@
+## v0.10.0 (Unreleased)
+
+ADDITIONS
+
+- idempotent: add [`Header(*http.Request) string`](https://godoc.org/github.com/moov-io/base/idempotent#Header) and `HeaderKey`
+
+BUG FIXES
+
+- http: respond with '429 PreconditionFailed' if X-Idempotency-Key has been seen before
+
+IMPROVEMENTS
+
+- idempotent: bump up max header length
+
+## v0.9.0 (Released 2019-03-04)
+
+ADDITIONS
+
+- admin: Added `AddLivenessCheck` and `AddReadinessCheck` for HTTP health checks
+
 ## v0.8.0 (Released 2019-02-01)
 
 ADDITIONS
