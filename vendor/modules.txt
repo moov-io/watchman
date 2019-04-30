@@ -11,7 +11,7 @@ github.com/go-kit/kit/metrics/internal/lv
 github.com/go-logfmt/logfmt
 # github.com/golang/protobuf v1.2.0
 github.com/golang/protobuf/proto
-# github.com/gorilla/mux v1.7.0
+# github.com/gorilla/mux v1.7.1
 github.com/gorilla/mux
 # github.com/hashicorp/golang-lru v0.5.1
 github.com/hashicorp/golang-lru
@@ -35,29 +35,25 @@ github.com/prometheus/client_golang/prometheus/promhttp
 github.com/prometheus/client_golang/prometheus/internal
 # github.com/prometheus/client_model v0.0.0-20190129233127-fd36f4220a90
 github.com/prometheus/client_model/go
-# github.com/prometheus/common v0.2.0
+# github.com/prometheus/common v0.3.0
 github.com/prometheus/common/expfmt
 github.com/prometheus/common/model
 github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg
-# github.com/prometheus/procfs v0.0.0-20190228175808-bbced9601137
+# github.com/prometheus/procfs v0.0.0-20190430205326-87a4384529e0
 github.com/prometheus/procfs
-github.com/prometheus/procfs/iostats
-github.com/prometheus/procfs/nfs
-github.com/prometheus/procfs/xfs
-github.com/prometheus/procfs/internal/util
-# github.com/rickar/cal v1.0.0
+# github.com/rickar/cal v1.0.1
 github.com/rickar/cal
 # github.com/xrash/smetrics v0.0.0-20170218160415-a3153f7040e9
 github.com/xrash/smetrics
-# go4.org v0.0.0-20190218023631-ce4c26f7be8e
+# go4.org v0.0.0-20190430205326-94abd6928b1d
 go4.org/syncutil
-# golang.org/x/net v0.0.0-20190304005336-16b79f2e4e95
+# golang.org/x/net v0.0.0-20190430205326-4829fb13d2c6
 golang.org/x/net/context/ctxhttp
 golang.org/x/net/context
-# golang.org/x/oauth2 v0.0.0-20190227165946-e64efc72b421
+# golang.org/x/oauth2 v0.0.0-20190430205326-9f3314589c9a
 golang.org/x/oauth2
 golang.org/x/oauth2/internal
-# golang.org/x/text v0.3.0
+# golang.org/x/text v0.3.2
 golang.org/x/text/transform
 golang.org/x/text/unicode/norm
 # google.golang.org/appengine v1.4.0
