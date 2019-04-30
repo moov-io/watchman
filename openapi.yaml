@@ -411,7 +411,7 @@ paths:
       tags:
         - OFAC
       summary: Search SDN names and metadata
-      operationId: searchSDNs
+      operationId: search
       parameters:
         - $ref: '#/components/parameters/requestId'
         - name: q

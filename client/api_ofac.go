@@ -1385,7 +1385,7 @@ func (a *OFACApiService) RemoveCustomerWatch(ctx context.Context, customerId str
 /*
 OFACApiService Search SDN names and metadata
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param optional nil or *SearchSDNsOpts - Optional Parameters:
+ * @param optional nil or *SearchOpts - Optional Parameters:
  * @param "XRequestId" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
  * @param "Q" (optional.String) -  Search across Name, Alt Names, and Address fields for all SDN entries. Entries may be returned in all response sub-objects.
  * @param "Name" (optional.String) -  Name which could correspond to a human on the SDN list. Only SDN results will be returned.
@@ -1395,7 +1395,7 @@ OFACApiService Search SDN names and metadata
 @return Search
 */
 
-type SearchSDNsOpts struct {
+type SearchOpts struct {
 	XRequestId optional.String
 	Q          optional.String
 	Name       optional.String
@@ -1404,7 +1404,7 @@ type SearchSDNsOpts struct {
 	Limit      optional.Int32
 }
 
-func (a *OFACApiService) SearchSDNs(ctx context.Context, localVarOptionals *SearchSDNsOpts) (Search, *http.Response, error) {
+func (a *OFACApiService) Search(ctx context.Context, localVarOptionals *SearchOpts) (Search, *http.Response, error) {
 	var (
 		localVarHttpMethod   = strings.ToUpper("Get")
 		localVarPostBody     interface{}

@@ -48,7 +48,7 @@ Class | Method | HTTP request | Description
 *OFACApi* | [**RemoveCompanyWatch**](docs/OFACApi.md#removecompanywatch) | **Delete** /companies/{companyId}/watch/{watchId} | Remove company watch
 *OFACApi* | [**RemoveCustomerNameWatch**](docs/OFACApi.md#removecustomernamewatch) | **Delete** /customers/watch/{watchId} | Remove a Customer name watch
 *OFACApi* | [**RemoveCustomerWatch**](docs/OFACApi.md#removecustomerwatch) | **Delete** /customers/{customerId}/watch/{watchId} | Remove customer watch
-*OFACApi* | [**SearchSDNs**](docs/OFACApi.md#searchsdns) | **Get** /search | Search SDN names and metadata
+*OFACApi* | [**Search**](docs/OFACApi.md#search) | **Get** /search | Search SDN names and metadata
 *OFACApi* | [**UpdateCompanyStatus**](docs/OFACApi.md#updatecompanystatus) | **Put** /companies/{companyId} | Update a Companies sanction status to always block or always allow transactions.
 *OFACApi* | [**UpdateCustomerStatus**](docs/OFACApi.md#updatecustomerstatus) | **Put** /customers/{customerId} | Update a Customer&#39;s sanction status to always block or always allow transactions.
 

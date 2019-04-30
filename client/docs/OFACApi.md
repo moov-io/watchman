@@ -19,7 +19,7 @@ Method | HTTP request | Description
 [**RemoveCompanyWatch**](OFACApi.md#RemoveCompanyWatch) | **Delete** /companies/{companyId}/watch/{watchId} | Remove company watch
 [**RemoveCustomerNameWatch**](OFACApi.md#RemoveCustomerNameWatch) | **Delete** /customers/watch/{watchId} | Remove a Customer name watch
 [**RemoveCustomerWatch**](OFACApi.md#RemoveCustomerWatch) | **Delete** /customers/{customerId}/watch/{watchId} | Remove customer watch
-[**SearchSDNs**](OFACApi.md#SearchSDNs) | **Get** /search | Search SDN names and metadata
+[**Search**](OFACApi.md#Search) | **Get** /search | Search SDN names and metadata
 [**UpdateCompanyStatus**](OFACApi.md#UpdateCompanyStatus) | **Put** /companies/{companyId} | Update a Companies sanction status to always block or always allow transactions.
 [**UpdateCustomerStatus**](OFACApi.md#UpdateCustomerStatus) | **Put** /customers/{customerId} | Update a Customer&#39;s sanction status to always block or always allow transactions.
 
@@ -654,9 +654,9 @@ No authorization required
 [[Back to README]](../README.md)
 
 
-## SearchSDNs
+## Search
 
-> Search SearchSDNs(ctx, optional)
+> Search Search(ctx, optional)
 Search SDN names and metadata
 
 ### Required Parameters
@@ -665,11 +665,11 @@ Search SDN names and metadata
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
- **optional** | ***SearchSDNsOpts** | optional parameters | nil if no parameters
+ **optional** | ***SearchOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
 
-Optional parameters are passed through a pointer to a SearchSDNsOpts struct
+Optional parameters are passed through a pointer to a SearchOpts struct
 
 
 Name | Type | Description  | Notes
