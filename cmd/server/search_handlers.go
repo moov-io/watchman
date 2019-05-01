@@ -99,6 +99,13 @@ type searchResponse struct {
 
 func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchRequest) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// TODO(adam): we need to handle all search params (right now it's just req.Address)
+		// .City, .State, .Providence, .Zip, .Country
+		// See: https://github.com/moov-io/ofac/issues/79
+		//
+		// i.e. Needing to block Iran all together
+		// https://www.treasury.gov/resource-center/sanctions/CivPen/Documents/20190327_decker_settlement.pdf
+
 		reqAdd := strings.TrimSpace(req.Address)
 		hasAddress := reqAdd != ""
 		if !hasAddress {
