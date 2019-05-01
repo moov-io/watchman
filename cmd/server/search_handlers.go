@@ -55,7 +55,7 @@ func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 			if logger != nil {
 				logger.Log("search", fmt.Sprintf("searching all names and address for %s", q))
 			}
-			searchByNameAndAltName(logger, searcher, q)(w, r)
+			searchViaQ(logger, searcher, q)(w, r)
 			return
 		}
 
@@ -117,7 +117,7 @@ func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchReq
 	}
 }
 
-func searchByNameAndAltName(logger log.Logger, searcher *searcher, name string) http.HandlerFunc {
+func searchViaQ(logger log.Logger, searcher *searcher, name string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name = strings.TrimSpace(name)
 		if name == "" {
