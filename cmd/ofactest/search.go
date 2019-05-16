@@ -111,7 +111,7 @@ func getSDNAltNames(ctx context.Context, api *moov.APIClient, id string) error {
 }
 
 func getCustomer(ctx context.Context, api *moov.APIClient, id string) error {
-	cust, resp, err := api.OFACApi.GetCustomer(ctx, id, nil)
+	cust, resp, err := api.OFACApi.GetOFACCustomer(ctx, id, nil)
 	if err != nil {
 		return fmt.Errorf("loadCustomer: %v", err)
 	}
@@ -123,7 +123,7 @@ func getCustomer(ctx context.Context, api *moov.APIClient, id string) error {
 }
 
 func getCompany(ctx context.Context, api *moov.APIClient, id string) error {
-	company, resp, err := api.OFACApi.GetCompany(ctx, id, nil)
+	company, resp, err := api.OFACApi.GetOFACCompany(ctx, id, nil)
 	if err != nil {
 		return fmt.Errorf("loadCompany: %v", err)
 	}
