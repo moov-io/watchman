@@ -3,6 +3,7 @@
 BREAKING CHANGES
 
 - api: Rename 'searchSDNs' to 'search' to reflect capability of other search capabilities
+- api: Add `*OFAC*` on Company and Customer OpenAPI operations (and thus generated clients)
 
 ADDITIONS
 
