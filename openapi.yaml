@@ -34,7 +34,7 @@ paths:
       tags:
         - OFAC
       summary: Get information about a company, trust or organization such as addresses, alternate names, and remarks.
-      operationId: getCompany
+      operationId: getOFACCompany
       parameters:
         - $ref: '#/components/parameters/requestId'
         - name: companyId
@@ -55,7 +55,7 @@ paths:
       tags:
         - OFAC
       summary: Update a Companies sanction status to always block or always allow transactions.
-      operationId: updateCompanyStatus
+      operationId: updateOFACCompanyStatus
       parameters:
         - $ref: '#/components/parameters/requestId'
         - name: companyId
@@ -79,7 +79,7 @@ paths:
       tags:
         - OFAC
       summary: Add OFAC watch on a Company
-      operationId: addCompanyWatch
+      operationId: addOFACCompanyWatch
       parameters:
         - $ref: '#/components/parameters/requestId'
         - name: companyId
@@ -109,7 +109,7 @@ paths:
       tags:
         - OFAC
       summary: Remove company watch
-      operationId: removeCompanyWatch
+      operationId: removeOFACCompanyWatch
       parameters:
         - $ref: '#/components/parameters/requestId'
         - name: companyId
@@ -134,7 +134,7 @@ paths:
       tags:
         - OFAC
       summary: Add company watch by name. The match percentage will be included in the webhook's JSON payload.
-      operationId: addCompanyNameWatch
+      operationId: addOFACCompanyNameWatch
       parameters:
         - $ref: '#/components/parameters/requestId'
         - name: name
@@ -162,7 +162,7 @@ paths:
       tags:
         - OFAC
       summary: Remove a Company name watch
-      operationId: removeCompanyNameWatch
+      operationId: removeOFACCompanyNameWatch
       parameters:
         - $ref: '#/components/parameters/requestId'
         - name: watchId
@@ -189,7 +189,7 @@ paths:
       tags:
         - OFAC
       summary: Get information about a customer, addresses, alternate names, and their SDN metadata.
-      operationId: getCustomer
+      operationId: getOFACCustomer
       parameters:
         - $ref: '#/components/parameters/requestId'
         - name: customerId
@@ -210,7 +210,7 @@ paths:
       tags:
         - OFAC
       summary: Update a Customer's sanction status to always block or always allow transactions.
-      operationId: updateCustomerStatus
+      operationId: updateOFACCustomerStatus
       parameters:
         - $ref: '#/components/parameters/requestId'
         - name: customerId
@@ -234,7 +234,7 @@ paths:
       tags:
         - OFAC
       summary: Add OFAC watch on a Customer
-      operationId: addCustomerWatch
+      operationId: addOFACCustomerWatch
       parameters:
         - $ref: '#/components/parameters/requestId'
         - name: customerId
@@ -264,7 +264,7 @@ paths:
       tags:
         - OFAC
       summary: Remove customer watch
-      operationId: removeCustomerWatch
+      operationId: removeOFACCustomerWatch
       parameters:
         - $ref: '#/components/parameters/requestId'
         - name: customerId
@@ -289,7 +289,7 @@ paths:
       tags:
         - OFAC
       summary: Add customer watch by name. The match percentage will be included in the webhook's JSON payload.
-      operationId: addCustomerNameWatch
+      operationId: addOFACCustomerNameWatch
       parameters:
         - $ref: '#/components/parameters/requestId'
         - name: name
@@ -317,7 +317,7 @@ paths:
       tags:
         - OFAC
       summary: Remove a Customer name watch
-      operationId: removeCustomerNameWatch
+      operationId: removeOFACCustomerNameWatch
       parameters:
         - $ref: '#/components/parameters/requestId'
         - name: watchId
