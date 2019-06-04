@@ -13,4 +13,6 @@ package openapi
 type UpdateCustomerStatus struct {
 	// manual override of customer/SDN sanction status
 	Status string `json:"status"`
+	// Free form notes about manually changing the Customer status
+	Notes string `json:"notes,omitempty"`
 }
