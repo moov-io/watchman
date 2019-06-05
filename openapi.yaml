@@ -640,6 +640,10 @@ components:
           enum:
             - unsafe
             - exception
+        notes:
+          description: Free form notes about manually changing the Company status
+          type: string
+          example: "False positive"
       required:
         - status
     UpdateCustomerStatus:
@@ -651,6 +655,10 @@ components:
           enum:
             - unsafe
             - exception
+        notes:
+          description: Free form notes about manually changing the Customer status
+          type: string
+          example: "False positive"
       required:
         - status
     Search:
