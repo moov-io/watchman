@@ -256,6 +256,16 @@ func TestSearch__TopAddresses(t *testing.T) {
 	}
 }
 
+func TestSearch__TopAddressFn(t *testing.T) {
+	addresses := addressSearcher.TopAddressesFn(1, topAddressesCountry("United Kingdom"))
+	if len(addresses) == 0 {
+		t.Fatal("empty Addresses")
+	}
+	if addresses[0].Address.EntityID != "173" {
+		t.Errorf("%#v", addresses[0].Address)
+	}
+}
+
 func TestSearch__FindAlts(t *testing.T) {
 	alts := altSearcher.FindAlts(1, "559")
 	if v := len(alts); v != 1 {

@@ -54,9 +54,54 @@ func (s *searcher) FindAddresses(limit int, id string) []*ofac.Address {
 	return out
 }
 
-func (s *searcher) TopAddresses(limit int, add string) []Address {
-	add = precompute(add)
+func (s *searcher) TopAddresses(limit int, reqAddress string) []Address {
+	return s.TopAddressesFn(limit, topAddressesAddress(reqAddress))
+}
 
+var (
+	// topAddressesAddress is a compare method for TopAddressesFn to extract and rank .Address
+	topAddressesAddress = func(needleAddr string) func(*Address) *item {
+		return func(add *Address) *item {
+			return &item{
+				value:  add,
+				weight: jaroWrinkler(add.address, precompute(needleAddr)),
+			}
+		}
+	}
+
+	// topAddressesCountry is a compare method for TopAddressesFn to extract and rank .Country
+	topAddressesCountry = func(needleCountry string) func(*Address) *item {
+		return func(add *Address) *item {
+			return &item{
+				value:  add,
+				weight: jaroWrinkler(add.country, precompute(needleCountry)),
+			}
+		}
+	}
+
+	// multiAddressCompare is a compare method for taking N higher-order compare methods
+	// and returning an average weight after computing them all.
+	multiAddressCompare = func(cmps ...func(*Address) *item) func(*Address) *item {
+		return func(add *Address) *item {
+			weight := 0.00
+			for i := range cmps {
+				weight += cmps[i](add).weight
+			}
+			return &item{
+				value:  add,
+				weight: weight / float64(len(cmps)),
+			}
+		}
+	}
+)
+
+// TopAddressesFn performs an Address search over an arbitrary member of Address. It's mainly used to rank
+// and search over .Country, .CityStateProvincePostalCode.
+//
+// compare takes an Address (from s.Addresses) and is expected to extract some property to be compared
+// against a captured parameter (in a closure calling compare) to return an *item for final sorting.
+// See searchByAddress in search_handlers.go for an example
+func (s *searcher) TopAddressesFn(limit int, compare func(*Address) *item) []Address {
 	s.RLock()
 	defer s.RUnlock()
 
@@ -66,12 +111,12 @@ func (s *searcher) TopAddresses(limit int, add string) []Address {
 	xs := newLargest(limit)
 
 	for i := range s.Addresses {
-		xs.add(&item{
-			value:  s.Addresses[i],
-			weight: jaroWrinkler(s.Addresses[i].address, add),
-		})
+		xs.add(compare(s.Addresses[i]))
 	}
+	return largestToAddresses(xs)
+}
 
+func largestToAddresses(xs *largest) []Address {
 	out := make([]Address, 0)
 	for i := range xs.items {
 		if v := xs.items[i]; v != nil {
