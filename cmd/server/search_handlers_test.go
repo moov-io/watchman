@@ -54,6 +54,24 @@ func TestSearch__Address(t *testing.T) {
 	}
 }
 
+func TestSearch__AddressCountry(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/search?country=united+kingdom&limit=1", nil)
+
+	router := mux.NewRouter()
+	addSearchRoutes(nil, router, addressSearcher)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusOK {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+
+	if v := w.Body.String(); !strings.Contains(v, `"match":1`) {
+		t.Errorf("%#v", v)
+	}
+}
+
 func TestSearch__AddressMulti(t *testing.T) {
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/search?address=ibex+house&country=united+kingdom&limit=1", nil)
