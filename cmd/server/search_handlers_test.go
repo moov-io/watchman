@@ -42,6 +42,34 @@ func TestSearch__Address(t *testing.T) {
 	if wrapper.Addresses[0].EntityID != "173" {
 		t.Errorf("%#v", wrapper.Addresses[0])
 	}
+
+	// send an empty body and get an error
+	w = httptest.NewRecorder()
+	req = httptest.NewRequest("GET", "/search?limit=1", nil)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+}
+
+func TestSearch__AddressMulti(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/search?address=ibex+house&country=united+kingdom&limit=1", nil)
+
+	router := mux.NewRouter()
+	addSearchRoutes(nil, router, addressSearcher)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusOK {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.945`) {
+		t.Errorf("%#v", v)
+	}
 }
 
 func TestSearch__NameAndAltName(t *testing.T) {
