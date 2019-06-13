@@ -175,6 +175,36 @@ func TestSearch_liveData(t *testing.T) {
 	}
 }
 
+func TestSearch__topAddressesAddress(t *testing.T) {
+	it := topAddressesAddress("needle")(&Address{address: "needleee"})
+
+	eql(t, "topAddressesAddress", it.weight, 0.95)
+	if add, ok := it.value.(*Address); !ok || add.address != "needleee" {
+		t.Errorf("got %#v", add)
+	}
+}
+
+func TestSearch__topAddressesCountry(t *testing.T) {
+	it := topAddressesAddress("needle")(&Address{address: "needleee"})
+
+	eql(t, "topAddressesCountry", it.weight, 0.95)
+	if add, ok := it.value.(*Address); !ok || add.address != "needleee" {
+		t.Errorf("got %#v", add)
+	}
+}
+
+func TestSearch__multiAddressCompare(t *testing.T) {
+	it := multiAddressCompare(
+		topAddressesAddress("needle"),
+		topAddressesCountry("other"),
+	)(&Address{address: "needlee", country: "other"})
+
+	eql(t, "multiAddressCompare", it.weight, 0.9857)
+	if add, ok := it.value.(*Address); !ok || add.address != "needlee" || add.country != "other" {
+		t.Errorf("got %#v", add)
+	}
+}
+
 func TestSearch__extractSearchLimit(t *testing.T) {
 	// Too high, fallback to hard max
 	req := httptest.NewRequest("GET", "/?limit=1000", nil)
@@ -252,6 +282,16 @@ func TestSearch__TopAddresses(t *testing.T) {
 		t.Fatal("empty Addresses")
 	}
 	if addresses[0].Address.EntityID != "735" {
+		t.Errorf("%#v", addresses[0].Address)
+	}
+}
+
+func TestSearch__TopAddressFn(t *testing.T) {
+	addresses := addressSearcher.TopAddressesFn(1, topAddressesCountry("United Kingdom"))
+	if len(addresses) == 0 {
+		t.Fatal("empty Addresses")
+	}
+	if addresses[0].Address.EntityID != "173" {
 		t.Errorf("%#v", addresses[0].Address)
 	}
 }

@@ -99,28 +99,32 @@ type searchResponse struct {
 
 func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchRequest) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// TODO(adam): we need to handle all search params (right now it's just req.Address)
-		// .City, .State, .Providence, .Zip, .Country
-		// See: https://github.com/moov-io/ofac/issues/79
-		//
-		// i.e. Needing to block Iran all together
-		// https://www.treasury.gov/resource-center/sanctions/CivPen/Documents/20190327_decker_settlement.pdf
-
-		reqAdd := strings.TrimSpace(req.Address)
-		hasAddress := reqAdd != ""
-		if !hasAddress {
+		if req.empty() {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		addresses := searcher.TopAddresses(extractSearchLimit(r), reqAdd)
+		var resp searchResponse
+		limit := extractSearchLimit(r)
 
+		// TODO(adam): We need to factor in the following properties also .City, .State, .Providence, .Zip
+		// This is to help avoid false positives, but if they're empty in the request we shouldn't count them.
+		// See: https://github.com/moov-io/ofac/issues/79
+		switch {
+		case req.Address != "" && req.Country != "":
+			// TODO(adam): Is there something in the (SDN?) files which signal to block an entire country? (i.e. Needing to block Iran all together)
+			// https://www.treasury.gov/resource-center/sanctions/CivPen/Documents/20190327_decker_settlement.pdf
+			resp.Addresses = searcher.TopAddressesFn(limit, multiAddressCompare(topAddressesAddress(req.Address), topAddressesCountry(req.Country)))
+
+		case req.Address != "":
+			resp.Addresses = searcher.TopAddresses(limit, req.Address)
+
+		case req.Country != "":
+			resp.Addresses = searcher.TopAddressesFn(limit, topAddressesCountry(req.Country))
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(&searchResponse{Addresses: addresses}); err != nil {
-			moovhttp.Problem(w, err)
-			return
-		}
+		json.NewEncoder(w).Encode(resp)
 	}
 }
 

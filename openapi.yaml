@@ -432,6 +432,12 @@ paths:
             type: string
             example: 123 83rd Ave
           description: Phsical address which could correspond to a human on the SDN list. Only Address results will be returned.
+        - name: country
+          in: query
+          schema:
+            type: string
+            example: USA
+          description: Country name as desginated by SDN guidelines. Only Address results will be returned.
         - name: altName
           in: query
           schema:

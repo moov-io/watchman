@@ -1390,6 +1390,7 @@ OFACApiService Search SDN names and metadata
  * @param "Q" (optional.String) -  Search across Name, Alt Names, and Address fields for all SDN entries. Entries may be returned in all response sub-objects.
  * @param "Name" (optional.String) -  Name which could correspond to a human on the SDN list. Only SDN results will be returned.
  * @param "Address" (optional.String) -  Phsical address which could correspond to a human on the SDN list. Only Address results will be returned.
+ * @param "Country" (optional.String) -  Country name as desginated by SDN guidelines. Only Address results will be returned.
  * @param "AltName" (optional.String) -  Alternate name which could correspond to a human on the SDN list. Only Alt name results will be returned.
  * @param "Limit" (optional.Int32) -  Maximum results returned by a search
 @return Search
@@ -1400,6 +1401,7 @@ type SearchOpts struct {
 	Q          optional.String
 	Name       optional.String
 	Address    optional.String
+	Country    optional.String
 	AltName    optional.String
 	Limit      optional.Int32
 }
@@ -1429,6 +1431,9 @@ func (a *OFACApiService) Search(ctx context.Context, localVarOptionals *SearchOp
 	}
 	if localVarOptionals != nil && localVarOptionals.Address.IsSet() {
 		localVarQueryParams.Add("address", parameterToString(localVarOptionals.Address.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.Country.IsSet() {
+		localVarQueryParams.Add("country", parameterToString(localVarOptionals.Country.Value(), ""))
 	}
 	if localVarOptionals != nil && localVarOptionals.AltName.IsSet() {
 		localVarQueryParams.Add("altName", parameterToString(localVarOptionals.AltName.Value(), ""))
