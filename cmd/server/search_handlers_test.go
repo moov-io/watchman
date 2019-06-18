@@ -90,6 +90,60 @@ func TestSearch__AddressMulti(t *testing.T) {
 	}
 }
 
+func TestSearch__AddressProvidence(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/search?address=ibex+house&country=united+kingdom&providence=london+ec3n+1DY&limit=1", nil)
+
+	router := mux.NewRouter()
+	addSearchRoutes(nil, router, addressSearcher)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusOK {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.96333`) {
+		t.Errorf("%#v", v)
+	}
+}
+
+func TestSearch__AddressCity(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/search?address=ibex+house&country=united+kingdom&city=london+ec3n+1DY&limit=1", nil)
+
+	router := mux.NewRouter()
+	addSearchRoutes(nil, router, addressSearcher)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusOK {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.96333`) {
+		t.Errorf("%#v", v)
+	}
+}
+
+func TestSearch__AddressState(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/search?address=ibex+house&country=united+kingdom&state=london+ec3n+1DY&limit=1", nil)
+
+	router := mux.NewRouter()
+	addSearchRoutes(nil, router, addressSearcher)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusOK {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.96333`) {
+		t.Errorf("%#v", v)
+	}
+}
+
 func TestSearch__NameAndAltName(t *testing.T) {
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/search?limit=1&q=Air+I", nil)
