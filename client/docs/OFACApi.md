@@ -678,6 +678,10 @@ Name | Type | Description  | Notes
  **q** | **optional.String**| Search across Name, Alt Names, and Address fields for all SDN entries. Entries may be returned in all response sub-objects. | 
  **name** | **optional.String**| Name which could correspond to a human on the SDN list. Only SDN results will be returned. | 
  **address** | **optional.String**| Phsical address which could correspond to a human on the SDN list. Only Address results will be returned. | 
+ **city** | **optional.String**| City name as desginated by SDN guidelines. Only Address results will be returned. | 
+ **state** | **optional.String**| State name as desginated by SDN guidelines. Only Address results will be returned. | 
+ **providence** | **optional.String**| Providence name as desginated by SDN guidelines. Only Address results will be returned. | 
+ **zip** | **optional.String**| Zip code as desginated by SDN guidelines. Only Address results will be returned. | 
  **country** | **optional.String**| Country name as desginated by SDN guidelines. Only Address results will be returned. | 
  **altName** | **optional.String**| Alternate name which could correspond to a human on the SDN list. Only Alt name results will be returned. | 
  **limit** | **optional.Int32**| Maximum results returned by a search | 

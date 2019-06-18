@@ -1390,6 +1390,10 @@ OFACApiService Search SDN names and metadata
  * @param "Q" (optional.String) -  Search across Name, Alt Names, and Address fields for all SDN entries. Entries may be returned in all response sub-objects.
  * @param "Name" (optional.String) -  Name which could correspond to a human on the SDN list. Only SDN results will be returned.
  * @param "Address" (optional.String) -  Phsical address which could correspond to a human on the SDN list. Only Address results will be returned.
+ * @param "City" (optional.String) -  City name as desginated by SDN guidelines. Only Address results will be returned.
+ * @param "State" (optional.String) -  State name as desginated by SDN guidelines. Only Address results will be returned.
+ * @param "Providence" (optional.String) -  Providence name as desginated by SDN guidelines. Only Address results will be returned.
+ * @param "Zip" (optional.String) -  Zip code as desginated by SDN guidelines. Only Address results will be returned.
  * @param "Country" (optional.String) -  Country name as desginated by SDN guidelines. Only Address results will be returned.
  * @param "AltName" (optional.String) -  Alternate name which could correspond to a human on the SDN list. Only Alt name results will be returned.
  * @param "Limit" (optional.Int32) -  Maximum results returned by a search
@@ -1401,6 +1405,10 @@ type SearchOpts struct {
 	Q          optional.String
 	Name       optional.String
 	Address    optional.String
+	City       optional.String
+	State      optional.String
+	Providence optional.String
+	Zip        optional.String
 	Country    optional.String
 	AltName    optional.String
 	Limit      optional.Int32
@@ -1431,6 +1439,18 @@ func (a *OFACApiService) Search(ctx context.Context, localVarOptionals *SearchOp
 	}
 	if localVarOptionals != nil && localVarOptionals.Address.IsSet() {
 		localVarQueryParams.Add("address", parameterToString(localVarOptionals.Address.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.City.IsSet() {
+		localVarQueryParams.Add("city", parameterToString(localVarOptionals.City.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.State.IsSet() {
+		localVarQueryParams.Add("state", parameterToString(localVarOptionals.State.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.Providence.IsSet() {
+		localVarQueryParams.Add("providence", parameterToString(localVarOptionals.Providence.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.Zip.IsSet() {
+		localVarQueryParams.Add("zip", parameterToString(localVarOptionals.Zip.Value(), ""))
 	}
 	if localVarOptionals != nil && localVarOptionals.Country.IsSet() {
 		localVarQueryParams.Add("country", parameterToString(localVarOptionals.Country.Value(), ""))
