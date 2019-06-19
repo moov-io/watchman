@@ -69,6 +69,18 @@ var (
 		}
 	}
 
+	// topAddressesCityState is a compare method for TopAddressesFn to extract and rank
+	// .City, .State, .Providence, and .Zip to return the average match between non-empty
+	// search criteria.
+	topAddressesCityState = func(needleCityState string) func(*Address) *item {
+		return func(add *Address) *item {
+			return &item{
+				value:  add,
+				weight: jaroWrinkler(add.citystate, precompute(needleCityState)),
+			}
+		}
+	}
+
 	// topAddressesCountry is a compare method for TopAddressesFn to extract and rank .Country
 	topAddressesCountry = func(needleCountry string) func(*Address) *item {
 		return func(add *Address) *item {

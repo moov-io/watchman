@@ -107,21 +107,33 @@ func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchReq
 		var resp searchResponse
 		limit := extractSearchLimit(r)
 
-		// TODO(adam): We need to factor in the following properties also .City, .State, .Providence, .Zip
-		// This is to help avoid false positives, but if they're empty in the request we shouldn't count them.
-		// See: https://github.com/moov-io/ofac/issues/79
-		switch {
-		case req.Address != "" && req.Country != "":
-			// TODO(adam): Is there something in the (SDN?) files which signal to block an entire country? (i.e. Needing to block Iran all together)
-			// https://www.treasury.gov/resource-center/sanctions/CivPen/Documents/20190327_decker_settlement.pdf
-			resp.Addresses = searcher.TopAddressesFn(limit, multiAddressCompare(topAddressesAddress(req.Address), topAddressesCountry(req.Country)))
-
-		case req.Address != "":
-			resp.Addresses = searcher.TopAddresses(limit, req.Address)
-
-		case req.Country != "":
-			resp.Addresses = searcher.TopAddressesFn(limit, topAddressesCountry(req.Country))
+		var compares []func(*Address) *item
+		if req.Address != "" {
+			compares = append(compares, topAddressesAddress(req.Address))
 		}
+
+		if req.City != "" {
+			compares = append(compares, topAddressesCityState(req.City))
+		}
+		if req.State != "" {
+			compares = append(compares, topAddressesCityState(req.State))
+		}
+		if req.Providence != "" {
+			compares = append(compares, topAddressesCityState(req.Providence))
+		}
+		if req.Zip != "" {
+			compares = append(compares, topAddressesCityState(req.Zip))
+		}
+		if req.Country != "" {
+			compares = append(compares, topAddressesCountry(req.Country))
+		}
+
+		// Perform our ranking across all accumulated compare functions
+		//
+		// TODO(adam): Is there something in the (SDN?) files which signal to block an entire country? (i.e. Needing to block Iran all together)
+		// https://www.treasury.gov/resource-center/sanctions/CivPen/Documents/20190327_decker_settlement.pdf
+		resp.Addresses = searcher.TopAddressesFn(limit, multiAddressCompare(compares...))
+
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(resp)
