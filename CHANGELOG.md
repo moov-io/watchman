@@ -9,10 +9,15 @@ ADDITIONS
 
 - api: Added Company routes and generated client code
 - cmd/server: async: send webhooks on company/customer name watches (with match %)
+- docs: add "A Framework for OFAC Compliance Commitments" from the US Treasury
+- cmd/server: search: handle ?country and average weight with ?address
+- cmd/server: handle city, state, providence, and zip in address search
 
 BUG FIXES
 
 - cmd/server: return database/sql Rows.Err
+- api: add missing 'notes' field on UpdateCompanyStatus and UpdateCustomerStatus
+- docs: describe moov's primary usage of OFAC (for paygate)
 
 ## v0.7.0 (Released 2019-04-25)
 
