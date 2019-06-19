@@ -12,7 +12,7 @@ require (
 	github.com/rickar/cal v1.0.1 // indirect
 	github.com/xrash/smetrics v0.0.0-20170218160415-a3153f7040e9
 	go4.org v0.0.0-20190430205326-94abd6928b1d
-	golang.org/x/net v0.0.0-20190520134616-3ec191127204 // indirect
-	golang.org/x/oauth2 v0.0.0-20190520134616-950ef44c6e07
+	golang.org/x/net v0.0.0-20190619160631-b5b0513f8c1b // indirect
+	golang.org/x/oauth2 v0.0.0-20190619160631-0f29369cfe45
 	golang.org/x/text v0.3.2
 )
