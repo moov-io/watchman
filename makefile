@@ -61,6 +61,7 @@ release: docker AUTHORS
 
 release-push:
 	docker push moov/ofac:$(VERSION)
+	docker push moov/ofac:latest
 	docker push moov/ofactest:$(VERSION)
 	docker push moov/ofac-webhook-example:$(VERSION)
 
