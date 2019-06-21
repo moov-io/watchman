@@ -15,15 +15,15 @@ To get started using OFAC download [the latest release](https://github.com/moov-
 
 ```
 # Run as a binary
-$ wget https://github.com/moov-io/ofac/releases/download/v0.7.0/ofac-darwin-amd64
+$ wget https://github.com/moov-io/ofac/releases/download/v0.8.0/ofac-darwin-amd64
 $ chmod +x ofac-darwin-amd64
 $ ./ofac-darwin-amd64
-ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting ofac server version v0.7.0"
+ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting ofac server version v0.8.0"
 ...
 
 # Run as a Docker image
-$ docker run -p 8084:8084 -p 9094:9094 -it moov/ofac:v0.7.0
-ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting ofac server version v0.7.0"
+$ docker run -p 8084:8084 -p 9094:9094 -it moov/ofac:latest
+ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting ofac server version v0.8.0"
 ...
 
 # Perform a basic search
