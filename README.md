@@ -60,6 +60,7 @@ Docs: [docs.moov.io](https://docs.moov.io/en/latest/) | [api docs](https://api.m
 |-----|-----|-----|
 | `OFAC_DATA_REFRESH` | Interval for OFAC data redownload and reparse. | 12h |
 | `OFAC_DOWNLOAD_TEMPLATE` | HTTP address for downloading raw OFAC files. | (OFAC website) |
+| `DPL_DOWNLOAD_TEMPLATE` | HTTP address for downloading the DPL | (BIS website) |
 | `SQLITE_DB_PATH`| Local filepath location for the paygate SQLite database. | `ofac.db` |
 | `WEBHOOK_BATCH_SIZE` | How many watches to read from database per batch of async searches. | 100 |
 
