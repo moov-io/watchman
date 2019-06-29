@@ -23,7 +23,7 @@ const (
 	// txtFile is a DPL tab-delimited file
 	// it should be a ".tsv" file, but BIS named it ".txt"...
 	txtFile  = ".txt"
-	txtDelim = '\n'
+	txtDelim = '\t'
 
 	// addressFile is an OFAC Specially Designated National (SDN) address File
 	addressFile = "add.csv"
