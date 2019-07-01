@@ -7,7 +7,7 @@ moov-io/ofac
 [![Go Report Card](https://goreportcard.com/badge/github.com/moov-io/ofac)](https://goreportcard.com/report/github.com/moov-io/ofac)
 [![Apache 2 licensed](https://img.shields.io/badge/license-Apache2-blue.svg)](https://raw.githubusercontent.com/moov-io/ofac/master/LICENSE)
 
-[Office of Foreign Asset Control](https://www.treasury.gov/about/organizational-structure/offices/Pages/Office-of-Foreign-Assets-Control.aspx) (OFAC) is an HTTP API and Go library to download, [parse and serve United States OFAC sanction data](https://docs.moov.io/en/latest/ofac/file-structure/) for applications and humans. Also supported is an async webhook notification service to initiate processes on remote systems connected with OFAC. The US Treasury department offers a [search page for OFAC records](https://sanctionssearch.ofac.treas.gov/).
+[Office of Foreign Asset Control](https://www.treasury.gov/about/organizational-structure/offices/Pages/Office-of-Foreign-Assets-Control.aspx) (OFAC) is an HTTP API and Go library to download, [parse and serve United States OFAC sanction data](https://docs.moov.io/ofac/file-structure/) for applications and humans. Also supported is an async webhook notification service to initiate processes on remote systems connected with OFAC. The US Treasury department offers a [search page for OFAC records](https://sanctionssearch.ofac.treas.gov/).
 
 All United States companies are required to comply with OFAC regulations and sanction lists. Moov's primary usage for this project is with ACH origination in our [paygate](https://github.com/moov-io/paygate) project.
 
@@ -52,7 +52,7 @@ $ curl -s localhost:8084/search?name=...
 
 We offer [hosted api docs as part of Moov's tools](https://api.moov.io/#tag/OFAC) and an [OpenAPI specification](https://github.com/moov-io/ofac/blob/master/openapi.yaml) for use with generated clients.
 
-Docs: [docs.moov.io](https://docs.moov.io/en/latest/) | [api docs](https://api.moov.io/apps/ofac/)
+Docs: [docs.moov.io](https://docs.moov.io/) | [api docs](https://api.moov.io/apps/ofac/)
 
 ### Configuration
 
@@ -94,7 +94,7 @@ We maintain a [runbook for common issues](docs/runbook.md) and configuration opt
 
  channel | info
  ------- | -------
- [Project Documentation](https://docs.moov.io/en/latest/) | Our project documentation available online.
+ [Project Documentation](https://docs.moov.io/) | Our project documentation available online.
  Google Group [moov-users](https://groups.google.com/forum/#!forum/moov-users)| The Moov users Google group is for contributors other people contributing to the Moov project. You can join them without a google account by sending an email to [moov-users+subscribe@googlegroups.com](mailto:moov-users+subscribe@googlegroups.com). After receiving the join-request message, you can simply reply to that to confirm the subscription.
 Twitter [@moov_io](https://twitter.com/moov_io)	| You can follow Moov.IO's Twitter feed to get updates on our project(s). You can also tweet us questions or just share blogs or stories.
 [GitHub Issue](https://github.com/moov-io) | If you are able to reproduce an problem please open a GitHub Issue under the specific project that caused the error.
