@@ -33,6 +33,7 @@ type searcher struct {
 	SDNs         []*SDN
 	Addresses    []*Address
 	Alts         []*Alt
+	DPs          []*DP
 	sync.RWMutex // protects all above fields
 
 	logger log.Logger
@@ -351,6 +352,35 @@ func precomputeAlts(alts []*ofac.AlternateIdentity) []*Alt {
 		out[i] = &Alt{
 			AlternateIdentity: alts[i],
 			name:              precompute(alts[i].AlternateName),
+		}
+	}
+	return out
+}
+
+// DP is a BIS Denied Person wrapped with precomputed search metadata
+type DP struct {
+	DeniedPerson *ofac.DPL
+	match        float64
+	name         string
+}
+
+// MarshalJSON is a custom method for marshalling a BIS Denied Person (DP)
+func (d DP) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		*ofac.DPL
+		Match float64 `json:"match"`
+	}{
+		d.DeniedPerson,
+		d.match,
+	})
+}
+
+func precomputeDPs(persons []*ofac.DPL) []*DP {
+	out := make([]*DP, len(persons))
+	for i := range persons {
+		out[i] = &DP{
+			DeniedPerson: persons[i],
+			name:         precompute(persons[i].Name),
 		}
 	}
 	return out
