@@ -19,7 +19,7 @@ import (
 	"github.com/moov-io/base/admin"
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/base/http/bind"
-	"github.com/moov-io/ofac"
+	"github.com/cardonator/ofac"
 
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"

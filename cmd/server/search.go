@@ -15,7 +15,7 @@ import (
 	"sync"
 	"unicode"
 
-	"github.com/moov-io/ofac"
+	"github.com/cardonator/ofac"
 
 	"github.com/go-kit/kit/log"
 	"github.com/xrash/smetrics"
