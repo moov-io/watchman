@@ -60,7 +60,7 @@ func TestDownload_record(t *testing.T) {
 	repo := createTestDownloadRepository(t)
 	defer repo.close()
 
-	stats := &downloadStats{1, 12, 42}
+	stats := &downloadStats{1, 12, 42, 13}
 	if err := repo.recordStats(stats); err != nil {
 		t.Fatal(err)
 	}
@@ -93,7 +93,7 @@ func TestDownload_route(t *testing.T) {
 	defer repo.close()
 
 	// save a record
-	repo.recordStats(&downloadStats{1, 421, 1511})
+	repo.recordStats(&downloadStats{1, 421, 1511, 731})
 
 	router := mux.NewRouter()
 	addDownloadRoutes(nil, router, repo)
