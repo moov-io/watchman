@@ -239,6 +239,39 @@ func (s *searcher) TopSDNs(limit int, name string) []SDN {
 	return out
 }
 
+func (s *searcher) TopDPs(limit int, name string) []DP {
+	name = precompute(name)
+
+	s.RLock()
+	defer s.RUnlock()
+
+	if len(s.DPs) == 0 {
+		return nil
+	}
+	xs := newLargest(limit)
+
+	for _, dp := range s.DPs {
+		xs.add(&item{
+			value:  dp,
+			weight: jaroWrinkler(dp.name, name),
+		})
+	}
+
+	out := make([]DP, 0)
+	for _, thisItem := range xs.items {
+		if v := thisItem; v != nil {
+			ss, ok := v.value.(*DP)
+			if !ok {
+				continue
+			}
+			dp := *ss
+			dp.match = v.weight
+			out = append(out, dp)
+		}
+	}
+	return out
+}
+
 // SDN is ofac.SDN wrapped with precomputed search metadata
 type SDN struct {
 	*ofac.SDN
