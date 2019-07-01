@@ -51,6 +51,16 @@ func TestSDNCommentsCSVFileRead(t *testing.T) {
 	}
 }
 
+// TestDPLTXTFileRead validates reading a BIS Denied Persons List file
+func TestDPLTXTFileRead(t *testing.T) {
+	r := Reader{}
+
+	r.FileName = "test/testdata/dpl.txt"
+	if err := r.Read(); err != nil {
+		t.Errorf("%T: %s", err, err)
+	}
+}
+
 // TestInvalidFileExtension validates the file extension is csv
 func TestInvalidFileExtension(t *testing.T) {
 	r := Reader{}
@@ -97,6 +107,28 @@ func TestSDNCSVFileHit(t *testing.T) {
 	}
 }
 
+// TestDPLTXTFileHit validates reading a BIS Denied Person TXT File Hit
+func TestDPLTXTFileHit(t *testing.T) {
+	r := Reader{}
+
+	r.FileName = "test/testdata/dpl.txt"
+	err := r.Read()
+
+	if err != nil {
+		t.Errorf("%T: %s", err, err)
+	}
+
+	hit := false
+	for _, sdn := range r.DeniedPersons {
+		if sdn.Name == "HAYDEE HERRERA" {
+			hit = true
+		}
+	}
+	if !hit {
+		t.Error("the check missed a denied person")
+	}
+}
+
 // TestSDNCSVFileJSON tests reading an OFAC Specially Designated National CSV File and formatting to JSON
 func TestSDNCSVFileJSON(t *testing.T) {
 	r := Reader{}
@@ -107,6 +139,20 @@ func TestSDNCSVFileJSON(t *testing.T) {
 	}
 
 	if _, err := json.Marshal(r.SDNs); err != nil {
+		t.Errorf("%T: %s", err, err)
+	}
+}
+
+// TestDPLTXTFileJSON tests reading a BIS Denied Persons TXT File and formatting to JSON
+func TestDPLTXTFileJSON(t *testing.T) {
+	r := Reader{}
+
+	r.FileName = "test/testdata/dpl.txt"
+	if err := r.Read(); err != nil {
+		t.Errorf("%T: %s", err, err)
+	}
+
+	if _, err := json.Marshal(r.DeniedPersons); err != nil {
 		t.Errorf("%T: %s", err, err)
 	}
 }

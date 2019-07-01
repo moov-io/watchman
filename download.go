@@ -22,11 +22,19 @@ var (
 		"sdn_comments.csv", // Specially Designated National Comments
 	}
 	ofacURLTemplate = "https://www.treasury.gov/ofac/downloads/%s"
+
+	dplFilenames = []string{
+		"dpl.txt", // Denied Persons List (tab separated)
+	}
+	dplURLTemplate = "https://www.bis.doc.gov/dpl/%s"
 )
 
 func init() {
 	if v := os.Getenv("OFAC_DOWNLOAD_TEMPLATE"); v != "" {
 		ofacURLTemplate = v
+	}
+	if w := os.Getenv("DPL_DOWNLOAD_TEMPLATE"); w != "" {
+		dplURLTemplate = w
 	}
 }
 
@@ -39,7 +47,7 @@ type Downloader struct {
 	HTTP *http.Client
 }
 
-// getFiles will download all OFAC related files and store them in a temporary directory
+// GetFiles will download all OFAC related files and store them in a temporary directory
 // returned and an error otherwise.
 //
 // Callers are expected to cleanup the temp directory.
@@ -48,21 +56,27 @@ func (dl *Downloader) GetFiles() (string, error) {
 		dl.HTTP = http.DefaultClient
 	}
 
-	dir, err := ioutil.TempDir("", "ofac-downloader")
+	dir, err := ioutil.TempDir("", "blacklist-downloader")
 	if err != nil {
 		return "", fmt.Errorf("OFAC: unable to make temp dir: %v", err)
 	}
 
+	// create a single list containing all filenames and source URLs
+	namesAndSources := make(map[string]string)
+	for _, fname := range ofacFilenames {
+		namesAndSources[fname] = fmt.Sprintf(ofacURLTemplate, fname)
+	}
+	for _, fname := range dplFilenames {
+		namesAndSources[fname] = fmt.Sprintf(dplURLTemplate, fname)
+	}
+
 	wg := sync.WaitGroup{}
-	wg.Add(len(ofacFilenames))
-
-	for i := range ofacFilenames {
-		name := ofacFilenames[i]
-
-		go func(wg *sync.WaitGroup, filename string) {
+	wg.Add(len(namesAndSources))
+	for name, source := range namesAndSources {
+		go func(wg *sync.WaitGroup, filename, downloadURL string) {
 			defer wg.Done()
 
-			resp, err := dl.HTTP.Get(fmt.Sprintf(ofacURLTemplate, filename))
+			resp, err := dl.HTTP.Get(downloadURL)
 			if err != nil {
 				return
 			}
@@ -76,15 +90,15 @@ func (dl *Downloader) GetFiles() (string, error) {
 			defer fd.Close()
 
 			io.Copy(fd, resp.Body) // copy contents
-		}(&wg, name)
+		}(&wg, name, source)
 	}
 
 	wg.Wait()
 
 	// count files and error if the count isn't what we expected
 	fds, err := ioutil.ReadDir(dir)
-	if err != nil || len(fds) != len(ofacFilenames) {
-		return "", fmt.Errorf("OFAC: problem downloading (found=%d, expected=%d): err=%v", len(fds), len(ofacFilenames), err)
+	if err != nil || len(fds) != len(namesAndSources) {
+		return "", fmt.Errorf("OFAC: problem downloading (found=%d, expected=%d): err=%v", len(fds), len(namesAndSources), err)
 	}
 
 	return dir, nil

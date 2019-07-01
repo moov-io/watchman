@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/cardonator/ofac"
 	moovhttp "github.com/moov-io/base/http"
-	"github.com/moov-io/ofac"
 
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
@@ -32,19 +32,21 @@ func init() {
 	prometheus.MustRegister(lastOFACDataRefreshSuccess)
 }
 
-// Download holds counts for each type of OFAC data parsed from files and a
+// Download holds counts for each type of OFAC and BIS data parsed from files and a
 // timestamp of when the download happened.
 type Download struct {
-	Timestamp time.Time `json:"timestamp"`
-	SDNs      int       `json:"SDNs"`
-	Alts      int       `json:"altNames"`
-	Addresses int       `json:"addresses"`
+	Timestamp     time.Time `json:"timestamp"`
+	SDNs          int       `json:"SDNs"`
+	Alts          int       `json:"altNames"`
+	Addresses     int       `json:"addresses"`
+	DeniedPersons int       `json:"deniedPersons"`
 }
 
 type downloadStats struct {
-	SDNs      int `json:"SDNs"`
-	Alts      int `json:"altNames"`
-	Addresses int `json:"addresses"`
+	SDNs          int `json:"SDNs"`
+	Alts          int `json:"altNames"`
+	Addresses     int `json:"addresses"`
+	DeniedPersons int `json:"deniedPersons"`
 }
 
 // periodicDataRefresh will forever block for interval's duration and then download and reparse the OFAC data.
@@ -55,32 +57,32 @@ func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo down
 		stats, err := s.refreshData()
 		if err != nil {
 			if s.logger != nil {
-				s.logger.Log("main", fmt.Sprintf("ERROR: refreshing OFAC data: %v", err))
+				s.logger.Log("main", fmt.Sprintf("ERROR: refreshing blacklist data: %v", err))
 			}
 		} else {
 			downloadRepo.recordStats(stats)
 			if s.logger != nil {
-				s.logger.Log("main", fmt.Sprintf("OFAC data refreshed - Addresses=%d AltNames=%d SDNs=%d", stats.Addresses, stats.Alts, stats.SDNs))
+				s.logger.Log("main", fmt.Sprintf("Blacklist data refreshed - Addresses=%d AltNames=%d SDNs=%d DPL=%d", stats.Addresses, stats.Alts, stats.SDNs, stats.DeniedPersons))
 			}
 			updates <- stats // send stats for re-search and watch notifications
 		}
 	}
 }
 
-// refreshData reaches out to the OFAC website to download the latest files and then runs ofac.Reader to
+// refreshData reaches out to the OFAC and BIS websites to download the latest files and then runs ofac.Reader to
 // parse and index data for searches.
 func (s *searcher) refreshData() (*downloadStats, error) {
 	if s.logger != nil {
-		s.logger.Log("download", "Starting refresh of OFAC data")
+		s.logger.Log("download", "Starting refresh of blacklist data")
 	}
 
 	// Download files
 	dir, err := (&ofac.Downloader{}).GetFiles()
 	if err != nil {
-		return nil, fmt.Errorf("ERROR: downloading OFAC data: %v", err)
+		return nil, fmt.Errorf("ERROR: downloading blacklist data: %v", err)
 	}
 
-	// Parse each OFAC file
+	// Parse each file
 	r := &ofac.Reader{}
 	r.FileName = filepath.Join(dir, "add.csv")
 	if err := r.Read(); err != nil {
@@ -94,16 +96,22 @@ func (s *searcher) refreshData() (*downloadStats, error) {
 	if err := r.Read(); err != nil {
 		return nil, fmt.Errorf("ERROR: reading sdn.csv: %v", err)
 	}
+	r.FileName = filepath.Join(dir, "dpl.txt")
+	if err := r.Read(); err != nil {
+		return nil, fmt.Errorf("ERROR: reading dpl.txt: %v", err)
+	}
 
 	// Precompute new data once for slight performance win
 	sdns := precomputeSDNs(r.SDNs)
 	adds := precomputeAddresses(r.Addresses)
 	alts := precomputeAlts(r.AlternateIdentities)
+	dps := precomputeDPs(r.DeniedPersons)
 
 	stats := &downloadStats{
-		SDNs:      len(sdns),
-		Alts:      len(alts),
-		Addresses: len(adds),
+		SDNs:          len(sdns),
+		Alts:          len(alts),
+		Addresses:     len(adds),
+		DeniedPersons: len(dps),
 	}
 
 	// Set new records after precomputation (to minimize lock contention)
@@ -111,10 +119,11 @@ func (s *searcher) refreshData() (*downloadStats, error) {
 	s.SDNs = sdns
 	s.Addresses = adds
 	s.Alts = alts
+	s.DPs = dps
 	s.Unlock()
 
 	if s.logger != nil {
-		s.logger.Log("download", "Finished refresh of OFAC data")
+		s.logger.Log("download", "Finished refresh of blacklist data")
 	}
 
 	// record successful data refresh
@@ -165,19 +174,19 @@ func (r *sqliteDownloadRepository) recordStats(stats *downloadStats) error {
 		return errors.New("recordStats: nil downloadStats")
 	}
 
-	query := `insert into ofac_download_stats (downloaded_at, sdns, alt_names, addresses) values (?, ?, ?, ?);`
+	query := `insert into ofac_download_stats (downloaded_at, sdns, alt_names, addresses, denied_persons) values (?, ?, ?, ?, ?);`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(time.Now(), stats.SDNs, stats.Alts, stats.Addresses)
+	_, err = stmt.Exec(time.Now(), stats.SDNs, stats.Alts, stats.Addresses, stats.DeniedPersons)
 	return err
 }
 
 func (r *sqliteDownloadRepository) latestDownloads(limit int) ([]Download, error) {
-	query := `select downloaded_at, sdns, alt_names, addresses from ofac_download_stats order by downloaded_at desc limit ?;`
+	query := `select downloaded_at, sdns, alt_names, addresses, denied_persons from ofac_download_stats order by downloaded_at desc limit ?;`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return nil, err
@@ -193,7 +202,7 @@ func (r *sqliteDownloadRepository) latestDownloads(limit int) ([]Download, error
 	var downloads []Download
 	for rows.Next() {
 		var dl Download
-		if err := rows.Scan(&dl.Timestamp, &dl.SDNs, &dl.Alts, &dl.Addresses); err == nil {
+		if err := rows.Scan(&dl.Timestamp, &dl.SDNs, &dl.Alts, &dl.Addresses, &dl.DeniedPersons); err == nil {
 			downloads = append(downloads, dl)
 		}
 	}

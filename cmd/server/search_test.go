@@ -11,7 +11,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/moov-io/ofac"
+	"github.com/cardonator/ofac"
 
 	"github.com/go-kit/kit/log"
 )

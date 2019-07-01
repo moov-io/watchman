@@ -9,7 +9,7 @@ import (
 	"fmt"
 
 	"github.com/moov-io/base"
-	moov "github.com/moov-io/ofac/client"
+	moov "github.com/cardonator/ofac/client"
 )
 
 func addCompanyWatch(ctx context.Context, api *moov.APIClient, id string, webhook string) error {
