@@ -27,7 +27,7 @@ func manualRefreshHandler(logger log.Logger, searcher *searcher, downloadRepo do
 			w.WriteHeader(http.StatusInternalServerError)
 		} else {
 			if logger != nil {
-				logger.Log("main", fmt.Sprintf("admin: finished OFAC data refresh - Addresses=%d AltNames=%d SDNs=%d", stats.Addresses, stats.Alts, stats.SDNs))
+				logger.Log("main", fmt.Sprintf("admin: finished OFAC data refresh - Addresses=%d AltNames=%d SDNs=%d DeniedPersons=%d", stats.Addresses, stats.Alts, stats.SDNs, stats.DeniedPersons))
 			}
 			downloadRepo.recordStats(stats)
 
