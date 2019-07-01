@@ -92,9 +92,10 @@ func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 }
 
 type searchResponse struct {
-	SDNs      []SDN     `json:"SDNs"`
-	AltNames  []Alt     `json:"altNames"`
-	Addresses []Address `json:"addresses"`
+	SDNs          []SDN     `json:"SDNs"`
+	AltNames      []Alt     `json:"altNames"`
+	Addresses     []Address `json:"addresses"`
+	DeniedPersons []DP      `json:"deniedPersons"`
 }
 
 func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchRequest) http.HandlerFunc {
@@ -150,9 +151,10 @@ func searchViaQ(logger log.Logger, searcher *searcher, name string) http.Handler
 
 		limit := extractSearchLimit(r)
 		response := &searchResponse{
-			SDNs:      searcher.TopSDNs(limit, name),
-			AltNames:  searcher.TopAltNames(limit, name),
-			Addresses: searcher.TopAddresses(limit, name),
+			SDNs:          searcher.TopSDNs(limit, name),
+			AltNames:      searcher.TopAltNames(limit, name),
+			Addresses:     searcher.TopAddresses(limit, name),
+			DeniedPersons: searcher.TopDPs(limit, name),
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
