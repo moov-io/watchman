@@ -16,10 +16,10 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/cardonator/ofac"
 	"github.com/moov-io/base/admin"
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/base/http/bind"
-	"github.com/cardonator/ofac"
 
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
@@ -130,7 +130,7 @@ func main() {
 		os.Exit(1)
 	} else {
 		downloadRepo.recordStats(stats)
-		logger.Log("main", fmt.Sprintf("OFAC data refreshed - Addresses=%d AltNames=%d SDNs=%d", stats.Addresses, stats.Alts, stats.SDNs))
+		logger.Log("main", fmt.Sprintf("OFAC data refreshed - Addresses=%d AltNames=%d SDNs=%d DeniedPersons=%d", stats.Addresses, stats.Alts, stats.SDNs, stats.DeniedPersons))
 	}
 
 	// Setup Watch and Webhook database wrapper
