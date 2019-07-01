@@ -152,6 +152,7 @@ func TestSearch__NameAndAltName(t *testing.T) {
 		Alts:      altSearcher.Alts,
 		SDNs:      sdnSearcher.SDNs,
 		Addresses: addressSearcher.Addresses,
+		DPs:       dplSearcher.DPs,
 	}
 
 	router := mux.NewRouter()
@@ -165,9 +166,10 @@ func TestSearch__NameAndAltName(t *testing.T) {
 
 	// read response body
 	var wrapper struct {
-		SDNs      []*ofac.SDN               `json:"SDNs"`
-		AltNames  []*ofac.AlternateIdentity `json:"altNames"`
-		Addresses []*ofac.Address           `json:"addresses"`
+		SDNs          []*ofac.SDN               `json:"SDNs"`
+		AltNames      []*ofac.AlternateIdentity `json:"altNames"`
+		Addresses     []*ofac.Address           `json:"addresses"`
+		DeniedPersons []*ofac.DPL               `json:"deniedPersons"`
 	}
 	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
 		t.Fatal(err)
@@ -180,6 +182,9 @@ func TestSearch__NameAndAltName(t *testing.T) {
 	}
 	if wrapper.Addresses[0].EntityID != "735" {
 		t.Errorf("%#v", wrapper.Addresses[0].EntityID)
+	}
+	if wrapper.DeniedPersons[0].StreetAddress != "P.O. BOX 28360" {
+		t.Errorf("%#v", wrapper.DeniedPersons[0].StreetAddress)
 	}
 }
 
