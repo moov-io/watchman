@@ -52,7 +52,7 @@ $ curl -s localhost:8084/search?name=...
 
 We offer [hosted api docs as part of Moov's tools](https://api.moov.io/#tag/OFAC) and an [OpenAPI specification](https://github.com/moov-io/ofac/blob/master/openapi.yaml) for use with generated clients.
 
-Docs: [docs.moov.io](https://docs.moov.io/) | [api docs](https://api.moov.io/apps/ofac/)
+Docs: [docs.moov.io](https://docs.moov.io/ofac/) | [api docs](https://api.moov.io/apps/ofac/)
 
 ### Configuration
 
