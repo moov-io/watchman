@@ -6,15 +6,15 @@ VERSION := $(shell grep -Eo '(v[0-9]+[\.][0-9]+[\.][0-9]+(-[a-zA-Z0-9]*)?)' vers
 build: check build-server build-ofactest build-examples
 
 build-server:
-	CGO_ENABLED=1 go build -o ./bin/server github.com/cardonator/ofac/cmd/server
+	CGO_ENABLED=1 go build -o ./bin/server github.com/moov-io/ofac/cmd/server
 
 build-ofactest:
-	CGO_ENABLED=0 go build -o ./bin/ofactest github.com/cardonator/ofac/cmd/ofactest
+	CGO_ENABLED=0 go build -o ./bin/ofactest github.com/moov-io/ofac/cmd/ofactest
 
 build-examples: build-webhook-example
 
 build-webhook-example:
-	CGO_ENABLED=0 go build -o ./bin/webhook-example github.com/cardonator/ofac/examples/webhook
+	CGO_ENABLED=0 go build -o ./bin/webhook-example github.com/moov-io/ofac/examples/webhook
 
 check:
 	go fmt ./...
@@ -28,7 +28,7 @@ client:
 	OPENAPI_GENERATOR_VERSION=4.0.1 ./openapi-generator generate -i openapi.yaml -g go -o ./client
 	rm -f client/go.mod client/go.sum
 	go fmt ./...
-	go build github.com/cardonator/ofac/client
+	go build github.com/moov-io/ofac/client
 	go test ./client
 
 .PHONY: clean
@@ -38,9 +38,9 @@ clean:
 
 dist: clean client build
 ifeq ($(OS),Windows_NT)
-	CGO_ENABLED=1 GOOS=windows go build -o bin/ofac-windows-amd64.exe github.com/cardonator/ofac/cmd/server
+	CGO_ENABLED=1 GOOS=windows go build -o bin/ofac-windows-amd64.exe github.com/moov-io/ofac/cmd/server
 else
-	CGO_ENABLED=1 GOOS=$(PLATFORM) go build -o bin/ofac-$(PLATFORM)-amd64 github.com/cardonator/ofac/cmd/server
+	CGO_ENABLED=1 GOOS=$(PLATFORM) go build -o bin/ofac-$(PLATFORM)-amd64 github.com/moov-io/ofac/cmd/server
 endif
 
 docker:

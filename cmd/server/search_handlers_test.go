@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/cardonator/ofac"
+	"github.com/moov-io/ofac"
 
 	"github.com/gorilla/mux"
 )

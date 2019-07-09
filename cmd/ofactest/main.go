@@ -36,8 +36,8 @@ import (
 	"time"
 
 	"github.com/moov-io/base/http/bind"
-	"github.com/cardonator/ofac"
-	moov "github.com/cardonator/ofac/client"
+	"github.com/moov-io/ofac"
+	moov "github.com/moov-io/ofac/client"
 
 	"github.com/antihax/optional"
 )
