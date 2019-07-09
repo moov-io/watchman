@@ -397,7 +397,7 @@ type DP struct {
 	name         string
 }
 
-// MarshalJSON is a custom method for marshalling a BIS Denied Person (DP)
+// MarshalJSON is a custom method for marshaling a BIS Denied Person (DP)
 func (d DP) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		*ofac.DPL
