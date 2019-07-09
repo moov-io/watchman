@@ -13,6 +13,5 @@ require (
 	github.com/xrash/smetrics v0.0.0-20170218160415-a3153f7040e9
 	go4.org v0.0.0-20190430205326-94abd6928b1d
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
-	golang.org/x/sys v0.0.0-20190630045133-04f50cda93cb // indirect
 	golang.org/x/text v0.3.2
 )
