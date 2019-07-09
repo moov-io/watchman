@@ -4,4 +4,4 @@
 
 package ofac
 
-const Version = "v0.8.1-dev"
+const Version = "v0.9.0-rc1"
