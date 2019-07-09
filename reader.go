@@ -20,6 +20,11 @@ const (
 	// csvFile is an OFAC CSVfile
 	csvFile = ".csv"
 
+	// txtFile is a DPL tab-delimited file
+	// it should be a ".tsv" file, but BIS named it ".txt"...
+	txtFile  = ".txt"
+	txtDelim = '\t'
+
 	// addressFile is an OFAC Specially Designated National (SDN) address File
 	addressFile = "add.csv"
 	// alternateIDFile is an OFAC Specially Designated National (SDN) alternate ID File
@@ -28,6 +33,9 @@ const (
 	speciallyDesignatedNationalFile = "sdn.csv"
 	// speciallyDesignatedNationalCommentsFile is an OFAC Specially Designated National (SDN) Comments File
 	speciallyDesignatedNationalCommentsFile = "sdn_comments.csv"
+
+	// deniedPersonsListFile is the Denied Persons List provided by the Bureau of Industry and Security, US Department of Commerce
+	deniedPersonsListFile = "dpl.txt"
 )
 
 // Error strings specific to parsing/reading an OFAC file
@@ -63,6 +71,8 @@ type Reader struct {
 	SDNs []*SDN `json:"sdn"`
 	// SDNComments returns an array of OFAC Specially Designated National Comments
 	SDNComments []*SDNComments `json:"sdnComments"`
+	// DPL returns an array of BIS Denied Persons
+	DeniedPersons []*DPL
 	// errors holds each error encountered when attempting to parse the file
 	errors base.ErrorList
 }
@@ -74,6 +84,10 @@ func (r *Reader) Read() error {
 	switch ext {
 	case csvFile:
 		if err := r.csvFile(); err != nil {
+			return err
+		}
+	case txtFile:
+		if err := r.txtFile(); err != nil {
 			return err
 		}
 	default:
@@ -243,6 +257,52 @@ func (r *Reader) csvSDNCommentsFile() error {
 			RemarksExtended: csvLine[1],
 		}
 		r.SDNComments = append(r.SDNComments, sdnComments)
+	}
+	return nil
+}
+
+func (r *Reader) txtFile() error {
+	if strings.Contains(r.FileName, deniedPersonsListFile) {
+		if err := r.txtDeniedPersonsFile(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (r *Reader) txtDeniedPersonsFile() error {
+	// open txt file
+	f, err := os.Open(r.FileName)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	// create a new csv.Reader and set the delim char to txtDelim char
+	reader := csv.NewReader(f)
+	reader.Comma = txtDelim
+	// Read File into a Variable
+	lines, err := reader.ReadAll()
+	if err != nil {
+		return err
+	}
+
+	for _, txtLine := range lines {
+		deniedPerson := &DPL{
+			Name:           txtLine[0],
+			StreetAddress:  txtLine[1],
+			City:           txtLine[2],
+			State:          txtLine[3],
+			Country:        txtLine[4],
+			PostalCode:     txtLine[5],
+			EffectiveDate:  txtLine[6],
+			ExpirationDate: txtLine[7],
+			StandardOrder:  txtLine[8],
+			LastUpdate:     txtLine[9],
+			Action:         txtLine[10],
+			FRCitation:     txtLine[11],
+		}
+		r.DeniedPersons = append(r.DeniedPersons, deniedPerson)
 	}
 	return nil
 }

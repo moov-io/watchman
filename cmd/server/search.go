@@ -29,10 +29,13 @@ var (
 	softResultsLimit, hardResultsLimit = 10, 100
 )
 
+// searcher holds precomputed data for each object available to search against.
+// This data comes from various US Federal agencies, such as: OFAC and BIS
 type searcher struct {
 	SDNs         []*SDN
 	Addresses    []*Address
 	Alts         []*Alt
+	DPs          []*DP
 	sync.RWMutex // protects all above fields
 
 	logger log.Logger
@@ -238,6 +241,39 @@ func (s *searcher) TopSDNs(limit int, name string) []SDN {
 	return out
 }
 
+func (s *searcher) TopDPs(limit int, name string) []DP {
+	name = precompute(name)
+
+	s.RLock()
+	defer s.RUnlock()
+
+	if len(s.DPs) == 0 {
+		return nil
+	}
+	xs := newLargest(limit)
+
+	for _, dp := range s.DPs {
+		xs.add(&item{
+			value:  dp,
+			weight: jaroWrinkler(dp.name, name),
+		})
+	}
+
+	out := make([]DP, 0)
+	for _, thisItem := range xs.items {
+		if v := thisItem; v != nil {
+			ss, ok := v.value.(*DP)
+			if !ok {
+				continue
+			}
+			dp := *ss
+			dp.match = v.weight
+			out = append(out, dp)
+		}
+	}
+	return out
+}
+
 // SDN is ofac.SDN wrapped with precomputed search metadata
 type SDN struct {
 	*ofac.SDN
@@ -351,6 +387,35 @@ func precomputeAlts(alts []*ofac.AlternateIdentity) []*Alt {
 		out[i] = &Alt{
 			AlternateIdentity: alts[i],
 			name:              precompute(alts[i].AlternateName),
+		}
+	}
+	return out
+}
+
+// DP is a BIS Denied Person wrapped with precomputed search metadata
+type DP struct {
+	DeniedPerson *ofac.DPL
+	match        float64
+	name         string
+}
+
+// MarshalJSON is a custom method for marshaling a BIS Denied Person (DP)
+func (d DP) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		*ofac.DPL
+		Match float64 `json:"match"`
+	}{
+		d.DeniedPerson,
+		d.match,
+	})
+}
+
+func precomputeDPs(persons []*ofac.DPL) []*DP {
+	out := make([]*DP, len(persons))
+	for i := range persons {
+		out[i] = &DP{
+			DeniedPerson: persons[i],
+			name:         precompute(persons[i].Name),
 		}
 	}
 	return out

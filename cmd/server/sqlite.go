@@ -28,7 +28,7 @@ var (
 		`create table if not exists company_watches(id primary key, company_id, webhook, auth_token, created_at datetime, deleted_at datetime);`,
 
 		// OFAC download stats
-		`create table if not exists ofac_download_stats(downloaded_at datetime, sdns, alt_names, addresses);`,
+		`create table if not exists ofac_download_stats(downloaded_at datetime, sdns, alt_names, addresses, denied_persons);`,
 
 		// Webhook stats
 		`create table if not exists webhook_stats(watch_id string, attempted_at datetime, status);`,

@@ -661,6 +661,60 @@ components:
         match:
           type: number
           example: 0.91
+    DPL:
+      description: BIS Denied Persons List item
+      properties:
+        name:
+          type: string
+          description: Name of the Denied Person
+          example: ISMAEL RETA
+        streetAddress:
+          type: string
+          description: "Denied Person's street address"
+          example: 'REGISTER NUMBER: 78795-379, FEDERAL CORRECTIONAL INSTITUTION, P.O. BOX 4200'
+        city:
+          type: string
+          description: "Denied Person's city"
+          example: THREE RIVERS
+        state:
+          type: string
+          description: "Denied Person's state"
+          example: TX
+        country:
+          type: string
+          description: "Denied Person's country"
+          example: ""
+        postalCode:
+          type: string
+          description: "Denied Person's postal code"
+          example: 78071
+        effectiveDate:
+          type: string
+          description: Date when denial came into effect
+          example: '06/15/2016'
+        expirationDate:
+          type: string
+          description: Date when denial expires, if blank denial never expires
+          example: '06/15/2025'
+        standardOrder:
+          type: string
+          description: Denotes whether or not the Denied Person was added by a standard order
+          example: 'Y'
+        lastUpdate:
+          type: string
+          description: Most recent date when the Denied Person record was updated
+          example: '2016-06-22'
+        action:
+          type: string
+          description: Most recent action taken regarding the denial
+          example: FR NOTICE ADDED
+        frCitation:
+          type: string
+          description: Reference to the order's citation in the Federal Register
+          example: '81.F.R. 40658 6/22/2016'
+        match:
+          type: number
+          example: 0.92
     UpdateCompanyStatus:
       description: Request body to update a company status.
       properties:
@@ -706,6 +760,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Address'
+        deniedPersons:
+          type: array
+          items:
+            $ref: '#/components/schemas/DPL'
     Watch:
       description: Customer or Company watch
       properties:

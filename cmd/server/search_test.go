@@ -71,6 +71,38 @@ var (
 			},
 		}),
 	}
+	dplSearcher = &searcher{
+		DPs: precomputeDPs([]*ofac.DPL{
+			{
+				Name:           "AL NASER WINGS AIRLINES",
+				StreetAddress:  "P.O. BOX 28360",
+				City:           "DUBAI",
+				State:          "",
+				Country:        "AE",
+				PostalCode:     "",
+				EffectiveDate:  "06/05/2019",
+				ExpirationDate: "12/03/2019",
+				StandardOrder:  "Y",
+				LastUpdate:     "2019-06-12",
+				Action:         "FR NOTICE ADDED, TDO RENEWAL, F.R. NOTICE ADDED, TDO RENEWAL ADDED, TDO RENEWAL ADDED, F.R. NOTICE ADDED",
+				FRCitation:     "82 F.R. 61745 12/29/2017,  83F.R. 28801 6/21/2018, 84 F.R. 27233 6/12/2019",
+			},
+			{
+				Name:           "PRESTON JOHN ENGEBRETSON",
+				StreetAddress:  "12725 ROYAL DRIVE",
+				City:           "STAFFORD",
+				State:          "TX",
+				Country:        "US",
+				PostalCode:     "77477",
+				EffectiveDate:  "01/24/2002",
+				ExpirationDate: "01/24/2027",
+				StandardOrder:  "Y",
+				LastUpdate:     "2002-01-28",
+				Action:         "STANDARD ORDER",
+				FRCitation:     "67 F.R. 7354 2/19/02 66 F.R. 48998 9/25/01 62 F.R. 26471 5/14/97 62 F.R. 34688 6/27/97 62 F.R. 60063 11/6/97 63 F.R. 25817 5/11/98 63 F.R. 58707 11/2/98 64 F.R. 23049 4/29/99",
+			},
+		}),
+	}
 )
 
 func TestJaroWrinkler(t *testing.T) {
@@ -333,5 +365,16 @@ func TestSearch__TopSDNs(t *testing.T) {
 	}
 	if sdns[0].EntityID != "2676" {
 		t.Errorf("%#v", sdns[0].SDN)
+	}
+}
+
+func TestSearch__TopDPs(t *testing.T) {
+	dps := dplSearcher.TopDPs(1, "NASER AIRLINES")
+	if len(dps) == 0 {
+		t.Fatal("empty DPs")
+	}
+	// DPL doesn't have any entity IDs. Comparing expected address components instead
+	if dps[0].DeniedPerson.StreetAddress != "P.O. BOX 28360" || dps[0].DeniedPerson.City != "DUBAI" {
+		t.Errorf("%#v", dps[0].DeniedPerson)
 	}
 }

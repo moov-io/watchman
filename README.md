@@ -7,9 +7,9 @@ moov-io/ofac
 [![Go Report Card](https://goreportcard.com/badge/github.com/moov-io/ofac)](https://goreportcard.com/report/github.com/moov-io/ofac)
 [![Apache 2 licensed](https://img.shields.io/badge/license-Apache2-blue.svg)](https://raw.githubusercontent.com/moov-io/ofac/master/LICENSE)
 
-[Office of Foreign Asset Control](https://www.treasury.gov/about/organizational-structure/offices/Pages/Office-of-Foreign-Assets-Control.aspx) (OFAC) is an HTTP API and Go library to download, [parse and serve United States OFAC sanction data](https://docs.moov.io/ofac/file-structure/) for applications and humans. Also supported is an async webhook notification service to initiate processes on remote systems connected with OFAC. The US Treasury department offers a [search page for OFAC records](https://sanctionssearch.ofac.treas.gov/).
+[Office of Foreign Asset Control](https://www.treasury.gov/about/organizational-structure/offices/Pages/Office-of-Foreign-Assets-Control.aspx) (OFAC) is an HTTP API and Go library to download, [parse and serve United States OFAC sanction data](https://docs.moov.io/ofac/file-structure/) along with the [BIS Denied Person's List](https://bis.data.commerce.gov/dataset/Denied-Persons-List-with-Denied-US-Export-Privileg/xwtd-wd7a/data) (DPL) for applications and humans. Also supported is an async webhook notification service to initiate processes on remote systems connected with OFAC. The US Treasury department offers a [search page for OFAC records](https://sanctionssearch.ofac.treas.gov/).
 
-All United States companies are required to comply with OFAC regulations and sanction lists. Moov's primary usage for this project is with ACH origination in our [paygate](https://github.com/moov-io/paygate) project.
+All United States companies are required to comply with OFAC regulations and sanction lists and the US Patriot Act requires compliance with the BIS Denied Person's List (DPL). Moov's primary usage for this project is with ACH origination in our [paygate](https://github.com/moov-io/paygate) project.
 
 To get started using OFAC download [the latest release](https://github.com/moov-io/ofac/releases) or our [Docker image](https://hub.docker.com/r/moov/ofac/tags). We also have a [demo OFAC instance](https://moov.io/ofac/) as part of Moov's demo environment.
 
@@ -46,7 +46,8 @@ $ curl -s localhost:8084/search?name=...
     }
   ],
   "altNames": null,
-  "addresses": null
+  "addresses": null,
+  "deniedPersons": null
 }
 ```
 
@@ -60,6 +61,7 @@ Docs: [docs.moov.io](https://docs.moov.io/ofac/) | [api docs](https://api.moov.i
 |-----|-----|-----|
 | `OFAC_DATA_REFRESH` | Interval for OFAC data redownload and reparse. | 12h |
 | `OFAC_DOWNLOAD_TEMPLATE` | HTTP address for downloading raw OFAC files. | (OFAC website) |
+| `DPL_DOWNLOAD_TEMPLATE` | HTTP address for downloading the DPL | (BIS website) |
 | `SQLITE_DB_PATH`| Local filepath location for the paygate SQLite database. | `ofac.db` |
 | `WEBHOOK_BATCH_SIZE` | How many watches to read from database per batch of async searches. | 100 |
 | `LOG_FORMAT` | Format for logging lines to be written as. | Options: `json`, `plain` - Default: `plain` |
@@ -69,12 +71,12 @@ Docs: [docs.moov.io](https://docs.moov.io/ofac/) | [api docs](https://api.moov.i
 
 ### Features
 
-- Download OFAC data on startup
-  - Admin endpoint to [manually refresh OFAC data](docs/runbook.md#force-ofac-data-refresh)
+- Download OFAC and BIS Denied Persons List (DPL) data on startup
+  - Admin endpoint to [manually refresh OFAC and DPL data](docs/runbook.md#force-data-refresh)
 - Index data for searches
 - Async searches and notifications (webhooks)
 - Manual overrides to mark a `Company` or `Customer` as `unsafe` (blocked) or `exception` (never blocked).
-- Library to download and parse OFAC files
+- Library for OFAC and BIS DPL data to download and parse their custom files
 
 #### Webhook Notifications
 
@@ -115,6 +117,7 @@ Note: This project uses Go Modules, which requires Go 1.11 or higher, but we shi
 - [Sanctions Search Page](https://sanctionssearch.ofac.treas.gov/)
 - [Subscribe for OFAC updates](https://service.govdelivery.com/accounts/USTREAS/subscriber/new)
 - [When should I call the OFAC Hotline?](https://www.treasury.gov/resource-center/faqs/Sanctions/Pages/directions.aspx)
+- [BIS Denied Persons List with Denied US Export Privileges](https://bis.data.commerce.gov/dataset/Denied-Persons-List-with-Denied-US-Export-Privileg/xwtd-wd7a/data)
 
 ## License
 
