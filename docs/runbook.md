@@ -2,24 +2,32 @@
 
 `OFAC_DATA_REFRESH=1h0m0s` can be set to refresh OFAC data more or less often. The value should match Go's `time.ParseDuration` syntax.
 
-### Force OFAC data refresh
+### Force data refresh
 
 Make a request to `/ofac/refresh` on the **admin** HTTP interface (`:9094` by default).
 
 ```
 $ curl http://localhost:9094/ofac/refresh
-{"SDNs":7414,"altNames":9729,"addresses":11747}
+{"SDNs":7724,"altNames":10107,"addresses":12145,"deniedPersons":548}
 ```
 
 ### Change OFAC download URL
 
 By default OFAC downloads [various files from treasury.gov](https://www.treasury.gov/resource-center/sanctions/SDN-List/Pages/default.aspx) on startup and will periodically download them to keep the data updated.
 
-This URL change be changed and follows a template as several files are downloaded (example: `add.csv` or `sdn.csv`). To change where OFAC files are downloaded set:
+This URL can be changed and follows a template as several files are downloaded (example: `add.csv` or `sdn.csv`). To change where OFAC files are downloaded set:
 
 `OFAC_DOWNLOAD_TEMPLATE='https://www.treasury.gov/ofac/downloads/%s'`
 
 You should make the following files available at the new endpoint: `add.csv`, `alt.csv`, `sdn.csv`, `sdn_comments.csv`.
+
+### Change DPL download URL
+
+By default Denied Person's List (DPL) downloads [from the BIS website](https://bis.data.commerce.gov/dataset/Denied-Persons-List-with-Denied-US-Export-Privileg/xwtd-wd7a/data) on startup and will periodically re-download to keep data fresh.
+
+The URL can be changed, but must end with `dpl.txt` in the final URL path segment.
+
+`DPL_DOWNLOAD_TEMPLATE=https://www.bis.doc.gov/dpl/%s`
 
 ### Change SQLite storage location
 
