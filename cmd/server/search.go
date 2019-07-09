@@ -29,6 +29,8 @@ var (
 	softResultsLimit, hardResultsLimit = 10, 100
 )
 
+// searcher holds precomputed data for each object available to search against.
+// This data comes from various US Federal agencies, such as: OFAC and BIS
 type searcher struct {
 	SDNs         []*SDN
 	Addresses    []*Address

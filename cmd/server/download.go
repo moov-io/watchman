@@ -32,7 +32,7 @@ func init() {
 	prometheus.MustRegister(lastOFACDataRefreshSuccess)
 }
 
-// Download holds counts for each type of OFAC and BIS data parsed from files and a
+// Download holds counts for each type of OFAC and BIS Denied Persons List data parsed from files and a
 // timestamp of when the download happened.
 type Download struct {
 	Timestamp     time.Time `json:"timestamp"`
@@ -57,29 +57,29 @@ func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo down
 		stats, err := s.refreshData()
 		if err != nil {
 			if s.logger != nil {
-				s.logger.Log("main", fmt.Sprintf("ERROR: refreshing blacklist data: %v", err))
+				s.logger.Log("main", fmt.Sprintf("ERROR: refreshing OFAC and/or BIS DPL data: %v", err))
 			}
 		} else {
 			downloadRepo.recordStats(stats)
 			if s.logger != nil {
-				s.logger.Log("main", fmt.Sprintf("Blacklist data refreshed - Addresses=%d AltNames=%d SDNs=%d DPL=%d", stats.Addresses, stats.Alts, stats.SDNs, stats.DeniedPersons))
+				s.logger.Log("main", fmt.Sprintf("OFAC and BIS DPL data refreshed - Addresses=%d AltNames=%d SDNs=%d DPL=%d", stats.Addresses, stats.Alts, stats.SDNs, stats.DeniedPersons))
 			}
 			updates <- stats // send stats for re-search and watch notifications
 		}
 	}
 }
 
-// refreshData reaches out to the OFAC and BIS websites to download the latest files and then runs ofac.Reader to
-// parse and index data for searches.
+// refreshData reaches out to the OFAC and BIS Denied Persons List websites to download the latest
+// files and then runs ofac.Reader to parse and index data for searches.
 func (s *searcher) refreshData() (*downloadStats, error) {
 	if s.logger != nil {
-		s.logger.Log("download", "Starting refresh of blacklist data")
+		s.logger.Log("download", "Starting refresh of OFAC and DPL data")
 	}
 
 	// Download files
 	dir, err := (&ofac.Downloader{}).GetFiles()
 	if err != nil {
-		return nil, fmt.Errorf("ERROR: downloading blacklist data: %v", err)
+		return nil, fmt.Errorf("ERROR: downloading OFAC and DPL data: %v", err)
 	}
 
 	// Parse each file
@@ -123,7 +123,7 @@ func (s *searcher) refreshData() (*downloadStats, error) {
 	s.Unlock()
 
 	if s.logger != nil {
-		s.logger.Log("download", "Finished refresh of blacklist data")
+		s.logger.Log("download", "Finished refresh of OFAC and BIS DPL data")
 	}
 
 	// record successful data refresh

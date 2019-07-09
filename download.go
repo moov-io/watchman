@@ -56,7 +56,7 @@ func (dl *Downloader) GetFiles() (string, error) {
 		dl.HTTP = http.DefaultClient
 	}
 
-	dir, err := ioutil.TempDir("", "blacklist-downloader")
+	dir, err := ioutil.TempDir("", "ofac-and-dpl-downloader")
 	if err != nil {
 		return "", fmt.Errorf("OFAC: unable to make temp dir: %v", err)
 	}
