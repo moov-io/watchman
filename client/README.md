@@ -58,6 +58,7 @@ Class | Method | HTTP request | Description
  - [Address](docs/Address.md)
  - [Alt](docs/Alt.md)
  - [Download](docs/Download.md)
+ - [Dpl](docs/Dpl.md)
  - [OfacCompany](docs/OfacCompany.md)
  - [OfacCompanyStatus](docs/OfacCompanyStatus.md)
  - [OfacCustomer](docs/OfacCustomer.md)
