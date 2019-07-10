@@ -11,29 +11,80 @@ import (
 	"strings"
 
 	"github.com/go-kit/kit/log"
+	"github.com/lopezator/migrator"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 var (
-	// migrations holds all our SQL migrations to be done (in order)
-	migrations = []string{
-		// Customer tables
-		`create table if not exists customer_name_watches(id primary key, name, webhook, auth_token, created_at datetime, deleted_at datetime);`,
-		`create table if not exists customer_status(customer_id, user_id, note, status, created_at datetime, deleted_at datetime);`,
-		`create table if not exists customer_watches(id primary key, customer_id, webhook, auth_token, created_at datetime, deleted_at datetime);`,
-
-		// Company status
-		`create table if not exists company_name_watches(id primary key, name, webhook, auth_token, created_at datetime, deleted_at datetime);`,
-		`create table if not exists company_status(company_id, user_id, note, status, created_at datetime, deleted_at datetime);`,
-		`create table if not exists company_watches(id primary key, company_id, webhook, auth_token, created_at datetime, deleted_at datetime);`,
-
-		// OFAC download stats
-		`create table if not exists ofac_download_stats(downloaded_at datetime, sdns, alt_names, addresses, denied_persons);`,
-
-		// Webhook stats
-		`create table if not exists webhook_stats(watch_id string, attempted_at datetime, status);`,
-	}
+	sqliteMigrator = migrator.New(
+		createTable(
+			"create_customer_name_watches",
+			`create table if not exists customer_name_watches(id primary key, name, webhook, auth_token, created_at datetime, deleted_at datetime);`,
+		),
+		createTable(
+			"create_customer_status",
+			`create table if not exists customer_status(customer_id, user_id, note, status, created_at datetime, deleted_at datetime);`,
+		),
+		createTable(
+			"create_customer_watches",
+			`create table if not exists customer_watches(id primary key, customer_id, webhook, auth_token, created_at datetime, deleted_at datetime);`,
+		),
+		createTable(
+			"create_company_name_watches",
+			`create table if not exists company_name_watches(id primary key, name, webhook, auth_token, created_at datetime, deleted_at datetime);`,
+		),
+		createTable(
+			"create_company_status",
+			`create table if not exists company_status(company_id, user_id, note, status, created_at datetime, deleted_at datetime);`,
+		),
+		createTable(
+			"create_company_watches",
+			`create table if not exists company_watches(id primary key, company_id, webhook, auth_token, created_at datetime, deleted_at datetime);`,
+		),
+		createTable(
+			"create_ofac_download_stats",
+			`create table if not exists ofac_download_stats(downloaded_at datetime, sdns, alt_names, addresses);`,
+		),
+		createTable(
+			"create_webhook_stats",
+			`create table if not exists webhook_stats(watch_id string, attempted_at datetime, status);`,
+		),
+		addColumn("ofac_download_stats", "denied_persons"),
+	)
 )
+
+func createTable(name, raw string) *migrator.MigrationNoTx {
+	return &migrator.MigrationNoTx{
+		Name: name,
+		Func: func(db *sql.DB) error {
+			_, err := db.Exec(raw)
+			return err
+		},
+	}
+}
+
+func addColumn(tableName, columnDesc string) *migrator.Migration {
+	colName := strings.Fields(columnDesc)[0] // take column name ('deleted_at' or 'deleted_at timestamp')
+
+	return &migrator.Migration{
+		Name: fmt.Sprintf("add__%s__to__%s", colName, tableName),
+		Func: func(tx *sql.Tx) error {
+			stmt, err := tx.Prepare(fmt.Sprintf(`select 1 from pragma_table_info('%s') where name = ? limit 1;`, tableName))
+			if err != nil {
+				return fmt.Errorf("addColumn: column=%s failed: %v", colName, err)
+			}
+			var n int
+			if err := stmt.QueryRow(colName).Scan(&n); err != nil && err != sql.ErrNoRows {
+				return fmt.Errorf("addColumn: query column=%s failed: %#v", colName, err)
+			}
+			if n == 0 {
+				_, err := tx.Exec(fmt.Sprintf(`alter table %s add column %s`, tableName, columnDesc))
+				return err
+			}
+			return nil
+		},
+	}
+}
 
 func getSqlitePath() string {
 	path := os.Getenv("SQLITE_DB_PATH")
@@ -72,16 +123,8 @@ func migrate(logger log.Logger, db *sql.DB) error {
 	if logger != nil {
 		logger.Log("sqlite", "starting database migrations")
 	}
-	for i := range migrations {
-		row := migrations[i]
-		res, err := db.Exec(row)
-		if err != nil {
-			return fmt.Errorf("migration #%d [%s...] had problem: %v", i, row[:40], err)
-		}
-		n, err := res.RowsAffected()
-		if err == nil && logger != nil {
-			logger.Log("sqlite", fmt.Sprintf("migration #%d [%s...] changed %d rows", i, row[:40], n))
-		}
+	if err := sqliteMigrator.Migrate(db); err != nil {
+		return err
 	}
 	if logger != nil {
 		logger.Log("sqlite", "finished migrations")

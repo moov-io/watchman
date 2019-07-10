@@ -6,6 +6,7 @@ require (
 	github.com/go-kit/kit v0.9.0
 	github.com/gorilla/mux v1.7.3
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
+	github.com/lopezator/migrator v0.1.0
 	github.com/mattn/go-sqlite3 v1.10.0
 	github.com/moov-io/base v0.9.1-0.20190430163914-76a8e2cca72d
 	github.com/prometheus/client_golang v1.0.0
