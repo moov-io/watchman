@@ -24,6 +24,7 @@ var (
 	errNoCompanyID = errors.New("no Company ID found")
 )
 
+// Company is a company on one or more SDN list(s)
 type Company struct {
 	ID string `json:"id"`
 	// Federal Data
@@ -36,12 +37,13 @@ type Company struct {
 	Match  float64        `json:"match,omitempty"`
 }
 
+// CompanyBlockStatus can be either CompanyUnsafe or CompanyException
 type CompanyBlockStatus string
 
 const (
 	// CompanyUnsafe companies have been manually marked to block all transactions with
 	CompanyUnsafe CompanyBlockStatus = "unsafe"
-	// Exception companies have been manually marked to allow transactions with
+	// CompanyException companies have been manually marked to allow transactions with
 	CompanyException CompanyBlockStatus = "exception"
 )
 

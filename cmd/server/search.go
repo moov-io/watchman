@@ -283,6 +283,7 @@ type SDN struct {
 	name string
 }
 
+// MarshalJSON is a custom method for marshaling a SDN search result
 func (s SDN) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		*ofac.SDN
@@ -336,6 +337,7 @@ type Address struct {
 	address, citystate, country string
 }
 
+// MarshalJSON is a custom method for marshaling a SDN Address search result
 func (a Address) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		*ofac.Address
@@ -369,6 +371,7 @@ type Alt struct {
 	name string
 }
 
+// MarshalJSON is a custom method for marshaling a SDN Alternate Identity search result
 func (a Alt) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		*ofac.AlternateIdentity
@@ -397,7 +400,7 @@ type DP struct {
 	name         string
 }
 
-// MarshalJSON is a custom method for marshalling a BIS Denied Person (DP)
+// MarshalJSON is a custom method for marshaling a BIS Denied Person (DP) search result
 func (d DP) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		*ofac.DPL

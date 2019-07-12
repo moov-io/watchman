@@ -27,6 +27,7 @@ var (
 	errNoUserID     = errors.New("no userID (X-User-Id header) found")
 )
 
+// Customer is an individual on one or more SDN list(s)
 type Customer struct {
 	ID string `json:"id"`
 	// Federal Data
@@ -39,6 +40,7 @@ type Customer struct {
 	Match  float64         `json:"match,omitempty"`
 }
 
+// CustomerBlockStatus can be either CustomerUnsafe or CustomerException
 type CustomerBlockStatus string
 
 const (
