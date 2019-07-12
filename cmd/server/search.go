@@ -320,11 +320,11 @@ func reorderSDNName(name string, tpe string) string {
 	if !strings.EqualFold(tpe, "individual") {
 		return name // only reorder individual names
 	}
-	if v := surnamePrecedes.FindString(name); v == "" {
+	v := surnamePrecedes.FindString(name)
+	if v == "" {
 		return name // no match on 'Doe, John'
-	} else {
-		return strings.TrimSpace(fmt.Sprintf("%s %s", strings.TrimPrefix(v, ","), strings.TrimSuffix(name, v)))
 	}
+	return strings.TrimSpace(fmt.Sprintf("%s %s", strings.TrimPrefix(v, ","), strings.TrimSuffix(name, v)))
 }
 
 // Address is ofac.Address wrapped with precomputed search metadata
