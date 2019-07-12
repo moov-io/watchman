@@ -29,22 +29,22 @@ func createTestWatchRepository(t *testing.T) *sqliteWatchRepository {
 func TestCompanyWatch(t *testing.T) {
 	repo := createTestWatchRepository(t)
 
-	companyId := base.ID()
-	if err := repo.removeCompanyWatch(companyId, base.ID()); err != nil {
+	companyID := base.ID()
+	if err := repo.removeCompanyWatch(companyID, base.ID()); err != nil {
 		t.Errorf("expected no error: %v", err)
 	}
 
 	// add watch, then remove
-	watchId, err := repo.addCompanyWatch(companyId, watchRequest{Webhook: "https://moov.io"})
+	watchID, err := repo.addCompanyWatch(companyID, watchRequest{Webhook: "https://moov.io"})
 	if err != nil {
-		t.Errorf("companyId=%q got error: %v", companyId, err)
+		t.Errorf("companyID=%q got error: %v", companyID, err)
 	}
-	if watchId == "" {
-		t.Error("empty watchId")
+	if watchID == "" {
+		t.Error("empty watchID")
 	}
 
 	// remove
-	if err := repo.removeCompanyWatch(companyId, watchId); err != nil {
+	if err := repo.removeCompanyWatch(companyID, watchID); err != nil {
 		t.Errorf("expected no error: %v", err)
 	}
 }
@@ -58,16 +58,16 @@ func TestCompanyNameWatch(t *testing.T) {
 
 	// Add
 	name := base.ID()
-	watchId, err := repo.addCompanyNameWatch(name, "https://moov.io", "authToken")
+	watchID, err := repo.addCompanyNameWatch(name, "https://moov.io", "authToken")
 	if err != nil {
 		t.Errorf("name=%q got error: %v", name, err)
 	}
-	if watchId == "" {
-		t.Error("empty watchId")
+	if watchID == "" {
+		t.Error("empty watchID")
 	}
 
 	// Remove
-	if err := repo.removeCompanyNameWatch(watchId); err != nil {
+	if err := repo.removeCompanyNameWatch(watchID); err != nil {
 		t.Errorf("expected no error: %v", err)
 	}
 }
@@ -75,22 +75,22 @@ func TestCompanyNameWatch(t *testing.T) {
 func TestCustomerWatch(t *testing.T) {
 	repo := createTestWatchRepository(t)
 
-	customerId := base.ID()
-	if err := repo.removeCustomerWatch(customerId, base.ID()); err != nil {
+	customerID := base.ID()
+	if err := repo.removeCustomerWatch(customerID, base.ID()); err != nil {
 		t.Errorf("expected no error: %v", err)
 	}
 
 	// add watch, then remove
-	watchId, err := repo.addCustomerWatch(customerId, watchRequest{Webhook: "https://moov.io"})
+	watchID, err := repo.addCustomerWatch(customerID, watchRequest{Webhook: "https://moov.io"})
 	if err != nil {
-		t.Errorf("customerId=%q got error: %v", customerId, err)
+		t.Errorf("customerID=%q got error: %v", customerID, err)
 	}
-	if watchId == "" {
-		t.Error("empty watchId")
+	if watchID == "" {
+		t.Error("empty watchID")
 	}
 
 	// remove
-	if err := repo.removeCustomerWatch(customerId, watchId); err != nil {
+	if err := repo.removeCustomerWatch(customerID, watchID); err != nil {
 		t.Errorf("expected no error: %v", err)
 	}
 }
@@ -104,16 +104,16 @@ func TestCustomerNameWatch(t *testing.T) {
 
 	// Add
 	name := base.ID()
-	watchId, err := repo.addCustomerNameWatch(name, "https://moov.io", "authToken")
+	watchID, err := repo.addCustomerNameWatch(name, "https://moov.io", "authToken")
 	if err != nil {
 		t.Errorf("name=%q got error: %v", name, err)
 	}
-	if watchId == "" {
-		t.Error("empty watchId")
+	if watchID == "" {
+		t.Error("empty watchID")
 	}
 
 	// Remove
-	if err := repo.removeCustomerNameWatch(watchId); err != nil {
+	if err := repo.removeCustomerNameWatch(watchID); err != nil {
 		t.Errorf("expected no error: %v", err)
 	}
 }
@@ -125,9 +125,9 @@ func TestWatchCursor_ID(t *testing.T) {
 	cur := repo.getWatchesCursor(log.NewNopLogger(), 4) // batchSize is divided in 4 parts to equally grab customer, customer name, company, and company name watches
 
 	// insert some watches
-	watchId1, _ := repo.addCustomerWatch(base.ID(), watchRequest{Webhook: "https://moov.io/1"})
-	watchId2, _ := repo.addCustomerWatch(base.ID(), watchRequest{Webhook: "https://moov.io/2"})
-	watchId3, _ := repo.addCompanyWatch(base.ID(), watchRequest{Webhook: "https://moov.io/3"})
+	watchID1, _ := repo.addCustomerWatch(base.ID(), watchRequest{Webhook: "https://moov.io/1"})
+	watchID2, _ := repo.addCustomerWatch(base.ID(), watchRequest{Webhook: "https://moov.io/2"})
+	watchID3, _ := repo.addCompanyWatch(base.ID(), watchRequest{Webhook: "https://moov.io/3"})
 
 	// get first batch (should have 2 watches)
 	firstBatch, err := cur.Next()
@@ -136,12 +136,12 @@ func TestWatchCursor_ID(t *testing.T) {
 	}
 	for i := range firstBatch {
 		switch firstBatch[i].id {
-		case watchId1:
-			if firstBatch[i].webhook != "https://moov.io/1" || firstBatch[i].customerId == "" {
+		case watchID1:
+			if firstBatch[i].webhook != "https://moov.io/1" || firstBatch[i].customerID == "" {
 				t.Errorf("watch %#v didn't match", firstBatch[i])
 			}
-		case watchId3:
-			if firstBatch[i].webhook != "https://moov.io/3" || firstBatch[i].companyId == "" {
+		case watchID3:
+			if firstBatch[i].webhook != "https://moov.io/3" || firstBatch[i].companyID == "" {
 				t.Errorf("watch %#v didn't match", firstBatch[i])
 			}
 		default:
@@ -149,12 +149,12 @@ func TestWatchCursor_ID(t *testing.T) {
 		}
 	}
 
-	// second batch (should only have watchId3)
+	// second batch (should only have watchID3)
 	secondBatch, err := cur.Next()
 	if len(secondBatch) != 1 || err != nil {
 		t.Fatalf("len(secondBatch)=%d expected 1, err=%v", len(secondBatch), err)
 	}
-	if secondBatch[0].id != watchId2 || secondBatch[0].webhook != "https://moov.io/2" || secondBatch[0].customerId == "" {
+	if secondBatch[0].id != watchID2 || secondBatch[0].webhook != "https://moov.io/2" || secondBatch[0].customerID == "" {
 		t.Errorf("unknown watch: %v", secondBatch[0])
 	}
 }
@@ -166,9 +166,9 @@ func TestWatchCursor_Names(t *testing.T) {
 	cur := repo.getWatchesCursor(log.NewNopLogger(), 4)
 
 	// insert some watches
-	watchId1, _ := repo.addCustomerNameWatch("foo corp", "https://moov.io/1", base.ID())
-	watchId2, _ := repo.addCustomerNameWatch("jane doe", "https://moov.io/2", base.ID())
-	watchId3, _ := repo.addCompanyNameWatch("bar corp", "https://moov.io/3", base.ID())
+	watchID1, _ := repo.addCustomerNameWatch("foo corp", "https://moov.io/1", base.ID())
+	watchID2, _ := repo.addCustomerNameWatch("jane doe", "https://moov.io/2", base.ID())
+	watchID3, _ := repo.addCompanyNameWatch("bar corp", "https://moov.io/3", base.ID())
 
 	// get first batch (should have 2 watches)
 	firstBatch, err := cur.Next()
@@ -177,14 +177,14 @@ func TestWatchCursor_Names(t *testing.T) {
 	}
 	for i := range firstBatch {
 		switch firstBatch[i].id {
-		case watchId1:
+		case watchID1:
 			if firstBatch[i].webhook != "https://moov.io/1" {
 				t.Errorf("watch %#v didn't match", firstBatch[i])
 			}
 			if firstBatch[i].customerName != "foo corp" {
 				t.Errorf("watch %#v didn't match", firstBatch[i])
 			}
-		case watchId3:
+		case watchID3:
 			if firstBatch[i].webhook != "https://moov.io/3" {
 				t.Errorf("watch %#v didn't match", firstBatch[i])
 			}
@@ -196,12 +196,12 @@ func TestWatchCursor_Names(t *testing.T) {
 		}
 	}
 
-	// second batch (should only have watchId3)
+	// second batch (should only have watchID3)
 	secondBatch, err := cur.Next()
 	if len(secondBatch) != 1 || err != nil {
 		t.Fatalf("len(secondBatch)=%d expected 1, err=%v", len(secondBatch), err)
 	}
-	if secondBatch[0].id != watchId2 || secondBatch[0].webhook != "https://moov.io/2" || secondBatch[0].customerName != "jane doe" {
+	if secondBatch[0].id != watchID2 || secondBatch[0].webhook != "https://moov.io/2" || secondBatch[0].customerName != "jane doe" {
 		t.Errorf("unknown watch: %v", secondBatch[0])
 	}
 }

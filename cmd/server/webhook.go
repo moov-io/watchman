@@ -38,7 +38,7 @@ var (
 
 // callWebhook will take `body` as JSON and make a POST request to the provided webhook url.
 // Returned is the HTTP status code.
-func callWebhook(watchId string, body *bytes.Buffer, webhook string, authToken string) (int, error) {
+func callWebhook(watchID string, body *bytes.Buffer, webhook string, authToken string) (int, error) {
 	webhook, err := validateWebhook(webhook)
 	if err != nil {
 		return 0, err
@@ -47,7 +47,7 @@ func callWebhook(watchId string, body *bytes.Buffer, webhook string, authToken s
 	// Setup HTTP request
 	req, err := http.NewRequest("POST", webhook, body)
 	if err != nil {
-		return 0, fmt.Errorf("unknown error with watch %s: %v", watchId, err)
+		return 0, fmt.Errorf("unknown error with watch %s: %v", watchID, err)
 	}
 	if authToken != "" {
 		req.Header.Set("Authorization", authToken)
@@ -59,7 +59,7 @@ func callWebhook(watchId string, body *bytes.Buffer, webhook string, authToken s
 
 	resp, err := webhookHTTPClient.Do(req)
 	if err != nil {
-		return resp.StatusCode, fmt.Errorf("HTTP problem with watch %s: %v", watchId, err)
+		return resp.StatusCode, fmt.Errorf("HTTP problem with watch %s: %v", watchID, err)
 	}
 	resp.Body.Close()
 	if resp.StatusCode > 299 || resp.StatusCode < 200 {
@@ -85,7 +85,7 @@ func validateWebhook(raw string) (string, error) {
 }
 
 type webhookRepository interface {
-	recordWebhook(watchId string, attemptedAt time.Time, status int) error
+	recordWebhook(watchID string, attemptedAt time.Time, status int) error
 }
 
 type sqliteWebhookRepository struct {
@@ -96,7 +96,7 @@ func (r *sqliteWebhookRepository) close() error {
 	return r.db.Close()
 }
 
-func (r *sqliteWebhookRepository) recordWebhook(watchId string, attemptedAt time.Time, status int) error {
+func (r *sqliteWebhookRepository) recordWebhook(watchID string, attemptedAt time.Time, status int) error {
 	query := `insert into webhook_stats (watch_id, attempted_at, status) values (?, ?, ?);`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
@@ -104,6 +104,6 @@ func (r *sqliteWebhookRepository) recordWebhook(watchId string, attemptedAt time
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(watchId, attemptedAt, status)
+	_, err = stmt.Exec(watchID, attemptedAt, status)
 	return err
 }

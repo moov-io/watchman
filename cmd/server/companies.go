@@ -13,15 +13,15 @@ import (
 	"strings"
 	"time"
 
-	moovhttp "github.com/moov-io/base/http"
 	"github.com/cardonator/ofac"
+	moovhttp "github.com/moov-io/base/http"
 
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
 )
 
 var (
-	errNoCompanyId = errors.New("no Company ID found")
+	errNoCompanyID = errors.New("no Company ID found")
 )
 
 type Company struct {
@@ -45,39 +45,39 @@ const (
 	CompanyException CompanyBlockStatus = "exception"
 )
 
-// CompanyStatus represents a userId's manual override of an SDN
+// CompanyStatus represents a userID's manual override of an SDN
 type CompanyStatus struct {
-	UserId    string             `json:"userId"`
+	UserID    string             `json:"userID"`
 	Note      string             `json:"note"`
 	Status    CompanyBlockStatus `json:"block"`
 	CreatedAt time.Time          `json:"createdAt"`
 }
 
 type companyWatchResponse struct {
-	WatchID string `json:"watchId"`
+	WatchID string `json:"watchID"`
 }
 
 func addCompanyRoutes(logger log.Logger, r *mux.Router, searcher *searcher, companyRepo companyRepository, watchRepo *sqliteWatchRepository) {
-	r.Methods("GET").Path("/companies/{companyId}").HandlerFunc(getCompany(logger, searcher, companyRepo))
-	r.Methods("PUT").Path("/companies/{companyId}").HandlerFunc(updateCompanyStatus(logger, searcher, companyRepo))
+	r.Methods("GET").Path("/companies/{companyID}").HandlerFunc(getCompany(logger, searcher, companyRepo))
+	r.Methods("PUT").Path("/companies/{companyID}").HandlerFunc(updateCompanyStatus(logger, searcher, companyRepo))
 
-	r.Methods("POST").Path("/companies/{companyId}/watch").HandlerFunc(addCompanyWatch(logger, searcher, watchRepo))
-	r.Methods("DELETE").Path("/companies/{companyId}/watch/{watchId}").HandlerFunc(removeCompanyWatch(logger, searcher, watchRepo))
+	r.Methods("POST").Path("/companies/{companyID}/watch").HandlerFunc(addCompanyWatch(logger, searcher, watchRepo))
+	r.Methods("DELETE").Path("/companies/{companyID}/watch/{watchID}").HandlerFunc(removeCompanyWatch(logger, searcher, watchRepo))
 
 	r.Methods("POST").Path("/companies/watch").HandlerFunc(addCompanyNameWatch(logger, searcher, watchRepo))
-	r.Methods("DELETE").Path("/companies/watch/{watchId}").HandlerFunc(removeCompanyNameWatch(logger, searcher, watchRepo))
+	r.Methods("DELETE").Path("/companies/watch/{watchID}").HandlerFunc(removeCompanyNameWatch(logger, searcher, watchRepo))
 }
 
-func getCompanyId(w http.ResponseWriter, r *http.Request) string {
-	v, ok := mux.Vars(r)["companyId"]
+func getCompanyID(w http.ResponseWriter, r *http.Request) string {
+	v, ok := mux.Vars(r)["companyID"]
 	if !ok || v == "" {
-		moovhttp.Problem(w, errNoCompanyId)
+		moovhttp.Problem(w, errNoCompanyID)
 		return ""
 	}
 	return v
 }
 
-func getCompanyById(id string, searcher *searcher, repo companyRepository) (*Company, error) {
+func getCompanyByID(id string, searcher *searcher, repo companyRepository) (*Company, error) {
 	sdn := searcher.FindSDN(id)
 	if sdn == nil {
 		return nil, fmt.Errorf("Company %s not found", id)
@@ -105,8 +105,8 @@ func getCompanyById(id string, searcher *searcher, repo companyRepository) (*Com
 // companyRepository holds the current status (i.e. unsafe or exception) for a given company and
 // is expected to save metadata about each time the status is changed.
 type companyRepository interface {
-	getCompanyStatus(companyId string) (*CompanyStatus, error)
-	upsertCompanyStatus(companyId string, status *CompanyStatus) error
+	getCompanyStatus(companyID string) (*CompanyStatus, error)
+	upsertCompanyStatus(companyID string, status *CompanyStatus) error
 }
 
 type sqliteCompanyRepository struct {
@@ -117,8 +117,8 @@ func (r *sqliteCompanyRepository) close() error {
 	return r.db.Close()
 }
 
-func (r *sqliteCompanyRepository) getCompanyStatus(companyId string) (*CompanyStatus, error) {
-	if companyId == "" {
+func (r *sqliteCompanyRepository) getCompanyStatus(companyID string) (*CompanyStatus, error) {
+	if companyID == "" {
 		return nil, errors.New("getCompanyStatus: no Company.ID")
 	}
 	query := `select user_id, note, status, created_at from company_status where company_id = ? and deleted_at is null order by created_at desc limit 1;`
@@ -128,38 +128,38 @@ func (r *sqliteCompanyRepository) getCompanyStatus(companyId string) (*CompanySt
 	}
 	defer stmt.Close()
 
-	row := stmt.QueryRow(companyId)
+	row := stmt.QueryRow(companyID)
 
 	var status CompanyStatus
-	err = row.Scan(&status.UserId, &status.Note, &status.Status, &status.CreatedAt)
+	err = row.Scan(&status.UserID, &status.Note, &status.Status, &status.CreatedAt)
 	if err != nil && !strings.Contains(err.Error(), "no rows in result set") {
 		return nil, fmt.Errorf("getCompanyStatus: %v", err)
 	}
-	if status.UserId == "" {
+	if status.UserID == "" {
 		return nil, nil // not found
 	}
 	return &status, nil
 }
 
-func (r *sqliteCompanyRepository) upsertCompanyStatus(companyId string, status *CompanyStatus) error {
+func (r *sqliteCompanyRepository) upsertCompanyStatus(companyID string, status *CompanyStatus) error {
 	query := `insert or replace into company_status (company_id, user_id, note, status, created_at) values (?, ?, ?, ?, ?);`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(companyId, status.UserId, status.Note, status.Status, status.CreatedAt)
+	_, err = stmt.Exec(companyID, status.UserID, status.Note, status.Status, status.CreatedAt)
 	return err
 }
 
 func getCompany(logger log.Logger, searcher *searcher, companyRepo companyRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w = wrapResponseWriter(logger, w, r)
-		id := getCompanyId(w, r)
+		id := getCompanyID(w, r)
 		if id == "" {
 			return
 		}
-		company, err := getCompanyById(id, searcher, companyRepo)
+		company, err := getCompanyByID(id, searcher, companyRepo)
 		if err != nil {
 			moovhttp.Problem(w, err)
 			return
@@ -181,12 +181,12 @@ func updateCompanyStatus(logger log.Logger, searcher *searcher, companyRepo comp
 	return func(w http.ResponseWriter, r *http.Request) {
 		w = wrapResponseWriter(logger, w, r)
 
-		companyId, userId := getCompanyId(w, r), moovhttp.GetUserId(r)
-		if companyId == "" {
+		companyID, userID := getCompanyID(w, r), moovhttp.GetUserId(r)
+		if companyID == "" {
 			return
 		}
-		if userId == "" {
-			moovhttp.Problem(w, errNoUserId)
+		if userID == "" {
+			moovhttp.Problem(w, errNoUserID)
 			return
 		}
 
@@ -200,12 +200,12 @@ func updateCompanyStatus(logger log.Logger, searcher *searcher, companyRepo comp
 		switch status {
 		case CompanyUnsafe, CompanyException:
 			companyStatus := &CompanyStatus{
-				UserId:    userId,
+				UserID:    userID,
 				Note:      req.Notes,
 				Status:    status,
 				CreatedAt: time.Now(),
 			}
-			if err := companyRepo.upsertCompanyStatus(companyId, companyStatus); err != nil {
+			if err := companyRepo.upsertCompanyStatus(companyID, companyStatus); err != nil {
 				moovhttp.Problem(w, err)
 				return
 			}
@@ -239,11 +239,11 @@ func addCompanyWatch(logger log.Logger, searcher *searcher, repo watchRepository
 		}
 		req.Webhook = webhook
 
-		companyId := getCompanyId(w, r)
-		if companyId == "" {
+		companyID := getCompanyID(w, r)
+		if companyID == "" {
 			return
 		}
-		watchId, err := repo.addCompanyWatch(companyId, req)
+		watchID, err := repo.addCompanyWatch(companyID, req)
 		if err != nil {
 			moovhttp.Problem(w, err)
 			return
@@ -251,7 +251,7 @@ func addCompanyWatch(logger log.Logger, searcher *searcher, repo watchRepository
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(companyWatchResponse{watchId})
+		json.NewEncoder(w).Encode(companyWatchResponse{watchID})
 	}
 }
 
@@ -259,11 +259,11 @@ func removeCompanyWatch(logger log.Logger, searcher *searcher, repo watchReposit
 	return func(w http.ResponseWriter, r *http.Request) {
 		w = wrapResponseWriter(logger, w, r)
 
-		companyId, watchId := getCompanyId(w, r), getWatchId(w, r)
-		if companyId == "" || watchId == "" {
+		companyID, watchID := getCompanyID(w, r), getWatchID(w, r)
+		if companyID == "" || watchID == "" {
 			return
 		}
-		if err := repo.removeCompanyWatch(companyId, watchId); err != nil {
+		if err := repo.removeCompanyWatch(companyID, watchID); err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}
@@ -295,7 +295,7 @@ func addCompanyNameWatch(logger log.Logger, searcher *searcher, repo watchReposi
 			moovhttp.Problem(w, err)
 			return
 		}
-		watchId, err := repo.addCompanyNameWatch(name, webhook, req.AuthToken)
+		watchID, err := repo.addCompanyNameWatch(name, webhook, req.AuthToken)
 		if err != nil {
 			moovhttp.Problem(w, err)
 			return
@@ -303,7 +303,7 @@ func addCompanyNameWatch(logger log.Logger, searcher *searcher, repo watchReposi
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(companyWatchResponse{watchId})
+		json.NewEncoder(w).Encode(companyWatchResponse{watchID})
 	}
 }
 
@@ -311,11 +311,11 @@ func removeCompanyNameWatch(logger log.Logger, searcher *searcher, repo watchRep
 	return func(w http.ResponseWriter, r *http.Request) {
 		w = wrapResponseWriter(logger, w, r)
 
-		watchId := getWatchId(w, r)
-		if watchId == "" {
+		watchID := getWatchID(w, r)
+		if watchID == "" {
 			return
 		}
-		if err := repo.removeCompanyNameWatch(watchId); err != nil {
+		if err := repo.removeCompanyNameWatch(watchID); err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}

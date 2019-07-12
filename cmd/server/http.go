@@ -33,7 +33,7 @@ func wrapResponseWriter(logger log.Logger, w http.ResponseWriter, r *http.Reques
 	return moovhttp.Wrap(logger, routeHistogram.With("route", route), w, r)
 }
 
-var baseIdRegex = regexp.MustCompile(`([a-f0-9]{40})`)
+var baseIDRegex = regexp.MustCompile(`([a-f0-9]{40})`)
 
 // cleanMetricsPath takes a URL path and formats it for Prometheus metrics
 //
@@ -46,7 +46,7 @@ func cleanMetricsPath(path string) string {
 		if n, _ := strconv.Atoi(parts[i]); n > 0 || parts[i] == "" {
 			continue // numeric ID
 		}
-		if baseIdRegex.MatchString(parts[i]) {
+		if baseIDRegex.MatchString(parts[i]) {
 			continue // assume it's a moov/base.ID() value
 		}
 		out = append(out, parts[i])

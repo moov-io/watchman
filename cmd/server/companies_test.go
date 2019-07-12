@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/moov-io/base"
 	"github.com/cardonator/ofac"
+	"github.com/moov-io/base"
 
 	"github.com/gorilla/mux"
 )
@@ -66,8 +66,8 @@ func TestCompanies__id(t *testing.T) {
 	// Happy path
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/companies/random-company-id", nil)
-	router.Methods("GET").Path("/companies/{companyId}").HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
-		if v := getCompanyId(w, r); v != "random-company-id" {
+	router.Methods("GET").Path("/companies/{companyID}").HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
+		if v := getCompanyID(w, r); v != "random-company-id" {
 			t.Errorf("got %s", v)
 		}
 		if w.Code != http.StatusOK {
@@ -79,9 +79,9 @@ func TestCompanies__id(t *testing.T) {
 	// Unhappy case
 	w = httptest.NewRecorder()
 	req = httptest.NewRequest("GET", "/companies", nil)
-	router.Methods("GET").Path("/companies/{companyId}").HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
-		if v := getCompanyId(w, req); v != "" {
-			t.Errorf("didn't expect companyId, got %s", v)
+	router.Methods("GET").Path("/companies/{companyID}").HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
+		if v := getCompanyID(w, req); v != "" {
+			t.Errorf("didn't expect companyID, got %s", v)
 		}
 		if w.Code != http.StatusBadRequest {
 			t.Errorf("got status code %d", w.Code)
@@ -90,7 +90,7 @@ func TestCompanies__id(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Don't pass req through mux so mux.Vars finds nothing
-	if v := getCompanyId(w, req); v != "" {
+	if v := getCompanyID(w, req); v != "" {
 		t.Errorf("expected empty, but got %q", v)
 	}
 }
@@ -101,7 +101,7 @@ func TestCompany_getById(t *testing.T) {
 
 	// make sure we only return SDNType != "individual"
 	// We do this by proviing a searcher with individual results
-	company, err := getCompanyById("306", customerSearcher, repo)
+	company, err := getCompanyByID("306", customerSearcher, repo)
 	if company != nil {
 		t.Fatalf("expected no Company, but got %#v", company)
 	}
@@ -447,9 +447,9 @@ func TestCompanyRepository(t *testing.T) {
 	repo := createTestCompanyRepository(t)
 	defer repo.close()
 
-	companyId, userId := base.ID(), base.ID()
+	companyID, userID := base.ID(), base.ID()
 
-	status, err := repo.getCompanyStatus(companyId)
+	status, err := repo.getCompanyStatus(companyID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -458,21 +458,21 @@ func TestCompanyRepository(t *testing.T) {
 	}
 
 	// block company
-	status = &CompanyStatus{UserId: userId, Status: CompanyUnsafe, CreatedAt: time.Now()}
-	if err := repo.upsertCompanyStatus(companyId, status); err != nil {
+	status = &CompanyStatus{UserID: userID, Status: CompanyUnsafe, CreatedAt: time.Now()}
+	if err := repo.upsertCompanyStatus(companyID, status); err != nil {
 		t.Errorf("addCompanyBlock: shouldn't error, but got %v", err)
 	}
 	status = nil
 
 	// verify
-	status, err = repo.getCompanyStatus(companyId)
+	status, err = repo.getCompanyStatus(companyID)
 	if err != nil {
 		t.Error(err)
 	}
 	if status == nil {
 		t.Errorf("empty CompanyStatus")
 	}
-	if status.UserId == "" || string(status.Status) == "" {
+	if status.UserID == "" || string(status.Status) == "" {
 		t.Errorf("invalid CompanyStatus: %#v", status)
 	}
 	if status.Status != CompanyUnsafe {
@@ -480,20 +480,20 @@ func TestCompanyRepository(t *testing.T) {
 	}
 
 	// unblock
-	status = &CompanyStatus{UserId: userId, Status: CompanyException, CreatedAt: time.Now()}
-	if err := repo.upsertCompanyStatus(companyId, status); err != nil {
+	status = &CompanyStatus{UserID: userID, Status: CompanyException, CreatedAt: time.Now()}
+	if err := repo.upsertCompanyStatus(companyID, status); err != nil {
 		t.Errorf("addCompanyBlock: shouldn't error, but got %v", err)
 	}
 	status = nil
 
-	status, err = repo.getCompanyStatus(companyId)
+	status, err = repo.getCompanyStatus(companyID)
 	if err != nil {
 		t.Error(err)
 	}
 	if status == nil {
 		t.Errorf("empty CompanyStatus")
 	}
-	if status.UserId == "" || string(status.Status) == "" {
+	if status.UserID == "" || string(status.Status) == "" {
 		t.Errorf("invalid CompanyStatus: %#v", status)
 	}
 	if status.Status != CompanyException {
@@ -503,7 +503,7 @@ func TestCompanyRepository(t *testing.T) {
 	// edgae case
 	status, err = repo.getCompanyStatus("")
 	if status != nil {
-		t.Error("empty companyId shouldn return nil status")
+		t.Error("empty companyID shouldn return nil status")
 	}
 	if err == nil {
 		t.Error("but an error should be returned")

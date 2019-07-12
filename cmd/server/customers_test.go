@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/moov-io/base"
 	"github.com/cardonator/ofac"
+	"github.com/moov-io/base"
 
 	"github.com/gorilla/mux"
 )
@@ -68,8 +68,8 @@ func TestCustomers__id(t *testing.T) {
 	// Happy path
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/customers/random-cust-id", nil)
-	router.Methods("GET").Path("/customers/{customerId}").HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
-		if v := getCustomerId(w, r); v != "random-cust-id" {
+	router.Methods("GET").Path("/customers/{customerID}").HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
+		if v := getCustomerID(w, r); v != "random-cust-id" {
 			t.Errorf("got %s", v)
 		}
 		if w.Code != http.StatusOK {
@@ -81,9 +81,9 @@ func TestCustomers__id(t *testing.T) {
 	// Unhappy case
 	w = httptest.NewRecorder()
 	req = httptest.NewRequest("GET", "/customers", nil)
-	router.Methods("GET").Path("/customers/{customerId}").HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
-		if v := getCustomerId(w, req); v != "" {
-			t.Errorf("didn't expect customerId, got %s", v)
+	router.Methods("GET").Path("/customers/{customerID}").HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
+		if v := getCustomerID(w, req); v != "" {
+			t.Errorf("didn't expect customerID, got %s", v)
 		}
 		if w.Code != http.StatusBadRequest {
 			t.Errorf("got status code %d", w.Code)
@@ -92,7 +92,7 @@ func TestCustomers__id(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Don't pass req through mux so mux.Vars finds nothing
-	if v := getCustomerId(w, req); v != "" {
+	if v := getCustomerID(w, req); v != "" {
 		t.Errorf("expected empty, but got %q", v)
 	}
 }
@@ -103,7 +103,7 @@ func TestCustomer_getById(t *testing.T) {
 
 	// make sure we only return SDNType == "individual"
 	// We do this by proviing a searcher with non-individual results
-	cust, err := getCustomerById("21206", companySearcher, repo)
+	cust, err := getCustomerByID("21206", companySearcher, repo)
 	if cust != nil {
 		t.Fatalf("expected no Customer, but got %#v", cust)
 	}
@@ -449,9 +449,9 @@ func TestCustomerRepository(t *testing.T) {
 	repo := createTestCustomerRepository(t)
 	defer repo.close()
 
-	customerId, userId := base.ID(), base.ID()
+	customerID, userID := base.ID(), base.ID()
 
-	status, err := repo.getCustomerStatus(customerId)
+	status, err := repo.getCustomerStatus(customerID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -460,21 +460,21 @@ func TestCustomerRepository(t *testing.T) {
 	}
 
 	// block customer
-	status = &CustomerStatus{UserId: userId, Status: CustomerUnsafe, CreatedAt: time.Now()}
-	if err := repo.upsertCustomerStatus(customerId, status); err != nil {
+	status = &CustomerStatus{UserID: userID, Status: CustomerUnsafe, CreatedAt: time.Now()}
+	if err := repo.upsertCustomerStatus(customerID, status); err != nil {
 		t.Errorf("addCustomerBlock: shouldn't error, but got %v", err)
 	}
 	status = nil
 
 	// verify
-	status, err = repo.getCustomerStatus(customerId)
+	status, err = repo.getCustomerStatus(customerID)
 	if err != nil {
 		t.Error(err)
 	}
 	if status == nil {
 		t.Errorf("empty CustomerStatus")
 	}
-	if status.UserId == "" || string(status.Status) == "" {
+	if status.UserID == "" || string(status.Status) == "" {
 		t.Errorf("invalid CustomerStatus: %#v", status)
 	}
 	if status.Status != CustomerUnsafe {
@@ -482,20 +482,20 @@ func TestCustomerRepository(t *testing.T) {
 	}
 
 	// unblock
-	status = &CustomerStatus{UserId: userId, Status: CustomerException, CreatedAt: time.Now()}
-	if err := repo.upsertCustomerStatus(customerId, status); err != nil {
+	status = &CustomerStatus{UserID: userID, Status: CustomerException, CreatedAt: time.Now()}
+	if err := repo.upsertCustomerStatus(customerID, status); err != nil {
 		t.Errorf("addCustomerBlock: shouldn't error, but got %v", err)
 	}
 	status = nil
 
-	status, err = repo.getCustomerStatus(customerId)
+	status, err = repo.getCustomerStatus(customerID)
 	if err != nil {
 		t.Error(err)
 	}
 	if status == nil {
 		t.Errorf("empty CustomerStatus")
 	}
-	if status.UserId == "" || string(status.Status) == "" {
+	if status.UserID == "" || string(status.Status) == "" {
 		t.Errorf("invalid CustomerStatus: %#v", status)
 	}
 	if status.Status != CustomerException {
@@ -505,7 +505,7 @@ func TestCustomerRepository(t *testing.T) {
 	// edgae case
 	status, err = repo.getCustomerStatus("")
 	if status != nil {
-		t.Error("empty customerId shouldn return nil status")
+		t.Error("empty customerID shouldn return nil status")
 	}
 	if err == nil {
 		t.Error("but an error should be returned")

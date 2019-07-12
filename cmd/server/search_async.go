@@ -54,9 +54,9 @@ func (s *searcher) spawnResearching(logger log.Logger, companyRepo companyReposi
 
 					// Perform a query (ID watches) or search (name watches) and encode the model in JSON for calling the webhook.
 					switch {
-					case watches[i].customerId != "":
-						s.logger.Log("search", fmt.Sprintf("async: watch %s for customer %s found", watches[i].id, watches[i].customerId))
-						body, err = getCustomerBody(s, watches[i].id, watches[i].customerId, 1.0, custRepo)
+					case watches[i].customerID != "":
+						s.logger.Log("search", fmt.Sprintf("async: watch %s for customer %s found", watches[i].id, watches[i].customerID))
+						body, err = getCustomerBody(s, watches[i].id, watches[i].customerID, 1.0, custRepo)
 
 					case watches[i].customerName != "":
 						s.logger.Log("search", fmt.Sprintf("async: name watch '%s' for customer %s found", watches[i].customerName, watches[i].id))
@@ -68,9 +68,9 @@ func (s *searcher) spawnResearching(logger log.Logger, companyRepo companyReposi
 							}
 						}
 
-					case watches[i].companyId != "":
-						s.logger.Log("search", fmt.Sprintf("async: watch %s for company %s found", watches[i].id, watches[i].companyId))
-						body, err = getCompanyBody(s, watches[i].id, watches[i].companyId, 1.0, companyRepo)
+					case watches[i].companyID != "":
+						s.logger.Log("search", fmt.Sprintf("async: watch %s for company %s found", watches[i].id, watches[i].companyID))
+						body, err = getCompanyBody(s, watches[i].id, watches[i].companyID, 1.0, companyRepo)
 
 					case watches[i].companyName != "":
 						s.logger.Log("search", fmt.Sprintf("async: name watch '%s' for company %s found", watches[i].companyName, watches[i].id))
@@ -104,31 +104,31 @@ func (s *searcher) spawnResearching(logger log.Logger, companyRepo companyReposi
 }
 
 // getCustomerBody returns the JSON encoded form of a given customer by their EntityID
-func getCustomerBody(s *searcher, watchId string, customerId string, match float64, repo customerRepository) (*bytes.Buffer, error) {
-	customer, _ := getCustomerById(customerId, s, repo)
+func getCustomerBody(s *searcher, watchID string, customerID string, match float64, repo customerRepository) (*bytes.Buffer, error) {
+	customer, _ := getCustomerByID(customerID, s, repo)
 	if customer == nil {
-		return nil, fmt.Errorf("async: watch %s customer %v not found", watchId, customerId)
+		return nil, fmt.Errorf("async: watch %s customer %v not found", watchID, customerID)
 	}
 	customer.Match = match
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(customer); err != nil {
-		return nil, fmt.Errorf("problem creating JSON for customer watch %s: %v", watchId, err)
+		return nil, fmt.Errorf("problem creating JSON for customer watch %s: %v", watchID, err)
 	}
 	return &buf, nil
 }
 
 // getCompanyBody returns the JSON encoded form of a given customer by their EntityID
-func getCompanyBody(s *searcher, watchId string, companyId string, match float64, repo companyRepository) (*bytes.Buffer, error) {
-	company, _ := getCompanyById(companyId, s, repo)
+func getCompanyBody(s *searcher, watchID string, companyID string, match float64, repo companyRepository) (*bytes.Buffer, error) {
+	company, _ := getCompanyByID(companyID, s, repo)
 	if company == nil {
-		return nil, fmt.Errorf("async: watch %s company %v not found", watchId, companyId)
+		return nil, fmt.Errorf("async: watch %s company %v not found", watchID, companyID)
 	}
 	company.Match = match
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(company); err != nil {
-		return nil, fmt.Errorf("problem creating JSON for company watch %s: %v", watchId, err)
+		return nil, fmt.Errorf("problem creating JSON for company watch %s: %v", watchID, err)
 	}
 	return &buf, nil
 }

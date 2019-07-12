@@ -129,7 +129,7 @@ func (a *OFACApiService) AddOFACCompanyNameWatch(ctx context.Context, name strin
 /*
 OFACApiService Add OFAC watch on a Company
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param companyId Company ID
+ * @param companyID Company ID
  * @param watchRequest
  * @param optional nil or *AddOFACCompanyWatchOpts - Optional Parameters:
  * @param "XRequestId" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
@@ -140,7 +140,7 @@ type AddOFACCompanyWatchOpts struct {
 	XRequestId optional.String
 }
 
-func (a *OFACApiService) AddOFACCompanyWatch(ctx context.Context, companyId string, watchRequest WatchRequest, localVarOptionals *AddOFACCompanyWatchOpts) (Watch, *http.Response, error) {
+func (a *OFACApiService) AddOFACCompanyWatch(ctx context.Context, companyID string, watchRequest WatchRequest, localVarOptionals *AddOFACCompanyWatchOpts) (Watch, *http.Response, error) {
 	var (
 		localVarHttpMethod   = strings.ToUpper("Post")
 		localVarPostBody     interface{}
@@ -151,8 +151,8 @@ func (a *OFACApiService) AddOFACCompanyWatch(ctx context.Context, companyId stri
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/companies/{companyId}/watch"
-	localVarPath = strings.Replace(localVarPath, "{"+"companyId"+"}", fmt.Sprintf("%v", companyId), -1)
+	localVarPath := a.client.cfg.BasePath + "/companies/{companyID}/watch"
+	localVarPath = strings.Replace(localVarPath, "{"+"companyID"+"}", fmt.Sprintf("%v", companyID), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -329,7 +329,7 @@ func (a *OFACApiService) AddOFACCustomerNameWatch(ctx context.Context, name stri
 /*
 OFACApiService Add OFAC watch on a Customer
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param customerId Customer ID
+ * @param customerID Customer ID
  * @param watchRequest
  * @param optional nil or *AddOFACCustomerWatchOpts - Optional Parameters:
  * @param "XRequestId" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
@@ -340,7 +340,7 @@ type AddOFACCustomerWatchOpts struct {
 	XRequestId optional.String
 }
 
-func (a *OFACApiService) AddOFACCustomerWatch(ctx context.Context, customerId string, watchRequest WatchRequest, localVarOptionals *AddOFACCustomerWatchOpts) (Watch, *http.Response, error) {
+func (a *OFACApiService) AddOFACCustomerWatch(ctx context.Context, customerID string, watchRequest WatchRequest, localVarOptionals *AddOFACCustomerWatchOpts) (Watch, *http.Response, error) {
 	var (
 		localVarHttpMethod   = strings.ToUpper("Post")
 		localVarPostBody     interface{}
@@ -351,8 +351,8 @@ func (a *OFACApiService) AddOFACCustomerWatch(ctx context.Context, customerId st
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/customers/{customerId}/watch"
-	localVarPath = strings.Replace(localVarPath, "{"+"customerId"+"}", fmt.Sprintf("%v", customerId), -1)
+	localVarPath := a.client.cfg.BasePath + "/customers/{customerID}/watch"
+	localVarPath = strings.Replace(localVarPath, "{"+"customerID"+"}", fmt.Sprintf("%v", customerID), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -524,7 +524,7 @@ func (a *OFACApiService) GetLatestDownloads(ctx context.Context, localVarOptiona
 /*
 OFACApiService Get information about a company, trust or organization such as addresses, alternate names, and remarks.
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param companyId Company ID
+ * @param companyID Company ID
  * @param optional nil or *GetOFACCompanyOpts - Optional Parameters:
  * @param "XRequestId" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
 @return OfacCompany
@@ -534,7 +534,7 @@ type GetOFACCompanyOpts struct {
 	XRequestId optional.String
 }
 
-func (a *OFACApiService) GetOFACCompany(ctx context.Context, companyId string, localVarOptionals *GetOFACCompanyOpts) (OfacCompany, *http.Response, error) {
+func (a *OFACApiService) GetOFACCompany(ctx context.Context, companyID string, localVarOptionals *GetOFACCompanyOpts) (OfacCompany, *http.Response, error) {
 	var (
 		localVarHttpMethod   = strings.ToUpper("Get")
 		localVarPostBody     interface{}
@@ -545,8 +545,8 @@ func (a *OFACApiService) GetOFACCompany(ctx context.Context, companyId string, l
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/companies/{companyId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"companyId"+"}", fmt.Sprintf("%v", companyId), -1)
+	localVarPath := a.client.cfg.BasePath + "/companies/{companyID}"
+	localVarPath = strings.Replace(localVarPath, "{"+"companyID"+"}", fmt.Sprintf("%v", companyID), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -621,7 +621,7 @@ func (a *OFACApiService) GetOFACCompany(ctx context.Context, companyId string, l
 /*
 OFACApiService Get information about a customer, addresses, alternate names, and their SDN metadata.
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param customerId Customer ID
+ * @param customerID Customer ID
  * @param optional nil or *GetOFACCustomerOpts - Optional Parameters:
  * @param "XRequestId" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
 @return OfacCustomer
@@ -631,7 +631,7 @@ type GetOFACCustomerOpts struct {
 	XRequestId optional.String
 }
 
-func (a *OFACApiService) GetOFACCustomer(ctx context.Context, customerId string, localVarOptionals *GetOFACCustomerOpts) (OfacCustomer, *http.Response, error) {
+func (a *OFACApiService) GetOFACCustomer(ctx context.Context, customerID string, localVarOptionals *GetOFACCustomerOpts) (OfacCustomer, *http.Response, error) {
 	var (
 		localVarHttpMethod   = strings.ToUpper("Get")
 		localVarPostBody     interface{}
@@ -642,8 +642,8 @@ func (a *OFACApiService) GetOFACCustomer(ctx context.Context, customerId string,
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/customers/{customerId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"customerId"+"}", fmt.Sprintf("%v", customerId), -1)
+	localVarPath := a.client.cfg.BasePath + "/customers/{customerID}"
+	localVarPath = strings.Replace(localVarPath, "{"+"customerID"+"}", fmt.Sprintf("%v", customerID), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -1073,7 +1073,7 @@ func (a *OFACApiService) Ping(ctx context.Context) (*http.Response, error) {
 /*
 OFACApiService Remove a Company name watch
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param watchId Watch ID, used to identify a specific watch
+ * @param watchID Watch ID, used to identify a specific watch
  * @param name Company name watch
  * @param optional nil or *RemoveOFACCompanyNameWatchOpts - Optional Parameters:
  * @param "XRequestId" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
@@ -1083,7 +1083,7 @@ type RemoveOFACCompanyNameWatchOpts struct {
 	XRequestId optional.String
 }
 
-func (a *OFACApiService) RemoveOFACCompanyNameWatch(ctx context.Context, watchId string, name string, localVarOptionals *RemoveOFACCompanyNameWatchOpts) (*http.Response, error) {
+func (a *OFACApiService) RemoveOFACCompanyNameWatch(ctx context.Context, watchID string, name string, localVarOptionals *RemoveOFACCompanyNameWatchOpts) (*http.Response, error) {
 	var (
 		localVarHttpMethod   = strings.ToUpper("Delete")
 		localVarPostBody     interface{}
@@ -1093,8 +1093,8 @@ func (a *OFACApiService) RemoveOFACCompanyNameWatch(ctx context.Context, watchId
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/companies/watch/{watchId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"watchId"+"}", fmt.Sprintf("%v", watchId), -1)
+	localVarPath := a.client.cfg.BasePath + "/companies/watch/{watchID}"
+	localVarPath = strings.Replace(localVarPath, "{"+"watchID"+"}", fmt.Sprintf("%v", watchID), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -1151,8 +1151,8 @@ func (a *OFACApiService) RemoveOFACCompanyNameWatch(ctx context.Context, watchId
 /*
 OFACApiService Remove company watch
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param companyId Company ID
- * @param watchId Watch ID, used to identify a specific watch
+ * @param companyID Company ID
+ * @param watchID Watch ID, used to identify a specific watch
  * @param optional nil or *RemoveOFACCompanyWatchOpts - Optional Parameters:
  * @param "XRequestId" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
 */
@@ -1161,7 +1161,7 @@ type RemoveOFACCompanyWatchOpts struct {
 	XRequestId optional.String
 }
 
-func (a *OFACApiService) RemoveOFACCompanyWatch(ctx context.Context, companyId string, watchId string, localVarOptionals *RemoveOFACCompanyWatchOpts) (*http.Response, error) {
+func (a *OFACApiService) RemoveOFACCompanyWatch(ctx context.Context, companyID string, watchID string, localVarOptionals *RemoveOFACCompanyWatchOpts) (*http.Response, error) {
 	var (
 		localVarHttpMethod   = strings.ToUpper("Delete")
 		localVarPostBody     interface{}
@@ -1171,9 +1171,9 @@ func (a *OFACApiService) RemoveOFACCompanyWatch(ctx context.Context, companyId s
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/companies/{companyId}/watch/{watchId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"companyId"+"}", fmt.Sprintf("%v", companyId), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"watchId"+"}", fmt.Sprintf("%v", watchId), -1)
+	localVarPath := a.client.cfg.BasePath + "/companies/{companyID}/watch/{watchID}"
+	localVarPath = strings.Replace(localVarPath, "{"+"companyID"+"}", fmt.Sprintf("%v", companyID), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"watchID"+"}", fmt.Sprintf("%v", watchID), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -1229,7 +1229,7 @@ func (a *OFACApiService) RemoveOFACCompanyWatch(ctx context.Context, companyId s
 /*
 OFACApiService Remove a Customer name watch
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param watchId Watch ID, used to identify a specific watch
+ * @param watchID Watch ID, used to identify a specific watch
  * @param name Customer or Company name watch
  * @param optional nil or *RemoveOFACCustomerNameWatchOpts - Optional Parameters:
  * @param "XRequestId" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
@@ -1239,7 +1239,7 @@ type RemoveOFACCustomerNameWatchOpts struct {
 	XRequestId optional.String
 }
 
-func (a *OFACApiService) RemoveOFACCustomerNameWatch(ctx context.Context, watchId string, name string, localVarOptionals *RemoveOFACCustomerNameWatchOpts) (*http.Response, error) {
+func (a *OFACApiService) RemoveOFACCustomerNameWatch(ctx context.Context, watchID string, name string, localVarOptionals *RemoveOFACCustomerNameWatchOpts) (*http.Response, error) {
 	var (
 		localVarHttpMethod   = strings.ToUpper("Delete")
 		localVarPostBody     interface{}
@@ -1249,8 +1249,8 @@ func (a *OFACApiService) RemoveOFACCustomerNameWatch(ctx context.Context, watchI
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/customers/watch/{watchId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"watchId"+"}", fmt.Sprintf("%v", watchId), -1)
+	localVarPath := a.client.cfg.BasePath + "/customers/watch/{watchID}"
+	localVarPath = strings.Replace(localVarPath, "{"+"watchID"+"}", fmt.Sprintf("%v", watchID), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -1307,8 +1307,8 @@ func (a *OFACApiService) RemoveOFACCustomerNameWatch(ctx context.Context, watchI
 /*
 OFACApiService Remove customer watch
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param customerId Customer ID
- * @param watchId Watch ID, used to identify a specific watch
+ * @param customerID Customer ID
+ * @param watchID Watch ID, used to identify a specific watch
  * @param optional nil or *RemoveOFACCustomerWatchOpts - Optional Parameters:
  * @param "XRequestId" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
 */
@@ -1317,7 +1317,7 @@ type RemoveOFACCustomerWatchOpts struct {
 	XRequestId optional.String
 }
 
-func (a *OFACApiService) RemoveOFACCustomerWatch(ctx context.Context, customerId string, watchId string, localVarOptionals *RemoveOFACCustomerWatchOpts) (*http.Response, error) {
+func (a *OFACApiService) RemoveOFACCustomerWatch(ctx context.Context, customerID string, watchID string, localVarOptionals *RemoveOFACCustomerWatchOpts) (*http.Response, error) {
 	var (
 		localVarHttpMethod   = strings.ToUpper("Delete")
 		localVarPostBody     interface{}
@@ -1327,9 +1327,9 @@ func (a *OFACApiService) RemoveOFACCustomerWatch(ctx context.Context, customerId
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/customers/{customerId}/watch/{watchId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"customerId"+"}", fmt.Sprintf("%v", customerId), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"watchId"+"}", fmt.Sprintf("%v", watchId), -1)
+	localVarPath := a.client.cfg.BasePath + "/customers/{customerID}/watch/{watchID}"
+	localVarPath = strings.Replace(localVarPath, "{"+"customerID"+"}", fmt.Sprintf("%v", customerID), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"watchID"+"}", fmt.Sprintf("%v", watchID), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -1530,7 +1530,7 @@ func (a *OFACApiService) Search(ctx context.Context, localVarOptionals *SearchOp
 /*
 OFACApiService Update a Companies sanction status to always block or always allow transactions.
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param companyId Company ID
+ * @param companyID Company ID
  * @param updateCompanyStatus
  * @param optional nil or *UpdateOFACCompanyStatusOpts - Optional Parameters:
  * @param "XRequestId" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
@@ -1540,7 +1540,7 @@ type UpdateOFACCompanyStatusOpts struct {
 	XRequestId optional.String
 }
 
-func (a *OFACApiService) UpdateOFACCompanyStatus(ctx context.Context, companyId string, updateCompanyStatus UpdateCompanyStatus, localVarOptionals *UpdateOFACCompanyStatusOpts) (*http.Response, error) {
+func (a *OFACApiService) UpdateOFACCompanyStatus(ctx context.Context, companyID string, updateCompanyStatus UpdateCompanyStatus, localVarOptionals *UpdateOFACCompanyStatusOpts) (*http.Response, error) {
 	var (
 		localVarHttpMethod   = strings.ToUpper("Put")
 		localVarPostBody     interface{}
@@ -1550,8 +1550,8 @@ func (a *OFACApiService) UpdateOFACCompanyStatus(ctx context.Context, companyId 
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/companies/{companyId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"companyId"+"}", fmt.Sprintf("%v", companyId), -1)
+	localVarPath := a.client.cfg.BasePath + "/companies/{companyID}"
+	localVarPath = strings.Replace(localVarPath, "{"+"companyID"+"}", fmt.Sprintf("%v", companyID), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -1609,7 +1609,7 @@ func (a *OFACApiService) UpdateOFACCompanyStatus(ctx context.Context, companyId 
 /*
 OFACApiService Update a Customer's sanction status to always block or always allow transactions.
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param customerId Customer ID
+ * @param customerID Customer ID
  * @param updateCustomerStatus
  * @param optional nil or *UpdateOFACCustomerStatusOpts - Optional Parameters:
  * @param "XRequestId" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
@@ -1619,7 +1619,7 @@ type UpdateOFACCustomerStatusOpts struct {
 	XRequestId optional.String
 }
 
-func (a *OFACApiService) UpdateOFACCustomerStatus(ctx context.Context, customerId string, updateCustomerStatus UpdateCustomerStatus, localVarOptionals *UpdateOFACCustomerStatusOpts) (*http.Response, error) {
+func (a *OFACApiService) UpdateOFACCustomerStatus(ctx context.Context, customerID string, updateCustomerStatus UpdateCustomerStatus, localVarOptionals *UpdateOFACCustomerStatusOpts) (*http.Response, error) {
 	var (
 		localVarHttpMethod   = strings.ToUpper("Put")
 		localVarPostBody     interface{}
@@ -1629,8 +1629,8 @@ func (a *OFACApiService) UpdateOFACCustomerStatus(ctx context.Context, customerI
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/customers/{customerId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"customerId"+"}", fmt.Sprintf("%v", customerId), -1)
+	localVarPath := a.client.cfg.BasePath + "/customers/{customerID}"
+	localVarPath = strings.Replace(localVarPath, "{"+"customerID"+"}", fmt.Sprintf("%v", customerID), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
