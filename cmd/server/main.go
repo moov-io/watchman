@@ -20,10 +20,10 @@ import (
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/base/http/bind"
 	"github.com/moov-io/ofac"
+	"github.com/moov-io/ofac/internal/database"
 
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
-	"github.com/mattn/go-sqlite3"
 )
 
 var (
@@ -61,16 +61,9 @@ func main() {
 		errs <- fmt.Errorf("%s", <-c)
 	}()
 
-	// Setup SQLite database
-	if sqliteVersion, _, _ := sqlite3.Version(); sqliteVersion != "" {
-		logger.Log("main", fmt.Sprintf("sqlite version %s", sqliteVersion))
-	}
-	db, err := createSqliteConnection(logger, getSqlitePath())
+	// Setup database connection
+	db, err := database.New(logger, os.Getenv("DATABASE_TYPE"))
 	if err != nil {
-		logger.Log("main", err)
-		os.Exit(1)
-	}
-	if err := migrate(logger, db); err != nil {
 		logger.Log("main", err)
 		os.Exit(1)
 	}

@@ -10,6 +10,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/moov-io/ofac/internal/database"
+
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
 )
@@ -48,12 +50,8 @@ func TestSearcher__refreshData(t *testing.T) {
 func createTestDownloadRepository(t *testing.T) *sqliteDownloadRepository {
 	t.Helper()
 
-	db, err := createTestSqliteDB()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	return &sqliteDownloadRepository{db.db, log.NewNopLogger()}
+	db := database.CreateTestSqliteDB(t)
+	return &sqliteDownloadRepository{db.DB, log.NewNopLogger()}
 }
 
 func TestDownload_record(t *testing.T) {

@@ -14,6 +14,7 @@ import (
 
 	"github.com/moov-io/base"
 	"github.com/moov-io/ofac"
+	"github.com/moov-io/ofac/internal/database"
 
 	"github.com/gorilla/mux"
 )
@@ -53,11 +54,8 @@ var (
 func createTestCompanyRepository(t *testing.T) *sqliteCompanyRepository {
 	t.Helper()
 
-	db, err := createTestSqliteDB()
-	if err != nil {
-		t.Fatal(err)
-	}
-	return &sqliteCompanyRepository{db.db}
+	db := database.CreateTestSqliteDB(t)
+	return &sqliteCompanyRepository{db.DB}
 }
 
 func TestCompanies__id(t *testing.T) {

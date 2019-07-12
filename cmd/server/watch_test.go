@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/moov-io/base"
+	"github.com/moov-io/ofac/internal/database"
 
 	"github.com/go-kit/kit/log"
 )
@@ -15,15 +16,8 @@ import (
 func createTestWatchRepository(t *testing.T) *sqliteWatchRepository {
 	t.Helper()
 
-	db, err := createTestSqliteDB()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	return &sqliteWatchRepository{
-		db.db,
-		log.NewNopLogger(),
-	}
+	db := database.CreateTestSqliteDB(t)
+	return &sqliteWatchRepository{db.DB, log.NewNopLogger()}
 }
 
 func TestCompanyWatch(t *testing.T) {
