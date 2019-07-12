@@ -31,35 +31,35 @@ var (
 	sqliteVersionLogOnce sync.Once
 
 	sqliteMigrator = migrator.New(
-		createTable(
+		execsql(
 			"create_customer_name_watches",
 			`create table if not exists customer_name_watches(id primary key, name, webhook, auth_token, created_at datetime, deleted_at datetime);`,
 		),
-		createTable(
+		execsql(
 			"create_customer_status",
 			`create table if not exists customer_status(customer_id, user_id, note, status, created_at datetime, deleted_at datetime);`,
 		),
-		createTable(
+		execsql(
 			"create_customer_watches",
 			`create table if not exists customer_watches(id primary key, customer_id, webhook, auth_token, created_at datetime, deleted_at datetime);`,
 		),
-		createTable(
+		execsql(
 			"create_company_name_watches",
 			`create table if not exists company_name_watches(id primary key, name, webhook, auth_token, created_at datetime, deleted_at datetime);`,
 		),
-		createTable(
+		execsql(
 			"create_company_status",
 			`create table if not exists company_status(company_id, user_id, note, status, created_at datetime, deleted_at datetime);`,
 		),
-		createTable(
+		execsql(
 			"create_company_watches",
 			`create table if not exists company_watches(id primary key, company_id, webhook, auth_token, created_at datetime, deleted_at datetime);`,
 		),
-		createTable(
+		execsql(
 			"create_ofac_download_stats",
 			`create table if not exists ofac_download_stats(downloaded_at datetime, sdns, alt_names, addresses);`,
 		),
-		createTable(
+		execsql(
 			"create_webhook_stats",
 			`create table if not exists webhook_stats(watch_id string, attempted_at datetime, status);`,
 		),

@@ -19,52 +19,41 @@ import (
 
 var (
 	mysqlMigrator = migrator.New(
-		createTable(
+		execsql(
 			"create_customer_name_watches",
 			`create table if not exists customer_name_watches(id varchar(40) primary key, name varchar(40), webhook varchar(512), auth_token varchar(128), created_at datetime, deleted_at datetime);`,
 		),
-		createTable(
+		execsql(
 			"create_customer_status",
 			`create table if not exists customer_status(customer_id varchar(40), user_id varchar(40), note varchar(1024), status varchar(10), created_at datetime, deleted_at datetime);`,
 		),
-		createTable(
+		execsql(
 			"create_customer_watches",
 			`create table if not exists customer_watches(id varchar(40) primary key, customer_id varchar(40), webhook varchar(512), auth_token varchar(128), created_at datetime, deleted_at datetime);`,
 		),
-		createTable(
+		execsql(
 			"create_company_name_watches",
 			`create table if not exists company_name_watches(id varchar(40) primary key, name varchar(256), webhook varchar(512), auth_token varchar(128), created_at datetime, deleted_at datetime);`,
 		),
-		createTable(
+		execsql(
 			"create_company_status",
 			`create table if not exists company_status(company_id varchar(40), user_id varchar(40), note varchar(1024), status varchar(10), created_at datetime, deleted_at datetime);`,
 		),
-		createTable(
+		execsql(
 			"create_company_watches",
 			`create table if not exists company_watches(id varchar(40) primary key, company_id varchar(40), webhook varchar(512), auth_token varchar(128), created_at datetime, deleted_at datetime);`,
 		),
-		createTable(
+		execsql(
 			"create_ofac_download_stats",
 			`create table if not exists ofac_download_stats(downloaded_at datetime, sdns integer, alt_names integer, addresses integer);`,
 		),
-		createTable(
+		execsql(
 			"create_webhook_stats",
 			`create table if not exists webhook_stats(watch_id varchar(40), attempted_at datetime, status varchar(10));`,
 		),
-		addSQLiteColumn("ofac_download_stats", "denied_persons integer"),
+		execsql("add__denied_persons__to__ofac_download_stats", "alter table ofac_download_stats add column denied_persons integer not null default 0;"),
 	)
 )
-
-// TODO(adam): create addMySQLColumn(..)
-// From https://stackoverflow.com/a/29428841
-//
-// IF NOT EXISTS( SELECT NULL
-//             FROM INFORMATION_SCHEMA.COLUMNS
-//            WHERE table_name = 'tablename'
-//              AND table_schema = 'db_name'
-//              AND column_name = 'columnname')  THEN
-//   ALTER TABLE `TableName` ADD `ColumnName` int(1) NOT NULL default '0';
-// END IF;
 
 type discardLogger struct{}
 

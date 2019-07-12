@@ -24,7 +24,7 @@ func New(logger log.Logger, _type string) (*sql.DB, error) {
 	return nil, fmt.Errorf("unknown database type %q", _type)
 }
 
-func createTable(name, raw string) *migrator.MigrationNoTx {
+func execsql(name, raw string) *migrator.MigrationNoTx {
 	return &migrator.MigrationNoTx{
 		Name: name,
 		Func: func(db *sql.DB) error {
