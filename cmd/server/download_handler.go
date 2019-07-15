@@ -12,7 +12,9 @@ import (
 	"github.com/go-kit/kit/log"
 )
 
-const manualRefreshPath = "/ofac/refresh"
+const (
+	manualRefreshPath = "/data/refresh"
+)
 
 // manualRefreshHandler will register an endpoint on the admin server OFAC data refresh endpoint
 func manualRefreshHandler(logger log.Logger, searcher *searcher, downloadRepo downloadRepository) http.HandlerFunc {
