@@ -22,8 +22,11 @@ func TestMySQL__basic(t *testing.T) {
 	m := mysqlConnection(log.NewNopLogger(), "user", "pass", "127.0.0.1:3006", "db")
 
 	conn, err := m.Connect()
-	defer conn.Close()
-
+	defer func() {
+		if conn != nil {
+			conn.Close()
+		}
+	}()
 	if conn != nil || err == nil {
 		t.Fatalf("conn=%#v expected error", conn)
 	}
