@@ -5,25 +5,37 @@
 package database
 
 import (
-	// "database/sql"
-	// "io/ioutil"
-	// "os"
-	// "path/filepath"
+	"runtime"
 	"testing"
+
+	"github.com/go-kit/kit/log"
 )
 
-// type testSqliteDB struct {
-// 	db *sql.DB
+func TestSQLite__basic(t *testing.T) {
+	db := CreateTestSqliteDB(t)
+	defer db.Close()
 
-// 	dir string // temp dir created for sqlite files
-// }
+	if err := db.DB.Ping(); err != nil {
+		t.Fatal(err)
+	}
 
-// func (r *testSqliteDB) close() error {
-// 	if err := r.db.Close(); err != nil {
-// 		return err
-// 	}
-// 	return os.RemoveAll(r.dir)
-// }
+	if runtime.GOOS == "windows" {
+		t.Skip("/dev/null doesn't exist on Windows")
+	}
+
+	// error case
+	s := sqliteConnection(log.NewNopLogger(), "/tmp/path/doesnt/exist")
+
+	conn, err := s.Connect()
+	defer conn.Close()
+
+	if err := conn.Ping(); err == nil {
+		t.Fatal("expected error")
+	}
+	if err == nil {
+		t.Fatalf("conn=%#v expected error", conn)
+	}
+}
 
 func TestSqlite__getSqlitePath(t *testing.T) {
 	if v := getSqlitePath(); v != "ofac.db" {

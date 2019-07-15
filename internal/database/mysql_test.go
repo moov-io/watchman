@@ -6,6 +6,8 @@ package database
 
 import (
 	"testing"
+
+	"github.com/go-kit/kit/log"
 )
 
 func TestMySQL__basic(t *testing.T) {
@@ -14,5 +16,15 @@ func TestMySQL__basic(t *testing.T) {
 
 	if err := db.DB.Ping(); err != nil {
 		t.Fatal(err)
+	}
+
+	// create a phony MySQL
+	m := mysqlConnection(log.NewNopLogger(), "user", "pass", "127.0.0.1:3006", "db")
+
+	conn, err := m.Connect()
+	defer conn.Close()
+
+	if conn != nil || err == nil {
+		t.Fatalf("conn=%#v expected error", conn)
 	}
 }
