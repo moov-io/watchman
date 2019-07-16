@@ -62,12 +62,30 @@ Docs: [docs.moov.io](https://docs.moov.io/ofac/) | [api docs](https://api.moov.i
 | `OFAC_DATA_REFRESH` | Interval for OFAC data redownload and reparse. | 12h |
 | `OFAC_DOWNLOAD_TEMPLATE` | HTTP address for downloading raw OFAC files. | (OFAC website) |
 | `DPL_DOWNLOAD_TEMPLATE` | HTTP address for downloading the DPL | (BIS website) |
-| `SQLITE_DB_PATH`| Local filepath location for the OFAC SQLite database. | `ofac.db` |
 | `WEBHOOK_BATCH_SIZE` | How many watches to read from database per batch of async searches. | 100 |
 | `LOG_FORMAT` | Format for logging lines to be written as. | Options: `json`, `plain` - Default: `plain` |
 | `HTTP_BIND_ADDRESS` | Address for OFAC to bind its HTTP server on. This overrides the command-line flag `-http.addr`. | Default: `:8080` |
 | `HTTP_ADMIN_BIND_ADDRESS` | Address for OFAC to bind its admin HTTP server on. This overrides the command-line flag `-admin.addr`. | Default: `:9090` |
+| `DATABASE_TYPE` | Which database option to use (Options: `sqlite`, `mysql`) | Default: `sqlite` |
 
+#### Storage
+
+Based on `DATABASE_TYPE` the following environment variables will be read to configure connections for a specific database.
+
+##### MySQL
+
+- `MYSQL_ADDRESS`: TCP address for connecting to the mysql server. (example: `tcp(hostname:3306)`)
+- `MYSQL_DATABASE`: Name of database to connect into.
+- `MYSQL_PASSWORD`: Password of user account for authentication.
+- `MYSQL_USER`: Username used for authentication,
+
+Refer to the mysql driver documentation for [connection parameters](https://github.com/go-sql-driver/mysql#dsn-data-source-name).
+
+##### SQLite
+
+- `SQLITE_DB_PATH`: Local filepath location for the paygate SQLite database. (Default: `ofac.db`)
+
+Refer to the sqlite driver documentation for [connection parameters](https://github.com/mattn/go-sqlite3#connection-string).
 
 ### Features
 
