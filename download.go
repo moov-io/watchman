@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 )
 
@@ -98,8 +99,37 @@ func (dl *Downloader) GetFiles() (string, error) {
 	// count files and error if the count isn't what we expected
 	fds, err := ioutil.ReadDir(dir)
 	if err != nil || len(fds) != len(namesAndSources) {
-		return "", fmt.Errorf("OFAC: problem downloading (found=%d, expected=%d): err=%v", len(fds), len(namesAndSources), err)
+		matched, missing := compareNames(fds, namesAndSources)
+		return "", fmt.Errorf("OFAC: problem downloading (matched=%v missing=%v): err=%v", matched, missing, err)
 	}
 
 	return dir, nil
+}
+
+func compareNames(found []os.FileInfo, expected map[string]string) (string, string) {
+	var matched []string
+	var missing []string
+
+	for k := range expected {
+		wasFound := false
+		for i := range found {
+			filename := filepath.Base(found[i].Name())
+			if k == filename {
+				wasFound = true
+				matched = append(matched, filename)
+				break
+			}
+		}
+		if !wasFound {
+			missing = append(missing, k)
+		}
+	}
+	for i := range found {
+		filename := filepath.Base(found[i].Name())
+		if _, exists := expected[filename]; !exists {
+			missing = append(missing, filename)
+		}
+	}
+
+	return strings.Join(matched, ", "), strings.Join(missing, ", ")
 }

@@ -4,7 +4,7 @@ RUN apk add -U make git
 RUN adduser -D -g '' --shell /bin/false moov
 COPY . .
 ENV GO111MODULE=on
-run go mod download
+RUN go mod download
 RUN make build-webhook-example
 USER moov
 

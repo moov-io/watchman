@@ -22,11 +22,12 @@ import (
 
 var (
 	errNoAuthToken  = errors.New("no authToken provided for webhook")
-	errNoCustomerId = errors.New("no Customer ID found")
+	errNoCustomerID = errors.New("no Customer ID found")
 	errNoNameParam  = errors.New("no name parameter found")
-	errNoUserId     = errors.New("no userId (X-User-Id header) found")
+	errNoUserID     = errors.New("no userID (X-User-Id header) found")
 )
 
+// Customer is an individual on one or more SDN list(s)
 type Customer struct {
 	ID string `json:"id"`
 	// Federal Data
@@ -39,6 +40,7 @@ type Customer struct {
 	Match  float64         `json:"match,omitempty"`
 }
 
+// CustomerBlockStatus can be either CustomerUnsafe or CustomerException
 type CustomerBlockStatus string
 
 const (
@@ -48,40 +50,40 @@ const (
 	CustomerException CustomerBlockStatus = "exception"
 )
 
-// CustomerStatus represents a userId's manual override of an SDN
+// CustomerStatus represents a userID's manual override of an SDN
 type CustomerStatus struct {
-	UserId    string              `json:"userId"`
+	UserID    string              `json:"userID"`
 	Note      string              `json:"note"`
 	Status    CustomerBlockStatus `json:"block"`
 	CreatedAt time.Time           `json:"createdAt"`
 }
 
 type customerWatchResponse struct {
-	WatchID string `json:"watchId"`
+	WatchID string `json:"watchID"`
 }
 
 func addCustomerRoutes(logger log.Logger, r *mux.Router, searcher *searcher, custRepo *sqliteCustomerRepository, watchRepo *sqliteWatchRepository) {
-	r.Methods("GET").Path("/customers/{customerId}").HandlerFunc(getCustomer(logger, searcher, custRepo))
-	r.Methods("PUT").Path("/customers/{customerId}").HandlerFunc(updateCustomerStatus(logger, searcher, custRepo))
+	r.Methods("GET").Path("/customers/{customerID}").HandlerFunc(getCustomer(logger, searcher, custRepo))
+	r.Methods("PUT").Path("/customers/{customerID}").HandlerFunc(updateCustomerStatus(logger, searcher, custRepo))
 
-	r.Methods("POST").Path("/customers/{customerId}/watch").HandlerFunc(addCustomerWatch(logger, searcher, watchRepo))
-	r.Methods("DELETE").Path("/customers/{customerId}/watch/{watchId}").HandlerFunc(removeCustomerWatch(logger, searcher, watchRepo))
+	r.Methods("POST").Path("/customers/{customerID}/watch").HandlerFunc(addCustomerWatch(logger, searcher, watchRepo))
+	r.Methods("DELETE").Path("/customers/{customerID}/watch/{watchID}").HandlerFunc(removeCustomerWatch(logger, searcher, watchRepo))
 
 	r.Methods("POST").Path("/customers/watch").HandlerFunc(addCustomerNameWatch(logger, searcher, watchRepo))
-	r.Methods("DELETE").Path("/customers/watch/{watchId}").HandlerFunc(removeCustomerNameWatch(logger, searcher, watchRepo))
+	r.Methods("DELETE").Path("/customers/watch/{watchID}").HandlerFunc(removeCustomerNameWatch(logger, searcher, watchRepo))
 }
 
-func getCustomerId(w http.ResponseWriter, r *http.Request) string {
-	v, ok := mux.Vars(r)["customerId"]
+func getCustomerID(w http.ResponseWriter, r *http.Request) string {
+	v, ok := mux.Vars(r)["customerID"]
 	if !ok || v == "" {
-		moovhttp.Problem(w, errNoCustomerId)
+		moovhttp.Problem(w, errNoCustomerID)
 		return ""
 	}
 	return v
 }
 
-// getCustomerId returns an SDN for an individual and any addresses or alt names by the entity id provided.a
-func getCustomerById(id string, searcher *searcher, custRepo customerRepository) (*Customer, error) {
+// getCustomerID returns an SDN for an individual and any addresses or alt names by the entity id provided.a
+func getCustomerByID(id string, searcher *searcher, custRepo customerRepository) (*Customer, error) {
 	sdn := searcher.FindSDN(id)
 	if sdn == nil {
 		return nil, fmt.Errorf("Customer %s not found", id)
@@ -109,8 +111,8 @@ func getCustomerById(id string, searcher *searcher, custRepo customerRepository)
 // customerRepository holds the current status (i.e. unsafe or exception) for a given customer
 // (individual) and is expected to save metadata about each time the status is changed.
 type customerRepository interface {
-	getCustomerStatus(customerId string) (*CustomerStatus, error)
-	upsertCustomerStatus(customerId string, status *CustomerStatus) error
+	getCustomerStatus(customerID string) (*CustomerStatus, error)
+	upsertCustomerStatus(customerID string, status *CustomerStatus) error
 }
 
 type sqliteCustomerRepository struct {
@@ -121,8 +123,8 @@ func (r *sqliteCustomerRepository) close() error {
 	return r.db.Close()
 }
 
-func (r *sqliteCustomerRepository) getCustomerStatus(customerId string) (*CustomerStatus, error) {
-	if customerId == "" {
+func (r *sqliteCustomerRepository) getCustomerStatus(customerID string) (*CustomerStatus, error) {
+	if customerID == "" {
 		return nil, errors.New("getCustomerStatus: no Customer.ID")
 	}
 	query := `select user_id, note, status, created_at from customer_status where customer_id = ? and deleted_at is null order by created_at desc limit 1;`
@@ -132,38 +134,38 @@ func (r *sqliteCustomerRepository) getCustomerStatus(customerId string) (*Custom
 	}
 	defer stmt.Close()
 
-	row := stmt.QueryRow(customerId)
+	row := stmt.QueryRow(customerID)
 
 	var status CustomerStatus
-	err = row.Scan(&status.UserId, &status.Note, &status.Status, &status.CreatedAt)
+	err = row.Scan(&status.UserID, &status.Note, &status.Status, &status.CreatedAt)
 	if err != nil && !strings.Contains(err.Error(), "no rows in result set") {
 		return nil, fmt.Errorf("getCustomerStatus: %v", err)
 	}
-	if status.UserId == "" {
+	if status.UserID == "" {
 		return nil, nil // not found
 	}
 	return &status, nil
 }
 
-func (r *sqliteCustomerRepository) upsertCustomerStatus(customerId string, status *CustomerStatus) error {
+func (r *sqliteCustomerRepository) upsertCustomerStatus(customerID string, status *CustomerStatus) error {
 	query := `insert or replace into customer_status (customer_id, user_id, note, status, created_at) values (?, ?, ?, ?, ?);`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(customerId, status.UserId, status.Note, status.Status, status.CreatedAt)
+	_, err = stmt.Exec(customerID, status.UserID, status.Note, status.Status, status.CreatedAt)
 	return err
 }
 
 func getCustomer(logger log.Logger, searcher *searcher, custRepo customerRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w = wrapResponseWriter(logger, w, r)
-		id := getCustomerId(w, r)
+		id := getCustomerID(w, r)
 		if id == "" {
 			return
 		}
-		customer, err := getCustomerById(id, searcher, custRepo)
+		customer, err := getCustomerByID(id, searcher, custRepo)
 		if err != nil {
 			moovhttp.Problem(w, err)
 			return
@@ -201,7 +203,7 @@ func addCustomerNameWatch(logger log.Logger, searcher *searcher, repo *sqliteWat
 			moovhttp.Problem(w, err)
 			return
 		}
-		watchId, err := repo.addCustomerNameWatch(name, webhook, req.AuthToken)
+		watchID, err := repo.addCustomerNameWatch(name, webhook, req.AuthToken)
 		if err != nil {
 			moovhttp.Problem(w, err)
 			return
@@ -209,7 +211,7 @@ func addCustomerNameWatch(logger log.Logger, searcher *searcher, repo *sqliteWat
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(customerWatchResponse{watchId}); err != nil {
+		if err := json.NewEncoder(w).Encode(customerWatchResponse{watchID}); err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}
@@ -236,8 +238,8 @@ func addCustomerWatch(logger log.Logger, searcher *searcher, repo *sqliteWatchRe
 		}
 		req.Webhook = webhook
 
-		customerId := getCustomerId(w, r)
-		watchId, err := repo.addCustomerWatch(customerId, req)
+		customerID := getCustomerID(w, r)
+		watchID, err := repo.addCustomerWatch(customerID, req)
 		if err != nil {
 			moovhttp.Problem(w, err)
 			return
@@ -245,7 +247,7 @@ func addCustomerWatch(logger log.Logger, searcher *searcher, repo *sqliteWatchRe
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(customerWatchResponse{watchId}); err != nil {
+		if err := json.NewEncoder(w).Encode(customerWatchResponse{watchID}); err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}
@@ -263,10 +265,10 @@ func updateCustomerStatus(logger log.Logger, searcher *searcher, custRepo custom
 	return func(w http.ResponseWriter, r *http.Request) {
 		w = wrapResponseWriter(logger, w, r)
 
-		custId := getCustomerId(w, r)
-		userId := moovhttp.GetUserId(r)
-		if userId == "" {
-			moovhttp.Problem(w, errNoUserId)
+		custID := getCustomerID(w, r)
+		userID := moovhttp.GetUserId(r)
+		if userID == "" {
+			moovhttp.Problem(w, errNoUserID)
 			return
 		}
 
@@ -280,12 +282,12 @@ func updateCustomerStatus(logger log.Logger, searcher *searcher, custRepo custom
 		switch status {
 		case CustomerUnsafe, CustomerException:
 			custStatus := &CustomerStatus{
-				UserId:    userId,
+				UserID:    userID,
 				Note:      req.Notes,
 				Status:    status,
 				CreatedAt: time.Now(),
 			}
-			if err := custRepo.upsertCustomerStatus(custId, custStatus); err != nil {
+			if err := custRepo.upsertCustomerStatus(custID, custStatus); err != nil {
 				moovhttp.Problem(w, err)
 				return
 			}
@@ -303,11 +305,11 @@ func removeCustomerWatch(logger log.Logger, searcher *searcher, repo *sqliteWatc
 	return func(w http.ResponseWriter, r *http.Request) {
 		w = wrapResponseWriter(logger, w, r)
 
-		customerId, watchId := getCustomerId(w, r), getWatchId(w, r)
-		if customerId == "" || watchId == "" {
+		customerID, watchID := getCustomerID(w, r), getWatchID(w, r)
+		if customerID == "" || watchID == "" {
 			return
 		}
-		if err := repo.removeCustomerWatch(customerId, watchId); err != nil {
+		if err := repo.removeCustomerWatch(customerID, watchID); err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}
@@ -319,11 +321,11 @@ func removeCustomerNameWatch(logger log.Logger, searcher *searcher, repo *sqlite
 	return func(w http.ResponseWriter, r *http.Request) {
 		w = wrapResponseWriter(logger, w, r)
 
-		watchId := getWatchId(w, r)
-		if watchId == "" {
+		watchID := getWatchID(w, r)
+		if watchID == "" {
 			return
 		}
-		if err := repo.removeCustomerNameWatch(watchId); err != nil {
+		if err := repo.removeCustomerNameWatch(watchID); err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}

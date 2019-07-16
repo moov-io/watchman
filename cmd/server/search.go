@@ -285,6 +285,7 @@ type SDN struct {
 	name string
 }
 
+// MarshalJSON is a custom method for marshaling a SDN search result
 func (s SDN) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		*ofac.SDN
@@ -321,11 +322,11 @@ func reorderSDNName(name string, tpe string) string {
 	if !strings.EqualFold(tpe, "individual") {
 		return name // only reorder individual names
 	}
-	if v := surnamePrecedes.FindString(name); v == "" {
+	v := surnamePrecedes.FindString(name)
+	if v == "" {
 		return name // no match on 'Doe, John'
-	} else {
-		return strings.TrimSpace(fmt.Sprintf("%s %s", strings.TrimPrefix(v, ","), strings.TrimSuffix(name, v)))
 	}
+	return strings.TrimSpace(fmt.Sprintf("%s %s", strings.TrimPrefix(v, ","), strings.TrimSuffix(name, v)))
 }
 
 // Address is ofac.Address wrapped with precomputed search metadata
@@ -338,6 +339,7 @@ type Address struct {
 	address, citystate, country string
 }
 
+// MarshalJSON is a custom method for marshaling a SDN Address search result
 func (a Address) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		*ofac.Address
@@ -371,6 +373,7 @@ type Alt struct {
 	name string
 }
 
+// MarshalJSON is a custom method for marshaling a SDN Alternate Identity search result
 func (a Alt) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		*ofac.AlternateIdentity

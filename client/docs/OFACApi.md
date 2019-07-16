@@ -5,23 +5,23 @@ All URIs are relative to *http://localhost:8084*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**AddOFACCompanyNameWatch**](OFACApi.md#AddOFACCompanyNameWatch) | **Post** /companies/watch | Add company watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
-[**AddOFACCompanyWatch**](OFACApi.md#AddOFACCompanyWatch) | **Post** /companies/{companyId}/watch | Add OFAC watch on a Company
+[**AddOFACCompanyWatch**](OFACApi.md#AddOFACCompanyWatch) | **Post** /companies/{companyID}/watch | Add OFAC watch on a Company
 [**AddOFACCustomerNameWatch**](OFACApi.md#AddOFACCustomerNameWatch) | **Post** /customers/watch | Add customer watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
-[**AddOFACCustomerWatch**](OFACApi.md#AddOFACCustomerWatch) | **Post** /customers/{customerId}/watch | Add OFAC watch on a Customer
+[**AddOFACCustomerWatch**](OFACApi.md#AddOFACCustomerWatch) | **Post** /customers/{customerID}/watch | Add OFAC watch on a Customer
 [**GetLatestDownloads**](OFACApi.md#GetLatestDownloads) | **Get** /downloads | Return list of recent downloads of OFAC data
-[**GetOFACCompany**](OFACApi.md#GetOFACCompany) | **Get** /companies/{companyId} | Get information about a company, trust or organization such as addresses, alternate names, and remarks.
-[**GetOFACCustomer**](OFACApi.md#GetOFACCustomer) | **Get** /customers/{customerId} | Get information about a customer, addresses, alternate names, and their SDN metadata.
+[**GetOFACCompany**](OFACApi.md#GetOFACCompany) | **Get** /companies/{companyID} | Get information about a company, trust or organization such as addresses, alternate names, and remarks.
+[**GetOFACCustomer**](OFACApi.md#GetOFACCustomer) | **Get** /customers/{customerID} | Get information about a customer, addresses, alternate names, and their SDN metadata.
 [**GetSDN**](OFACApi.md#GetSDN) | **Get** /sdn/{sdnId} | Specially designated national
 [**GetSDNAddresses**](OFACApi.md#GetSDNAddresses) | **Get** /sdn/{sdnId}/addresses | Get addresses for a given SDN
 [**GetSDNAltNames**](OFACApi.md#GetSDNAltNames) | **Get** /sdn/{sdnId}/alts | Get alternate names for a given SDN
 [**Ping**](OFACApi.md#Ping) | **Get** /ping | Ping the OFAC service to check if running
-[**RemoveOFACCompanyNameWatch**](OFACApi.md#RemoveOFACCompanyNameWatch) | **Delete** /companies/watch/{watchId} | Remove a Company name watch
-[**RemoveOFACCompanyWatch**](OFACApi.md#RemoveOFACCompanyWatch) | **Delete** /companies/{companyId}/watch/{watchId} | Remove company watch
-[**RemoveOFACCustomerNameWatch**](OFACApi.md#RemoveOFACCustomerNameWatch) | **Delete** /customers/watch/{watchId} | Remove a Customer name watch
-[**RemoveOFACCustomerWatch**](OFACApi.md#RemoveOFACCustomerWatch) | **Delete** /customers/{customerId}/watch/{watchId} | Remove customer watch
+[**RemoveOFACCompanyNameWatch**](OFACApi.md#RemoveOFACCompanyNameWatch) | **Delete** /companies/watch/{watchID} | Remove a Company name watch
+[**RemoveOFACCompanyWatch**](OFACApi.md#RemoveOFACCompanyWatch) | **Delete** /companies/{companyID}/watch/{watchID} | Remove company watch
+[**RemoveOFACCustomerNameWatch**](OFACApi.md#RemoveOFACCustomerNameWatch) | **Delete** /customers/watch/{watchID} | Remove a Customer name watch
+[**RemoveOFACCustomerWatch**](OFACApi.md#RemoveOFACCustomerWatch) | **Delete** /customers/{customerID}/watch/{watchID} | Remove customer watch
 [**Search**](OFACApi.md#Search) | **Get** /search | Search SDN names and metadata
-[**UpdateOFACCompanyStatus**](OFACApi.md#UpdateOFACCompanyStatus) | **Put** /companies/{companyId} | Update a Companies sanction status to always block or always allow transactions.
-[**UpdateOFACCustomerStatus**](OFACApi.md#UpdateOFACCustomerStatus) | **Put** /customers/{customerId} | Update a Customer&#39;s sanction status to always block or always allow transactions.
+[**UpdateOFACCompanyStatus**](OFACApi.md#UpdateOFACCompanyStatus) | **Put** /companies/{companyID} | Update a Companies sanction status to always block or always allow transactions.
+[**UpdateOFACCustomerStatus**](OFACApi.md#UpdateOFACCustomerStatus) | **Put** /customers/{customerID} | Update a Customer&#39;s sanction status to always block or always allow transactions.
 
 
 
@@ -71,7 +71,7 @@ No authorization required
 
 ## AddOFACCompanyWatch
 
-> Watch AddOFACCompanyWatch(ctx, companyId, watchRequest, optional)
+> Watch AddOFACCompanyWatch(ctx, companyID, watchRequest, optional)
 Add OFAC watch on a Company
 
 ### Required Parameters
@@ -80,7 +80,7 @@ Add OFAC watch on a Company
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**companyId** | **string**| Company ID | 
+**companyID** | **string**| Company ID | 
 **watchRequest** | [**WatchRequest**](WatchRequest.md)|  | 
  **optional** | ***AddOFACCompanyWatchOpts** | optional parameters | nil if no parameters
 
@@ -159,7 +159,7 @@ No authorization required
 
 ## AddOFACCustomerWatch
 
-> Watch AddOFACCustomerWatch(ctx, customerId, watchRequest, optional)
+> Watch AddOFACCustomerWatch(ctx, customerID, watchRequest, optional)
 Add OFAC watch on a Customer
 
 ### Required Parameters
@@ -168,7 +168,7 @@ Add OFAC watch on a Customer
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**customerId** | **string**| Customer ID | 
+**customerID** | **string**| Customer ID | 
 **watchRequest** | [**WatchRequest**](WatchRequest.md)|  | 
  **optional** | ***AddOFACCustomerWatchOpts** | optional parameters | nil if no parameters
 
@@ -243,7 +243,7 @@ No authorization required
 
 ## GetOFACCompany
 
-> OfacCompany GetOFACCompany(ctx, companyId, optional)
+> OfacCompany GetOFACCompany(ctx, companyID, optional)
 Get information about a company, trust or organization such as addresses, alternate names, and remarks.
 
 ### Required Parameters
@@ -252,7 +252,7 @@ Get information about a company, trust or organization such as addresses, altern
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**companyId** | **string**| Company ID | 
+**companyID** | **string**| Company ID | 
  **optional** | ***GetOFACCompanyOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
@@ -285,7 +285,7 @@ No authorization required
 
 ## GetOFACCustomer
 
-> OfacCustomer GetOFACCustomer(ctx, customerId, optional)
+> OfacCustomer GetOFACCustomer(ctx, customerID, optional)
 Get information about a customer, addresses, alternate names, and their SDN metadata.
 
 ### Required Parameters
@@ -294,7 +294,7 @@ Get information about a customer, addresses, alternate names, and their SDN meta
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**customerId** | **string**| Customer ID | 
+**customerID** | **string**| Customer ID | 
  **optional** | ***GetOFACCustomerOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
@@ -480,7 +480,7 @@ No authorization required
 
 ## RemoveOFACCompanyNameWatch
 
-> RemoveOFACCompanyNameWatch(ctx, watchId, name, optional)
+> RemoveOFACCompanyNameWatch(ctx, watchID, name, optional)
 Remove a Company name watch
 
 ### Required Parameters
@@ -489,7 +489,7 @@ Remove a Company name watch
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**watchId** | **string**| Watch ID, used to identify a specific watch | 
+**watchID** | **string**| Watch ID, used to identify a specific watch | 
 **name** | **string**| Company name watch | 
  **optional** | ***RemoveOFACCompanyNameWatchOpts** | optional parameters | nil if no parameters
 
@@ -524,7 +524,7 @@ No authorization required
 
 ## RemoveOFACCompanyWatch
 
-> RemoveOFACCompanyWatch(ctx, companyId, watchId, optional)
+> RemoveOFACCompanyWatch(ctx, companyID, watchID, optional)
 Remove company watch
 
 ### Required Parameters
@@ -533,8 +533,8 @@ Remove company watch
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**companyId** | **string**| Company ID | 
-**watchId** | **string**| Watch ID, used to identify a specific watch | 
+**companyID** | **string**| Company ID | 
+**watchID** | **string**| Watch ID, used to identify a specific watch | 
  **optional** | ***RemoveOFACCompanyWatchOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
@@ -568,7 +568,7 @@ No authorization required
 
 ## RemoveOFACCustomerNameWatch
 
-> RemoveOFACCustomerNameWatch(ctx, watchId, name, optional)
+> RemoveOFACCustomerNameWatch(ctx, watchID, name, optional)
 Remove a Customer name watch
 
 ### Required Parameters
@@ -577,7 +577,7 @@ Remove a Customer name watch
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**watchId** | **string**| Watch ID, used to identify a specific watch | 
+**watchID** | **string**| Watch ID, used to identify a specific watch | 
 **name** | **string**| Customer or Company name watch | 
  **optional** | ***RemoveOFACCustomerNameWatchOpts** | optional parameters | nil if no parameters
 
@@ -612,7 +612,7 @@ No authorization required
 
 ## RemoveOFACCustomerWatch
 
-> RemoveOFACCustomerWatch(ctx, customerId, watchId, optional)
+> RemoveOFACCustomerWatch(ctx, customerID, watchID, optional)
 Remove customer watch
 
 ### Required Parameters
@@ -621,8 +621,8 @@ Remove customer watch
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**customerId** | **string**| Customer ID | 
-**watchId** | **string**| Watch ID, used to identify a specific watch | 
+**customerID** | **string**| Customer ID | 
+**watchID** | **string**| Watch ID, used to identify a specific watch | 
  **optional** | ***RemoveOFACCustomerWatchOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
@@ -706,7 +706,7 @@ No authorization required
 
 ## UpdateOFACCompanyStatus
 
-> UpdateOFACCompanyStatus(ctx, companyId, updateCompanyStatus, optional)
+> UpdateOFACCompanyStatus(ctx, companyID, updateCompanyStatus, optional)
 Update a Companies sanction status to always block or always allow transactions.
 
 ### Required Parameters
@@ -715,7 +715,7 @@ Update a Companies sanction status to always block or always allow transactions.
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**companyId** | **string**| Company ID | 
+**companyID** | **string**| Company ID | 
 **updateCompanyStatus** | [**UpdateCompanyStatus**](UpdateCompanyStatus.md)|  | 
  **optional** | ***UpdateOFACCompanyStatusOpts** | optional parameters | nil if no parameters
 
@@ -750,7 +750,7 @@ No authorization required
 
 ## UpdateOFACCustomerStatus
 
-> UpdateOFACCustomerStatus(ctx, customerId, updateCustomerStatus, optional)
+> UpdateOFACCustomerStatus(ctx, customerID, updateCustomerStatus, optional)
 Update a Customer's sanction status to always block or always allow transactions.
 
 ### Required Parameters
@@ -759,7 +759,7 @@ Update a Customer's sanction status to always block or always allow transactions
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**customerId** | **string**| Customer ID | 
+**customerID** | **string**| Customer ID | 
 **updateCustomerStatus** | [**UpdateCustomerStatus**](UpdateCustomerStatus.md)|  | 
  **optional** | ***UpdateOFACCustomerStatusOpts** | optional parameters | nil if no parameters
 

@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**UserId** | **string** | User ID provided when updating status | [optional] 
+**UserID** | **string** | User ID provided when updating status | [optional] 
 **Note** | **string** | Optional note from updating status | [optional] 
 **Status** | **string** | Manually applied status for OFAC Customer | [optional] 
 **CreatedAt** | [**time.Time**](time.Time.md) |  | [optional] 

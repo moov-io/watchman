@@ -34,23 +34,23 @@ All URIs are relative to *http://localhost:8084*
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 *OFACApi* | [**AddOFACCompanyNameWatch**](docs/OFACApi.md#addofaccompanynamewatch) | **Post** /companies/watch | Add company watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
-*OFACApi* | [**AddOFACCompanyWatch**](docs/OFACApi.md#addofaccompanywatch) | **Post** /companies/{companyId}/watch | Add OFAC watch on a Company
+*OFACApi* | [**AddOFACCompanyWatch**](docs/OFACApi.md#addofaccompanywatch) | **Post** /companies/{companyID}/watch | Add OFAC watch on a Company
 *OFACApi* | [**AddOFACCustomerNameWatch**](docs/OFACApi.md#addofaccustomernamewatch) | **Post** /customers/watch | Add customer watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
-*OFACApi* | [**AddOFACCustomerWatch**](docs/OFACApi.md#addofaccustomerwatch) | **Post** /customers/{customerId}/watch | Add OFAC watch on a Customer
+*OFACApi* | [**AddOFACCustomerWatch**](docs/OFACApi.md#addofaccustomerwatch) | **Post** /customers/{customerID}/watch | Add OFAC watch on a Customer
 *OFACApi* | [**GetLatestDownloads**](docs/OFACApi.md#getlatestdownloads) | **Get** /downloads | Return list of recent downloads of OFAC data
-*OFACApi* | [**GetOFACCompany**](docs/OFACApi.md#getofaccompany) | **Get** /companies/{companyId} | Get information about a company, trust or organization such as addresses, alternate names, and remarks.
-*OFACApi* | [**GetOFACCustomer**](docs/OFACApi.md#getofaccustomer) | **Get** /customers/{customerId} | Get information about a customer, addresses, alternate names, and their SDN metadata.
+*OFACApi* | [**GetOFACCompany**](docs/OFACApi.md#getofaccompany) | **Get** /companies/{companyID} | Get information about a company, trust or organization such as addresses, alternate names, and remarks.
+*OFACApi* | [**GetOFACCustomer**](docs/OFACApi.md#getofaccustomer) | **Get** /customers/{customerID} | Get information about a customer, addresses, alternate names, and their SDN metadata.
 *OFACApi* | [**GetSDN**](docs/OFACApi.md#getsdn) | **Get** /sdn/{sdnId} | Specially designated national
 *OFACApi* | [**GetSDNAddresses**](docs/OFACApi.md#getsdnaddresses) | **Get** /sdn/{sdnId}/addresses | Get addresses for a given SDN
 *OFACApi* | [**GetSDNAltNames**](docs/OFACApi.md#getsdnaltnames) | **Get** /sdn/{sdnId}/alts | Get alternate names for a given SDN
 *OFACApi* | [**Ping**](docs/OFACApi.md#ping) | **Get** /ping | Ping the OFAC service to check if running
-*OFACApi* | [**RemoveOFACCompanyNameWatch**](docs/OFACApi.md#removeofaccompanynamewatch) | **Delete** /companies/watch/{watchId} | Remove a Company name watch
-*OFACApi* | [**RemoveOFACCompanyWatch**](docs/OFACApi.md#removeofaccompanywatch) | **Delete** /companies/{companyId}/watch/{watchId} | Remove company watch
-*OFACApi* | [**RemoveOFACCustomerNameWatch**](docs/OFACApi.md#removeofaccustomernamewatch) | **Delete** /customers/watch/{watchId} | Remove a Customer name watch
-*OFACApi* | [**RemoveOFACCustomerWatch**](docs/OFACApi.md#removeofaccustomerwatch) | **Delete** /customers/{customerId}/watch/{watchId} | Remove customer watch
+*OFACApi* | [**RemoveOFACCompanyNameWatch**](docs/OFACApi.md#removeofaccompanynamewatch) | **Delete** /companies/watch/{watchID} | Remove a Company name watch
+*OFACApi* | [**RemoveOFACCompanyWatch**](docs/OFACApi.md#removeofaccompanywatch) | **Delete** /companies/{companyID}/watch/{watchID} | Remove company watch
+*OFACApi* | [**RemoveOFACCustomerNameWatch**](docs/OFACApi.md#removeofaccustomernamewatch) | **Delete** /customers/watch/{watchID} | Remove a Customer name watch
+*OFACApi* | [**RemoveOFACCustomerWatch**](docs/OFACApi.md#removeofaccustomerwatch) | **Delete** /customers/{customerID}/watch/{watchID} | Remove customer watch
 *OFACApi* | [**Search**](docs/OFACApi.md#search) | **Get** /search | Search SDN names and metadata
-*OFACApi* | [**UpdateOFACCompanyStatus**](docs/OFACApi.md#updateofaccompanystatus) | **Put** /companies/{companyId} | Update a Companies sanction status to always block or always allow transactions.
-*OFACApi* | [**UpdateOFACCustomerStatus**](docs/OFACApi.md#updateofaccustomerstatus) | **Put** /customers/{customerId} | Update a Customer&#39;s sanction status to always block or always allow transactions.
+*OFACApi* | [**UpdateOFACCompanyStatus**](docs/OFACApi.md#updateofaccompanystatus) | **Put** /companies/{companyID} | Update a Companies sanction status to always block or always allow transactions.
+*OFACApi* | [**UpdateOFACCustomerStatus**](docs/OFACApi.md#updateofaccustomerstatus) | **Put** /customers/{customerID} | Update a Customer&#39;s sanction status to always block or always allow transactions.
 
 
 ## Documentation For Models

@@ -18,13 +18,13 @@ import (
 )
 
 var (
-	errNoWatchId = errors.New("no watchId found")
+	errNoWatchID = errors.New("no watchID found")
 )
 
-func getWatchId(w http.ResponseWriter, r *http.Request) string {
-	v, ok := mux.Vars(r)["watchId"]
+func getWatchID(w http.ResponseWriter, r *http.Request) string {
+	v, ok := mux.Vars(r)["watchID"]
 	if !ok || v == "" {
-		moovhttp.Problem(w, errNoWatchId)
+		moovhttp.Problem(w, errNoWatchID)
 		return ""
 	}
 	return v
@@ -42,16 +42,16 @@ type watchRepository interface {
 	getWatchesCursor(logger log.Logger, batchSize int) *watchCursor
 
 	// Company watches
-	addCompanyWatch(companyId string, params watchRequest) (string, error)
+	addCompanyWatch(companyID string, params watchRequest) (string, error)
 	addCompanyNameWatch(name string, webhook string, authToken string) (string, error)
-	removeCompanyWatch(companyId string, watchId string) error
-	removeCompanyNameWatch(watchId string) error
+	removeCompanyWatch(companyID string, watchID string) error
+	removeCompanyNameWatch(watchID string) error
 
 	// Customer watches
-	addCustomerWatch(customerId string, params watchRequest) (string, error)
+	addCustomerWatch(customerID string, params watchRequest) (string, error)
 	addCustomerNameWatch(name string, webhook string, authToken string) (string, error)
-	removeCustomerWatch(customerId string, watchId string) error
-	removeCustomerNameWatch(watchId string) error
+	removeCustomerWatch(customerID string, watchID string) error
+	removeCustomerNameWatch(watchID string) error
 }
 
 type sqliteWatchRepository struct {
@@ -73,9 +73,9 @@ func (r *sqliteWatchRepository) getWatchesCursor(logger log.Logger, batchSize in
 
 // Company methods
 
-func (r *sqliteWatchRepository) addCompanyWatch(companyId string, params watchRequest) (string, error) {
-	if companyId == "" {
-		return "", errNoCompanyId
+func (r *sqliteWatchRepository) addCompanyWatch(companyID string, params watchRequest) (string, error) {
+	if companyID == "" {
+		return "", errNoCompanyID
 	}
 	id := base.ID()
 
@@ -86,16 +86,16 @@ func (r *sqliteWatchRepository) addCompanyWatch(companyId string, params watchRe
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(id, companyId, params.Webhook, params.AuthToken, time.Now())
+	_, err = stmt.Exec(id, companyID, params.Webhook, params.AuthToken, time.Now())
 	if err != nil {
 		return "", err
 	}
 	return id, nil
 }
 
-func (r *sqliteWatchRepository) removeCompanyWatch(companyId string, watchId string) error {
-	if watchId == "" {
-		return errNoWatchId
+func (r *sqliteWatchRepository) removeCompanyWatch(companyID string, watchID string) error {
+	if watchID == "" {
+		return errNoWatchID
 	}
 
 	query := `update company_watches set deleted_at = ? where company_id = ? and id = ? and deleted_at is null`
@@ -105,7 +105,7 @@ func (r *sqliteWatchRepository) removeCompanyWatch(companyId string, watchId str
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(time.Now(), companyId, watchId)
+	_, err = stmt.Exec(time.Now(), companyID, watchID)
 	return err
 }
 
@@ -125,9 +125,9 @@ func (r *sqliteWatchRepository) addCompanyNameWatch(name string, webhook string,
 	return id, nil
 }
 
-func (r *sqliteWatchRepository) removeCompanyNameWatch(watchId string) error {
-	if watchId == "" {
-		return errNoWatchId
+func (r *sqliteWatchRepository) removeCompanyNameWatch(watchID string) error {
+	if watchID == "" {
+		return errNoWatchID
 	}
 
 	query := `update company_name_watches set deleted_at = ? where id = ? and deleted_at is null`
@@ -137,15 +137,15 @@ func (r *sqliteWatchRepository) removeCompanyNameWatch(watchId string) error {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(time.Now(), watchId)
+	_, err = stmt.Exec(time.Now(), watchID)
 	return err
 }
 
 // Customer methods
 
-func (r *sqliteWatchRepository) addCustomerWatch(customerId string, params watchRequest) (string, error) {
-	if customerId == "" {
-		return "", errNoCustomerId
+func (r *sqliteWatchRepository) addCustomerWatch(customerID string, params watchRequest) (string, error) {
+	if customerID == "" {
+		return "", errNoCustomerID
 	}
 	id := base.ID()
 
@@ -156,16 +156,16 @@ func (r *sqliteWatchRepository) addCustomerWatch(customerId string, params watch
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(id, customerId, params.Webhook, params.AuthToken, time.Now())
+	_, err = stmt.Exec(id, customerID, params.Webhook, params.AuthToken, time.Now())
 	if err != nil {
 		return "", err
 	}
 	return id, nil
 }
 
-func (r *sqliteWatchRepository) removeCustomerWatch(customerId string, watchId string) error {
-	if watchId == "" {
-		return errNoWatchId
+func (r *sqliteWatchRepository) removeCustomerWatch(customerID string, watchID string) error {
+	if watchID == "" {
+		return errNoWatchID
 	}
 
 	query := `update customer_watches set deleted_at = ? where customer_id = ? and id = ? and deleted_at is null`
@@ -175,7 +175,7 @@ func (r *sqliteWatchRepository) removeCustomerWatch(customerId string, watchId s
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(time.Now(), customerId, watchId)
+	_, err = stmt.Exec(time.Now(), customerID, watchID)
 	return err
 }
 
@@ -195,9 +195,9 @@ func (r *sqliteWatchRepository) addCustomerNameWatch(name string, webhook string
 	return id, nil
 }
 
-func (r *sqliteWatchRepository) removeCustomerNameWatch(watchId string) error {
-	if watchId == "" {
-		return errNoWatchId
+func (r *sqliteWatchRepository) removeCustomerNameWatch(watchID string) error {
+	if watchID == "" {
+		return errNoWatchID
 	}
 
 	query := `update customer_name_watches set deleted_at = ? where id = ? and deleted_at is null`
@@ -207,14 +207,14 @@ func (r *sqliteWatchRepository) removeCustomerNameWatch(watchId string) error {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(time.Now(), watchId)
+	_, err = stmt.Exec(time.Now(), watchID)
 	return err
 }
 
 type watch struct {
 	id                       string
-	customerId, customerName string
-	companyId, companyName   string
+	customerID, customerName string
+	companyID, companyName   string
 	webhook                  string
 	authToken                string
 }
@@ -290,7 +290,7 @@ func (cur *watchCursor) getCompanyBatch(limit int) ([]watch, error) {
 	for rows.Next() {
 		var createdAt time.Time
 		var watch watch
-		if err := rows.Scan(&watch.id, &watch.companyId, &watch.webhook, &watch.authToken, &createdAt); err == nil {
+		if err := rows.Scan(&watch.id, &watch.companyID, &watch.webhook, &watch.authToken, &createdAt); err == nil {
 			watches = append(watches, watch)
 		}
 		if createdAt.After(max) {
@@ -356,7 +356,7 @@ func (cur *watchCursor) getCustomerBatch(limit int) ([]watch, error) {
 	for rows.Next() {
 		var createdAt time.Time
 		var watch watch
-		if err := rows.Scan(&watch.id, &watch.customerId, &watch.webhook, &watch.authToken, &createdAt); err == nil {
+		if err := rows.Scan(&watch.id, &watch.customerID, &watch.webhook, &watch.authToken, &createdAt); err == nil {
 			watches = append(watches, watch)
 		}
 		if createdAt.After(max) {

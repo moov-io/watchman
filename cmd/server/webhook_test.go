@@ -126,7 +126,7 @@ func TestWebhook_call(t *testing.T) {
 	defer custRepo.close()
 
 	// execute webhook with arbitrary Customer
-	body, err := getCustomerBody(customerSearcher, "watchId", "306", 1.0, custRepo)
+	body, err := getCustomerBody(customerSearcher, "watchID", "306", 1.0, custRepo)
 	if body == nil {
 		t.Fatalf("nil body: %v", err)
 	}

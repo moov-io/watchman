@@ -23,7 +23,7 @@ func TestSearchAsync_getCompanyBody(t *testing.T) {
 	repo := createTestCompanyRepository(t)
 	defer repo.close()
 
-	body, err := getCompanyBody(companySearcher, "watchId", "21206", 1.0, repo)
+	body, err := getCompanyBody(companySearcher, "watchID", "21206", 1.0, repo)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -43,7 +43,7 @@ func TestSearchAsync_getCompanyBody(t *testing.T) {
 	}
 
 	// Company not found
-	body, err = getCompanyBody(companySearcher, "watchId", "", 0.0, repo)
+	body, err = getCompanyBody(companySearcher, "watchID", "", 0.0, repo)
 	if err == nil || body != nil {
 		t.Fatal("expected error and no body")
 	}
@@ -53,7 +53,7 @@ func TestSearchAsync_getCustomerBody(t *testing.T) {
 	repo := createTestCustomerRepository(t)
 	defer repo.close()
 
-	body, err := getCustomerBody(customerSearcher, "watchId", "306", 0.91, repo)
+	body, err := getCustomerBody(customerSearcher, "watchID", "306", 0.91, repo)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,7 +73,7 @@ func TestSearchAsync_getCustomerBody(t *testing.T) {
 	}
 
 	// Customer not found
-	body, err = getCustomerBody(customerSearcher, "watchId", "", 0.0, repo)
+	body, err = getCustomerBody(customerSearcher, "watchID", "", 0.0, repo)
 	if err == nil || body != nil {
 		t.Fatal("expected error and no body")
 	}
