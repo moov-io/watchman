@@ -79,7 +79,7 @@ func (r *sqliteWatchRepository) addCompanyWatch(companyID string, params watchRe
 	}
 	id := base.ID()
 
-	query := `insert or ignore into company_watches (id, company_id, webhook, auth_token, created_at) values (?, ?, ?, ?, ?)`
+	query := `insert into company_watches (id, company_id, webhook, auth_token, created_at) values (?, ?, ?, ?, ?)`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return "", err
@@ -110,7 +110,7 @@ func (r *sqliteWatchRepository) removeCompanyWatch(companyID string, watchID str
 }
 
 func (r *sqliteWatchRepository) addCompanyNameWatch(name string, webhook string, authToken string) (string, error) {
-	query := `insert or ignore into company_name_watches (id, name, webhook, auth_token, created_at) values (?, ?, ?, ?, ?);`
+	query := `insert into company_name_watches (id, name, webhook, auth_token, created_at) values (?, ?, ?, ?, ?);`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return "", err
@@ -149,7 +149,7 @@ func (r *sqliteWatchRepository) addCustomerWatch(customerID string, params watch
 	}
 	id := base.ID()
 
-	query := `insert or ignore into customer_watches (id, customer_id, webhook, auth_token, created_at) values (?, ?, ?, ?, ?)`
+	query := `insert into customer_watches (id, customer_id, webhook, auth_token, created_at) values (?, ?, ?, ?, ?)`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return "", err
@@ -180,7 +180,7 @@ func (r *sqliteWatchRepository) removeCustomerWatch(customerID string, watchID s
 }
 
 func (r *sqliteWatchRepository) addCustomerNameWatch(name string, webhook string, authToken string) (string, error) {
-	query := `insert or ignore into customer_name_watches (id, name, webhook, auth_token, created_at) values (?, ?, ?, ?, ?);`
+	query := `insert into customer_name_watches (id, name, webhook, auth_token, created_at) values (?, ?, ?, ?, ?);`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return "", err

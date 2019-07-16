@@ -16,6 +16,7 @@ import (
 	"github.com/moov-io/ofac"
 	"github.com/moov-io/ofac/internal/database"
 
+	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
 )
 
@@ -55,7 +56,7 @@ func createTestCompanyRepository(t *testing.T) *sqliteCompanyRepository {
 	t.Helper()
 
 	db := database.CreateTestSqliteDB(t)
-	return &sqliteCompanyRepository{db.DB}
+	return &sqliteCompanyRepository{db.DB, log.NewNopLogger()}
 }
 
 func TestCompanies__id(t *testing.T) {
@@ -94,55 +95,78 @@ func TestCompanies__id(t *testing.T) {
 }
 
 func TestCompany_getById(t *testing.T) {
-	repo := createTestCompanyRepository(t)
-	defer repo.close()
+	t.Parallel()
 
-	// make sure we only return SDNType != "individual"
-	// We do this by proviing a searcher with individual results
-	company, err := getCompanyByID("306", customerSearcher, repo)
-	if company != nil {
-		t.Fatalf("expected no Company, but got %#v", company)
+	check := func(t *testing.T, repo *sqliteCompanyRepository) {
+		// make sure we only return SDNType != "individual"
+		// We do this by proviing a searcher with individual results
+		company, err := getCompanyByID("306", customerSearcher, repo)
+		if company != nil {
+			t.Fatalf("expected no Company, but got %#v", company)
+		}
+		if err != nil {
+			t.Fatalf("expected no error, but got %#v", err)
+		}
 	}
-	if err != nil {
-		t.Fatalf("expected no error, but got %#v", err)
-	}
+
+	// SQLite tests
+	sqliteDB := database.CreateTestSqliteDB(t)
+	defer sqliteDB.Close()
+	check(t, &sqliteCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+
+	// MySQL tests
+	mysqlDB := database.CreateTestMySQLDB(t)
+	defer mysqlDB.Close()
+	check(t, &sqliteCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_get(t *testing.T) {
-	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/companies/21206", nil)
-	req.Header.Set("x-user-id", "test")
+	t.Parallel()
 
-	companyRepo := createTestCompanyRepository(t)
-	defer companyRepo.close()
-	watchRepo := createTestWatchRepository(t)
-	defer watchRepo.close()
+	check := func(t *testing.T, repo *sqliteCompanyRepository) {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/companies/21206", nil)
+		req.Header.Set("x-user-id", "test")
 
-	router := mux.NewRouter()
-	addCompanyRoutes(nil, router, companySearcher, companyRepo, watchRepo)
-	router.ServeHTTP(w, req)
-	w.Flush()
+		watchRepo := createTestWatchRepository(t)
+		defer watchRepo.close()
 
-	if w.Code != http.StatusOK {
-		t.Errorf("bogus status code: %d", w.Code)
+		router := mux.NewRouter()
+		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		router.ServeHTTP(w, req)
+		w.Flush()
+
+		if w.Code != http.StatusOK {
+			t.Errorf("bogus status code: %d", w.Code)
+		}
+
+		var company Company
+		if err := json.NewDecoder(w.Body).Decode(&company); err != nil {
+			t.Fatal(err)
+		}
+		if company.ID == "" {
+			t.Fatalf("empty ofac.Company: %#v", company)
+		}
+		if company.SDN == nil {
+			t.Fatal("missing company.SDN")
+		}
+		if len(company.Addresses) != 1 {
+			t.Errorf("company.Addresses: %#v", company.Addresses)
+		}
+		if len(company.Alts) != 1 {
+			t.Errorf("company.Alts: %#v", company.Alts)
+		}
 	}
 
-	var company Company
-	if err := json.NewDecoder(w.Body).Decode(&company); err != nil {
-		t.Fatal(err)
-	}
-	if company.ID == "" {
-		t.Fatalf("empty ofac.Company: %#v", company)
-	}
-	if company.SDN == nil {
-		t.Fatal("missing company.SDN")
-	}
-	if len(company.Addresses) != 1 {
-		t.Errorf("company.Addresses: %#v", company.Addresses)
-	}
-	if len(company.Alts) != 1 {
-		t.Errorf("company.Alts: %#v", company.Alts)
-	}
+	// SQLite tests
+	sqliteDB := database.CreateTestSqliteDB(t)
+	defer sqliteDB.Close()
+	check(t, &sqliteCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+
+	// MySQL tests
+	mysqlDB := database.CreateTestMySQLDB(t)
+	defer mysqlDB.Close()
+	check(t, &sqliteCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_EmptyHTTP(t *testing.T) {
@@ -161,32 +185,44 @@ func TestCompany_EmptyHTTP(t *testing.T) {
 }
 
 func TestCompany_addWatch(t *testing.T) {
-	w := httptest.NewRecorder()
-	body := strings.NewReader(`{"webhook": "https://moov.io", "authToken": "foo"}`)
-	req := httptest.NewRequest("POST", "/companies/foo/watch", body)
-	req.Header.Set("x-user-id", "test")
+	t.Parallel()
 
-	companyRepo := createTestCompanyRepository(t)
-	defer companyRepo.close()
-	watchRepo := createTestWatchRepository(t)
-	defer watchRepo.close()
+	check := func(t *testing.T, repo *sqliteCompanyRepository) {
+		w := httptest.NewRecorder()
+		body := strings.NewReader(`{"webhook": "https://moov.io", "authToken": "foo"}`)
+		req := httptest.NewRequest("POST", "/companies/foo/watch", body)
+		req.Header.Set("x-user-id", "test")
 
-	router := mux.NewRouter()
-	addCompanyRoutes(nil, router, companySearcher, companyRepo, watchRepo)
-	router.ServeHTTP(w, req)
-	w.Flush()
+		watchRepo := createTestWatchRepository(t)
+		defer watchRepo.close()
 
-	if w.Code != http.StatusOK {
-		t.Errorf("bogus status code: %d", w.Code)
+		router := mux.NewRouter()
+		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		router.ServeHTTP(w, req)
+		w.Flush()
+
+		if w.Code != http.StatusOK {
+			t.Errorf("bogus status code: %d", w.Code)
+		}
+
+		var watch companyWatchResponse
+		if err := json.NewDecoder(w.Body).Decode(&watch); err != nil {
+			t.Fatal(err)
+		}
+		if watch.WatchID == "" {
+			t.Error("empty watch.WatchID")
+		}
 	}
 
-	var watch companyWatchResponse
-	if err := json.NewDecoder(w.Body).Decode(&watch); err != nil {
-		t.Fatal(err)
-	}
-	if watch.WatchID == "" {
-		t.Error("empty watch.WatchID")
-	}
+	// SQLite tests
+	sqliteDB := database.CreateTestSqliteDB(t)
+	defer sqliteDB.Close()
+	check(t, &sqliteCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+
+	// MySQL tests
+	mysqlDB := database.CreateTestMySQLDB(t)
+	defer mysqlDB.Close()
+	check(t, &sqliteCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_addWatchNoBody(t *testing.T) {
@@ -208,302 +244,431 @@ func TestCompany_addWatchNoBody(t *testing.T) {
 }
 
 func TestCompany_addWatchMissingAuthToken(t *testing.T) {
-	companyRepo := createTestCompanyRepository(t)
-	defer companyRepo.close()
-	watchRepo := createTestWatchRepository(t)
-	defer watchRepo.close()
+	t.Parallel()
 
-	body := strings.NewReader(`{"webhook": "https://moov.io", "authToken": ""}`)
+	check := func(t *testing.T, repo *sqliteCompanyRepository) {
+		watchRepo := createTestWatchRepository(t)
+		defer watchRepo.close()
 
-	req := httptest.NewRequest("POST", "/companies/foo/watch", body)
-	req.Header.Set("x-user-id", "test")
+		body := strings.NewReader(`{"webhook": "https://moov.io", "authToken": ""}`)
 
-	w := httptest.NewRecorder()
+		req := httptest.NewRequest("POST", "/companies/foo/watch", body)
+		req.Header.Set("x-user-id", "test")
 
-	// Setup test HTTP server
-	router := mux.NewRouter()
-	addCompanyRoutes(nil, router, companySearcher, companyRepo, watchRepo)
-	router.ServeHTTP(w, req)
-	w.Flush()
+		w := httptest.NewRecorder()
 
-	if w.Code != http.StatusBadRequest {
-		t.Errorf("bogus status code: %d", w.Code)
+		// Setup test HTTP server
+		router := mux.NewRouter()
+		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		router.ServeHTTP(w, req)
+		w.Flush()
+
+		if w.Code != http.StatusBadRequest {
+			t.Errorf("bogus status code: %d", w.Code)
+		}
 	}
+
+	// SQLite tests
+	sqliteDB := database.CreateTestSqliteDB(t)
+	defer sqliteDB.Close()
+	check(t, &sqliteCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+
+	// MySQL tests
+	mysqlDB := database.CreateTestMySQLDB(t)
+	defer mysqlDB.Close()
+	check(t, &sqliteCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_addNameWatch(t *testing.T) {
-	w := httptest.NewRecorder()
-	body := strings.NewReader(`{"webhook": "https://moov.io", "authToken": "foo"}`)
-	req := httptest.NewRequest("POST", "/companies/watch?name=foo", body)
-	req.Header.Set("x-user-id", "test")
+	t.Parallel()
 
-	companyRepo := createTestCompanyRepository(t)
-	defer companyRepo.close()
-	watchRepo := createTestWatchRepository(t)
-	defer watchRepo.close()
+	check := func(t *testing.T, repo *sqliteCompanyRepository) {
+		w := httptest.NewRecorder()
+		body := strings.NewReader(`{"webhook": "https://moov.io", "authToken": "foo"}`)
+		req := httptest.NewRequest("POST", "/companies/watch?name=foo", body)
+		req.Header.Set("x-user-id", "test")
 
-	router := mux.NewRouter()
-	addCompanyRoutes(nil, router, companySearcher, companyRepo, watchRepo)
-	router.ServeHTTP(w, req)
-	w.Flush()
+		watchRepo := createTestWatchRepository(t)
+		defer watchRepo.close()
 
-	if w.Code != http.StatusOK {
-		t.Errorf("bogus status code: %d", w.Code)
+		router := mux.NewRouter()
+		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		router.ServeHTTP(w, req)
+		w.Flush()
+
+		if w.Code != http.StatusOK {
+			t.Errorf("bogus status code: %d", w.Code)
+		}
+
+		var watch companyWatchResponse
+		if err := json.NewDecoder(w.Body).Decode(&watch); err != nil {
+			t.Fatal(err)
+		}
+		if watch.WatchID == "" {
+			t.Error("empty watch.WatchID")
+		}
 	}
 
-	var watch companyWatchResponse
-	if err := json.NewDecoder(w.Body).Decode(&watch); err != nil {
-		t.Fatal(err)
-	}
-	if watch.WatchID == "" {
-		t.Error("empty watch.WatchID")
-	}
+	// SQLite tests
+	sqliteDB := database.CreateTestSqliteDB(t)
+	defer sqliteDB.Close()
+	check(t, &sqliteCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+
+	// MySQL tests
+	mysqlDB := database.CreateTestMySQLDB(t)
+	defer mysqlDB.Close()
+	check(t, &sqliteCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_addCompanyNameWatchNoBody(t *testing.T) {
-	w := httptest.NewRecorder()
-	req := httptest.NewRequest("POST", "/companies/watch?name=foo", nil)
-	req.Header.Set("x-user-id", "test")
+	t.Parallel()
 
-	companyRepo := createTestCompanyRepository(t)
-	defer companyRepo.close()
-	watchRepo := createTestWatchRepository(t)
-	defer watchRepo.close()
+	check := func(t *testing.T, repo *sqliteCompanyRepository) {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("POST", "/companies/watch?name=foo", nil)
+		req.Header.Set("x-user-id", "test")
 
-	router := mux.NewRouter()
-	addCompanyRoutes(nil, router, companySearcher, companyRepo, watchRepo)
-	router.ServeHTTP(w, req)
-	w.Flush()
+		watchRepo := createTestWatchRepository(t)
+		defer watchRepo.close()
 
-	if w.Code != http.StatusBadRequest {
-		t.Errorf("bogus status code: %d", w.Code)
+		router := mux.NewRouter()
+		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		router.ServeHTTP(w, req)
+		w.Flush()
+
+		if w.Code != http.StatusBadRequest {
+			t.Errorf("bogus status code: %d", w.Code)
+		}
+
+		// reset
+		w = httptest.NewRecorder()
+		if w.Code != http.StatusOK {
+			t.Errorf("bad state reset: %d", w.Code)
+		}
+
+		req.URL.Query().Set("name", "")
+		router.ServeHTTP(w, req)
+		w.Flush()
+
+		if w.Code != http.StatusBadRequest {
+			t.Errorf("bogus status code: %d", w.Code)
+		}
 	}
 
-	// reset
-	w = httptest.NewRecorder()
-	if w.Code != http.StatusOK {
-		t.Errorf("bad state reset: %d", w.Code)
-	}
+	// SQLite tests
+	sqliteDB := database.CreateTestSqliteDB(t)
+	defer sqliteDB.Close()
+	check(t, &sqliteCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
 
-	req.URL.Query().Set("name", "")
-	router.ServeHTTP(w, req)
-	w.Flush()
-
-	if w.Code != http.StatusBadRequest {
-		t.Errorf("bogus status code: %d", w.Code)
-	}
+	// MySQL tests
+	mysqlDB := database.CreateTestMySQLDB(t)
+	defer mysqlDB.Close()
+	check(t, &sqliteCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_updateUnsafe(t *testing.T) {
-	w := httptest.NewRecorder()
+	t.Parallel()
 
-	body := strings.NewReader(`{"status": "unsafe"}`)
-	req := httptest.NewRequest("PUT", "/companies/foo", body)
-	req.Header.Set("x-user-id", "test")
+	check := func(t *testing.T, repo *sqliteCompanyRepository) {
+		w := httptest.NewRecorder()
 
-	companyRepo := createTestCompanyRepository(t)
-	defer companyRepo.close()
-	watchRepo := createTestWatchRepository(t)
-	defer watchRepo.close()
+		body := strings.NewReader(`{"status": "unsafe"}`)
+		req := httptest.NewRequest("PUT", "/companies/foo", body)
+		req.Header.Set("x-user-id", "test")
 
-	router := mux.NewRouter()
-	addCompanyRoutes(nil, router, companySearcher, companyRepo, watchRepo)
-	router.ServeHTTP(w, req)
-	w.Flush()
+		watchRepo := createTestWatchRepository(t)
+		defer watchRepo.close()
 
-	if w.Code != http.StatusOK {
-		t.Errorf("bogus status code: %d", w.Code)
+		router := mux.NewRouter()
+		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		router.ServeHTTP(w, req)
+		w.Flush()
+
+		if w.Code != http.StatusOK {
+			t.Errorf("bogus status code: %d", w.Code)
+		}
 	}
+
+	// SQLite tests
+	sqliteDB := database.CreateTestSqliteDB(t)
+	defer sqliteDB.Close()
+	check(t, &sqliteCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+
+	// MySQL tests
+	mysqlDB := database.CreateTestMySQLDB(t)
+	defer mysqlDB.Close()
+	check(t, &sqliteCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_updateException(t *testing.T) {
-	w := httptest.NewRecorder()
+	t.Parallel()
 
-	body := strings.NewReader(`{"status": "exception"}`)
-	req := httptest.NewRequest("PUT", "/companies/foo", body)
-	req.Header.Set("x-user-id", "test")
+	check := func(t *testing.T, repo *sqliteCompanyRepository) {
+		w := httptest.NewRecorder()
 
-	companyRepo := createTestCompanyRepository(t)
-	defer companyRepo.close()
-	watchRepo := createTestWatchRepository(t)
-	defer watchRepo.close()
+		body := strings.NewReader(`{"status": "exception"}`)
+		req := httptest.NewRequest("PUT", "/companies/foo", body)
+		req.Header.Set("x-user-id", "test")
 
-	router := mux.NewRouter()
-	addCompanyRoutes(nil, router, companySearcher, companyRepo, watchRepo)
-	router.ServeHTTP(w, req)
-	w.Flush()
+		watchRepo := createTestWatchRepository(t)
+		defer watchRepo.close()
 
-	if w.Code != http.StatusOK {
-		t.Errorf("bogus status code: %d", w.Code)
+		router := mux.NewRouter()
+		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		router.ServeHTTP(w, req)
+		w.Flush()
+
+		if w.Code != http.StatusOK {
+			t.Errorf("bogus status code: %d", w.Code)
+		}
 	}
+
+	// SQLite tests
+	sqliteDB := database.CreateTestSqliteDB(t)
+	defer sqliteDB.Close()
+	check(t, &sqliteCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+
+	// MySQL tests
+	mysqlDB := database.CreateTestMySQLDB(t)
+	defer mysqlDB.Close()
+	check(t, &sqliteCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_updateUnknown(t *testing.T) {
-	w := httptest.NewRecorder()
+	t.Parallel()
 
-	body := strings.NewReader(`{"status": "unknown"}`) // has status, but not blocked or unblocked
-	req := httptest.NewRequest("PUT", "/companies/foo", body)
-	req.Header.Set("x-user-id", "test")
+	check := func(t *testing.T, repo *sqliteCompanyRepository) {
+		w := httptest.NewRecorder()
 
-	companyRepo := createTestCompanyRepository(t)
-	defer companyRepo.close()
-	watchRepo := createTestWatchRepository(t)
-	defer watchRepo.close()
+		body := strings.NewReader(`{"status": "unknown"}`) // has status, but not blocked or unblocked
+		req := httptest.NewRequest("PUT", "/companies/foo", body)
+		req.Header.Set("x-user-id", "test")
 
-	router := mux.NewRouter()
-	addCompanyRoutes(nil, router, companySearcher, companyRepo, watchRepo)
-	router.ServeHTTP(w, req)
-	w.Flush()
+		watchRepo := createTestWatchRepository(t)
+		defer watchRepo.close()
 
-	if w.Code != http.StatusBadRequest {
-		t.Errorf("bogus status code: %d", w.Code)
+		router := mux.NewRouter()
+		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		router.ServeHTTP(w, req)
+		w.Flush()
+
+		if w.Code != http.StatusBadRequest {
+			t.Errorf("bogus status code: %d", w.Code)
+		}
 	}
+
+	// SQLite tests
+	sqliteDB := database.CreateTestSqliteDB(t)
+	defer sqliteDB.Close()
+	check(t, &sqliteCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+
+	// MySQL tests
+	mysqlDB := database.CreateTestMySQLDB(t)
+	defer mysqlDB.Close()
+	check(t, &sqliteCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_updateNoUserId(t *testing.T) {
-	w := httptest.NewRecorder()
+	t.Parallel()
 
-	req := httptest.NewRequest("PUT", "/companies/foo", nil)
+	check := func(t *testing.T, repo *sqliteCompanyRepository) {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("PUT", "/companies/foo", nil)
 
-	companyRepo := createTestCompanyRepository(t)
-	defer companyRepo.close()
-	watchRepo := createTestWatchRepository(t)
-	defer watchRepo.close()
+		watchRepo := createTestWatchRepository(t)
+		defer watchRepo.close()
 
-	router := mux.NewRouter()
-	addCompanyRoutes(nil, router, companySearcher, companyRepo, watchRepo)
-	router.ServeHTTP(w, req)
-	w.Flush()
+		router := mux.NewRouter()
+		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		router.ServeHTTP(w, req)
+		w.Flush()
 
-	if w.Code != http.StatusBadRequest {
-		t.Errorf("expected %d but got: %d", http.StatusBadRequest, w.Code)
+		if w.Code != http.StatusBadRequest {
+			t.Errorf("expected %d but got: %d", http.StatusBadRequest, w.Code)
+		}
 	}
+
+	// SQLite tests
+	sqliteDB := database.CreateTestSqliteDB(t)
+	defer sqliteDB.Close()
+	check(t, &sqliteCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+
+	// MySQL tests
+	mysqlDB := database.CreateTestMySQLDB(t)
+	defer mysqlDB.Close()
+	check(t, &sqliteCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_updateNoBody(t *testing.T) {
-	w := httptest.NewRecorder()
+	t.Parallel()
 
-	req := httptest.NewRequest("PUT", "/companies/foo", nil)
-	req.Header.Set("x-user-id", "test")
+	check := func(t *testing.T, repo *sqliteCompanyRepository) {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("PUT", "/companies/foo", nil)
+		req.Header.Set("x-user-id", "test")
 
-	companyRepo := createTestCompanyRepository(t)
-	defer companyRepo.close()
-	watchRepo := createTestWatchRepository(t)
-	defer watchRepo.close()
+		watchRepo := createTestWatchRepository(t)
+		defer watchRepo.close()
 
-	router := mux.NewRouter()
-	addCompanyRoutes(nil, router, companySearcher, companyRepo, watchRepo)
-	router.ServeHTTP(w, req)
-	w.Flush()
+		router := mux.NewRouter()
+		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		router.ServeHTTP(w, req)
+		w.Flush()
 
-	if w.Code != http.StatusBadRequest {
-		t.Errorf("expected %d but got: %d", http.StatusBadRequest, w.Code)
+		if w.Code != http.StatusBadRequest {
+			t.Errorf("expected %d but got: %d", http.StatusBadRequest, w.Code)
+		}
 	}
+
+	// SQLite tests
+	sqliteDB := database.CreateTestSqliteDB(t)
+	defer sqliteDB.Close()
+	check(t, &sqliteCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+
+	// MySQL tests
+	mysqlDB := database.CreateTestMySQLDB(t)
+	defer mysqlDB.Close()
+	check(t, &sqliteCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_removeWatch(t *testing.T) {
-	w := httptest.NewRecorder()
-	req := httptest.NewRequest("DELETE", "/companies/foo/watch/watch-id", nil)
-	req.Header.Set("x-user-id", "test")
+	t.Parallel()
 
-	companyRepo := createTestCompanyRepository(t)
-	defer companyRepo.close()
-	watchRepo := createTestWatchRepository(t)
-	defer watchRepo.close()
+	check := func(t *testing.T, repo *sqliteCompanyRepository) {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("DELETE", "/companies/foo/watch/watch-id", nil)
+		req.Header.Set("x-user-id", "test")
 
-	router := mux.NewRouter()
-	addCompanyRoutes(nil, router, companySearcher, companyRepo, watchRepo)
-	router.ServeHTTP(w, req)
-	w.Flush()
+		watchRepo := createTestWatchRepository(t)
+		defer watchRepo.close()
 
-	if w.Code != http.StatusOK {
-		t.Errorf("bogus status code: %d", w.Code)
+		router := mux.NewRouter()
+		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		router.ServeHTTP(w, req)
+		w.Flush()
+
+		if w.Code != http.StatusOK {
+			t.Errorf("bogus status code: %d", w.Code)
+		}
 	}
+
+	// SQLite tests
+	sqliteDB := database.CreateTestSqliteDB(t)
+	defer sqliteDB.Close()
+	check(t, &sqliteCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+
+	// MySQL tests
+	mysqlDB := database.CreateTestMySQLDB(t)
+	defer mysqlDB.Close()
+	check(t, &sqliteCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_removeNameWatch(t *testing.T) {
-	w := httptest.NewRecorder()
-	req := httptest.NewRequest("DELETE", "/companies/watch/foo", nil)
-	req.Header.Set("x-user-id", "test")
+	t.Parallel()
 
-	companyRepo := createTestCompanyRepository(t)
-	defer companyRepo.close()
-	watchRepo := createTestWatchRepository(t)
-	defer watchRepo.close()
+	check := func(t *testing.T, repo *sqliteCompanyRepository) {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("DELETE", "/companies/watch/foo", nil)
+		req.Header.Set("x-user-id", "test")
 
-	router := mux.NewRouter()
-	addCompanyRoutes(nil, router, companySearcher, companyRepo, watchRepo)
-	router.ServeHTTP(w, req)
-	w.Flush()
+		watchRepo := createTestWatchRepository(t)
+		defer watchRepo.close()
 
-	if w.Code != http.StatusOK {
-		t.Errorf("bogus status code: %d", w.Code)
+		router := mux.NewRouter()
+		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		router.ServeHTTP(w, req)
+		w.Flush()
+
+		if w.Code != http.StatusOK {
+			t.Errorf("bogus status code: %d", w.Code)
+		}
 	}
+
+	// SQLite tests
+	sqliteDB := database.CreateTestSqliteDB(t)
+	defer sqliteDB.Close()
+	check(t, &sqliteCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+
+	// MySQL tests
+	mysqlDB := database.CreateTestMySQLDB(t)
+	defer mysqlDB.Close()
+	check(t, &sqliteCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompanyRepository(t *testing.T) {
-	repo := createTestCompanyRepository(t)
-	defer repo.close()
+	t.Parallel()
 
-	companyID, userID := base.ID(), base.ID()
+	check := func(t *testing.T, repo *sqliteCompanyRepository) {
+		companyID, userID := base.ID(), base.ID()
 
-	status, err := repo.getCompanyStatus(companyID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if status != nil {
-		t.Fatal("should give nil CompanyStatus")
+		status, err := repo.getCompanyStatus(companyID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if status != nil {
+			t.Fatal("should give nil CompanyStatus")
+		}
+
+		// block company
+		status = &CompanyStatus{UserID: userID, Status: CompanyUnsafe, CreatedAt: time.Now()}
+		if err := repo.upsertCompanyStatus(companyID, status); err != nil {
+			t.Errorf("addCompanyBlock: shouldn't error, but got %v", err)
+		}
+		status = nil
+
+		// verify
+		status, err = repo.getCompanyStatus(companyID)
+		if err != nil {
+			t.Error(err)
+		}
+		if status == nil {
+			t.Errorf("empty CompanyStatus")
+		}
+		if status.UserID == "" || string(status.Status) == "" {
+			t.Errorf("invalid CompanyStatus: %#v", status)
+		}
+		if status.Status != CompanyUnsafe {
+			t.Errorf("status.Status=%v", status.Status)
+		}
+
+		// unblock
+		status = &CompanyStatus{UserID: userID, Status: CompanyException, CreatedAt: time.Now()}
+		if err := repo.upsertCompanyStatus(companyID, status); err != nil {
+			t.Errorf("addCompanyBlock: shouldn't error, but got %v", err)
+		}
+		status = nil
+
+		status, err = repo.getCompanyStatus(companyID)
+		if err != nil {
+			t.Error(err)
+		}
+		if status == nil {
+			t.Errorf("empty CompanyStatus")
+		}
+		if status.UserID == "" || string(status.Status) == "" {
+			t.Errorf("invalid CompanyStatus: %#v", status)
+		}
+		if status.Status != CompanyException {
+			t.Errorf("status.Status=%v", status.Status)
+		}
+
+		// edgae case
+		status, err = repo.getCompanyStatus("")
+		if status != nil {
+			t.Error("empty companyID shouldn return nil status")
+		}
+		if err == nil {
+			t.Error("but an error should be returned")
+		}
 	}
 
-	// block company
-	status = &CompanyStatus{UserID: userID, Status: CompanyUnsafe, CreatedAt: time.Now()}
-	if err := repo.upsertCompanyStatus(companyID, status); err != nil {
-		t.Errorf("addCompanyBlock: shouldn't error, but got %v", err)
-	}
-	status = nil
+	// SQLite tests
+	sqliteDB := database.CreateTestSqliteDB(t)
+	defer sqliteDB.Close()
+	check(t, &sqliteCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
 
-	// verify
-	status, err = repo.getCompanyStatus(companyID)
-	if err != nil {
-		t.Error(err)
-	}
-	if status == nil {
-		t.Errorf("empty CompanyStatus")
-	}
-	if status.UserID == "" || string(status.Status) == "" {
-		t.Errorf("invalid CompanyStatus: %#v", status)
-	}
-	if status.Status != CompanyUnsafe {
-		t.Errorf("status.Status=%v", status.Status)
-	}
-
-	// unblock
-	status = &CompanyStatus{UserID: userID, Status: CompanyException, CreatedAt: time.Now()}
-	if err := repo.upsertCompanyStatus(companyID, status); err != nil {
-		t.Errorf("addCompanyBlock: shouldn't error, but got %v", err)
-	}
-	status = nil
-
-	status, err = repo.getCompanyStatus(companyID)
-	if err != nil {
-		t.Error(err)
-	}
-	if status == nil {
-		t.Errorf("empty CompanyStatus")
-	}
-	if status.UserID == "" || string(status.Status) == "" {
-		t.Errorf("invalid CompanyStatus: %#v", status)
-	}
-	if status.Status != CompanyException {
-		t.Errorf("status.Status=%v", status.Status)
-	}
-
-	// edgae case
-	status, err = repo.getCompanyStatus("")
-	if status != nil {
-		t.Error("empty companyID shouldn return nil status")
-	}
-	if err == nil {
-		t.Error("but an error should be returned")
-	}
+	// MySQL tests
+	mysqlDB := database.CreateTestMySQLDB(t)
+	defer mysqlDB.Close()
+	check(t, &sqliteCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }

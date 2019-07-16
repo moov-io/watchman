@@ -146,7 +146,7 @@ func main() {
 	defer webhookRepo.close()
 
 	// Setup company / customer repositories
-	companyRepo := &sqliteCompanyRepository{db}
+	companyRepo := &sqliteCompanyRepository{db, logger}
 	defer companyRepo.close()
 	custRepo := &sqliteCustomerRepository{db}
 	defer custRepo.close()

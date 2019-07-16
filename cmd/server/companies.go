@@ -112,7 +112,8 @@ type companyRepository interface {
 }
 
 type sqliteCompanyRepository struct {
-	db *sql.DB
+	db     *sql.DB
+	logger log.Logger
 }
 
 func (r *sqliteCompanyRepository) close() error {
