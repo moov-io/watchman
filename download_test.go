@@ -8,7 +8,48 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+	"time"
 )
+
+type fd struct {
+	name string
+}
+
+func (fd *fd) Name() string       { return fd.name }
+func (fd *fd) Size() int64        { return 1 }
+func (fd *fd) Mode() os.FileMode  { return 0600 }
+func (fd *fd) ModTime() time.Time { return time.Now() }
+func (fd *fd) IsDir() bool        { return false }
+func (fd *fd) Sys() interface{}   { return nil }
+
+func TestDownloader__compareNames(t *testing.T) {
+	var fds = []os.FileInfo{
+		&fd{name: "sdn.csv"},
+		&fd{name: "dpl.txt"},
+	}
+	expected := map[string]string{
+		"sdn.csv": "https://example.com",
+		"dpl.txt": "https://example.com",
+	}
+
+	// first case, all matched
+	matched, missing := compareNames(fds, expected)
+	if (matched != "sdn.csv, dpl.txt" && matched != "dpl.txt, sdn.csv") || missing != "" {
+		t.Errorf("matched=%q missing=%q", matched, missing)
+	}
+	matched, missing = compareNames(nil, expected)
+	if matched != "" || (missing != "sdn.csv, dpl.txt" && missing != "dpl.txt, sdn.csv") {
+		t.Errorf("matched=%q missing=%q", matched, missing)
+	}
+	matched, missing = compareNames([]os.FileInfo{&fd{name: "dpl.txt"}}, expected)
+	if matched != "dpl.txt" || missing != "sdn.csv" {
+		t.Errorf("matched=%q missing=%q", matched, missing)
+	}
+	matched, missing = compareNames(fds, make(map[string]string))
+	if matched != "" || (missing != "sdn.csv, dpl.txt" && missing != "dpl.txt, sdn.csv") {
+		t.Errorf("matched=%q missing=%q", matched, missing)
+	}
+}
 
 func TestDownloader(t *testing.T) {
 	dl := Downloader{}
