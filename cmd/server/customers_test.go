@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/moov-io/ofac"
 	"github.com/moov-io/base"
+	"github.com/moov-io/ofac"
 
 	"github.com/gorilla/mux"
 )
