@@ -16,7 +16,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/cardonator/ofac"
+	"github.com/moov-io/ofac"
 	"github.com/moov-io/base/admin"
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/base/http/bind"

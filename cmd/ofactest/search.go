@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"strings"
 
-	moov "github.com/cardonator/ofac/client"
+	moov "github.com/moov-io/ofac/client"
 
 	"github.com/antihax/optional"
 )

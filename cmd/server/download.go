@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/cardonator/ofac"
 	moovhttp "github.com/moov-io/base/http"
+	"github.com/moov-io/ofac"
 
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"

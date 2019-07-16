@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cardonator/ofac"
+	"github.com/moov-io/ofac"
 	"github.com/moov-io/base"
 
 	"github.com/gorilla/mux"

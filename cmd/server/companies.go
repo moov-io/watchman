@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cardonator/ofac"
+	"github.com/moov-io/ofac"
 	moovhttp "github.com/moov-io/base/http"
 
 	"github.com/go-kit/kit/log"

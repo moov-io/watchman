@@ -1,4 +1,4 @@
-module github.com/cardonator/ofac
+module github.com/moov-io/ofac
 
 require (
 	github.com/VividCortex/gohistogram v1.0.0 // indirect
