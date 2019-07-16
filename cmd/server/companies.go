@@ -15,6 +15,7 @@ import (
 
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/ofac"
+	"github.com/moov-io/ofac/internal/database"
 
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
@@ -145,14 +146,34 @@ func (r *sqliteCompanyRepository) getCompanyStatus(companyID string) (*CompanySt
 }
 
 func (r *sqliteCompanyRepository) upsertCompanyStatus(companyID string, status *CompanyStatus) error {
-	query := `insert or replace into company_status (company_id, user_id, note, status, created_at) values (?, ?, ?, ?, ?);`
-	stmt, err := r.db.Prepare(query)
+	tx, err := r.db.Begin()
 	if err != nil {
-		return err
+		return fmt.Errorf("upsertCompanyStatus: begin: %v", err)
 	}
-	defer stmt.Close()
+
+	query := `insert into company_status (company_id, user_id, note, status, created_at) values (?, ?, ?, ?, ?);`
+	stmt, err := tx.Prepare(query)
+	if err != nil {
+		return fmt.Errorf("upsertCompanyStatus: prepare error=%v rollback=%v", err, tx.Rollback())
+	}
 	_, err = stmt.Exec(companyID, status.UserID, status.Note, status.Status, status.CreatedAt)
-	return err
+	stmt.Close()
+	if err == nil {
+		return tx.Commit()
+	}
+	if database.UniqueViolation(err) {
+		query = `update company_status set note = ?, status = ? where company_id = ? and user_id = ?;`
+		stmt, err = tx.Prepare(query)
+		if err != nil {
+			return fmt.Errorf("upsertCompanyStatus: inner prepare error=%v rollback=%v", err, tx.Rollback())
+		}
+		_, err := stmt.Exec(status.Note, status.Status, companyID, status.UserID)
+		stmt.Close()
+		if err != nil {
+			return fmt.Errorf("upsertCompanyStatus: unique error=%v rollback=%v", err, tx.Rollback())
+		}
+	}
+	return tx.Commit()
 }
 
 func getCompany(logger log.Logger, searcher *searcher, companyRepo companyRepository) http.HandlerFunc {

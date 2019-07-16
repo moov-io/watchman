@@ -148,7 +148,7 @@ func main() {
 	// Setup company / customer repositories
 	companyRepo := &sqliteCompanyRepository{db, logger}
 	defer companyRepo.close()
-	custRepo := &sqliteCustomerRepository{db}
+	custRepo := &sqliteCustomerRepository{db, logger}
 	defer custRepo.close()
 
 	// Setup periodic download and re-search
