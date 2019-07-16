@@ -1,3 +1,15 @@
+## v0.9.0 (Unreleased)
+
+ADDITIONS
+
+- cmd/server: Include the BIS Denied Person's List data in search endpoints
+
+IMPROVEMENTS
+
+- build: push moov/ofac:latest on 'make release-push'
+- docs: update docs.moov.io links after design refresh
+- build: update dependencies
+
 ## v0.8.0 (Released 2019-06-19)
 
 BREAKING CHANGES

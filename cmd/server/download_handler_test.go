@@ -22,7 +22,7 @@ func TestDownload__manualRefreshPath(t *testing.T) {
 	repo := createTestDownloadRepository(t)
 
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", manualRefreshPath, nil)
+	req := httptest.NewRequest("GET", "/data/refresh", nil)
 	logger := log.NewNopLogger()
 	manualRefreshHandler(logger, searcher, repo)(w, req)
 	w.Flush()

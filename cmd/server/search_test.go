@@ -373,7 +373,6 @@ func TestSearch__TopDPs(t *testing.T) {
 	if len(dps) == 0 {
 		t.Fatal("empty DPs")
 	}
-	t.Logf("%+v\n", dps[0])
 	// DPL doesn't have any entity IDs. Comparing expected address components instead
 	if dps[0].DeniedPerson.StreetAddress != "P.O. BOX 28360" || dps[0].DeniedPerson.City != "DUBAI" {
 		t.Errorf("%#v", dps[0].DeniedPerson)
