@@ -26,35 +26,35 @@ var (
 	mysqlMigrator = migrator.New(
 		execsql(
 			"create_customer_name_watches",
-			`create table if not exists customer_name_watches(id varchar(40) primary key, name varchar(40), webhook varchar(512), auth_token varchar(128), created_at datetime, deleted_at datetime);`,
+			`create table if not exists customer_name_watches(id varchar(40) primary key, name varchar(40), webhook varchar(512), auth_token varchar(128), created_at timestamp(3), deleted_at timestamp(3));`,
 		),
 		execsql(
 			"create_customer_status",
-			`create table if not exists customer_status(customer_id varchar(40) primary key, user_id varchar(40), note varchar(1024), status varchar(10), created_at datetime, deleted_at datetime);`,
+			`create table if not exists customer_status(customer_id varchar(40) primary key, user_id varchar(40), note varchar(1024), status varchar(10), created_at timestamp(3), deleted_at timestamp(3));`,
 		),
 		execsql(
 			"create_customer_watches",
-			`create table if not exists customer_watches(id varchar(40) primary key, customer_id varchar(40), webhook varchar(512), auth_token varchar(128), created_at datetime, deleted_at datetime);`,
+			`create table if not exists customer_watches(id varchar(40) primary key, customer_id varchar(40), webhook varchar(512), auth_token varchar(128), created_at timestamp(3), deleted_at timestamp(3));`,
 		),
 		execsql(
 			"create_company_name_watches",
-			`create table if not exists company_name_watches(id varchar(40) primary key, name varchar(256), webhook varchar(512), auth_token varchar(128), created_at datetime, deleted_at datetime);`,
+			`create table if not exists company_name_watches(id varchar(40) primary key, name varchar(256), webhook varchar(512), auth_token varchar(128), created_at timestamp(3), deleted_at timestamp(3));`,
 		),
 		execsql(
 			"create_company_status",
-			`create table if not exists company_status(company_id varchar(40) primary key, user_id varchar(40), note varchar(1024), status varchar(10), created_at datetime, deleted_at datetime);`,
+			`create table if not exists company_status(company_id varchar(40) primary key, user_id varchar(40), note varchar(1024), status varchar(10), created_at timestamp(3), deleted_at timestamp(3));`,
 		),
 		execsql(
 			"create_company_watches",
-			`create table if not exists company_watches(id varchar(40) primary key, company_id varchar(40), webhook varchar(512), auth_token varchar(128), created_at datetime, deleted_at datetime);`,
+			`create table if not exists company_watches(id varchar(40) primary key, company_id varchar(40), webhook varchar(512), auth_token varchar(128), created_at timestamp(3), deleted_at timestamp(3));`,
 		),
 		execsql(
 			"create_ofac_download_stats",
-			`create table if not exists ofac_download_stats(downloaded_at datetime, sdns integer, alt_names integer, addresses integer);`,
+			`create table if not exists ofac_download_stats(downloaded_at timestamp(3), sdns integer, alt_names integer, addresses integer);`,
 		),
 		execsql(
 			"create_webhook_stats",
-			`create table if not exists webhook_stats(watch_id varchar(40), attempted_at datetime, status varchar(10));`,
+			`create table if not exists webhook_stats(watch_id varchar(40), attempted_at timestamp(3), status varchar(10));`,
 		),
 		execsql("add__denied_persons__to__ofac_download_stats", "alter table ofac_download_stats add column denied_persons integer not null default 0;"),
 	)
