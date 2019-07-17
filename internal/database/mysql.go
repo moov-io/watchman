@@ -9,16 +9,24 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/moov-io/base/docker"
 
 	"github.com/go-kit/kit/log"
+	kitprom "github.com/go-kit/kit/metrics/prometheus"
 	gomysql "github.com/go-sql-driver/mysql"
 	"github.com/lopezator/migrator"
 	"github.com/ory/dockertest"
+	stdprom "github.com/prometheus/client_golang/prometheus"
 )
 
 var (
+	mysqlConnections = kitprom.NewGaugeFrom(stdprom.GaugeOpts{
+		Name: "mysql_connections",
+		Help: "How many MySQL connections and what status they're in.",
+	}, []string{"state"})
+
 	// mySQLErrDuplicateKey is the error code for duplicate entries
 	// https://dev.mysql.com/doc/refman/8.0/en/server-error-reference.html#error_er_dup_entry
 	mySQLErrDuplicateKey uint16 = 1062
@@ -71,6 +79,8 @@ func init() {
 type mysql struct {
 	dsn    string
 	logger log.Logger
+
+	connections *kitprom.Gauge
 }
 
 func (my *mysql) Connect() (*sql.DB, error) {
@@ -88,6 +98,17 @@ func (my *mysql) Connect() (*sql.DB, error) {
 	if err := mysqlMigrator.Migrate(db); err != nil {
 		return nil, err
 	}
+
+	// Setup metrics after the database is setup
+	go func() {
+		t := time.NewTicker(1 * time.Minute)
+		for range t.C {
+			stats := db.Stats()
+			my.connections.With("state", "idle").Set(float64(stats.Idle))
+			my.connections.With("state", "inuse").Set(float64(stats.InUse))
+			my.connections.With("state", "open").Set(float64(stats.OpenConnections))
+		}
+	}()
 
 	return db, nil
 }
