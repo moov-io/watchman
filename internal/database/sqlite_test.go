@@ -5,6 +5,7 @@
 package database
 
 import (
+	"errors"
 	"runtime"
 	"testing"
 
@@ -40,5 +41,12 @@ func TestSQLite__basic(t *testing.T) {
 func TestSqlite__getSqlitePath(t *testing.T) {
 	if v := getSqlitePath(); v != "ofac.db" {
 		t.Errorf("got %s", v)
+	}
+}
+
+func TestSqliteUniqueViolation(t *testing.T) {
+	err := errors.New(`problem upserting depository="7d676c65eccd48090ff238a0d5e35eb6126c23f2", userId="80cfe1311d9eb7659d02cba9ee6cb04ed3739a85": UNIQUE constraint failed: depositories.depository_id`)
+	if !UniqueViolation(err) {
+		t.Error("should have matched unique violation")
 	}
 }

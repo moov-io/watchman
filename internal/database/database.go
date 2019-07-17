@@ -33,3 +33,9 @@ func execsql(name, raw string) *migrator.MigrationNoTx {
 		},
 	}
 }
+
+// UniqueViolation returns true when the provided error matches a database error
+// for duplicate entries (violating a unique table constraint).
+func UniqueViolation(err error) bool {
+	return MySQLUniqueViolation(err) || SqliteUniqueViolation(err)
+}

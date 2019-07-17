@@ -7,6 +7,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/moov-io/base/docker"
@@ -18,6 +19,10 @@ import (
 )
 
 var (
+	// mySQLErrDuplicateKey is the error code for duplicate entries
+	// https://dev.mysql.com/doc/refman/8.0/en/server-error-reference.html#error_er_dup_entry
+	mySQLErrDuplicateKey uint16 = 1062
+
 	mysqlMigrator = migrator.New(
 		execsql(
 			"create_customer_name_watches",
@@ -158,4 +163,14 @@ func CreateTestMySQLDB(t *testing.T) *TestMySQLDB {
 		t.Fatal(err)
 	}
 	return &TestMySQLDB{db, resource}
+}
+
+// MySQLUniqueViolation returns true when the provided error matches the MySQL code
+// for duplicate entries (violating a unique table constraint).
+func MySQLUniqueViolation(err error) bool {
+	match := strings.Contains(err.Error(), fmt.Sprintf("Error %d: Duplicate entry", mySQLErrDuplicateKey))
+	if e, ok := err.(*gomysql.MySQLError); ok {
+		return match || e.Number == mySQLErrDuplicateKey
+	}
+	return match
 }
