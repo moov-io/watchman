@@ -30,7 +30,7 @@ var (
 		),
 		execsql(
 			"create_customer_status",
-			`create table if not exists customer_status(customer_id varchar(40), user_id varchar(40), note varchar(1024), status varchar(10), created_at datetime, deleted_at datetime);`,
+			`create table if not exists customer_status(customer_id varchar(40) primary key, user_id varchar(40), note varchar(1024), status varchar(10), created_at datetime, deleted_at datetime);`,
 		),
 		execsql(
 			"create_customer_watches",
@@ -42,7 +42,7 @@ var (
 		),
 		execsql(
 			"create_company_status",
-			`create table if not exists company_status(company_id varchar(40), user_id varchar(40), note varchar(1024), status varchar(10), created_at datetime, deleted_at datetime);`,
+			`create table if not exists company_status(company_id varchar(40) primary key, user_id varchar(40), note varchar(1024), status varchar(10), created_at datetime, deleted_at datetime);`,
 		),
 		execsql(
 			"create_company_watches",
