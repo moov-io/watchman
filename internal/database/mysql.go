@@ -7,6 +7,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -114,7 +115,12 @@ func (my *mysql) Connect() (*sql.DB, error) {
 }
 
 func mysqlConnection(logger log.Logger, user, pass string, address string, database string) *mysql {
-	dsn := fmt.Sprintf("%s:%s@%s/%s?%s", user, pass, address, database, "timeout=30s&tls=false&charset=utf8mb4&parseTime=true&sql_mode=ALLOW_INVALID_DATES")
+	timeout := "30s"
+	if v := os.Getenv("MYSQL_TIMEOUT"); v != "" {
+		timeout = v
+	}
+	params := fmt.Sprintf("timeout=%s&charset=utf8mb4&parseTime=true&sql_mode=ALLOW_INVALID_DATES", timeout)
+	dsn := fmt.Sprintf("%s:%s@%s/%s?%s", user, pass, address, database, params)
 	return &mysql{
 		dsn:    dsn,
 		logger: logger,

@@ -81,6 +81,8 @@ Based on `DATABASE_TYPE` the following environment variables will be read to con
 
 Refer to the mysql driver documentation for [connection parameters](https://github.com/go-sql-driver/mysql#dsn-data-source-name).
 
+- `MYSQL_TIMEOUT`: Timeout parameter specified on (DSN) data source name. (Default: `30s`)
+
 ##### SQLite
 
 - `SQLITE_DB_PATH`: Local filepath location for the paygate SQLite database. (Default: `ofac.db`)
