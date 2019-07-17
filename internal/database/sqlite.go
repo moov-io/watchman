@@ -136,7 +136,7 @@ func (s *sqlite) Connect() (*sql.DB, error) {
 
 	// Spin up metrics only after everything works
 	go func() {
-		t := time.NewTicker(1 * time.Second)
+		t := time.NewTicker(1 * time.Minute)
 		for range t.C {
 			stats := db.Stats()
 			s.connections.With("state", "idle").Set(float64(stats.Idle))
