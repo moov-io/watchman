@@ -1,4 +1,4 @@
-## v0.9.0 (Unreleased)
+## v0.9.0 (Released 2019-07-18)
 
 BREAKING CHANGES
 
