@@ -1,14 +1,20 @@
 ## v0.9.0 (Unreleased)
 
+BREAKING CHANGES
+
+- The admin endpoint `:9092/ofac/refresh` was renamed to `:9092/data/refresh`
+
 ADDITIONS
 
 - cmd/server: Include the BIS Denied Person's List data in search endpoints
+- cmd/server: Support MySQL as a storage layer via `DATABASE_TYPE=mysql` (See: [#100](https://github.com/moov-io/ofac/pull/100))
 
 IMPROVEMENTS
 
 - build: push moov/ofac:latest on 'make release-push'
 - docs: update docs.moov.io links after design refresh
 - build: update dependencies
+- cmd/server: rename manual refresh endpoint to /data/refresh
 
 ## v0.8.0 (Released 2019-06-19)
 
