@@ -122,8 +122,9 @@ func mysqlConnection(logger log.Logger, user, pass string, address string, datab
 	params := fmt.Sprintf("timeout=%s&charset=utf8mb4&parseTime=true&sql_mode=ALLOW_INVALID_DATES", timeout)
 	dsn := fmt.Sprintf("%s:%s@%s/%s?%s", user, pass, address, database, params)
 	return &mysql{
-		dsn:    dsn,
-		logger: logger,
+		dsn:         dsn,
+		logger:      logger,
+		connections: mysqlConnections,
 	}
 }
 
