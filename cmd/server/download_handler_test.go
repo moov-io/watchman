@@ -10,31 +10,42 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/moov-io/ofac/internal/database"
+
 	"github.com/go-kit/kit/log"
 )
 
 func TestDownload__manualRefreshPath(t *testing.T) {
-	if testing.Short() {
-		return
+	t.Parallel()
+
+	check := func(t *testing.T, repo *sqliteDownloadRepository) {
+		searcher := &searcher{}
+
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/data/refresh", nil)
+		logger := log.NewNopLogger()
+		manualRefreshHandler(logger, searcher, repo)(w, req)
+		w.Flush()
+
+		if w.Code != http.StatusOK {
+			t.Errorf("bogus status code: %d", w.Code)
+		}
+		var stats downloadStats
+		if err := json.NewDecoder(w.Body).Decode(&stats); err != nil {
+			t.Error(err)
+		}
+		if stats.SDNs == 0 {
+			t.Errorf("stats.SDNs=%d but expected non-zero", stats.SDNs)
+		}
 	}
 
-	searcher := &searcher{}
-	repo := createTestDownloadRepository(t)
+	// SQLite tests
+	sqliteDB := database.CreateTestSqliteDB(t)
+	defer sqliteDB.Close()
+	check(t, &sqliteDownloadRepository{sqliteDB.DB, log.NewNopLogger()})
 
-	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/data/refresh", nil)
-	logger := log.NewNopLogger()
-	manualRefreshHandler(logger, searcher, repo)(w, req)
-	w.Flush()
-
-	if w.Code != http.StatusOK {
-		t.Errorf("bogus status code: %d", w.Code)
-	}
-	var stats downloadStats
-	if err := json.NewDecoder(w.Body).Decode(&stats); err != nil {
-		t.Error(err)
-	}
-	if stats.SDNs == 0 {
-		t.Errorf("stats.SDNs=%d but expected non-zero", stats.SDNs)
-	}
+	// MySQL tests
+	mysqlDB := database.CreateTestMySQLDB(t)
+	defer mysqlDB.Close()
+	check(t, &sqliteDownloadRepository{mysqlDB.DB, log.NewNopLogger()})
 }

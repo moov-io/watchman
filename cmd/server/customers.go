@@ -15,6 +15,7 @@ import (
 
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/ofac"
+	"github.com/moov-io/ofac/internal/database"
 
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
@@ -116,7 +117,8 @@ type customerRepository interface {
 }
 
 type sqliteCustomerRepository struct {
-	db *sql.DB
+	db     *sql.DB
+	logger log.Logger
 }
 
 func (r *sqliteCustomerRepository) close() error {
@@ -148,14 +150,34 @@ func (r *sqliteCustomerRepository) getCustomerStatus(customerID string) (*Custom
 }
 
 func (r *sqliteCustomerRepository) upsertCustomerStatus(customerID string, status *CustomerStatus) error {
-	query := `insert or replace into customer_status (customer_id, user_id, note, status, created_at) values (?, ?, ?, ?, ?);`
+	tx, err := r.db.Begin()
+	if err != nil {
+		return fmt.Errorf("upsertCustomerStatus: begin: %v", err)
+	}
+
+	query := `insert into customer_status (customer_id, user_id, note, status, created_at) values (?, ?, ?, ?, ?);`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
-		return err
+		return fmt.Errorf("upsertCustomerStatus: prepare error=%v rollback=%v", err, tx.Rollback())
 	}
-	defer stmt.Close()
 	_, err = stmt.Exec(customerID, status.UserID, status.Note, status.Status, status.CreatedAt)
-	return err
+	stmt.Close()
+	if err == nil {
+		return tx.Commit()
+	}
+	if database.UniqueViolation(err) {
+		query = `update customer_status set note = ?, status = ? where customer_id = ? and user_id = ?`
+		stmt, err = tx.Prepare(query)
+		if err != nil {
+			return fmt.Errorf("upsertCustomerStatus: inner prepare error=%v rollback=%v", err, tx.Rollback())
+		}
+		_, err := stmt.Exec(status.Note, status.Status, customerID, status.UserID)
+		stmt.Close()
+		if err != nil {
+			return fmt.Errorf("upsertCustomerStatus: unique error=%v rollback=%v", err, tx.Rollback())
+		}
+	}
+	return tx.Commit()
 }
 
 func getCustomer(logger log.Logger, searcher *searcher, custRepo customerRepository) http.HandlerFunc {

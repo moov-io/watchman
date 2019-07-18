@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/moov-io/base"
+	"github.com/moov-io/ofac/internal/database"
 )
 
 var (
@@ -136,16 +137,21 @@ func TestWebhook_call(t *testing.T) {
 }
 
 func TestWebhook_record(t *testing.T) {
-	db, err := createTestSqliteDB()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer db.close()
+	t.Parallel()
 
-	repo := sqliteWebhookRepository{db.db}
-	defer repo.close()
-
-	if err := repo.recordWebhook(base.ID(), time.Now(), 200); err != nil {
-		t.Fatal(err)
+	check := func(t *testing.T, repo *sqliteWebhookRepository) {
+		if err := repo.recordWebhook(base.ID(), time.Now(), 200); err != nil {
+			t.Fatal(err)
+		}
 	}
+
+	// SQLite tests
+	sqliteDB := database.CreateTestSqliteDB(t)
+	defer sqliteDB.Close()
+	check(t, &sqliteWebhookRepository{sqliteDB.DB})
+
+	// MySQL tests
+	mysqlDB := database.CreateTestMySQLDB(t)
+	defer mysqlDB.Close()
+	check(t, &sqliteWebhookRepository{mysqlDB.DB})
 }
