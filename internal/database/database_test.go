@@ -12,9 +12,22 @@ import (
 )
 
 func TestDatabase(t *testing.T) {
-	db, err := New(log.NewNopLogger(), "other")
+	logger := log.NewNopLogger()
+
+	db, err := New(logger, "other")
 	if db != nil || err == nil {
 		t.Errorf("db=%#v expected error", db)
+	}
+
+	db, err = New(logger, "sqlite")
+	if db == nil || err != nil {
+		t.Errorf("sqlite never errors on initial Connect")
+	}
+	db.Close()
+
+	db, err = New(logger, "mysql")
+	if db != nil || err == nil {
+		t.Errorf("expected mysql to fail, but got no error")
 	}
 }
 
