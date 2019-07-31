@@ -175,7 +175,7 @@ func main() {
 				logger.Log("exit", err)
 			}
 		} else {
-			logger.Log("startup", fmt.Sprintf("binding to %s for secure HTTP server", *httpAddr))
+			logger.Log("startup", fmt.Sprintf("binding to %s for HTTP server", *httpAddr))
 			if err := serve.ListenAndServe(); err != nil {
 				logger.Log("exit", err)
 			}
