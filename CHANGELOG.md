@@ -1,3 +1,14 @@
+## v0.10.0 (Unreleased)
+
+BUG FIXES
+
+- attempt retries when downloading files
+
+ADDITIONS
+
+- internal/database: log which provider we're using
+- cmd/server: bind HTTP server with TLS if HTTPS_* variables are defined
+
 ## v0.9.0 (Released 2019-07-18)
 
 BREAKING CHANGES
