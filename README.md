@@ -11,7 +11,7 @@ moov-io/ofac
 
 All United States companies are required to comply with OFAC regulations and sanction lists and the US Patriot Act requires compliance with the BIS Denied Person's List (DPL). Moov's primary usage for this project is with ACH origination in our [paygate](https://github.com/moov-io/paygate) project.
 
-To get started using OFAC download [the latest release](https://github.com/moov-io/ofac/releases) or our [Docker image](https://hub.docker.com/r/moov/ofac/tags). We also have a [demo OFAC instance](https://moov.io/ofac/) as part of Moov's demo environment.
+To get started using OFAC download [the latest release](https://github.com/moov-io/ofac/releases/latest) or our [Docker image](https://hub.docker.com/r/moov/ofac/tags). We also have a [demo OFAC instance](https://moov.io/ofac/) as part of Moov's demo environment.
 
 ```
 # Run as a binary
