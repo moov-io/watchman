@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 )
 
 var (
@@ -77,20 +78,24 @@ func (dl *Downloader) GetFiles() (string, error) {
 		go func(wg *sync.WaitGroup, filename, downloadURL string) {
 			defer wg.Done()
 
-			resp, err := dl.HTTP.Get(downloadURL)
-			if err != nil {
-				return
+			// Allow a couple retries for various sources (some are flakey)
+			for i := 0; i < 3; i++ {
+				resp, err := dl.HTTP.Get(downloadURL)
+				if err != nil {
+					time.Sleep(100 * time.Millisecond)
+					continue // retry
+				}
+				// Copy resp.Body into a file in our temp dir
+				fd, err := os.Create(filepath.Join(dir, filename))
+				if err != nil {
+					resp.Body.Close()
+					return
+				}
+				io.Copy(fd, resp.Body) // copy file contents
+				// close the open files
+				fd.Close()
+				resp.Body.Close()
 			}
-			defer resp.Body.Close()
-
-			// Copy resp.Body into a file in our temp dir
-			fd, err := os.Create(filepath.Join(dir, filename))
-			if err != nil {
-				return
-			}
-			defer fd.Close()
-
-			io.Copy(fd, resp.Body) // copy contents
 		}(&wg, name, source)
 	}
 
