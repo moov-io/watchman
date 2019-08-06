@@ -18,5 +18,6 @@ coverage.html
 .tmp/
 openapi.yaml
 openapi-generator*jar
+.DS_Store
 
 *.db

@@ -15,10 +15,17 @@ services:
       - "8084:8084"
       - "9094:9094"
     environment:
-      DATABASE_TYPE: mysql
+      DATABASE_TYPE: postgres
       MYSQL_ADDRESS: tcp(mysql:3306)
       MYSQL_DATABASE: ofac
       MYSQL_PASSWORD: secret
       MYSQL_USER: ofac
+      # Other databases variables
+      DB_HOST:
+      DB_PORT:
+      DB_SSL:
+      DB_NAME:
+      DB_USER:
+      DB_PASSWORD:
     depends_on:
       - mysql

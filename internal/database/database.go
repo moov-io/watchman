@@ -6,8 +6,10 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/go-kit/kit/log"
@@ -17,6 +19,18 @@ import (
 func New(logger log.Logger, _type string) (*sql.DB, error) {
 	logger.Log("database", fmt.Sprintf("looking for %s database provider", _type))
 	switch strings.ToLower(_type) {
+	case "postgres":
+		// check for ssl
+		hasSSL := (os.Getenv("DB_SSL") != "")
+
+		// check for port
+		port, _ := getenvInt(os.Getenv("DB_PORT"))
+		if port == 0 {
+			// default Postgres port
+			port = 5432
+		}
+
+		return postgreSQLConnection(logger, os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_DATABASE"), os.Getenv("DB_HOST"), hasSSL, port).Connect()
 	case "sqlite", "":
 		return sqliteConnection(logger, getSqlitePath()).Connect()
 	case "mysql":
@@ -38,5 +52,16 @@ func execsql(name, raw string) *migrator.MigrationNoTx {
 // UniqueViolation returns true when the provided error matches a database error
 // for duplicate entries (violating a unique table constraint).
 func UniqueViolation(err error) bool {
-	return MySQLUniqueViolation(err) || SqliteUniqueViolation(err)
+	return MySQLUniqueViolation(err) || SqliteUniqueViolation(err) || PostgreSQLUniqueViolation(err)
+}
+
+func getenvInt(key string) (int, error) {
+	if key == "" {
+		return 0, errors.New("empty environment variable")
+	}
+	v, err := strconv.Atoi(key)
+	if err != nil {
+		return 0, err
+	}
+	return v, nil
 }

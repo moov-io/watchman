@@ -16,6 +16,7 @@ require (
 	github.com/gorilla/mux v1.7.3
 	github.com/gotestyourself/gotestyourself v2.2.0+incompatible // indirect
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
+	github.com/lib/pq v1.0.0
 	github.com/lopezator/migrator v0.1.0
 	github.com/mattn/go-sqlite3 v1.10.0
 	github.com/moov-io/base v0.9.1-0.20190430163914-76a8e2cca72d
