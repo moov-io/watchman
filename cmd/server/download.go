@@ -54,7 +54,7 @@ type downloadStats struct {
 func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo downloadRepository, updates chan *downloadStats) {
 	for {
 		time.Sleep(interval)
-		stats, err := s.refreshData()
+		stats, err := s.refreshData("")
 		if err != nil {
 			if s.logger != nil {
 				s.logger.Log("main", fmt.Sprintf("ERROR: refreshing OFAC and/or BIS DPL data: %v", err))
@@ -71,13 +71,15 @@ func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo down
 
 // refreshData reaches out to the OFAC and BIS Denied Persons List websites to download the latest
 // files and then runs ofac.Reader to parse and index data for searches.
-func (s *searcher) refreshData() (*downloadStats, error) {
+func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 	if s.logger != nil {
 		s.logger.Log("download", "Starting refresh of OFAC and DPL data")
 	}
 
 	// Download files
-	dir, err := (&ofac.Downloader{}).GetFiles()
+	dir, err := (&ofac.Downloader{
+		Logger: s.logger,
+	}).GetFiles(initialDir)
 	if err != nil {
 		return nil, fmt.Errorf("ERROR: downloading OFAC and DPL data: %v", err)
 	}

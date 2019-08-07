@@ -62,6 +62,7 @@ Docs: [docs.moov.io](https://docs.moov.io/ofac/) | [api docs](https://api.moov.i
 | `OFAC_DATA_REFRESH` | Interval for OFAC data redownload and reparse. | 12h |
 | `OFAC_DOWNLOAD_TEMPLATE` | HTTP address for downloading raw OFAC files. | (OFAC website) |
 | `DPL_DOWNLOAD_TEMPLATE` | HTTP address for downloading the DPL | (BIS website) |
+| `INITIAL_DATA_DIRECTORY` | Directory filepath with initial files to use instead of downloading. Periodic downloads will replace the initial files. | Empty |
 | `WEBHOOK_BATCH_SIZE` | How many watches to read from database per batch of async searches. | 100 |
 | `LOG_FORMAT` | Format for logging lines to be written as. | Options: `json`, `plain` - Default: `plain` |
 | `HTTP_BIND_ADDRESS` | Address for OFAC to bind its HTTP server on. This overrides the command-line flag `-http.addr`. | Default: `:8084` |

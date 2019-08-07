@@ -14,6 +14,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/go-kit/kit/log"
 )
 
 var (
@@ -46,21 +48,37 @@ func init() {
 //
 // See: https://www.treasury.gov/resource-center/sanctions/SDN-List/Pages/sdn_data.aspx
 type Downloader struct {
-	HTTP *http.Client
+	HTTP   *http.Client
+	Logger log.Logger
 }
 
 // GetFiles will download all OFAC related files and store them in a temporary directory
 // returned and an error otherwise.
 //
+// initialDir is an optional filepath to look for files in before attempting to download.
+//
 // Callers are expected to cleanup the temp directory.
-func (dl *Downloader) GetFiles() (string, error) {
+func (dl *Downloader) GetFiles(initialDir string) (string, error) {
 	if dl.HTTP == nil {
 		dl.HTTP = http.DefaultClient
 	}
+	if dl.Logger == nil {
+		dl.Logger = log.NewNopLogger()
+	}
 
+	// Create a temporary directory for downloads
 	dir, err := ioutil.TempDir("", "ofac-and-dpl-downloader")
 	if err != nil {
 		return "", fmt.Errorf("OFAC: unable to make temp dir: %v", err)
+	}
+
+	// Check the initial directory for files we don't need to download
+	if initialDir == "" {
+		initialDir = dir // empty, but use it as a directory
+	}
+	localFiles, err := ioutil.ReadDir(initialDir)
+	if err != nil {
+		return "", fmt.Errorf("readdir %s: %v", initialDir, err)
 	}
 
 	// create a single list containing all filenames and source URLs
@@ -77,6 +95,33 @@ func (dl *Downloader) GetFiles() (string, error) {
 	for name, source := range namesAndSources {
 		go func(wg *sync.WaitGroup, filename, downloadURL string) {
 			defer wg.Done()
+
+			// Check if we have the file locally first
+			for i := range localFiles {
+				if strings.EqualFold(filepath.Base(localFiles[i].Name()), filename) {
+					in, err := os.Open(filepath.Join(initialDir, localFiles[i].Name()))
+					if err != nil {
+						dl.Logger.Log("download", fmt.Errorf("problem opening local file %s: %v", localFiles[i].Name(), err))
+						return
+					}
+					// Copy the local file to our output directory
+					out, err := os.Create(filepath.Join(dir, filename))
+					if err != nil {
+						dl.Logger.Log("download", fmt.Errorf("problem creating out file (from local) %s: %v", filename, err))
+						in.Close()
+						return
+					}
+					if n, err := io.Copy(out, in); err != nil { // copy file contents
+						dl.Logger.Log("download", fmt.Errorf("copied (n=%d) from local file %s: %v", n, filename, err))
+						return
+					}
+
+					in.Close()
+					out.Close()
+
+					return // quit as we've copied instead of downloading
+				}
+			}
 
 			// Allow a couple retries for various sources (some are flakey)
 			for i := 0; i < 3; i++ {

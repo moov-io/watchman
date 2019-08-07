@@ -131,7 +131,7 @@ func main() {
 	searcher := &searcher{
 		logger: logger,
 	}
-	if stats, err := searcher.refreshData(); err != nil {
+	if stats, err := searcher.refreshData(os.Getenv("INITIAL_DATA_DIRECTORY")); err != nil {
 		logger.Log("main", fmt.Sprintf("ERROR: failed to download/parse initial OFAC data: %v", err))
 		os.Exit(1)
 	} else {

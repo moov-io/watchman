@@ -7,8 +7,11 @@ package ofac
 import (
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/go-kit/kit/log"
 )
 
 type fd struct {
@@ -52,8 +55,10 @@ func TestDownloader__compareNames(t *testing.T) {
 }
 
 func TestDownloader(t *testing.T) {
-	dl := Downloader{}
-	dir, err := dl.GetFiles()
+	dl := Downloader{
+		Logger: log.NewNopLogger(),
+	}
+	dir, err := dl.GetFiles("")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,5 +82,60 @@ func TestDownloader(t *testing.T) {
 		default:
 			t.Errorf("unknown file %s", name)
 		}
+	}
+}
+
+func TestDownloader__initialDir(t *testing.T) {
+	dir, err := ioutil.TempDir("", "iniital-dir")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(dir)
+
+	mk := func(t *testing.T, name string, body string) {
+		if err := ioutil.WriteFile(filepath.Join(dir, name), []byte(body), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	// create each file
+	mk(t, "add.csv", "file=add.csv")
+	mk(t, "alt.csv", "file=alt.csv")
+	mk(t, "sdn.csv", "file=sdn.csv")
+	mk(t, "sdn_comments.csv", "file=sdn_comments.csv")
+	mk(t, "dpl.txt", "file=dpl.txt")
+
+	dl := Downloader{
+		// Logger: log.NewNopLogger(), // nil so GetFiles sets this
+	}
+	out, err := dl.GetFiles(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// read a couple files
+	bs, err := ioutil.ReadFile(filepath.Join(out, "add.csv"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v := string(bs); v != "file=add.csv" {
+		t.Error("unexpected contents in add.csv")
+	}
+	// read another file
+	bs, err = ioutil.ReadFile(filepath.Join(out, "dpl.txt"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v := string(bs); v != "file=dpl.txt" {
+		t.Error("unexpected contents in dpl.txt")
+	}
+
+	// use an invalid initial directory to get an error
+	out, err = dl.GetFiles(filepath.Join("this", "path", "doesn't", "exist"))
+	if err == nil {
+		t.Error("expected error")
+	}
+	if len(out) != 0 {
+		t.Errorf("got %d files", len(out))
 	}
 }
