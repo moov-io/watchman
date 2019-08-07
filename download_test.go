@@ -83,6 +83,12 @@ func TestDownloader(t *testing.T) {
 			t.Errorf("unknown file %s", name)
 		}
 	}
+
+	// nil Downloader
+	var dl2 *Downloader
+	if _, err := dl2.GetFiles(""); err == nil {
+		t.Error("expected error")
+	}
 }
 
 func TestDownloader__initialDir(t *testing.T) {

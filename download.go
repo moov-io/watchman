@@ -5,6 +5,7 @@
 package ofac
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -59,6 +60,9 @@ type Downloader struct {
 //
 // Callers are expected to cleanup the temp directory.
 func (dl *Downloader) GetFiles(initialDir string) (string, error) {
+	if dl == nil {
+		return "", errors.New("nil Downloader")
+	}
 	if dl.HTTP == nil {
 		dl.HTTP = http.DefaultClient
 	}

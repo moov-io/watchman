@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/moov-io/ofac/internal/database"
 
@@ -17,13 +18,21 @@ import (
 )
 
 func TestSearcher__refreshInterval(t *testing.T) {
-	if v := getOFACRefreshInterval(nil, ""); v.String() != "12h0m0s" {
+	if v := getOFACRefreshInterval(log.NewNopLogger(), ""); v.String() != "12h0m0s" {
 		t.Errorf("Got %v", v)
 	}
-	// override
-	if v := getOFACRefreshInterval(nil, "60s"); v.String() != "1m0s" {
+	if v := getOFACRefreshInterval(log.NewNopLogger(), "60s"); v.String() != "1m0s" {
 		t.Errorf("Got %v", v)
 	}
+	if v := getOFACRefreshInterval(log.NewNopLogger(), "off"); v != 0*time.Second {
+		t.Errorf("got %v", v)
+	}
+
+	// cover another branch
+	s := &searcher{
+		logger: log.NewNopLogger(),
+	}
+	s.periodicDataRefresh(0*time.Second, nil, nil)
 }
 
 func TestSearcher__refreshData(t *testing.T) {
