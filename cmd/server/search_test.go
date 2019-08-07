@@ -186,7 +186,7 @@ func TestSearch_liveData(t *testing.T) {
 	searcher := &searcher{
 		logger: log.NewNopLogger(),
 	}
-	if stats, err := searcher.refreshData(); err != nil {
+	if stats, err := searcher.refreshData(""); err != nil {
 		t.Fatal(err)
 	} else {
 		searcher.logger.Log("liveData", fmt.Sprintf("stats: %#v", stats))

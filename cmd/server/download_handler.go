@@ -22,7 +22,7 @@ func manualRefreshHandler(logger log.Logger, searcher *searcher, downloadRepo do
 		if logger != nil {
 			logger.Log("main", "admin: refreshing OFAC data")
 		}
-		if stats, err := searcher.refreshData(); err != nil {
+		if stats, err := searcher.refreshData(""); err != nil {
 			if logger != nil {
 				logger.Log("main", fmt.Sprintf("ERROR: admin: problem refreshing OFAC data: %v", err))
 			}

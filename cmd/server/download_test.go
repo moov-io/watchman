@@ -32,7 +32,7 @@ func TestSearcher__refreshData(t *testing.T) {
 	}
 
 	s := &searcher{}
-	stats, err := s.refreshData()
+	stats, err := s.refreshData("")
 	if err != nil {
 		t.Fatal(err)
 	}
