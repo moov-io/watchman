@@ -59,7 +59,7 @@ Docs: [docs.moov.io](https://docs.moov.io/ofac/) | [api docs](https://api.moov.i
 
 | Environmental Variable | Description | Default |
 |-----|-----|-----|
-| `OFAC_DATA_REFRESH` | Interval for OFAC data redownload and reparse. | 12h |
+| `OFAC_DATA_REFRESH` | Interval for OFAC data redownload and reparse. `off` disables this refreshing. | 12h |
 | `OFAC_DOWNLOAD_TEMPLATE` | HTTP address for downloading raw OFAC files. | (OFAC website) |
 | `DPL_DOWNLOAD_TEMPLATE` | HTTP address for downloading the DPL | (BIS website) |
 | `INITIAL_DATA_DIRECTORY` | Directory filepath with initial files to use instead of downloading. Periodic downloads will replace the initial files. | Empty |

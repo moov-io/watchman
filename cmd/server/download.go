@@ -52,6 +52,10 @@ type downloadStats struct {
 // periodicDataRefresh will forever block for interval's duration and then download and reparse the OFAC data.
 // Download stats are recorded as part of a successful re-download and parse.
 func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo downloadRepository, updates chan *downloadStats) {
+	if interval == 0*time.Second {
+		s.logger.Log("download", fmt.Sprintf("not scheduling periodic refreshing duration=%v", interval))
+		return
+	}
 	for {
 		time.Sleep(interval)
 		stats, err := s.refreshData("")

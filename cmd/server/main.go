@@ -198,16 +198,19 @@ func addPingRoute(r *mux.Router) {
 	})
 }
 
+// getOFACRefreshInterval returns a time.Duration for how often OFAC should refresh data
+//
 // env is the value from an environmental variable
 func getOFACRefreshInterval(logger log.Logger, env string) time.Duration {
 	if env != "" {
-		dur, _ := time.ParseDuration(env)
-		if dur > 0 {
-			if logger != nil {
-				logger.Log("main", fmt.Sprintf("Setting OFAC data refresh interval to %v", dur))
-			}
+		if strings.EqualFold(env, "off") {
+			return 0 * time.Second
+		}
+		if dur, _ := time.ParseDuration(env); dur > 0 {
+			logger.Log("main", fmt.Sprintf("Setting OFAC data refresh interval to %v", dur))
 			return dur
 		}
 	}
+	logger.Log("main", fmt.Sprintf("Setting OFAC data refresh interval to %v (default)", ofacDataRefreshInterval))
 	return ofacDataRefreshInterval
 }
