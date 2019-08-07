@@ -95,6 +95,7 @@ func (dl *Downloader) GetFiles() (string, error) {
 				// close the open files
 				fd.Close()
 				resp.Body.Close()
+				return // quit after successful download
 			}
 		}(&wg, name, source)
 	}
