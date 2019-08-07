@@ -3,11 +3,14 @@
 BUG FIXES
 
 - attempt retries when downloading files
+- download: return after successful download
 
 ADDITIONS
 
 - internal/database: log which provider we're using
 - cmd/server: bind HTTP server with TLS if HTTPS_* variables are defined
+- cmd/server: disable perioidic refresh via OFAC_DATA_REFRESH=off
+- download: check for initial files on first refresh
 
 ## v0.9.0 (Released 2019-07-18)
 
