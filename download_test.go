@@ -129,4 +129,13 @@ func TestDownloader__initialDir(t *testing.T) {
 	if v := string(bs); v != "file=dpl.txt" {
 		t.Error("unexpected contents in dpl.txt")
 	}
+
+	// use an invalid initial directory to get an error
+	out, err = dl.GetFiles(filepath.Join("this", "path", "doesn't", "exist"))
+	if err == nil {
+		t.Error("expected error")
+	}
+	if len(out) != 0 {
+		t.Errorf("got %d files", len(out))
+	}
 }
