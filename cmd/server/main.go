@@ -127,10 +127,12 @@ func main() {
 	downloadRepo := &sqliteDownloadRepository{db, logger}
 	defer downloadRepo.close()
 
-	// Start our searcher (and downloader)
-	searcher := &searcher{
-		logger: logger,
-	}
+	searcher := &searcher{logger: logger}
+
+	// Add manual OFAC data refresh endpoint
+	adminServer.AddHandler(manualRefreshPath, manualRefreshHandler(logger, searcher, downloadRepo))
+
+	// Initial download of OFAC data
 	if stats, err := searcher.refreshData(os.Getenv("INITIAL_DATA_DIRECTORY")); err != nil {
 		logger.Log("main", fmt.Sprintf("ERROR: failed to download/parse initial OFAC data: %v", err))
 		os.Exit(1)
@@ -156,9 +158,6 @@ func main() {
 	ofacDataRefreshInterval = getOFACRefreshInterval(logger, os.Getenv("OFAC_DATA_REFRESH"))
 	go searcher.periodicDataRefresh(ofacDataRefreshInterval, downloadRepo, updates)
 	go searcher.spawnResearching(logger, companyRepo, custRepo, watchRepo, webhookRepo, updates)
-
-	// Add manual OFAC data refresh endpoint
-	adminServer.AddHandler(manualRefreshPath, manualRefreshHandler(logger, searcher, downloadRepo))
 
 	// Add searcher for HTTP routes
 	addCompanyRoutes(logger, router, searcher, companyRepo, watchRepo)
