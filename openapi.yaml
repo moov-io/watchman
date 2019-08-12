@@ -808,7 +808,7 @@ components:
   parameters:
     requestID:
       in: header
-      name: X-Request-Id
+      name: X-Request-ID
       description: Optional Request ID allows application developer to trace requests through the systems logs
       schema:
         type: string
