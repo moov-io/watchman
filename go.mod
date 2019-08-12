@@ -29,5 +29,4 @@ require (
 	go4.org v0.0.0-20190430205326-94abd6928b1d
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/text v0.3.2
-	gotest.tools v2.3.0+incompatible // indirect
 )
