@@ -42,7 +42,7 @@ type AddOFACCompanyNameWatchOpts struct {
 
 func (a *OFACApiService) AddOFACCompanyNameWatch(ctx context.Context, name string, watchRequest WatchRequest, localVarOptionals *AddOFACCompanyNameWatchOpts) (Watch, *http.Response, error) {
 	var (
-		localVarHttpMethod   = strings.ToUpper("Post")
+		localVarHttpMethod   = http.MethodPost
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
@@ -142,7 +142,7 @@ type AddOFACCompanyWatchOpts struct {
 
 func (a *OFACApiService) AddOFACCompanyWatch(ctx context.Context, companyID string, watchRequest WatchRequest, localVarOptionals *AddOFACCompanyWatchOpts) (Watch, *http.Response, error) {
 	var (
-		localVarHttpMethod   = strings.ToUpper("Post")
+		localVarHttpMethod   = http.MethodPost
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
@@ -242,7 +242,7 @@ type AddOFACCustomerNameWatchOpts struct {
 
 func (a *OFACApiService) AddOFACCustomerNameWatch(ctx context.Context, name string, watchRequest WatchRequest, localVarOptionals *AddOFACCustomerNameWatchOpts) (Watch, *http.Response, error) {
 	var (
-		localVarHttpMethod   = strings.ToUpper("Post")
+		localVarHttpMethod   = http.MethodPost
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
@@ -342,7 +342,7 @@ type AddOFACCustomerWatchOpts struct {
 
 func (a *OFACApiService) AddOFACCustomerWatch(ctx context.Context, customerID string, watchRequest WatchRequest, localVarOptionals *AddOFACCustomerWatchOpts) (Watch, *http.Response, error) {
 	var (
-		localVarHttpMethod   = strings.ToUpper("Post")
+		localVarHttpMethod   = http.MethodPost
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
@@ -440,7 +440,7 @@ type GetLatestDownloadsOpts struct {
 
 func (a *OFACApiService) GetLatestDownloads(ctx context.Context, localVarOptionals *GetLatestDownloadsOpts) ([]Download, *http.Response, error) {
 	var (
-		localVarHttpMethod   = strings.ToUpper("Get")
+		localVarHttpMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
@@ -536,7 +536,7 @@ type GetOFACCompanyOpts struct {
 
 func (a *OFACApiService) GetOFACCompany(ctx context.Context, companyID string, localVarOptionals *GetOFACCompanyOpts) (OfacCompany, *http.Response, error) {
 	var (
-		localVarHttpMethod   = strings.ToUpper("Get")
+		localVarHttpMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
@@ -633,7 +633,7 @@ type GetOFACCustomerOpts struct {
 
 func (a *OFACApiService) GetOFACCustomer(ctx context.Context, customerID string, localVarOptionals *GetOFACCustomerOpts) (OfacCustomer, *http.Response, error) {
 	var (
-		localVarHttpMethod   = strings.ToUpper("Get")
+		localVarHttpMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
@@ -718,7 +718,7 @@ func (a *OFACApiService) GetOFACCustomer(ctx context.Context, customerID string,
 /*
 OFACApiService Specially designated national
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param sdnId SDN ID
+ * @param sdnID SDN ID
  * @param optional nil or *GetSDNOpts - Optional Parameters:
  * @param "XRequestId" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
 @return Sdn
@@ -728,9 +728,9 @@ type GetSDNOpts struct {
 	XRequestId optional.String
 }
 
-func (a *OFACApiService) GetSDN(ctx context.Context, sdnId string, localVarOptionals *GetSDNOpts) (Sdn, *http.Response, error) {
+func (a *OFACApiService) GetSDN(ctx context.Context, sdnID string, localVarOptionals *GetSDNOpts) (Sdn, *http.Response, error) {
 	var (
-		localVarHttpMethod   = strings.ToUpper("Get")
+		localVarHttpMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
@@ -739,8 +739,8 @@ func (a *OFACApiService) GetSDN(ctx context.Context, sdnId string, localVarOptio
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/sdn/{sdnId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"sdnId"+"}", fmt.Sprintf("%v", sdnId), -1)
+	localVarPath := a.client.cfg.BasePath + "/sdn/{sdnID}"
+	localVarPath = strings.Replace(localVarPath, "{"+"sdnID"+"}", fmt.Sprintf("%v", sdnID), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -815,7 +815,7 @@ func (a *OFACApiService) GetSDN(ctx context.Context, sdnId string, localVarOptio
 /*
 OFACApiService Get addresses for a given SDN
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param sdnId SDN ID
+ * @param sdnID SDN ID
  * @param optional nil or *GetSDNAddressesOpts - Optional Parameters:
  * @param "XRequestId" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
 @return []Address
@@ -825,9 +825,9 @@ type GetSDNAddressesOpts struct {
 	XRequestId optional.String
 }
 
-func (a *OFACApiService) GetSDNAddresses(ctx context.Context, sdnId string, localVarOptionals *GetSDNAddressesOpts) ([]Address, *http.Response, error) {
+func (a *OFACApiService) GetSDNAddresses(ctx context.Context, sdnID string, localVarOptionals *GetSDNAddressesOpts) ([]Address, *http.Response, error) {
 	var (
-		localVarHttpMethod   = strings.ToUpper("Get")
+		localVarHttpMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
@@ -836,8 +836,8 @@ func (a *OFACApiService) GetSDNAddresses(ctx context.Context, sdnId string, loca
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/sdn/{sdnId}/addresses"
-	localVarPath = strings.Replace(localVarPath, "{"+"sdnId"+"}", fmt.Sprintf("%v", sdnId), -1)
+	localVarPath := a.client.cfg.BasePath + "/sdn/{sdnID}/addresses"
+	localVarPath = strings.Replace(localVarPath, "{"+"sdnID"+"}", fmt.Sprintf("%v", sdnID), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -912,7 +912,7 @@ func (a *OFACApiService) GetSDNAddresses(ctx context.Context, sdnId string, loca
 /*
 OFACApiService Get alternate names for a given SDN
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param sdnId SDN ID
+ * @param sdnID SDN ID
  * @param optional nil or *GetSDNAltNamesOpts - Optional Parameters:
  * @param "XRequestId" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
 @return []Alt
@@ -922,9 +922,9 @@ type GetSDNAltNamesOpts struct {
 	XRequestId optional.String
 }
 
-func (a *OFACApiService) GetSDNAltNames(ctx context.Context, sdnId string, localVarOptionals *GetSDNAltNamesOpts) ([]Alt, *http.Response, error) {
+func (a *OFACApiService) GetSDNAltNames(ctx context.Context, sdnID string, localVarOptionals *GetSDNAltNamesOpts) ([]Alt, *http.Response, error) {
 	var (
-		localVarHttpMethod   = strings.ToUpper("Get")
+		localVarHttpMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
@@ -933,8 +933,8 @@ func (a *OFACApiService) GetSDNAltNames(ctx context.Context, sdnId string, local
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/sdn/{sdnId}/alts"
-	localVarPath = strings.Replace(localVarPath, "{"+"sdnId"+"}", fmt.Sprintf("%v", sdnId), -1)
+	localVarPath := a.client.cfg.BasePath + "/sdn/{sdnID}/alts"
+	localVarPath = strings.Replace(localVarPath, "{"+"sdnID"+"}", fmt.Sprintf("%v", sdnID), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -1012,7 +1012,7 @@ OFACApiService Ping the OFAC service to check if running
 */
 func (a *OFACApiService) Ping(ctx context.Context) (*http.Response, error) {
 	var (
-		localVarHttpMethod   = strings.ToUpper("Get")
+		localVarHttpMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
@@ -1085,7 +1085,7 @@ type RemoveOFACCompanyNameWatchOpts struct {
 
 func (a *OFACApiService) RemoveOFACCompanyNameWatch(ctx context.Context, watchID string, name string, localVarOptionals *RemoveOFACCompanyNameWatchOpts) (*http.Response, error) {
 	var (
-		localVarHttpMethod   = strings.ToUpper("Delete")
+		localVarHttpMethod   = http.MethodDelete
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
@@ -1163,7 +1163,7 @@ type RemoveOFACCompanyWatchOpts struct {
 
 func (a *OFACApiService) RemoveOFACCompanyWatch(ctx context.Context, companyID string, watchID string, localVarOptionals *RemoveOFACCompanyWatchOpts) (*http.Response, error) {
 	var (
-		localVarHttpMethod   = strings.ToUpper("Delete")
+		localVarHttpMethod   = http.MethodDelete
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
@@ -1241,7 +1241,7 @@ type RemoveOFACCustomerNameWatchOpts struct {
 
 func (a *OFACApiService) RemoveOFACCustomerNameWatch(ctx context.Context, watchID string, name string, localVarOptionals *RemoveOFACCustomerNameWatchOpts) (*http.Response, error) {
 	var (
-		localVarHttpMethod   = strings.ToUpper("Delete")
+		localVarHttpMethod   = http.MethodDelete
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
@@ -1319,7 +1319,7 @@ type RemoveOFACCustomerWatchOpts struct {
 
 func (a *OFACApiService) RemoveOFACCustomerWatch(ctx context.Context, customerID string, watchID string, localVarOptionals *RemoveOFACCustomerWatchOpts) (*http.Response, error) {
 	var (
-		localVarHttpMethod   = strings.ToUpper("Delete")
+		localVarHttpMethod   = http.MethodDelete
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
@@ -1416,7 +1416,7 @@ type SearchOpts struct {
 
 func (a *OFACApiService) Search(ctx context.Context, localVarOptionals *SearchOpts) (Search, *http.Response, error) {
 	var (
-		localVarHttpMethod   = strings.ToUpper("Get")
+		localVarHttpMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
@@ -1542,7 +1542,7 @@ type UpdateOFACCompanyStatusOpts struct {
 
 func (a *OFACApiService) UpdateOFACCompanyStatus(ctx context.Context, companyID string, updateCompanyStatus UpdateCompanyStatus, localVarOptionals *UpdateOFACCompanyStatusOpts) (*http.Response, error) {
 	var (
-		localVarHttpMethod   = strings.ToUpper("Put")
+		localVarHttpMethod   = http.MethodPut
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
@@ -1621,7 +1621,7 @@ type UpdateOFACCustomerStatusOpts struct {
 
 func (a *OFACApiService) UpdateOFACCustomerStatus(ctx context.Context, customerID string, updateCustomerStatus UpdateCustomerStatus, localVarOptionals *UpdateOFACCustomerStatusOpts) (*http.Response, error) {
 	var (
-		localVarHttpMethod   = strings.ToUpper("Put")
+		localVarHttpMethod   = http.MethodPut
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string

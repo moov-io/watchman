@@ -29,15 +29,15 @@ paths:
           description: Service is running properly
 
   # Company Endpoints
-  /companies/{companyId}:
+  /companies/{companyID}:
     get:
       tags:
         - OFAC
       summary: Get information about a company, trust or organization such as addresses, alternate names, and remarks.
       operationId: getOFACCompany
       parameters:
-        - $ref: '#/components/parameters/requestId'
-        - name: companyId
+        - $ref: '#/components/parameters/requestID'
+        - name: companyID
           in: path
           description: Company ID
           required: true
@@ -57,8 +57,8 @@ paths:
       summary: Update a Companies sanction status to always block or always allow transactions.
       operationId: updateOFACCompanyStatus
       parameters:
-        - $ref: '#/components/parameters/requestId'
-        - name: companyId
+        - $ref: '#/components/parameters/requestID'
+        - name: companyID
           in: path
           description: Company ID
           required: true
@@ -74,15 +74,15 @@ paths:
       responses:
         '200':
           description: Company status updated
-  /companies/{companyId}/watch:
+  /companies/{companyID}/watch:
     post:
       tags:
         - OFAC
       summary: Add OFAC watch on a Company
       operationId: addOFACCompanyWatch
       parameters:
-        - $ref: '#/components/parameters/requestId'
-        - name: companyId
+        - $ref: '#/components/parameters/requestID'
+        - name: companyID
           in: path
           description: Company ID
           required: true
@@ -104,22 +104,22 @@ paths:
                 $ref: '#/components/schemas/Watch'
         '404':
           description: Company not found
-  /companies/{companyId}/watch/{watchId}:
+  /companies/{companyID}/watch/{watchID}:
     delete:
       tags:
         - OFAC
       summary: Remove company watch
       operationId: removeOFACCompanyWatch
       parameters:
-        - $ref: '#/components/parameters/requestId'
-        - name: companyId
+        - $ref: '#/components/parameters/requestID'
+        - name: companyID
           in: path
           description: Company ID
           required: true
           schema:
             type: string
             example: c3cf0f66
-        - name: watchId
+        - name: watchID
           in: path
           description: Watch ID, used to identify a specific watch
           required: true
@@ -136,7 +136,7 @@ paths:
       summary: Add company watch by name. The match percentage will be included in the webhook's JSON payload.
       operationId: addOFACCompanyNameWatch
       parameters:
-        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/requestID'
         - name: name
           in: query
           required: true
@@ -157,15 +157,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Watch'
-  /companies/watch/{watchId}:
+  /companies/watch/{watchID}:
     delete:
       tags:
         - OFAC
       summary: Remove a Company name watch
       operationId: removeOFACCompanyNameWatch
       parameters:
-        - $ref: '#/components/parameters/requestId'
-        - name: watchId
+        - $ref: '#/components/parameters/requestID'
+        - name: watchID
           in: path
           description: Watch ID, used to identify a specific watch
           required: true
@@ -184,15 +184,15 @@ paths:
           description: Company watch removed
 
   # Customer Endpoints
-  /customers/{customerId}:
+  /customers/{customerID}:
     get:
       tags:
         - OFAC
       summary: Get information about a customer, addresses, alternate names, and their SDN metadata.
       operationId: getOFACCustomer
       parameters:
-        - $ref: '#/components/parameters/requestId'
-        - name: customerId
+        - $ref: '#/components/parameters/requestID'
+        - name: customerID
           in: path
           description: Customer ID
           required: true
@@ -212,8 +212,8 @@ paths:
       summary: Update a Customer's sanction status to always block or always allow transactions.
       operationId: updateOFACCustomerStatus
       parameters:
-        - $ref: '#/components/parameters/requestId'
-        - name: customerId
+        - $ref: '#/components/parameters/requestID'
+        - name: customerID
           in: path
           description: Customer ID
           required: true
@@ -229,15 +229,15 @@ paths:
       responses:
         '200':
           description: Customer status updated
-  /customers/{customerId}/watch:
+  /customers/{customerID}/watch:
     post:
       tags:
         - OFAC
       summary: Add OFAC watch on a Customer
       operationId: addOFACCustomerWatch
       parameters:
-        - $ref: '#/components/parameters/requestId'
-        - name: customerId
+        - $ref: '#/components/parameters/requestID'
+        - name: customerID
           in: path
           description: Customer ID
           required: true
@@ -259,22 +259,22 @@ paths:
                 $ref: '#/components/schemas/Watch'
         '404':
           description: Customer not found
-  /customers/{customerId}/watch/{watchId}:
+  /customers/{customerID}/watch/{watchID}:
     delete:
       tags:
         - OFAC
       summary: Remove customer watch
       operationId: removeOFACCustomerWatch
       parameters:
-        - $ref: '#/components/parameters/requestId'
-        - name: customerId
+        - $ref: '#/components/parameters/requestID'
+        - name: customerID
           in: path
           description: Customer ID
           required: true
           schema:
             type: string
             example: c3cf0f66
-        - name: watchId
+        - name: watchID
           in: path
           description: Watch ID, used to identify a specific watch
           required: true
@@ -291,7 +291,7 @@ paths:
       summary: Add customer watch by name. The match percentage will be included in the webhook's JSON payload.
       operationId: addOFACCustomerNameWatch
       parameters:
-        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/requestID'
         - name: name
           in: query
           required: true
@@ -312,15 +312,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Watch'
-  /customers/watch/{watchId}:
+  /customers/watch/{watchID}:
     delete:
       tags:
         - OFAC
       summary: Remove a Customer name watch
       operationId: removeOFACCustomerNameWatch
       parameters:
-        - $ref: '#/components/parameters/requestId'
-        - name: watchId
+        - $ref: '#/components/parameters/requestID'
+        - name: watchID
           in: path
           description: Watch ID, used to identify a specific watch
           required: true
@@ -339,16 +339,16 @@ paths:
           description: Company or Customer watch removed
 
   # SDN Endpoints
-  /sdn/{sdnId}:
+  /sdn/{sdnID}:
     get:
       tags:
         - OFAC
       summary: Specially designated national
       operationId: getSDN
       parameters:
-        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/requestID'
         - in: path
-          name: sdnId
+          name: sdnID
           required: true
           description: SDN ID
           schema:
@@ -361,16 +361,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SDN'
-  /sdn/{sdnId}/alts:
+  /sdn/{sdnID}/alts:
     get:
       tags:
         - OFAC
       summary: Get alternate names for a given SDN
       operationId: getSDNAltNames
       parameters:
-        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/requestID'
         - in: path
-          name: sdnId
+          name: sdnID
           description: SDN ID
           required: true
           schema:
@@ -383,16 +383,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SDNAltNames'
-  /sdn/{sdnId}/addresses:
+  /sdn/{sdnID}/addresses:
     get:
       tags:
         - OFAC
       summary: Get addresses for a given SDN
       operationId: getSDNAddresses
       parameters:
-        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/requestID'
         - in: path
-          name: sdnId
+          name: sdnID
           description: SDN ID
           required: true
           schema:
@@ -413,7 +413,7 @@ paths:
       summary: Search SDN names and metadata
       operationId: search
       parameters:
-        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/requestID'
         - name: q
           in: query
           schema:
@@ -528,7 +528,7 @@ components:
     OFACCompanyStatus:
       description: Status properties of an OFAC Company
       properties:
-        userId:
+        userID:
           description: User ID provided when updating status
           type: string
           example: 349661f9
@@ -568,7 +568,7 @@ components:
     OFACCustomerStatus:
       description: Status properties of an OFAC Customer
       properties:
-        userId:
+        userID:
           description: User ID provided when updating status
           type: string
           example: 349661f9
@@ -767,7 +767,7 @@ components:
     Watch:
       description: Customer or Company watch
       properties:
-        watchId:
+        watchID:
           description: Object representing a customer or company watch
           type: string
           example: 08ddba92
@@ -806,7 +806,7 @@ components:
           format: date-time
           example: 2006-01-02T15:04:05Z07:00
   parameters:
-    requestId:
+    requestID:
       in: header
       name: X-Request-Id
       description: Optional Request ID allows application developer to trace requests through the systems logs

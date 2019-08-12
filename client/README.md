@@ -40,9 +40,9 @@ Class | Method | HTTP request | Description
 *OFACApi* | [**GetLatestDownloads**](docs/OFACApi.md#getlatestdownloads) | **Get** /downloads | Return list of recent downloads of OFAC data
 *OFACApi* | [**GetOFACCompany**](docs/OFACApi.md#getofaccompany) | **Get** /companies/{companyID} | Get information about a company, trust or organization such as addresses, alternate names, and remarks.
 *OFACApi* | [**GetOFACCustomer**](docs/OFACApi.md#getofaccustomer) | **Get** /customers/{customerID} | Get information about a customer, addresses, alternate names, and their SDN metadata.
-*OFACApi* | [**GetSDN**](docs/OFACApi.md#getsdn) | **Get** /sdn/{sdnId} | Specially designated national
-*OFACApi* | [**GetSDNAddresses**](docs/OFACApi.md#getsdnaddresses) | **Get** /sdn/{sdnId}/addresses | Get addresses for a given SDN
-*OFACApi* | [**GetSDNAltNames**](docs/OFACApi.md#getsdnaltnames) | **Get** /sdn/{sdnId}/alts | Get alternate names for a given SDN
+*OFACApi* | [**GetSDN**](docs/OFACApi.md#getsdn) | **Get** /sdn/{sdnID} | Specially designated national
+*OFACApi* | [**GetSDNAddresses**](docs/OFACApi.md#getsdnaddresses) | **Get** /sdn/{sdnID}/addresses | Get addresses for a given SDN
+*OFACApi* | [**GetSDNAltNames**](docs/OFACApi.md#getsdnaltnames) | **Get** /sdn/{sdnID}/alts | Get alternate names for a given SDN
 *OFACApi* | [**Ping**](docs/OFACApi.md#ping) | **Get** /ping | Ping the OFAC service to check if running
 *OFACApi* | [**RemoveOFACCompanyNameWatch**](docs/OFACApi.md#removeofaccompanynamewatch) | **Delete** /companies/watch/{watchID} | Remove a Company name watch
 *OFACApi* | [**RemoveOFACCompanyWatch**](docs/OFACApi.md#removeofaccompanywatch) | **Delete** /companies/{companyID}/watch/{watchID} | Remove company watch

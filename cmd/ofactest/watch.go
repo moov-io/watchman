@@ -24,7 +24,7 @@ func addCompanyWatch(ctx context.Context, api *moov.APIClient, id string, webhoo
 	defer resp.Body.Close()
 
 	// cleanup watch
-	resp, err = api.OFACApi.RemoveOFACCompanyWatch(ctx, id, watch.WatchId, nil)
+	resp, err = api.OFACApi.RemoveOFACCompanyWatch(ctx, id, watch.WatchID, nil)
 	if err != nil {
 		return fmt.Errorf("addCompanyWatch: remove: %v", err)
 	}
@@ -44,7 +44,7 @@ func addCustomerWatch(ctx context.Context, api *moov.APIClient, id string, webho
 	resp.Body.Close()
 
 	// cleanup watch
-	resp, err = api.OFACApi.RemoveOFACCustomerWatch(ctx, id, watch.WatchId, nil)
+	resp, err = api.OFACApi.RemoveOFACCustomerWatch(ctx, id, watch.WatchID, nil)
 	if err != nil {
 		return fmt.Errorf("addCustomerWatch: remove: %v", err)
 	}

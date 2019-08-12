@@ -11,9 +11,9 @@ Method | HTTP request | Description
 [**GetLatestDownloads**](OFACApi.md#GetLatestDownloads) | **Get** /downloads | Return list of recent downloads of OFAC data
 [**GetOFACCompany**](OFACApi.md#GetOFACCompany) | **Get** /companies/{companyID} | Get information about a company, trust or organization such as addresses, alternate names, and remarks.
 [**GetOFACCustomer**](OFACApi.md#GetOFACCustomer) | **Get** /customers/{customerID} | Get information about a customer, addresses, alternate names, and their SDN metadata.
-[**GetSDN**](OFACApi.md#GetSDN) | **Get** /sdn/{sdnId} | Specially designated national
-[**GetSDNAddresses**](OFACApi.md#GetSDNAddresses) | **Get** /sdn/{sdnId}/addresses | Get addresses for a given SDN
-[**GetSDNAltNames**](OFACApi.md#GetSDNAltNames) | **Get** /sdn/{sdnId}/alts | Get alternate names for a given SDN
+[**GetSDN**](OFACApi.md#GetSDN) | **Get** /sdn/{sdnID} | Specially designated national
+[**GetSDNAddresses**](OFACApi.md#GetSDNAddresses) | **Get** /sdn/{sdnID}/addresses | Get addresses for a given SDN
+[**GetSDNAltNames**](OFACApi.md#GetSDNAltNames) | **Get** /sdn/{sdnID}/alts | Get alternate names for a given SDN
 [**Ping**](OFACApi.md#Ping) | **Get** /ping | Ping the OFAC service to check if running
 [**RemoveOFACCompanyNameWatch**](OFACApi.md#RemoveOFACCompanyNameWatch) | **Delete** /companies/watch/{watchID} | Remove a Company name watch
 [**RemoveOFACCompanyWatch**](OFACApi.md#RemoveOFACCompanyWatch) | **Delete** /companies/{companyID}/watch/{watchID} | Remove company watch
@@ -327,7 +327,7 @@ No authorization required
 
 ## GetSDN
 
-> Sdn GetSDN(ctx, sdnId, optional)
+> Sdn GetSDN(ctx, sdnID, optional)
 Specially designated national
 
 ### Required Parameters
@@ -336,7 +336,7 @@ Specially designated national
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**sdnId** | **string**| SDN ID | 
+**sdnID** | **string**| SDN ID | 
  **optional** | ***GetSDNOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
@@ -369,7 +369,7 @@ No authorization required
 
 ## GetSDNAddresses
 
-> []Address GetSDNAddresses(ctx, sdnId, optional)
+> []Address GetSDNAddresses(ctx, sdnID, optional)
 Get addresses for a given SDN
 
 ### Required Parameters
@@ -378,7 +378,7 @@ Get addresses for a given SDN
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**sdnId** | **string**| SDN ID | 
+**sdnID** | **string**| SDN ID | 
  **optional** | ***GetSDNAddressesOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
@@ -411,7 +411,7 @@ No authorization required
 
 ## GetSDNAltNames
 
-> []Alt GetSDNAltNames(ctx, sdnId, optional)
+> []Alt GetSDNAltNames(ctx, sdnID, optional)
 Get alternate names for a given SDN
 
 ### Required Parameters
@@ -420,7 +420,7 @@ Get alternate names for a given SDN
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**sdnId** | **string**| SDN ID | 
+**sdnID** | **string**| SDN ID | 
  **optional** | ***GetSDNAltNamesOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
