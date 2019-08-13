@@ -509,7 +509,7 @@ components:
     OFACCompany:
       description: OFAC Company and metadata
       properties:
-        id:
+        ID:
           description: OFAC Company ID
           type: string
           example: 9574756b
@@ -549,7 +549,7 @@ components:
     OFACCustomer:
       description: OFAC Customer and metadata
       properties:
-        id:
+        ID:
           description: OFAC Customer ID
           type: string
           example: 9574756b

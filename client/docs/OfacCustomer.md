@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Id** | **string** | OFAC Customer ID | [optional] 
+**ID** | **string** | OFAC Customer ID | [optional] 
 **Sdn** | [**Sdn**](SDN.md) |  | [optional] 
 **Addresses** | [**[]Address**](Address.md) |  | [optional] 
 **Alts** | [**[]Alt**](Alt.md) |  | [optional] 
