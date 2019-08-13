@@ -124,9 +124,9 @@ func TestJaroWrinkler(t *testing.T) {
 		{"maduro, nicolas", "maduro, nicolas", 0.933},
 		{"maduro moros, nicolas", "maduro moros, nicolas", 0.905},
 		{"maduro moros, nicolas", "nicolas maduro", 0.377},
-		{"nicolas maduro moros", "nicolás maduro", 0.712},
+		{"nicolas maduro moros", "nicolás maduro", 0.665},
 		{"nicolas, maduro moros", "nicolas maduro", 0.656},
-		{"nicolas, maduro moros", "nicolás maduro", 0.696},
+		{"nicolas, maduro moros", "nicolás maduro", 0.649},
 	}
 
 	for _, v := range cases {
@@ -206,7 +206,7 @@ func TestSearch_liveData(t *testing.T) {
 		name  string
 		match float64 // top match %
 	}{
-		{"Nicolas MADURO", 0.944},
+		{"Nicolas MADURO", 0.821},
 	}
 	for i := range cases {
 		sdns := searcher.TopSDNs(1, cases[i].name)

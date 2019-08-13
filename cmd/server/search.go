@@ -15,6 +15,7 @@ import (
 	"strings"
 	"sync"
 	"unicode"
+	"unicode/utf8"
 
 	"github.com/moov-io/ofac"
 
@@ -475,6 +476,7 @@ func extractSearchLimit(r *http.Request) int {
 // Right now s1 is assumes to have been passed through `chomp(..)` already and so this
 // func only calls `chomp` for s2.
 func jaroWrinkler(s1, s2 string) float64 {
-	ratio := math.Min(float64(len(s1)), float64(len(s2))) / math.Max(float64(len(s1)), float64(len(s2)))
+	n1, n2 := float64(utf8.RuneCountInString(s1)), float64(utf8.RuneCountInString(s2))
+	ratio := math.Min(n1, n2) / math.Max(n1, n2)
 	return ratio * smetrics.JaroWinkler(s1, chomp(s2), 0.7, 4)
 }
