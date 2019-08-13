@@ -220,7 +220,7 @@ func TestSearch_liveData(t *testing.T) {
 func TestSearch__topAddressesAddress(t *testing.T) {
 	it := topAddressesAddress("needle")(&Address{address: "needleee"})
 
-	eql(t, "topAddressesAddress", it.weight, 0.95)
+	eql(t, "topAddressesAddress", it.weight, 0.712)
 	if add, ok := it.value.(*Address); !ok || add.address != "needleee" {
 		t.Errorf("got %#v", add)
 	}
@@ -229,7 +229,7 @@ func TestSearch__topAddressesAddress(t *testing.T) {
 func TestSearch__topAddressesCountry(t *testing.T) {
 	it := topAddressesAddress("needle")(&Address{address: "needleee"})
 
-	eql(t, "topAddressesCountry", it.weight, 0.95)
+	eql(t, "topAddressesCountry", it.weight, 0.712)
 	if add, ok := it.value.(*Address); !ok || add.address != "needleee" {
 		t.Errorf("got %#v", add)
 	}
@@ -241,7 +241,7 @@ func TestSearch__multiAddressCompare(t *testing.T) {
 		topAddressesCountry("other"),
 	)(&Address{address: "needlee", country: "other"})
 
-	eql(t, "multiAddressCompare", it.weight, 0.9857)
+	eql(t, "multiAddressCompare", it.weight, 0.916)
 	if add, ok := it.value.(*Address); !ok || add.address != "needlee" || add.country != "other" {
 		t.Errorf("got %#v", add)
 	}
