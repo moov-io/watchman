@@ -1,0 +1,33 @@
+// Copyright 2018 The Moov Authors
+// Use of this source code is governed by an Apache License
+// license that can be found in the LICENSE file.
+
+package main
+
+import (
+	"testing"
+
+	"github.com/moov-io/ofac"
+
+	"github.com/go-kit/kit/log"
+)
+
+func TestIssue115__TopSDNs(t *testing.T) {
+	score := jaroWrinkler("georgehabbash", "georgebush")
+	eql(t, "george bush jaroWrinkler", score, 0.689)
+
+	s := &searcher{logger: log.NewNopLogger()}
+
+	// Issue 115 (https://github.com/moov-io/ofac/issues/115) talks about how "george bush" is a false positive (90%) match against
+	// several other "George ..." records. This is too senstive and so we need to tone that down.
+
+	// was 89.6% match
+	s.SDNs = precomputeSDNs([]*ofac.SDN{{EntityID: "2680", SDNName: "HABBASH, George", SDNType: "INDIVIDUAL"}})
+	out := s.TopSDNs(1, "george bush")
+	eql(t, "issue115: top SDN 2680", out[0].match, 0.689)
+
+	// was 88.3% match
+	s.SDNs = precomputeSDNs([]*ofac.SDN{{EntityID: "9432", SDNName: "CHIWESHE, George", SDNType: "INDIVIDUAL"}})
+	out = s.TopSDNs(1, "george bush")
+	eql(t, "issue115: top SDN 18996", out[0].match, 0.607)
+}

@@ -9,6 +9,7 @@ import (
 	"math"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/moov-io/ofac"
@@ -110,17 +111,22 @@ func TestJaroWrinkler(t *testing.T) {
 		s1, s2 string
 		match  float64
 	}{
-		{"wei, zhao", "wei, Zhao", 0.950},
-		{"WEI, Zhao", "WEI, Zhao", 1.0},
+		{"wei, zhao", "wei, Zhao", 0.844},
+		{"WEI, Zhao", "WEI, Zhao", 0.889},
+		{"WEI Zhao", "WEI Zhao", 0.875},
+		{strings.ToLower("WEI Zhao"), precompute("WEI, Zhao"), 1.0},
 		// make sure jaroWrinkler is communative
-		{"jane doe", "jan lahore", 0.69},
-		{"jan lahore", "jane doe", 0.69},
+		{"jane doe", "jan lahore", 0.483},
+		{"jan lahore", "jane doe", 0.613},
+		// close match
+		{"jane doe", "jane doe2", 0.758},
 		// example cases
-		{"maduro moros, nicolas", "maduro moros, nicolas", 1.0},
-		{"maduro moros, nicolas", "nicolas maduro", 0.512},
-		{"nicolas maduro moros", "nicolás maduro", 0.855},
-		{"nicolas, maduro moros", "nicolas maduro", 0.891},
-		{"nicolas, maduro moros", "nicolás maduro", 0.881},
+		{"maduro, nicolas", "maduro, nicolas", 0.933},
+		{"maduro moros, nicolas", "maduro moros, nicolas", 0.905},
+		{"maduro moros, nicolas", "nicolas maduro", 0.377},
+		{"nicolas maduro moros", "nicolás maduro", 0.712},
+		{"nicolas, maduro moros", "nicolas maduro", 0.656},
+		{"nicolas, maduro moros", "nicolás maduro", 0.696},
 	}
 
 	for _, v := range cases {
