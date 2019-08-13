@@ -169,11 +169,15 @@ func TestSearch_reorderSDNName(t *testing.T) {
 	cases := []struct {
 		input, expected string
 	}{
-		{"Jane Doe", "Jane Doe"},                         // control
-		{"Jane, Doe Other", "Jane, Doe Other"},           // made up name to make sure we don't clobber ,'s in the middle of a name
+		{"Jane Doe", "Jane Doe"}, // no change, control (without commas)
+		{"Doe Other, Jane", "Jane Doe Other"},
+		{"Last, First Middle", "First Middle Last"},
 		{"FELIX B. MADURO S.A.", "FELIX B. MADURO S.A."}, // keep .'s in a name
 		{"MADURO MOROS, Nicolas", "Nicolas MADURO MOROS"},
 		{"IBRAHIM, Sadr", "Sadr IBRAHIM"},
+		// Issue 115
+		{"Bush, George W", "George W Bush"},
+		{"RIZO MORENO, Jorge Luis", "Jorge Luis RIZO MORENO"},
 	}
 	for i := range cases {
 		guess := reorderSDNName(cases[i].input, "individual")
