@@ -22,7 +22,7 @@ func TestIssue115__TopSDNs(t *testing.T) {
 	s := &searcher{logger: log.NewNopLogger()}
 
 	// Issue 115 (https://github.com/moov-io/ofac/issues/115) talks about how "george bush" is a false positive (90%) match against
-	// several other "George ..." records. This is too senstive and so we need to tone that down.
+	// several other "George ..." records. This is too sensitive and so we need to tone that down.
 
 	// was 89.6% match
 	s.SDNs = precomputeSDNs([]*ofac.SDN{{EntityID: "2680", SDNName: "HABBASH, George", SDNType: "INDIVIDUAL"}})
