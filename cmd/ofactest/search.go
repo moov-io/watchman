@@ -116,8 +116,8 @@ func getCustomer(ctx context.Context, api *moov.APIClient, id string) error {
 		return fmt.Errorf("loadCustomer: %v", err)
 	}
 	defer resp.Body.Close()
-	if cust.Id != id {
-		return fmt.Errorf("loadCustomer: wrong Customer: expected %s but got %s", id, cust.Id)
+	if cust.ID != id {
+		return fmt.Errorf("loadCustomer: wrong Customer: expected %s but got %s", id, cust.ID)
 	}
 	return nil
 }
@@ -128,8 +128,8 @@ func getCompany(ctx context.Context, api *moov.APIClient, id string) error {
 		return fmt.Errorf("loadCompany: %v", err)
 	}
 	defer resp.Body.Close()
-	if company.Id != id {
-		return fmt.Errorf("loadCompany: wrong Company: expected %s but got %s", id, company.Id)
+	if company.ID != id {
+		return fmt.Errorf("loadCompany: wrong Company: expected %s but got %s", id, company.ID)
 	}
 	return nil
 }
