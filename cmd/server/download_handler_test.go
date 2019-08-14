@@ -17,6 +17,9 @@ import (
 
 func TestDownload__manualRefreshPath(t *testing.T) {
 	t.Parallel()
+	if testing.Short() {
+		return
+	}
 
 	check := func(t *testing.T, repo *sqliteDownloadRepository) {
 		searcher := &searcher{}

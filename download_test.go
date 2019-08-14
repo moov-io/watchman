@@ -55,6 +55,10 @@ func TestDownloader__compareNames(t *testing.T) {
 }
 
 func TestDownloader(t *testing.T) {
+	if testing.Short() {
+		return
+	}
+
 	dl := Downloader{
 		Logger: log.NewNopLogger(),
 	}
