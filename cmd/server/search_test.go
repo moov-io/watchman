@@ -9,6 +9,7 @@ import (
 	"math"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/moov-io/ofac"
@@ -110,17 +111,22 @@ func TestJaroWrinkler(t *testing.T) {
 		s1, s2 string
 		match  float64
 	}{
-		{"wei, zhao", "wei, Zhao", 0.950},
-		{"WEI, Zhao", "WEI, Zhao", 1.0},
+		{"wei, zhao", "wei, Zhao", 0.844},
+		{"WEI, Zhao", "WEI, Zhao", 0.889},
+		{"WEI Zhao", "WEI Zhao", 0.875},
+		{strings.ToLower("WEI Zhao"), precompute("WEI, Zhao"), 1.0},
 		// make sure jaroWrinkler is communative
-		{"jane doe", "jan lahore", 0.69},
-		{"jan lahore", "jane doe", 0.69},
+		{"jane doe", "jan lahore", 0.483},
+		{"jan lahore", "jane doe", 0.613},
+		// close match
+		{"jane doe", "jane doe2", 0.758},
 		// example cases
-		{"maduro moros, nicolas", "maduro moros, nicolas", 1.0},
-		{"maduro moros, nicolas", "nicolas maduro", 0.512},
-		{"nicolas maduro moros", "nicolás maduro", 0.855},
-		{"nicolas, maduro moros", "nicolas maduro", 0.891},
-		{"nicolas, maduro moros", "nicolás maduro", 0.881},
+		{"maduro, nicolas", "maduro, nicolas", 0.933},
+		{"maduro moros, nicolas", "maduro moros, nicolas", 0.905},
+		{"maduro moros, nicolas", "nicolas maduro", 0.377},
+		{"nicolas maduro moros", "nicolás maduro", 0.665},
+		{"nicolas, maduro moros", "nicolas maduro", 0.656},
+		{"nicolas, maduro moros", "nicolás maduro", 0.649},
 	}
 
 	for _, v := range cases {
@@ -163,11 +169,15 @@ func TestSearch_reorderSDNName(t *testing.T) {
 	cases := []struct {
 		input, expected string
 	}{
-		{"Jane Doe", "Jane Doe"},                         // control
-		{"Jane, Doe Other", "Jane, Doe Other"},           // made up name to make sure we don't clobber ,'s in the middle of a name
+		{"Jane Doe", "Jane Doe"}, // no change, control (without commas)
+		{"Doe Other, Jane", "Jane Doe Other"},
+		{"Last, First Middle", "First Middle Last"},
 		{"FELIX B. MADURO S.A.", "FELIX B. MADURO S.A."}, // keep .'s in a name
 		{"MADURO MOROS, Nicolas", "Nicolas MADURO MOROS"},
 		{"IBRAHIM, Sadr", "Sadr IBRAHIM"},
+		// Issue 115
+		{"Bush, George W", "George W Bush"},
+		{"RIZO MORENO, Jorge Luis", "Jorge Luis RIZO MORENO"},
 	}
 	for i := range cases {
 		guess := reorderSDNName(cases[i].input, "individual")
@@ -196,7 +206,7 @@ func TestSearch_liveData(t *testing.T) {
 		name  string
 		match float64 // top match %
 	}{
-		{"Nicolas MADURO", 0.944},
+		{"Nicolas MADURO", 0.821},
 	}
 	for i := range cases {
 		sdns := searcher.TopSDNs(1, cases[i].name)
@@ -210,7 +220,7 @@ func TestSearch_liveData(t *testing.T) {
 func TestSearch__topAddressesAddress(t *testing.T) {
 	it := topAddressesAddress("needle")(&Address{address: "needleee"})
 
-	eql(t, "topAddressesAddress", it.weight, 0.95)
+	eql(t, "topAddressesAddress", it.weight, 0.712)
 	if add, ok := it.value.(*Address); !ok || add.address != "needleee" {
 		t.Errorf("got %#v", add)
 	}
@@ -219,7 +229,7 @@ func TestSearch__topAddressesAddress(t *testing.T) {
 func TestSearch__topAddressesCountry(t *testing.T) {
 	it := topAddressesAddress("needle")(&Address{address: "needleee"})
 
-	eql(t, "topAddressesCountry", it.weight, 0.95)
+	eql(t, "topAddressesCountry", it.weight, 0.712)
 	if add, ok := it.value.(*Address); !ok || add.address != "needleee" {
 		t.Errorf("got %#v", add)
 	}
@@ -231,7 +241,7 @@ func TestSearch__multiAddressCompare(t *testing.T) {
 		topAddressesCountry("other"),
 	)(&Address{address: "needlee", country: "other"})
 
-	eql(t, "multiAddressCompare", it.weight, 0.9857)
+	eql(t, "multiAddressCompare", it.weight, 0.916)
 	if add, ok := it.value.(*Address); !ok || add.address != "needlee" || add.country != "other" {
 		t.Errorf("got %#v", add)
 	}

@@ -8,12 +8,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
 	"sync"
 	"unicode"
+	"unicode/utf8"
 
 	"github.com/moov-io/ofac"
 
@@ -308,7 +310,7 @@ func precomputeSDNs(sdns []*ofac.SDN) []*SDN {
 }
 
 var (
-	surnamePrecedes = regexp.MustCompile(`(,\s?[a-zA-Z]*)$`)
+	surnamePrecedes = regexp.MustCompile(`(,?[\s?a-zA-Z]{1,})$`)
 )
 
 // reorderSDNName will take a given SDN name and if it matches a specific pattern where
@@ -465,11 +467,16 @@ func extractSearchLimit(r *http.Request) int {
 	return limit
 }
 
-// jaroWrinkler runs the similarly named algorithm over the two input strings.
+// jaroWrinkler runs the similarly named algorithm over the two input strings and weighs the score
+// against the string lengths. We do this to tone down equality among strings whose lengths vary by
+// several characters.
+//
 // For more details see https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance
 //
 // Right now s1 is assumes to have been passed through `chomp(..)` already and so this
 // func only calls `chomp` for s2.
 func jaroWrinkler(s1, s2 string) float64 {
-	return smetrics.JaroWinkler(s1, chomp(s2), 0.7, 4)
+	n1, n2 := float64(utf8.RuneCountInString(s1)), float64(utf8.RuneCountInString(s2))
+	ratio := math.Min(n1, n2) / math.Max(n1, n2)
+	return ratio * smetrics.JaroWinkler(s1, chomp(s2), 0.7, 4)
 }
