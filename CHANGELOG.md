@@ -1,9 +1,17 @@
 ## v0.10.0 (Unreleased)
 
+This release contains improvements to OFAC's match percentages to tone down false positives. We do this by adjusting the match percentage according to the query and SDN lenth ratio -- if the two strings are different lengths (after normalization) they cannot be equal. We are looking for feedback to further improve the matching code.
+
+BREAKING CHANGES
+
+- api,client: We've renamed all fields like `*Id` to `*ID` which is consistent with Go's style.
+
 BUG FIXES
 
 - attempt retries when downloading files
 - download: return after successful download
+- cmd/server: search: fix match percents after jaroWrinkler change
+- cmd/server: when reordering names handle multiple first or last names
 
 ADDITIONS
 
@@ -11,6 +19,11 @@ ADDITIONS
 - cmd/server: bind HTTP server with TLS if HTTPS_* variables are defined
 - cmd/server: disable perioidic refresh via OFAC_DATA_REFRESH=off
 - download: check for initial files on first refresh
+
+IMPROVEMENTS
+
+- build: upgrade openapi-generator to 4.1.0
+- all: skip more tests on -short
 
 ## v0.9.0 (Released 2019-07-18)
 
