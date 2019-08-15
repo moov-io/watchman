@@ -28,14 +28,14 @@ func TestSQLite__basic(t *testing.T) {
 	s := sqliteConnection(log.NewNopLogger(), "/tmp/path/doesnt/exist")
 
 	conn, err := s.Connect()
-	if err != nil {
-		t.Fatal(err)
+	if err == nil {
+		// close test connection since it somehow worked
+		defer func(t *testing.T) {
+			if err := conn.Close(); err == nil {
+				t.Error("expected error")
+			}
+		}(t)
 	}
-	defer func(t *testing.T) {
-		if err := conn.Close(); err != nil {
-			t.Error(err)
-		}
-	}(t)
 
 	if err := conn.Ping(); err == nil {
 		t.Fatal("expected error")
