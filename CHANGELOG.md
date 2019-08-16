@@ -1,4 +1,4 @@
-## v0.10.0 (Unreleased)
+## v0.10.0 (Released 2019-08-16)
 
 This release contains improvements to OFAC's match percentages to tone down false positives. We do this by adjusting the match percentage according to the query and SDN lenth ratio -- if the two strings are different lengths (after normalization) they cannot be equal. We are looking for feedback to further improve the matching code.
 
