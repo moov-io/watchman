@@ -18,7 +18,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
 	github.com/lopezator/migrator v0.1.0
 	github.com/mattn/go-sqlite3 v1.10.0
-	github.com/moov-io/base v0.9.1-0.20190430163914-76a8e2cca72d
+	github.com/moov-io/base v0.10.0
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/opencontainers/image-spec v1.0.1 // indirect
 	github.com/opencontainers/runc v0.1.1 // indirect
@@ -29,4 +29,5 @@ require (
 	go4.org v0.0.0-20190430205326-94abd6928b1d
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/text v0.3.2
+	gotest.tools v2.2.0+incompatible // indirect
 )

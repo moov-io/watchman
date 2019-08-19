@@ -205,7 +205,7 @@ func updateCompanyStatus(logger log.Logger, searcher *searcher, companyRepo comp
 	return func(w http.ResponseWriter, r *http.Request) {
 		w = wrapResponseWriter(logger, w, r)
 
-		companyID, userID := getCompanyID(w, r), moovhttp.GetUserId(r)
+		companyID, userID := getCompanyID(w, r), moovhttp.GetUserID(r)
 		if companyID == "" {
 			return
 		}
