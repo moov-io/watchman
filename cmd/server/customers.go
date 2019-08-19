@@ -288,7 +288,7 @@ func updateCustomerStatus(logger log.Logger, searcher *searcher, custRepo custom
 		w = wrapResponseWriter(logger, w, r)
 
 		custID := getCustomerID(w, r)
-		userID := moovhttp.GetUserId(r)
+		userID := moovhttp.GetUserID(r)
 		if userID == "" {
 			moovhttp.Problem(w, errNoUserID)
 			return
