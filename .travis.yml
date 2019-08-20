@@ -2,7 +2,7 @@ language: go
 dist: xenial
 sudo: true
 services:
-- docker
+  - docker
 env:
   matrix:
   - GO111MODULE=on
@@ -25,27 +25,40 @@ matrix:
   # - os: windows
   #   go: 1.12.x
 before_install:
-- GO111MODULE=off go get -u github.com/client9/misspell/cmd/misspell
-- GO111MODULE=off go get -u golang.org/x/lint/golint
-- GO111MODULE=off go get github.com/fzipp/gocyclo
-- GO111MODULE=off go get -u honnef.co/go/tools/cmd/staticcheck
-- GO111MODULE=off go get golang.org/x/tools/cmd/cover
+  # Setup directory for binaries
+  - mkdir ./bin
+  - export PATH=$PATH:$PWD/bin
+  # Misspell
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget -O misspell.tar.gz https://github.com/client9/misspell/releases/download/v0.3.4/misspell_0.3.4_linux_64bit.tar.gz; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then wget -O misspell.tar.gz https://github.com/client9/misspell/releases/download/v0.3.4/misspell_0.3.4_mac_64bit.tar.gz; fi
+  - tar xf misspell.tar.gz && cp ./misspell ./bin/misspell
+  # staticcheck
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget -O staticcheck.tar.gz https://github.com/dominikh/go-tools/releases/download/2019.2.2/staticcheck_linux_amd64.tar.gz; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then wget -O staticcheck.tar.gz https://github.com/dominikh/go-tools/releases/download/2019.2.2/staticcheck_darwin_amd64.tar.gz; fi
+  - tar xf staticcheck.tar.gz && cp ./staticcheck/staticcheck ./bin/staticcheck
+  # golint
+  - go get -u golang.org/x/lint/golint
+  # gocyclo
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget -O ./bin/gocyclo https://github.com/adamdecaf/gocyclo/releases/download/2019-08-09/gocyclo-linux-amd64; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then wget -O ./bin/gocyclo https://github.com/adamdecaf/gocyclo/releases/download/2019-08-09/gocyclo-darwin-amd64; fi
+  - chmod +x ./bin/gocyclo
 before_script:
-- GOFILES=$(find . -type f -name '*.go' | grep -v vendor | grep -v client)
+  - GOFILES=$(find . -type f -name '*.go' | grep -v vendor | grep -v client)
+  - go mod tidy
 script:
-# Just check gofmt on linux, it's the fastest builder
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then test -z $(gofmt -s -l $GOFILES); fi
-- go test ./... -race -coverprofile=coverage.txt -covermode=atomic
-- misspell -error -locale US $GOFILES
-- gocyclo -over 20 $GOFILES
-- golint -set_exit_status $GOFILES
-- staticcheck ./cmd/... ./internal/... .
-- if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install -y mingw; export PATH=/c/tools/mingw64/bin:"$PATH";fi
+  # Just check gofmt on linux, it's the fastest builder
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then test -z $(gofmt -s -l $GOFILES); fi
+  - go test ./... -race -coverprofile=coverage.txt -covermode=atomic
+  - misspell -error -locale US $GOFILES
+  - gocyclo -over 20 $GOFILES
+  - golint -set_exit_status $GOFILES
+  - staticcheck ./cmd/... ./internal/... .
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install -y mingw; export PATH=/c/tools/mingw64/bin:"$PATH";fi
 after_success:
-- bash <(curl -s https://codecov.io/bash) -X fix
-- make
-- make client
-- make docker
+  - bash <(curl -s https://codecov.io/bash) -X fix
+  - make
+  - make client
+  - make docker
 before_deploy:
   - make dist
 deploy:
