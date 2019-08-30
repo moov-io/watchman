@@ -16,7 +16,6 @@ coverage.html
 
 # Generated files
 .tmp/
-openapi.yaml
 openapi-generator*jar
 
 *.db

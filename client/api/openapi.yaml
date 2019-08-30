@@ -1,0 +1,1260 @@
+openapi: 3.0.2
+info:
+  contact:
+    url: https://github.com/moov-io/ofac
+  description: OFAC (Office of Foreign Assets Control) API is designed to facilitate
+    the enforcement of US government economic sanctions programs required by federal
+    law. This project implements a modern REST HTTP API for companies and organizations
+    to obey federal law and use OFAC data in their applications.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: OFAC API
+  version: v1
+servers:
+- description: Local development
+  url: http://localhost:8084
+tags:
+- description: Endpoints for searching individuals and corporations which US government
+    enforces economic sanctions against and adding webhook notifications for search
+    criteria.
+  name: OFAC
+paths:
+  /ping:
+    get:
+      operationId: ping
+      responses:
+        200:
+          description: Service is running properly
+      summary: Ping the OFAC service to check if running
+      tags:
+      - OFAC
+  /companies/{companyID}:
+    get:
+      operationId: getOFACCompany
+      parameters:
+      - description: Optional Request ID allows application developer to trace requests
+          through the systems logs
+        explode: false
+        in: header
+        name: X-Request-ID
+        required: false
+        schema:
+          example: 94c825ee
+          type: string
+        style: simple
+      - description: Company ID
+        explode: false
+        in: path
+        name: companyID
+        required: true
+        schema:
+          example: 1d1c824a
+          type: string
+        style: simple
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OFACCompany'
+          description: Company and associated metadata
+      summary: Get information about a company, trust or organization such as addresses,
+        alternate names, and remarks.
+      tags:
+      - OFAC
+    put:
+      operationId: updateOFACCompanyStatus
+      parameters:
+      - description: Optional Request ID allows application developer to trace requests
+          through the systems logs
+        explode: false
+        in: header
+        name: X-Request-ID
+        required: false
+        schema:
+          example: 94c825ee
+          type: string
+        style: simple
+      - description: Company ID
+        explode: false
+        in: path
+        name: companyID
+        required: true
+        schema:
+          example: 8d49fd61
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCompanyStatus'
+        required: true
+      responses:
+        200:
+          description: Company status updated
+      summary: Update a Companies sanction status to always block or always allow
+        transactions.
+      tags:
+      - OFAC
+  /companies/{companyID}/watch:
+    post:
+      operationId: addOFACCompanyWatch
+      parameters:
+      - description: Optional Request ID allows application developer to trace requests
+          through the systems logs
+        explode: false
+        in: header
+        name: X-Request-ID
+        required: false
+        schema:
+          example: 94c825ee
+          type: string
+        style: simple
+      - description: Company ID
+        explode: false
+        in: path
+        name: companyID
+        required: true
+        schema:
+          example: c3cf0f66
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WatchRequest'
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Watch'
+          description: Company watch added
+        404:
+          description: Company not found
+      summary: Add OFAC watch on a Company
+      tags:
+      - OFAC
+  /companies/{companyID}/watch/{watchID}:
+    delete:
+      operationId: removeOFACCompanyWatch
+      parameters:
+      - description: Optional Request ID allows application developer to trace requests
+          through the systems logs
+        explode: false
+        in: header
+        name: X-Request-ID
+        required: false
+        schema:
+          example: 94c825ee
+          type: string
+        style: simple
+      - description: Company ID
+        explode: false
+        in: path
+        name: companyID
+        required: true
+        schema:
+          example: c3cf0f66
+          type: string
+        style: simple
+      - description: Watch ID, used to identify a specific watch
+        explode: false
+        in: path
+        name: watchID
+        required: true
+        schema:
+          example: 0c5e215c
+          type: string
+        style: simple
+      responses:
+        200:
+          description: Company watch removed
+      summary: Remove company watch
+      tags:
+      - OFAC
+  /companies/watch:
+    post:
+      operationId: addOFACCompanyNameWatch
+      parameters:
+      - description: Optional Request ID allows application developer to trace requests
+          through the systems logs
+        explode: false
+        in: header
+        name: X-Request-ID
+        required: false
+        schema:
+          example: 94c825ee
+          type: string
+        style: simple
+      - description: Company name used to match and send watch notifications
+        explode: true
+        in: query
+        name: name
+        required: true
+        schema:
+          example: Jane Smith
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WatchRequest'
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Watch'
+          description: Company watch applied
+      summary: Add company watch by name. The match percentage will be included in
+        the webhook's JSON payload.
+      tags:
+      - OFAC
+  /companies/watch/{watchID}:
+    delete:
+      operationId: removeOFACCompanyNameWatch
+      parameters:
+      - description: Optional Request ID allows application developer to trace requests
+          through the systems logs
+        explode: false
+        in: header
+        name: X-Request-ID
+        required: false
+        schema:
+          example: 94c825ee
+          type: string
+        style: simple
+      - description: Watch ID, used to identify a specific watch
+        explode: false
+        in: path
+        name: watchID
+        required: true
+        schema:
+          example: 0c5e215c
+          type: string
+        style: simple
+      - description: Company name watch
+        explode: true
+        in: query
+        name: name
+        required: true
+        schema:
+          example: Jane Smith
+          type: string
+        style: form
+      responses:
+        200:
+          description: Company watch removed
+      summary: Remove a Company name watch
+      tags:
+      - OFAC
+  /customers/{customerID}:
+    get:
+      operationId: getOFACCustomer
+      parameters:
+      - description: Optional Request ID allows application developer to trace requests
+          through the systems logs
+        explode: false
+        in: header
+        name: X-Request-ID
+        required: false
+        schema:
+          example: 94c825ee
+          type: string
+        style: simple
+      - description: Customer ID
+        explode: false
+        in: path
+        name: customerID
+        required: true
+        schema:
+          example: c3cf0f66
+          type: string
+        style: simple
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OFACCustomer'
+          description: Customer and associated metadata
+      summary: Get information about a customer, addresses, alternate names, and their
+        SDN metadata.
+      tags:
+      - OFAC
+    put:
+      operationId: updateOFACCustomerStatus
+      parameters:
+      - description: Optional Request ID allows application developer to trace requests
+          through the systems logs
+        explode: false
+        in: header
+        name: X-Request-ID
+        required: false
+        schema:
+          example: 94c825ee
+          type: string
+        style: simple
+      - description: Customer ID
+        explode: false
+        in: path
+        name: customerID
+        required: true
+        schema:
+          example: c3cf0f66
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomerStatus'
+        required: true
+      responses:
+        200:
+          description: Customer status updated
+      summary: Update a Customer's sanction status to always block or always allow
+        transactions.
+      tags:
+      - OFAC
+  /customers/{customerID}/watch:
+    post:
+      operationId: addOFACCustomerWatch
+      parameters:
+      - description: Optional Request ID allows application developer to trace requests
+          through the systems logs
+        explode: false
+        in: header
+        name: X-Request-ID
+        required: false
+        schema:
+          example: 94c825ee
+          type: string
+        style: simple
+      - description: Customer ID
+        explode: false
+        in: path
+        name: customerID
+        required: true
+        schema:
+          example: c3cf0f66
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WatchRequest'
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Watch'
+          description: Customer watch added
+        404:
+          description: Customer not found
+      summary: Add OFAC watch on a Customer
+      tags:
+      - OFAC
+  /customers/{customerID}/watch/{watchID}:
+    delete:
+      operationId: removeOFACCustomerWatch
+      parameters:
+      - description: Optional Request ID allows application developer to trace requests
+          through the systems logs
+        explode: false
+        in: header
+        name: X-Request-ID
+        required: false
+        schema:
+          example: 94c825ee
+          type: string
+        style: simple
+      - description: Customer ID
+        explode: false
+        in: path
+        name: customerID
+        required: true
+        schema:
+          example: c3cf0f66
+          type: string
+        style: simple
+      - description: Watch ID, used to identify a specific watch
+        explode: false
+        in: path
+        name: watchID
+        required: true
+        schema:
+          example: 0c5e215c
+          type: string
+        style: simple
+      responses:
+        200:
+          description: Customer watch removed
+      summary: Remove customer watch
+      tags:
+      - OFAC
+  /customers/watch:
+    post:
+      operationId: addOFACCustomerNameWatch
+      parameters:
+      - description: Optional Request ID allows application developer to trace requests
+          through the systems logs
+        explode: false
+        in: header
+        name: X-Request-ID
+        required: false
+        schema:
+          example: 94c825ee
+          type: string
+        style: simple
+      - description: Individual name used to match and send watch notifications
+        explode: true
+        in: query
+        name: name
+        required: true
+        schema:
+          example: Jane Smith
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WatchRequest'
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Watch'
+          description: Customer watch applied
+      summary: Add customer watch by name. The match percentage will be included in
+        the webhook's JSON payload.
+      tags:
+      - OFAC
+  /customers/watch/{watchID}:
+    delete:
+      operationId: removeOFACCustomerNameWatch
+      parameters:
+      - description: Optional Request ID allows application developer to trace requests
+          through the systems logs
+        explode: false
+        in: header
+        name: X-Request-ID
+        required: false
+        schema:
+          example: 94c825ee
+          type: string
+        style: simple
+      - description: Watch ID, used to identify a specific watch
+        explode: false
+        in: path
+        name: watchID
+        required: true
+        schema:
+          example: 0c5e215c
+          type: string
+        style: simple
+      - description: Customer or Company name watch
+        explode: true
+        in: query
+        name: name
+        required: true
+        schema:
+          example: Jane Smith
+          type: string
+        style: form
+      responses:
+        200:
+          description: Company or Customer watch removed
+      summary: Remove a Customer name watch
+      tags:
+      - OFAC
+  /sdn/{sdnID}:
+    get:
+      operationId: getSDN
+      parameters:
+      - description: Optional Request ID allows application developer to trace requests
+          through the systems logs
+        explode: false
+        in: header
+        name: X-Request-ID
+        required: false
+        schema:
+          example: 94c825ee
+          type: string
+        style: simple
+      - description: SDN ID
+        explode: false
+        in: path
+        name: sdnID
+        required: true
+        schema:
+          example: 564dd7d1
+          type: string
+        style: simple
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SDN'
+          description: SDN metadata
+      summary: Specially designated national
+      tags:
+      - OFAC
+  /sdn/{sdnID}/alts:
+    get:
+      operationId: getSDNAltNames
+      parameters:
+      - description: Optional Request ID allows application developer to trace requests
+          through the systems logs
+        explode: false
+        in: header
+        name: X-Request-ID
+        required: false
+        schema:
+          example: 94c825ee
+          type: string
+        style: simple
+      - description: SDN ID
+        explode: false
+        in: path
+        name: sdnID
+        required: true
+        schema:
+          example: 564dd7d1
+          type: string
+        style: simple
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SDNAltNames'
+          description: SDN alternate names
+      summary: Get alternate names for a given SDN
+      tags:
+      - OFAC
+  /sdn/{sdnID}/addresses:
+    get:
+      operationId: getSDNAddresses
+      parameters:
+      - description: Optional Request ID allows application developer to trace requests
+          through the systems logs
+        explode: false
+        in: header
+        name: X-Request-ID
+        required: false
+        schema:
+          example: 94c825ee
+          type: string
+        style: simple
+      - description: SDN ID
+        explode: false
+        in: path
+        name: sdnID
+        required: true
+        schema:
+          example: 564dd7d1
+          type: string
+        style: simple
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Addresses'
+          description: SDN addresses
+      summary: Get addresses for a given SDN
+      tags:
+      - OFAC
+  /search:
+    get:
+      operationId: search
+      parameters:
+      - description: Optional Request ID allows application developer to trace requests
+          through the systems logs
+        explode: false
+        in: header
+        name: X-Request-ID
+        required: false
+        schema:
+          example: 94c825ee
+          type: string
+        style: simple
+      - description: Search across Name, Alt Names, and Address fields for all SDN
+          entries. Entries may be returned in all response sub-objects.
+        explode: true
+        in: query
+        name: q
+        required: false
+        schema:
+          example: John Doe
+          type: string
+        style: form
+      - description: Name which could correspond to a human on the SDN list. Only
+          SDN results will be returned.
+        explode: true
+        in: query
+        name: name
+        required: false
+        schema:
+          example: Jane Smith
+          type: string
+        style: form
+      - description: Phsical address which could correspond to a human on the SDN
+          list. Only Address results will be returned.
+        explode: true
+        in: query
+        name: address
+        required: false
+        schema:
+          example: 123 83rd Ave
+          type: string
+        style: form
+      - description: City name as desginated by SDN guidelines. Only Address results
+          will be returned.
+        explode: true
+        in: query
+        name: city
+        required: false
+        schema:
+          example: USA
+          type: string
+        style: form
+      - description: State name as desginated by SDN guidelines. Only Address results
+          will be returned.
+        explode: true
+        in: query
+        name: state
+        required: false
+        schema:
+          example: USA
+          type: string
+        style: form
+      - description: Providence name as desginated by SDN guidelines. Only Address
+          results will be returned.
+        explode: true
+        in: query
+        name: providence
+        required: false
+        schema:
+          example: USA
+          type: string
+        style: form
+      - description: Zip code as desginated by SDN guidelines. Only Address results
+          will be returned.
+        explode: true
+        in: query
+        name: zip
+        required: false
+        schema:
+          example: USA
+          type: string
+        style: form
+      - description: Country name as desginated by SDN guidelines. Only Address results
+          will be returned.
+        explode: true
+        in: query
+        name: country
+        required: false
+        schema:
+          example: USA
+          type: string
+        style: form
+      - description: Alternate name which could correspond to a human on the SDN list.
+          Only Alt name results will be returned.
+        explode: true
+        in: query
+        name: altName
+        required: false
+        schema:
+          example: Jane Smith
+          type: string
+        style: form
+      - description: Maximum results returned by a search
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          example: 25
+          type: integer
+        style: form
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Search'
+          description: SDNs returned from a search
+      summary: Search SDN names and metadata
+      tags:
+      - OFAC
+  /downloads:
+    get:
+      operationId: getLatestDownloads
+      parameters:
+      - description: Maximum results returned by a search
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          example: 25
+          type: integer
+        style: form
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Downloads'
+          description: Recent timestamps and counts of parsed objects
+      summary: Return list of recent downloads of OFAC data
+      tags:
+      - OFAC
+components:
+  parameters:
+    requestID:
+      description: Optional Request ID allows application developer to trace requests
+        through the systems logs
+      explode: false
+      in: header
+      name: X-Request-ID
+      required: false
+      schema:
+        example: 94c825ee
+        type: string
+      style: simple
+  schemas:
+    OFACCompany:
+      description: OFAC Company and metadata
+      example:
+        addresses:
+        - country: Japan
+          address: 123 73th St
+          cityStateProvincePostalCode: Tokyo 103
+          match: 0.91
+          entityID: "2112"
+          addressID: "201"
+        - country: Japan
+          address: 123 73th St
+          cityStateProvincePostalCode: Tokyo 103
+          match: 0.91
+          entityID: "2112"
+          addressID: "201"
+        alts:
+        - alternateID: "220"
+          alternateRemarks: Extra information
+          alternateType: aka
+          match: 0.91
+          entityID: "306"
+          alternateName: NATIONAL BANK OF CUBA
+        - alternateID: "220"
+          alternateRemarks: Extra information
+          alternateType: aka
+          match: 0.91
+          entityID: "306"
+          alternateName: NATIONAL BANK OF CUBA
+        ID: 9574756b
+        sdn:
+          sdnType: individual
+          match: 0.91
+          entityID: "1231"
+          program: CUBA
+          sdnName: BANCO NACIONAL DE CUBA
+          title: Title of an individual
+          remarks: remarks
+        status:
+          note: Incorrect match
+          createdAt: 2000-01-23T04:56:07.000+00:00
+          userID: 349661f9
+          status: unsafe
+      properties:
+        ID:
+          description: OFAC Company ID
+          example: 9574756b
+          type: string
+        sdn:
+          $ref: '#/components/schemas/SDN'
+        addresses:
+          items:
+            $ref: '#/components/schemas/Address'
+          type: array
+        alts:
+          items:
+            $ref: '#/components/schemas/Alt'
+          type: array
+        status:
+          $ref: '#/components/schemas/OFACCompanyStatus'
+    OFACCompanyStatus:
+      description: Status properties of an OFAC Company
+      example:
+        note: Incorrect match
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        userID: 349661f9
+        status: unsafe
+      properties:
+        userID:
+          description: User ID provided when updating status
+          example: 349661f9
+          type: string
+        note:
+          description: Optional note from updating status
+          example: Incorrect match
+          type: string
+        status:
+          description: Manually applied status for OFAC Company
+          enum:
+          - unsafe
+          - exception
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+    OFACCustomer:
+      description: OFAC Customer and metadata
+      example:
+        addresses:
+        - country: Japan
+          address: 123 73th St
+          cityStateProvincePostalCode: Tokyo 103
+          match: 0.91
+          entityID: "2112"
+          addressID: "201"
+        - country: Japan
+          address: 123 73th St
+          cityStateProvincePostalCode: Tokyo 103
+          match: 0.91
+          entityID: "2112"
+          addressID: "201"
+        alts:
+        - alternateID: "220"
+          alternateRemarks: Extra information
+          alternateType: aka
+          match: 0.91
+          entityID: "306"
+          alternateName: NATIONAL BANK OF CUBA
+        - alternateID: "220"
+          alternateRemarks: Extra information
+          alternateType: aka
+          match: 0.91
+          entityID: "306"
+          alternateName: NATIONAL BANK OF CUBA
+        ID: 9574756b
+        sdn:
+          sdnType: individual
+          match: 0.91
+          entityID: "1231"
+          program: CUBA
+          sdnName: BANCO NACIONAL DE CUBA
+          title: Title of an individual
+          remarks: remarks
+        status:
+          note: Incorrect match
+          createdAt: 2000-01-23T04:56:07.000+00:00
+          userID: 349661f9
+          status: unsafe
+      properties:
+        ID:
+          description: OFAC Customer ID
+          example: 9574756b
+          type: string
+        sdn:
+          $ref: '#/components/schemas/SDN'
+        addresses:
+          items:
+            $ref: '#/components/schemas/Address'
+          type: array
+        alts:
+          items:
+            $ref: '#/components/schemas/Alt'
+          type: array
+        status:
+          $ref: '#/components/schemas/OFACCustomerStatus'
+    OFACCustomerStatus:
+      description: Status properties of an OFAC Customer
+      example:
+        note: Incorrect match
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        userID: 349661f9
+        status: unsafe
+      properties:
+        userID:
+          description: User ID provided when updating status
+          example: 349661f9
+          type: string
+        note:
+          description: Optional note from updating status
+          example: Incorrect match
+          type: string
+        status:
+          description: Manually applied status for OFAC Customer
+          enum:
+          - unsafe
+          - exception
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+    SDN:
+      description: Specially designated national from OFAC list
+      example:
+        sdnType: individual
+        match: 0.91
+        entityID: "1231"
+        program: CUBA
+        sdnName: BANCO NACIONAL DE CUBA
+        title: Title of an individual
+        remarks: remarks
+      properties:
+        entityID:
+          example: "1231"
+          type: string
+        sdnName:
+          example: BANCO NACIONAL DE CUBA
+          type: string
+        sdnType:
+          description: SDN's typically represent an individual (customer) or trust/company/organization.
+            OFAC endpoints refer to customers or companies as different entities,
+            but underlying both is the same SDN metadata.
+          example: individual
+          type: string
+        program:
+          example: CUBA
+          type: string
+        title:
+          example: Title of an individual
+          type: string
+        remarks:
+          type: string
+        match:
+          description: Remarks on SDN and often additional information about the SDN
+          example: 0.91
+          type: number
+    Addresses:
+      items:
+        $ref: '#/components/schemas/Address'
+      type: array
+    Address:
+      description: Physical address from OFAC list
+      example:
+        country: Japan
+        address: 123 73th St
+        cityStateProvincePostalCode: Tokyo 103
+        match: 0.91
+        entityID: "2112"
+        addressID: "201"
+      properties:
+        entityID:
+          example: "2112"
+          type: string
+        addressID:
+          example: "201"
+          type: string
+        address:
+          example: 123 73th St
+          type: string
+        cityStateProvincePostalCode:
+          example: Tokyo 103
+          type: string
+        country:
+          example: Japan
+          type: string
+        match:
+          example: 0.91
+          type: number
+    SDNAltNames:
+      items:
+        $ref: '#/components/schemas/Alt'
+      type: array
+    Alt:
+      description: Alternate name from OFAC list
+      example:
+        alternateID: "220"
+        alternateRemarks: Extra information
+        alternateType: aka
+        match: 0.91
+        entityID: "306"
+        alternateName: NATIONAL BANK OF CUBA
+      properties:
+        entityID:
+          example: "306"
+          type: string
+        alternateID:
+          example: "220"
+          type: string
+        alternateType:
+          example: aka
+          type: string
+        alternateName:
+          example: NATIONAL BANK OF CUBA
+          type: string
+        alternateRemarks:
+          example: Extra information
+          type: string
+        match:
+          example: 0.91
+          type: number
+    DPL:
+      description: BIS Denied Persons List item
+      example:
+        country: country
+        city: THREE RIVERS
+        postalCode: "78071"
+        match: 0.92
+        standardOrder: Y
+        frCitation: 81.F.R. 40658 6/22/2016
+        streetAddress: 'REGISTER NUMBER: 78795-379, FEDERAL CORRECTIONAL INSTITUTION,
+          P.O. BOX 4200'
+        lastUpdate: 2016-06-22
+        name: ISMAEL RETA
+        action: FR NOTICE ADDED
+        state: TX
+        effectiveDate: 06/15/2016
+        expirationDate: 06/15/2025
+      properties:
+        name:
+          description: Name of the Denied Person
+          example: ISMAEL RETA
+          type: string
+        streetAddress:
+          description: Denied Person's street address
+          example: 'REGISTER NUMBER: 78795-379, FEDERAL CORRECTIONAL INSTITUTION,
+            P.O. BOX 4200'
+          type: string
+        city:
+          description: Denied Person's city
+          example: THREE RIVERS
+          type: string
+        state:
+          description: Denied Person's state
+          example: TX
+          type: string
+        country:
+          description: Denied Person's country
+          type: string
+        postalCode:
+          description: Denied Person's postal code
+          example: "78071"
+          type: string
+        effectiveDate:
+          description: Date when denial came into effect
+          example: 06/15/2016
+          type: string
+        expirationDate:
+          description: Date when denial expires, if blank denial never expires
+          example: 06/15/2025
+          type: string
+        standardOrder:
+          description: Denotes whether or not the Denied Person was added by a standard
+            order
+          example: Y
+          type: string
+        lastUpdate:
+          description: Most recent date when the Denied Person record was updated
+          example: 2016-06-22
+          type: string
+        action:
+          description: Most recent action taken regarding the denial
+          example: FR NOTICE ADDED
+          type: string
+        frCitation:
+          description: Reference to the order's citation in the Federal Register
+          example: 81.F.R. 40658 6/22/2016
+          type: string
+        match:
+          example: 0.92
+          type: number
+    UpdateCompanyStatus:
+      description: Request body to update a company status.
+      example:
+        notes: False positive
+        status: unsafe
+      properties:
+        status:
+          description: manual override of company/SDN sanction status
+          enum:
+          - unsafe
+          - exception
+          type: string
+        notes:
+          description: Free form notes about manually changing the Company status
+          example: False positive
+          type: string
+      required:
+      - status
+    UpdateCustomerStatus:
+      description: Request body to update a customers status.
+      example:
+        notes: False positive
+        status: unsafe
+      properties:
+        status:
+          description: manual override of customer/SDN sanction status
+          enum:
+          - unsafe
+          - exception
+          type: string
+        notes:
+          description: Free form notes about manually changing the Customer status
+          example: False positive
+          type: string
+      required:
+      - status
+    Search:
+      description: Search results containing SDNs, alternate names and/or addreses
+      example:
+        SDNs:
+        - sdnType: individual
+          match: 0.91
+          entityID: "1231"
+          program: CUBA
+          sdnName: BANCO NACIONAL DE CUBA
+          title: Title of an individual
+          remarks: remarks
+        - sdnType: individual
+          match: 0.91
+          entityID: "1231"
+          program: CUBA
+          sdnName: BANCO NACIONAL DE CUBA
+          title: Title of an individual
+          remarks: remarks
+        altNames:
+        - alternateID: "220"
+          alternateRemarks: Extra information
+          alternateType: aka
+          match: 0.91
+          entityID: "306"
+          alternateName: NATIONAL BANK OF CUBA
+        - alternateID: "220"
+          alternateRemarks: Extra information
+          alternateType: aka
+          match: 0.91
+          entityID: "306"
+          alternateName: NATIONAL BANK OF CUBA
+        addresses:
+        - country: Japan
+          address: 123 73th St
+          cityStateProvincePostalCode: Tokyo 103
+          match: 0.91
+          entityID: "2112"
+          addressID: "201"
+        - country: Japan
+          address: 123 73th St
+          cityStateProvincePostalCode: Tokyo 103
+          match: 0.91
+          entityID: "2112"
+          addressID: "201"
+        deniedPersons:
+        - country: country
+          city: THREE RIVERS
+          postalCode: "78071"
+          match: 0.92
+          standardOrder: Y
+          frCitation: 81.F.R. 40658 6/22/2016
+          streetAddress: 'REGISTER NUMBER: 78795-379, FEDERAL CORRECTIONAL INSTITUTION,
+            P.O. BOX 4200'
+          lastUpdate: 2016-06-22
+          name: ISMAEL RETA
+          action: FR NOTICE ADDED
+          state: TX
+          effectiveDate: 06/15/2016
+          expirationDate: 06/15/2025
+        - country: country
+          city: THREE RIVERS
+          postalCode: "78071"
+          match: 0.92
+          standardOrder: Y
+          frCitation: 81.F.R. 40658 6/22/2016
+          streetAddress: 'REGISTER NUMBER: 78795-379, FEDERAL CORRECTIONAL INSTITUTION,
+            P.O. BOX 4200'
+          lastUpdate: 2016-06-22
+          name: ISMAEL RETA
+          action: FR NOTICE ADDED
+          state: TX
+          effectiveDate: 06/15/2016
+          expirationDate: 06/15/2025
+      properties:
+        SDNs:
+          items:
+            $ref: '#/components/schemas/SDN'
+          type: array
+        altNames:
+          items:
+            $ref: '#/components/schemas/Alt'
+          type: array
+        addresses:
+          items:
+            $ref: '#/components/schemas/Address'
+          type: array
+        deniedPersons:
+          items:
+            $ref: '#/components/schemas/DPL'
+          type: array
+    Watch:
+      description: Customer or Company watch
+      example:
+        watchID: 08ddba92
+      properties:
+        watchID:
+          description: Object representing a customer or company watch
+          example: 08ddba92
+          type: string
+    WatchRequest:
+      description: Webhook or other means of notification on search criteria. OFAC
+        will make a POST request with a body of the customer or company (SDN, AltNames,
+        and Address).
+      example:
+        webhook: https://api.example.com/ofac/webhook
+        authToken: 75d0384b-a105-4048-9fce-91a280ce7337
+      properties:
+        authToken:
+          description: Private token supplied by clients to be used for authenticating
+            webhooks.
+          example: 75d0384b-a105-4048-9fce-91a280ce7337
+          type: string
+        webhook:
+          description: HTTPS url for webhook on search match
+          example: https://api.example.com/ofac/webhook
+          type: string
+      required:
+      - authToken
+      - webhook
+    Downloads:
+      items:
+        $ref: '#/components/schemas/Download'
+      type: array
+    Download:
+      description: Metadata and stats about downloaded OFAC data
+      example:
+        SDNs: 7414
+        altNames: 9729
+        addresses: 11747
+        timestamp: 2000-01-23T04:56:07.000+00:00
+      properties:
+        SDNs:
+          example: 7414
+          type: integer
+        altNames:
+          example: 9729
+          type: integer
+        addresses:
+          example: 11747
+          type: integer
+        timestamp:
+          format: date-time
+          type: string
