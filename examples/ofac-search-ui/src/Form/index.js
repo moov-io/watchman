@@ -43,8 +43,8 @@ const initialValues = {
   providence: "",
   country: "",
   zip: "",
-  limit: 1,
-  q: "cubametales",
+  limit: 10,
+  q: "",
   // disabled ///////////
   idNumber: "",
   type: "All",
