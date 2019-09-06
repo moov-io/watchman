@@ -4,11 +4,28 @@ import { matchToPercent } from "../utils";
 import { Remarks } from "./Remarks";
 import * as C from "Components";
 
+export const Header = ({ withMatch = true }) => (
+  <div
+    css={`
+      margin-top: 1em;
+      width: 100%;
+      display: grid;
+      grid-template-columns: ${withMatch ? `4em 3fr 1fr 4em` : `4em 4fr 1fr`};
+    `}
+  >
+    <C.ResultHeader>ID</C.ResultHeader>
+    <C.ResultHeader>Alternate Name</C.ResultHeader>
+    <C.ResultHeader>Type</C.ResultHeader>
+    {withMatch && <C.ResultHeader>Match</C.ResultHeader>}
+  </div>
+);
+
 export const AltNames = ({ data }) => {
   if (!data) return null;
   return (
     <C.Section>
       <C.SectionTitle>Alternate Names</C.SectionTitle>
+      <Header />
       {data.length > 0 &&
         data.map(s => <AltName key={`${s.entityID}-${s.alternateID}`} data={s} />)}
     </C.Section>
@@ -32,7 +49,7 @@ export const AltName = ({ data }) => {
       <div
         css={`
           display: grid;
-          grid-template-columns: 4em 2fr 1fr 1fr 4em;
+          grid-template-columns: ${data.match ? `4em 3fr 1fr 4em` : `4em 4fr 1fr`};
           padding-top: 1em;
           & > div {
             margin-right: 1em;
@@ -41,7 +58,6 @@ export const AltName = ({ data }) => {
       >
         <div>{data.entityID}</div>
         <div>{data.alternateName}</div>
-        <div />
         <div
           css={`
             text-transform: uppercase;
@@ -49,7 +65,7 @@ export const AltName = ({ data }) => {
         >
           {data.alternateType}
         </div>
-        <div>{data.match && matchToPercent(data.match)}</div>
+        {data.match && <div>{matchToPercent(data.match)}</div>}
       </div>
       <Remarks remarks={data.remarks} />
     </div>

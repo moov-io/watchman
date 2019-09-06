@@ -12,11 +12,36 @@ import MExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
 import MExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
+const Header = () => (
+  <div
+    css={`
+      margin-top: 1em;
+      width: 100%;
+    `}
+  >
+    <div
+      css={`
+        width: 100%;
+        display: grid;
+        grid-template-columns: 4em 1fr 1fr 1fr 4em 36px;
+      `}
+    >
+      <C.ResultHeader>ID</C.ResultHeader>
+      <C.ResultHeader>Name</C.ResultHeader>
+      <C.ResultHeader>Type</C.ResultHeader>
+      <C.ResultHeader>Program</C.ResultHeader>
+      <C.ResultHeader>Match</C.ResultHeader>
+      <C.ResultHeader />
+    </div>
+  </div>
+);
+
 export const SDNS = ({ data }) => {
   if (!data) return null;
   return (
     <C.Section>
       <C.SectionTitle>Specially Designated Nationals</C.SectionTitle>
+      <Header />
       {data && data.length > 0 && data.map(s => <SDN key={s.entityID} data={s} />)}
     </C.Section>
   );

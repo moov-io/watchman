@@ -7,11 +7,28 @@ import * as C from "../Components";
 
 const l = R.toLower;
 
+const Header = () => (
+  <div
+    css={`
+      display: grid;
+      grid-template-columns: 2fr 2fr 1fr 1fr 4em;
+      margin-top: 1em;
+    `}
+  >
+    <C.ResultHeader>Name</C.ResultHeader>
+    <C.ResultHeader>Action</C.ResultHeader>
+    <C.ResultHeader>Effective</C.ResultHeader>
+    <C.ResultHeader>Expiration</C.ResultHeader>
+    <C.ResultHeader>Match</C.ResultHeader>
+  </div>
+);
+
 export const DeniedPersons = ({ data }) => {
   if (!data) return null;
   return (
     <C.Section>
       <C.SectionTitle>Denied Persons</C.SectionTitle>
+      <Header />
       {data.length > 0 &&
         data.map(s => <DeniedPerson key={`${s.name}-${s.streetAddress}`} data={s} />)}
     </C.Section>

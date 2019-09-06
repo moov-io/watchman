@@ -18,3 +18,10 @@ export const SectionTitle = styled.div`
 export const Unknown = styled.span`
   color: #666;
 `;
+
+export const ResultHeader = styled.div`
+  text-transform: uppercase;
+  font-size: 0.8em;
+  padding-bottom: 0.5em;
+  border-bottom: 1px solid #eee;
+`;
