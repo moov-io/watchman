@@ -6,7 +6,7 @@ require (
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
 	github.com/VividCortex/gohistogram v1.0.0 // indirect
 	github.com/antihax/optional v0.0.0-20180407024304-ca021399b1a6
-	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
+	github.com/cenkalti/backoff v3.0.0 // indirect
 	github.com/containerd/continuity v0.0.0-20190827140505-75bee3e2ccb6 // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
@@ -14,7 +14,7 @@ require (
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/google/go-cmp v0.3.1 // indirect
 	github.com/gorilla/mux v1.7.3
-	github.com/gotestyourself/gotestyourself v2.2.0+incompatible // indirect
+	github.com/gotestyourself/gotestyourself v3.0.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/lopezator/migrator v0.1.0
 	github.com/mattn/go-sqlite3 v1.10.0
@@ -29,7 +29,7 @@ require (
 	go4.org v0.0.0-20190430205326-94abd6928b1d
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/text v0.3.2
-	gotest.tools v2.2.0+incompatible // indirect
+	gotest.tools v3.0.0 // indirect
 )
 
 replace go4.org v0.0.0-20190430205326-94abd6928b1d => go4.org v0.0.0-20190313082347-94abd6928b1d
