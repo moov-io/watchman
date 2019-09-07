@@ -56,24 +56,44 @@ const row = css`
   }
 `;
 
-const ExpansionPanel = styled(MExpansionPanel)`
+// remote the 'isExpanded' prop to prevent it from being passed to React/DOM
+const FilterExpansionPanel = ({ isExpanded, ...props }) => <MExpansionPanel {...props} />;
+
+const ExpansionPanel = styled(FilterExpansionPanel)`
   && {
+    padding: 8px;
     box-shadow: unset;
-    border-bottom: 0px solid #eee;
+    border: 1px solid transparent;
+    border-bottom: 1px solid #eee;
+    ${({ isExpanded }) =>
+      isExpanded &&
+      `
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-top-color: transparent;
+    `};
+  }
+  &&:hover {
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
   }
   &&:last-child,
   &&:first-child {
     border-radius: 0;
   }
+  &&&& * {
+    user-select: initial;
+  }
 `;
+
 const ExpansionPanelSummary = styled(MExpansionPanelSummary)`
   && {
-    padding: 0;
+    padding: 0px;
   }
 `;
 const ExpansionPanelDetails = styled(MExpansionPanelDetails)`
   && {
-    padding: 0;
+    padding: 0px;
   }
 `;
 
@@ -81,6 +101,7 @@ const statusList = ["PRE_INIT", "INIT", "SUCCESS", "ERROR"];
 const status = R.zipObj(statusList, statusList);
 
 const initialState = {
+  expanded: false,
   loaded: false,
   ALTS: {
     status: status.PRE_INIT,
@@ -95,6 +116,8 @@ const initialState = {
 const reducer = (state, action) => {
   // console.log("action: ", action);
   switch (action.type) {
+    case "EXPANDED_STATE":
+      return R.assoc("expanded", action.value, state);
     case status.INIT:
       return R.assocPath([action.api, "status"], action.type, state);
     case status.SUCCESS:
@@ -103,7 +126,6 @@ const reducer = (state, action) => {
         R.assocPath([action.api, "status"], action.type),
         R.assocPath([action.api, "data"], action.payload || [])
       )(state);
-    // TODO
     //case status.ERROR:
     default:
       return state;
@@ -113,7 +135,8 @@ const reducer = (state, action) => {
 export const SDN = ({ data }) => {
   const [details, dispatch] = useReducer(reducer, initialState);
 
-  const handleExpandToggle = () => {
+  const handleExpandToggle = (_, expanded) => {
+    dispatch({ type: "EXPANDED_STATE", value: expanded });
     if (details.loaded) return;
 
     dispatch({ api: "ALTS", type: status.INIT });
@@ -130,7 +153,7 @@ export const SDN = ({ data }) => {
   if (isNilOrEmpty(data)) return null;
   return (
     <div>
-      <ExpansionPanel onChange={handleExpandToggle}>
+      <ExpansionPanel onChange={handleExpandToggle} isExpanded={details.expanded}>
         <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
           <div
             css={`
@@ -158,11 +181,16 @@ export const SDN = ({ data }) => {
               <div>{matchToPercent(data.match)}</div>
             </div>
 
-            {data.sdnType === "individual" && (
+            {data.sdnType === "individual" && data.title && (
               <div
                 css={`
                   ${row};
+                  padding-top: 0.5em;
+                  color: #666;
                   grid-template-columns: 4em 1fr;
+                  & > div {
+                    margin-right: 1em;
+                  }
                 `}
               >
                 <div />
