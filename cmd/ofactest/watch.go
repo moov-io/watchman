@@ -10,21 +10,31 @@ import (
 
 	"github.com/moov-io/base"
 	moov "github.com/moov-io/ofac/client"
+
+	"github.com/antihax/optional"
 )
 
 func addCompanyWatch(ctx context.Context, api *moov.APIClient, id string, webhook string) error {
 	// add watch
-	watch, resp, err := api.OFACApi.AddOFACCompanyWatch(ctx, id, moov.WatchRequest{
+	req := moov.WatchRequest{
 		AuthToken: base.ID(),
 		Webhook:   webhook,
-	}, nil)
+	}
+	opts := &moov.AddOFACCompanyWatchOpts{
+		XRequestID: optional.NewString(*flagRequestID),
+		XUserID:    optional.NewString(*flagUserID),
+	}
+	watch, resp, err := api.OFACApi.AddOFACCompanyWatch(ctx, id, req, opts)
 	if err != nil {
 		return fmt.Errorf("addCompanyWatch: %v", err)
 	}
 	defer resp.Body.Close()
 
-	// cleanup watch
-	resp, err = api.OFACApi.RemoveOFACCompanyWatch(ctx, id, watch.WatchID, nil)
+	// remove watch
+	resp, err = api.OFACApi.RemoveOFACCompanyWatch(ctx, id, watch.WatchID, &moov.RemoveOFACCompanyWatchOpts{
+		XRequestID: optional.NewString(*flagRequestID),
+		XUserID:    optional.NewString(*flagUserID),
+	})
 	if err != nil {
 		return fmt.Errorf("addCompanyWatch: remove: %v", err)
 	}
@@ -34,17 +44,25 @@ func addCompanyWatch(ctx context.Context, api *moov.APIClient, id string, webhoo
 
 func addCustomerWatch(ctx context.Context, api *moov.APIClient, id string, webhook string) error {
 	// add watch
-	watch, resp, err := api.OFACApi.AddOFACCustomerWatch(ctx, id, moov.WatchRequest{
+	req := moov.WatchRequest{
 		AuthToken: base.ID(),
 		Webhook:   webhook,
-	}, nil)
+	}
+	opts := &moov.AddOFACCustomerWatchOpts{
+		XRequestID: optional.NewString(*flagRequestID),
+		XUserID:    optional.NewString(*flagUserID),
+	}
+	watch, resp, err := api.OFACApi.AddOFACCustomerWatch(ctx, id, req, opts)
 	if err != nil {
 		return fmt.Errorf("addCustomerWatch: add: %v", err)
 	}
 	resp.Body.Close()
 
-	// cleanup watch
-	resp, err = api.OFACApi.RemoveOFACCustomerWatch(ctx, id, watch.WatchID, nil)
+	// remove watch
+	resp, err = api.OFACApi.RemoveOFACCustomerWatch(ctx, id, watch.WatchID, &moov.RemoveOFACCustomerWatchOpts{
+		XRequestID: optional.NewString(*flagRequestID),
+		XUserID:    optional.NewString(*flagUserID),
+	})
 	if err != nil {
 		return fmt.Errorf("addCustomerWatch: remove: %v", err)
 	}

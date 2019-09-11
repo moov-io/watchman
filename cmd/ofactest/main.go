@@ -48,6 +48,9 @@ var (
 	flagApiAddress = flag.String("address", defaultApiAddress, "Moov API address")
 	flagLocal      = flag.Bool("local", false, "Use local HTTP addresses")
 	flagWebhook    = flag.String("webhook", "https://moov.io/ofac", "Secure HTTP address for webhooks")
+
+	flagRequestID = flag.String("request-id", "", "Override what is set for the X-Request-ID HTTP header")
+	flagUserID    = flag.String("user-id", "", "Override what is set for the X-User-ID HTTP header")
 )
 
 func main() {
@@ -74,7 +77,7 @@ func main() {
 		conf.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", v))
 	} else {
 		if local := *flagLocal; !local {
-			log.Fatal("[FAILURE] no OAuth token provided")
+			log.Fatal("[FAILURE] no OAuth token provided (try adding -local for http://localhost requests)")
 		}
 	}
 
@@ -168,9 +171,17 @@ func ping(ctx context.Context, api *moov.APIClient) error {
 }
 
 func latestDownload(ctx context.Context, api *moov.APIClient) (time.Time, error) {
-	downloads, resp, err := api.OFACApi.GetLatestDownloads(ctx, &moov.GetLatestDownloadsOpts{
+	opts := &moov.GetLatestDownloadsOpts{
 		Limit: optional.NewInt32(1),
-	})
+	}
+	if *flagRequestID != "" {
+		opts.XRequestID = optional.NewString(*flagRequestID)
+	}
+	if *flagUserID != "" {
+		opts.XUserID = optional.NewString(*flagUserID)
+	}
+
+	downloads, resp, err := api.OFACApi.GetLatestDownloads(ctx, opts)
 	if err != nil {
 		return time.Time{}, err
 	}
