@@ -188,6 +188,10 @@ func getCompany(logger log.Logger, searcher *searcher, companyRepo companyReposi
 			moovhttp.Problem(w, err)
 			return
 		}
+		if requestID := moovhttp.GetRequestID(r); requestID != "" {
+			userID := moovhttp.GetUserID(r)
+			logger.Log("companies", fmt.Sprintf("getting companies=%s", id), "requestID", requestID, "userID", userID)
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(company)
@@ -233,6 +237,10 @@ func updateCompanyStatus(logger log.Logger, searcher *searcher, companyRepo comp
 				moovhttp.Problem(w, err)
 				return
 			}
+			if requestID := moovhttp.GetRequestID(r); requestID != "" {
+				userID := moovhttp.GetUserID(r)
+				logger.Log("companies", fmt.Sprintf("updated company=%s status", companyID), "requestID", requestID, "userID", userID)
+			}
 			w.WriteHeader(http.StatusOK)
 			return
 		default:
@@ -273,6 +281,11 @@ func addCompanyWatch(logger log.Logger, searcher *searcher, repo watchRepository
 			return
 		}
 
+		if requestID := moovhttp.GetRequestID(r); requestID != "" {
+			userID := moovhttp.GetUserID(r)
+			logger.Log("companies", fmt.Sprintf("added watch for company=%s", companyID), "requestID", requestID, "userID", userID)
+		}
+
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(companyWatchResponse{watchID})
@@ -290,6 +303,10 @@ func removeCompanyWatch(logger log.Logger, searcher *searcher, repo watchReposit
 		if err := repo.removeCompanyWatch(companyID, watchID); err != nil {
 			moovhttp.Problem(w, err)
 			return
+		}
+		if requestID := moovhttp.GetRequestID(r); requestID != "" {
+			userID := moovhttp.GetUserID(r)
+			logger.Log("companies", fmt.Sprintf("removed company=%s watch=%s", companyID, watchID), "requestID", requestID, "userID", userID)
 		}
 		w.WriteHeader(http.StatusOK)
 	}
@@ -325,6 +342,11 @@ func addCompanyNameWatch(logger log.Logger, searcher *searcher, repo watchReposi
 			return
 		}
 
+		if requestID := moovhttp.GetRequestID(r); requestID != "" {
+			userID := moovhttp.GetUserID(r)
+			logger.Log("companies", "added company=%s name watch", "requestID", requestID, "userID", userID)
+		}
+
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(companyWatchResponse{watchID})
@@ -343,6 +365,12 @@ func removeCompanyNameWatch(logger log.Logger, searcher *searcher, repo watchRep
 			moovhttp.Problem(w, err)
 			return
 		}
+
+		if requestID := moovhttp.GetRequestID(r); requestID != "" {
+			userID := moovhttp.GetUserID(r)
+			logger.Log("companies", "removed company=%s name watch", "requestID", requestID, "userID", userID)
+		}
+
 		w.WriteHeader(http.StatusOK)
 	}
 }
