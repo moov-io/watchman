@@ -132,7 +132,7 @@ func TestCompany_get(t *testing.T) {
 		defer watchRepo.close()
 
 		router := mux.NewRouter()
-		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		addCompanyRoutes(log.NewNopLogger(), router, companySearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -197,7 +197,7 @@ func TestCompany_addWatch(t *testing.T) {
 		defer watchRepo.close()
 
 		router := mux.NewRouter()
-		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		addCompanyRoutes(log.NewNopLogger(), router, companySearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -234,7 +234,7 @@ func TestCompany_addWatchNoBody(t *testing.T) {
 	defer watchRepo.close()
 
 	router := mux.NewRouter()
-	addCompanyRoutes(nil, router, companySearcher, nil, watchRepo)
+	addCompanyRoutes(log.NewNopLogger(), router, companySearcher, nil, watchRepo)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -259,7 +259,7 @@ func TestCompany_addWatchMissingAuthToken(t *testing.T) {
 
 		// Setup test HTTP server
 		router := mux.NewRouter()
-		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		addCompanyRoutes(log.NewNopLogger(), router, companySearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -292,7 +292,7 @@ func TestCompany_addNameWatch(t *testing.T) {
 		defer watchRepo.close()
 
 		router := mux.NewRouter()
-		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		addCompanyRoutes(log.NewNopLogger(), router, companySearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -332,7 +332,7 @@ func TestCompany_addCompanyNameWatchNoBody(t *testing.T) {
 		defer watchRepo.close()
 
 		router := mux.NewRouter()
-		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		addCompanyRoutes(log.NewNopLogger(), router, companySearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -380,7 +380,7 @@ func TestCompany_updateUnsafe(t *testing.T) {
 		defer watchRepo.close()
 
 		router := mux.NewRouter()
-		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		addCompanyRoutes(log.NewNopLogger(), router, companySearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -414,7 +414,7 @@ func TestCompany_updateException(t *testing.T) {
 		defer watchRepo.close()
 
 		router := mux.NewRouter()
-		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		addCompanyRoutes(log.NewNopLogger(), router, companySearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -448,7 +448,7 @@ func TestCompany_updateUnknown(t *testing.T) {
 		defer watchRepo.close()
 
 		router := mux.NewRouter()
-		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		addCompanyRoutes(log.NewNopLogger(), router, companySearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -479,7 +479,7 @@ func TestCompany_updateNoUserId(t *testing.T) {
 		defer watchRepo.close()
 
 		router := mux.NewRouter()
-		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		addCompanyRoutes(log.NewNopLogger(), router, companySearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -511,7 +511,7 @@ func TestCompany_updateNoBody(t *testing.T) {
 		defer watchRepo.close()
 
 		router := mux.NewRouter()
-		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		addCompanyRoutes(log.NewNopLogger(), router, companySearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -543,7 +543,7 @@ func TestCompany_removeWatch(t *testing.T) {
 		defer watchRepo.close()
 
 		router := mux.NewRouter()
-		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		addCompanyRoutes(log.NewNopLogger(), router, companySearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -575,7 +575,7 @@ func TestCompany_removeNameWatch(t *testing.T) {
 		defer watchRepo.close()
 
 		router := mux.NewRouter()
-		addCompanyRoutes(nil, router, companySearcher, repo, watchRepo)
+		addCompanyRoutes(log.NewNopLogger(), router, companySearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 

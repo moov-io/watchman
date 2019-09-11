@@ -123,7 +123,7 @@ func TestCustomer_get(t *testing.T) {
 		defer watchRepo.close()
 
 		router := mux.NewRouter()
-		addCustomerRoutes(nil, router, customerSearcher, repo, watchRepo)
+		addCustomerRoutes(log.NewNopLogger(), router, customerSearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -199,7 +199,7 @@ func TestCustomer_addWatch(t *testing.T) {
 		defer watchRepo.close()
 
 		router := mux.NewRouter()
-		addCustomerRoutes(nil, router, customerSearcher, repo, watchRepo)
+		addCustomerRoutes(log.NewNopLogger(), router, customerSearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -236,7 +236,7 @@ func TestCustomer_addWatchNoBody(t *testing.T) {
 	defer watchRepo.close()
 
 	router := mux.NewRouter()
-	addCustomerRoutes(nil, router, customerSearcher, nil, watchRepo)
+	addCustomerRoutes(log.NewNopLogger(), router, customerSearcher, nil, watchRepo)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -261,7 +261,7 @@ func TestCustomer_addWatchMissingAuthToken(t *testing.T) {
 
 		// Setup test HTTP server
 		router := mux.NewRouter()
-		addCustomerRoutes(nil, router, customerSearcher, repo, watchRepo)
+		addCustomerRoutes(log.NewNopLogger(), router, customerSearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -294,7 +294,7 @@ func TestCustomer_addNameWatch(t *testing.T) {
 		defer watchRepo.close()
 
 		router := mux.NewRouter()
-		addCustomerRoutes(nil, router, customerSearcher, repo, watchRepo)
+		addCustomerRoutes(log.NewNopLogger(), router, customerSearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -334,7 +334,7 @@ func TestCustomer_addCustomerNameWatchNoBody(t *testing.T) {
 		defer watchRepo.close()
 
 		router := mux.NewRouter()
-		addCustomerRoutes(nil, router, customerSearcher, repo, watchRepo)
+		addCustomerRoutes(log.NewNopLogger(), router, customerSearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -381,7 +381,7 @@ func TestCustomer_updateUnsafe(t *testing.T) {
 		defer watchRepo.close()
 
 		router := mux.NewRouter()
-		addCustomerRoutes(nil, router, customerSearcher, repo, watchRepo)
+		addCustomerRoutes(log.NewNopLogger(), router, customerSearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -414,7 +414,7 @@ func TestCustomer_updateException(t *testing.T) {
 		defer watchRepo.close()
 
 		router := mux.NewRouter()
-		addCustomerRoutes(nil, router, customerSearcher, repo, watchRepo)
+		addCustomerRoutes(log.NewNopLogger(), router, customerSearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -447,7 +447,7 @@ func TestCustomer_updateUnknown(t *testing.T) {
 		defer watchRepo.close()
 
 		router := mux.NewRouter()
-		addCustomerRoutes(nil, router, customerSearcher, repo, watchRepo)
+		addCustomerRoutes(log.NewNopLogger(), router, customerSearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -478,7 +478,7 @@ func TestCustomer_updateNoUserId(t *testing.T) {
 		defer watchRepo.close()
 
 		router := mux.NewRouter()
-		addCustomerRoutes(nil, router, customerSearcher, repo, watchRepo)
+		addCustomerRoutes(log.NewNopLogger(), router, customerSearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -510,7 +510,7 @@ func TestCustomer_updateNoBody(t *testing.T) {
 		defer watchRepo.close()
 
 		router := mux.NewRouter()
-		addCustomerRoutes(nil, router, customerSearcher, repo, watchRepo)
+		addCustomerRoutes(log.NewNopLogger(), router, customerSearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -542,7 +542,7 @@ func TestCustomer_removeWatch(t *testing.T) {
 		defer watchRepo.close()
 
 		router := mux.NewRouter()
-		addCustomerRoutes(nil, router, customerSearcher, repo, watchRepo)
+		addCustomerRoutes(log.NewNopLogger(), router, customerSearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -574,7 +574,7 @@ func TestCustomer_removeNameWatch(t *testing.T) {
 		defer watchRepo.close()
 
 		router := mux.NewRouter()
-		addCustomerRoutes(nil, router, customerSearcher, repo, watchRepo)
+		addCustomerRoutes(log.NewNopLogger(), router, customerSearcher, repo, watchRepo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 
