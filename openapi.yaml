@@ -36,7 +36,17 @@ paths:
       summary: Get information about a company, trust or organization such as addresses, alternate names, and remarks.
       operationId: getOFACCompany
       parameters:
-        - $ref: '#/components/parameters/requestID'
+        - name: X-Request-ID
+          in: header
+          description: Optional Request ID allows application developer to trace requests through the systems logs
+          schema:
+            type: string
+            example: 94c825ee
+        - name: X-User-ID
+          in: header
+          description: Optional User ID used to perform this search
+          schema:
+            type: string
         - name: companyID
           in: path
           description: Company ID
@@ -57,7 +67,17 @@ paths:
       summary: Update a Companies sanction status to always block or always allow transactions.
       operationId: updateOFACCompanyStatus
       parameters:
-        - $ref: '#/components/parameters/requestID'
+        - name: X-Request-ID
+          in: header
+          description: Optional Request ID allows application developer to trace requests through the systems logs
+          schema:
+            type: string
+            example: 94c825ee
+        - name: X-User-ID
+          in: header
+          description: Optional User ID used to perform this search
+          schema:
+            type: string
         - name: companyID
           in: path
           description: Company ID
@@ -81,7 +101,17 @@ paths:
       summary: Add OFAC watch on a Company
       operationId: addOFACCompanyWatch
       parameters:
-        - $ref: '#/components/parameters/requestID'
+        - name: X-Request-ID
+          in: header
+          description: Optional Request ID allows application developer to trace requests through the systems logs
+          schema:
+            type: string
+            example: 94c825ee
+        - name: X-User-ID
+          in: header
+          description: Optional User ID used to perform this search
+          schema:
+            type: string
         - name: companyID
           in: path
           description: Company ID
@@ -111,7 +141,17 @@ paths:
       summary: Remove company watch
       operationId: removeOFACCompanyWatch
       parameters:
-        - $ref: '#/components/parameters/requestID'
+        - name: X-Request-ID
+          in: header
+          description: Optional Request ID allows application developer to trace requests through the systems logs
+          schema:
+            type: string
+            example: 94c825ee
+        - name: X-User-ID
+          in: header
+          description: Optional User ID used to perform this search
+          schema:
+            type: string
         - name: companyID
           in: path
           description: Company ID
@@ -136,7 +176,17 @@ paths:
       summary: Add company watch by name. The match percentage will be included in the webhook's JSON payload.
       operationId: addOFACCompanyNameWatch
       parameters:
-        - $ref: '#/components/parameters/requestID'
+        - name: X-Request-ID
+          in: header
+          description: Optional Request ID allows application developer to trace requests through the systems logs
+          schema:
+            type: string
+            example: 94c825ee
+        - name: X-User-ID
+          in: header
+          description: Optional User ID used to perform this search
+          schema:
+            type: string
         - name: name
           in: query
           required: true
@@ -164,7 +214,17 @@ paths:
       summary: Remove a Company name watch
       operationId: removeOFACCompanyNameWatch
       parameters:
-        - $ref: '#/components/parameters/requestID'
+        - name: X-Request-ID
+          in: header
+          description: Optional Request ID allows application developer to trace requests through the systems logs
+          schema:
+            type: string
+            example: 94c825ee
+        - name: X-User-ID
+          in: header
+          description: Optional User ID used to perform this search
+          schema:
+            type: string
         - name: watchID
           in: path
           description: Watch ID, used to identify a specific watch
@@ -191,7 +251,17 @@ paths:
       summary: Get information about a customer, addresses, alternate names, and their SDN metadata.
       operationId: getOFACCustomer
       parameters:
-        - $ref: '#/components/parameters/requestID'
+        - name: X-Request-ID
+          in: header
+          description: Optional Request ID allows application developer to trace requests through the systems logs
+          schema:
+            type: string
+            example: 94c825ee
+        - name: X-User-ID
+          in: header
+          description: Optional User ID used to perform this search
+          schema:
+            type: string
         - name: customerID
           in: path
           description: Customer ID
@@ -212,7 +282,17 @@ paths:
       summary: Update a Customer's sanction status to always block or always allow transactions.
       operationId: updateOFACCustomerStatus
       parameters:
-        - $ref: '#/components/parameters/requestID'
+        - name: X-Request-ID
+          in: header
+          description: Optional Request ID allows application developer to trace requests through the systems logs
+          schema:
+            type: string
+            example: 94c825ee
+        - name: X-User-ID
+          in: header
+          description: Optional User ID used to perform this search
+          schema:
+            type: string
         - name: customerID
           in: path
           description: Customer ID
@@ -236,7 +316,17 @@ paths:
       summary: Add OFAC watch on a Customer
       operationId: addOFACCustomerWatch
       parameters:
-        - $ref: '#/components/parameters/requestID'
+        - name: X-Request-ID
+          in: header
+          description: Optional Request ID allows application developer to trace requests through the systems logs
+          schema:
+            type: string
+            example: 94c825ee
+        - name: X-User-ID
+          in: header
+          description: Optional User ID used to perform this search
+          schema:
+            type: string
         - name: customerID
           in: path
           description: Customer ID
@@ -266,7 +356,17 @@ paths:
       summary: Remove customer watch
       operationId: removeOFACCustomerWatch
       parameters:
-        - $ref: '#/components/parameters/requestID'
+        - name: X-Request-ID
+          in: header
+          description: Optional Request ID allows application developer to trace requests through the systems logs
+          schema:
+            type: string
+            example: 94c825ee
+        - name: X-User-ID
+          in: header
+          description: Optional User ID used to perform this search
+          schema:
+            type: string
         - name: customerID
           in: path
           description: Customer ID
@@ -291,7 +391,17 @@ paths:
       summary: Add customer watch by name. The match percentage will be included in the webhook's JSON payload.
       operationId: addOFACCustomerNameWatch
       parameters:
-        - $ref: '#/components/parameters/requestID'
+        - name: X-Request-ID
+          in: header
+          description: Optional Request ID allows application developer to trace requests through the systems logs
+          schema:
+            type: string
+            example: 94c825ee
+        - name: X-User-ID
+          in: header
+          description: Optional User ID used to perform this search
+          schema:
+            type: string
         - name: name
           in: query
           required: true
@@ -319,7 +429,17 @@ paths:
       summary: Remove a Customer name watch
       operationId: removeOFACCustomerNameWatch
       parameters:
-        - $ref: '#/components/parameters/requestID'
+        - name: X-Request-ID
+          in: header
+          description: Optional Request ID allows application developer to trace requests through the systems logs
+          schema:
+            type: string
+            example: 94c825ee
+        - name: X-User-ID
+          in: header
+          description: Optional User ID used to perform this search
+          schema:
+            type: string
         - name: watchID
           in: path
           description: Watch ID, used to identify a specific watch
@@ -346,7 +466,17 @@ paths:
       summary: Specially designated national
       operationId: getSDN
       parameters:
-        - $ref: '#/components/parameters/requestID'
+        - name: X-Request-ID
+          in: header
+          description: Optional Request ID allows application developer to trace requests through the systems logs
+          schema:
+            type: string
+            example: 94c825ee
+        - name: X-User-ID
+          in: header
+          description: Optional User ID used to perform this search
+          schema:
+            type: string
         - in: path
           name: sdnID
           required: true
@@ -368,7 +498,17 @@ paths:
       summary: Get alternate names for a given SDN
       operationId: getSDNAltNames
       parameters:
-        - $ref: '#/components/parameters/requestID'
+        - name: X-Request-ID
+          in: header
+          description: Optional Request ID allows application developer to trace requests through the systems logs
+          schema:
+            type: string
+            example: 94c825ee
+        - name: X-User-ID
+          in: header
+          description: Optional User ID used to perform this search
+          schema:
+            type: string
         - in: path
           name: sdnID
           description: SDN ID
@@ -390,7 +530,17 @@ paths:
       summary: Get addresses for a given SDN
       operationId: getSDNAddresses
       parameters:
-        - $ref: '#/components/parameters/requestID'
+        - name: X-Request-ID
+          in: header
+          description: Optional Request ID allows application developer to trace requests through the systems logs
+          schema:
+            type: string
+            example: 94c825ee
+        - name: X-User-ID
+          in: header
+          description: Optional User ID used to perform this search
+          schema:
+            type: string
         - in: path
           name: sdnID
           description: SDN ID
@@ -413,7 +563,17 @@ paths:
       summary: Search SDN names and metadata
       operationId: search
       parameters:
-        - $ref: '#/components/parameters/requestID'
+        - name: X-Request-ID
+          in: header
+          description: Optional Request ID allows application developer to trace requests through the systems logs
+          schema:
+            type: string
+            example: 94c825ee
+        - name: X-User-ID
+          in: header
+          description: Optional User ID used to perform this search
+          schema:
+            type: string
         - name: q
           in: query
           schema:
@@ -490,6 +650,17 @@ paths:
       summary: Return list of recent downloads of OFAC data
       operationId: getLatestDownloads
       parameters:
+        - name: X-Request-ID
+          in: header
+          description: Optional Request ID allows application developer to trace requests through the systems logs
+          schema:
+            type: string
+            example: 94c825ee
+        - name: X-User-ID
+          in: header
+          description: Optional User ID used to perform this search
+          schema:
+            type: string
         - name: limit
           in: query
           schema:
@@ -805,11 +976,3 @@ components:
           type: string
           format: date-time
           example: 2006-01-02T15:04:05Z07:00
-  parameters:
-    requestID:
-      in: header
-      name: X-Request-ID
-      description: Optional Request ID allows application developer to trace requests through the systems logs
-      schema:
-        type: string
-        example: 94c825ee

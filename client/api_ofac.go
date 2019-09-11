@@ -33,11 +33,13 @@ OFACApiService Add company watch by name. The match percentage will be included 
  * @param watchRequest
  * @param optional nil or *AddOFACCompanyNameWatchOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
+ * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 @return Watch
 */
 
 type AddOFACCompanyNameWatchOpts struct {
 	XRequestID optional.String
+	XUserID    optional.String
 }
 
 func (a *OFACApiService) AddOFACCompanyNameWatch(ctx context.Context, name string, watchRequest WatchRequest, localVarOptionals *AddOFACCompanyNameWatchOpts) (Watch, *http.Response, error) {
@@ -77,6 +79,9 @@ func (a *OFACApiService) AddOFACCompanyNameWatch(ctx context.Context, name strin
 	}
 	if localVarOptionals != nil && localVarOptionals.XRequestID.IsSet() {
 		localVarHeaderParams["X-Request-ID"] = parameterToString(localVarOptionals.XRequestID.Value(), "")
+	}
+	if localVarOptionals != nil && localVarOptionals.XUserID.IsSet() {
+		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
 	}
 	// body params
 	localVarPostBody = &watchRequest
@@ -133,11 +138,13 @@ OFACApiService Add OFAC watch on a Company
  * @param watchRequest
  * @param optional nil or *AddOFACCompanyWatchOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
+ * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 @return Watch
 */
 
 type AddOFACCompanyWatchOpts struct {
 	XRequestID optional.String
+	XUserID    optional.String
 }
 
 func (a *OFACApiService) AddOFACCompanyWatch(ctx context.Context, companyID string, watchRequest WatchRequest, localVarOptionals *AddOFACCompanyWatchOpts) (Watch, *http.Response, error) {
@@ -177,6 +184,9 @@ func (a *OFACApiService) AddOFACCompanyWatch(ctx context.Context, companyID stri
 	}
 	if localVarOptionals != nil && localVarOptionals.XRequestID.IsSet() {
 		localVarHeaderParams["X-Request-ID"] = parameterToString(localVarOptionals.XRequestID.Value(), "")
+	}
+	if localVarOptionals != nil && localVarOptionals.XUserID.IsSet() {
+		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
 	}
 	// body params
 	localVarPostBody = &watchRequest
@@ -233,11 +243,13 @@ OFACApiService Add customer watch by name. The match percentage will be included
  * @param watchRequest
  * @param optional nil or *AddOFACCustomerNameWatchOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
+ * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 @return Watch
 */
 
 type AddOFACCustomerNameWatchOpts struct {
 	XRequestID optional.String
+	XUserID    optional.String
 }
 
 func (a *OFACApiService) AddOFACCustomerNameWatch(ctx context.Context, name string, watchRequest WatchRequest, localVarOptionals *AddOFACCustomerNameWatchOpts) (Watch, *http.Response, error) {
@@ -277,6 +289,9 @@ func (a *OFACApiService) AddOFACCustomerNameWatch(ctx context.Context, name stri
 	}
 	if localVarOptionals != nil && localVarOptionals.XRequestID.IsSet() {
 		localVarHeaderParams["X-Request-ID"] = parameterToString(localVarOptionals.XRequestID.Value(), "")
+	}
+	if localVarOptionals != nil && localVarOptionals.XUserID.IsSet() {
+		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
 	}
 	// body params
 	localVarPostBody = &watchRequest
@@ -333,11 +348,13 @@ OFACApiService Add OFAC watch on a Customer
  * @param watchRequest
  * @param optional nil or *AddOFACCustomerWatchOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
+ * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 @return Watch
 */
 
 type AddOFACCustomerWatchOpts struct {
 	XRequestID optional.String
+	XUserID    optional.String
 }
 
 func (a *OFACApiService) AddOFACCustomerWatch(ctx context.Context, customerID string, watchRequest WatchRequest, localVarOptionals *AddOFACCustomerWatchOpts) (Watch, *http.Response, error) {
@@ -377,6 +394,9 @@ func (a *OFACApiService) AddOFACCustomerWatch(ctx context.Context, customerID st
 	}
 	if localVarOptionals != nil && localVarOptionals.XRequestID.IsSet() {
 		localVarHeaderParams["X-Request-ID"] = parameterToString(localVarOptionals.XRequestID.Value(), "")
+	}
+	if localVarOptionals != nil && localVarOptionals.XUserID.IsSet() {
+		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
 	}
 	// body params
 	localVarPostBody = &watchRequest
@@ -430,12 +450,16 @@ func (a *OFACApiService) AddOFACCustomerWatch(ctx context.Context, customerID st
 OFACApiService Return list of recent downloads of OFAC data
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *GetLatestDownloadsOpts - Optional Parameters:
+ * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
+ * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
  * @param "Limit" (optional.Int32) -  Maximum results returned by a search
 @return []Download
 */
 
 type GetLatestDownloadsOpts struct {
-	Limit optional.Int32
+	XRequestID optional.String
+	XUserID    optional.String
+	Limit      optional.Int32
 }
 
 func (a *OFACApiService) GetLatestDownloads(ctx context.Context, localVarOptionals *GetLatestDownloadsOpts) ([]Download, *http.Response, error) {
@@ -474,6 +498,12 @@ func (a *OFACApiService) GetLatestDownloads(ctx context.Context, localVarOptiona
 	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
 	if localVarHttpHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
+	}
+	if localVarOptionals != nil && localVarOptionals.XRequestID.IsSet() {
+		localVarHeaderParams["X-Request-ID"] = parameterToString(localVarOptionals.XRequestID.Value(), "")
+	}
+	if localVarOptionals != nil && localVarOptionals.XUserID.IsSet() {
+		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
 	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
@@ -527,11 +557,13 @@ OFACApiService Get information about a company, trust or organization such as ad
  * @param companyID Company ID
  * @param optional nil or *GetOFACCompanyOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
+ * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 @return OfacCompany
 */
 
 type GetOFACCompanyOpts struct {
 	XRequestID optional.String
+	XUserID    optional.String
 }
 
 func (a *OFACApiService) GetOFACCompany(ctx context.Context, companyID string, localVarOptionals *GetOFACCompanyOpts) (OfacCompany, *http.Response, error) {
@@ -571,6 +603,9 @@ func (a *OFACApiService) GetOFACCompany(ctx context.Context, companyID string, l
 	}
 	if localVarOptionals != nil && localVarOptionals.XRequestID.IsSet() {
 		localVarHeaderParams["X-Request-ID"] = parameterToString(localVarOptionals.XRequestID.Value(), "")
+	}
+	if localVarOptionals != nil && localVarOptionals.XUserID.IsSet() {
+		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
 	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
@@ -624,11 +659,13 @@ OFACApiService Get information about a customer, addresses, alternate names, and
  * @param customerID Customer ID
  * @param optional nil or *GetOFACCustomerOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
+ * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 @return OfacCustomer
 */
 
 type GetOFACCustomerOpts struct {
 	XRequestID optional.String
+	XUserID    optional.String
 }
 
 func (a *OFACApiService) GetOFACCustomer(ctx context.Context, customerID string, localVarOptionals *GetOFACCustomerOpts) (OfacCustomer, *http.Response, error) {
@@ -668,6 +705,9 @@ func (a *OFACApiService) GetOFACCustomer(ctx context.Context, customerID string,
 	}
 	if localVarOptionals != nil && localVarOptionals.XRequestID.IsSet() {
 		localVarHeaderParams["X-Request-ID"] = parameterToString(localVarOptionals.XRequestID.Value(), "")
+	}
+	if localVarOptionals != nil && localVarOptionals.XUserID.IsSet() {
+		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
 	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
@@ -721,11 +761,13 @@ OFACApiService Specially designated national
  * @param sdnID SDN ID
  * @param optional nil or *GetSDNOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
+ * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 @return Sdn
 */
 
 type GetSDNOpts struct {
 	XRequestID optional.String
+	XUserID    optional.String
 }
 
 func (a *OFACApiService) GetSDN(ctx context.Context, sdnID string, localVarOptionals *GetSDNOpts) (Sdn, *http.Response, error) {
@@ -765,6 +807,9 @@ func (a *OFACApiService) GetSDN(ctx context.Context, sdnID string, localVarOptio
 	}
 	if localVarOptionals != nil && localVarOptionals.XRequestID.IsSet() {
 		localVarHeaderParams["X-Request-ID"] = parameterToString(localVarOptionals.XRequestID.Value(), "")
+	}
+	if localVarOptionals != nil && localVarOptionals.XUserID.IsSet() {
+		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
 	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
@@ -818,11 +863,13 @@ OFACApiService Get addresses for a given SDN
  * @param sdnID SDN ID
  * @param optional nil or *GetSDNAddressesOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
+ * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 @return []Address
 */
 
 type GetSDNAddressesOpts struct {
 	XRequestID optional.String
+	XUserID    optional.String
 }
 
 func (a *OFACApiService) GetSDNAddresses(ctx context.Context, sdnID string, localVarOptionals *GetSDNAddressesOpts) ([]Address, *http.Response, error) {
@@ -862,6 +909,9 @@ func (a *OFACApiService) GetSDNAddresses(ctx context.Context, sdnID string, loca
 	}
 	if localVarOptionals != nil && localVarOptionals.XRequestID.IsSet() {
 		localVarHeaderParams["X-Request-ID"] = parameterToString(localVarOptionals.XRequestID.Value(), "")
+	}
+	if localVarOptionals != nil && localVarOptionals.XUserID.IsSet() {
+		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
 	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
@@ -915,11 +965,13 @@ OFACApiService Get alternate names for a given SDN
  * @param sdnID SDN ID
  * @param optional nil or *GetSDNAltNamesOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
+ * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 @return []Alt
 */
 
 type GetSDNAltNamesOpts struct {
 	XRequestID optional.String
+	XUserID    optional.String
 }
 
 func (a *OFACApiService) GetSDNAltNames(ctx context.Context, sdnID string, localVarOptionals *GetSDNAltNamesOpts) ([]Alt, *http.Response, error) {
@@ -959,6 +1011,9 @@ func (a *OFACApiService) GetSDNAltNames(ctx context.Context, sdnID string, local
 	}
 	if localVarOptionals != nil && localVarOptionals.XRequestID.IsSet() {
 		localVarHeaderParams["X-Request-ID"] = parameterToString(localVarOptionals.XRequestID.Value(), "")
+	}
+	if localVarOptionals != nil && localVarOptionals.XUserID.IsSet() {
+		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
 	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
@@ -1077,10 +1132,12 @@ OFACApiService Remove a Company name watch
  * @param name Company name watch
  * @param optional nil or *RemoveOFACCompanyNameWatchOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
+ * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 */
 
 type RemoveOFACCompanyNameWatchOpts struct {
 	XRequestID optional.String
+	XUserID    optional.String
 }
 
 func (a *OFACApiService) RemoveOFACCompanyNameWatch(ctx context.Context, watchID string, name string, localVarOptionals *RemoveOFACCompanyNameWatchOpts) (*http.Response, error) {
@@ -1121,6 +1178,9 @@ func (a *OFACApiService) RemoveOFACCompanyNameWatch(ctx context.Context, watchID
 	if localVarOptionals != nil && localVarOptionals.XRequestID.IsSet() {
 		localVarHeaderParams["X-Request-ID"] = parameterToString(localVarOptionals.XRequestID.Value(), "")
 	}
+	if localVarOptionals != nil && localVarOptionals.XUserID.IsSet() {
+		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
+	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return nil, err
@@ -1155,10 +1215,12 @@ OFACApiService Remove company watch
  * @param watchID Watch ID, used to identify a specific watch
  * @param optional nil or *RemoveOFACCompanyWatchOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
+ * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 */
 
 type RemoveOFACCompanyWatchOpts struct {
 	XRequestID optional.String
+	XUserID    optional.String
 }
 
 func (a *OFACApiService) RemoveOFACCompanyWatch(ctx context.Context, companyID string, watchID string, localVarOptionals *RemoveOFACCompanyWatchOpts) (*http.Response, error) {
@@ -1199,6 +1261,9 @@ func (a *OFACApiService) RemoveOFACCompanyWatch(ctx context.Context, companyID s
 	if localVarOptionals != nil && localVarOptionals.XRequestID.IsSet() {
 		localVarHeaderParams["X-Request-ID"] = parameterToString(localVarOptionals.XRequestID.Value(), "")
 	}
+	if localVarOptionals != nil && localVarOptionals.XUserID.IsSet() {
+		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
+	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return nil, err
@@ -1233,10 +1298,12 @@ OFACApiService Remove a Customer name watch
  * @param name Customer or Company name watch
  * @param optional nil or *RemoveOFACCustomerNameWatchOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
+ * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 */
 
 type RemoveOFACCustomerNameWatchOpts struct {
 	XRequestID optional.String
+	XUserID    optional.String
 }
 
 func (a *OFACApiService) RemoveOFACCustomerNameWatch(ctx context.Context, watchID string, name string, localVarOptionals *RemoveOFACCustomerNameWatchOpts) (*http.Response, error) {
@@ -1277,6 +1344,9 @@ func (a *OFACApiService) RemoveOFACCustomerNameWatch(ctx context.Context, watchI
 	if localVarOptionals != nil && localVarOptionals.XRequestID.IsSet() {
 		localVarHeaderParams["X-Request-ID"] = parameterToString(localVarOptionals.XRequestID.Value(), "")
 	}
+	if localVarOptionals != nil && localVarOptionals.XUserID.IsSet() {
+		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
+	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return nil, err
@@ -1311,10 +1381,12 @@ OFACApiService Remove customer watch
  * @param watchID Watch ID, used to identify a specific watch
  * @param optional nil or *RemoveOFACCustomerWatchOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
+ * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 */
 
 type RemoveOFACCustomerWatchOpts struct {
 	XRequestID optional.String
+	XUserID    optional.String
 }
 
 func (a *OFACApiService) RemoveOFACCustomerWatch(ctx context.Context, customerID string, watchID string, localVarOptionals *RemoveOFACCustomerWatchOpts) (*http.Response, error) {
@@ -1355,6 +1427,9 @@ func (a *OFACApiService) RemoveOFACCustomerWatch(ctx context.Context, customerID
 	if localVarOptionals != nil && localVarOptionals.XRequestID.IsSet() {
 		localVarHeaderParams["X-Request-ID"] = parameterToString(localVarOptionals.XRequestID.Value(), "")
 	}
+	if localVarOptionals != nil && localVarOptionals.XUserID.IsSet() {
+		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
+	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return nil, err
@@ -1387,6 +1462,7 @@ OFACApiService Search SDN names and metadata
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *SearchOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
+ * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
  * @param "Q" (optional.String) -  Search across Name, Alt Names, and Address fields for all SDN entries. Entries may be returned in all response sub-objects.
  * @param "Name" (optional.String) -  Name which could correspond to a human on the SDN list. Only SDN results will be returned.
  * @param "Address" (optional.String) -  Phsical address which could correspond to a human on the SDN list. Only Address results will be returned.
@@ -1402,6 +1478,7 @@ OFACApiService Search SDN names and metadata
 
 type SearchOpts struct {
 	XRequestID optional.String
+	XUserID    optional.String
 	Q          optional.String
 	Name       optional.String
 	Address    optional.String
@@ -1481,6 +1558,9 @@ func (a *OFACApiService) Search(ctx context.Context, localVarOptionals *SearchOp
 	if localVarOptionals != nil && localVarOptionals.XRequestID.IsSet() {
 		localVarHeaderParams["X-Request-ID"] = parameterToString(localVarOptionals.XRequestID.Value(), "")
 	}
+	if localVarOptionals != nil && localVarOptionals.XUserID.IsSet() {
+		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
+	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -1534,10 +1614,12 @@ OFACApiService Update a Companies sanction status to always block or always allo
  * @param updateCompanyStatus
  * @param optional nil or *UpdateOFACCompanyStatusOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
+ * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 */
 
 type UpdateOFACCompanyStatusOpts struct {
 	XRequestID optional.String
+	XUserID    optional.String
 }
 
 func (a *OFACApiService) UpdateOFACCompanyStatus(ctx context.Context, companyID string, updateCompanyStatus UpdateCompanyStatus, localVarOptionals *UpdateOFACCompanyStatusOpts) (*http.Response, error) {
@@ -1577,6 +1659,9 @@ func (a *OFACApiService) UpdateOFACCompanyStatus(ctx context.Context, companyID 
 	if localVarOptionals != nil && localVarOptionals.XRequestID.IsSet() {
 		localVarHeaderParams["X-Request-ID"] = parameterToString(localVarOptionals.XRequestID.Value(), "")
 	}
+	if localVarOptionals != nil && localVarOptionals.XUserID.IsSet() {
+		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
+	}
 	// body params
 	localVarPostBody = &updateCompanyStatus
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
@@ -1613,10 +1698,12 @@ OFACApiService Update a Customer's sanction status to always block or always all
  * @param updateCustomerStatus
  * @param optional nil or *UpdateOFACCustomerStatusOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
+ * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 */
 
 type UpdateOFACCustomerStatusOpts struct {
 	XRequestID optional.String
+	XUserID    optional.String
 }
 
 func (a *OFACApiService) UpdateOFACCustomerStatus(ctx context.Context, customerID string, updateCustomerStatus UpdateCustomerStatus, localVarOptionals *UpdateOFACCustomerStatusOpts) (*http.Response, error) {
@@ -1655,6 +1742,9 @@ func (a *OFACApiService) UpdateOFACCustomerStatus(ctx context.Context, customerI
 	}
 	if localVarOptionals != nil && localVarOptionals.XRequestID.IsSet() {
 		localVarHeaderParams["X-Request-ID"] = parameterToString(localVarOptionals.XRequestID.Value(), "")
+	}
+	if localVarOptionals != nil && localVarOptionals.XUserID.IsSet() {
+		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
 	}
 	// body params
 	localVarPostBody = &updateCustomerStatus
