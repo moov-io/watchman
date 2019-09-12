@@ -13,6 +13,7 @@ import (
 
 	"github.com/moov-io/ofac"
 
+	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
 )
 
@@ -21,7 +22,7 @@ func TestSearch__Address(t *testing.T) {
 	req := httptest.NewRequest("GET", "/search?address=ibex+house+minories&limit=1", nil)
 
 	router := mux.NewRouter()
-	addSearchRoutes(nil, router, addressSearcher)
+	addSearchRoutes(log.NewNopLogger(), router, addressSearcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -59,7 +60,7 @@ func TestSearch__AddressCountry(t *testing.T) {
 	req := httptest.NewRequest("GET", "/search?country=united+kingdom&limit=1", nil)
 
 	router := mux.NewRouter()
-	addSearchRoutes(nil, router, addressSearcher)
+	addSearchRoutes(log.NewNopLogger(), router, addressSearcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -77,7 +78,7 @@ func TestSearch__AddressMulti(t *testing.T) {
 	req := httptest.NewRequest("GET", "/search?address=ibex+house&country=united+kingdom&limit=1", nil)
 
 	router := mux.NewRouter()
-	addSearchRoutes(nil, router, addressSearcher)
+	addSearchRoutes(log.NewNopLogger(), router, addressSearcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -95,7 +96,7 @@ func TestSearch__AddressProvidence(t *testing.T) {
 	req := httptest.NewRequest("GET", "/search?address=ibex+house&country=united+kingdom&providence=london+ec3n+1DY&limit=1", nil)
 
 	router := mux.NewRouter()
-	addSearchRoutes(nil, router, addressSearcher)
+	addSearchRoutes(log.NewNopLogger(), router, addressSearcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -113,7 +114,7 @@ func TestSearch__AddressCity(t *testing.T) {
 	req := httptest.NewRequest("GET", "/search?address=ibex+house&country=united+kingdom&city=london+ec3n+1DY&limit=1", nil)
 
 	router := mux.NewRouter()
-	addSearchRoutes(nil, router, addressSearcher)
+	addSearchRoutes(log.NewNopLogger(), router, addressSearcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -131,7 +132,7 @@ func TestSearch__AddressState(t *testing.T) {
 	req := httptest.NewRequest("GET", "/search?address=ibex+house&country=united+kingdom&state=london+ec3n+1DY&limit=1", nil)
 
 	router := mux.NewRouter()
-	addSearchRoutes(nil, router, addressSearcher)
+	addSearchRoutes(log.NewNopLogger(), router, addressSearcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -156,7 +157,7 @@ func TestSearch__NameAndAltName(t *testing.T) {
 	}
 
 	router := mux.NewRouter()
-	addSearchRoutes(nil, router, s)
+	addSearchRoutes(log.NewNopLogger(), router, s)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -193,7 +194,7 @@ func TestSearch__Name(t *testing.T) {
 	req := httptest.NewRequest("GET", "/search?name=AL+ZAWAHIRI&limit=1", nil)
 
 	router := mux.NewRouter()
-	addSearchRoutes(nil, router, sdnSearcher)
+	addSearchRoutes(log.NewNopLogger(), router, sdnSearcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -221,7 +222,7 @@ func TestSearch__AltName(t *testing.T) {
 	req := httptest.NewRequest("GET", "/search?altName=sogo+KENKYUSHO&limit=1", nil)
 
 	router := mux.NewRouter()
-	addSearchRoutes(nil, router, altSearcher)
+	addSearchRoutes(log.NewNopLogger(), router, altSearcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 

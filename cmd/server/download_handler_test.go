@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/moov-io/base"
 	"github.com/moov-io/ofac/internal/database"
 
 	"github.com/go-kit/kit/log"
@@ -25,9 +26,11 @@ func TestDownload__manualRefreshPath(t *testing.T) {
 		searcher := &searcher{}
 
 		w := httptest.NewRecorder()
+
 		req := httptest.NewRequest("GET", "/data/refresh", nil)
-		logger := log.NewNopLogger()
-		manualRefreshHandler(logger, searcher, repo)(w, req)
+		req.Header.Set("x-request-id", base.ID())
+
+		manualRefreshHandler(log.NewNopLogger(), searcher, repo)(w, req)
 		w.Flush()
 
 		if w.Code != http.StatusOK {

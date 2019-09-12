@@ -18,10 +18,14 @@ import (
 // searchByName will attempt OFAC searches for the provided name and then load the SDN metadata
 // associated to the company/organization or individual.
 func searchByName(ctx context.Context, api *moov.APIClient, name string) (*moov.Sdn, error) {
-	search, resp, err := api.OFACApi.Search(ctx, &moov.SearchOpts{
-		Name:  optional.NewString(name),
-		Limit: optional.NewInt32(2),
-	})
+	opts := &moov.SearchOpts{
+		Limit:      optional.NewInt32(2),
+		Name:       optional.NewString(name),
+		XRequestID: optional.NewString(*flagRequestID),
+		XUserID:    optional.NewString(*flagUserID),
+	}
+
+	search, resp, err := api.OFACApi.Search(ctx, opts)
 	if err != nil {
 		return nil, fmt.Errorf("searchByName: %v", err)
 	}
@@ -47,10 +51,14 @@ func searchByName(ctx context.Context, api *moov.APIClient, name string) (*moov.
 // searchByAltName will attempt OFAC searches and retrieval of all alt names associated to the first result
 // for the provided altName and error if none are found.
 func searchByAltName(ctx context.Context, api *moov.APIClient, alt string) error {
-	search, resp, err := api.OFACApi.Search(ctx, &moov.SearchOpts{
-		AltName: optional.NewString(alt),
-		Limit:   optional.NewInt32(2),
-	})
+	opts := &moov.SearchOpts{
+		AltName:    optional.NewString(alt),
+		Limit:      optional.NewInt32(2),
+		XRequestID: optional.NewString(*flagRequestID),
+		XUserID:    optional.NewString(*flagUserID),
+	}
+
+	search, resp, err := api.OFACApi.Search(ctx, opts)
 	if err != nil {
 		return fmt.Errorf("searchByAltName: %v", err)
 	}
@@ -65,10 +73,14 @@ func searchByAltName(ctx context.Context, api *moov.APIClient, alt string) error
 // searchByAddress will attempt OFAC searches and retrieval of all addresses associated to the first result
 // for the provided address and error if none are found.
 func searchByAddress(ctx context.Context, api *moov.APIClient, address string) error {
-	search, resp, err := api.OFACApi.Search(ctx, &moov.SearchOpts{
-		Address: optional.NewString(address),
-		Limit:   optional.NewInt32(2),
-	})
+	opts := &moov.SearchOpts{
+		Address:    optional.NewString(address),
+		Limit:      optional.NewInt32(2),
+		XRequestID: optional.NewString(*flagRequestID),
+		XUserID:    optional.NewString(*flagUserID),
+	}
+
+	search, resp, err := api.OFACApi.Search(ctx, opts)
 	if err != nil {
 		return fmt.Errorf("searchByAddress: %v", err)
 	}

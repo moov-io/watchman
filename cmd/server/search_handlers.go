@@ -49,11 +49,12 @@ func readAddressSearchRequest(u *url.URL) addressSearchRequest {
 func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w = wrapResponseWriter(logger, w, r)
+		requestID, userID := moovhttp.GetRequestID(r), moovhttp.GetUserID(r)
 
 		// Search over all fields
 		if q := strings.TrimSpace(r.URL.Query().Get("q")); q != "" {
 			if logger != nil {
-				logger.Log("search", fmt.Sprintf("searching all names and address for %s", q))
+				logger.Log("search", fmt.Sprintf("searching all names and address for %s", q), "requestID", requestID, "userID", userID)
 			}
 			searchViaQ(logger, searcher, q)(w, r)
 			return
@@ -62,7 +63,7 @@ func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 		// Search by Name
 		if name := strings.TrimSpace(r.URL.Query().Get("name")); name != "" {
 			if logger != nil {
-				logger.Log("search", fmt.Sprintf("searching SDN names for %s", name))
+				logger.Log("search", fmt.Sprintf("searching SDN names for %s", name), "requestID", requestID, "userID", userID)
 			}
 			searchByName(logger, searcher, name)(w, r)
 			return
@@ -71,7 +72,7 @@ func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 		// Search by Alt Name
 		if alt := strings.TrimSpace(r.URL.Query().Get("altName")); alt != "" {
 			if logger != nil {
-				logger.Log("search", fmt.Sprintf("searching SDN alt names for %s", alt))
+				logger.Log("search", fmt.Sprintf("searching SDN alt names for %s", alt), "requestID", requestID, "userID", userID)
 			}
 			searchByAltName(logger, searcher, alt)(w, r)
 			return
@@ -80,7 +81,7 @@ func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 		// Search Addresses
 		if req := readAddressSearchRequest(r.URL); !req.empty() {
 			if logger != nil {
-				logger.Log("search", fmt.Sprintf("searching address for %#v", req))
+				logger.Log("search", fmt.Sprintf("searching address for %#v", req), "requestID", requestID, "userID", userID)
 			}
 			searchByAddress(logger, searcher, req)(w, r)
 			return

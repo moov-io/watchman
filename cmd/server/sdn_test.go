@@ -12,6 +12,7 @@ import (
 
 	"github.com/moov-io/ofac"
 
+	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
 )
 
@@ -56,7 +57,7 @@ func TestSDN__Address(t *testing.T) {
 	req.Header.Set("x-user-id", "test")
 
 	router := mux.NewRouter()
-	addSDNRoutes(nil, router, addressSearcher)
+	addSDNRoutes(log.NewNopLogger(), router, addressSearcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -82,7 +83,7 @@ func TestSDN__AltNames(t *testing.T) {
 	req.Header.Set("x-user-id", "test")
 
 	router := mux.NewRouter()
-	addSDNRoutes(nil, router, altSearcher)
+	addSDNRoutes(log.NewNopLogger(), router, altSearcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -108,7 +109,7 @@ func TestSDN__Get(t *testing.T) {
 	req.Header.Set("x-user-id", "test")
 
 	router := mux.NewRouter()
-	addSDNRoutes(nil, router, sdnSearcher)
+	addSDNRoutes(log.NewNopLogger(), router, sdnSearcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
