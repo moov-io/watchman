@@ -45,6 +45,7 @@ before_install:
 before_script:
   - GOFILES=$(find . -type f -name '*.go' | grep -v vendor | grep -v client)
   - go mod tidy
+  - make
 script:
   # Just check gofmt on linux, it's the fastest builder
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then test -z $(gofmt -s -l $GOFILES); fi
@@ -54,9 +55,11 @@ script:
   - golint -set_exit_status $GOFILES
   - staticcheck ./cmd/... ./internal/... .
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install -y mingw; export PATH=/c/tools/mingw64/bin:"$PATH";fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make docker && make test-integration; fi
+after_script:
+  - make clean-integration
 after_success:
   - bash <(curl -s https://codecov.io/bash) -X fix
-  - make
   - make client
   - make docker
 before_deploy:
