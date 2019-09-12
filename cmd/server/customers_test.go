@@ -289,6 +289,7 @@ func TestCustomer_addNameWatch(t *testing.T) {
 		body := strings.NewReader(`{"webhook": "https://moov.io", "authToken": "foo"}`)
 		req := httptest.NewRequest("POST", "/customers/watch?name=foo", body)
 		req.Header.Set("x-user-id", "test")
+		req.Header.Set("x-request-id", base.ID())
 
 		watchRepo := createTestWatchRepository(t)
 		defer watchRepo.close()
@@ -569,6 +570,7 @@ func TestCustomer_removeNameWatch(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("DELETE", "/customers/watch/foo", nil)
 		req.Header.Set("x-user-id", "test")
+		req.Header.Set("x-request-id", base.ID())
 
 		watchRepo := createTestWatchRepository(t)
 		defer watchRepo.close()
