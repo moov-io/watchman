@@ -172,15 +172,10 @@ func ping(ctx context.Context, api *moov.APIClient) error {
 
 func latestDownload(ctx context.Context, api *moov.APIClient) (time.Time, error) {
 	opts := &moov.GetLatestDownloadsOpts{
-		Limit: optional.NewInt32(1),
+		Limit:      optional.NewInt32(1),
+		XRequestID: optional.NewString(*flagRequestID),
+		XUserID:    optional.NewString(*flagUserID),
 	}
-	if *flagRequestID != "" {
-		opts.XRequestID = optional.NewString(*flagRequestID)
-	}
-	if *flagUserID != "" {
-		opts.XUserID = optional.NewString(*flagUserID)
-	}
-
 	downloads, resp, err := api.OFACApi.GetLatestDownloads(ctx, opts)
 	if err != nil {
 		return time.Time{}, err

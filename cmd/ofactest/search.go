@@ -19,14 +19,10 @@ import (
 // associated to the company/organization or individual.
 func searchByName(ctx context.Context, api *moov.APIClient, name string) (*moov.Sdn, error) {
 	opts := &moov.SearchOpts{
-		Name:  optional.NewString(name),
-		Limit: optional.NewInt32(2),
-	}
-	if *flagRequestID != "" {
-		opts.XRequestID = optional.NewString(*flagRequestID)
-	}
-	if *flagUserID != "" {
-		opts.XUserID = optional.NewString(*flagUserID)
+		Limit:      optional.NewInt32(2),
+		Name:       optional.NewString(name),
+		XRequestID: optional.NewString(*flagRequestID),
+		XUserID:    optional.NewString(*flagUserID),
 	}
 
 	search, resp, err := api.OFACApi.Search(ctx, opts)
@@ -56,14 +52,10 @@ func searchByName(ctx context.Context, api *moov.APIClient, name string) (*moov.
 // for the provided altName and error if none are found.
 func searchByAltName(ctx context.Context, api *moov.APIClient, alt string) error {
 	opts := &moov.SearchOpts{
-		AltName: optional.NewString(alt),
-		Limit:   optional.NewInt32(2),
-	}
-	if *flagRequestID != "" {
-		opts.XRequestID = optional.NewString(*flagRequestID)
-	}
-	if *flagUserID != "" {
-		opts.XUserID = optional.NewString(*flagUserID)
+		AltName:    optional.NewString(alt),
+		Limit:      optional.NewInt32(2),
+		XRequestID: optional.NewString(*flagRequestID),
+		XUserID:    optional.NewString(*flagUserID),
 	}
 
 	search, resp, err := api.OFACApi.Search(ctx, opts)
@@ -82,14 +74,10 @@ func searchByAltName(ctx context.Context, api *moov.APIClient, alt string) error
 // for the provided address and error if none are found.
 func searchByAddress(ctx context.Context, api *moov.APIClient, address string) error {
 	opts := &moov.SearchOpts{
-		Address: optional.NewString(address),
-		Limit:   optional.NewInt32(2),
-	}
-	if *flagRequestID != "" {
-		opts.XRequestID = optional.NewString(*flagRequestID)
-	}
-	if *flagUserID != "" {
-		opts.XUserID = optional.NewString(*flagUserID)
+		Address:    optional.NewString(address),
+		Limit:      optional.NewInt32(2),
+		XRequestID: optional.NewString(*flagRequestID),
+		XUserID:    optional.NewString(*flagUserID),
 	}
 
 	search, resp, err := api.OFACApi.Search(ctx, opts)
