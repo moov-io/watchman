@@ -1,24 +1,7 @@
 version: '3'
 services:
-  mysql:
-    image: mysql:8
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: supresecret
-      MYSQL_DATABASE: ofac
-      MYSQL_USER: ofac
-      MYSQL_PASSWORD: secret
   ofac:
     image: moov/ofac:latest
     ports:
       - "8084:8084"
       - "9094:9094"
-    environment:
-      DATABASE_TYPE: mysql
-      MYSQL_ADDRESS: tcp(mysql:3306)
-      MYSQL_DATABASE: ofac
-      MYSQL_PASSWORD: secret
-      MYSQL_USER: ofac
-    depends_on:
-      - mysql
