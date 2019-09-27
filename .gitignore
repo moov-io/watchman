@@ -19,3 +19,6 @@ coverage.html
 openapi-generator*jar
 
 *.db
+
+webui/build/
+webui/node_modules/

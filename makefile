@@ -4,6 +4,7 @@ VERSION := $(shell grep -Eo '(v[0-9]+[\.][0-9]+[\.][0-9]+(-[a-zA-Z0-9]*)?)' vers
 .PHONY: build build-server build-examples docker release check
 
 build: check build-server build-ofactest build-examples
+	cd webui/ && npm install && npm run build && cd ../
 
 build-server:
 	CGO_ENABLED=1 go build -o ./bin/server github.com/moov-io/ofac/cmd/server

@@ -3,13 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "express": "^4.17.1",
+    "express-winston": "^3.3.0",
+    "http-proxy-middleware": "^0.20.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react-scripts": "3.0.1"
+    "react-scripts": "3.0.1",
+    "winston": "^3.2.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "ofac-server": "docker run -p 8084:8084 -p 9094:9094 -it moov/ofac:latest"
+    "build": "react-scripts build",
+    "ofac-server": "docker run -p 8084:8084 -p 9094:9094 -it moov/ofac:latest",
+    "server": "node server/index.js",
+    "start": "react-scripts start"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -26,7 +32,6 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:8084",
   "devDependencies": {
     "@material-ui/core": "^4.3.1",
     "@material-ui/icons": "^4.2.1",
