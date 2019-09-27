@@ -1,4 +1,4 @@
-## examples / ofac-search-ui
+## webui
 
 This project provides an interface to retrieve results from an OFAC service search endpoint.
 

@@ -7,7 +7,7 @@ RUN go mod download
 RUN make build-server
 
 FROM node:12-buster as frontend
-COPY examples/ofac-search-ui/ /ofac/
+COPY webui/ /ofac/
 WORKDIR /ofac/
 RUN npm install
 RUN npm run build
