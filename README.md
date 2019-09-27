@@ -55,6 +55,22 @@ We offer [hosted api docs as part of Moov's tools](https://api.moov.io/#tag/OFAC
 
 Docs: [docs.moov.io](https://docs.moov.io/ofac/) | [api docs](https://api.moov.io/apps/ofac/)
 
+### Web UI
+
+OFAC ships with a web interface for easier access searching the records. Our Docker image hosts the UI by default, but you can build and run it locally as well.
+
+```
+$ make
+...
+CGO_ENABLED=1 go build -o ./bin/server github.com/moov-io/ofac/cmd/server
+...
+npm run build
+...
+Success!
+
+$ go run ./cmd/server/ # Load http://localhost:8084 in a web browser
+```
+
 ### Configuration
 
 | Environmental Variable | Description | Default |
@@ -70,6 +86,7 @@ Docs: [docs.moov.io](https://docs.moov.io/ofac/) | [api docs](https://api.moov.i
 | `HTTPS_CERT_FILE` | Filepath containing a certificate (or intermediate chain) to be served by the HTTP server. Requires all traffic be over secure HTTP. | Empty |
 | `HTTPS_KEY_FILE`  | Filepath of a private key matching the leaf certificate from `HTTPS_CERT_FILE`. | Empty |
 | `DATABASE_TYPE` | Which database option to use (Options: `sqlite`, `mysql`) | Default: `sqlite` |
+| `WEB_ROOT` | Directory to serve web UI from | Default: `examples/ofac-search-ui/build/` |
 
 #### Storage
 

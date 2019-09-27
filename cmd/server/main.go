@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
@@ -165,6 +166,13 @@ func main() {
 	addSDNRoutes(logger, router, searcher)
 	addSearchRoutes(logger, router, searcher)
 	addDownloadRoutes(logger, router, downloadRepo)
+
+	// Setup our web UI to be served as well
+	webDir := http.Dir(os.Getenv("WEB_ROOT"))
+	if webDir == "" {
+		webDir = http.Dir(filepath.Join("examples", "ofac-search-ui", "build"))
+	}
+	router.PathPrefix("/").Handler(http.FileServer(webDir))
 
 	// Start business logic HTTP server
 	go func() {
