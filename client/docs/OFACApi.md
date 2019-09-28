@@ -701,6 +701,8 @@ Name | Type | Description  | Notes
  **country** | **optional.String**| Country name as desginated by SDN guidelines. Only Address results will be returned. | 
  **altName** | **optional.String**| Alternate name which could correspond to a human on the SDN list. Only Alt name results will be returned. | 
  **limit** | **optional.Int32**| Maximum results returned by a search | 
+ **sdnType** | **optional.String**| Optional filter to only return SDNs whose type case-insensitively matches | 
+ **program** | **optional.String**| Optional filter to only return SDNs whose program case-insensitively matches | 
 
 ### Return type
 

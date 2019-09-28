@@ -821,6 +821,26 @@ paths:
           example: 25
           type: integer
         style: form
+      - description: Optional filter to only return SDNs whose type case-insensitively
+          matches
+        explode: true
+        in: query
+        name: sdnType
+        required: false
+        schema:
+          example: individual
+          type: string
+        style: form
+      - description: Optional filter to only return SDNs whose program case-insensitively
+          matches
+        explode: true
+        in: query
+        name: program
+        required: false
+        schema:
+          example: SDGT
+          type: string
+        style: form
       responses:
         200:
           content:
