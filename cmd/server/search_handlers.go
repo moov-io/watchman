@@ -152,7 +152,7 @@ func searchViaQ(logger log.Logger, searcher *searcher, name string) http.Handler
 
 		limit := extractSearchLimit(r)
 		response := &searchResponse{
-			SDNs:          searcher.TopSDNs(limit, name),
+			SDNs:          filterSDNs(searcher.TopSDNs(limit, name), buildFilterRequest(r.URL)),
 			AltNames:      searcher.TopAltNames(limit, name),
 			Addresses:     searcher.TopAddresses(limit, name),
 			DeniedPersons: searcher.TopDPs(limit, name),
@@ -174,7 +174,9 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 			return
 		}
 
+		// Grab the SDN's and then filter any out based on query params
 		sdns := searcher.TopSDNs(extractSearchLimit(r), nameSlug)
+		sdns = filterSDNs(sdns, buildFilterRequest(r.URL))
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)

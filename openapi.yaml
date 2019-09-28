@@ -634,6 +634,18 @@ paths:
             type: integer
             example: 25
           description: Maximum results returned by a search
+        - name: sdnType
+          in: query
+          schema:
+            type: string
+            example: individual
+          description: Optional filter to only return SDNs whose type case-insensitively matches
+        - name: program
+          in: query
+          schema:
+            type: string
+            example: SDGT
+          description: Optional filter to only return SDNs whose program case-insensitively matches
       responses:
         '200':
           description: SDNs returned from a search
