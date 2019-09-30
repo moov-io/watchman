@@ -1,3 +1,27 @@
+## v0.11.0 (Unreleased)
+
+This release adds a web interface for OFAC (developed by [Linden Lab](https://www.lindenlab.com/)) which allows for easier querying from desktop and mobile browsers.
+
+![](docs/images/webui.png)
+
+ADDITIONS
+
+- cmd/server: add the web interface developed by Linden Lab
+- cmd/server: accept additional query params to filter SDN search results
+  - `?sdnType=individual` and `?program=example`
+
+IMPROVEMENTS
+
+- api,client: specify x-request-id and x-user-id as optional HTTP headers
+- cmd/ofactest: set x-request-id and x-user-id HTTP headers if CLI flags are set
+- cmd/server: use a non-nil logger in search HTTP route tests
+
+BUILD
+
+- cmd/server: update github.com/moov-io/base to v0.10.0
+- build: download CI tools rather than install
+- build: remove mysql setup from docker-compose.yml
+
 ## v0.10.0 (Released 2019-08-16)
 
 This release contains improvements to OFAC's match percentages to tone down false positives. We do this by adjusting the match percentage according to the query and SDN lenth ratio -- if the two strings are different lengths (after normalization) they cannot be equal. We are looking for feedback to further improve the matching code.
