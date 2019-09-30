@@ -17,7 +17,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// accumulator is a case-insensitve collector for string values.
+// accumulator is a case-insensitive collector for string values.
 //
 // getValues() will return an orderd distinct array of accumulated strings
 // where each string is the first seen instance.
@@ -61,8 +61,7 @@ func addValuesRoutes(logger log.Logger, r *mux.Router, searcher *searcher) {
 }
 
 func getKey(r *http.Request) string {
-	v, _ := mux.Vars(r)["key"]
-	return strings.ToLower(v)
+	return strings.ToLower(mux.Vars(r)["key"])
 }
 
 func getValues(logger log.Logger, searcher *searcher) http.HandlerFunc {
