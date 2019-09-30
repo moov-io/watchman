@@ -19,23 +19,37 @@ import (
 
 // accumulator is a case-insensitve collector for string values.
 //
-// values() will return an orderd distinct array of accumulated strings
+// getValues() will return an orderd distinct array of accumulated strings
 // where each string is the first seen instance.
-type accumulator map[string]string
+type accumulator struct {
+	limit  int
+	values map[string]string
+}
+
+func newAccumulator(limit int) accumulator {
+	return accumulator{
+		limit:  limit,
+		values: make(map[string]string),
+	}
+}
 
 func (acc accumulator) add(value string) {
+	if len(acc.values) >= acc.limit {
+		return
+	}
+
 	norm := strings.ToLower(strings.TrimSpace(value))
 	if norm == "" {
 		return
 	}
-	if _, exists := acc[norm]; !exists {
-		acc[norm] = value
+	if _, exists := acc.values[norm]; !exists {
+		acc.values[norm] = value
 	}
 }
 
-func (acc accumulator) values() []string {
+func (acc accumulator) getValues() []string {
 	var out []string
-	for _, v := range acc {
+	for _, v := range acc.values {
 		out = append(out, v)
 	}
 	sort.Strings(out)
@@ -56,7 +70,7 @@ func getValues(logger log.Logger, searcher *searcher) http.HandlerFunc {
 		w = wrapResponseWriter(logger, w, r)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
-		acc := make(accumulator)
+		acc := newAccumulator(extractSearchLimit(r))
 		for i := range searcher.SDNs {
 			// If we add support for other filters (CallSign, Tonnage)
 			// then we should add those keys here.
@@ -72,6 +86,6 @@ func getValues(logger log.Logger, searcher *searcher) http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(acc.values())
+		json.NewEncoder(w).Encode(acc.getValues())
 	}
 }
