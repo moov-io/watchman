@@ -38,6 +38,8 @@ func filterSDNs(sdns []SDN, req filterRequest) []SDN {
 
 		// Look at all our filters
 		// If the filter is non-empty AND matches the SDN's field then keep it
+		//
+		// TODO(adam): If we add more filters don't forget to also add them in values.go
 		if req.sdnType != "" {
 			if strings.EqualFold(sdns[i].SDNType, req.sdnType) {
 				keep = true

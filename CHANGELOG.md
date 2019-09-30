@@ -9,6 +9,8 @@ ADDITIONS
 - cmd/server: add the web interface developed by Linden Lab
 - cmd/server: accept additional query params to filter SDN search results
   - `?sdnType=individual` and `?program=example`
+- cmd/server: add endpoint for applications to grab distinct sets of column values
+  - `GET /ui/values/sdnType` returns `["aircraft","individual","vessel"]`
 
 IMPROVEMENTS
 
