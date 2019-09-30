@@ -686,9 +686,49 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Downloads'
+  /ui/values/{key}:
+    get:
+      tags: ["OFAC"]
+      summary: Return an ordered distinct list of keys for an SDN property.
+      operationId: getUIValues
+      parameters:
+        - in: path
+          name: key
+          description: SDN property to lookup
+          required: true
+          schema:
+            type: string
+            example: sdnType
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            example: 25
+          description: Maximum results returned by a search
+      responses:
+        '200':
+          description: Ordered and distinct list of values for an SDN property
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UIKeys'
+        '400':
+          description: Invalid key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 components:
   schemas:
+    Error:
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: An error message describing the problem intended for humans.
+          example: Unknown key
     OFACCompany:
       description: OFAC Company and metadata
       properties:
@@ -988,3 +1028,8 @@ components:
           type: string
           format: date-time
           example: 2006-01-02T15:04:05Z07:00
+    UIKeys:
+      type: array
+      items:
+        type: string
+        example: ["aircraft", "individual", "vessel"]

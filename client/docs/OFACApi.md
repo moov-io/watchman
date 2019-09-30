@@ -14,6 +14,7 @@ Method | HTTP request | Description
 [**GetSDN**](OFACApi.md#GetSDN) | **Get** /sdn/{sdnID} | Specially designated national
 [**GetSDNAddresses**](OFACApi.md#GetSDNAddresses) | **Get** /sdn/{sdnID}/addresses | Get addresses for a given SDN
 [**GetSDNAltNames**](OFACApi.md#GetSDNAltNames) | **Get** /sdn/{sdnID}/alts | Get alternate names for a given SDN
+[**GetUIValues**](OFACApi.md#GetUIValues) | **Get** /ui/values/{key} | Return an ordered distinct list of keys for an SDN property.
 [**Ping**](OFACApi.md#Ping) | **Get** /ping | Ping the OFAC service to check if running
 [**RemoveOFACCompanyNameWatch**](OFACApi.md#RemoveOFACCompanyNameWatch) | **Delete** /companies/watch/{watchID} | Remove a Company name watch
 [**RemoveOFACCompanyWatch**](OFACApi.md#RemoveOFACCompanyWatch) | **Delete** /companies/{companyID}/watch/{watchID} | Remove company watch
@@ -447,6 +448,48 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**[]Alt**](Alt.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetUIValues
+
+> []string GetUIValues(ctx, key, optional)
+Return an ordered distinct list of keys for an SDN property.
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**key** | **string**| SDN property to lookup | 
+ **optional** | ***GetUIValuesOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+
+Optional parameters are passed through a pointer to a GetUIValuesOpts struct
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **limit** | **optional.Int32**| Maximum results returned by a search | 
+
+### Return type
+
+**[]string**
 
 ### Authorization
 
