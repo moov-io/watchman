@@ -137,6 +137,13 @@ func main() {
 	} else {
 		log.Println("[SUCCESS] address search passed")
 	}
+
+	// Lookup UI values
+	if err := getUIValues(ctx, api); err != nil {
+		log.Fatalf("[FAILURE] problem looking up UI values: %v", err)
+	} else {
+		log.Println("[SUCCESS] UI values lookup passed")
+	}
 }
 
 // getBasePath reads flagLocal and flagApiAddress to compute the HTTP address used for connecting with OFAC.
