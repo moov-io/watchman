@@ -168,11 +168,7 @@ func main() {
 	addDownloadRoutes(logger, router, downloadRepo)
 
 	// Setup our web UI to be served as well
-	webDir := http.Dir(os.Getenv("WEB_ROOT"))
-	if webDir == "" {
-		webDir = http.Dir(filepath.Join("examples", "ofac-search-ui", "build"))
-	}
-	router.PathPrefix("/").Handler(http.FileServer(webDir))
+	setupWebui(logger, router)
 
 	// Start business logic HTTP server
 	go func() {
@@ -220,4 +216,16 @@ func getOFACRefreshInterval(logger log.Logger, env string) time.Duration {
 	}
 	logger.Log("main", fmt.Sprintf("Setting OFAC data refresh interval to %v (default)", ofacDataRefreshInterval))
 	return ofacDataRefreshInterval
+}
+
+func setupWebui(logger log.Logger, r *mux.Router) {
+	dir := os.Getenv("WEB_ROOT")
+	if dir == "" {
+		dir = filepath.Join("webui", "build")
+	}
+	if _, err := os.Stat(dir); err != nil {
+		logger.Log("main", fmt.Sprintf("problem with webui=%s: %v", dir, err))
+		os.Exit(1)
+	}
+	r.PathPrefix("/").Handler(http.FileServer(http.Dir(dir)))
 }
