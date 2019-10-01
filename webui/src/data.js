@@ -1,7 +1,4 @@
-import * as R from "ramda";
-
-const makeOption = v => ({ val: v, name: v });
-const makeOptionData = R.map(makeOption);
+import { makeOptionData } from "utils";
 
 export const types = ["All", "Aircraft", "Entity", "Individual", "Vessel"];
 export const typeOptionData = makeOptionData(types);

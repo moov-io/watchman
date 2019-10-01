@@ -1,5 +1,10 @@
 import * as R from "ramda";
 
+const capitalize = R.replace(/^./, R.toUpper);
+
+const makeOption = v => ({ val: v, name: capitalize(v) });
+export const makeOptionData = R.map(makeOption);
+
 export const matchToPercent = match => `${(match * 100).toFixed(1)}%`;
 export const isNilOrEmpty = R.anyPass([R.isNil, R.isEmpty]);
 
