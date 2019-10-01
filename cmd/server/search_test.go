@@ -209,7 +209,8 @@ func TestSearch_liveData(t *testing.T) {
 		name  string
 		match float64 // top match %
 	}{
-		{"Nicolas MADURO", 0.821},
+		{"Nicolas MADURO", 0.944},
+		{"nicolas maduro", 0.944},
 	}
 	for i := range cases {
 		sdns := searcher.TopSDNs(1, cases[i].name)
