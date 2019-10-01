@@ -43,6 +43,7 @@ Class | Method | HTTP request | Description
 *OFACApi* | [**GetSDN**](docs/OFACApi.md#getsdn) | **Get** /sdn/{sdnID} | Specially designated national
 *OFACApi* | [**GetSDNAddresses**](docs/OFACApi.md#getsdnaddresses) | **Get** /sdn/{sdnID}/addresses | Get addresses for a given SDN
 *OFACApi* | [**GetSDNAltNames**](docs/OFACApi.md#getsdnaltnames) | **Get** /sdn/{sdnID}/alts | Get alternate names for a given SDN
+*OFACApi* | [**GetUIValues**](docs/OFACApi.md#getuivalues) | **Get** /ui/values/{key} | Return an ordered distinct list of keys for an SDN property.
 *OFACApi* | [**Ping**](docs/OFACApi.md#ping) | **Get** /ping | Ping the OFAC service to check if running
 *OFACApi* | [**RemoveOFACCompanyNameWatch**](docs/OFACApi.md#removeofaccompanynamewatch) | **Delete** /companies/watch/{watchID} | Remove a Company name watch
 *OFACApi* | [**RemoveOFACCompanyWatch**](docs/OFACApi.md#removeofaccompanywatch) | **Delete** /companies/{companyID}/watch/{watchID} | Remove company watch
@@ -59,6 +60,7 @@ Class | Method | HTTP request | Description
  - [Alt](docs/Alt.md)
  - [Download](docs/Download.md)
  - [Dpl](docs/Dpl.md)
+ - [Error](docs/Error.md)
  - [OfacCompany](docs/OfacCompany.md)
  - [OfacCompanyStatus](docs/OfacCompanyStatus.md)
  - [OfacCustomer](docs/OfacCustomer.md)
