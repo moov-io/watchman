@@ -1579,6 +1579,7 @@ OFACApiService Search SDN names and metadata
  * @param "Zip" (optional.String) -  Zip code as desginated by SDN guidelines. Only Address results will be returned.
  * @param "Country" (optional.String) -  Country name as desginated by SDN guidelines. Only Address results will be returned.
  * @param "AltName" (optional.String) -  Alternate name which could correspond to a human on the SDN list. Only Alt name results will be returned.
+ * @param "Id" (optional.String) -  ID value often found in remarks property of an SDN. Takes the form of 'No. NNNNN' as an alphanumeric value.
  * @param "Limit" (optional.Int32) -  Maximum results returned by a search
  * @param "SdnType" (optional.String) -  Optional filter to only return SDNs whose type case-insensitively matches
  * @param "Program" (optional.String) -  Optional filter to only return SDNs whose program case-insensitively matches
@@ -1597,6 +1598,7 @@ type SearchOpts struct {
 	Zip        optional.String
 	Country    optional.String
 	AltName    optional.String
+	Id         optional.String
 	Limit      optional.Int32
 	SdnType    optional.String
 	Program    optional.String
@@ -1645,6 +1647,9 @@ func (a *OFACApiService) Search(ctx context.Context, localVarOptionals *SearchOp
 	}
 	if localVarOptionals != nil && localVarOptionals.AltName.IsSet() {
 		localVarQueryParams.Add("altName", parameterToString(localVarOptionals.AltName.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.Id.IsSet() {
+		localVarQueryParams.Add("id", parameterToString(localVarOptionals.Id.Value(), ""))
 	}
 	if localVarOptionals != nil && localVarOptionals.Limit.IsSet() {
 		localVarQueryParams.Add("limit", parameterToString(localVarOptionals.Limit.Value(), ""))

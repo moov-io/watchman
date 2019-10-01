@@ -628,6 +628,12 @@ paths:
             type: string
             example: Jane Smith
           description: Alternate name which could correspond to a human on the SDN list. Only Alt name results will be returned.
+        - name: id
+          in: query
+          schema:
+            type: string
+            example: '10517860'
+          description: ID value often found in remarks property of an SDN. Takes the form of 'No. NNNNN' as an alphanumeric value.
         - name: limit
           in: query
           schema:

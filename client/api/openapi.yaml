@@ -812,6 +812,16 @@ paths:
           example: Jane Smith
           type: string
         style: form
+      - description: ID value often found in remarks property of an SDN. Takes the
+          form of 'No. NNNNN' as an alphanumeric value.
+        explode: true
+        in: query
+        name: id
+        required: false
+        schema:
+          example: "10517860"
+          type: string
+        style: form
       - description: Maximum results returned by a search
         explode: true
         in: query
