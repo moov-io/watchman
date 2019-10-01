@@ -11,12 +11,14 @@ ADDITIONS
   - `?sdnType=individual` and `?program=example`
 - cmd/server: add endpoint for applications to grab distinct sets of column values
   - `GET /ui/values/sdnType` returns `["aircraft","individual","vessel"]`
+- cmd/server: add `/search?id=NNN` endpoint for matching remark IDs
 
 IMPROVEMENTS
 
 - api,client: specify x-request-id and x-user-id as optional HTTP headers
 - cmd/ofactest: set x-request-id and x-user-id HTTP headers if CLI flags are set
 - cmd/server: use a non-nil logger in search HTTP route tests
+- cmd/server: adjust jaro weighting to maximize total weight in strong single word matches
 
 BUILD
 
