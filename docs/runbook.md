@@ -29,6 +29,10 @@ The URL can be changed, but must end with `dpl.txt` in the final URL path segmen
 
 `DPL_DOWNLOAD_TEMPLATE=https://www.bis.doc.gov/dpl/%s`
 
+### Use local directory for initial data
+
+You can specify the `INITIAL_DATA_DIRECTORY=test/testdata/` environmental variable for OFAC to initially load data from a local filesystem. The data will be refreshed normally, but not downloaded on startup.
+
 ### Change SQLite storage location
 
 To change where the SQLite database is stored on disk set `SQLITE_DB_PATH` as an environmental variable.
