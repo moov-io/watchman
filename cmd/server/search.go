@@ -309,7 +309,7 @@ func precomputeSDNs(sdns []*ofac.SDN) []*SDN {
 }
 
 var (
-	surnamePrecedes = regexp.MustCompile(`(,?[\s?a-zA-Z]{1,})$`)
+	surnamePrecedes = regexp.MustCompile(`(,?[\s?a-zA-Z\.]{1,})$`)
 )
 
 // reorderSDNName will take a given SDN name and if it matches a specific pattern where

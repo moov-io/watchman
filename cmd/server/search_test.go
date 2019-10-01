@@ -177,6 +177,7 @@ func TestSearch_reorderSDNName(t *testing.T) {
 		{"FELIX B. MADURO S.A.", "FELIX B. MADURO S.A."}, // keep .'s in a name
 		{"MADURO MOROS, Nicolas", "Nicolas MADURO MOROS"},
 		{"IBRAHIM, Sadr", "Sadr IBRAHIM"},
+		{"AL ZAWAHIRI, Dr. Ayman", "Dr. Ayman AL ZAWAHIRI"},
 		// Issue 115
 		{"Bush, George W", "George W Bush"},
 		{"RIZO MORENO, Jorge Luis", "Jorge Luis RIZO MORENO"},
