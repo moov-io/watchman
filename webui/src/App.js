@@ -4,8 +4,11 @@ import styled from "styled-components/macro"; // eslint-disable-line no-unused-v
 import Form from "Form";
 import Results from "Results";
 import { Container } from "Components";
-import { isNilOrEmpty } from "utils";
+import { buildQueryString, isNilOrEmpty } from "utils";
 import { search } from "api";
+import { createBrowserHistory } from "history";
+
+const history = createBrowserHistory();
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -21,28 +24,24 @@ const initialState = {
   results: []
 };
 
+const valuesOnlyContainLimit = R.pipe(
+  R.filter(R.complement(isNilOrEmpty)),
+  R.omit(["limit"]),
+  R.isEmpty
+);
+
 function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const handleReset = () => {
     dispatch({ type: "SEARCH_RESET" });
+    history.push({ ...history.location, search: "" });
   };
 
   const handleSubmit = values => {
-    const onlyLimit = R.pipe(
-      R.filter(R.complement(isNilOrEmpty)),
-      R.omit(["limit"]),
-      R.isEmpty
-    )(values);
-    if (onlyLimit) return;
-
-    const qs = R.pipe(
-      R.filter(R.complement(isNilOrEmpty)),
-      R.mapObjIndexed((val, key) => `${key}=${val}`),
-      R.values,
-      R.join("&")
-    )(values);
-    // console.log("qs: ", qs);
+    if (valuesOnlyContainLimit(values)) return;
+    const qs = buildQueryString(values);
+    history.push({ ...history.location, search: qs });
     search(qs).then(payload => dispatch({ type: "SEARCH_SUCCESS", payload }));
   };
 

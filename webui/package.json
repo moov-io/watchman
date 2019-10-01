@@ -5,6 +5,7 @@
   "dependencies": {
     "express": "4.17.1",
     "express-winston": "3.3.0",
+    "history": "^4.10.1",
     "http-proxy-middleware": "0.20.0",
     "react": "16.10.1",
     "react-dom": "16.10.1",
@@ -15,7 +16,8 @@
     "build": "react-scripts build",
     "ofac-server": "docker run -p 8084:8084 -p 9094:9094 -it moov/ofac:latest",
     "server": "node server/index.js",
-    "start": "react-scripts start"
+    "start": "react-scripts start",
+    "test": "react-scripts test"
   },
   "eslintConfig": {
     "extends": "react-app"
