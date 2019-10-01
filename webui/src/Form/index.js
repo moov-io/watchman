@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 import * as R from "ramda";
 import styled from "styled-components/macro"; // eslint-disable-line no-unused-vars
 import MButton from "@material-ui/core/Button";
@@ -8,6 +8,7 @@ import Select from "./Select";
 import TextInput from "./TextInput";
 import Slider from "./Slider";
 import { countryOptionData, listOptionData, typeOptionData, programOptionData } from "../data";
+import { parseQueryString } from "utils";
 
 const Button = styled(MButton)`
   margin: 1em;
@@ -44,13 +45,13 @@ const initialValues = {
   country: "",
   zip: "",
   limit: 10,
-  q: "",
+  q: ""
   // disabled ///////////
-  idNumber: "",
-  type: "All",
-  program: ["All"],
-  list: "All",
-  score: 100
+  // idNumber: "",
+  // type: "All",
+  // program: ["All"],
+  // list: "All",
+  // score: 100
 };
 
 export default ({ onSubmit, onReset }) => {
@@ -66,7 +67,6 @@ export default ({ onSubmit, onReset }) => {
 
   const handleSearchClick = () => {
     const activeValues = R.omit(["idNumber", "type", "program", "list", "score"])(values);
-    // TODO: validate input for sanity
     onSubmit(activeValues);
   };
 
@@ -74,6 +74,19 @@ export default ({ onSubmit, onReset }) => {
     setValues(initialValues);
     onReset();
   };
+
+  const submit = useCallback(onSubmit, []);
+  useEffect(() => {
+    const { search } = window.location;
+    if (!search) {
+      return;
+    }
+    setValues(values => {
+      const newValues = R.mergeDeepRight(values, parseQueryString(search));
+      submit(newValues);
+      return newValues;
+    });
+  }, [submit]);
 
   return (
     <Container>
