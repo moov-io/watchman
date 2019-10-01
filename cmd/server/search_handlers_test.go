@@ -30,7 +30,7 @@ func TestSearch__Address(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.7845`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.9229`) {
 		t.Errorf("%#v", v)
 	}
 
@@ -86,7 +86,7 @@ func TestSearch__AddressMulti(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.70025`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.945`) {
 		t.Errorf("%#v", v)
 	}
 }
@@ -104,7 +104,7 @@ func TestSearch__AddressProvidence(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.80`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.963`) {
 		t.Errorf("%#v", v)
 	}
 }
@@ -122,7 +122,7 @@ func TestSearch__AddressCity(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.80`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.963`) {
 		t.Errorf("%#v", v)
 	}
 }
@@ -140,14 +140,14 @@ func TestSearch__AddressState(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.80`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.963`) {
 		t.Errorf("%#v", v)
 	}
 }
 
 func TestSearch__NameAndAltName(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/search?limit=1&q=Air+I", nil)
+	req := httptest.NewRequest("GET", "/search?limit=1&q=nayif", nil)
 
 	s := &searcher{
 		Alts:      altSearcher.Alts,
@@ -178,10 +178,10 @@ func TestSearch__NameAndAltName(t *testing.T) {
 	if wrapper.SDNs[0].EntityID != "2681" {
 		t.Errorf("%#v", wrapper.SDNs[0])
 	}
-	if wrapper.AltNames[0].EntityID != "559" {
+	if wrapper.AltNames[0].EntityID != "4691" {
 		t.Errorf("%#v", wrapper.AltNames[0].EntityID)
 	}
-	if wrapper.Addresses[0].EntityID != "735" {
+	if wrapper.Addresses[0].EntityID != "173" {
 		t.Errorf("%#v", wrapper.Addresses[0].EntityID)
 	}
 	if wrapper.DeniedPersons[0].StreetAddress != "P.O. BOX 28360" {
@@ -191,7 +191,7 @@ func TestSearch__NameAndAltName(t *testing.T) {
 
 func TestSearch__Name(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/search?name=AL+ZAWAHIRI&limit=1", nil)
+	req := httptest.NewRequest("GET", "/search?name=Dr+AL+ZAWAHIRI&limit=1", nil)
 
 	router := mux.NewRouter()
 	addSearchRoutes(log.NewNopLogger(), router, sdnSearcher)
@@ -202,7 +202,7 @@ func TestSearch__Name(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.4765`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.873`) {
 		t.Error(v)
 	}
 
@@ -215,6 +215,16 @@ func TestSearch__Name(t *testing.T) {
 	if wrapper.SDNs[0].EntityID != "2676" {
 		t.Errorf("%#v", wrapper.SDNs[0])
 	}
+
+	// directly check searcher.TopSDNs
+	sdns := sdnSearcher.TopSDNs(1, "Dr AL ZAWAHIRI")
+	if len(sdns) != 1 {
+		t.Errorf("got SDNs: %#v", sdns)
+	}
+	if sdns[0].EntityID != "2676" {
+		t.Errorf("%#v", sdns[0])
+	}
+	eql(t, "name match", sdns[0].match, 0.873)
 }
 
 func TestSearch__AltName(t *testing.T) {
@@ -230,7 +240,7 @@ func TestSearch__AltName(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.6367`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.7836`) {
 		t.Error(v)
 	}
 

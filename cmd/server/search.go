@@ -9,14 +9,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math"
 	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
 	"sync"
 	"unicode"
-	"unicode/utf8"
 
 	"github.com/moov-io/ofac"
 
@@ -347,7 +345,7 @@ func precomputeSDNs(sdns []*ofac.SDN) []*SDN {
 }
 
 var (
-	surnamePrecedes = regexp.MustCompile(`(,?[\s?a-zA-Z]{1,})$`)
+	surnamePrecedes = regexp.MustCompile(`(,?[\s?a-zA-Z\.]{1,})$`)
 )
 
 // reorderSDNName will take a given SDN name and if it matches a specific pattern where
@@ -509,9 +507,34 @@ func extractSearchLimit(r *http.Request) int {
 // Right now s1 is assumes to have been passed through `chomp(..)` already and so this
 // func only calls `chomp` for s2.
 func jaroWrinkler(s1, s2 string) float64 {
-	n1, n2 := float64(utf8.RuneCountInString(s1)), float64(utf8.RuneCountInString(s2))
-	ratio := math.Min(n1, n2) / math.Max(n1, n2)
-	return ratio * smetrics.JaroWinkler(s1, chomp(s2), 0.7, 4)
+	maxMatch := func(word string, parts []string) float64 {
+		if len(parts) == 0 {
+			return 0.0
+		}
+		max := smetrics.JaroWinkler(word, parts[0], 0.7, 4)
+		for i := 1; i < len(parts); i++ {
+			if score := smetrics.JaroWinkler(word, parts[i], 0.7, 4); score > max {
+				max = score
+			}
+		}
+		return max
+	}
+
+	var max float64
+	s1Parts, s2Parts := strings.Fields(s1), strings.Fields(chomp(s2))
+	for i := range s1Parts {
+		score := maxMatch(s1Parts[i], s2Parts)
+		if score > 0.99 {
+			// one word matched exactly to our query, so return 100% like OFAC's search service
+			return 1.0
+		}
+		if score > max {
+			max = score
+		} else {
+			max = (max + score) * 0.75
+		}
+	}
+	return max
 }
 
 // extractIDFromRemark attempts to parse out a National ID or similar governmental ID value

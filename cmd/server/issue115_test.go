@@ -14,10 +14,10 @@ import (
 
 func TestIssue115__TopSDNs(t *testing.T) {
 	score := jaroWrinkler("georgehabbash", "georgebush")
-	eql(t, "george bush jaroWrinkler", score, 0.689)
+	eql(t, "george bush jaroWrinkler", score, 0.896)
 
 	score = jaroWrinkler("g", "geoergebush")
-	eql(t, "g vs geoerge bush", score, 0.063)
+	eql(t, "g vs geoergebush", score, 0.697)
 
 	s := &searcher{logger: log.NewNopLogger()}
 
@@ -27,12 +27,12 @@ func TestIssue115__TopSDNs(t *testing.T) {
 	// was 89.6% match
 	s.SDNs = precomputeSDNs([]*ofac.SDN{{EntityID: "2680", SDNName: "HABBASH, George", SDNType: "INDIVIDUAL"}})
 	out := s.TopSDNs(1, "george bush")
-	eql(t, "issue115: top SDN 2680", out[0].match, 0.689)
+	eql(t, "issue115: top SDN 2680", out[0].match, 0.896)
 
 	// was 88.3% match
 	s.SDNs = precomputeSDNs([]*ofac.SDN{{EntityID: "9432", SDNName: "CHIWESHE, George", SDNType: "INDIVIDUAL"}})
 	out = s.TopSDNs(1, "george bush")
-	eql(t, "issue115: top SDN 18996", out[0].match, 0.607)
+	eql(t, "issue115: top SDN 18996", out[0].match, 0.849)
 
 	// another example
 	s.SDNs = precomputeSDNs([]*ofac.SDN{{EntityID: "0", SDNName: "Bush, George W", SDNType: "INDIVIDUAL"}})
@@ -41,7 +41,7 @@ func TestIssue115__TopSDNs(t *testing.T) {
 	}
 
 	out = s.TopSDNs(1, "george bush")
-	eql(t, "issue115: top SDN 0", out[0].match, 0.856)
+	eql(t, "issue115: top SDN 0", out[0].match, 0.942)
 
 	out = s.TopSDNs(1, "george w bush")
 	eql(t, "issue115: top SDN 0", out[0].match, 1.0)

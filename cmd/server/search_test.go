@@ -123,27 +123,29 @@ func TestJaroWrinkler(t *testing.T) {
 		s1, s2 string
 		match  float64
 	}{
-		{"wei, zhao", "wei, Zhao", 0.844},
-		{"WEI, Zhao", "WEI, Zhao", 0.889},
-		{"WEI Zhao", "WEI Zhao", 0.875},
+		{"wei, zhao", "wei, Zhao", 0.95},
+		{"WEI, Zhao", "WEI, Zhao", 1.0},
+		{"WEI Zhao", "WEI Zhao", 1.0},
 		{strings.ToLower("WEI Zhao"), precompute("WEI, Zhao"), 1.0},
 		// make sure jaroWrinkler is communative
-		{"jane doe", "jan lahore", 0.483},
-		{"jan lahore", "jane doe", 0.613},
+		{"jane doe", "jan lahore", 0.690},
+		{"jan lahore", "jane doe", 0.690},
 		// close match
-		{"jane doe", "jane doe2", 0.758},
+		{"jane doe", "jane doe2", 0.975},
 		// example cases
-		{"maduro, nicolas", "maduro, nicolas", 0.933},
-		{"maduro moros, nicolas", "maduro moros, nicolas", 0.905},
-		{"maduro moros, nicolas", "nicolas maduro", 0.377},
-		{"nicolas maduro moros", "nicolás maduro", 0.665},
-		{"nicolas, maduro moros", "nicolas maduro", 0.656},
-		{"nicolas, maduro moros", "nicolás maduro", 0.649},
+		{"nicolas maduro", "nicolas maduro", 1.0},
+		{"maduro, nicolas", "maduro, nicolas", 1.0},
+		{"maduro moros, nicolas", "maduro moros, nicolas", 1.0},
+		{"maduro moros, nicolas", "nicolas maduro", 0.512},
+		{"nicolas maduro moros", "nicolás maduro", 0.855},
+		{"nicolas, maduro moros", "nicolas maduro", 0.891},
+		{"nicolas, maduro moros", "nicolás maduro", 0.881},
 	}
 
-	for _, v := range cases {
+	for i := range cases {
+		v := cases[i]
 		// Only need to call chomp on s1, see jaroWrinkler doc
-		eql(t, fmt.Sprintf("%s vs %s", v.s1, v.s2), jaroWrinkler(chomp(v.s1), v.s2), v.match)
+		eql(t, fmt.Sprintf("#%d %s vs %s", i, v.s1, v.s2), jaroWrinkler(chomp(v.s1), v.s2), v.match)
 	}
 }
 
@@ -187,6 +189,7 @@ func TestSearch_reorderSDNName(t *testing.T) {
 		{"FELIX B. MADURO S.A.", "FELIX B. MADURO S.A."}, // keep .'s in a name
 		{"MADURO MOROS, Nicolas", "Nicolas MADURO MOROS"},
 		{"IBRAHIM, Sadr", "Sadr IBRAHIM"},
+		{"AL ZAWAHIRI, Dr. Ayman", "Dr. Ayman AL ZAWAHIRI"},
 		// Issue 115
 		{"Bush, George W", "George W Bush"},
 		{"RIZO MORENO, Jorge Luis", "Jorge Luis RIZO MORENO"},
@@ -218,7 +221,8 @@ func TestSearch_liveData(t *testing.T) {
 		name  string
 		match float64 // top match %
 	}{
-		{"Nicolas MADURO", 0.821},
+		{"Nicolas MADURO", 0.944},
+		{"nicolas maduro", 0.944},
 	}
 	for i := range cases {
 		sdns := searcher.TopSDNs(1, cases[i].name)
@@ -232,7 +236,7 @@ func TestSearch_liveData(t *testing.T) {
 func TestSearch__topAddressesAddress(t *testing.T) {
 	it := topAddressesAddress("needle")(&Address{address: "needleee"})
 
-	eql(t, "topAddressesAddress", it.weight, 0.712)
+	eql(t, "topAddressesAddress", it.weight, 0.950)
 	if add, ok := it.value.(*Address); !ok || add.address != "needleee" {
 		t.Errorf("got %#v", add)
 	}
@@ -241,7 +245,7 @@ func TestSearch__topAddressesAddress(t *testing.T) {
 func TestSearch__topAddressesCountry(t *testing.T) {
 	it := topAddressesAddress("needle")(&Address{address: "needleee"})
 
-	eql(t, "topAddressesCountry", it.weight, 0.712)
+	eql(t, "topAddressesCountry", it.weight, 0.950)
 	if add, ok := it.value.(*Address); !ok || add.address != "needleee" {
 		t.Errorf("got %#v", add)
 	}
@@ -253,7 +257,7 @@ func TestSearch__multiAddressCompare(t *testing.T) {
 		topAddressesCountry("other"),
 	)(&Address{address: "needlee", country: "other"})
 
-	eql(t, "multiAddressCompare", it.weight, 0.916)
+	eql(t, "multiAddressCompare", it.weight, 0.986)
 	if add, ok := it.value.(*Address); !ok || add.address != "needlee" || add.country != "other" {
 		t.Errorf("got %#v", add)
 	}
@@ -381,7 +385,7 @@ func TestSearch__FindSDN(t *testing.T) {
 }
 
 func TestSearch__TopSDNs(t *testing.T) {
-	sdns := sdnSearcher.TopSDNs(1, "AL ZAWAHIRI")
+	sdns := sdnSearcher.TopSDNs(1, "Ayman ZAWAHIRI")
 	if len(sdns) == 0 {
 		t.Fatal("empty SDNs")
 	}
