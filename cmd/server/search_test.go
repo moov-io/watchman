@@ -72,6 +72,18 @@ var (
 			},
 		}),
 	}
+	idSearcher = &searcher{
+		SDNs: precomputeSDNs([]*ofac.SDN{
+			{
+				EntityID: "22790",
+				SDNName:  "MADURO MOROS, Nicolas",
+				SDNType:  "individual",
+				Program:  "VENEZUELA",
+				Title:    "President of the Bolivarian Republic of Venezuela",
+				Remarks:  "DOB 23 Nov 1962; POB Caracas, Venezuela; citizen Venezuela; Gender Male; Cedula No. 5892464 (Venezuela); President of the Bolivarian Republic of Venezuela.",
+			},
+		}),
+	}
 	dplSearcher = &searcher{
 		DPs: precomputeDPs([]*ofac.DPL{
 			{
@@ -386,5 +398,36 @@ func TestSearch__TopDPs(t *testing.T) {
 	// DPL doesn't have any entity IDs. Comparing expected address components instead
 	if dps[0].DeniedPerson.StreetAddress != "P.O. BOX 28360" || dps[0].DeniedPerson.City != "DUBAI" {
 		t.Errorf("%#v", dps[0].DeniedPerson)
+	}
+}
+
+func TestSearch__extractIDFromRemark(t *testing.T) {
+	cases := []struct {
+		input, expected string
+	}{
+		{"Cedula No. 10517860 (Venezuela);", "10517860"},
+		{"National ID No. 22095919778 (Norway).", "22095919778"},
+		{"Driver's License No. 180839 (Mexico);", "180839"},
+		{"Immigration No. A38839964 (United States).", "A38839964"},
+		{"C.R. No. 79190 (United Arab Emirates).", "79190"},
+		{"Electoral Registry No. RZZVAL62051010M200 (Mexico).", "RZZVAL62051010M200"},
+		{"Trade License No. GE0426505 (Italy).", "GE0426505"},
+		{"Public Security and Immigration No. 98.805", "98.805"},
+		{"Folio Mercantil No. 578349 (Panama).", "578349"},
+		{"Trade License No. C 37422 (Malta).", "C 37422"},
+		{"Moroccan Personal ID No. E 427689 (Morocco) issued 20 Mar 2001.", "E 427689"},
+		{"National ID No. 5-5715-00025-50-6 (Thailand);", "5-5715-00025-50-6"},
+		{"Trade License No. HRB94311.", "HRB94311"},
+		{"Registered Charity No. 1040094.", "1040094"},
+		{"Bosnian Personal ID No. 1005967953038;", "1005967953038"},
+		{"Telephone No. 009613679153;", "009613679153"},
+		{"Tax ID No. AABA 670850 Y.", "AABA 670850"},
+		{"Phone No. 263-4-486946; Fax No. 263-4-487261.", "263-4-486946"},
+	}
+	for i := range cases {
+		result := extractIDFromRemark(cases[i].input)
+		if cases[i].expected != result {
+			t.Errorf("input=%s expected=%s result=%s", cases[i].input, cases[i].expected, result)
+		}
 	}
 }

@@ -244,3 +244,31 @@ func TestSearch__AltName(t *testing.T) {
 		t.Errorf("%#v", wrapper.Alts[0])
 	}
 }
+
+func TestSearch__ID(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/search?id=5892464&limit=2", nil)
+
+	router := mux.NewRouter()
+	addSearchRoutes(log.NewNopLogger(), router, idSearcher)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusOK {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+
+	if v := w.Body.String(); !strings.Contains(v, `"match":1`) {
+		t.Error(v)
+	}
+
+	var wrapper struct {
+		SDNs []*ofac.SDN `json:"SDNs"`
+	}
+	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
+		t.Fatal(err)
+	}
+	if wrapper.SDNs[0].EntityID != "22790" {
+		t.Errorf("%#v", wrapper.SDNs[0])
+	}
+}
