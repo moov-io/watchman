@@ -60,6 +60,15 @@ func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 			return
 		}
 
+		// Search by ID (found in an SDN's Remarks property)
+		if id := strings.TrimSpace(r.URL.Query().Get("id")); id != "" {
+			if logger != nil {
+				logger.Log("search", fmt.Sprintf("searching SDNs by remarks ID for %s", id))
+			}
+			searchByRemarksID(logger, searcher, id)(w, r)
+			return
+		}
+
 		// Search by Name
 		if name := strings.TrimSpace(r.URL.Query().Get("name")); name != "" {
 			if logger != nil {
@@ -151,8 +160,17 @@ func searchViaQ(logger log.Logger, searcher *searcher, name string) http.Handler
 		}
 
 		limit := extractSearchLimit(r)
+
+		// Perform multiple searches over the set of SDNs
+		sdns := searcher.FindSDNsByRemarksID(limit, name)
+		if len(sdns) == 0 {
+			sdns = searcher.TopSDNs(limit, name)
+		}
+		sdns = filterSDNs(sdns, buildFilterRequest(r.URL))
+
+		// Build our big response object
 		response := &searchResponse{
-			SDNs:          filterSDNs(searcher.TopSDNs(limit, name), buildFilterRequest(r.URL)),
+			SDNs:          sdns,
 			AltNames:      searcher.TopAltNames(limit, name),
 			Addresses:     searcher.TopAddresses(limit, name),
 			DeniedPersons: searcher.TopDPs(limit, name),
@@ -160,6 +178,26 @@ func searchViaQ(logger log.Logger, searcher *searcher, name string) http.Handler
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(response); err != nil {
+			moovhttp.Problem(w, err)
+			return
+		}
+	}
+}
+
+func searchByRemarksID(logger log.Logger, searcher *searcher, id string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if id == "" {
+			moovhttp.Problem(w, errNoSearchParams)
+			return
+		}
+
+		limit := extractSearchLimit(r)
+		sdns := searcher.FindSDNsByRemarksID(limit, id)
+		sdns = filterSDNs(sdns, buildFilterRequest(r.URL))
+
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		if err := json.NewEncoder(w).Encode(&searchResponse{SDNs: sdns}); err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}

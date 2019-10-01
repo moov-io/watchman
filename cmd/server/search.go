@@ -5,6 +5,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -199,16 +200,43 @@ func (s *searcher) TopAltNames(limit int, alt string) []Alt {
 	return out
 }
 
-func (s *searcher) FindSDN(id string) *ofac.SDN {
+func (s *searcher) FindSDN(entityID string) *ofac.SDN {
 	s.RLock()
 	defer s.RUnlock()
 
 	for i := range s.SDNs {
-		if s.SDNs[i].EntityID == id {
+		if s.SDNs[i].EntityID == entityID {
 			return s.SDNs[i].SDN
 		}
 	}
 	return nil
+}
+
+// FindSDNsByRemarksID looks for SDN's whose remarks property contains an ID matching
+// what is provided to this function. It's typically used with values assigned by a local
+// government. (National ID, Drivers License, etc)
+func (s *searcher) FindSDNsByRemarksID(limit int, id string) []SDN {
+	var out []SDN
+	for i := range s.SDNs {
+		// If our remarks ID contains a space then just see if the query ID matches any part.
+		// Otherwise ID searches need to be exact matches.
+		if strings.Contains(s.SDNs[i].id, " ") && strings.Contains(s.SDNs[i].id, id) {
+			sdn := *s.SDNs[i]
+			sdn.match = 1.0
+			out = append(out, sdn)
+		} else {
+			if s.SDNs[i].id == id {
+				sdn := *s.SDNs[i]
+				sdn.match = 1.0
+				out = append(out, sdn)
+			}
+		}
+		// quit if we're at our max result size
+		if len(out) >= limit {
+			return out
+		}
+	}
+	return out
 }
 
 func (s *searcher) TopSDNs(limit int, name string) []SDN {
@@ -286,6 +314,13 @@ type SDN struct {
 
 	// name is precomputed for speed
 	name string
+
+	// id is the parseed ID value from an SDN's remarks field. Often this
+	// is a National ID, Drivers License, or similar government value
+	// ueed to uniquely identify an entiy.
+	//
+	// Typically the form of this is 'No. NNNNN' where NNNNN is alphanumeric.
+	id string
 }
 
 // MarshalJSON is a custom method for marshaling a SDN search result
@@ -305,6 +340,7 @@ func precomputeSDNs(sdns []*ofac.SDN) []*SDN {
 		out[i] = &SDN{
 			SDN:  sdns[i],
 			name: precompute(reorderSDNName(sdns[i].SDNName, sdns[i].SDNType)),
+			id:   extractIDFromRemark(strings.TrimSpace(sdns[i].Remarks)),
 		}
 	}
 	return out
@@ -476,4 +512,39 @@ func jaroWrinkler(s1, s2 string) float64 {
 	n1, n2 := float64(utf8.RuneCountInString(s1)), float64(utf8.RuneCountInString(s2))
 	ratio := math.Min(n1, n2) / math.Max(n1, n2)
 	return ratio * smetrics.JaroWinkler(s1, chomp(s2), 0.7, 4)
+}
+
+// extractIDFromRemark attempts to parse out a National ID or similar governmental ID value
+// from an SDN's remarks property.
+//
+// Typically the form of this is 'No. NNNNN' where NNNNN is alphanumeric.
+func extractIDFromRemark(remarks string) string {
+	if remarks == "" {
+		return ""
+	}
+
+	var out bytes.Buffer
+	parts := strings.Fields(remarks)
+	for i := range parts {
+		if parts[i] == "No." {
+			trimmed := strings.TrimSuffix(strings.TrimSuffix(parts[i+1], "."), ";")
+
+			// Always take the next part
+			if strings.HasSuffix(parts[i+1], ".") || strings.HasSuffix(parts[i+1], ";") {
+				return trimmed
+			} else {
+				out.WriteString(trimmed)
+			}
+			// possibly take additional parts
+			for j := i + 2; j < len(parts); j++ {
+				if strings.HasPrefix(parts[j], "(") {
+					return out.String()
+				}
+				if _, err := strconv.ParseInt(parts[j], 10, 32); err == nil {
+					out.WriteString(" " + parts[j])
+				}
+			}
+		}
+	}
+	return out.String()
 }
