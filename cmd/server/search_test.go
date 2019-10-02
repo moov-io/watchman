@@ -123,29 +123,38 @@ func TestJaroWinkler(t *testing.T) {
 		s1, s2 string
 		match  float64
 	}{
-		{"wei, zhao", "wei, Zhao", 0.95},
+		{"wei, zhao", "wei, Zhao", 0.942},
 		{"WEI, Zhao", "WEI, Zhao", 1.0},
 		{"WEI Zhao", "WEI Zhao", 1.0},
 		{strings.ToLower("WEI Zhao"), precompute("WEI, Zhao"), 1.0},
 		// make sure jaroWinkler is communative
-		{"jane doe", "jan lahore", 0.690},
-		{"jan lahore", "jane doe", 0.690},
+		{"jane doe", "jan lahore", 0.471},
+		{"jan lahore", "jane doe", 0.707},
+		// real world case
+		{"john doe", "paul john", 0.764},
+		{"john doe", "john othername", 0.764},
 		// close match
-		{"jane doe", "jane doe2", 0.975},
+		{"jane doe", "jane doe2", 0.971},
+		// real-ish world examples
+		{"kalamity linden", "kala limited", 0.771},
+		{"kala limited", "kalamity linden", 0.771},
+		// examples used in demos / commonly
+		{"nicolas", "nicolas", 1.0},
+		{"nicolas moros maduro", "nicolas maduro", 1.0},
+		{"nicolas maduro", "nicolas moros maduro", 1.0},
 		// example cases
 		{"nicolas maduro", "nicolas maduro", 1.0},
 		{"maduro, nicolas", "maduro, nicolas", 1.0},
 		{"maduro moros, nicolas", "maduro moros, nicolas", 1.0},
-		{"maduro moros, nicolas", "nicolas maduro", 0.512},
-		{"nicolas maduro moros", "nicolás maduro", 0.855},
-		{"nicolas, maduro moros", "nicolas maduro", 0.891},
-		{"nicolas, maduro moros", "nicolás maduro", 0.881},
+		{"maduro moros, nicolas", "nicolas maduro", 1.0},
+		{"nicolas maduro moros", "nicolás maduro", 0.961},
+		{"nicolas, maduro moros", "nicolas maduro", 0.988},
+		{"nicolas, maduro moros", "nicolás maduro", 0.950},
 	}
-
 	for i := range cases {
 		v := cases[i]
 		// Only need to call chomp on s1, see jaroWinkler doc
-		eql(t, fmt.Sprintf("#%d %s vs %s", i, v.s1, v.s2), jaroWinkler(chomp(v.s1), v.s2), v.match)
+		eql(t, fmt.Sprintf("#%d %s vs %s", i, v.s1, v.s2), jaroWinkler(v.s1, v.s2), v.match)
 	}
 }
 
@@ -178,9 +187,9 @@ func TestSearch_precompute(t *testing.T) {
 	cases := []struct {
 		input, expected string
 	}{
-		{"nicolás maduro", "nicolasmaduro"},
-		{"Delcy Rodríguez", "delcyrodriguez"},
-		{"Raúl Castro", "raulcastro"},
+		{"nicolás maduro", "nicolas maduro"},
+		{"Delcy Rodríguez", "delcy rodriguez"},
+		{"Raúl Castro", "raul castro"},
 	}
 	for i := range cases {
 		guess := precompute(cases[i].input)
@@ -232,8 +241,8 @@ func TestSearch_liveData(t *testing.T) {
 		name  string
 		match float64 // top match %
 	}{
-		{"Nicolas MADURO", 0.944},
-		{"nicolas maduro", 0.944},
+		{"Nicolas MADURO", 1.0},
+		{"nicolas maduro", 1.0},
 	}
 	for i := range cases {
 		sdns := searcher.TopSDNs(1, cases[i].name)
