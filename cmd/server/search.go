@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 	"unicode"
 
 	"github.com/moov-io/ofac"
@@ -34,11 +35,12 @@ var (
 // searcher holds precomputed data for each object available to search against.
 // This data comes from various US Federal agencies, such as: OFAC and BIS
 type searcher struct {
-	SDNs         []*SDN
-	Addresses    []*Address
-	Alts         []*Alt
-	DPs          []*DP
-	sync.RWMutex // protects all above fields
+	SDNs            []*SDN
+	Addresses       []*Address
+	Alts            []*Alt
+	DPs             []*DP
+	lastRefreshedAt time.Time
+	sync.RWMutex    // protects all above fields
 
 	logger log.Logger
 }

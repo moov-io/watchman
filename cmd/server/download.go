@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"path/filepath"
 	"time"
@@ -43,10 +44,11 @@ type Download struct {
 }
 
 type downloadStats struct {
-	SDNs          int `json:"SDNs"`
-	Alts          int `json:"altNames"`
-	Addresses     int `json:"addresses"`
-	DeniedPersons int `json:"deniedPersons"`
+	SDNs          int       `json:"SDNs"`
+	Alts          int       `json:"altNames"`
+	Addresses     int       `json:"addresses"`
+	DeniedPersons int       `json:"deniedPersons"`
+	RefreshedAt   time.Time `json:"timestamp"`
 }
 
 // periodicDataRefresh will forever block for interval's duration and then download and reparse the OFAC data.
@@ -119,6 +121,7 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 		Addresses:     len(adds),
 		DeniedPersons: len(dps),
 	}
+	stats.RefreshedAt = lastRefresh(initialDir)
 
 	// Set new records after precomputation (to minimize lock contention)
 	s.Lock()
@@ -126,6 +129,7 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 	s.Addresses = adds
 	s.Alts = alts
 	s.DPs = dps
+	s.lastRefreshedAt = stats.RefreshedAt
 	s.Unlock()
 
 	if s.logger != nil {
@@ -136,6 +140,26 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 	lastOFACDataRefreshSuccess.WithLabelValues().Set(float64(time.Now().Unix()))
 
 	return stats, nil
+}
+
+// lastRefresh returns a time.Time for the oldest file in dir or the current time if empty.
+func lastRefresh(dir string) time.Time {
+	if dir == "" {
+		return time.Now()
+	}
+
+	infos, err := ioutil.ReadDir(dir)
+	if len(infos) == 0 || err != nil {
+		return time.Time{} // zero time because there's no initial data
+	}
+
+	oldest := infos[0].ModTime()
+	for i := range infos[1:] {
+		if t := infos[i].ModTime(); t.Before(oldest) {
+			oldest = t
+		}
+	}
+	return oldest
 }
 
 func addDownloadRoutes(logger log.Logger, r *mux.Router, repo downloadRepository) {
@@ -193,7 +217,7 @@ func (r *sqliteDownloadRepository) recordStats(stats *downloadStats) error {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(time.Now(), stats.SDNs, stats.Alts, stats.Addresses, stats.DeniedPersons)
+	_, err = stmt.Exec(stats.RefreshedAt, stats.SDNs, stats.Alts, stats.Addresses, stats.DeniedPersons)
 	return err
 }
 

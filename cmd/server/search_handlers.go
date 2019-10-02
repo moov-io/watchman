@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	moovhttp "github.com/moov-io/base/http"
 
@@ -96,6 +97,7 @@ type searchResponse struct {
 	AltNames      []Alt     `json:"altNames"`
 	Addresses     []Address `json:"addresses"`
 	DeniedPersons []DP      `json:"deniedPersons"`
+	RefreshedAt   time.Time `json:"refreshedAt"`
 }
 
 func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchRequest) http.HandlerFunc {
@@ -105,7 +107,9 @@ func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchReq
 			return
 		}
 
-		var resp searchResponse
+		resp := searchResponse{
+			RefreshedAt: searcher.lastRefreshedAt,
+		}
 		limit := extractSearchLimit(r)
 
 		var compares []func(*Address) *item
@@ -164,6 +168,7 @@ func searchViaQ(logger log.Logger, searcher *searcher, name string) http.Handler
 			AltNames:      searcher.TopAltNames(limit, name),
 			Addresses:     searcher.TopAddresses(limit, name),
 			DeniedPersons: searcher.TopDPs(limit, name),
+			RefreshedAt:   searcher.lastRefreshedAt,
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
@@ -187,7 +192,7 @@ func searchByRemarksID(logger log.Logger, searcher *searcher, id string) http.Ha
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(&searchResponse{SDNs: sdns}); err != nil {
+		if err := json.NewEncoder(w).Encode(&searchResponse{SDNs: sdns, RefreshedAt: searcher.lastRefreshedAt}); err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}
@@ -208,7 +213,7 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(&searchResponse{SDNs: sdns}); err != nil {
+		if err := json.NewEncoder(w).Encode(&searchResponse{SDNs: sdns, RefreshedAt: searcher.lastRefreshedAt}); err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}
@@ -227,7 +232,7 @@ func searchByAltName(logger log.Logger, searcher *searcher, altSlug string) http
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(&searchResponse{AltNames: alts}); err != nil {
+		if err := json.NewEncoder(w).Encode(&searchResponse{AltNames: alts, RefreshedAt: searcher.lastRefreshedAt}); err != nil {
 			moovhttp.Problem(w, err)
 			return
 		}
