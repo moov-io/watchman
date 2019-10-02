@@ -19,18 +19,15 @@ const (
 // manualRefreshHandler will register an endpoint on the admin server OFAC data refresh endpoint
 func manualRefreshHandler(logger log.Logger, searcher *searcher, downloadRepo downloadRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if logger != nil {
-			logger.Log("main", "admin: refreshing OFAC data")
-		}
+		logger.Log("main", "admin: refreshing OFAC data")
 		if stats, err := searcher.refreshData(""); err != nil {
-			if logger != nil {
-				logger.Log("main", fmt.Sprintf("ERROR: admin: problem refreshing OFAC data: %v", err))
-			}
+			logger.Log("main", fmt.Sprintf("ERROR: admin: problem refreshing OFAC data: %v", err))
 			w.WriteHeader(http.StatusInternalServerError)
 		} else {
-			if logger != nil {
-				logger.Log("main", fmt.Sprintf("admin: finished OFAC data refresh - Addresses=%d AltNames=%d SDNs=%d DeniedPersons=%d", stats.Addresses, stats.Alts, stats.SDNs, stats.DeniedPersons))
-			}
+			logger.Log("main",
+				fmt.Sprintf("admin: finished OFAC data refresh - Addresses=%d AltNames=%d SDNs=%d DeniedPersons=%d",
+					stats.Addresses, stats.Alts, stats.SDNs, stats.DeniedPersons))
+
 			downloadRepo.recordStats(stats)
 
 			w.WriteHeader(http.StatusOK)
