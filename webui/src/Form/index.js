@@ -7,8 +7,9 @@ import * as C from "../Components";
 import Select from "./Select";
 import TextInput from "./TextInput";
 import Slider from "./Slider";
-import { countryOptionData, listOptionData, typeOptionData, programOptionData } from "../data";
+import { countryOptionData, listOptionData, programOptionData } from "../data";
 import { parseQueryString } from "utils";
+import { useTypeOptions, useProgramOptions } from "./options";
 
 const Button = styled(MButton)`
   margin: 1em;
@@ -45,11 +46,11 @@ const initialValues = {
   country: "",
   zip: "",
   limit: 10,
-  q: ""
+  q: "",
+  type: "",
+  program: ""
   // disabled ///////////
   // idNumber: "",
-  // type: "All",
-  // program: ["All"],
   // list: "All",
   // score: 100
 };
@@ -57,16 +58,20 @@ const initialValues = {
 export default ({ onSubmit, onReset }) => {
   const [values, setValues] = React.useState(initialValues);
 
+  const { values: typeOptionValues } = useTypeOptions();
+  const { values: programOptionValues } = useProgramOptions();
+
   const handleChange = name => e => {
     const value = R.path(["target", "value"], e);
     setValues(values => R.assoc(name, value, values));
   };
+
   const handleChangeSlider = name => (e, value) => {
     setValues(values => R.assoc(name, value, values));
   };
 
   const handleSearchClick = () => {
-    const activeValues = R.omit(["idNumber", "type", "program", "list", "score"])(values);
+    const activeValues = R.omit(["idNumber", "list", "score"])(values);
     onSubmit(activeValues);
   };
 
@@ -122,6 +127,24 @@ export default ({ onSubmit, onReset }) => {
                   id="altName"
                   value={values["altName"]}
                   onChange={handleChange("altName")}
+                />
+              </Cell>
+              <Cell>
+                <Select
+                  label="Type"
+                  id="type"
+                  value={values["type"]}
+                  onChange={handleChange("type")}
+                  options={typeOptionValues}
+                />
+              </Cell>
+              <Cell>
+                <Select
+                  label="Program"
+                  id="program"
+                  value={values["program"]}
+                  onChange={handleChange("program")}
+                  options={programOptionValues}
                 />
               </Cell>
               <Cell>
@@ -216,7 +239,7 @@ export default ({ onSubmit, onReset }) => {
                   id="type"
                   value={values["type"]}
                   onChange={handleChange("type")}
-                  options={typeOptionData}
+                  options={typeOptionValues}
                 />
               </Cell>
 
