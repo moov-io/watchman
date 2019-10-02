@@ -41,14 +41,14 @@ func filterSDNs(sdns []SDN, req filterRequest) []SDN {
 		//
 		// TODO(adam): If we add more filters don't forget to also add them in values.go
 		if req.sdnType != "" {
-			if strings.EqualFold(sdns[i].SDNType, req.sdnType) {
+			if sdns[i].SDNType != "" && strings.EqualFold(sdns[i].SDNType, req.sdnType) {
 				keep = true
 			} else {
 				continue // skip this SDN as the filter didn't match
 			}
 		}
 		if req.program != "" {
-			if strings.EqualFold(sdns[i].Program, req.program) {
+			if sdns[i].Program != "" && strings.EqualFold(sdns[i].Program, req.program) {
 				keep = true
 			} else {
 				continue
