@@ -520,8 +520,12 @@ func jaroWinkler(s1, s2 string) float64 {
 		return max
 	}
 
-	var max float64
 	s1Parts, s2Parts := strings.Fields(s1), strings.Fields(chomp(s2))
+	if len(s1Parts) == 0 || len(s2Parts) == 0 {
+		return 0.0 // avoid returning NaN later on
+	}
+
+	var max float64
 	for i := range s1Parts {
 		score := maxMatch(s1Parts[i], s2Parts)
 		if score > 0.99 {

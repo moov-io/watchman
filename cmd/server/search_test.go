@@ -149,6 +149,14 @@ func TestJaroWinkler(t *testing.T) {
 	}
 }
 
+func TestJaroWinklerErr(t *testing.T) {
+	v := jaroWinkler("", "hello")
+	eql(t, "NaN #1", v, 0.0)
+
+	v = jaroWinkler("hello", "")
+	eql(t, "NaN #1", v, 0.0)
+}
+
 func eql(t *testing.T, desc string, x, y float64) {
 	t.Helper()
 	if math.IsNaN(x) || math.IsNaN(y) {
