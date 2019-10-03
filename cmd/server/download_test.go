@@ -6,8 +6,11 @@ package main
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -132,4 +135,36 @@ func TestDownload_route(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &sqliteDownloadRepository{mysqlDB.DB, log.NewNopLogger()})
+}
+
+func TestDownload__lastRefresh(t *testing.T) {
+	start := time.Now()
+	time.Sleep(5 * time.Millisecond) // force start to be before our calls
+
+	if when := lastRefresh(""); when.Before(start) {
+		t.Errorf("expected time.Now()")
+	}
+
+	// make a temp dir (initially with nothing in it)
+	dir, err := ioutil.TempDir("", "lastRefresh")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if when := lastRefresh(dir); !when.IsZero() {
+		t.Errorf("expected zero time: %v", t)
+	}
+
+	// add a file and get it's mtime
+	path := filepath.Join(dir, "out.txt")
+	if err := ioutil.WriteFile(path, []byte("hello, world"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if info, err := os.Stat(path); err != nil {
+		t.Fatal(err)
+	} else {
+		if when := lastRefresh(dir); !when.Equal(info.ModTime()) {
+			t.Errorf("t=%v", when)
+		}
+	}
 }
