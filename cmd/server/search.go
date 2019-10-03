@@ -531,13 +531,29 @@ func extractSearchLimit(r *http.Request) int {
 // Right now s1 is assumes to have been passed through `chomp(..)` already and so this
 // func only calls `chomp` for s2.
 func jaroWinkler(s1, s2 string) float64 {
+	return rankStrings(s1, s2, func(s1, s2 string) float64 {
+		return smetrics.JaroWinkler(s1, s2, 0.7, 4)
+	})
+}
+
+// soundex will phonetically normalize two strings and then return their jaro-winkler distance
+// as a percentage.
+//
+// For more details see https://en.wikipedia.org/wiki/Soundex
+func soundex(s1, s2 string) float64 {
+	return rankStrings(s1, s2, func(s1, s2 string) float64 {
+		return jaroWinkler(smetrics.Soundex(s1), smetrics.Soundex(s2))
+	})
+}
+
+func rankStrings(s1, s2 string, f func(s1, s2 string) float64) float64 {
 	maxMatch := func(word string, parts []string) float64 {
 		if len(parts) == 0 {
 			return 0.0
 		}
-		max := smetrics.JaroWinkler(word, parts[0], 0.7, 4)
+		max := f(word, parts[0])
 		for i := 1; i < len(parts); i++ {
-			if score := smetrics.JaroWinkler(word, parts[i], 0.7, 4); score > max {
+			if score := f(word, parts[i]); score > max {
 				max = score
 			}
 		}
@@ -563,14 +579,6 @@ func jaroWinkler(s1, s2 string) float64 {
 		}
 	}
 	return max
-}
-
-// soundex will phonetically normalize two strings and then return their jaro-winkler distance
-// as a percentage.
-//
-// For more details see https://en.wikipedia.org/wiki/Soundex
-func soundex(s1, s2 string) float64 {
-	return jaroWinkler(smetrics.Soundex(s1), smetrics.Soundex(s2))
 }
 
 // extractIDFromRemark attempts to parse out a National ID or similar governmental ID value
