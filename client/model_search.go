@@ -9,10 +9,15 @@
 
 package openapi
 
+import (
+	"time"
+)
+
 // Search results containing SDNs, alternate names and/or addreses
 type Search struct {
 	SDNs          []Sdn     `json:"SDNs,omitempty"`
 	AltNames      []Alt     `json:"altNames,omitempty"`
 	Addresses     []Address `json:"addresses,omitempty"`
 	DeniedPersons []Dpl     `json:"deniedPersons,omitempty"`
+	RefreshedAt   time.Time `json:"refreshedAt,omitempty"`
 }
