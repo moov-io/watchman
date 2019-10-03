@@ -7,7 +7,7 @@ import * as C from "../Components";
 import Select from "./Select";
 import TextInput from "./TextInput";
 import Slider from "./Slider";
-import { countryOptionData, listOptionData, programOptionData } from "../data";
+import { countryOptionData, listOptionData } from "../data";
 import { parseQueryString } from "utils";
 import { useTypeOptions, useProgramOptions } from "./options";
 

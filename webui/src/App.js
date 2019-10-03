@@ -12,8 +12,24 @@ const history = createBrowserHistory();
 
 const reducer = (state, action) => {
   switch (action.type) {
+    case "SEARCH_INIT":
+      return R.pipe(
+        R.assoc("results", null),
+        R.assoc("loading", true),
+        R.assoc("error", null)
+      )(state);
     case "SEARCH_SUCCESS":
-      return R.assoc("results", action.payload)(state);
+      return R.pipe(
+        R.assoc("results", action.payload),
+        R.assoc("loading", false),
+        R.assoc("error", null)
+      )(state);
+    case "SEARCH_ERROR":
+      return R.pipe(
+        R.assoc("results", null),
+        R.assoc("loading", false),
+        R.assoc("error", action.payload)
+      )(state);
     case "SEARCH_RESET":
       return initialState;
     default:
@@ -21,7 +37,9 @@ const reducer = (state, action) => {
   }
 };
 const initialState = {
-  results: []
+  error: null,
+  loading: false,
+  results: null
 };
 
 const valuesOnlyContainLimit = R.pipe(
@@ -32,6 +50,15 @@ const valuesOnlyContainLimit = R.pipe(
 
 function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const executeSearch = async qs => {
+    dispatch({ type: "SEARCH_INIT" });
+    try {
+      const payload = await search(qs);
+      dispatch({ type: "SEARCH_SUCCESS", payload });
+    } catch (err) {
+      dispatch({ type: "SEARCH_ERROR", payload: err });
+    }
+  };
 
   const handleReset = () => {
     dispatch({ type: "SEARCH_RESET" });
@@ -42,7 +69,7 @@ function App() {
     if (valuesOnlyContainLimit(values)) return;
     const qs = buildQueryString(values);
     history.push({ ...history.location, search: qs });
-    search(qs).then(payload => dispatch({ type: "SEARCH_SUCCESS", payload }));
+    executeSearch(qs);
   };
 
   return (
@@ -56,7 +83,7 @@ function App() {
         <h1>OFAC Search</h1>
       </Container>
       <Form onSubmit={handleSubmit} onReset={handleReset} />
-      <Results data={state.results} />
+      <Results data={state} />
     </div>
   );
 }

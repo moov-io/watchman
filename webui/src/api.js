@@ -1,24 +1,13 @@
-export const search = async qs => {
-  const r = await fetch(`/search?${qs}`);
-  return await r.json();
+const apiGet = async path => {
+  const response = await fetch(path);
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload.error);
+  return payload;
 };
 
-export const getSDNAlts = async sdnId => {
-  const r = await fetch(`/sdn/${sdnId}/alts`);
-  return await r.json();
-};
+export const search = async qs => apiGet(`/search?${qs}`);
 
-export const getSDNAddresses = async sdnId => {
-  const r = await fetch(`/sdn/${sdnId}/addresses`);
-  return await r.json();
-};
-
-export const getSDNTypes = async qs => {
-  const r = await fetch(`/ui/values/sdnType`);
-  return await r.json();
-};
-
-export const getPrograms = async qs => {
-  const r = await fetch(`/ui/values/program`);
-  return await r.json();
-};
+export const getSDNAlts = async sdnId => (await fetch(`/sdn/${sdnId}/alts`)).json();
+export const getSDNAddresses = async sdnId => (await fetch(`/sdn/${sdnId}/addresses`)).json();
+export const getSDNTypes = async qs => (await fetch(`/ui/values/sdnType`)).json();
+export const getPrograms = async qs => (await fetch(`/ui/values/program`)).json();
