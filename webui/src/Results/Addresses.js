@@ -39,7 +39,7 @@ export const Addresses = ({ data }) => {
   );
 };
 
-export const Address = ({ data }) => {
+export const Address = ({ data, displayId = "entityID" }) => {
   return (
     <div
       css={`
@@ -64,7 +64,7 @@ export const Address = ({ data }) => {
           }
         `}
       >
-        <div>{R.toLower(data.entityID)}</div>
+        <div>{R.toLower(data[displayId])}</div>
         <div>{R.toLower(data.address)}</div>
         <div>{R.toLower(data.cityStateProvincePostalCode)}</div>
         <div>{R.toLower(data.country)}</div>

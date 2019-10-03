@@ -18,7 +18,7 @@ const Addresses = ({ data }) => {
       <C.SectionTitle>Addresses</C.SectionTitle>
       <AddressHeader withMatch={false} />
       {data.map(a => (
-        <Address key={a.addressID} data={a} />
+        <Address key={a.addressID} data={a} displayId="addressID" />
       ))}
     </div>
   );
@@ -36,7 +36,7 @@ const Alternates = ({ data }) => {
       <C.SectionTitle>Alternate Names</C.SectionTitle>
       <AlternatesHeader withMatch={false} />
       {data.map(a => (
-        <AltName key={a.alternateID} data={a} />
+        <AltName key={a.alternateID} data={a} displayId="alternateID" />
       ))}
     </div>
   );

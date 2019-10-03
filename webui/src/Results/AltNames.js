@@ -32,7 +32,7 @@ export const AltNames = ({ data }) => {
   );
 };
 
-export const AltName = ({ data }) => {
+export const AltName = ({ data, displayId = "entityID" }) => {
   return (
     <div
       css={`
@@ -56,7 +56,7 @@ export const AltName = ({ data }) => {
           }
         `}
       >
-        <div>{data.entityID}</div>
+        <div>{data[displayId]}</div>
         <div>{data.alternateName}</div>
         <div
           css={`
