@@ -1398,6 +1398,7 @@ components:
           state: TX
           effectiveDate: 06/15/2016
           expirationDate: 06/15/2025
+        refreshedAt: 2000-01-23T04:56:07.000+00:00
       properties:
         SDNs:
           items:
@@ -1415,6 +1416,9 @@ components:
           items:
             $ref: '#/components/schemas/DPL'
           type: array
+        refreshedAt:
+          format: date-time
+          type: string
     Watch:
       description: Customer or Company watch
       example:

@@ -6,8 +6,11 @@ package main
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -60,7 +63,7 @@ func TestDownload_record(t *testing.T) {
 	t.Parallel()
 
 	check := func(t *testing.T, repo *sqliteDownloadRepository) {
-		stats := &downloadStats{1, 12, 42, 13}
+		stats := &downloadStats{SDNs: 1, Alts: 12, Addresses: 42, DeniedPersons: 13}
 		if err := repo.recordStats(stats); err != nil {
 			t.Fatal(err)
 		}
@@ -103,7 +106,7 @@ func TestDownload_route(t *testing.T) {
 		req := httptest.NewRequest("GET", "/downloads", nil)
 		req.Header.Set("x-user-id", "test")
 
-		repo.recordStats(&downloadStats{1, 421, 1511, 731})
+		repo.recordStats(&downloadStats{SDNs: 1, Alts: 421, Addresses: 1511, DeniedPersons: 731})
 
 		router := mux.NewRouter()
 		addDownloadRoutes(nil, router, repo)
@@ -132,4 +135,36 @@ func TestDownload_route(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &sqliteDownloadRepository{mysqlDB.DB, log.NewNopLogger()})
+}
+
+func TestDownload__lastRefresh(t *testing.T) {
+	start := time.Now()
+	time.Sleep(5 * time.Millisecond) // force start to be before our calls
+
+	if when := lastRefresh(""); when.Before(start) {
+		t.Errorf("expected time.Now()")
+	}
+
+	// make a temp dir (initially with nothing in it)
+	dir, err := ioutil.TempDir("", "lastRefresh")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if when := lastRefresh(dir); !when.IsZero() {
+		t.Errorf("expected zero time: %v", t)
+	}
+
+	// add a file and get it's mtime
+	path := filepath.Join(dir, "out.txt")
+	if err := ioutil.WriteFile(path, []byte("hello, world"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if info, err := os.Stat(path); err != nil {
+		t.Fatal(err)
+	} else {
+		if when := lastRefresh(dir); !when.Equal(info.ModTime()) {
+			t.Errorf("t=%v", when)
+		}
+	}
 }
