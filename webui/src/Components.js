@@ -1,7 +1,9 @@
 // import React from "react";
 import styled from "styled-components/macro"; // eslint-disable-line no-unused-vars
 import MContainer from "@material-ui/core/Container";
+import MCircularProgress from "@material-ui/core/CircularProgress";
 
+export const Spinner = MCircularProgress;
 export const Container = styled(MContainer)``;
 export const Section = styled.section`
   border: 1px solid #eee;

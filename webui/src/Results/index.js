@@ -7,16 +7,29 @@ import { Addresses } from "./Addresses";
 import { DeniedPersons } from "./DeniedPersons";
 import { isNilOrEmpty } from "utils";
 
-const Results = ({ data }) => {
-  if (isNilOrEmpty(data)) return null;
+export default ({ data }) => {
+  const { loading, error, results } = data;
+  if (loading)
+    return (
+      <C.Container>
+        <div
+          css={`
+            display: flex;
+            justify-content: center;
+          `}
+        >
+          <C.Spinner />
+        </div>
+      </C.Container>
+    );
+  if (error) return <C.Container>ERROR: {error.message}</C.Container>;
+  if (isNilOrEmpty(results)) return null;
   return (
     <C.Container>
-      <SDNS data={data.SDNs} />
-      <AltNames data={data.altNames} />
-      <Addresses data={data.addresses} />
-      <DeniedPersons data={data.deniedPersons} />
+      <SDNS data={results.SDNs} />
+      <AltNames data={results.altNames} />
+      <Addresses data={results.addresses} />
+      <DeniedPersons data={results.deniedPersons} />
     </C.Container>
   );
 };
-
-export default Results;

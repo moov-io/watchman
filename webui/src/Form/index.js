@@ -7,7 +7,7 @@ import * as C from "../Components";
 import Select from "./Select";
 import TextInput from "./TextInput";
 import Slider from "./Slider";
-import { countryOptionData, listOptionData, programOptionData } from "../data";
+import { countryOptionData, listOptionData } from "../data";
 import { parseQueryString } from "utils";
 import { useTypeOptions, useProgramOptions } from "./options";
 
@@ -47,7 +47,7 @@ const initialValues = {
   zip: "",
   limit: 10,
   q: "",
-  type: "",
+  sdnType: "",
   program: ""
   // disabled ///////////
   // idNumber: "",
@@ -132,9 +132,9 @@ export default ({ onSubmit, onReset }) => {
               <Cell>
                 <Select
                   label="Type"
-                  id="type"
-                  value={values["type"]}
-                  onChange={handleChange("type")}
+                  id="sdnType"
+                  value={values["sdnType"]}
+                  onChange={handleChange("sdnType")}
                   options={typeOptionValues}
                 />
               </Cell>
@@ -221,28 +221,6 @@ export default ({ onSubmit, onReset }) => {
           </Cell>
           {false && (
             <>
-              <Cell>
-                <Select
-                  disabled={true}
-                  label="Program"
-                  id="program"
-                  multiple
-                  value={values["program"]}
-                  onChange={handleChange("program")}
-                  options={programOptionData}
-                />
-              </Cell>
-              <Cell>
-                <Select
-                  disabled={true}
-                  label="Type"
-                  id="type"
-                  value={values["type"]}
-                  onChange={handleChange("type")}
-                  options={typeOptionValues}
-                />
-              </Cell>
-
               <Cell>
                 <Select
                   disabled={true}
