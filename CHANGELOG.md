@@ -38,7 +38,7 @@ BUG FIXES
 
 - attempt retries when downloading files
 - download: return after successful download
-- cmd/server: search: fix match percents after jaroWrinkler change
+- cmd/server: search: fix match percents after jaroWinkler change
 - cmd/server: when reordering names handle multiple first or last names
 
 ADDITIONS

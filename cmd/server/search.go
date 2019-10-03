@@ -69,7 +69,7 @@ var (
 		return func(add *Address) *item {
 			return &item{
 				value:  add,
-				weight: jaroWrinkler(add.address, precompute(needleAddr)),
+				weight: jaroWinkler(add.address, precompute(needleAddr)),
 			}
 		}
 	}
@@ -81,7 +81,7 @@ var (
 		return func(add *Address) *item {
 			return &item{
 				value:  add,
-				weight: jaroWrinkler(add.citystate, precompute(needleCityState)),
+				weight: jaroWinkler(add.citystate, precompute(needleCityState)),
 			}
 		}
 	}
@@ -91,7 +91,7 @@ var (
 		return func(add *Address) *item {
 			return &item{
 				value:  add,
-				weight: jaroWrinkler(add.country, precompute(needleCountry)),
+				weight: jaroWinkler(add.country, precompute(needleCountry)),
 			}
 		}
 	}
@@ -179,7 +179,7 @@ func (s *searcher) TopAltNames(limit int, alt string) []Alt {
 	for i := range s.Alts {
 		xs.add(&item{
 			value:  s.Alts[i],
-			weight: jaroWrinkler(s.Alts[i].name, alt),
+			weight: jaroWinkler(s.Alts[i].name, alt),
 		})
 	}
 
@@ -251,7 +251,7 @@ func (s *searcher) TopSDNs(limit int, name string) []SDN {
 	for i := range s.SDNs {
 		xs.add(&item{
 			value:  s.SDNs[i],
-			weight: jaroWrinkler(s.SDNs[i].name, name),
+			weight: jaroWinkler(s.SDNs[i].name, name),
 		})
 	}
 
@@ -284,7 +284,7 @@ func (s *searcher) TopDPs(limit int, name string) []DP {
 	for _, dp := range s.DPs {
 		xs.add(&item{
 			value:  dp,
-			weight: jaroWrinkler(dp.name, name),
+			weight: jaroWinkler(dp.name, name),
 		})
 	}
 
@@ -498,7 +498,7 @@ func extractSearchLimit(r *http.Request) int {
 	return limit
 }
 
-// jaroWrinkler runs the similarly named algorithm over the two input strings and weighs the score
+// jaroWinkler runs the similarly named algorithm over the two input strings and weighs the score
 // against the string lengths. We do this to tone down equality among strings whose lengths vary by
 // several characters.
 //
@@ -506,7 +506,7 @@ func extractSearchLimit(r *http.Request) int {
 //
 // Right now s1 is assumes to have been passed through `chomp(..)` already and so this
 // func only calls `chomp` for s2.
-func jaroWrinkler(s1, s2 string) float64 {
+func jaroWinkler(s1, s2 string) float64 {
 	maxMatch := func(word string, parts []string) float64 {
 		if len(parts) == 0 {
 			return 0.0
