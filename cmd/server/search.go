@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -69,9 +70,13 @@ var (
 	// topAddressesAddress is a compare method for TopAddressesFn to extract and rank .Address
 	topAddressesAddress = func(needleAddr string) func(*Address) *item {
 		return func(add *Address) *item {
+			needle := precompute(needleAddr)
 			return &item{
-				value:  add,
-				weight: jaroWinkler(add.address, precompute(needleAddr)),
+				value: add,
+				weight: math.Max(
+					soundex(add.address, needle),
+					jaroWinkler(add.address, needle),
+				),
 			}
 		}
 	}
@@ -81,9 +86,13 @@ var (
 	// search criteria.
 	topAddressesCityState = func(needleCityState string) func(*Address) *item {
 		return func(add *Address) *item {
+			needle := precompute(needleCityState)
 			return &item{
-				value:  add,
-				weight: jaroWinkler(add.citystate, precompute(needleCityState)),
+				value: add,
+				weight: math.Max(
+					soundex(add.citystate, needle),
+					jaroWinkler(add.citystate, needle),
+				),
 			}
 		}
 	}
@@ -91,9 +100,13 @@ var (
 	// topAddressesCountry is a compare method for TopAddressesFn to extract and rank .Country
 	topAddressesCountry = func(needleCountry string) func(*Address) *item {
 		return func(add *Address) *item {
+			needle := precompute(needleCountry)
 			return &item{
-				value:  add,
-				weight: jaroWinkler(add.country, precompute(needleCountry)),
+				value: add,
+				weight: math.Max(
+					soundex(add.country, needle),
+					jaroWinkler(add.country, needle),
+				),
 			}
 		}
 	}
@@ -180,8 +193,11 @@ func (s *searcher) TopAltNames(limit int, alt string) []Alt {
 
 	for i := range s.Alts {
 		xs.add(&item{
-			value:  s.Alts[i],
-			weight: jaroWinkler(s.Alts[i].name, alt),
+			value: s.Alts[i],
+			weight: math.Max(
+				soundex(s.Alts[i].name, alt),
+				jaroWinkler(s.Alts[i].name, alt),
+			),
 		})
 	}
 
@@ -252,8 +268,11 @@ func (s *searcher) TopSDNs(limit int, name string) []SDN {
 
 	for i := range s.SDNs {
 		xs.add(&item{
-			value:  s.SDNs[i],
-			weight: jaroWinkler(s.SDNs[i].name, name),
+			value: s.SDNs[i],
+			weight: math.Max(
+				soundex(s.SDNs[i].name, name),
+				jaroWinkler(s.SDNs[i].name, name),
+			),
 		})
 	}
 
@@ -285,8 +304,11 @@ func (s *searcher) TopDPs(limit int, name string) []DP {
 
 	for _, dp := range s.DPs {
 		xs.add(&item{
-			value:  dp,
-			weight: jaroWinkler(dp.name, name),
+			value: dp,
+			weight: math.Max(
+				soundex(dp.name, name),
+				jaroWinkler(dp.name, name),
+			),
 		})
 	}
 
@@ -541,6 +563,14 @@ func jaroWinkler(s1, s2 string) float64 {
 		}
 	}
 	return max
+}
+
+// soundex will phonetically normalize two strings and then return their jaro-winkler distance
+// as a percentage.
+//
+// For more details see https://en.wikipedia.org/wiki/Soundex
+func soundex(s1, s2 string) float64 {
+	return jaroWinkler(smetrics.Soundex(s1), smetrics.Soundex(s2))
 }
 
 // extractIDFromRemark attempts to parse out a National ID or similar governmental ID value
