@@ -53,45 +53,35 @@ func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 
 		// Search over all fields
 		if q := strings.TrimSpace(r.URL.Query().Get("q")); q != "" {
-			if logger != nil {
-				logger.Log("search", fmt.Sprintf("searching all names and address for %s", q), "requestID", requestID, "userID", userID)
-			}
+			logger.Log("search", fmt.Sprintf("searching all names and address for %s", q), "requestID", requestID, "userID", userID)
 			searchViaQ(logger, searcher, q)(w, r)
 			return
 		}
 
 		// Search by ID (found in an SDN's Remarks property)
 		if id := strings.TrimSpace(r.URL.Query().Get("id")); id != "" {
-			if logger != nil {
-				logger.Log("search", fmt.Sprintf("searching SDNs by remarks ID for %s", id))
-			}
+			logger.Log("search", fmt.Sprintf("searching SDNs by remarks ID for %s", id))
 			searchByRemarksID(logger, searcher, id)(w, r)
 			return
 		}
 
 		// Search by Name
 		if name := strings.TrimSpace(r.URL.Query().Get("name")); name != "" {
-			if logger != nil {
-				logger.Log("search", fmt.Sprintf("searching SDN names for %s", name), "requestID", requestID, "userID", userID)
-			}
+			logger.Log("search", fmt.Sprintf("searching SDN names for %s", name), "requestID", requestID, "userID", userID)
 			searchByName(logger, searcher, name)(w, r)
 			return
 		}
 
 		// Search by Alt Name
 		if alt := strings.TrimSpace(r.URL.Query().Get("altName")); alt != "" {
-			if logger != nil {
-				logger.Log("search", fmt.Sprintf("searching SDN alt names for %s", alt), "requestID", requestID, "userID", userID)
-			}
+			logger.Log("search", fmt.Sprintf("searching SDN alt names for %s", alt), "requestID", requestID, "userID", userID)
 			searchByAltName(logger, searcher, alt)(w, r)
 			return
 		}
 
 		// Search Addresses
 		if req := readAddressSearchRequest(r.URL); !req.empty() {
-			if logger != nil {
-				logger.Log("search", fmt.Sprintf("searching address for %#v", req), "requestID", requestID, "userID", userID)
-			}
+			logger.Log("search", fmt.Sprintf("searching address for %#v", req), "requestID", requestID, "userID", userID)
 			searchByAddress(logger, searcher, req)(w, r)
 			return
 		}
