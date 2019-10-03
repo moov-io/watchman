@@ -163,19 +163,15 @@ func searchViaQ(logger log.Logger, searcher *searcher, name string) http.Handler
 		sdns = filterSDNs(sdns, buildFilterRequest(r.URL))
 
 		// Build our big response object
-		response := &searchResponse{
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(&searchResponse{
 			SDNs:          sdns,
 			AltNames:      searcher.TopAltNames(limit, name),
 			Addresses:     searcher.TopAddresses(limit, name),
 			DeniedPersons: searcher.TopDPs(limit, name),
 			RefreshedAt:   searcher.lastRefreshedAt,
-		}
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(response); err != nil {
-			moovhttp.Problem(w, err)
-			return
-		}
+		})
 	}
 }
 
@@ -192,10 +188,10 @@ func searchByRemarksID(logger log.Logger, searcher *searcher, id string) http.Ha
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(&searchResponse{SDNs: sdns, RefreshedAt: searcher.lastRefreshedAt}); err != nil {
-			moovhttp.Problem(w, err)
-			return
-		}
+		json.NewEncoder(w).Encode(&searchResponse{
+			SDNs:        sdns,
+			RefreshedAt: searcher.lastRefreshedAt,
+		})
 	}
 }
 
@@ -213,10 +209,10 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(&searchResponse{SDNs: sdns, RefreshedAt: searcher.lastRefreshedAt}); err != nil {
-			moovhttp.Problem(w, err)
-			return
-		}
+		json.NewEncoder(w).Encode(&searchResponse{
+			SDNs:        sdns,
+			RefreshedAt: searcher.lastRefreshedAt,
+		})
 	}
 }
 
@@ -232,9 +228,9 @@ func searchByAltName(logger log.Logger, searcher *searcher, altSlug string) http
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(&searchResponse{AltNames: alts, RefreshedAt: searcher.lastRefreshedAt}); err != nil {
-			moovhttp.Problem(w, err)
-			return
-		}
+		json.NewEncoder(w).Encode(&searchResponse{
+			AltNames:    alts,
+			RefreshedAt: searcher.lastRefreshedAt,
+		})
 	}
 }
