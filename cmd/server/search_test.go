@@ -118,7 +118,7 @@ var (
 	}
 )
 
-func TestJaroWrinkler(t *testing.T) {
+func TestJaroWinkler(t *testing.T) {
 	cases := []struct {
 		s1, s2 string
 		match  float64
@@ -127,7 +127,7 @@ func TestJaroWrinkler(t *testing.T) {
 		{"WEI, Zhao", "WEI, Zhao", 1.0},
 		{"WEI Zhao", "WEI Zhao", 1.0},
 		{strings.ToLower("WEI Zhao"), precompute("WEI, Zhao"), 1.0},
-		// make sure jaroWrinkler is communative
+		// make sure jaroWinkler is communative
 		{"jane doe", "jan lahore", 0.690},
 		{"jan lahore", "jane doe", 0.690},
 		// close match
@@ -144,13 +144,24 @@ func TestJaroWrinkler(t *testing.T) {
 
 	for i := range cases {
 		v := cases[i]
-		// Only need to call chomp on s1, see jaroWrinkler doc
-		eql(t, fmt.Sprintf("#%d %s vs %s", i, v.s1, v.s2), jaroWrinkler(chomp(v.s1), v.s2), v.match)
+		// Only need to call chomp on s1, see jaroWinkler doc
+		eql(t, fmt.Sprintf("#%d %s vs %s", i, v.s1, v.s2), jaroWinkler(chomp(v.s1), v.s2), v.match)
 	}
+}
+
+func TestJaroWinklerErr(t *testing.T) {
+	v := jaroWinkler("", "hello")
+	eql(t, "NaN #1", v, 0.0)
+
+	v = jaroWinkler("hello", "")
+	eql(t, "NaN #1", v, 0.0)
 }
 
 func eql(t *testing.T, desc string, x, y float64) {
 	t.Helper()
+	if math.IsNaN(x) || math.IsNaN(y) {
+		t.Fatalf("%s: x=%.2f y=%.2f", desc, x, y)
+	}
 	if math.Abs(x-y) > 0.01 {
 		t.Errorf("%s: %.3f != %.3f", desc, x, y)
 	}

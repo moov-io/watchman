@@ -13,10 +13,10 @@ import (
 )
 
 func TestIssue115__TopSDNs(t *testing.T) {
-	score := jaroWrinkler("georgehabbash", "georgebush")
-	eql(t, "george bush jaroWrinkler", score, 0.896)
+	score := jaroWinkler("georgehabbash", "georgebush")
+	eql(t, "george bush jaroWinkler", score, 0.896)
 
-	score = jaroWrinkler("g", "geoergebush")
+	score = jaroWinkler("g", "geoergebush")
 	eql(t, "g vs geoergebush", score, 0.697)
 
 	s := &searcher{logger: log.NewNopLogger()}
