@@ -30,7 +30,7 @@ func TestSearch__Address(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.9229`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":1`) {
 		t.Errorf("%#v", v)
 	}
 
@@ -86,7 +86,7 @@ func TestSearch__AddressMulti(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.945`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.921`) {
 		t.Errorf("%#v", v)
 	}
 }
@@ -104,7 +104,7 @@ func TestSearch__AddressProvidence(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.963`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.947`) {
 		t.Errorf("%#v", v)
 	}
 }
@@ -122,7 +122,7 @@ func TestSearch__AddressCity(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.963`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.947`) {
 		t.Errorf("%#v", v)
 	}
 }
@@ -140,7 +140,7 @@ func TestSearch__AddressState(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.963`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.947`) {
 		t.Errorf("%#v", v)
 	}
 }
@@ -181,7 +181,7 @@ func TestSearch__NameAndAltName(t *testing.T) {
 	if wrapper.AltNames[0].EntityID != "4691" {
 		t.Errorf("%#v", wrapper.AltNames[0].EntityID)
 	}
-	if wrapper.Addresses[0].EntityID != "173" {
+	if wrapper.Addresses[0].EntityID != "735" {
 		t.Errorf("%#v", wrapper.Addresses[0].EntityID)
 	}
 	if wrapper.DeniedPersons[0].StreetAddress != "P.O. BOX 28360" {
@@ -202,7 +202,7 @@ func TestSearch__Name(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.873`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":1`) {
 		t.Error(v)
 	}
 
@@ -224,7 +224,7 @@ func TestSearch__Name(t *testing.T) {
 	if sdns[0].EntityID != "2676" {
 		t.Errorf("%#v", sdns[0])
 	}
-	eql(t, "name match", sdns[0].match, 0.873)
+	eql(t, "name match", sdns[0].match, 1.0)
 }
 
 func TestSearch__AltName(t *testing.T) {
@@ -240,7 +240,7 @@ func TestSearch__AltName(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.7836`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":1`) {
 		t.Error(v)
 	}
 

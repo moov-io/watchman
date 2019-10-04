@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -474,16 +475,12 @@ var (
 // See: https://godoc.org/golang.org/x/text/unicode/norm#Form
 // See: https://withblue.ink/2019/03/11/why-you-need-to-normalize-unicode-strings.html
 func precompute(s string) string {
-	trimmed := chomp(strings.ToLower(punctuationReplacer.Replace(s)))
+	trimmed := strings.ToLower(punctuationReplacer.Replace(s))
 
 	// UTF-8 normalization
 	t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC) // Mn: nonspacing marks
 	result, _, _ := transform.String(t, trimmed)
 	return result
-}
-
-func chomp(s string) string {
-	return strings.Replace(s, " ", "", -1)
 }
 
 func extractSearchLimit(r *http.Request) int {
@@ -500,14 +497,10 @@ func extractSearchLimit(r *http.Request) int {
 	return limit
 }
 
-// jaroWinkler runs the similarly named algorithm over the two input strings and weighs the score
-// against the string lengths. We do this to tone down equality among strings whose lengths vary by
-// several characters.
+// jaroWrinkler runs the similarly named algorithm over the two input strings and averages their match percentages
+// according to the second string (assumed to be the user's query)
 //
 // For more details see https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance
-//
-// Right now s1 is assumes to have been passed through `chomp(..)` already and so this
-// func only calls `chomp` for s2.
 func jaroWinkler(s1, s2 string) float64 {
 	maxMatch := func(word string, parts []string) float64 {
 		if len(parts) == 0 {
@@ -522,25 +515,27 @@ func jaroWinkler(s1, s2 string) float64 {
 		return max
 	}
 
-	s1Parts, s2Parts := strings.Fields(s1), strings.Fields(chomp(s2))
+	s1Parts, s2Parts := strings.Fields(s1), strings.Fields(s2)
 	if len(s1Parts) == 0 || len(s2Parts) == 0 {
 		return 0.0 // avoid returning NaN later on
 	}
 
-	var max float64
+	var scores []float64
 	for i := range s1Parts {
-		score := maxMatch(s1Parts[i], s2Parts)
-		if score > 0.99 {
-			// one word matched exactly to our query, so return 100% like OFAC's search service
-			return 1.0
-		}
-		if score > max {
-			max = score
-		} else {
-			max = (max + score) * 0.75
-		}
+		scores = append(scores, maxMatch(s1Parts[i], s2Parts))
 	}
-	return max
+
+	// average the highest N scores where N is the words in our query (s2).
+	sort.Float64s(scores)
+	if len(s1Parts) > len(s2Parts) {
+		scores = scores[len(s2Parts)-1:]
+	}
+
+	var sum float64
+	for i := range scores {
+		sum += scores[i]
+	}
+	return sum / float64(len(scores))
 }
 
 // extractIDFromRemark attempts to parse out a National ID or similar governmental ID value

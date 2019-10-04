@@ -116,7 +116,6 @@ func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchReq
 		if req.Address != "" {
 			compares = append(compares, topAddressesAddress(req.Address))
 		}
-
 		if req.City != "" {
 			compares = append(compares, topAddressesCityState(req.City))
 		}
