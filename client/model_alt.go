@@ -9,7 +9,7 @@
 
 package openapi
 
-// Alternate name from OFAC list
+// Alt Alternate name from OFAC list
 type Alt struct {
 	EntityID         string  `json:"entityID,omitempty"`
 	AlternateID      string  `json:"alternateID,omitempty"`

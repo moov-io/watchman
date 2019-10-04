@@ -9,7 +9,7 @@
 
 package openapi
 
-// Specially designated national from OFAC list
+// Sdn Specially designated national from OFAC list
 type Sdn struct {
 	EntityID string `json:"entityID,omitempty"`
 	SdnName  string `json:"sdnName,omitempty"`

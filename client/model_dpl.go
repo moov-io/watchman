@@ -9,7 +9,7 @@
 
 package openapi
 
-// BIS Denied Persons List item
+// Dpl BIS Denied Persons List item
 type Dpl struct {
 	// Name of the Denied Person
 	Name string `json:"name,omitempty"`

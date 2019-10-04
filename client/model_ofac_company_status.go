@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// Status properties of an OFAC Company
+// OfacCompanyStatus Status properties of an OFAC Company
 type OfacCompanyStatus struct {
 	// User ID provided when updating status
 	UserID string `json:"userID,omitempty"`

@@ -9,7 +9,7 @@
 
 package openapi
 
-// OFAC Customer and metadata
+// OfacCustomer OFAC Customer and metadata
 type OfacCustomer struct {
 	// OFAC Customer ID
 	ID        string             `json:"ID,omitempty"`

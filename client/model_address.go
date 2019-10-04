@@ -9,7 +9,7 @@
 
 package openapi
 
-// Physical address from OFAC list
+// Address Physical address from OFAC list
 type Address struct {
 	EntityID                    string  `json:"entityID,omitempty"`
 	AddressID                   string  `json:"addressID,omitempty"`
