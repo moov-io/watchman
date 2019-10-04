@@ -1,6 +1,6 @@
 ## v0.11.0 (Unreleased)
 
-This release adds a web interface for OFAC (developed by [Linden Lab](https://www.lindenlab.com/)) which allows for easier querying from desktop and mobile browsers.
+This release adds a web interface for OFAC (developed by [Linden Lab](https://www.lindenlab.com/)) which allows for easier querying from desktop and mobile browsers. Also added are query params to apply additional filtering (exmaple: `sdnType=individual`) and we have improved match percentages to closer mirror the [official OFAC search tool](https://sanctionssearch.ofac.treas.gov/).
 
 ![](docs/images/webui.png)
 
@@ -12,6 +12,7 @@ ADDITIONS
 - cmd/server: add endpoint for applications to grab distinct sets of column values
   - `GET /ui/values/sdnType` returns `["aircraft","individual","vessel"]`
 - cmd/server: add `/search?id=NNN` endpoint for matching remark IDs
+- cmd/server: return the oldest refresh time for our data in search results
 
 IMPROVEMENTS
 
@@ -19,6 +20,12 @@ IMPROVEMENTS
 - cmd/ofactest: set x-request-id and x-user-id HTTP headers if CLI flags are set
 - cmd/server: use a non-nil logger in search HTTP route tests
 - cmd/server: adjust jaro weighting to maximize total weight in strong single word matches
+
+BUG FIXES
+
+- cmd/server: fix spelling of jaroWinkler
+- cmd/server: never allow jaroWinkler to return NaN
+- cmd/server: match treasury.gov match percentages
 
 BUILD
 
