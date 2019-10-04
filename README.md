@@ -59,6 +59,8 @@ Docs: [docs.moov.io](https://docs.moov.io/ofac/) | [api docs](https://api.moov.i
 
 OFAC ships with a web interface for easier access searching the records. Our Docker image hosts the UI by default, but you can build and run it locally as well.
 
+![](docs/images/webui.png)
+
 ```
 $ make
 ...
