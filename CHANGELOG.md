@@ -1,4 +1,4 @@
-## v0.11.0 (Unreleased)
+## v0.11.0 (Released 2019-10-08)
 
 This release adds a web interface for OFAC (developed by [Linden Lab](https://www.lindenlab.com/)) which allows for easier querying from desktop and mobile browsers. Also added are query params to apply additional filtering (exmaple: `sdnType=individual`) and we have improved match percentages to closer mirror the [official OFAC search tool](https://sanctionssearch.ofac.treas.gov/).
 
@@ -13,6 +13,7 @@ ADDITIONS
   - `GET /ui/values/sdnType` returns `["aircraft","individual","vessel"]`
 - cmd/server: add `/search?id=NNN` endpoint for matching remark IDs
 - cmd/server: return the oldest refresh time for our data in search results
+- cmd/server: add `-base-path` for serving HTTP routes and web UI from non-root paths
 
 IMPROVEMENTS
 
