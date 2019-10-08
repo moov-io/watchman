@@ -5,9 +5,12 @@ const apiGet = async path => {
   return payload;
 };
 
-export const search = async qs => apiGet(`/search?${qs}`);
+// grab the base URL/href (IE 11 and older don't support 'new URL(..)')
+const { pathname } = new URL(document.baseURI);
 
-export const getSDNAlts = async sdnId => (await fetch(`/sdn/${sdnId}/alts`)).json();
-export const getSDNAddresses = async sdnId => (await fetch(`/sdn/${sdnId}/addresses`)).json();
-export const getSDNTypes = async qs => (await fetch(`/ui/values/sdnType`)).json();
-export const getPrograms = async qs => (await fetch(`/ui/values/program`)).json();
+export const search = async qs => apiGet(pathname + `/search?${qs}`);
+
+export const getSDNAlts = async sdnId => (await fetch(pathname + `/sdn/${sdnId}/alts`)).json();
+export const getSDNAddresses = async sdnId => (await fetch(pathname + `/sdn/${sdnId}/addresses`)).json();
+export const getSDNTypes = async qs => (await fetch(pathname + `/ui/values/sdnType`)).json();
+export const getPrograms = async qs => (await fetch(pathname + `/ui/values/program`)).json();
