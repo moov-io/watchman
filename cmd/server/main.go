@@ -31,6 +31,8 @@ var (
 	httpAddr  = flag.String("http.addr", bind.HTTP("ofac"), "HTTP listen address")
 	adminAddr = flag.String("admin.addr", bind.Admin("ofac"), "Admin HTTP listen address")
 
+	flagBasePath = flag.String("base-path", "/", "Base path to serve HTTP routes and webui from")
+
 	flagLogFormat = flag.String("log.format", "", "Format for log lines (Options: json, plain")
 
 	ofacDataRefreshInterval = 12 * time.Hour
@@ -75,7 +77,10 @@ func main() {
 	}()
 
 	// Setup business HTTP routes
-	router := mux.NewRouter()
+	if v := os.Getenv("BASE_PATH"); v != "" {
+		*flagBasePath = v
+	}
+	router := mux.NewRouter().PathPrefix(*flagBasePath).Subrouter()
 	moovhttp.AddCORSHandler(router)
 	addPingRoute(router)
 
@@ -169,7 +174,7 @@ func main() {
 	addValuesRoutes(logger, router, searcher)
 
 	// Setup our web UI to be served as well
-	setupWebui(logger, router)
+	setupWebui(logger, router, *flagBasePath)
 
 	// Start business logic HTTP server
 	go func() {
@@ -219,7 +224,7 @@ func getOFACRefreshInterval(logger log.Logger, env string) time.Duration {
 	return ofacDataRefreshInterval
 }
 
-func setupWebui(logger log.Logger, r *mux.Router) {
+func setupWebui(logger log.Logger, r *mux.Router, basePath string) {
 	dir := os.Getenv("WEB_ROOT")
 	if dir == "" {
 		dir = filepath.Join("webui", "build")
@@ -228,5 +233,5 @@ func setupWebui(logger log.Logger, r *mux.Router) {
 		logger.Log("main", fmt.Sprintf("problem with webui=%s: %v", dir, err))
 		os.Exit(1)
 	}
-	r.PathPrefix("/").Handler(http.FileServer(http.Dir(dir)))
+	r.PathPrefix("/").Handler(http.StripPrefix(basePath, http.FileServer(http.Dir(dir))))
 }
