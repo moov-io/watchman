@@ -30,22 +30,19 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/moov-io/base/http/bind"
 	"github.com/moov-io/ofac"
 	moov "github.com/moov-io/ofac/client"
+	"github.com/moov-io/ofac/cmd/internal"
 
 	"github.com/antihax/optional"
 )
 
 var (
-	defaultApiAddress = "https://api.moov.io"
-
-	flagApiAddress = flag.String("address", defaultApiAddress, "Moov API address")
+	flagApiAddress = flag.String("address", internal.DefaultApiAddress, "Moov API address")
 	flagLocal      = flag.Bool("local", false, "Use local HTTP addresses")
 	flagWebhook    = flag.String("webhook", "https://moov.io/ofac", "Secure HTTP address for webhooks")
 
@@ -59,17 +56,7 @@ func main() {
 	log.SetFlags(log.Ldate | log.Ltime | log.LUTC | log.Lmicroseconds | log.Lshortfile)
 	log.Printf("Starting moov/ofactest %s", ofac.Version)
 
-	conf := moov.NewConfiguration()
-	conf.BasePath = getBasePath(*flagApiAddress, *flagLocal)
-
-	conf.UserAgent = fmt.Sprintf("moov/ofactest:%s", ofac.Version)
-	conf.HTTPClient = &http.Client{
-		Timeout: 10 * time.Second,
-		Transport: &http.Transport{
-			IdleConnTimeout: 1 * time.Minute,
-		},
-	}
-
+	conf := internal.Config(*flagApiAddress, *flagLocal)
 	log.Printf("[INFO] using %s for address", conf.BasePath)
 
 	// Read OAuth token and set on conf
@@ -143,25 +130,6 @@ func main() {
 		log.Fatalf("[FAILURE] problem looking up UI values: %v", err)
 	} else {
 		log.Println("[SUCCESS] UI values lookup passed")
-	}
-}
-
-// getBasePath reads flagLocal and flagApiAddress to compute the HTTP address used for connecting with OFAC.
-func getBasePath(address string, local bool) string {
-	if local {
-		// If '-local and -address <foo>' use <foo>
-		if address != defaultApiAddress {
-			return strings.TrimSuffix(address, "/")
-		} else {
-			return "http://localhost" + bind.HTTP("ofac")
-		}
-	} else {
-		address = strings.TrimSuffix(address, "/")
-		// -address isn't changed, so assume Moov's API (needs extra path added)
-		if address == defaultApiAddress {
-			return address + "/v1/ofac"
-		}
-		return address
 	}
 }
 
