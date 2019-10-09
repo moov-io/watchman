@@ -137,6 +137,12 @@ OFAC supports sending a webhook periodically when a specific [Company](https://a
 
 OFAC supports sending a webhook periodically with a free-form name of a [Company](https://api.moov.io/#operation/addCompanyNameWatch) or [Customer](https://api.moov.io/#operation/addCustomerNameWatch). This allows external applications to be notified when an entity matching that name is added to the OFAC list. The match percentage will be included in the JSON payload.
 
+##### Prometheus Metrics
+
+- `http_response_duration_seconds`: A Histogram of HTTP response timings
+- `ofac_match_percentages` A Histogram which holds the match percentages with a label (`type`) of searches
+   - `type`: Can be address, q, remarksID, name, altName
+
 ## Getting Help
 
 We maintain a [runbook for common issues](docs/runbook.md) and configuration options. Also, if you've encountered a security issue please contact us at [`security@moov.io`](mailto:security@moov.io).

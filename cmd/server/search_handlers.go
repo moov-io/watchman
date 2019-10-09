@@ -15,7 +15,17 @@ import (
 	moovhttp "github.com/moov-io/base/http"
 
 	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/metrics/prometheus"
 	"github.com/gorilla/mux"
+	stdprometheus "github.com/prometheus/client_golang/prometheus"
+)
+
+var (
+	matchHist = prometheus.NewHistogramFrom(stdprometheus.HistogramOpts{
+		Name:    "ofac_match_percentages",
+		Help:    "Histogram representing the match percent of search routes",
+		Buckets: []float64{0.0, 0.5, 0.8, 0.9, 0.99},
+	}, []string{"type"})
 )
 
 func addSearchRoutes(logger log.Logger, r *mux.Router, searcher *searcher) {
@@ -138,6 +148,13 @@ func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchReq
 		// https://www.treasury.gov/resource-center/sanctions/CivPen/Documents/20190327_decker_settlement.pdf
 		resp.Addresses = searcher.TopAddressesFn(limit, multiAddressCompare(compares...))
 
+		// record Prometheus metrics
+		if len(resp.Addresses) > 0 {
+			matchHist.With("type", "address").Observe(resp.Addresses[0].match)
+		} else {
+			matchHist.With("type", "address").Observe(0.0)
+		}
+
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(resp)
@@ -160,6 +177,13 @@ func searchViaQ(logger log.Logger, searcher *searcher, name string) http.Handler
 			sdns = searcher.TopSDNs(limit, name)
 		}
 		sdns = filterSDNs(sdns, buildFilterRequest(r.URL))
+
+		// record Prometheus metrics
+		if len(sdns) > 0 {
+			matchHist.With("type", "q").Observe(sdns[0].match)
+		} else {
+			matchHist.With("type", "q").Observe(0.0)
+		}
 
 		// Build our big response object
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -185,6 +209,13 @@ func searchByRemarksID(logger log.Logger, searcher *searcher, id string) http.Ha
 		sdns := searcher.FindSDNsByRemarksID(limit, id)
 		sdns = filterSDNs(sdns, buildFilterRequest(r.URL))
 
+		// record Prometheus metrics
+		if len(sdns) > 0 {
+			matchHist.With("type", "remarksID").Observe(sdns[0].match)
+		} else {
+			matchHist.With("type", "remarksID").Observe(0.0)
+		}
+
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(&searchResponse{
@@ -206,6 +237,13 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 		sdns := searcher.TopSDNs(extractSearchLimit(r), nameSlug)
 		sdns = filterSDNs(sdns, buildFilterRequest(r.URL))
 
+		// record Prometheus metrics
+		if len(sdns) > 0 {
+			matchHist.With("type", "name").Observe(sdns[0].match)
+		} else {
+			matchHist.With("type", "name").Observe(0.0)
+		}
+
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(&searchResponse{
@@ -224,6 +262,13 @@ func searchByAltName(logger log.Logger, searcher *searcher, altSlug string) http
 		}
 
 		alts := searcher.TopAltNames(extractSearchLimit(r), altSlug)
+
+		// record Prometheus metrics
+		if len(alts) > 0 {
+			matchHist.With("type", "altName").Observe(alts[0].match)
+		} else {
+			matchHist.With("type", "altName").Observe(0.0)
+		}
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
