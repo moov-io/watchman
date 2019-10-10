@@ -1,3 +1,7 @@
+## v0.11.1 (Released 2019-10-10)
+
+Version `v0.11.0` was improperly released and cached by some Go Modules proxies. Version `v0.11.1` is the same code as the previous release.
+
 ## v0.11.0 (Released 2019-10-08)
 
 This release adds a web interface for OFAC (developed by [Linden Lab](https://www.lindenlab.com/)) which allows for easier querying from desktop and mobile browsers. Also added are query params to apply additional filtering (exmaple: `sdnType=individual`) and we have improved match percentages to closer mirror the [official OFAC search tool](https://sanctionssearch.ofac.treas.gov/).
