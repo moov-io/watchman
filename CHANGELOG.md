@@ -1,3 +1,14 @@
+## v0.12.0 (Unreleased)
+
+ADDITIONS
+
+- cmd/server: add histogram for match percentages
+- cmd/ofaccheck: initial setup of a cli tool for batch searches
+
+BUILD
+
+- chore(deps): update mui monorepo to v4.5.1
+
 ## v0.11.0 (Released 2019-10-08)
 
 This release adds a web interface for OFAC (developed by [Linden Lab](https://www.lindenlab.com/)) which allows for easier querying from desktop and mobile browsers. Also added are query params to apply additional filtering (exmaple: `sdnType=individual`) and we have improved match percentages to closer mirror the [official OFAC search tool](https://sanctionssearch.ofac.treas.gov/).
