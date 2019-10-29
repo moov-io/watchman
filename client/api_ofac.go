@@ -871,16 +871,16 @@ GetSDNAddresses Get addresses for a given SDN
  * @param optional nil or *GetSDNAddressesOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
  * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
-@return []Address
+@return []EntityAddress
 */
-func (a *OFACApiService) GetSDNAddresses(ctx _context.Context, sdnID string, localVarOptionals *GetSDNAddressesOpts) ([]Address, *_nethttp.Response, error) {
+func (a *OFACApiService) GetSDNAddresses(ctx _context.Context, sdnID string, localVarOptionals *GetSDNAddressesOpts) ([]EntityAddress, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  []Address
+		localVarReturnValue  []EntityAddress
 	)
 
 	// create path and map variables
@@ -936,7 +936,7 @@ func (a *OFACApiService) GetSDNAddresses(ctx _context.Context, sdnID string, loc
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 200 {
-			var v []Address
+			var v []EntityAddress
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()

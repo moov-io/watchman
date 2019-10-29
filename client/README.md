@@ -56,10 +56,10 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
- - [Address](docs/Address.md)
  - [Alt](docs/Alt.md)
  - [Download](docs/Download.md)
  - [Dpl](docs/Dpl.md)
+ - [EntityAddress](docs/EntityAddress.md)
  - [Error](docs/Error.md)
  - [OfacCompany](docs/OfacCompany.md)
  - [OfacCompanyStatus](docs/OfacCompanyStatus.md)

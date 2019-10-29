@@ -14,7 +14,7 @@ type OfacCompany struct {
 	// OFAC Company ID
 	ID        string            `json:"ID,omitempty"`
 	Sdn       Sdn               `json:"sdn,omitempty"`
-	Addresses []Address         `json:"addresses,omitempty"`
+	Addresses []EntityAddress   `json:"addresses,omitempty"`
 	Alts      []Alt             `json:"alts,omitempty"`
 	Status    OfacCompanyStatus `json:"status,omitempty"`
 }

@@ -695,7 +695,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Addresses'
+                $ref: '#/components/schemas/EntityAddresses'
           description: SDN addresses
       summary: Get addresses for a given SDN
       tags:
@@ -1002,7 +1002,7 @@ components:
           $ref: '#/components/schemas/SDN'
         addresses:
           items:
-            $ref: '#/components/schemas/Address'
+            $ref: '#/components/schemas/EntityAddress'
           type: array
         alts:
           items:
@@ -1087,7 +1087,7 @@ components:
           $ref: '#/components/schemas/SDN'
         addresses:
           items:
-            $ref: '#/components/schemas/Address'
+            $ref: '#/components/schemas/EntityAddress'
           type: array
         alts:
           items:
@@ -1155,11 +1155,11 @@ components:
           description: Remarks on SDN and often additional information about the SDN
           example: 0.91
           type: number
-    Addresses:
+    EntityAddresses:
       items:
-        $ref: '#/components/schemas/Address'
+        $ref: '#/components/schemas/EntityAddress'
       type: array
-    Address:
+    EntityAddress:
       description: Physical address from OFAC list
       example:
         country: Japan
@@ -1410,7 +1410,7 @@ components:
           type: array
         addresses:
           items:
-            $ref: '#/components/schemas/Address'
+            $ref: '#/components/schemas/EntityAddress'
           type: array
         deniedPersons:
           items:

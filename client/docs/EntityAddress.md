@@ -1,4 +1,4 @@
-# Address
+# EntityAddress
 
 ## Properties
 
