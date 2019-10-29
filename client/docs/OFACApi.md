@@ -379,7 +379,7 @@ No authorization required
 
 ## GetSDNAddresses
 
-> []Address GetSDNAddresses(ctx, sdnID, optional)
+> []EntityAddress GetSDNAddresses(ctx, sdnID, optional)
 Get addresses for a given SDN
 
 ### Required Parameters
@@ -404,7 +404,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**[]Address**](Address.md)
+[**[]EntityAddress**](EntityAddress.md)
 
 ### Authorization
 

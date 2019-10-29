@@ -6,7 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **ID** | **string** | OFAC Company ID | [optional] 
 **Sdn** | [**Sdn**](SDN.md) |  | [optional] 
-**Addresses** | [**[]Address**](Address.md) |  | [optional] 
+**Addresses** | [**[]EntityAddress**](EntityAddress.md) |  | [optional] 
 **Alts** | [**[]Alt**](Alt.md) |  | [optional] 
 **Status** | [**OfacCompanyStatus**](OFACCompanyStatus.md) |  | [optional] 
 

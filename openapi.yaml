@@ -554,7 +554,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Addresses'
+                $ref: '#/components/schemas/EntityAddresses'
   # Search Endpoint
   /search:
     get:
@@ -747,7 +747,7 @@ components:
         addresses:
           type: array
           items:
-            $ref: '#/components/schemas/Address'
+            $ref: '#/components/schemas/EntityAddress'
         alts:
           type: array
           items:
@@ -787,7 +787,7 @@ components:
         addresses:
           type: array
           items:
-            $ref: '#/components/schemas/Address'
+            $ref: '#/components/schemas/EntityAddress'
         alts:
           type: array
           items:
@@ -840,11 +840,11 @@ components:
           type: number
           example: 0.91
           description: Remarks on SDN and often additional information about the SDN
-    Addresses:
+    EntityAddresses:
       type: array
       items:
-        $ref: '#/components/schemas/Address'
-    Address:
+        $ref: '#/components/schemas/EntityAddress'
+    EntityAddress:
       description: Physical address from OFAC list
       properties:
         entityID:
@@ -988,7 +988,7 @@ components:
         addresses:
           type: array
           items:
-            $ref: '#/components/schemas/Address'
+            $ref: '#/components/schemas/EntityAddress'
         deniedPersons:
           type: array
           items:
