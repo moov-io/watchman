@@ -1,5 +1,9 @@
 ## v0.12.0 (Unreleased)
 
+BREAKING CHANGES
+
+- `Address` in our OpenAPI spec and generated Go client was renamed `EntiyAddress` to provide a more specific naming when combined in Moov's larger OpenAPI specification.
+
 ADDITIONS
 
 - cmd/server: add histogram for match percentages
