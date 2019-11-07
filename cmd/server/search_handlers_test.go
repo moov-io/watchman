@@ -145,6 +145,79 @@ func TestSearch__AddressState(t *testing.T) {
 	}
 }
 
+func TestSearch__NameAndAddress(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/search?name=midco&address=rue+de+rhone&limit=1", nil)
+
+	s := &searcher{
+		Addresses: precomputeAddresses([]*ofac.Address{
+			{
+				EntityID:                    "2831",
+				AddressID:                   "1965",
+				Address:                     "57 Rue du Rhone",
+				CityStateProvincePostalCode: "Geneva CH-1204",
+				Country:                     "Switzerland",
+			},
+			{
+				EntityID:                    "173",
+				AddressID:                   "129",
+				Address:                     "Ibex House, The Minories",
+				CityStateProvincePostalCode: "London EC3N 1DY",
+				Country:                     "United Kingdom",
+			},
+		}),
+		SDNs: precomputeSDNs([]*ofac.SDN{
+			{
+				EntityID: "2831",
+				SDNName:  "MIDCO FINANCE S.A.",
+				SDNType:  "individual",
+				Program:  "IRAQ2",
+				Remarks:  "US FEIN CH-660-0-469-982-0 (United States); Switzerland.",
+			},
+		}),
+	}
+
+	router := mux.NewRouter()
+	addSearchRoutes(log.NewNopLogger(), router, s)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusOK {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+	var wrapper struct {
+		SDNs      []*ofac.SDN     `json:"SDNs"`
+		Addresses []*ofac.Address `json:"addresses"`
+	}
+	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
+		t.Fatal(err)
+	}
+
+	if len(wrapper.SDNs) != 1 || len(wrapper.Addresses) != 1 {
+		t.Fatalf("sdns=%#v addresses=%#v", wrapper.SDNs[0], wrapper.Addresses[0])
+	}
+
+	if wrapper.SDNs[0].EntityID != "2831" || wrapper.Addresses[0].EntityID != "2831" {
+		t.Errorf("SDNs[0].EntityID=%s Addresses[0].EntityID=%s", wrapper.SDNs[0].EntityID, wrapper.Addresses[0].EntityID)
+	}
+
+	// request with no results
+	req = httptest.NewRequest("GET", "/search?name=midco&country=United+Kingdom&limit=1", nil)
+
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	if w.Code != http.StatusOK {
+		t.Errorf("bogus status code: %d", w.Code)
+	}
+	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
+		t.Fatal(err)
+	}
+	if len(wrapper.SDNs) != 0 || len(wrapper.Addresses) != 0 {
+		t.Fatalf("sdns=%#v addresses=%#v", wrapper.SDNs[0], wrapper.Addresses[0])
+	}
+}
+
 func TestSearch__NameAndAltName(t *testing.T) {
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/search?limit=1&q=nayif", nil)

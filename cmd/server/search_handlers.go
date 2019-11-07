@@ -7,6 +7,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 	"net/url"
 	"strings"
@@ -78,6 +79,12 @@ func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 
 		// Search by Name
 		if name := strings.TrimSpace(r.URL.Query().Get("name")); name != "" {
+			if req := readAddressSearchRequest(r.URL); !req.empty() {
+				logger.Log("search", fmt.Sprintf("searching SDN names='%s' and addresses", name), "requestID", requestID, "userID", userID)
+				searchViaAddressAndName(logger, searcher, name, req)(w, r)
+				return
+			}
+
 			logger.Log("search", fmt.Sprintf("searching SDN names for %s", name), "requestID", requestID, "userID", userID)
 			searchByName(logger, searcher, name)(w, r)
 			return
@@ -110,6 +117,29 @@ type searchResponse struct {
 	RefreshedAt   time.Time `json:"refreshedAt"`
 }
 
+func buildAddressCompares(req addressSearchRequest) []func(*Address) *item {
+	var compares []func(*Address) *item
+	if req.Address != "" {
+		compares = append(compares, topAddressesAddress(req.Address))
+	}
+	if req.City != "" {
+		compares = append(compares, topAddressesCityState(req.City))
+	}
+	if req.State != "" {
+		compares = append(compares, topAddressesCityState(req.State))
+	}
+	if req.Providence != "" {
+		compares = append(compares, topAddressesCityState(req.Providence))
+	}
+	if req.Zip != "" {
+		compares = append(compares, topAddressesCityState(req.Zip))
+	}
+	if req.Country != "" {
+		compares = append(compares, topAddressesCountry(req.Country))
+	}
+	return compares
+}
+
 func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchRequest) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if req.empty() {
@@ -122,30 +152,11 @@ func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchReq
 		}
 		limit := extractSearchLimit(r)
 
-		var compares []func(*Address) *item
-		if req.Address != "" {
-			compares = append(compares, topAddressesAddress(req.Address))
-		}
-		if req.City != "" {
-			compares = append(compares, topAddressesCityState(req.City))
-		}
-		if req.State != "" {
-			compares = append(compares, topAddressesCityState(req.State))
-		}
-		if req.Providence != "" {
-			compares = append(compares, topAddressesCityState(req.Providence))
-		}
-		if req.Zip != "" {
-			compares = append(compares, topAddressesCityState(req.Zip))
-		}
-		if req.Country != "" {
-			compares = append(compares, topAddressesCountry(req.Country))
-		}
-
 		// Perform our ranking across all accumulated compare functions
 		//
 		// TODO(adam): Is there something in the (SDN?) files which signal to block an entire country? (i.e. Needing to block Iran all together)
 		// https://www.treasury.gov/resource-center/sanctions/CivPen/Documents/20190327_decker_settlement.pdf
+		compares := buildAddressCompares(req)
 		resp.Addresses = searcher.TopAddressesFn(limit, multiAddressCompare(compares...))
 
 		// record Prometheus metrics
@@ -195,6 +206,47 @@ func searchViaQ(logger log.Logger, searcher *searcher, name string) http.Handler
 			DeniedPersons: searcher.TopDPs(limit, name),
 			RefreshedAt:   searcher.lastRefreshedAt,
 		})
+	}
+}
+
+func searchViaAddressAndName(logger log.Logger, searcher *searcher, name string, req addressSearchRequest) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		name = strings.TrimSpace(name)
+		if name == "" || req.empty() {
+			moovhttp.Problem(w, errNoSearchParams)
+			return
+		}
+
+		limit := extractSearchLimit(r)
+
+		// Grab the top SDNs by name and top addresses
+		sdns := filterSDNs(searcher.TopSDNs(limit, name), buildFilterRequest(r.URL))
+
+		compares := buildAddressCompares(req)
+		addresses := searcher.TopAddressesFn(limit, multiAddressCompare(compares...))
+
+		resp := &searchResponse{
+			RefreshedAt: searcher.lastRefreshedAt,
+		}
+		for i := range sdns {
+			for j := range addresses {
+				if sdns[i].EntityID == addresses[j].Address.EntityID {
+					resp.SDNs = append(resp.SDNs, sdns[i])
+					resp.Addresses = append(resp.Addresses, addresses[j])
+				}
+			}
+		}
+
+		// record Prometheus metrics
+		if len(resp.SDNs) > 0 && len(resp.Addresses) > 0 {
+			matchHist.With("type", "addressname").Observe(math.Max(resp.SDNs[0].match, resp.Addresses[0].match))
+		} else {
+			matchHist.With("type", "addressname").Observe(0.0)
+		}
+
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(resp)
 	}
 }
 
