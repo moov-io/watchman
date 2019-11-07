@@ -8,10 +8,12 @@ ADDITIONS
 
 - cmd/server: add histogram for match percentages
 - cmd/ofaccheck: initial setup of a cli tool for batch searches
+- cmd/server: AND name and address queries if params are provided
 
 BUILD
 
 - chore(deps): update mui monorepo to v4.5.1
+- build: upgrade openapi-generator to 4.2.0
 
 ## v0.11.0 (Released 2019-10-08)
 
