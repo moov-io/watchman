@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "express": "4.17.1",
-    "express-winston": "3.3.0",
+    "express-winston": "4.0.1",
     "history": "4.10.1",
     "http-proxy-middleware": "0.20.0",
     "react": "16.11.0",
