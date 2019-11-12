@@ -1,4 +1,4 @@
-## v0.12.0 (Unreleased)
+## v0.12.0 (Released 2019-11-12)
 
 BREAKING CHANGES
 
@@ -12,8 +12,7 @@ ADDITIONS
 
 BUILD
 
-- chore(deps): update mui monorepo to v4.5.1
-- build: upgrade openapi-generator to 4.2.0
+- build: upgrade Go and webui dependencies
 
 ## v0.11.0 (Released 2019-10-08)
 
