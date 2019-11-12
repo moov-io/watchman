@@ -26,7 +26,7 @@ require (
 	github.com/prometheus/client_golang v1.0.0
 	github.com/rickar/cal v1.0.1 // indirect
 	github.com/xrash/smetrics v0.0.0-20170218160415-a3153f7040e9
-	go4.org v0.0.0-20191010144846-132d2879e1e9
+	go4.org v0.0.0-20190313082347-94abd6928b1d
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/text v0.3.2
 	gotest.tools v2.2.0+incompatible // indirect
