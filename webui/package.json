@@ -4,12 +4,12 @@
   "private": true,
   "dependencies": {
     "express": "4.17.1",
-    "express-winston": "3.3.0",
+    "express-winston": "3.4.0",
     "history": "4.10.1",
     "http-proxy-middleware": "0.20.0",
     "react": "16.11.0",
     "react-dom": "16.11.0",
-    "react-scripts": "3.0.1",
+    "react-scripts": "3.2.0",
     "winston": "3.2.1"
   },
   "scripts": {
@@ -40,6 +40,6 @@
     "@material-ui/core": "4.6.0",
     "@material-ui/icons": "4.5.1",
     "ramda": "0.26.1",
-    "styled-components": "4.3.2"
+    "styled-components": "4.4.0"
   }
 }
