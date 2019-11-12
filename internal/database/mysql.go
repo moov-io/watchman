@@ -18,7 +18,7 @@ import (
 	kitprom "github.com/go-kit/kit/metrics/prometheus"
 	gomysql "github.com/go-sql-driver/mysql"
 	"github.com/lopezator/migrator"
-	"github.com/ory/dockertest"
+	"github.com/ory/dockertest/v3"
 	stdprom "github.com/prometheus/client_golang/prometheus"
 )
 
@@ -32,7 +32,7 @@ var (
 	// https://dev.mysql.com/doc/refman/8.0/en/server-error-reference.html#error_er_dup_entry
 	mySQLErrDuplicateKey uint16 = 1062
 
-	mysqlMigrator = migrator.New(
+	mysqlMigrations = migrator.Migrations(
 		execsql(
 			"create_customer_name_watches",
 			`create table if not exists customer_name_watches(id varchar(40) primary key, name varchar(40), webhook varchar(512), auth_token varchar(128), created_at timestamp(3), deleted_at timestamp(3));`,
@@ -65,7 +65,10 @@ var (
 			"create_webhook_stats",
 			`create table if not exists webhook_stats(watch_id varchar(40), attempted_at timestamp(3), status varchar(10));`,
 		),
-		execsql("add__denied_persons__to__ofac_download_stats", "alter table ofac_download_stats add column denied_persons integer not null default 0;"),
+		execsql(
+			"add__denied_persons__to__ofac_download_stats",
+			"alter table ofac_download_stats add column denied_persons integer not null default 0;",
+		),
 	)
 )
 
@@ -96,8 +99,12 @@ func (my *mysql) Connect() (*sql.DB, error) {
 	}
 
 	// Migrate our database
-	if err := mysqlMigrator.Migrate(db); err != nil {
+	if m, err := migrator.New(mysqlMigrations); err != nil {
 		return nil, err
+	} else {
+		if err := m.Migrate(db); err != nil {
+			return nil, err
+		}
 	}
 
 	// Setup metrics after the database is setup

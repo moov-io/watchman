@@ -30,7 +30,7 @@ var (
 
 	sqliteVersionLogOnce sync.Once
 
-	sqliteMigrator = migrator.New(
+	sqliteMigrations = migrator.Migrations(
 		execsql(
 			"create_customer_name_watches",
 			`create table if not exists customer_name_watches(id primary key, name, webhook, auth_token, created_at datetime, deleted_at datetime);`,
@@ -63,42 +63,12 @@ var (
 			"create_webhook_stats",
 			`create table if not exists webhook_stats(watch_id string, attempted_at datetime, status);`,
 		),
-		addSQLiteColumn("ofac_download_stats", "denied_persons"),
+		execsql(
+			"add_denied_persons_to_ofac_download_stats",
+			"alter table ofac_download_stats add column denied_persons default 0;",
+		),
 	)
 )
-
-func addSQLiteColumn(tableName, columnDesc string) *migrator.Migration {
-	colName := strings.Fields(columnDesc)[0] // take column name ('deleted_at' or 'deleted_at timestamp')
-
-	return &migrator.Migration{
-		Name: fmt.Sprintf("add__%s__to__%s", colName, tableName),
-		Func: func(tx *sql.Tx) error {
-			stmt, err := tx.Prepare(fmt.Sprintf(`select 1 from pragma_table_info('%s') where name = ? limit 1;`, tableName))
-			if err != nil {
-				return fmt.Errorf("addSQLiteColumn: column=%s failed: %v", colName, err)
-			}
-			var n int
-			if err := stmt.QueryRow(colName).Scan(&n); err != nil && err != sql.ErrNoRows {
-				return fmt.Errorf("addSQLiteColumn: query column=%s failed: %#v", colName, err)
-			}
-			if n == 0 {
-				_, err := tx.Exec(fmt.Sprintf(`alter table %s add column %s`, tableName, columnDesc))
-				return err
-			}
-			return nil
-		},
-	}
-}
-
-func getSqlitePath() string {
-	path := os.Getenv("SQLITE_DB_PATH")
-	if path == "" || strings.Contains(path, "..") {
-		// set default if empty or trying to escape
-		// don't filepath.ABS to avoid full-fs reads
-		path = "ofac.db"
-	}
-	return path
-}
 
 type sqlite struct {
 	path string
@@ -120,7 +90,6 @@ func (s *sqlite) Connect() (*sql.DB, error) {
 		}
 	})
 
-	// Connect to our DB and perform a quick sanity check
 	db, err := sql.Open("sqlite3", s.path)
 	if err != nil {
 		return nil, err
@@ -130,13 +99,17 @@ func (s *sqlite) Connect() (*sql.DB, error) {
 	}
 
 	// Migrate our database
-	if err := sqliteMigrator.Migrate(db); err != nil {
+	if m, err := migrator.New(sqliteMigrations); err != nil {
 		return db, err
+	} else {
+		if err := m.Migrate(db); err != nil {
+			return db, err
+		}
 	}
 
 	// Spin up metrics only after everything works
 	go func() {
-		t := time.NewTicker(1 * time.Minute)
+		t := time.NewTicker(1 * time.Second)
 		for range t.C {
 			stats := db.Stats()
 			s.connections.With("state", "idle").Set(float64(stats.Idle))
@@ -154,6 +127,16 @@ func sqliteConnection(logger log.Logger, path string) *sqlite {
 		logger:      logger,
 		connections: sqliteConnections,
 	}
+}
+
+func getSqlitePath() string {
+	path := os.Getenv("SQLITE_DB_PATH")
+	if path == "" || strings.Contains(path, "..") {
+		// set default if empty or trying to escape
+		// don't filepath.ABS to avoid full-fs reads
+		path = "ofac.db"
+	}
+	return path
 }
 
 // TestSQLiteDB is a wrapper around sql.DB for SQLite connections designed for tests to provide
