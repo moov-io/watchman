@@ -2,14 +2,14 @@
 // Use of this source code is governed by an Apache License
 // license that can be found in the LICENSE file.
 
-// ofaccheck is a cli tool used for testing batches of names against Moov's OFAC service.
+// batchsearch is a cli tool used for testing batches of names against Moov's sanctions service.
 //
 // With no arguments the contaier runs tests against the production API, but we strongly ask you
-// run ofaccheck against local instances of OFAC.
+// run batchsearch against local instances of SanctionSearch.
 //
-//  $ go install ./cmd/ofaccheck
-//  $ ofaccheck -allowed-file users.txt -blocked-file criminals.txt -threshold 0.99 -sdn-type individual -v
-//  2019/10/09 17:36:16.160025 main.go:61: Starting moov/ofaccheck v0.12.0-dev
+//  $ go install ./cmd/batchsearch
+//  $ batchsearch -allowed-file users.txt -blocked-file criminals.txt -threshold 0.99 -sdn-type individual -v
+//  2019/10/09 17:36:16.160025 main.go:61: Starting moov/batchsearch v0.12.0-dev
 //  2019/10/09 17:36:16.160055 main.go:64: [INFO] using http://localhost:8084 for address
 //  2019/10/09 17:36:16.161818 main.go:73: [SUCCESS] ping
 //  2019/10/09 17:36:16.174108 main.go:156: [INFO] didn't block 'Husein HAZEM'
@@ -17,7 +17,7 @@
 //  2019/10/09 17:36:16.213423 main.go:146: [ERROR] 'Maria Alexandra PERDOMO' wasn't blocked (match=0.96)
 //  exit status 1
 //
-// ofaccheck is not a stable tool. Please contact Moov developers if you intend to use this tool,
+// batchsearch is not a stable tool. Please contact Moov developers if you intend to use this tool,
 // otherwise we might change the tool (or remove it) without notice.
 package main
 
@@ -37,9 +37,9 @@ import (
 	"time"
 
 	"github.com/antihax/optional"
-	"github.com/moov-io/ofac"
-	moov "github.com/moov-io/ofac/client"
-	"github.com/moov-io/ofac/cmd/internal"
+	"github.com/moov-io/sanctionsearch"
+	moov "github.com/moov-io/sanctionsearch/client"
+	"github.com/moov-io/sanctionsearch/cmd/internal"
 
 	"go4.org/syncutil"
 )
@@ -67,17 +67,17 @@ func main() {
 	flag.Parse()
 
 	log.SetFlags(log.Ldate | log.Ltime | log.LUTC | log.Lmicroseconds | log.Lshortfile)
-	log.Printf("Starting moov/ofaccheck %s", ofac.Version)
+	log.Printf("Starting moov/batchsearch %s", sanctionsearch.Version)
 
 	conf := internal.Config(*flagApiAddress, *flagLocal)
 	log.Printf("[INFO] using %s for address", conf.BasePath)
 
-	// Setup OFAC API client
+	// Setup API client
 	api, ctx := moov.NewAPIClient(conf), context.TODO()
 
-	// Ping OFAC
+	// Ping
 	if err := ping(ctx, api); err != nil {
-		log.Fatal("[FAILURE] ping OFAC")
+		log.Fatalf("[FAILURE] ping Sanctions Search: %v", err)
 	} else {
 		log.Println("[SUCCESS] ping")
 	}

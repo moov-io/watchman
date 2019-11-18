@@ -10,12 +10,12 @@ import (
 	"fmt"
 	"strings"
 
-	moov "github.com/moov-io/ofac/client"
+	moov "github.com/moov-io/sanctionsearch/client"
 
 	"github.com/antihax/optional"
 )
 
-// searchByName will attempt OFAC searches for the provided name and then load the SDN metadata
+// searchByName will attempt sanctions searches for the provided name and then load the SDN metadata
 // associated to the company/organization or individual.
 func searchByName(ctx context.Context, api *moov.APIClient, name string) (*moov.Sdn, error) {
 	opts := &moov.SearchOpts{
@@ -48,7 +48,7 @@ func searchByName(ctx context.Context, api *moov.APIClient, name string) (*moov.
 	return &search.SDNs[0], nil
 }
 
-// searchByAltName will attempt OFAC searches and retrieval of all alt names associated to the first result
+// searchByAltName will attempt sanctions searches and retrieval of all alt names associated to the first result
 // for the provided altName and error if none are found.
 func searchByAltName(ctx context.Context, api *moov.APIClient, alt string) error {
 	opts := &moov.SearchOpts{
@@ -70,7 +70,7 @@ func searchByAltName(ctx context.Context, api *moov.APIClient, alt string) error
 	return getSDNAltNames(ctx, api, search.AltNames[0].EntityID)
 }
 
-// searchByAddress will attempt OFAC searches and retrieval of all addresses associated to the first result
+// searchByAddress will attempt sanctions searches and retrieval of all addresses associated to the first result
 // for the provided address and error if none are found.
 func searchByAddress(ctx context.Context, api *moov.APIClient, address string) error {
 	opts := &moov.SearchOpts{

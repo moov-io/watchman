@@ -1,15 +1,15 @@
-## ofactest
+## sanctiontest
 
-`ofactest` is a cli tool used for testing the Moov OFAC service.
+`sanctiontest` is a cli tool used for testing the Moov Sanction Search service.
 
 With no arguments the contaier runs tests against the production API. This tool requires an OAuth token provided by github.com/moov-io/api written to the local disk, but running apitest first will write this token.
 
 This tool can be used to query with custom searches:
 
 ```
-$ go install ./cmd/ofactest
-$ ofactest -local moh
-2019/02/14 23:37:44.432334 main.go:44: Starting moov/ofactest v0.4.1-dev
+$ go install ./cmd/sanctiontest
+$ sanctiontest -local moh
+2019/02/14 23:37:44.432334 main.go:44: Starting moov/sanctiontest v0.4.1-dev
 2019/02/14 23:37:44.432366 main.go:60: [INFO] using http://localhost:8084 for address
 2019/02/14 23:37:44.434534 main.go:76: [SUCCESS] ping
 2019/02/14 23:37:44.435204 main.go:83: [SUCCESS] last download was: 3h45m58s ago
@@ -19,4 +19,4 @@ $ ofactest -local moh
 2019/02/14 23:37:44.449367 main.go:123: [SUCCESS] address search passed
 ```
 
-__ofactest is not a stable tool. Please contact Moov developers if you intend to use this tool, otherwise we might change the tool (or remove it) without notice.__
+__sanctiontest is not a stable tool. Please contact Moov developers if you intend to use this tool, otherwise we might change the tool (or remove it) without notice.__

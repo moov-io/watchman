@@ -1,4 +1,4 @@
-moov-io/ofac
+moov-io/sanctionsearch
 ===
 
 [![GoDoc](https://godoc.org/github.com/moov-io/ofac?status.svg)](https://godoc.org/github.com/moov-io/ofac)

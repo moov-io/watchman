@@ -7,7 +7,7 @@ package main
 import (
 	"testing"
 
-	"github.com/moov-io/ofac"
+	"github.com/moov-io/sanctionsearch/pkg/ofac"
 
 	"github.com/go-kit/kit/log"
 )

@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/moov-io/ofac"
+	"github.com/moov-io/sanctionsearch/pkg/ofac"
 )
 
 func TestFilter__buildFilterRequest(t *testing.T) {
