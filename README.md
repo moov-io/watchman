@@ -1,29 +1,35 @@
 moov-io/sanctionsearch
 ===
 
-[![GoDoc](https://godoc.org/github.com/moov-io/ofac?status.svg)](https://godoc.org/github.com/moov-io/ofac)
-[![Build Status](https://travis-ci.com/moov-io/ofac.svg?branch=master)](https://travis-ci.com/moov-io/ofac)
-[![Coverage Status](https://codecov.io/gh/moov-io/ofac/branch/master/graph/badge.svg)](https://codecov.io/gh/moov-io/ofac)
-[![Go Report Card](https://goreportcard.com/badge/github.com/moov-io/ofac)](https://goreportcard.com/report/github.com/moov-io/ofac)
-[![Apache 2 licensed](https://img.shields.io/badge/license-Apache2-blue.svg)](https://raw.githubusercontent.com/moov-io/ofac/master/LICENSE)
+[![GoDoc](https://godoc.org/github.com/moov-io/sanctionsearch?status.svg)](https://godoc.org/github.com/moov-io/sanctionsearch)
+[![Build Status](https://travis-ci.com/moov-io/sanctionsearch.svg?branch=master)](https://travis-ci.com/moov-io/sanctionsearch)
+[![Coverage Status](https://codecov.io/gh/moov-io/sanctionsearch/branch/master/graph/badge.svg)](https://codecov.io/gh/moov-io/sanctionsearch)
+[![Go Report Card](https://goreportcard.com/badge/github.com/moov-io/sanctionsearch)](https://goreportcard.com/report/github.com/moov-io/sanctionsearch)
+[![Apache 2 licensed](https://img.shields.io/badge/license-Apache2-blue.svg)](https://raw.githubusercontent.com/moov-io/sanctionsearch/master/LICENSE)
 
-[Office of Foreign Asset Control](https://www.treasury.gov/about/organizational-structure/offices/Pages/Office-of-Foreign-Assets-Control.aspx) (OFAC) is an HTTP API and Go library to download, [parse and serve United States OFAC sanction data](https://docs.moov.io/ofac/file-structure/) along with the [BIS Denied Person's List](https://bis.data.commerce.gov/dataset/Denied-Persons-List-with-Denied-US-Export-Privileg/xwtd-wd7a/data) (DPL) for applications and humans. Also supported is an async webhook notification service to initiate processes on remote systems connected with OFAC. The US Treasury department offers a [search page for OFAC records](https://sanctionssearch.ofac.treas.gov/).
+Moov Sanction Search is an HTTP API and Go library to download, parse and offer search functions over numerous trade sanction lists from the United States and European Union Goernments or agencies. Also included is a web UI and async webhook notification service to initiate processes on remote systems.
 
-All United States companies are required to comply with OFAC regulations and sanction lists and the US Patriot Act requires compliance with the BIS Denied Person's List (DPL). Moov's primary usage for this project is with ACH origination in our [paygate](https://github.com/moov-io/paygate) project.
+Lists included in search are:
 
-To get started using OFAC download [the latest release](https://github.com/moov-io/ofac/releases/latest) or our [Docker image](https://hub.docker.com/r/moov/ofac/tags). We also have a [demo OFAC instance](https://moov.io/ofac/) as part of Moov's demo environment.
+- [Office of Foreign Asset Control](https://www.treasury.gov/about/organizational-structure/offices/Pages/Office-of-Foreign-Assets-Control.aspx) (OFAC)
+   - The US Treasury department offers a [search page for OFAC records](https://sanctionssearch.ofac.treas.gov/)
+- [BIS Denied Person's List](https://bis.data.commerce.gov/dataset/Denied-Persons-List-with-Denied-US-Export-Privileg/xwtd-wd7a/data) (DPL)
+
+All United States or European Union companies are required to comply with various regulations and sanction lists (such as the US Patriot Act requiring compliance with the BIS Denied Person's List). Moov's primary usage for this project is with ACH origination in our [paygate](https://github.com/moov-io/paygate) project.
+
+To get started using sanctionsearch download [the latest release](https://github.com/moov-io/sanctionsearch/releases/latest) or our [Docker image](https://hub.docker.com/r/moov/sanctionsearch/tags). We also have a [demo instance](https://moov.io/sanctionsearch/) as part of Moov's demo environment.
 
 ```
 # Run as a binary
-$ wget https://github.com/moov-io/ofac/releases/download/v0.12.0/ofac-darwin-amd64
-$ chmod +x ofac-darwin-amd64
-$ ./ofac-darwin-amd64
-ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting ofac server version v0.12.0"
+$ wget https://github.com/moov-io/sanctionsearch/releases/download/v0.12.0/sanctionsearch-darwin-amd64
+$ chmod +x sanctionsearch-darwin-amd64
+$ ./sanctionsearch-darwin-amd64
+ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting sanctionsearch server version v0.12.0"
 ...
 
 # Run as a Docker image
-$ docker run -p 8084:8084 -p 9094:9094 -it moov/ofac:latest
-ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting ofac server version v0.12.0"
+$ docker run -p 8084:8084 -p 9094:9094 -it moov/sanctionsearch:latest
+ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting sanctionsearch server version v0.12.0"
 ...
 
 # Perform a basic search
@@ -51,20 +57,20 @@ $ curl -s localhost:8084/search?name=...
 }
 ```
 
-We offer [hosted api docs as part of Moov's tools](https://api.moov.io/#tag/OFAC) and an [OpenAPI specification](https://github.com/moov-io/ofac/blob/master/openapi.yaml) for use with generated clients.
+We offer [hosted api docs as part of Moov's tools](https://api.moov.io/#tag/Sanctions) and an [OpenAPI specification](https://github.com/moov-io/sanctionsearch/blob/master/openapi.yaml) for use with generated clients.
 
-Docs: [docs.moov.io](https://docs.moov.io/ofac/) | [api docs](https://api.moov.io/apps/ofac/)
+Docs: [docs.moov.io](https://docs.moov.io/sanctionsearch/) | [api docs](https://api.moov.io/apps/sanctionsearch/)
 
 ### Web UI
 
-OFAC ships with a web interface for easier access searching the records. Our Docker image hosts the UI by default, but you can build and run it locally as well.
+Moov Sanction Search ships with a web interface for easier access searching the records. Our Docker image hosts the UI by default, but you can build and run it locally as well.
 
 ![](docs/images/webui.png)
 
 ```
 $ make
 ...
-CGO_ENABLED=1 go build -o ./bin/server github.com/moov-io/ofac/cmd/server
+CGO_ENABLED=1 go build -o ./bin/server github.com/moov-io/sanctionsearch/cmd/server
 ...
 npm run build
 ...
@@ -77,19 +83,19 @@ $ go run ./cmd/server/ # Load http://localhost:8084 in a web browser
 
 | Environmental Variable | Description | Default |
 |-----|-----|-----|
-| `OFAC_DATA_REFRESH` | Interval for OFAC data redownload and reparse. `off` disables this refreshing. | 12h |
+| `DATA_REFRESH_INTERVAL` | Interval for OFAC data redownload and reparse. `off` disables this refreshing. | 12h | # TODO(adam): was renamed
 | `OFAC_DOWNLOAD_TEMPLATE` | HTTP address for downloading raw OFAC files. | (OFAC website) |
 | `DPL_DOWNLOAD_TEMPLATE` | HTTP address for downloading the DPL | (BIS website) |
 | `INITIAL_DATA_DIRECTORY` | Directory filepath with initial files to use instead of downloading. Periodic downloads will replace the initial files. | Empty |
 | `WEBHOOK_BATCH_SIZE` | How many watches to read from database per batch of async searches. | 100 |
 | `LOG_FORMAT` | Format for logging lines to be written as. | Options: `json`, `plain` - Default: `plain` |
 | `BASE_PATH` | HTTP path to serve API and web UI from. | `/` |
-| `HTTP_BIND_ADDRESS` | Address for OFAC to bind its HTTP server on. This overrides the command-line flag `-http.addr`. | Default: `:8084` |
-| `HTTP_ADMIN_BIND_ADDRESS` | Address for OFAC to bind its admin HTTP server on. This overrides the command-line flag `-admin.addr`. | Default: `:9094` |
+| `HTTP_BIND_ADDRESS` | Address to bind HTTP server on. This overrides the command-line flag `-http.addr`. | Default: `:8084` |
+| `HTTP_ADMIN_BIND_ADDRESS` | Address to bind admin HTTP server on. This overrides the command-line flag `-admin.addr`. | Default: `:9094` |
 | `HTTPS_CERT_FILE` | Filepath containing a certificate (or intermediate chain) to be served by the HTTP server. Requires all traffic be over secure HTTP. | Empty |
 | `HTTPS_KEY_FILE`  | Filepath of a private key matching the leaf certificate from `HTTPS_CERT_FILE`. | Empty |
 | `DATABASE_TYPE` | Which database option to use (Options: `sqlite`, `mysql`) | Default: `sqlite` |
-| `WEB_ROOT` | Directory to serve web UI from | Default: `examples/ofac-search-ui/build/` |
+| `WEB_ROOT` | Directory to serve web UI from | Default: `webui/` |
 
 #### Storage
 
@@ -108,7 +114,7 @@ Refer to the mysql driver documentation for [connection parameters](https://gith
 
 ##### SQLite
 
-- `SQLITE_DB_PATH`: Local filepath location for the paygate SQLite database. (Default: `ofac.db`)
+- `SQLITE_DB_PATH`: Local filepath location for the paygate SQLite database. (Default: `sanctionsearch.db`)
 
 Refer to the sqlite driver documentation for [connection parameters](https://github.com/mattn/go-sqlite3#connection-string).
 
@@ -123,19 +129,19 @@ Refer to the sqlite driver documentation for [connection parameters](https://git
 
 #### Webhook Notifications
 
-When OFAC sends a [webhook](https://en.wikipedia.org/wiki/Webhook) to your application the body will contain a JSON representation of the [Company](https://godoc.org/github.com/moov-io/ofac/client#Company) or [Customer](https://godoc.org/github.com/moov-io/ofac/client#Customer) model as the body to a POST request. You can see an [example in Go](examples/webhook/webhook.go).
+When SancionSearch sends a [webhook](https://en.wikipedia.org/wiki/Webhook) to your application the body will contain a JSON representation of the [Company](https://godoc.org/github.com/moov-io/sanctionsearch/client#Company) or [Customer](https://godoc.org/github.com/moov-io/sanctionsearch/client#Customer) model as the body to a POST request. You can see an [example in Go](examples/webhook/webhook.go).
 
 An `Authorization` header will also be sent with the `authToken` provided when setting up the watch. Clients should verify this token to ensure authenticated communicated.
 
-Webhook notifications are ran after the OFAC data is successfully refreshed, which is determined by the `OFAC_DATA_REFRESH` environmental variable.
+Webhook notifications are ran after the OFAC data is successfully refreshed, which is determined by the `DATA_REFRESH_INTERVAL` environmental variable.
 
 ##### Watching a specific Customer or Company by ID
 
-OFAC supports sending a webhook periodically when a specific [Company](https://api.moov.io/#operation/addCompanyWatch) or [Customer](https://api.moov.io/#operation/addCustomerWatch) is to be watched. This is designed to update another system about an OFAC entry's sanction status.
+Moov Sanction Search supports sending a webhook periodically when a specific [Company](https://api.moov.io/#operation/addCompanyWatch) or [Customer](https://api.moov.io/#operation/addCustomerWatch) is to be watched. This is designed to update another system about an OFAC entry's sanction status.
 
 ##### Watching a customer or company name
 
-OFAC supports sending a webhook periodically with a free-form name of a [Company](https://api.moov.io/#operation/addCompanyNameWatch) or [Customer](https://api.moov.io/#operation/addCustomerNameWatch). This allows external applications to be notified when an entity matching that name is added to the OFAC list. The match percentage will be included in the JSON payload.
+Moov Sanction Search supports sending a webhook periodically with a free-form name of a [Company](https://api.moov.io/#operation/addCompanyNameWatch) or [Customer](https://api.moov.io/#operation/addCustomerNameWatch). This allows external applications to be notified when an entity matching that name is added to the OFAC list. The match percentage will be included in the JSON payload.
 
 ##### Prometheus Metrics
 
