@@ -3,22 +3,22 @@ VERSION := $(shell grep -Eo '(v[0-9]+[\.][0-9]+[\.][0-9]+(-[a-zA-Z0-9]*)?)' vers
 
 .PHONY: build build-server build-examples docker release check
 
-build: check build-server build-ofaccheck build-ofactest build-examples
+build: check build-server build-sanctioncheck build-batchsearch build-examples
 	cd webui/ && npm install && npm run build && cd ../
 
 build-server:
-	CGO_ENABLED=1 go build -o ./bin/server github.com/moov-io/ofac/cmd/server
+	CGO_ENABLED=1 go build -o ./bin/server github.com/moov-io/sanctionsearch/cmd/server
 
-build-ofaccheck:
-	CGO_ENABLED=0 go build -o ./bin/ofaccheck github.com/moov-io/ofac/cmd/ofaccheck
+build-sanctioncheck:
+	CGO_ENABLED=0 go build -o ./bin/sanctioncheck github.com/moov-io/sanctionsearch/cmd/sanctioncheck
 
-build-ofactest:
-	CGO_ENABLED=0 go build -o ./bin/ofactest github.com/moov-io/ofac/cmd/ofactest
+build-batchsearch:
+	CGO_ENABLED=0 go build -o ./bin/batchsearch github.com/moov-io/sanctionsearch/cmd/batchsearch
 
 build-examples: build-webhook-example
 
 build-webhook-example:
-	CGO_ENABLED=0 go build -o ./bin/webhook-example github.com/moov-io/ofac/examples/webhook
+	CGO_ENABLED=0 go build -o ./bin/webhook-example github.com/moov-io/sanctionsearch/examples/webhook
 
 check:
 	go fmt ./...
@@ -32,7 +32,7 @@ client:
 	OPENAPI_GENERATOR_VERSION=4.2.0 ./openapi-generator generate -i openapi.yaml -g go -o ./client
 	rm -f client/go.mod client/go.sum
 	go fmt ./...
-	go build github.com/moov-io/ofac/client
+	go build github.com/moov-io/sanctionsearch/client
 	go test ./client
 
 .PHONY: clean
@@ -43,21 +43,21 @@ clean:
 
 dist: clean client build
 ifeq ($(OS),Windows_NT)
-	CGO_ENABLED=1 GOOS=windows go build -o bin/ofac-windows-amd64.exe github.com/moov-io/ofac/cmd/server
+	CGO_ENABLED=1 GOOS=windows go build -o bin/sanctionsearch-windows-amd64.exe github.com/moov-io/sanctionsearch/cmd/server
 else
-	CGO_ENABLED=1 GOOS=$(PLATFORM) go build -o bin/ofac-$(PLATFORM)-amd64 github.com/moov-io/ofac/cmd/server
+	CGO_ENABLED=1 GOOS=$(PLATFORM) go build -o bin/sanctionsearch-$(PLATFORM)-amd64 github.com/moov-io/sanctionsearch/cmd/server
 endif
 
 docker:
-# Main OFAC server Docker image
-	docker build --pull -t moov/ofac:$(VERSION) -f Dockerfile .
-	docker tag moov/ofac:$(VERSION) moov/ofac:latest
-# ofactest image
-	docker build --pull -t moov/ofactest:$(VERSION) -f ./cmd/ofactest/Dockerfile .
-	docker tag moov/ofactest:$(VERSION) moov/ofactest:latest
+# main server Docker image
+	docker build --pull -t moov/sanctionsearch:$(VERSION) -f Dockerfile .
+	docker tag moov/sanctionsearch:$(VERSION) moov/sanctionsearch:latest
+# batchsearch image
+	docker build --pull -t moov/batchsearch:$(VERSION) -f ./cmd/batchsearch/Dockerfile .
+	docker tag moov/batchsearch:$(VERSION) moov/batchsearch:latest
 # webhook example
-	docker build --pull -t moov/ofac-webhook-example:$(VERSION) -f ./examples/webhook/Dockerfile .
-	docker tag moov/ofac-webhook-example:$(VERSION) moov/ofac-webhook-example:latest
+	docker build --pull -t moov/sanctionsearch-webhook-example:$(VERSION) -f ./examples/webhook/Dockerfile .
+	docker tag moov/sanctionsearch-webhook-example:$(VERSION) moov/sanctionsearch-webhook-example:latest
 
 release: docker AUTHORS
 	go vet ./...
@@ -65,10 +65,10 @@ release: docker AUTHORS
 	git tag -f $(VERSION)
 
 release-push:
-	docker push moov/ofac:$(VERSION)
-	docker push moov/ofac:latest
-	docker push moov/ofactest:$(VERSION)
-	docker push moov/ofac-webhook-example:$(VERSION)
+	docker push moov/sanctionsearch:$(VERSION)
+	docker push moov/sanctionsearch:latest
+	docker push moov/batchsearch:$(VERSION)
+	docker push moov/sanctionsearch-webhook-example:$(VERSION)
 
 .PHONY: cover-test cover-web
 cover-test:
@@ -84,7 +84,7 @@ test-integration: clean-integration
 	docker-compose up -d
 	sleep 10
 	curl -v http://localhost:9094/data/refresh # hangs until download and parsing completes
-	./bin/ofactest -local
+	./bin/batchsearch -local
 
 # From https://github.com/genuinetools/img
 .PHONY: AUTHORS
