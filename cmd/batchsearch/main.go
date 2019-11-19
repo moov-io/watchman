@@ -48,7 +48,7 @@ var (
 	flagApiAddress = flag.String("address", internal.DefaultApiAddress, "Moov API address")
 	flagLocal      = flag.Bool("local", false, "Use local HTTP addresses")
 
-	flagThreshold = flag.Float64("threshold", 0.90, "Minimum match percentage required for blocking")
+	flagThreshold = flag.Float64("threshold", 0.99, "Minimum match percentage required for blocking")
 
 	flagAllowedFile = flag.String("allowed-file", filepath.Join("test", "testdata", "allowed.txt"), "Filepath to file with names expected to be allowed")
 	flagBlockedFile = flag.String("blocked-file", filepath.Join("test", "testdata", "blocked.txt"), "Filepath to file with names expected to be blocked")
