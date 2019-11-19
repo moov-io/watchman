@@ -3,17 +3,17 @@ VERSION := $(shell grep -Eo '(v[0-9]+[\.][0-9]+[\.][0-9]+(-[a-zA-Z0-9]*)?)' vers
 
 .PHONY: build build-server build-examples docker release check
 
-build: check build-server build-sanctioncheck build-batchsearch build-examples
+build: check build-server build-batchsearch build-sanctiontest build-examples
 	cd webui/ && npm install && npm run build && cd ../
 
 build-server:
 	CGO_ENABLED=1 go build -o ./bin/server github.com/moov-io/sanctionsearch/cmd/server
 
-build-sanctioncheck:
-	CGO_ENABLED=0 go build -o ./bin/sanctioncheck github.com/moov-io/sanctionsearch/cmd/sanctioncheck
-
 build-batchsearch:
 	CGO_ENABLED=0 go build -o ./bin/batchsearch github.com/moov-io/sanctionsearch/cmd/batchsearch
+
+build-sanctiontest:
+	CGO_ENABLED=0 go build -o ./bin/sanctiontest github.com/moov-io/sanctionsearch/cmd/sanctiontest
 
 build-examples: build-webhook-example
 

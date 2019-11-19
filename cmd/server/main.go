@@ -161,7 +161,7 @@ func main() {
 
 	// Setup periodic download and re-search
 	updates := make(chan *downloadStats)
-	ofacDataRefreshInterval = getOFACRefreshInterval(logger, os.Getenv("OFAC_DATA_REFRESH"))
+	ofacDataRefreshInterval = getOFACRefreshInterval(logger, os.Getenv("DATA_REFRESH_INTERVAL"))
 	go searcher.periodicDataRefresh(ofacDataRefreshInterval, downloadRepo, updates)
 	go searcher.spawnResearching(logger, companyRepo, custRepo, watchRepo, webhookRepo, updates)
 
