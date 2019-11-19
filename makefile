@@ -52,9 +52,9 @@ docker:
 # main server Docker image
 	docker build --pull -t moov/sanctionsearch:$(VERSION) -f Dockerfile .
 	docker tag moov/sanctionsearch:$(VERSION) moov/sanctionsearch:latest
-# batchsearch image
-	docker build --pull -t moov/batchsearch:$(VERSION) -f ./cmd/batchsearch/Dockerfile .
-	docker tag moov/batchsearch:$(VERSION) moov/batchsearch:latest
+# sanctiontest image
+	docker build --pull -t moov/sanctiontest:$(VERSION) -f ./cmd/sanctiontest/Dockerfile .
+	docker tag moov/sanctiontest:$(VERSION) moov/sanctiontest:latest
 # webhook example
 	docker build --pull -t moov/sanctionsearch-webhook-example:$(VERSION) -f ./examples/webhook/Dockerfile .
 	docker tag moov/sanctionsearch-webhook-example:$(VERSION) moov/sanctionsearch-webhook-example:latest
