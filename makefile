@@ -84,7 +84,7 @@ test-integration: clean-integration
 	docker-compose up -d
 	sleep 10
 	curl -v http://localhost:9094/data/refresh # hangs until download and parsing completes
-	./bin/batchsearch -local
+	./bin/batchsearch -local -threshold 0.95
 
 # From https://github.com/genuinetools/img
 .PHONY: AUTHORS
