@@ -104,7 +104,7 @@ func main() {
 }
 
 func ping(ctx context.Context, api *moov.APIClient) error {
-	resp, err := api.OFACApi.Ping(ctx)
+	resp, err := api.WatchmanApi.Ping(ctx)
 	if err != nil {
 		return err
 	}
@@ -207,7 +207,7 @@ func searchByName(api *moov.APIClient, name string) (float64, error) {
 	ctx, cancelFunc := context.WithTimeout(context.TODO(), 5*time.Second)
 	defer cancelFunc()
 
-	search, resp, err := api.OFACApi.Search(ctx, opts)
+	search, resp, err := api.WatchmanApi.Search(ctx, opts)
 	if err != nil {
 		return 0.0, fmt.Errorf("searchByName: %v", err)
 	}

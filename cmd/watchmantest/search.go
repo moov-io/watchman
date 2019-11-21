@@ -25,7 +25,7 @@ func searchByName(ctx context.Context, api *moov.APIClient, name string) (*moov.
 		XUserID:    optional.NewString(*flagUserID),
 	}
 
-	search, resp, err := api.OFACApi.Search(ctx, opts)
+	search, resp, err := api.WatchmanApi.Search(ctx, opts)
 	if err != nil {
 		return nil, fmt.Errorf("searchByName: %v", err)
 	}
@@ -58,7 +58,7 @@ func searchByAltName(ctx context.Context, api *moov.APIClient, alt string) error
 		XUserID:    optional.NewString(*flagUserID),
 	}
 
-	search, resp, err := api.OFACApi.Search(ctx, opts)
+	search, resp, err := api.WatchmanApi.Search(ctx, opts)
 	if err != nil {
 		return fmt.Errorf("searchByAltName: %v", err)
 	}
@@ -80,7 +80,7 @@ func searchByAddress(ctx context.Context, api *moov.APIClient, address string) e
 		XUserID:    optional.NewString(*flagUserID),
 	}
 
-	search, resp, err := api.OFACApi.Search(ctx, opts)
+	search, resp, err := api.WatchmanApi.Search(ctx, opts)
 	if err != nil {
 		return fmt.Errorf("searchByAddress: %v", err)
 	}
@@ -93,7 +93,7 @@ func searchByAddress(ctx context.Context, api *moov.APIClient, address string) e
 }
 
 func getSDNAddresses(ctx context.Context, api *moov.APIClient, id string) error {
-	addr, resp, err := api.OFACApi.GetSDNAddresses(ctx, id, nil)
+	addr, resp, err := api.WatchmanApi.GetSDNAddresses(ctx, id, nil)
 	if err != nil {
 		return fmt.Errorf("loadAddresses: %v", err)
 	}
@@ -108,7 +108,7 @@ func getSDNAddresses(ctx context.Context, api *moov.APIClient, id string) error 
 }
 
 func getSDNAltNames(ctx context.Context, api *moov.APIClient, id string) error {
-	alt, resp, err := api.OFACApi.GetSDNAltNames(ctx, id, nil)
+	alt, resp, err := api.WatchmanApi.GetSDNAltNames(ctx, id, nil)
 	if err != nil {
 		return fmt.Errorf("loadAltNames: %v", err)
 	}
@@ -123,7 +123,7 @@ func getSDNAltNames(ctx context.Context, api *moov.APIClient, id string) error {
 }
 
 func getCustomer(ctx context.Context, api *moov.APIClient, id string) error {
-	cust, resp, err := api.OFACApi.GetOFACCustomer(ctx, id, nil)
+	cust, resp, err := api.WatchmanApi.GetOFACCustomer(ctx, id, nil)
 	if err != nil {
 		return fmt.Errorf("loadCustomer: %v", err)
 	}
@@ -135,7 +135,7 @@ func getCustomer(ctx context.Context, api *moov.APIClient, id string) error {
 }
 
 func getCompany(ctx context.Context, api *moov.APIClient, id string) error {
-	company, resp, err := api.OFACApi.GetOFACCompany(ctx, id, nil)
+	company, resp, err := api.WatchmanApi.GetOFACCompany(ctx, id, nil)
 	if err != nil {
 		return fmt.Errorf("loadCompany: %v", err)
 	}

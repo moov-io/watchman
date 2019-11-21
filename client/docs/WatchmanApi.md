@@ -1,28 +1,28 @@
-# \OFACApi
+# \WatchmanApi
 
 All URIs are relative to *http://localhost:8084*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**AddOFACCompanyNameWatch**](OFACApi.md#AddOFACCompanyNameWatch) | **Post** /companies/watch | Add company watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
-[**AddOFACCompanyWatch**](OFACApi.md#AddOFACCompanyWatch) | **Post** /companies/{companyID}/watch | Add OFAC watch on a Company
-[**AddOFACCustomerNameWatch**](OFACApi.md#AddOFACCustomerNameWatch) | **Post** /customers/watch | Add customer watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
-[**AddOFACCustomerWatch**](OFACApi.md#AddOFACCustomerWatch) | **Post** /customers/{customerID}/watch | Add OFAC watch on a Customer
-[**GetLatestDownloads**](OFACApi.md#GetLatestDownloads) | **Get** /downloads | Return list of recent downloads of OFAC data
-[**GetOFACCompany**](OFACApi.md#GetOFACCompany) | **Get** /companies/{companyID} | Get information about a company, trust or organization such as addresses, alternate names, and remarks.
-[**GetOFACCustomer**](OFACApi.md#GetOFACCustomer) | **Get** /customers/{customerID} | Get information about a customer, addresses, alternate names, and their SDN metadata.
-[**GetSDN**](OFACApi.md#GetSDN) | **Get** /sdn/{sdnID} | Specially designated national
-[**GetSDNAddresses**](OFACApi.md#GetSDNAddresses) | **Get** /sdn/{sdnID}/addresses | Get addresses for a given SDN
-[**GetSDNAltNames**](OFACApi.md#GetSDNAltNames) | **Get** /sdn/{sdnID}/alts | Get alternate names for a given SDN
-[**GetUIValues**](OFACApi.md#GetUIValues) | **Get** /ui/values/{key} | Return an ordered distinct list of keys for an SDN property.
-[**Ping**](OFACApi.md#Ping) | **Get** /ping | Ping the OFAC service to check if running
-[**RemoveOFACCompanyNameWatch**](OFACApi.md#RemoveOFACCompanyNameWatch) | **Delete** /companies/watch/{watchID} | Remove a Company name watch
-[**RemoveOFACCompanyWatch**](OFACApi.md#RemoveOFACCompanyWatch) | **Delete** /companies/{companyID}/watch/{watchID} | Remove company watch
-[**RemoveOFACCustomerNameWatch**](OFACApi.md#RemoveOFACCustomerNameWatch) | **Delete** /customers/watch/{watchID} | Remove a Customer name watch
-[**RemoveOFACCustomerWatch**](OFACApi.md#RemoveOFACCustomerWatch) | **Delete** /customers/{customerID}/watch/{watchID} | Remove customer watch
-[**Search**](OFACApi.md#Search) | **Get** /search | Search SDN names and metadata
-[**UpdateOFACCompanyStatus**](OFACApi.md#UpdateOFACCompanyStatus) | **Put** /companies/{companyID} | Update a Companies sanction status to always block or always allow transactions.
-[**UpdateOFACCustomerStatus**](OFACApi.md#UpdateOFACCustomerStatus) | **Put** /customers/{customerID} | Update a Customer&#39;s sanction status to always block or always allow transactions.
+[**AddOFACCompanyNameWatch**](WatchmanApi.md#AddOFACCompanyNameWatch) | **Post** /companies/watch | Add company watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
+[**AddOFACCompanyWatch**](WatchmanApi.md#AddOFACCompanyWatch) | **Post** /companies/{companyID}/watch | Add OFAC watch on a Company
+[**AddOFACCustomerNameWatch**](WatchmanApi.md#AddOFACCustomerNameWatch) | **Post** /customers/watch | Add customer watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
+[**AddOFACCustomerWatch**](WatchmanApi.md#AddOFACCustomerWatch) | **Post** /customers/{customerID}/watch | Add OFAC watch on a Customer
+[**GetLatestDownloads**](WatchmanApi.md#GetLatestDownloads) | **Get** /downloads | Return list of recent downloads of OFAC data
+[**GetOFACCompany**](WatchmanApi.md#GetOFACCompany) | **Get** /companies/{companyID} | Get information about a company, trust or organization such as addresses, alternate names, and remarks.
+[**GetOFACCustomer**](WatchmanApi.md#GetOFACCustomer) | **Get** /customers/{customerID} | Get information about a customer, addresses, alternate names, and their SDN metadata.
+[**GetSDN**](WatchmanApi.md#GetSDN) | **Get** /sdn/{sdnID} | Specially designated national
+[**GetSDNAddresses**](WatchmanApi.md#GetSDNAddresses) | **Get** /sdn/{sdnID}/addresses | Get addresses for a given SDN
+[**GetSDNAltNames**](WatchmanApi.md#GetSDNAltNames) | **Get** /sdn/{sdnID}/alts | Get alternate names for a given SDN
+[**GetUIValues**](WatchmanApi.md#GetUIValues) | **Get** /ui/values/{key} | Return an ordered distinct list of keys for an SDN property.
+[**Ping**](WatchmanApi.md#Ping) | **Get** /ping | Ping the Watchman service to check if running
+[**RemoveOFACCompanyNameWatch**](WatchmanApi.md#RemoveOFACCompanyNameWatch) | **Delete** /companies/watch/{watchID} | Remove a Company name watch
+[**RemoveOFACCompanyWatch**](WatchmanApi.md#RemoveOFACCompanyWatch) | **Delete** /companies/{companyID}/watch/{watchID} | Remove company watch
+[**RemoveOFACCustomerNameWatch**](WatchmanApi.md#RemoveOFACCustomerNameWatch) | **Delete** /customers/watch/{watchID} | Remove a Customer name watch
+[**RemoveOFACCustomerWatch**](WatchmanApi.md#RemoveOFACCustomerWatch) | **Delete** /customers/{customerID}/watch/{watchID} | Remove customer watch
+[**Search**](WatchmanApi.md#Search) | **Get** /search | Search SDN names and metadata
+[**UpdateOFACCompanyStatus**](WatchmanApi.md#UpdateOFACCompanyStatus) | **Put** /companies/{companyID} | Update a Companies sanction status to always block or always allow transactions.
+[**UpdateOFACCustomerStatus**](WatchmanApi.md#UpdateOFACCustomerStatus) | **Put** /customers/{customerID} | Update a Customer&#39;s sanction status to always block or always allow transactions.
 
 
 
@@ -520,7 +520,7 @@ No authorization required
 
 > Ping(ctx, )
 
-Ping the OFAC service to check if running
+Ping the Watchman service to check if running
 
 ### Required Parameters
 

@@ -134,7 +134,7 @@ func main() {
 }
 
 func ping(ctx context.Context, api *moov.APIClient) error {
-	resp, err := api.OFACApi.Ping(ctx)
+	resp, err := api.WatchmanApi.Ping(ctx)
 	if err != nil {
 		return err
 	}
@@ -151,7 +151,7 @@ func latestDownload(ctx context.Context, api *moov.APIClient) (time.Time, error)
 		XRequestID: optional.NewString(*flagRequestID),
 		XUserID:    optional.NewString(*flagUserID),
 	}
-	downloads, resp, err := api.OFACApi.GetLatestDownloads(ctx, opts)
+	downloads, resp, err := api.WatchmanApi.GetLatestDownloads(ctx, opts)
 	if err != nil {
 		return time.Time{}, err
 	}

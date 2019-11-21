@@ -1,8 +1,8 @@
 openapi: 3.0.2
 info:
-  description: TODO(adam): rewrite -- Moov Watchman (Office of Foreign Assets Control) API is designed to facilitate the enforcement of US government economic sanctions programs required by federal law. This project implements a modern REST HTTP API for companies and organizations to obey federal law and use OFAC data in their applications.
+  description: Moov Watchman is an HTTP API and Go library to download, parse and offer search functions over numerous trade sanction lists from the United States, European Union governments, agencies, and non profits for complying with regional laws. Also included is a web UI and async webhook notification service to initiate processes on remote systems.
   version: v1
-  title: OFAC API
+  title: Watchman API
   contact:
     url: https://github.com/moov-io/watchman
   license:
@@ -21,7 +21,7 @@ paths:
   /ping:
     get:
       tags: ["Watchman"]
-      summary: Ping the OFAC service to check if running
+      summary: Ping the Watchman service to check if running
       operationId: ping
       responses:
         '200':
@@ -676,7 +676,7 @@ paths:
                 $ref: '#/components/schemas/Downloads'
   /ui/values/{key}:
     get:
-      tags: ["OFAC"]
+      tags: ["Watchman"]
       summary: Return an ordered distinct list of keys for an SDN property.
       operationId: getUIValues
       parameters:
