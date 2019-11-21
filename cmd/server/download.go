@@ -11,11 +11,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"path/filepath"
 	"time"
 
 	moovhttp "github.com/moov-io/base/http"
-	"github.com/moov-io/ofac"
+	"github.com/moov-io/watchman/pkg/dpl"
+	"github.com/moov-io/watchman/pkg/ofac"
 
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
@@ -75,6 +75,46 @@ func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo down
 	}
 }
 
+func ofacRecords(logger log.Logger, initialDir string) (*ofac.Results, error) {
+	files, err := ofac.Download(logger, initialDir)
+	if err != nil {
+		return nil, err
+	}
+	if len(files) == 0 {
+		return nil, errors.New("no OFAC Results")
+	}
+
+	var res *ofac.Results
+
+	for i := range files {
+		if i == 0 {
+			res, err = ofac.Read(files[i])
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			rr, err := ofac.Read(files[i])
+			if err != nil {
+				return nil, err
+			}
+
+			res.Addresses = append(res.Addresses, rr.Addresses...)
+			res.AlternateIdentities = append(res.AlternateIdentities, rr.AlternateIdentities...)
+			res.SDNs = append(res.SDNs, rr.SDNs...)
+			res.SDNComments = append(res.SDNComments, rr.SDNComments...)
+		}
+	}
+	return res, err
+}
+
+func dplRecords(logger log.Logger, initialDir string) ([]*dpl.DPL, error) {
+	file, err := dpl.Download(logger, initialDir)
+	if err != nil {
+		return nil, err
+	}
+	return dpl.Read(file)
+}
+
 // refreshData reaches out to the OFAC and BIS Denied Persons List websites to download the latest
 // files and then runs ofac.Reader to parse and index data for searches.
 func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
@@ -82,38 +122,19 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 		s.logger.Log("download", "Starting refresh of OFAC and DPL data")
 	}
 
-	// Download files
-	dir, err := (&ofac.Downloader{
-		Logger: s.logger,
-	}).GetFiles(initialDir)
+	results, err := ofacRecords(s.logger, initialDir)
 	if err != nil {
-		return nil, fmt.Errorf("ERROR: downloading OFAC and DPL data: %v", err)
+		return nil, err
 	}
 
-	// Parse each file
-	r := &ofac.Reader{}
-	r.FileName = filepath.Join(dir, "add.csv")
-	if err := r.Read(); err != nil {
-		return nil, fmt.Errorf("ERROR: reading add.csv: %v", err)
-	}
-	r.FileName = filepath.Join(dir, "alt.csv")
-	if err := r.Read(); err != nil {
-		return nil, fmt.Errorf("ERROR: reading alt.csv: %v", err)
-	}
-	r.FileName = filepath.Join(dir, "sdn.csv")
-	if err := r.Read(); err != nil {
-		return nil, fmt.Errorf("ERROR: reading sdn.csv: %v", err)
-	}
-	r.FileName = filepath.Join(dir, "dpl.txt")
-	if err := r.Read(); err != nil {
-		return nil, fmt.Errorf("ERROR: reading dpl.txt: %v", err)
-	}
+	sdns := precomputeSDNs(results.SDNs)
+	adds := precomputeAddresses(results.Addresses)
+	alts := precomputeAlts(results.AlternateIdentities)
 
-	// Precompute new data once for slight performance win
-	sdns := precomputeSDNs(r.SDNs)
-	adds := precomputeAddresses(r.Addresses)
-	alts := precomputeAlts(r.AlternateIdentities)
-	dps := precomputeDPs(r.DeniedPersons)
+	dps, err := dplRecords(s.logger, initialDir)
+	if err != nil {
+		return nil, err
+	}
 
 	stats := &downloadStats{
 		SDNs:          len(sdns),
@@ -128,7 +149,7 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 	s.SDNs = sdns
 	s.Addresses = adds
 	s.Alts = alts
-	s.DPs = dps
+	s.DPs = precomputeDPs(dps)
 	s.lastRefreshedAt = stats.RefreshedAt
 	s.Unlock()
 
@@ -210,7 +231,7 @@ func (r *sqliteDownloadRepository) recordStats(stats *downloadStats) error {
 		return errors.New("recordStats: nil downloadStats")
 	}
 
-	query := `insert into ofac_download_stats (downloaded_at, sdns, alt_names, addresses, denied_persons) values (?, ?, ?, ?, ?);`
+	query := `insert into download_stats (downloaded_at, sdns, alt_names, addresses, denied_persons) values (?, ?, ?, ?, ?);`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return err
@@ -222,7 +243,7 @@ func (r *sqliteDownloadRepository) recordStats(stats *downloadStats) error {
 }
 
 func (r *sqliteDownloadRepository) latestDownloads(limit int) ([]Download, error) {
-	query := `select downloaded_at, sdns, alt_names, addresses, denied_persons from ofac_download_stats order by downloaded_at desc limit ?;`
+	query := `select downloaded_at, sdns, alt_names, addresses, denied_persons from download_stats order by downloaded_at desc limit ?;`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return nil, err

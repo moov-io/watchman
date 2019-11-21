@@ -18,7 +18,8 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/moov-io/ofac"
+	"github.com/moov-io/watchman/pkg/dpl"
+	"github.com/moov-io/watchman/pkg/ofac"
 
 	"github.com/go-kit/kit/log"
 	"github.com/xrash/smetrics"
@@ -437,7 +438,7 @@ func precomputeAlts(alts []*ofac.AlternateIdentity) []*Alt {
 
 // DP is a BIS Denied Person wrapped with precomputed search metadata
 type DP struct {
-	DeniedPerson *ofac.DPL
+	DeniedPerson *dpl.DPL
 	match        float64
 	name         string
 }
@@ -445,7 +446,7 @@ type DP struct {
 // MarshalJSON is a custom method for marshaling a BIS Denied Person (DP)
 func (d DP) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
-		*ofac.DPL
+		*dpl.DPL
 		Match float64 `json:"match"`
 	}{
 		d.DeniedPerson,
@@ -453,7 +454,7 @@ func (d DP) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func precomputeDPs(persons []*ofac.DPL) []*DP {
+func precomputeDPs(persons []*dpl.DPL) []*DP {
 	out := make([]*DP, len(persons))
 	for i := range persons {
 		out[i] = &DP{

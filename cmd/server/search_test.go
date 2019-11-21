@@ -12,7 +12,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/moov-io/ofac"
+	"github.com/moov-io/watchman/pkg/dpl"
+	"github.com/moov-io/watchman/pkg/ofac"
 
 	"github.com/go-kit/kit/log"
 )
@@ -85,7 +86,7 @@ var (
 		}),
 	}
 	dplSearcher = &searcher{
-		DPs: precomputeDPs([]*ofac.DPL{
+		DPs: precomputeDPs([]*dpl.DPL{
 			{
 				Name:           "AL NASER WINGS AIRLINES",
 				StreetAddress:  "P.O. BOX 28360",

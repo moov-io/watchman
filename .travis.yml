@@ -75,9 +75,9 @@ deploy:
     secure: lPJQJFPgzw0eAZwG6A5yG3hMVrkuAeXhZy0wcWpOHWH/Ten2uDPo0hm4W5aoeTLi0ABEL9YWeheZRtq5BY9sxNBZLoGf4duz9q4Nc+WvrJT7dIEaynbK1ou2ycHPU35VX3FY6wdcCBPxcDVNQiKHgreXpY6IbcBj8iDWYaaz945INoN+8LAkceyeonrm7AeqeS2jEmdbxlOAHxGFh2mgP2XylLAIKrWe/tvOEPvn7Hz/EIjTJE7K5+j+UhNFFUd+VtcN8I/qyPrs9IoleIKrU9lx1RcrXA0EPDt+bXFzc233Uwa5lYBsj3mtI1imriCEy9ByA8CEBwYOxa9KQPendkGlwqGrKn3bjDXKuBKM7nsiJWG4uHUABMQGBVDXGXcOJnDsmcaR69sCrNxFWed8R4YpYC/QLZkNVPnw4E08dQ9gaw83I6mUW01/qeFczgDd/HDjhNRB1o6/y4Jb5kPVTRYiQ8p+suAmhPfmIUOKlSjwBTB95LisrWtEud66tzfkV9XdKvuxh0FYdlIGDhexcUEME7ZkYo5gelDPmX4V5NagBmKd+9Y+xYAsqCE/Z3Vy0DWRyGZYZGxWcQ5+8M0XlYrPqBP6saDALM8XI+apNuLa3KKzozS5s4G2F9vSVyFHOS+uhOnAz6gftrL9t6g2E9KHiN43tf2JhNrsVNqZbEs=
   file_glob: true
   file:
-    - bin/ofac-*
+    - bin/watchman-*
   on:
-    repo: moov-io/ofac
+    repo: moov-io/watchman
     tags: true
     go: 1.13.x
   skip_cleanup: true

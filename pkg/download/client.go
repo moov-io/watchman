@@ -2,7 +2,7 @@
 // Use of this source code is governed by an Apache License
 // license that can be found in the LICENSE file.
 
-package ofac
+package download
 
 import (
 	"errors"
@@ -20,30 +20,19 @@ import (
 )
 
 var (
-	ofacFilenames = []string{
-		"add.csv",          // Address
-		"alt.csv",          // Alternate ID
-		"sdn.csv",          // Specially Designated National
-		"sdn_comments.csv", // Specially Designated National Comments
+	HTTPClient = &http.Client{
+		Timeout: 15 * time.Second,
 	}
-	ofacURLTemplate = "https://www.treasury.gov/ofac/downloads/%s"
-
-	dplFilenames = []string{
-		"dpl.txt", // Denied Persons List (tab separated)
-	}
-	dplURLTemplate = "https://www.bis.doc.gov/dpl/%s"
 )
 
-func init() {
-	if v := os.Getenv("OFAC_DOWNLOAD_TEMPLATE"); v != "" {
-		ofacURLTemplate = v
-	}
-	if w := os.Getenv("DPL_DOWNLOAD_TEMPLATE"); w != "" {
-		dplURLTemplate = w
+func New(logger log.Logger, httpClient *http.Client) *Downloader {
+	return &Downloader{
+		HTTP:   httpClient,
+		Logger: logger,
 	}
 }
 
-// Downloader will download and cache OFAC files in a temp directory.
+// Downloader will download and cache DPL files in a temp directory.
 //
 // If HTTP is nil then http.DefaultClient will be used (which has NO timeouts).
 //
@@ -53,15 +42,15 @@ type Downloader struct {
 	Logger log.Logger
 }
 
-// GetFiles will download all OFAC related files and store them in a temporary directory
-// returned and an error otherwise.
+// GetFiles will download all provided files, return their filepaths, and store them in a
+// temporary directory and an error otherwise.
 //
 // initialDir is an optional filepath to look for files in before attempting to download.
 //
 // Callers are expected to cleanup the temp directory.
-func (dl *Downloader) GetFiles(initialDir string) (string, error) {
+func (dl *Downloader) GetFiles(initialDir string, namesAndSources map[string]string) ([]string, error) {
 	if dl == nil {
-		return "", errors.New("nil Downloader")
+		return nil, errors.New("nil Downloader")
 	}
 	if dl.HTTP == nil {
 		dl.HTTP = http.DefaultClient
@@ -71,9 +60,9 @@ func (dl *Downloader) GetFiles(initialDir string) (string, error) {
 	}
 
 	// Create a temporary directory for downloads
-	dir, err := ioutil.TempDir("", "ofac-and-dpl-downloader")
+	dir, err := ioutil.TempDir("", "downloader")
 	if err != nil {
-		return "", fmt.Errorf("OFAC: unable to make temp dir: %v", err)
+		return nil, fmt.Errorf("downloader: unable to make temp dir: %v", err)
 	}
 
 	// Check the initial directory for files we don't need to download
@@ -82,19 +71,10 @@ func (dl *Downloader) GetFiles(initialDir string) (string, error) {
 	}
 	localFiles, err := ioutil.ReadDir(initialDir)
 	if err != nil {
-		return "", fmt.Errorf("readdir %s: %v", initialDir, err)
+		return nil, fmt.Errorf("readdir %s: %v", initialDir, err)
 	}
 
-	// create a single list containing all filenames and source URLs
-	namesAndSources := make(map[string]string)
-	for _, fname := range ofacFilenames {
-		namesAndSources[fname] = fmt.Sprintf(ofacURLTemplate, fname)
-	}
-	for _, fname := range dplFilenames {
-		namesAndSources[fname] = fmt.Sprintf(dplURLTemplate, fname)
-	}
-
-	wg := sync.WaitGroup{}
+	var wg sync.WaitGroup
 	wg.Add(len(namesAndSources))
 	for name, source := range namesAndSources {
 		go func(wg *sync.WaitGroup, filename, downloadURL string) {
@@ -155,10 +135,13 @@ func (dl *Downloader) GetFiles(initialDir string) (string, error) {
 	fds, err := ioutil.ReadDir(dir)
 	if err != nil || len(fds) != len(namesAndSources) {
 		matched, missing := compareNames(fds, namesAndSources)
-		return "", fmt.Errorf("OFAC: problem downloading (matched=%v missing=%v): err=%v", matched, missing, err)
+		return nil, fmt.Errorf("DPL: problem downloading (matched=%v missing=%v): err=%v", matched, missing, err)
 	}
-
-	return dir, nil
+	var out []string
+	for i := range fds {
+		out = append(out, filepath.Join(dir, filepath.Base(fds[i].Name())))
+	}
+	return out, nil
 }
 
 func compareNames(found []os.FileInfo, expected map[string]string) (string, string) {

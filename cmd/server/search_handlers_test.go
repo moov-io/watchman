@@ -11,7 +11,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/moov-io/ofac"
+	"github.com/moov-io/watchman/pkg/dpl"
+	"github.com/moov-io/watchman/pkg/ofac"
 
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
@@ -243,7 +244,7 @@ func TestSearch__NameAndAltName(t *testing.T) {
 		SDNs          []*ofac.SDN               `json:"SDNs"`
 		AltNames      []*ofac.AlternateIdentity `json:"altNames"`
 		Addresses     []*ofac.Address           `json:"addresses"`
-		DeniedPersons []*ofac.DPL               `json:"deniedPersons"`
+		DeniedPersons []*dpl.DPL                `json:"deniedPersons"`
 	}
 	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
 		t.Fatal(err)

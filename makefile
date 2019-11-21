@@ -3,22 +3,22 @@ VERSION := $(shell grep -Eo '(v[0-9]+[\.][0-9]+[\.][0-9]+(-[a-zA-Z0-9]*)?)' vers
 
 .PHONY: build build-server build-examples docker release check
 
-build: check build-server build-ofaccheck build-ofactest build-examples
+build: check build-server build-batchsearch build-watchmantest build-examples
 	cd webui/ && npm install && npm run build && cd ../
 
 build-server:
-	CGO_ENABLED=1 go build -o ./bin/server github.com/moov-io/ofac/cmd/server
+	CGO_ENABLED=1 go build -o ./bin/server github.com/moov-io/watchman/cmd/server
 
-build-ofaccheck:
-	CGO_ENABLED=0 go build -o ./bin/ofaccheck github.com/moov-io/ofac/cmd/ofaccheck
+build-batchsearch:
+	CGO_ENABLED=0 go build -o ./bin/batchsearch github.com/moov-io/watchman/cmd/batchsearch
 
-build-ofactest:
-	CGO_ENABLED=0 go build -o ./bin/ofactest github.com/moov-io/ofac/cmd/ofactest
+build-watchmantest:
+	CGO_ENABLED=0 go build -o ./bin/watchmantest github.com/moov-io/watchman/cmd/watchmantest
 
 build-examples: build-webhook-example
 
 build-webhook-example:
-	CGO_ENABLED=0 go build -o ./bin/webhook-example github.com/moov-io/ofac/examples/webhook
+	CGO_ENABLED=0 go build -o ./bin/webhook-example github.com/moov-io/watchman/examples/webhook
 
 check:
 	go fmt ./...
@@ -32,7 +32,7 @@ client:
 	OPENAPI_GENERATOR_VERSION=4.2.0 ./openapi-generator generate -i openapi.yaml -g go -o ./client
 	rm -f client/go.mod client/go.sum
 	go fmt ./...
-	go build github.com/moov-io/ofac/client
+	go build github.com/moov-io/watchman/client
 	go test ./client
 
 .PHONY: clean
@@ -43,21 +43,21 @@ clean:
 
 dist: clean client build
 ifeq ($(OS),Windows_NT)
-	CGO_ENABLED=1 GOOS=windows go build -o bin/ofac-windows-amd64.exe github.com/moov-io/ofac/cmd/server
+	CGO_ENABLED=1 GOOS=windows go build -o bin/watchman-windows-amd64.exe github.com/moov-io/watchman/cmd/server
 else
-	CGO_ENABLED=1 GOOS=$(PLATFORM) go build -o bin/ofac-$(PLATFORM)-amd64 github.com/moov-io/ofac/cmd/server
+	CGO_ENABLED=1 GOOS=$(PLATFORM) go build -o bin/watchman-$(PLATFORM)-amd64 github.com/moov-io/watchman/cmd/server
 endif
 
 docker:
-# Main OFAC server Docker image
-	docker build --pull -t moov/ofac:$(VERSION) -f Dockerfile .
-	docker tag moov/ofac:$(VERSION) moov/ofac:latest
-# ofactest image
-	docker build --pull -t moov/ofactest:$(VERSION) -f ./cmd/ofactest/Dockerfile .
-	docker tag moov/ofactest:$(VERSION) moov/ofactest:latest
+# main server Docker image
+	docker build --pull -t moov/watchman:$(VERSION) -f Dockerfile .
+	docker tag moov/watchman:$(VERSION) moov/watchman:latest
+# watchmantest image
+	docker build --pull -t moov/watchmantest:$(VERSION) -f ./cmd/watchmantest/Dockerfile .
+	docker tag moov/watchmantest:$(VERSION) moov/watchmantest:latest
 # webhook example
-	docker build --pull -t moov/ofac-webhook-example:$(VERSION) -f ./examples/webhook/Dockerfile .
-	docker tag moov/ofac-webhook-example:$(VERSION) moov/ofac-webhook-example:latest
+	docker build --pull -t moov/watchman-webhook-example:$(VERSION) -f ./examples/webhook/Dockerfile .
+	docker tag moov/watchman-webhook-example:$(VERSION) moov/watchman-webhook-example:latest
 
 release: docker AUTHORS
 	go vet ./...
@@ -65,10 +65,10 @@ release: docker AUTHORS
 	git tag -f $(VERSION)
 
 release-push:
-	docker push moov/ofac:$(VERSION)
-	docker push moov/ofac:latest
-	docker push moov/ofactest:$(VERSION)
-	docker push moov/ofac-webhook-example:$(VERSION)
+	docker push moov/watchman:$(VERSION)
+	docker push moov/watchman:latest
+	docker push moov/batchsearch:$(VERSION)
+	docker push moov/watchman-webhook-example:$(VERSION)
 
 .PHONY: cover-test cover-web
 cover-test:
@@ -84,7 +84,7 @@ test-integration: clean-integration
 	docker-compose up -d
 	sleep 10
 	curl -v http://localhost:9094/data/refresh # hangs until download and parsing completes
-	./bin/ofactest -local
+	./bin/batchsearch -local -threshold 0.95
 
 # From https://github.com/genuinetools/img
 .PHONY: AUTHORS

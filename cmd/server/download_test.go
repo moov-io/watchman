@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/moov-io/ofac/internal/database"
+	"github.com/moov-io/watchman/internal/database"
 
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"

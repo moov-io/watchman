@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/moov-io/base"
-	"github.com/moov-io/ofac/internal/database"
+	"github.com/moov-io/watchman/internal/database"
 )
 
 var (

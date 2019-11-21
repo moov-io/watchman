@@ -1,6 +1,6 @@
 ### Change OFAC refresh frequency
 
-`OFAC_DATA_REFRESH=1h0m0s` can be set to refresh OFAC data more or less often. The value should match Go's `time.ParseDuration` syntax.
+`DATA_REFRESH_INTERVAL=1h0m0s` can be set to refresh OFAC data more or less often. The value should match Go's `time.ParseDuration` syntax.
 
 ### Force data refresh
 

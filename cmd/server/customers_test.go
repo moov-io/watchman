@@ -13,8 +13,8 @@ import (
 	"time"
 
 	"github.com/moov-io/base"
-	"github.com/moov-io/ofac"
-	"github.com/moov-io/ofac/internal/database"
+	"github.com/moov-io/watchman/internal/database"
+	"github.com/moov-io/watchman/pkg/ofac"
 
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
