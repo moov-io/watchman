@@ -6,7 +6,7 @@ const apiGet = async path => {
 };
 
 // grab the base URL/href (IE 11 and older don't support 'new URL(..)')
-const { pathname } = new URL(document.baseURI);
+const pathname = new URL(document.baseURI).origin + "/";
 
 export const search = async qs => apiGet(pathname + `/search?${qs}`);
 
