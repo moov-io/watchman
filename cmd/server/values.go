@@ -70,16 +70,22 @@ func getValues(logger log.Logger, searcher *searcher) http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
 		acc := newAccumulator(extractSearchLimit(r))
+
+		key := getKey(r)
+		if strings.EqualFold(key, "sdnType") {
+			acc.add("entity")
+		}
+
 		for i := range searcher.SDNs {
 			// If we add support for other filters (CallSign, Tonnage)
 			// then we should add those keys here.
-			switch k := getKey(r); k {
+			switch key {
 			case "sdntype":
 				acc.add(searcher.SDNs[i].SDNType)
 			case "ofacprogram":
 				acc.add(searcher.SDNs[i].Program)
 			default:
-				moovhttp.Problem(w, fmt.Errorf("unknown key: %s", k))
+				moovhttp.Problem(w, fmt.Errorf("unknown key: %s", key))
 				return
 			}
 		}
