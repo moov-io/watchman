@@ -10,18 +10,18 @@ import (
 )
 
 type filterRequest struct {
-	sdnType string
-	program string
+	sdnType     string
+	ofacProgram string
 }
 
 func (req filterRequest) empty() bool {
-	return req.sdnType == "" && req.program == ""
+	return req.sdnType == "" && req.ofacProgram == ""
 }
 
 func buildFilterRequest(u *url.URL) filterRequest {
 	return filterRequest{
-		sdnType: u.Query().Get("sdnType"),
-		program: u.Query().Get("program"),
+		sdnType:     u.Query().Get("sdnType"),
+		ofacProgram: u.Query().Get("ofacProgram"),
 	}
 }
 
@@ -46,19 +46,13 @@ func filterSDNs(sdns []SDN, req filterRequest) []SDN {
 				// Keep this SDN if our filter value matches
 				case strings.EqualFold(sdns[i].SDNType, req.sdnType):
 					keep = true
-
-				// 'entity' is a special case value for ?sdnType in that it refers to a company or organization
-				// and not an individual, however OFAC's data files do not contain this value and we must infer
-				// it instead.
-				case sdns[i].SDNType == "" && strings.EqualFold(sdns[i].SDNType, "entity"):
-					keep = true
 				}
 			} else {
 				continue // skip this SDN as the filter didn't match
 			}
 		}
-		if req.program != "" {
-			if sdns[i].Program != "" && strings.EqualFold(sdns[i].Program, req.program) {
+		if req.ofacProgram != "" {
+			if sdns[i].Program != "" && strings.EqualFold(sdns[i].Program, req.ofacProgram) {
 				keep = true
 			} else {
 				continue

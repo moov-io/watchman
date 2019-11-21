@@ -4,9 +4,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**SDNs** | [**[]Sdn**](SDN.md) |  | [optional] 
-**AltNames** | [**[]Alt**](Alt.md) |  | [optional] 
-**Addresses** | [**[]EntityAddress**](EntityAddress.md) |  | [optional] 
+**SDNs** | [**[]OfacSdn**](OfacSDN.md) |  | [optional] 
+**AltNames** | [**[]OfacAlt**](OfacAlt.md) |  | [optional] 
+**Addresses** | [**[]OfacEntityAddress**](OfacEntityAddress.md) |  | [optional] 
 **DeniedPersons** | [**[]Dpl**](DPL.md) |  | [optional] 
 **RefreshedAt** | [**time.Time**](time.Time.md) |  | [optional] 
 

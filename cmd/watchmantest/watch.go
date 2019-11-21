@@ -16,22 +16,22 @@ import (
 
 func addCompanyWatch(ctx context.Context, api *moov.APIClient, id string, webhook string) error {
 	// add watch
-	req := moov.WatchRequest{
+	req := moov.OfacWatchRequest{
 		AuthToken: base.ID(),
 		Webhook:   webhook,
 	}
-	opts := &moov.AddOFACCompanyWatchOpts{
+	opts := &moov.AddOfacCompanyWatchOpts{
 		XRequestID: optional.NewString(*flagRequestID),
 		XUserID:    optional.NewString(*flagUserID),
 	}
-	watch, resp, err := api.WatchmanApi.AddOFACCompanyWatch(ctx, id, req, opts)
+	watch, resp, err := api.WatchmanApi.AddOfacCompanyWatch(ctx, id, req, opts)
 	if err != nil {
 		return fmt.Errorf("addCompanyWatch: %v", err)
 	}
 	defer resp.Body.Close()
 
 	// remove watch
-	resp, err = api.WatchmanApi.RemoveOFACCompanyWatch(ctx, id, watch.WatchID, &moov.RemoveOFACCompanyWatchOpts{
+	resp, err = api.WatchmanApi.RemoveOfacCompanyWatch(ctx, id, watch.WatchID, &moov.RemoveOfacCompanyWatchOpts{
 		XRequestID: optional.NewString(*flagRequestID),
 		XUserID:    optional.NewString(*flagUserID),
 	})
@@ -44,22 +44,22 @@ func addCompanyWatch(ctx context.Context, api *moov.APIClient, id string, webhoo
 
 func addCustomerWatch(ctx context.Context, api *moov.APIClient, id string, webhook string) error {
 	// add watch
-	req := moov.WatchRequest{
+	req := moov.OfacWatchRequest{
 		AuthToken: base.ID(),
 		Webhook:   webhook,
 	}
-	opts := &moov.AddOFACCustomerWatchOpts{
+	opts := &moov.AddOfacCustomerWatchOpts{
 		XRequestID: optional.NewString(*flagRequestID),
 		XUserID:    optional.NewString(*flagUserID),
 	}
-	watch, resp, err := api.WatchmanApi.AddOFACCustomerWatch(ctx, id, req, opts)
+	watch, resp, err := api.WatchmanApi.AddOfacCustomerWatch(ctx, id, req, opts)
 	if err != nil {
 		return fmt.Errorf("addCustomerWatch: add: %v", err)
 	}
 	resp.Body.Close()
 
 	// remove watch
-	resp, err = api.WatchmanApi.RemoveOFACCustomerWatch(ctx, id, watch.WatchID, &moov.RemoveOFACCustomerWatchOpts{
+	resp, err = api.WatchmanApi.RemoveOfacCustomerWatch(ctx, id, watch.WatchID, &moov.RemoveOfacCustomerWatchOpts{
 		XRequestID: optional.NewString(*flagRequestID),
 		XUserID:    optional.NewString(*flagUserID),
 	})

@@ -76,7 +76,7 @@ func getValues(logger log.Logger, searcher *searcher) http.HandlerFunc {
 			switch k := getKey(r); k {
 			case "sdntype":
 				acc.add(searcher.SDNs[i].SDNType)
-			case "program":
+			case "ofacprogram":
 				acc.add(searcher.SDNs[i].Program)
 			default:
 				moovhttp.Problem(w, fmt.Errorf("unknown key: %s", k))

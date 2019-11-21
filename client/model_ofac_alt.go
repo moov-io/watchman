@@ -9,12 +9,12 @@
 
 package openapi
 
-// EntityAddress Physical address from OFAC list
-type EntityAddress struct {
-	EntityID                    string  `json:"entityID,omitempty"`
-	AddressID                   string  `json:"addressID,omitempty"`
-	Address                     string  `json:"address,omitempty"`
-	CityStateProvincePostalCode string  `json:"cityStateProvincePostalCode,omitempty"`
-	Country                     string  `json:"country,omitempty"`
-	Match                       float32 `json:"match,omitempty"`
+// OfacAlt Alternate name from OFAC list
+type OfacAlt struct {
+	EntityID         string  `json:"entityID,omitempty"`
+	AlternateID      string  `json:"alternateID,omitempty"`
+	AlternateType    string  `json:"alternateType,omitempty"`
+	AlternateName    string  `json:"alternateName,omitempty"`
+	AlternateRemarks string  `json:"alternateRemarks,omitempty"`
+	Match            float32 `json:"match,omitempty"`
 }

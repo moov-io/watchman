@@ -66,7 +66,7 @@ func TestValues__getValuesLimit(t *testing.T) {
 	addValuesRoutes(log.NewNopLogger(), router, sdnSearcher)
 
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/ui/values/program?limit=1", nil)
+	req := httptest.NewRequest("GET", "/ui/values/ofacProgram?limit=1", nil)
 	router.ServeHTTP(w, req)
 	w.Flush()
 

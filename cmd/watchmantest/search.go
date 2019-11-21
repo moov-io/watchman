@@ -17,7 +17,7 @@ import (
 
 // searchByName will attempt sanctions searches for the provided name and then load the SDN metadata
 // associated to the company/organization or individual.
-func searchByName(ctx context.Context, api *moov.APIClient, name string) (*moov.Sdn, error) {
+func searchByName(ctx context.Context, api *moov.APIClient, name string) (*moov.OfacSdn, error) {
 	opts := &moov.SearchOpts{
 		Limit:      optional.NewInt32(2),
 		Name:       optional.NewString(name),
@@ -123,7 +123,7 @@ func getSDNAltNames(ctx context.Context, api *moov.APIClient, id string) error {
 }
 
 func getCustomer(ctx context.Context, api *moov.APIClient, id string) error {
-	cust, resp, err := api.WatchmanApi.GetOFACCustomer(ctx, id, nil)
+	cust, resp, err := api.WatchmanApi.GetOfacCustomer(ctx, id, nil)
 	if err != nil {
 		return fmt.Errorf("loadCustomer: %v", err)
 	}
@@ -135,7 +135,7 @@ func getCustomer(ctx context.Context, api *moov.APIClient, id string) error {
 }
 
 func getCompany(ctx context.Context, api *moov.APIClient, id string) error {
-	company, resp, err := api.WatchmanApi.GetOFACCompany(ctx, id, nil)
+	company, resp, err := api.WatchmanApi.GetOfacCompany(ctx, id, nil)
 	if err != nil {
 		return fmt.Errorf("loadCompany: %v", err)
 	}

@@ -34,7 +34,7 @@ func TestDownload__manualRefreshPath(t *testing.T) {
 		w.Flush()
 
 		if w.Code != http.StatusOK {
-			t.Errorf("bogus status code: %d", w.Code)
+			t.Errorf("bogus status code: %d: %s", w.Code, w.Body.String())
 		}
 		var stats downloadStats
 		if err := json.NewDecoder(w.Body).Decode(&stats); err != nil {

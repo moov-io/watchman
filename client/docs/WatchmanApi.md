@@ -4,31 +4,31 @@ All URIs are relative to *http://localhost:8084*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**AddOFACCompanyNameWatch**](WatchmanApi.md#AddOFACCompanyNameWatch) | **Post** /companies/watch | Add company watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
-[**AddOFACCompanyWatch**](WatchmanApi.md#AddOFACCompanyWatch) | **Post** /companies/{companyID}/watch | Add OFAC watch on a Company
-[**AddOFACCustomerNameWatch**](WatchmanApi.md#AddOFACCustomerNameWatch) | **Post** /customers/watch | Add customer watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
-[**AddOFACCustomerWatch**](WatchmanApi.md#AddOFACCustomerWatch) | **Post** /customers/{customerID}/watch | Add OFAC watch on a Customer
+[**AddOfacCompanyNameWatch**](WatchmanApi.md#AddOfacCompanyNameWatch) | **Post** /ofac/companies/watch | Add company watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
+[**AddOfacCompanyWatch**](WatchmanApi.md#AddOfacCompanyWatch) | **Post** /ofac/companies/{companyID}/watch | Add OFAC watch on a Company
+[**AddOfacCustomerNameWatch**](WatchmanApi.md#AddOfacCustomerNameWatch) | **Post** /ofac/customers/watch | Add customer watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
+[**AddOfacCustomerWatch**](WatchmanApi.md#AddOfacCustomerWatch) | **Post** /ofac/customers/{customerID}/watch | Add OFAC watch on a Customer
 [**GetLatestDownloads**](WatchmanApi.md#GetLatestDownloads) | **Get** /downloads | Return list of recent downloads of OFAC data
-[**GetOFACCompany**](WatchmanApi.md#GetOFACCompany) | **Get** /companies/{companyID} | Get information about a company, trust or organization such as addresses, alternate names, and remarks.
-[**GetOFACCustomer**](WatchmanApi.md#GetOFACCustomer) | **Get** /customers/{customerID} | Get information about a customer, addresses, alternate names, and their SDN metadata.
-[**GetSDN**](WatchmanApi.md#GetSDN) | **Get** /sdn/{sdnID} | Specially designated national
-[**GetSDNAddresses**](WatchmanApi.md#GetSDNAddresses) | **Get** /sdn/{sdnID}/addresses | Get addresses for a given SDN
-[**GetSDNAltNames**](WatchmanApi.md#GetSDNAltNames) | **Get** /sdn/{sdnID}/alts | Get alternate names for a given SDN
+[**GetOfacCompany**](WatchmanApi.md#GetOfacCompany) | **Get** /ofac/companies/{companyID} | Get information about a company, trust or organization such as addresses, alternate names, and remarks.
+[**GetOfacCustomer**](WatchmanApi.md#GetOfacCustomer) | **Get** /ofac/customers/{customerID} | Get information about a customer, addresses, alternate names, and their SDN metadata.
+[**GetSDN**](WatchmanApi.md#GetSDN) | **Get** /ofac/sdn/{sdnID} | Specially designated national
+[**GetSDNAddresses**](WatchmanApi.md#GetSDNAddresses) | **Get** /ofac/sdn/{sdnID}/addresses | Get addresses for a given SDN
+[**GetSDNAltNames**](WatchmanApi.md#GetSDNAltNames) | **Get** /ofac/sdn/{sdnID}/alts | Get alternate names for a given SDN
 [**GetUIValues**](WatchmanApi.md#GetUIValues) | **Get** /ui/values/{key} | Return an ordered distinct list of keys for an SDN property.
 [**Ping**](WatchmanApi.md#Ping) | **Get** /ping | Ping the Watchman service to check if running
-[**RemoveOFACCompanyNameWatch**](WatchmanApi.md#RemoveOFACCompanyNameWatch) | **Delete** /companies/watch/{watchID} | Remove a Company name watch
-[**RemoveOFACCompanyWatch**](WatchmanApi.md#RemoveOFACCompanyWatch) | **Delete** /companies/{companyID}/watch/{watchID} | Remove company watch
-[**RemoveOFACCustomerNameWatch**](WatchmanApi.md#RemoveOFACCustomerNameWatch) | **Delete** /customers/watch/{watchID} | Remove a Customer name watch
-[**RemoveOFACCustomerWatch**](WatchmanApi.md#RemoveOFACCustomerWatch) | **Delete** /customers/{customerID}/watch/{watchID} | Remove customer watch
+[**RemoveOfacCompanyNameWatch**](WatchmanApi.md#RemoveOfacCompanyNameWatch) | **Delete** /ofac/companies/watch/{watchID} | Remove a Company name watch
+[**RemoveOfacCompanyWatch**](WatchmanApi.md#RemoveOfacCompanyWatch) | **Delete** /ofac/companies/{companyID}/watch/{watchID} | Remove company watch
+[**RemoveOfacCustomerNameWatch**](WatchmanApi.md#RemoveOfacCustomerNameWatch) | **Delete** /ofac/customers/watch/{watchID} | Remove a Customer name watch
+[**RemoveOfacCustomerWatch**](WatchmanApi.md#RemoveOfacCustomerWatch) | **Delete** /ofac/customers/{customerID}/watch/{watchID} | Remove customer watch
 [**Search**](WatchmanApi.md#Search) | **Get** /search | Search SDN names and metadata
-[**UpdateOFACCompanyStatus**](WatchmanApi.md#UpdateOFACCompanyStatus) | **Put** /companies/{companyID} | Update a Companies sanction status to always block or always allow transactions.
-[**UpdateOFACCustomerStatus**](WatchmanApi.md#UpdateOFACCustomerStatus) | **Put** /customers/{customerID} | Update a Customer&#39;s sanction status to always block or always allow transactions.
+[**UpdateOfacCompanyStatus**](WatchmanApi.md#UpdateOfacCompanyStatus) | **Put** /ofac/companies/{companyID} | Update a Companies sanction status to always block or always allow transactions.
+[**UpdateOfacCustomerStatus**](WatchmanApi.md#UpdateOfacCustomerStatus) | **Put** /ofac/customers/{customerID} | Update a Customer&#39;s sanction status to always block or always allow transactions.
 
 
 
-## AddOFACCompanyNameWatch
+## AddOfacCompanyNameWatch
 
-> Watch AddOFACCompanyNameWatch(ctx, name, watchRequest, optional)
+> OfacWatch AddOfacCompanyNameWatch(ctx, name, ofacWatchRequest, optional)
 
 Add company watch by name. The match percentage will be included in the webhook's JSON payload.
 
@@ -39,12 +39,12 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
 **name** | **string**| Company name used to match and send watch notifications | 
-**watchRequest** | [**WatchRequest**](WatchRequest.md)|  | 
- **optional** | ***AddOFACCompanyNameWatchOpts** | optional parameters | nil if no parameters
+**ofacWatchRequest** | [**OfacWatchRequest**](OfacWatchRequest.md)|  | 
+ **optional** | ***AddOfacCompanyNameWatchOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
 
-Optional parameters are passed through a pointer to a AddOFACCompanyNameWatchOpts struct
+Optional parameters are passed through a pointer to a AddOfacCompanyNameWatchOpts struct
 
 
 Name | Type | Description  | Notes
@@ -56,7 +56,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**Watch**](Watch.md)
+[**OfacWatch**](OfacWatch.md)
 
 ### Authorization
 
@@ -72,9 +72,9 @@ No authorization required
 [[Back to README]](../README.md)
 
 
-## AddOFACCompanyWatch
+## AddOfacCompanyWatch
 
-> Watch AddOFACCompanyWatch(ctx, companyID, watchRequest, optional)
+> OfacWatch AddOfacCompanyWatch(ctx, companyID, ofacWatchRequest, optional)
 
 Add OFAC watch on a Company
 
@@ -85,12 +85,12 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
 **companyID** | **string**| Company ID | 
-**watchRequest** | [**WatchRequest**](WatchRequest.md)|  | 
- **optional** | ***AddOFACCompanyWatchOpts** | optional parameters | nil if no parameters
+**ofacWatchRequest** | [**OfacWatchRequest**](OfacWatchRequest.md)|  | 
+ **optional** | ***AddOfacCompanyWatchOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
 
-Optional parameters are passed through a pointer to a AddOFACCompanyWatchOpts struct
+Optional parameters are passed through a pointer to a AddOfacCompanyWatchOpts struct
 
 
 Name | Type | Description  | Notes
@@ -102,7 +102,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**Watch**](Watch.md)
+[**OfacWatch**](OfacWatch.md)
 
 ### Authorization
 
@@ -118,9 +118,9 @@ No authorization required
 [[Back to README]](../README.md)
 
 
-## AddOFACCustomerNameWatch
+## AddOfacCustomerNameWatch
 
-> Watch AddOFACCustomerNameWatch(ctx, name, watchRequest, optional)
+> OfacWatch AddOfacCustomerNameWatch(ctx, name, ofacWatchRequest, optional)
 
 Add customer watch by name. The match percentage will be included in the webhook's JSON payload.
 
@@ -131,12 +131,12 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
 **name** | **string**| Individual name used to match and send watch notifications | 
-**watchRequest** | [**WatchRequest**](WatchRequest.md)|  | 
- **optional** | ***AddOFACCustomerNameWatchOpts** | optional parameters | nil if no parameters
+**ofacWatchRequest** | [**OfacWatchRequest**](OfacWatchRequest.md)|  | 
+ **optional** | ***AddOfacCustomerNameWatchOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
 
-Optional parameters are passed through a pointer to a AddOFACCustomerNameWatchOpts struct
+Optional parameters are passed through a pointer to a AddOfacCustomerNameWatchOpts struct
 
 
 Name | Type | Description  | Notes
@@ -148,7 +148,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**Watch**](Watch.md)
+[**OfacWatch**](OfacWatch.md)
 
 ### Authorization
 
@@ -164,9 +164,9 @@ No authorization required
 [[Back to README]](../README.md)
 
 
-## AddOFACCustomerWatch
+## AddOfacCustomerWatch
 
-> Watch AddOFACCustomerWatch(ctx, customerID, watchRequest, optional)
+> OfacWatch AddOfacCustomerWatch(ctx, customerID, ofacWatchRequest, optional)
 
 Add OFAC watch on a Customer
 
@@ -177,12 +177,12 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
 **customerID** | **string**| Customer ID | 
-**watchRequest** | [**WatchRequest**](WatchRequest.md)|  | 
- **optional** | ***AddOFACCustomerWatchOpts** | optional parameters | nil if no parameters
+**ofacWatchRequest** | [**OfacWatchRequest**](OfacWatchRequest.md)|  | 
+ **optional** | ***AddOfacCustomerWatchOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
 
-Optional parameters are passed through a pointer to a AddOFACCustomerWatchOpts struct
+Optional parameters are passed through a pointer to a AddOfacCustomerWatchOpts struct
 
 
 Name | Type | Description  | Notes
@@ -194,7 +194,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**Watch**](Watch.md)
+[**OfacWatch**](OfacWatch.md)
 
 ### Authorization
 
@@ -253,9 +253,9 @@ No authorization required
 [[Back to README]](../README.md)
 
 
-## GetOFACCompany
+## GetOfacCompany
 
-> OfacCompany GetOFACCompany(ctx, companyID, optional)
+> OfacCompany GetOfacCompany(ctx, companyID, optional)
 
 Get information about a company, trust or organization such as addresses, alternate names, and remarks.
 
@@ -266,11 +266,11 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
 **companyID** | **string**| Company ID | 
- **optional** | ***GetOFACCompanyOpts** | optional parameters | nil if no parameters
+ **optional** | ***GetOfacCompanyOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
 
-Optional parameters are passed through a pointer to a GetOFACCompanyOpts struct
+Optional parameters are passed through a pointer to a GetOfacCompanyOpts struct
 
 
 Name | Type | Description  | Notes
@@ -281,7 +281,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**OfacCompany**](OFACCompany.md)
+[**OfacCompany**](OfacCompany.md)
 
 ### Authorization
 
@@ -297,9 +297,9 @@ No authorization required
 [[Back to README]](../README.md)
 
 
-## GetOFACCustomer
+## GetOfacCustomer
 
-> OfacCustomer GetOFACCustomer(ctx, customerID, optional)
+> OfacCustomer GetOfacCustomer(ctx, customerID, optional)
 
 Get information about a customer, addresses, alternate names, and their SDN metadata.
 
@@ -310,11 +310,11 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
 **customerID** | **string**| Customer ID | 
- **optional** | ***GetOFACCustomerOpts** | optional parameters | nil if no parameters
+ **optional** | ***GetOfacCustomerOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
 
-Optional parameters are passed through a pointer to a GetOFACCustomerOpts struct
+Optional parameters are passed through a pointer to a GetOfacCustomerOpts struct
 
 
 Name | Type | Description  | Notes
@@ -325,7 +325,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**OfacCustomer**](OFACCustomer.md)
+[**OfacCustomer**](OfacCustomer.md)
 
 ### Authorization
 
@@ -343,7 +343,7 @@ No authorization required
 
 ## GetSDN
 
-> Sdn GetSDN(ctx, sdnID, optional)
+> OfacSdn GetSDN(ctx, sdnID, optional)
 
 Specially designated national
 
@@ -369,7 +369,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**Sdn**](SDN.md)
+[**OfacSdn**](OfacSDN.md)
 
 ### Authorization
 
@@ -387,7 +387,7 @@ No authorization required
 
 ## GetSDNAddresses
 
-> []EntityAddress GetSDNAddresses(ctx, sdnID, optional)
+> []OfacEntityAddress GetSDNAddresses(ctx, sdnID, optional)
 
 Get addresses for a given SDN
 
@@ -413,7 +413,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**[]EntityAddress**](EntityAddress.md)
+[**[]OfacEntityAddress**](OfacEntityAddress.md)
 
 ### Authorization
 
@@ -431,7 +431,7 @@ No authorization required
 
 ## GetSDNAltNames
 
-> []Alt GetSDNAltNames(ctx, sdnID, optional)
+> []OfacAlt GetSDNAltNames(ctx, sdnID, optional)
 
 Get alternate names for a given SDN
 
@@ -457,7 +457,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**[]Alt**](Alt.md)
+[**[]OfacAlt**](OfacAlt.md)
 
 ### Authorization
 
@@ -485,7 +485,7 @@ Return an ordered distinct list of keys for an SDN property.
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**key** | **string**| SDN property to lookup | 
+**key** | **string**| SDN property to lookup. Values are sdnType, ofacProgram | 
  **optional** | ***GetUIValuesOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
@@ -544,9 +544,9 @@ No authorization required
 [[Back to README]](../README.md)
 
 
-## RemoveOFACCompanyNameWatch
+## RemoveOfacCompanyNameWatch
 
-> RemoveOFACCompanyNameWatch(ctx, watchID, name, optional)
+> RemoveOfacCompanyNameWatch(ctx, watchID, name, optional)
 
 Remove a Company name watch
 
@@ -558,11 +558,11 @@ Name | Type | Description  | Notes
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
 **watchID** | **string**| Watch ID, used to identify a specific watch | 
 **name** | **string**| Company name watch | 
- **optional** | ***RemoveOFACCompanyNameWatchOpts** | optional parameters | nil if no parameters
+ **optional** | ***RemoveOfacCompanyNameWatchOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
 
-Optional parameters are passed through a pointer to a RemoveOFACCompanyNameWatchOpts struct
+Optional parameters are passed through a pointer to a RemoveOfacCompanyNameWatchOpts struct
 
 
 Name | Type | Description  | Notes
@@ -590,9 +590,9 @@ No authorization required
 [[Back to README]](../README.md)
 
 
-## RemoveOFACCompanyWatch
+## RemoveOfacCompanyWatch
 
-> RemoveOFACCompanyWatch(ctx, companyID, watchID, optional)
+> RemoveOfacCompanyWatch(ctx, companyID, watchID, optional)
 
 Remove company watch
 
@@ -604,11 +604,11 @@ Name | Type | Description  | Notes
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
 **companyID** | **string**| Company ID | 
 **watchID** | **string**| Watch ID, used to identify a specific watch | 
- **optional** | ***RemoveOFACCompanyWatchOpts** | optional parameters | nil if no parameters
+ **optional** | ***RemoveOfacCompanyWatchOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
 
-Optional parameters are passed through a pointer to a RemoveOFACCompanyWatchOpts struct
+Optional parameters are passed through a pointer to a RemoveOfacCompanyWatchOpts struct
 
 
 Name | Type | Description  | Notes
@@ -636,9 +636,9 @@ No authorization required
 [[Back to README]](../README.md)
 
 
-## RemoveOFACCustomerNameWatch
+## RemoveOfacCustomerNameWatch
 
-> RemoveOFACCustomerNameWatch(ctx, watchID, name, optional)
+> RemoveOfacCustomerNameWatch(ctx, watchID, name, optional)
 
 Remove a Customer name watch
 
@@ -650,11 +650,11 @@ Name | Type | Description  | Notes
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
 **watchID** | **string**| Watch ID, used to identify a specific watch | 
 **name** | **string**| Customer or Company name watch | 
- **optional** | ***RemoveOFACCustomerNameWatchOpts** | optional parameters | nil if no parameters
+ **optional** | ***RemoveOfacCustomerNameWatchOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
 
-Optional parameters are passed through a pointer to a RemoveOFACCustomerNameWatchOpts struct
+Optional parameters are passed through a pointer to a RemoveOfacCustomerNameWatchOpts struct
 
 
 Name | Type | Description  | Notes
@@ -682,9 +682,9 @@ No authorization required
 [[Back to README]](../README.md)
 
 
-## RemoveOFACCustomerWatch
+## RemoveOfacCustomerWatch
 
-> RemoveOFACCustomerWatch(ctx, customerID, watchID, optional)
+> RemoveOfacCustomerWatch(ctx, customerID, watchID, optional)
 
 Remove customer watch
 
@@ -696,11 +696,11 @@ Name | Type | Description  | Notes
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
 **customerID** | **string**| Customer ID | 
 **watchID** | **string**| Watch ID, used to identify a specific watch | 
- **optional** | ***RemoveOFACCustomerWatchOpts** | optional parameters | nil if no parameters
+ **optional** | ***RemoveOfacCustomerWatchOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
 
-Optional parameters are passed through a pointer to a RemoveOFACCustomerWatchOpts struct
+Optional parameters are passed through a pointer to a RemoveOfacCustomerWatchOpts struct
 
 
 Name | Type | Description  | Notes
@@ -783,9 +783,9 @@ No authorization required
 [[Back to README]](../README.md)
 
 
-## UpdateOFACCompanyStatus
+## UpdateOfacCompanyStatus
 
-> UpdateOFACCompanyStatus(ctx, companyID, updateCompanyStatus, optional)
+> UpdateOfacCompanyStatus(ctx, companyID, updateOfacCompanyStatus, optional)
 
 Update a Companies sanction status to always block or always allow transactions.
 
@@ -796,12 +796,12 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
 **companyID** | **string**| Company ID | 
-**updateCompanyStatus** | [**UpdateCompanyStatus**](UpdateCompanyStatus.md)|  | 
- **optional** | ***UpdateOFACCompanyStatusOpts** | optional parameters | nil if no parameters
+**updateOfacCompanyStatus** | [**UpdateOfacCompanyStatus**](UpdateOfacCompanyStatus.md)|  | 
+ **optional** | ***UpdateOfacCompanyStatusOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
 
-Optional parameters are passed through a pointer to a UpdateOFACCompanyStatusOpts struct
+Optional parameters are passed through a pointer to a UpdateOfacCompanyStatusOpts struct
 
 
 Name | Type | Description  | Notes
@@ -829,9 +829,9 @@ No authorization required
 [[Back to README]](../README.md)
 
 
-## UpdateOFACCustomerStatus
+## UpdateOfacCustomerStatus
 
-> UpdateOFACCustomerStatus(ctx, customerID, updateCustomerStatus, optional)
+> UpdateOfacCustomerStatus(ctx, customerID, updateOfacCustomerStatus, optional)
 
 Update a Customer's sanction status to always block or always allow transactions.
 
@@ -842,12 +842,12 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
 **customerID** | **string**| Customer ID | 
-**updateCustomerStatus** | [**UpdateCustomerStatus**](UpdateCustomerStatus.md)|  | 
- **optional** | ***UpdateOFACCustomerStatusOpts** | optional parameters | nil if no parameters
+**updateOfacCustomerStatus** | [**UpdateOfacCustomerStatus**](UpdateOfacCustomerStatus.md)|  | 
+ **optional** | ***UpdateOfacCustomerStatusOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
 
-Optional parameters are passed through a pointer to a UpdateOFACCustomerStatusOpts struct
+Optional parameters are passed through a pointer to a UpdateOfacCustomerStatusOpts struct
 
 
 Name | Type | Description  | Notes

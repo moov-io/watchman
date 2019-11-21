@@ -28,11 +28,11 @@ paths:
           description: Service is running properly
 
   # Company Endpoints
-  /companies/{companyID}:
+  /ofac/companies/{companyID}:
     get:
       tags: ["Watchman"]
       summary: Get information about a company, trust or organization such as addresses, alternate names, and remarks.
-      operationId: getOFACCompany
+      operationId: getOfacCompany
       parameters:
         - name: X-Request-ID
           in: header
@@ -58,11 +58,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OFACCompany'
+                $ref: '#/components/schemas/OfacCompany'
     put:
       tags: ["Watchman"]
       summary: Update a Companies sanction status to always block or always allow transactions.
-      operationId: updateOFACCompanyStatus
+      operationId: updateOfacCompanyStatus
       parameters:
         - name: X-Request-ID
           in: header
@@ -87,15 +87,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateCompanyStatus'
+              $ref: '#/components/schemas/UpdateOfacCompanyStatus'
       responses:
         '200':
           description: Company status updated
-  /companies/{companyID}/watch:
+  /ofac/companies/{companyID}/watch:
     post:
       tags: ["Watchman"]
       summary: Add OFAC watch on a Company
-      operationId: addOFACCompanyWatch
+      operationId: addOfacCompanyWatch
       parameters:
         - name: X-Request-ID
           in: header
@@ -120,21 +120,21 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/WatchRequest'
+              $ref: '#/components/schemas/OfacWatchRequest'
       responses:
         '200':
           description: Company watch added
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Watch'
+                $ref: '#/components/schemas/OfacWatch'
         '404':
           description: Company not found
-  /companies/{companyID}/watch/{watchID}:
+  /ofac/companies/{companyID}/watch/{watchID}:
     delete:
       tags: ["Watchman"]
       summary: Remove company watch
-      operationId: removeOFACCompanyWatch
+      operationId: removeOfacCompanyWatch
       parameters:
         - name: X-Request-ID
           in: header
@@ -164,11 +164,11 @@ paths:
       responses:
         '200':
           description: Company watch removed
-  /companies/watch:
+  /ofac/companies/watch:
     post:
       tags: ["Watchman"]
       summary: Add company watch by name. The match percentage will be included in the webhook's JSON payload.
-      operationId: addOFACCompanyNameWatch
+      operationId: addOfacCompanyNameWatch
       parameters:
         - name: X-Request-ID
           in: header
@@ -193,19 +193,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/WatchRequest'
+              $ref: '#/components/schemas/OfacWatchRequest'
       responses:
         '200':
           description: Company watch applied
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Watch'
-  /companies/watch/{watchID}:
+                $ref: '#/components/schemas/OfacWatch'
+  /ofac/companies/watch/{watchID}:
     delete:
       tags: ["Watchman"]
       summary: Remove a Company name watch
-      operationId: removeOFACCompanyNameWatch
+      operationId: removeOfacCompanyNameWatch
       parameters:
         - name: X-Request-ID
           in: header
@@ -235,13 +235,12 @@ paths:
       responses:
         '200':
           description: Company watch removed
-
   # Customer Endpoints
-  /customers/{customerID}:
+  /ofac/customers/{customerID}:
     get:
       tags: ["Watchman"]
       summary: Get information about a customer, addresses, alternate names, and their SDN metadata.
-      operationId: getOFACCustomer
+      operationId: getOfacCustomer
       parameters:
         - name: X-Request-ID
           in: header
@@ -267,11 +266,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OFACCustomer'
+                $ref: '#/components/schemas/OfacCustomer'
     put:
       tags: ["Watchman"]
       summary: Update a Customer's sanction status to always block or always allow transactions.
-      operationId: updateOFACCustomerStatus
+      operationId: updateOfacCustomerStatus
       parameters:
         - name: X-Request-ID
           in: header
@@ -296,15 +295,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateCustomerStatus'
+              $ref: '#/components/schemas/UpdateOfacCustomerStatus'
       responses:
         '200':
           description: Customer status updated
-  /customers/{customerID}/watch:
+  /ofac/customers/{customerID}/watch:
     post:
       tags: ["Watchman"]
       summary: Add OFAC watch on a Customer
-      operationId: addOFACCustomerWatch
+      operationId: addOfacCustomerWatch
       parameters:
         - name: X-Request-ID
           in: header
@@ -329,21 +328,21 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/WatchRequest'
+              $ref: '#/components/schemas/OfacWatchRequest'
       responses:
         '200':
           description: Customer watch added
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Watch'
+                $ref: '#/components/schemas/OfacWatch'
         '404':
           description: Customer not found
-  /customers/{customerID}/watch/{watchID}:
+  /ofac/customers/{customerID}/watch/{watchID}:
     delete:
       tags: ["Watchman"]
       summary: Remove customer watch
-      operationId: removeOFACCustomerWatch
+      operationId: removeOfacCustomerWatch
       parameters:
         - name: X-Request-ID
           in: header
@@ -373,11 +372,11 @@ paths:
       responses:
         '200':
           description: Customer watch removed
-  /customers/watch:
+  /ofac/customers/watch:
     post:
       tags: ["Watchman"]
       summary: Add customer watch by name. The match percentage will be included in the webhook's JSON payload.
-      operationId: addOFACCustomerNameWatch
+      operationId: addOfacCustomerNameWatch
       parameters:
         - name: X-Request-ID
           in: header
@@ -402,19 +401,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/WatchRequest'
+              $ref: '#/components/schemas/OfacWatchRequest'
       responses:
         '200':
           description: Customer watch applied
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Watch'
-  /customers/watch/{watchID}:
+                $ref: '#/components/schemas/OfacWatch'
+  /ofac/customers/watch/{watchID}:
     delete:
       tags: ["Watchman"]
       summary: Remove a Customer name watch
-      operationId: removeOFACCustomerNameWatch
+      operationId: removeOfacCustomerNameWatch
       parameters:
         - name: X-Request-ID
           in: header
@@ -446,7 +445,7 @@ paths:
           description: Company or Customer watch removed
 
   # SDN Endpoints
-  /sdn/{sdnID}:
+  /ofac/sdn/{sdnID}:
     get:
       tags: ["Watchman"]
       summary: Specially designated national
@@ -476,8 +475,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SDN'
-  /sdn/{sdnID}/alts:
+                $ref: '#/components/schemas/OfacSDN'
+  /ofac/sdn/{sdnID}/alts:
     get:
       tags: ["Watchman"]
       summary: Get alternate names for a given SDN
@@ -507,8 +506,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SDNAltNames'
-  /sdn/{sdnID}/addresses:
+                $ref: '#/components/schemas/OfacSDNAltNames'
+  /ofac/sdn/{sdnID}/addresses:
     get:
       tags: ["Watchman"]
       summary: Get addresses for a given SDN
@@ -538,7 +537,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EntityAddresses'
+                $ref: '#/components/schemas/OfacEntityAddresses'
   # Search Endpoint
   /search:
     get:
@@ -682,7 +681,7 @@ paths:
       parameters:
         - in: path
           name: key
-          description: SDN property to lookup
+          description: SDN property to lookup. Values are sdnType, ofacProgram
           required: true
           schema:
             type: string
@@ -717,7 +716,7 @@ components:
           type: string
           description: An error message describing the problem intended for humans.
           example: Unknown key
-    OFACCompany:
+    OfacCompany:
       description: OFAC Company and metadata
       properties:
         ID:
@@ -725,18 +724,18 @@ components:
           type: string
           example: 9574756b
         sdn:
-          $ref: '#/components/schemas/SDN'
+          $ref: '#/components/schemas/OfacSDN'
         addresses:
           type: array
           items:
-            $ref: '#/components/schemas/EntityAddress'
+            $ref: '#/components/schemas/OfacEntityAddress'
         alts:
           type: array
           items:
-            $ref: '#/components/schemas/Alt'
+            $ref: '#/components/schemas/OfacAlt'
         status:
-          $ref: '#/components/schemas/OFACCompanyStatus'
-    OFACCompanyStatus:
+          $ref: '#/components/schemas/OfacCompanyStatus'
+    OfacCompanyStatus:
       description: Status properties of an OFAC Company
       properties:
         userID:
@@ -757,7 +756,7 @@ components:
           type: string
           format: date-time
           example: 2006-01-02T15:04:05Z07:00
-    OFACCustomer:
+    OfacCustomer:
       description: OFAC Customer and metadata
       properties:
         ID:
@@ -765,18 +764,18 @@ components:
           type: string
           example: 9574756b
         sdn:
-          $ref: '#/components/schemas/SDN'
+          $ref: '#/components/schemas/OfacSDN'
         addresses:
           type: array
           items:
-            $ref: '#/components/schemas/EntityAddress'
+            $ref: '#/components/schemas/OfacEntityAddress'
         alts:
           type: array
           items:
-            $ref: '#/components/schemas/Alt'
+            $ref: '#/components/schemas/OfacAlt'
         status:
-          $ref: '#/components/schemas/OFACCustomerStatus'
-    OFACCustomerStatus:
+          $ref: '#/components/schemas/OfacCustomerStatus'
+    OfacCustomerStatus:
       description: Status properties of an OFAC Customer
       properties:
         userID:
@@ -797,7 +796,7 @@ components:
           type: string
           format: date-time
           example: 2006-01-02T15:04:05Z07:00
-    SDN:
+    OfacSDN:
       description: Specially designated national from OFAC list
       properties:
         entityID:
@@ -822,11 +821,11 @@ components:
           type: number
           example: 0.91
           description: Remarks on SDN and often additional information about the SDN
-    EntityAddresses:
+    OfacEntityAddresses:
       type: array
       items:
-        $ref: '#/components/schemas/EntityAddress'
-    EntityAddress:
+        $ref: '#/components/schemas/OfacEntityAddress'
+    OfacEntityAddress:
       description: Physical address from OFAC list
       properties:
         entityID:
@@ -847,11 +846,11 @@ components:
         match:
           type: number
           example: 0.91
-    SDNAltNames:
+    OfacSDNAltNames:
       type: array
       items:
-        $ref: '#/components/schemas/Alt'
-    Alt:
+        $ref: '#/components/schemas/OfacAlt'
+    OfacAlt:
       description: Alternate name from OFAC list
       properties:
         entityID:
@@ -926,7 +925,7 @@ components:
         match:
           type: number
           example: 0.92
-    UpdateCompanyStatus:
+    UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       properties:
         status:
@@ -941,7 +940,7 @@ components:
           example: "False positive"
       required:
         - status
-    UpdateCustomerStatus:
+    UpdateOfacCustomerStatus:
       description: Request body to update a customers status.
       properties:
         status:
@@ -962,15 +961,15 @@ components:
         SDNs:
           type: array
           items:
-            $ref: '#/components/schemas/SDN'
+            $ref: '#/components/schemas/OfacSDN'
         altNames:
           type: array
           items:
-            $ref: '#/components/schemas/Alt'
+            $ref: '#/components/schemas/OfacAlt'
         addresses:
           type: array
           items:
-            $ref: '#/components/schemas/EntityAddress'
+            $ref: '#/components/schemas/OfacEntityAddress'
         deniedPersons:
           type: array
           items:
@@ -979,14 +978,14 @@ components:
           type: string
           format: date-time
           example: 2006-01-02T15:04:05Z07:00
-    Watch:
+    OfacWatch:
       description: Customer or Company watch
       properties:
         watchID:
           description: Object representing a customer or company watch
           type: string
           example: 08ddba92
-    WatchRequest:
+    OfacWatchRequest:
       description: Webhook or other means of notification on search criteria. OFAC will make a POST request with a body of the customer or company (SDN, AltNames, and Address).
       properties:
         authToken:

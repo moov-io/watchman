@@ -27,34 +27,34 @@ var (
 // WatchmanApiService WatchmanApi service
 type WatchmanApiService service
 
-// AddOFACCompanyNameWatchOpts Optional parameters for the method 'AddOFACCompanyNameWatch'
-type AddOFACCompanyNameWatchOpts struct {
+// AddOfacCompanyNameWatchOpts Optional parameters for the method 'AddOfacCompanyNameWatch'
+type AddOfacCompanyNameWatchOpts struct {
 	XRequestID optional.String
 	XUserID    optional.String
 }
 
 /*
-AddOFACCompanyNameWatch Add company watch by name. The match percentage will be included in the webhook's JSON payload.
+AddOfacCompanyNameWatch Add company watch by name. The match percentage will be included in the webhook's JSON payload.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param name Company name used to match and send watch notifications
- * @param watchRequest
- * @param optional nil or *AddOFACCompanyNameWatchOpts - Optional Parameters:
+ * @param ofacWatchRequest
+ * @param optional nil or *AddOfacCompanyNameWatchOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
  * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
-@return Watch
+@return OfacWatch
 */
-func (a *WatchmanApiService) AddOFACCompanyNameWatch(ctx _context.Context, name string, watchRequest WatchRequest, localVarOptionals *AddOFACCompanyNameWatchOpts) (Watch, *_nethttp.Response, error) {
+func (a *WatchmanApiService) AddOfacCompanyNameWatch(ctx _context.Context, name string, ofacWatchRequest OfacWatchRequest, localVarOptionals *AddOfacCompanyNameWatchOpts) (OfacWatch, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPost
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  Watch
+		localVarReturnValue  OfacWatch
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/companies/watch"
+	localVarPath := a.client.cfg.BasePath + "/ofac/companies/watch"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -85,7 +85,7 @@ func (a *WatchmanApiService) AddOFACCompanyNameWatch(ctx _context.Context, name 
 		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
 	}
 	// body params
-	localVarPostBody = &watchRequest
+	localVarPostBody = &ofacWatchRequest
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -108,7 +108,7 @@ func (a *WatchmanApiService) AddOFACCompanyNameWatch(ctx _context.Context, name 
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 200 {
-			var v Watch
+			var v OfacWatch
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -131,34 +131,34 @@ func (a *WatchmanApiService) AddOFACCompanyNameWatch(ctx _context.Context, name 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-// AddOFACCompanyWatchOpts Optional parameters for the method 'AddOFACCompanyWatch'
-type AddOFACCompanyWatchOpts struct {
+// AddOfacCompanyWatchOpts Optional parameters for the method 'AddOfacCompanyWatch'
+type AddOfacCompanyWatchOpts struct {
 	XRequestID optional.String
 	XUserID    optional.String
 }
 
 /*
-AddOFACCompanyWatch Add OFAC watch on a Company
+AddOfacCompanyWatch Add OFAC watch on a Company
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param companyID Company ID
- * @param watchRequest
- * @param optional nil or *AddOFACCompanyWatchOpts - Optional Parameters:
+ * @param ofacWatchRequest
+ * @param optional nil or *AddOfacCompanyWatchOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
  * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
-@return Watch
+@return OfacWatch
 */
-func (a *WatchmanApiService) AddOFACCompanyWatch(ctx _context.Context, companyID string, watchRequest WatchRequest, localVarOptionals *AddOFACCompanyWatchOpts) (Watch, *_nethttp.Response, error) {
+func (a *WatchmanApiService) AddOfacCompanyWatch(ctx _context.Context, companyID string, ofacWatchRequest OfacWatchRequest, localVarOptionals *AddOfacCompanyWatchOpts) (OfacWatch, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPost
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  Watch
+		localVarReturnValue  OfacWatch
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/companies/{companyID}/watch"
+	localVarPath := a.client.cfg.BasePath + "/ofac/companies/{companyID}/watch"
 	localVarPath = strings.Replace(localVarPath, "{"+"companyID"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", companyID)), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -189,7 +189,7 @@ func (a *WatchmanApiService) AddOFACCompanyWatch(ctx _context.Context, companyID
 		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
 	}
 	// body params
-	localVarPostBody = &watchRequest
+	localVarPostBody = &ofacWatchRequest
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -212,7 +212,7 @@ func (a *WatchmanApiService) AddOFACCompanyWatch(ctx _context.Context, companyID
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 200 {
-			var v Watch
+			var v OfacWatch
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -236,34 +236,34 @@ func (a *WatchmanApiService) AddOFACCompanyWatch(ctx _context.Context, companyID
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-// AddOFACCustomerNameWatchOpts Optional parameters for the method 'AddOFACCustomerNameWatch'
-type AddOFACCustomerNameWatchOpts struct {
+// AddOfacCustomerNameWatchOpts Optional parameters for the method 'AddOfacCustomerNameWatch'
+type AddOfacCustomerNameWatchOpts struct {
 	XRequestID optional.String
 	XUserID    optional.String
 }
 
 /*
-AddOFACCustomerNameWatch Add customer watch by name. The match percentage will be included in the webhook's JSON payload.
+AddOfacCustomerNameWatch Add customer watch by name. The match percentage will be included in the webhook's JSON payload.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param name Individual name used to match and send watch notifications
- * @param watchRequest
- * @param optional nil or *AddOFACCustomerNameWatchOpts - Optional Parameters:
+ * @param ofacWatchRequest
+ * @param optional nil or *AddOfacCustomerNameWatchOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
  * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
-@return Watch
+@return OfacWatch
 */
-func (a *WatchmanApiService) AddOFACCustomerNameWatch(ctx _context.Context, name string, watchRequest WatchRequest, localVarOptionals *AddOFACCustomerNameWatchOpts) (Watch, *_nethttp.Response, error) {
+func (a *WatchmanApiService) AddOfacCustomerNameWatch(ctx _context.Context, name string, ofacWatchRequest OfacWatchRequest, localVarOptionals *AddOfacCustomerNameWatchOpts) (OfacWatch, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPost
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  Watch
+		localVarReturnValue  OfacWatch
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/customers/watch"
+	localVarPath := a.client.cfg.BasePath + "/ofac/customers/watch"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -294,7 +294,7 @@ func (a *WatchmanApiService) AddOFACCustomerNameWatch(ctx _context.Context, name
 		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
 	}
 	// body params
-	localVarPostBody = &watchRequest
+	localVarPostBody = &ofacWatchRequest
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -317,7 +317,7 @@ func (a *WatchmanApiService) AddOFACCustomerNameWatch(ctx _context.Context, name
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 200 {
-			var v Watch
+			var v OfacWatch
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -340,34 +340,34 @@ func (a *WatchmanApiService) AddOFACCustomerNameWatch(ctx _context.Context, name
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-// AddOFACCustomerWatchOpts Optional parameters for the method 'AddOFACCustomerWatch'
-type AddOFACCustomerWatchOpts struct {
+// AddOfacCustomerWatchOpts Optional parameters for the method 'AddOfacCustomerWatch'
+type AddOfacCustomerWatchOpts struct {
 	XRequestID optional.String
 	XUserID    optional.String
 }
 
 /*
-AddOFACCustomerWatch Add OFAC watch on a Customer
+AddOfacCustomerWatch Add OFAC watch on a Customer
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param customerID Customer ID
- * @param watchRequest
- * @param optional nil or *AddOFACCustomerWatchOpts - Optional Parameters:
+ * @param ofacWatchRequest
+ * @param optional nil or *AddOfacCustomerWatchOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
  * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
-@return Watch
+@return OfacWatch
 */
-func (a *WatchmanApiService) AddOFACCustomerWatch(ctx _context.Context, customerID string, watchRequest WatchRequest, localVarOptionals *AddOFACCustomerWatchOpts) (Watch, *_nethttp.Response, error) {
+func (a *WatchmanApiService) AddOfacCustomerWatch(ctx _context.Context, customerID string, ofacWatchRequest OfacWatchRequest, localVarOptionals *AddOfacCustomerWatchOpts) (OfacWatch, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPost
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  Watch
+		localVarReturnValue  OfacWatch
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/customers/{customerID}/watch"
+	localVarPath := a.client.cfg.BasePath + "/ofac/customers/{customerID}/watch"
 	localVarPath = strings.Replace(localVarPath, "{"+"customerID"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", customerID)), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -398,7 +398,7 @@ func (a *WatchmanApiService) AddOFACCustomerWatch(ctx _context.Context, customer
 		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
 	}
 	// body params
-	localVarPostBody = &watchRequest
+	localVarPostBody = &ofacWatchRequest
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -421,7 +421,7 @@ func (a *WatchmanApiService) AddOFACCustomerWatch(ctx _context.Context, customer
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 200 {
-			var v Watch
+			var v OfacWatch
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -549,22 +549,22 @@ func (a *WatchmanApiService) GetLatestDownloads(ctx _context.Context, localVarOp
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-// GetOFACCompanyOpts Optional parameters for the method 'GetOFACCompany'
-type GetOFACCompanyOpts struct {
+// GetOfacCompanyOpts Optional parameters for the method 'GetOfacCompany'
+type GetOfacCompanyOpts struct {
 	XRequestID optional.String
 	XUserID    optional.String
 }
 
 /*
-GetOFACCompany Get information about a company, trust or organization such as addresses, alternate names, and remarks.
+GetOfacCompany Get information about a company, trust or organization such as addresses, alternate names, and remarks.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param companyID Company ID
- * @param optional nil or *GetOFACCompanyOpts - Optional Parameters:
+ * @param optional nil or *GetOfacCompanyOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
  * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 @return OfacCompany
 */
-func (a *WatchmanApiService) GetOFACCompany(ctx _context.Context, companyID string, localVarOptionals *GetOFACCompanyOpts) (OfacCompany, *_nethttp.Response, error) {
+func (a *WatchmanApiService) GetOfacCompany(ctx _context.Context, companyID string, localVarOptionals *GetOfacCompanyOpts) (OfacCompany, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
@@ -575,7 +575,7 @@ func (a *WatchmanApiService) GetOFACCompany(ctx _context.Context, companyID stri
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/companies/{companyID}"
+	localVarPath := a.client.cfg.BasePath + "/ofac/companies/{companyID}"
 	localVarPath = strings.Replace(localVarPath, "{"+"companyID"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", companyID)), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -650,22 +650,22 @@ func (a *WatchmanApiService) GetOFACCompany(ctx _context.Context, companyID stri
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-// GetOFACCustomerOpts Optional parameters for the method 'GetOFACCustomer'
-type GetOFACCustomerOpts struct {
+// GetOfacCustomerOpts Optional parameters for the method 'GetOfacCustomer'
+type GetOfacCustomerOpts struct {
 	XRequestID optional.String
 	XUserID    optional.String
 }
 
 /*
-GetOFACCustomer Get information about a customer, addresses, alternate names, and their SDN metadata.
+GetOfacCustomer Get information about a customer, addresses, alternate names, and their SDN metadata.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param customerID Customer ID
- * @param optional nil or *GetOFACCustomerOpts - Optional Parameters:
+ * @param optional nil or *GetOfacCustomerOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
  * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 @return OfacCustomer
 */
-func (a *WatchmanApiService) GetOFACCustomer(ctx _context.Context, customerID string, localVarOptionals *GetOFACCustomerOpts) (OfacCustomer, *_nethttp.Response, error) {
+func (a *WatchmanApiService) GetOfacCustomer(ctx _context.Context, customerID string, localVarOptionals *GetOfacCustomerOpts) (OfacCustomer, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
@@ -676,7 +676,7 @@ func (a *WatchmanApiService) GetOFACCustomer(ctx _context.Context, customerID st
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/customers/{customerID}"
+	localVarPath := a.client.cfg.BasePath + "/ofac/customers/{customerID}"
 	localVarPath = strings.Replace(localVarPath, "{"+"customerID"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", customerID)), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -764,20 +764,20 @@ GetSDN Specially designated national
  * @param optional nil or *GetSDNOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
  * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
-@return Sdn
+@return OfacSdn
 */
-func (a *WatchmanApiService) GetSDN(ctx _context.Context, sdnID string, localVarOptionals *GetSDNOpts) (Sdn, *_nethttp.Response, error) {
+func (a *WatchmanApiService) GetSDN(ctx _context.Context, sdnID string, localVarOptionals *GetSDNOpts) (OfacSdn, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  Sdn
+		localVarReturnValue  OfacSdn
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/sdn/{sdnID}"
+	localVarPath := a.client.cfg.BasePath + "/ofac/sdn/{sdnID}"
 	localVarPath = strings.Replace(localVarPath, "{"+"sdnID"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", sdnID)), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -829,7 +829,7 @@ func (a *WatchmanApiService) GetSDN(ctx _context.Context, sdnID string, localVar
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 200 {
-			var v Sdn
+			var v OfacSdn
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -865,20 +865,20 @@ GetSDNAddresses Get addresses for a given SDN
  * @param optional nil or *GetSDNAddressesOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
  * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
-@return []EntityAddress
+@return []OfacEntityAddress
 */
-func (a *WatchmanApiService) GetSDNAddresses(ctx _context.Context, sdnID string, localVarOptionals *GetSDNAddressesOpts) ([]EntityAddress, *_nethttp.Response, error) {
+func (a *WatchmanApiService) GetSDNAddresses(ctx _context.Context, sdnID string, localVarOptionals *GetSDNAddressesOpts) ([]OfacEntityAddress, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  []EntityAddress
+		localVarReturnValue  []OfacEntityAddress
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/sdn/{sdnID}/addresses"
+	localVarPath := a.client.cfg.BasePath + "/ofac/sdn/{sdnID}/addresses"
 	localVarPath = strings.Replace(localVarPath, "{"+"sdnID"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", sdnID)), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -930,7 +930,7 @@ func (a *WatchmanApiService) GetSDNAddresses(ctx _context.Context, sdnID string,
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 200 {
-			var v []EntityAddress
+			var v []OfacEntityAddress
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -966,20 +966,20 @@ GetSDNAltNames Get alternate names for a given SDN
  * @param optional nil or *GetSDNAltNamesOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
  * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
-@return []Alt
+@return []OfacAlt
 */
-func (a *WatchmanApiService) GetSDNAltNames(ctx _context.Context, sdnID string, localVarOptionals *GetSDNAltNamesOpts) ([]Alt, *_nethttp.Response, error) {
+func (a *WatchmanApiService) GetSDNAltNames(ctx _context.Context, sdnID string, localVarOptionals *GetSDNAltNamesOpts) ([]OfacAlt, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  []Alt
+		localVarReturnValue  []OfacAlt
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/sdn/{sdnID}/alts"
+	localVarPath := a.client.cfg.BasePath + "/ofac/sdn/{sdnID}/alts"
 	localVarPath = strings.Replace(localVarPath, "{"+"sdnID"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", sdnID)), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -1031,7 +1031,7 @@ func (a *WatchmanApiService) GetSDNAltNames(ctx _context.Context, sdnID string, 
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 200 {
-			var v []Alt
+			var v []OfacAlt
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -1062,7 +1062,7 @@ type GetUIValuesOpts struct {
 /*
 GetUIValues Return an ordered distinct list of keys for an SDN property.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param key SDN property to lookup
+ * @param key SDN property to lookup. Values are sdnType, ofacProgram
  * @param optional nil or *GetUIValuesOpts - Optional Parameters:
  * @param "Limit" (optional.Int32) -  Maximum results returned by a search
 @return []string
@@ -1224,22 +1224,22 @@ func (a *WatchmanApiService) Ping(ctx _context.Context) (*_nethttp.Response, err
 	return localVarHTTPResponse, nil
 }
 
-// RemoveOFACCompanyNameWatchOpts Optional parameters for the method 'RemoveOFACCompanyNameWatch'
-type RemoveOFACCompanyNameWatchOpts struct {
+// RemoveOfacCompanyNameWatchOpts Optional parameters for the method 'RemoveOfacCompanyNameWatch'
+type RemoveOfacCompanyNameWatchOpts struct {
 	XRequestID optional.String
 	XUserID    optional.String
 }
 
 /*
-RemoveOFACCompanyNameWatch Remove a Company name watch
+RemoveOfacCompanyNameWatch Remove a Company name watch
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param watchID Watch ID, used to identify a specific watch
  * @param name Company name watch
- * @param optional nil or *RemoveOFACCompanyNameWatchOpts - Optional Parameters:
+ * @param optional nil or *RemoveOfacCompanyNameWatchOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
  * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 */
-func (a *WatchmanApiService) RemoveOFACCompanyNameWatch(ctx _context.Context, watchID string, name string, localVarOptionals *RemoveOFACCompanyNameWatchOpts) (*_nethttp.Response, error) {
+func (a *WatchmanApiService) RemoveOfacCompanyNameWatch(ctx _context.Context, watchID string, name string, localVarOptionals *RemoveOfacCompanyNameWatchOpts) (*_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodDelete
 		localVarPostBody     interface{}
@@ -1249,7 +1249,7 @@ func (a *WatchmanApiService) RemoveOFACCompanyNameWatch(ctx _context.Context, wa
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/companies/watch/{watchID}"
+	localVarPath := a.client.cfg.BasePath + "/ofac/companies/watch/{watchID}"
 	localVarPath = strings.Replace(localVarPath, "{"+"watchID"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", watchID)), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -1307,22 +1307,22 @@ func (a *WatchmanApiService) RemoveOFACCompanyNameWatch(ctx _context.Context, wa
 	return localVarHTTPResponse, nil
 }
 
-// RemoveOFACCompanyWatchOpts Optional parameters for the method 'RemoveOFACCompanyWatch'
-type RemoveOFACCompanyWatchOpts struct {
+// RemoveOfacCompanyWatchOpts Optional parameters for the method 'RemoveOfacCompanyWatch'
+type RemoveOfacCompanyWatchOpts struct {
 	XRequestID optional.String
 	XUserID    optional.String
 }
 
 /*
-RemoveOFACCompanyWatch Remove company watch
+RemoveOfacCompanyWatch Remove company watch
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param companyID Company ID
  * @param watchID Watch ID, used to identify a specific watch
- * @param optional nil or *RemoveOFACCompanyWatchOpts - Optional Parameters:
+ * @param optional nil or *RemoveOfacCompanyWatchOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
  * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 */
-func (a *WatchmanApiService) RemoveOFACCompanyWatch(ctx _context.Context, companyID string, watchID string, localVarOptionals *RemoveOFACCompanyWatchOpts) (*_nethttp.Response, error) {
+func (a *WatchmanApiService) RemoveOfacCompanyWatch(ctx _context.Context, companyID string, watchID string, localVarOptionals *RemoveOfacCompanyWatchOpts) (*_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodDelete
 		localVarPostBody     interface{}
@@ -1332,7 +1332,7 @@ func (a *WatchmanApiService) RemoveOFACCompanyWatch(ctx _context.Context, compan
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/companies/{companyID}/watch/{watchID}"
+	localVarPath := a.client.cfg.BasePath + "/ofac/companies/{companyID}/watch/{watchID}"
 	localVarPath = strings.Replace(localVarPath, "{"+"companyID"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", companyID)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"watchID"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", watchID)), -1)
 
@@ -1390,22 +1390,22 @@ func (a *WatchmanApiService) RemoveOFACCompanyWatch(ctx _context.Context, compan
 	return localVarHTTPResponse, nil
 }
 
-// RemoveOFACCustomerNameWatchOpts Optional parameters for the method 'RemoveOFACCustomerNameWatch'
-type RemoveOFACCustomerNameWatchOpts struct {
+// RemoveOfacCustomerNameWatchOpts Optional parameters for the method 'RemoveOfacCustomerNameWatch'
+type RemoveOfacCustomerNameWatchOpts struct {
 	XRequestID optional.String
 	XUserID    optional.String
 }
 
 /*
-RemoveOFACCustomerNameWatch Remove a Customer name watch
+RemoveOfacCustomerNameWatch Remove a Customer name watch
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param watchID Watch ID, used to identify a specific watch
  * @param name Customer or Company name watch
- * @param optional nil or *RemoveOFACCustomerNameWatchOpts - Optional Parameters:
+ * @param optional nil or *RemoveOfacCustomerNameWatchOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
  * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 */
-func (a *WatchmanApiService) RemoveOFACCustomerNameWatch(ctx _context.Context, watchID string, name string, localVarOptionals *RemoveOFACCustomerNameWatchOpts) (*_nethttp.Response, error) {
+func (a *WatchmanApiService) RemoveOfacCustomerNameWatch(ctx _context.Context, watchID string, name string, localVarOptionals *RemoveOfacCustomerNameWatchOpts) (*_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodDelete
 		localVarPostBody     interface{}
@@ -1415,7 +1415,7 @@ func (a *WatchmanApiService) RemoveOFACCustomerNameWatch(ctx _context.Context, w
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/customers/watch/{watchID}"
+	localVarPath := a.client.cfg.BasePath + "/ofac/customers/watch/{watchID}"
 	localVarPath = strings.Replace(localVarPath, "{"+"watchID"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", watchID)), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -1473,22 +1473,22 @@ func (a *WatchmanApiService) RemoveOFACCustomerNameWatch(ctx _context.Context, w
 	return localVarHTTPResponse, nil
 }
 
-// RemoveOFACCustomerWatchOpts Optional parameters for the method 'RemoveOFACCustomerWatch'
-type RemoveOFACCustomerWatchOpts struct {
+// RemoveOfacCustomerWatchOpts Optional parameters for the method 'RemoveOfacCustomerWatch'
+type RemoveOfacCustomerWatchOpts struct {
 	XRequestID optional.String
 	XUserID    optional.String
 }
 
 /*
-RemoveOFACCustomerWatch Remove customer watch
+RemoveOfacCustomerWatch Remove customer watch
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param customerID Customer ID
  * @param watchID Watch ID, used to identify a specific watch
- * @param optional nil or *RemoveOFACCustomerWatchOpts - Optional Parameters:
+ * @param optional nil or *RemoveOfacCustomerWatchOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
  * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 */
-func (a *WatchmanApiService) RemoveOFACCustomerWatch(ctx _context.Context, customerID string, watchID string, localVarOptionals *RemoveOFACCustomerWatchOpts) (*_nethttp.Response, error) {
+func (a *WatchmanApiService) RemoveOfacCustomerWatch(ctx _context.Context, customerID string, watchID string, localVarOptionals *RemoveOfacCustomerWatchOpts) (*_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodDelete
 		localVarPostBody     interface{}
@@ -1498,7 +1498,7 @@ func (a *WatchmanApiService) RemoveOFACCustomerWatch(ctx _context.Context, custo
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/customers/{customerID}/watch/{watchID}"
+	localVarPath := a.client.cfg.BasePath + "/ofac/customers/{customerID}/watch/{watchID}"
 	localVarPath = strings.Replace(localVarPath, "{"+"customerID"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", customerID)), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"watchID"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", watchID)), -1)
 
@@ -1720,22 +1720,22 @@ func (a *WatchmanApiService) Search(ctx _context.Context, localVarOptionals *Sea
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-// UpdateOFACCompanyStatusOpts Optional parameters for the method 'UpdateOFACCompanyStatus'
-type UpdateOFACCompanyStatusOpts struct {
+// UpdateOfacCompanyStatusOpts Optional parameters for the method 'UpdateOfacCompanyStatus'
+type UpdateOfacCompanyStatusOpts struct {
 	XRequestID optional.String
 	XUserID    optional.String
 }
 
 /*
-UpdateOFACCompanyStatus Update a Companies sanction status to always block or always allow transactions.
+UpdateOfacCompanyStatus Update a Companies sanction status to always block or always allow transactions.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param companyID Company ID
- * @param updateCompanyStatus
- * @param optional nil or *UpdateOFACCompanyStatusOpts - Optional Parameters:
+ * @param updateOfacCompanyStatus
+ * @param optional nil or *UpdateOfacCompanyStatusOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
  * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 */
-func (a *WatchmanApiService) UpdateOFACCompanyStatus(ctx _context.Context, companyID string, updateCompanyStatus UpdateCompanyStatus, localVarOptionals *UpdateOFACCompanyStatusOpts) (*_nethttp.Response, error) {
+func (a *WatchmanApiService) UpdateOfacCompanyStatus(ctx _context.Context, companyID string, updateOfacCompanyStatus UpdateOfacCompanyStatus, localVarOptionals *UpdateOfacCompanyStatusOpts) (*_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPut
 		localVarPostBody     interface{}
@@ -1745,7 +1745,7 @@ func (a *WatchmanApiService) UpdateOFACCompanyStatus(ctx _context.Context, compa
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/companies/{companyID}"
+	localVarPath := a.client.cfg.BasePath + "/ofac/companies/{companyID}"
 	localVarPath = strings.Replace(localVarPath, "{"+"companyID"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", companyID)), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -1776,7 +1776,7 @@ func (a *WatchmanApiService) UpdateOFACCompanyStatus(ctx _context.Context, compa
 		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
 	}
 	// body params
-	localVarPostBody = &updateCompanyStatus
+	localVarPostBody = &updateOfacCompanyStatus
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return nil, err
@@ -1804,22 +1804,22 @@ func (a *WatchmanApiService) UpdateOFACCompanyStatus(ctx _context.Context, compa
 	return localVarHTTPResponse, nil
 }
 
-// UpdateOFACCustomerStatusOpts Optional parameters for the method 'UpdateOFACCustomerStatus'
-type UpdateOFACCustomerStatusOpts struct {
+// UpdateOfacCustomerStatusOpts Optional parameters for the method 'UpdateOfacCustomerStatus'
+type UpdateOfacCustomerStatusOpts struct {
 	XRequestID optional.String
 	XUserID    optional.String
 }
 
 /*
-UpdateOFACCustomerStatus Update a Customer's sanction status to always block or always allow transactions.
+UpdateOfacCustomerStatus Update a Customer's sanction status to always block or always allow transactions.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param customerID Customer ID
- * @param updateCustomerStatus
- * @param optional nil or *UpdateOFACCustomerStatusOpts - Optional Parameters:
+ * @param updateOfacCustomerStatus
+ * @param optional nil or *UpdateOfacCustomerStatusOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
  * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
 */
-func (a *WatchmanApiService) UpdateOFACCustomerStatus(ctx _context.Context, customerID string, updateCustomerStatus UpdateCustomerStatus, localVarOptionals *UpdateOFACCustomerStatusOpts) (*_nethttp.Response, error) {
+func (a *WatchmanApiService) UpdateOfacCustomerStatus(ctx _context.Context, customerID string, updateOfacCustomerStatus UpdateOfacCustomerStatus, localVarOptionals *UpdateOfacCustomerStatusOpts) (*_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPut
 		localVarPostBody     interface{}
@@ -1829,7 +1829,7 @@ func (a *WatchmanApiService) UpdateOFACCustomerStatus(ctx _context.Context, cust
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/customers/{customerID}"
+	localVarPath := a.client.cfg.BasePath + "/ofac/customers/{customerID}"
 	localVarPath = strings.Replace(localVarPath, "{"+"customerID"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", customerID)), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -1860,7 +1860,7 @@ func (a *WatchmanApiService) UpdateOFACCustomerStatus(ctx _context.Context, cust
 		localVarHeaderParams["X-User-ID"] = parameterToString(localVarOptionals.XUserID.Value(), "")
 	}
 	// body params
-	localVarPostBody = &updateCustomerStatus
+	localVarPostBody = &updateOfacCustomerStatus
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return nil, err

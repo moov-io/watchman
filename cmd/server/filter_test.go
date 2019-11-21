@@ -12,7 +12,7 @@ import (
 )
 
 func TestFilter__buildFilterRequest(t *testing.T) {
-	u, _ := url.Parse("/search?q=jane+doe&sdnType=individual&program=SDGT")
+	u, _ := url.Parse("/search?q=jane+doe&sdnType=individual&ofacProgram=SDGT")
 	req := buildFilterRequest(u)
 	if req.empty() {
 		t.Error("filterRequest is not empty")
@@ -20,8 +20,8 @@ func TestFilter__buildFilterRequest(t *testing.T) {
 	if req.sdnType != "individual" {
 		t.Errorf("req.sdnType=%s", req.sdnType)
 	}
-	if req.program != "SDGT" {
-		t.Errorf("req.program=%s", req.program)
+	if req.ofacProgram != "SDGT" {
+		t.Errorf("req.ofacProgram=%s", req.ofacProgram)
 	}
 
 	// just the sdnType filter
@@ -33,8 +33,8 @@ func TestFilter__buildFilterRequest(t *testing.T) {
 	if req.sdnType != "individual" {
 		t.Errorf("req.sdnType=%s", req.sdnType)
 	}
-	if req.program != "" {
-		t.Errorf("req.program=%s", req.program)
+	if req.ofacProgram != "" {
+		t.Errorf("req.ofacProgram=%s", req.ofacProgram)
 	}
 
 	// empty request
@@ -43,8 +43,8 @@ func TestFilter__buildFilterRequest(t *testing.T) {
 	if !req.empty() {
 		t.Error("filterRequest is empty")
 	}
-	if req.sdnType != "" || req.program != "" {
-		t.Errorf("req.sdnType=%s req.program=%s", req.sdnType, req.program)
+	if req.sdnType != "" || req.ofacProgram != "" {
+		t.Errorf("req.sdnType=%s req.ofacProgram=%s", req.sdnType, req.ofacProgram)
 	}
 }
 
@@ -108,7 +108,7 @@ func TestFilter__sdnType(t *testing.T) {
 }
 
 func TestFilter__program(t *testing.T) {
-	sdns := filterSDNs(filterableSDNs, filterRequest{program: "SDGT"})
+	sdns := filterSDNs(filterableSDNs, filterRequest{ofacProgram: "SDGT"})
 	if len(sdns) != 1 {
 		t.Errorf("got: %#v", sdns)
 	}
@@ -121,14 +121,14 @@ func TestFilter__program(t *testing.T) {
 		t.Errorf("got %#v", sdns)
 	}
 
-	sdns = filterSDNs(filterableSDNs, filterRequest{program: "unknown"})
+	sdns = filterSDNs(filterableSDNs, filterRequest{ofacProgram: "unknown"})
 	if len(sdns) != 0 {
 		t.Errorf("got %#v", sdns)
 	}
 }
 
 func TestFilter__multiple(t *testing.T) {
-	sdns := filterSDNs(filterableSDNs, filterRequest{sdnType: "aircraft", program: "SDGT"})
+	sdns := filterSDNs(filterableSDNs, filterRequest{sdnType: "aircraft", ofacProgram: "SDGT"})
 	if len(sdns) != 1 {
 		t.Errorf("got: %#v", sdns)
 	}
@@ -141,7 +141,7 @@ func TestFilter__multiple(t *testing.T) {
 		t.Errorf("got %#v", sdns)
 	}
 
-	sdns = filterSDNs(filterableSDNs, filterRequest{sdnType: "other", program: "unknown"})
+	sdns = filterSDNs(filterableSDNs, filterRequest{sdnType: "other", ofacProgram: "unknown"})
 	if len(sdns) != 0 {
 		t.Errorf("got %#v", sdns)
 	}
@@ -159,7 +159,7 @@ func TestFilter__missing(t *testing.T) {
 	if len(missingProgram) != 1 {
 		t.Fatalf("%#v", missingProgram)
 	}
-	sdns = filterSDNs(append(filterableSDNs, missingProgram...), filterRequest{program: "SDGT"})
+	sdns = filterSDNs(append(filterableSDNs, missingProgram...), filterRequest{ofacProgram: "SDGT"})
 	if len(sdns) != 1 || sdns[0].EntityID != "13" {
 		t.Errorf("sdns=%#v", sdns)
 	}

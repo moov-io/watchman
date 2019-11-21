@@ -33,44 +33,44 @@ All URIs are relative to *http://localhost:8084*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*WatchmanApi* | [**AddOFACCompanyNameWatch**](docs/WatchmanApi.md#addofaccompanynamewatch) | **Post** /companies/watch | Add company watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
-*WatchmanApi* | [**AddOFACCompanyWatch**](docs/WatchmanApi.md#addofaccompanywatch) | **Post** /companies/{companyID}/watch | Add OFAC watch on a Company
-*WatchmanApi* | [**AddOFACCustomerNameWatch**](docs/WatchmanApi.md#addofaccustomernamewatch) | **Post** /customers/watch | Add customer watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
-*WatchmanApi* | [**AddOFACCustomerWatch**](docs/WatchmanApi.md#addofaccustomerwatch) | **Post** /customers/{customerID}/watch | Add OFAC watch on a Customer
+*WatchmanApi* | [**AddOfacCompanyNameWatch**](docs/WatchmanApi.md#addofaccompanynamewatch) | **Post** /ofac/companies/watch | Add company watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
+*WatchmanApi* | [**AddOfacCompanyWatch**](docs/WatchmanApi.md#addofaccompanywatch) | **Post** /ofac/companies/{companyID}/watch | Add OFAC watch on a Company
+*WatchmanApi* | [**AddOfacCustomerNameWatch**](docs/WatchmanApi.md#addofaccustomernamewatch) | **Post** /ofac/customers/watch | Add customer watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
+*WatchmanApi* | [**AddOfacCustomerWatch**](docs/WatchmanApi.md#addofaccustomerwatch) | **Post** /ofac/customers/{customerID}/watch | Add OFAC watch on a Customer
 *WatchmanApi* | [**GetLatestDownloads**](docs/WatchmanApi.md#getlatestdownloads) | **Get** /downloads | Return list of recent downloads of OFAC data
-*WatchmanApi* | [**GetOFACCompany**](docs/WatchmanApi.md#getofaccompany) | **Get** /companies/{companyID} | Get information about a company, trust or organization such as addresses, alternate names, and remarks.
-*WatchmanApi* | [**GetOFACCustomer**](docs/WatchmanApi.md#getofaccustomer) | **Get** /customers/{customerID} | Get information about a customer, addresses, alternate names, and their SDN metadata.
-*WatchmanApi* | [**GetSDN**](docs/WatchmanApi.md#getsdn) | **Get** /sdn/{sdnID} | Specially designated national
-*WatchmanApi* | [**GetSDNAddresses**](docs/WatchmanApi.md#getsdnaddresses) | **Get** /sdn/{sdnID}/addresses | Get addresses for a given SDN
-*WatchmanApi* | [**GetSDNAltNames**](docs/WatchmanApi.md#getsdnaltnames) | **Get** /sdn/{sdnID}/alts | Get alternate names for a given SDN
+*WatchmanApi* | [**GetOfacCompany**](docs/WatchmanApi.md#getofaccompany) | **Get** /ofac/companies/{companyID} | Get information about a company, trust or organization such as addresses, alternate names, and remarks.
+*WatchmanApi* | [**GetOfacCustomer**](docs/WatchmanApi.md#getofaccustomer) | **Get** /ofac/customers/{customerID} | Get information about a customer, addresses, alternate names, and their SDN metadata.
+*WatchmanApi* | [**GetSDN**](docs/WatchmanApi.md#getsdn) | **Get** /ofac/sdn/{sdnID} | Specially designated national
+*WatchmanApi* | [**GetSDNAddresses**](docs/WatchmanApi.md#getsdnaddresses) | **Get** /ofac/sdn/{sdnID}/addresses | Get addresses for a given SDN
+*WatchmanApi* | [**GetSDNAltNames**](docs/WatchmanApi.md#getsdnaltnames) | **Get** /ofac/sdn/{sdnID}/alts | Get alternate names for a given SDN
 *WatchmanApi* | [**GetUIValues**](docs/WatchmanApi.md#getuivalues) | **Get** /ui/values/{key} | Return an ordered distinct list of keys for an SDN property.
 *WatchmanApi* | [**Ping**](docs/WatchmanApi.md#ping) | **Get** /ping | Ping the Watchman service to check if running
-*WatchmanApi* | [**RemoveOFACCompanyNameWatch**](docs/WatchmanApi.md#removeofaccompanynamewatch) | **Delete** /companies/watch/{watchID} | Remove a Company name watch
-*WatchmanApi* | [**RemoveOFACCompanyWatch**](docs/WatchmanApi.md#removeofaccompanywatch) | **Delete** /companies/{companyID}/watch/{watchID} | Remove company watch
-*WatchmanApi* | [**RemoveOFACCustomerNameWatch**](docs/WatchmanApi.md#removeofaccustomernamewatch) | **Delete** /customers/watch/{watchID} | Remove a Customer name watch
-*WatchmanApi* | [**RemoveOFACCustomerWatch**](docs/WatchmanApi.md#removeofaccustomerwatch) | **Delete** /customers/{customerID}/watch/{watchID} | Remove customer watch
+*WatchmanApi* | [**RemoveOfacCompanyNameWatch**](docs/WatchmanApi.md#removeofaccompanynamewatch) | **Delete** /ofac/companies/watch/{watchID} | Remove a Company name watch
+*WatchmanApi* | [**RemoveOfacCompanyWatch**](docs/WatchmanApi.md#removeofaccompanywatch) | **Delete** /ofac/companies/{companyID}/watch/{watchID} | Remove company watch
+*WatchmanApi* | [**RemoveOfacCustomerNameWatch**](docs/WatchmanApi.md#removeofaccustomernamewatch) | **Delete** /ofac/customers/watch/{watchID} | Remove a Customer name watch
+*WatchmanApi* | [**RemoveOfacCustomerWatch**](docs/WatchmanApi.md#removeofaccustomerwatch) | **Delete** /ofac/customers/{customerID}/watch/{watchID} | Remove customer watch
 *WatchmanApi* | [**Search**](docs/WatchmanApi.md#search) | **Get** /search | Search SDN names and metadata
-*WatchmanApi* | [**UpdateOFACCompanyStatus**](docs/WatchmanApi.md#updateofaccompanystatus) | **Put** /companies/{companyID} | Update a Companies sanction status to always block or always allow transactions.
-*WatchmanApi* | [**UpdateOFACCustomerStatus**](docs/WatchmanApi.md#updateofaccustomerstatus) | **Put** /customers/{customerID} | Update a Customer&#39;s sanction status to always block or always allow transactions.
+*WatchmanApi* | [**UpdateOfacCompanyStatus**](docs/WatchmanApi.md#updateofaccompanystatus) | **Put** /ofac/companies/{companyID} | Update a Companies sanction status to always block or always allow transactions.
+*WatchmanApi* | [**UpdateOfacCustomerStatus**](docs/WatchmanApi.md#updateofaccustomerstatus) | **Put** /ofac/customers/{customerID} | Update a Customer&#39;s sanction status to always block or always allow transactions.
 
 
 ## Documentation For Models
 
- - [Alt](docs/Alt.md)
  - [Download](docs/Download.md)
  - [Dpl](docs/Dpl.md)
- - [EntityAddress](docs/EntityAddress.md)
  - [Error](docs/Error.md)
+ - [OfacAlt](docs/OfacAlt.md)
  - [OfacCompany](docs/OfacCompany.md)
  - [OfacCompanyStatus](docs/OfacCompanyStatus.md)
  - [OfacCustomer](docs/OfacCustomer.md)
  - [OfacCustomerStatus](docs/OfacCustomerStatus.md)
- - [Sdn](docs/Sdn.md)
+ - [OfacEntityAddress](docs/OfacEntityAddress.md)
+ - [OfacSdn](docs/OfacSdn.md)
+ - [OfacWatch](docs/OfacWatch.md)
+ - [OfacWatchRequest](docs/OfacWatchRequest.md)
  - [Search](docs/Search.md)
- - [UpdateCompanyStatus](docs/UpdateCompanyStatus.md)
- - [UpdateCustomerStatus](docs/UpdateCustomerStatus.md)
- - [Watch](docs/Watch.md)
- - [WatchRequest](docs/WatchRequest.md)
+ - [UpdateOfacCompanyStatus](docs/UpdateOfacCompanyStatus.md)
+ - [UpdateOfacCustomerStatus](docs/UpdateOfacCustomerStatus.md)
 
 
 ## Documentation For Authorization
