@@ -177,7 +177,7 @@ export const SDN = ({ data }) => {
               >
                 {data.sdnType || <C.Unknown>Unknown Type</C.Unknown>}
               </div>
-              <div>{data.program}</div>
+              <div>{data.ofacProgram}</div>
               <div>{matchToPercent(data.match)}</div>
             </div>
 

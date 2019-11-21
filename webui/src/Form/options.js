@@ -1,6 +1,6 @@
 import { useEffect, useReducer } from "react";
 import * as R from "ramda";
-import { getSDNTypes, getPrograms } from "api";
+import { getSDNTypes, getOFACPrograms } from "api";
 import { makeOptionData } from "utils";
 
 const allOption = { val: "", name: "All" };
@@ -28,4 +28,4 @@ const buildUseOptions = api => () => {
 };
 
 export const useTypeOptions = buildUseOptions(getSDNTypes);
-export const useProgramOptions = buildUseOptions(getPrograms);
+export const useProgramOptions = buildUseOptions(getOFACPrograms);

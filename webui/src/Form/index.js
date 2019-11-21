@@ -140,10 +140,10 @@ export default ({ onSubmit, onReset }) => {
               </Cell>
               <Cell>
                 <Select
-                  label="Program"
-                  id="program"
-                  value={values["program"]}
-                  onChange={handleChange("program")}
+                  label="OFAC Program"
+                  id="ofacProgram"
+                  value={values["ofacProgram"]}
+                  onChange={handleChange("ofacProgram")}
                   options={programOptionValues}
                 />
               </Cell>
