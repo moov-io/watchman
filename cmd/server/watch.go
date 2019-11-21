@@ -36,7 +36,7 @@ type watchRequest struct {
 }
 
 // watchRepository holds information about each company and/or customer that another service wants notifications
-// for every time we re-download OFAC data.
+// for every time we re-download data.
 type watchRepository interface {
 	// getWatchesCursor returns a watchCursor which traverses both customer and company watches
 	getWatchesCursor(logger log.Logger, batchSize int) *watchCursor

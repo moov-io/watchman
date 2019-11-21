@@ -1,8 +1,8 @@
 ## batchsearch
 
-`batchsearch` is a cli tool used for testing batches of names against Moov's OFAC service.
+`batchsearch` is a cli tool used for testing batches of names against Moov's Watchman service.
 
-With no arguments the contaier runs tests against the production API, but we strongly ask you run batchsearch against local instances of OFAC.
+With no arguments the contaier runs tests against the production API, but we strongly ask you run batchsearch against local instances of Watchman.
 
 ```
 $ go install ./cmd/batchsearch

@@ -24,13 +24,13 @@ We use GitHub to manage reviews of pull requests.
 
 Before starting please make sure you have Go setup and can build our projects from source.
 
-This project uses [Go Modules](https://github.com/golang/go/wiki/Modules) and thus requires Go 1.11+. You can download the source code and we offer [tagged and released versions](https://github.com/moov-io/ofac/releases) as well. We highly recommend you use a tagged release for production.
+This project uses [Go Modules](https://github.com/golang/go/wiki/Modules) and thus requires Go 1.11+. You can download the source code and we offer [tagged and released versions](https://github.com/moov-io/watchman/releases) as well. We highly recommend you use a tagged release for production.
 
 ```
 # Just pull down into the Go Module's cache, not the source code.
-$ go get -u github.com/moov-io/ofac
+$ go get -u github.com/moov-io/watchman
 
-$ go doc github.com/moov-io/ofac BatchHeader
+$ go doc github.com/moov-io/watchman/pkg/ofac SDN
 ```
 
 You can pull a working repository of our code code with git:
@@ -38,17 +38,17 @@ You can pull a working repository of our code code with git:
 ```
 $ midir -p moov/
 $ cd moov/
-$ git clone git@github.com:moov-io/ofac.git
+$ git clone git@github.com:moov-io/watchman.git
 ```
 
 We recommend using additional git remote's for pushing/pulling code. This allows you to use the same repository for submitting patches as tracking our code.
 
-First, [Fork our project](https://github.com/moov-io/ofac) somewhere and after that's done add the remote:
+First, [Fork our project](https://github.com/moov-io/watchman) somewhere and after that's done add the remote:
 
 ```
-$ cd moov/ofac # Whereever this project's source code is
+$ cd moov/watchman # Whereever this project's source code is
 
-$ git remote add $user git@github.com:$user/ofac.git # After
+$ git remote add $user git@github.com:$user/watchman.git # After
 
 $ git fetch $user
 ```
@@ -69,4 +69,4 @@ A good quality PR will have the following characteristics:
 
 A good PR should be able to flow through a peer review system easily and quickly.
 
-Our Build pipeline utilizes [Travis-CI](https://travis-ci.com/moov-io/ofac) to enforce many tools that you should add to your editor before issuing a pull request. Learn more about these tools on our [Go Report card](https://goreportcard.com/report/github.com/moov-io/ofac)
+Our Build pipeline utilizes [Travis-CI](https://travis-ci.com/moov-io/watchman) to enforce many tools that you should add to your editor before issuing a pull request. Learn more about these tools on our [Go Report card](https://goreportcard.com/report/github.com/moov-io/watchman)

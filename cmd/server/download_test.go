@@ -21,13 +21,13 @@ import (
 )
 
 func TestSearcher__refreshInterval(t *testing.T) {
-	if v := getOFACRefreshInterval(log.NewNopLogger(), ""); v.String() != "12h0m0s" {
+	if v := getDataRefreshInterval(log.NewNopLogger(), ""); v.String() != "12h0m0s" {
 		t.Errorf("Got %v", v)
 	}
-	if v := getOFACRefreshInterval(log.NewNopLogger(), "60s"); v.String() != "1m0s" {
+	if v := getDataRefreshInterval(log.NewNopLogger(), "60s"); v.String() != "1m0s" {
 		t.Errorf("Got %v", v)
 	}
-	if v := getOFACRefreshInterval(log.NewNopLogger(), "off"); v != 0*time.Second {
+	if v := getDataRefreshInterval(log.NewNopLogger(), "off"); v != 0*time.Second {
 		t.Errorf("got %v", v)
 	}
 

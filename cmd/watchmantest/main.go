@@ -44,7 +44,7 @@ import (
 var (
 	flagApiAddress = flag.String("address", internal.DefaultApiAddress, "Moov API address")
 	flagLocal      = flag.Bool("local", false, "Use local HTTP addresses")
-	flagWebhook    = flag.String("webhook", "https://moov.io/ofac", "Secure HTTP address for webhooks")
+	flagWebhook    = flag.String("webhook", "https://moov.io/watchman", "Secure HTTP address for webhooks")
 
 	flagRequestID = flag.String("request-id", "", "Override what is set for the X-Request-ID HTTP header")
 	flagUserID    = flag.String("user-id", "", "Override what is set for the X-User-ID HTTP header")

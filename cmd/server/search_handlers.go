@@ -23,7 +23,7 @@ import (
 
 var (
 	matchHist = prometheus.NewHistogramFrom(stdprometheus.HistogramOpts{
-		Name:    "ofac_match_percentages",
+		Name:    "match_percentages",
 		Help:    "Histogram representing the match percent of search routes",
 		Buckets: []float64{0.0, 0.5, 0.8, 0.9, 0.99},
 	}, []string{"type"})

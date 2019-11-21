@@ -23,17 +23,17 @@ import (
 )
 
 var (
-	lastOFACDataRefreshSuccess = prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "last_ofac_data_refresh_success",
-		Help: "Unix timestamp of when OFAC data was last refreshed successfully",
+	lastDataRefreshSuccess = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "last_data_refresh_success",
+		Help: "Unix timestamp of when data was last refreshed successfully",
 	}, nil)
 )
 
 func init() {
-	prometheus.MustRegister(lastOFACDataRefreshSuccess)
+	prometheus.MustRegister(lastDataRefreshSuccess)
 }
 
-// Download holds counts for each type of OFAC and BIS Denied Persons List data parsed from files and a
+// Download holds counts for each type of list data parsed from files and a
 // timestamp of when the download happened.
 type Download struct {
 	Timestamp     time.Time `json:"timestamp"`
@@ -51,7 +51,7 @@ type downloadStats struct {
 	RefreshedAt   time.Time `json:"timestamp"`
 }
 
-// periodicDataRefresh will forever block for interval's duration and then download and reparse the OFAC data.
+// periodicDataRefresh will forever block for interval's duration and then download and reparse the data.
 // Download stats are recorded as part of a successful re-download and parse.
 func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo downloadRepository, updates chan *downloadStats) {
 	if interval == 0*time.Second {
@@ -63,12 +63,12 @@ func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo down
 		stats, err := s.refreshData("")
 		if err != nil {
 			if s.logger != nil {
-				s.logger.Log("main", fmt.Sprintf("ERROR: refreshing OFAC and/or BIS DPL data: %v", err))
+				s.logger.Log("main", fmt.Sprintf("ERROR: refreshing data: %v", err))
 			}
 		} else {
 			downloadRepo.recordStats(stats)
 			if s.logger != nil {
-				s.logger.Log("main", fmt.Sprintf("OFAC and BIS DPL data refreshed - Addresses=%d AltNames=%d SDNs=%d DPL=%d", stats.Addresses, stats.Alts, stats.SDNs, stats.DeniedPersons))
+				s.logger.Log("main", fmt.Sprintf("data refreshed - Addresses=%d AltNames=%d SDNs=%d DPL=%d", stats.Addresses, stats.Alts, stats.SDNs, stats.DeniedPersons))
 			}
 			updates <- stats // send stats for re-search and watch notifications
 		}
@@ -115,11 +115,11 @@ func dplRecords(logger log.Logger, initialDir string) ([]*dpl.DPL, error) {
 	return dpl.Read(file)
 }
 
-// refreshData reaches out to the OFAC and BIS Denied Persons List websites to download the latest
-// files and then runs ofac.Reader to parse and index data for searches.
+// refreshData reaches out to the various websites to download the latest
+// files, runs each list's parser, and index data for searches.
 func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 	if s.logger != nil {
-		s.logger.Log("download", "Starting refresh of OFAC and DPL data")
+		s.logger.Log("download", "Starting refresh of data")
 	}
 
 	results, err := ofacRecords(s.logger, initialDir)
@@ -154,11 +154,11 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 	s.Unlock()
 
 	if s.logger != nil {
-		s.logger.Log("download", "Finished refresh of OFAC and BIS DPL data")
+		s.logger.Log("download", "Finished refresh of data")
 	}
 
 	// record successful data refresh
-	lastOFACDataRefreshSuccess.WithLabelValues().Set(float64(time.Now().Unix()))
+	lastDataRefreshSuccess.WithLabelValues().Set(float64(time.Now().Unix()))
 
 	return stats, nil
 }

@@ -1,6 +1,6 @@
 ## webui
 
-This project provides an interface to retrieve results from an OFAC service search endpoint.
+This project provides an interface to retrieve results from an Watchman service search endpoint.
 
 ### Available Scripts
 
@@ -18,17 +18,17 @@ Builds the application, producing bundles of the frontend assets, making the app
 
 #### `npm run server`
 
-Serves the bundled application and proxies api requests to the OFAC search endpoint.
+Serves the bundled application and proxies api requests to the Watchman search endpoint.
 
 By default, the server will start on port `3000`. Setting the `HTTP_BIND_ADDRESS` environment variable will override this value.
 
-#### `npm run ofac-server`
+#### `npm run watchman-server`
 
-Runs the latest docker image of the OFAC server as recommended in the main README. This is a convenience script and is not required if the server is already running.
+Runs the latest docker image of the Watchman server as recommended in the main README. This is a convenience script and is not required if the server is already running.
 
 ### Connecting the UI to the search endpoint
 
-By default, the api proxy will forward requests to [http://localhost:8084](http://localhost:8084). Setting the `OFAC_ENDPOINT` environment variable will override this value.
+By default, the api proxy will forward requests to [http://localhost:8084](http://localhost:8084). Setting the `WATCHMAN_ENDPOINT` environment variable will override this value.
 
 ### Learn More
 

@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestOFAC_addr(t *testing.T) {
+func TestWatchman_addr(t *testing.T) {
 	cases := []struct {
 		addr     string
 		local    bool
@@ -17,7 +17,7 @@ func TestOFAC_addr(t *testing.T) {
 		{"http://localhost:8084", false, "http://localhost:8084"},
 		{"http://localhost:8084/", false, "http://localhost:8084"},
 		{DefaultApiAddress, true, "http://localhost:8084"},
-		{DefaultApiAddress, false, DefaultApiAddress + "/v1/ofac"},
+		{DefaultApiAddress, false, DefaultApiAddress + "/v1/watchman"},
 	}
 	for i := range cases {
 		got := addr(cases[i].addr, cases[i].local)

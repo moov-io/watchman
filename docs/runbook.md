@@ -1,13 +1,13 @@
-### Change OFAC refresh frequency
+### Change Data refresh frequency
 
-`DATA_REFRESH_INTERVAL=1h0m0s` can be set to refresh OFAC data more or less often. The value should match Go's `time.ParseDuration` syntax.
+`DATA_REFRESH_INTERVAL=1h0m0s` can be set to refresh data more or less often. The value should match Go's `time.ParseDuration` syntax.
 
 ### Force data refresh
 
-Make a request to `/ofac/refresh` on the **admin** HTTP interface (`:9094` by default).
+Make a request to `/data/refresh` on the **admin** HTTP interface (`:9094` by default).
 
 ```
-$ curl http://localhost:9094/ofac/refresh
+$ curl http://localhost:9094/data/refresh
 {"SDNs":7724,"altNames":10107,"addresses":12145,"deniedPersons":548}
 ```
 
@@ -31,7 +31,7 @@ The URL can be changed, but must end with `dpl.txt` in the final URL path segmen
 
 ### Use local directory for initial data
 
-You can specify the `INITIAL_DATA_DIRECTORY=test/testdata/` environmental variable for OFAC to initially load data from a local filesystem. The data will be refreshed normally, but not downloaded on startup.
+You can specify the `INITIAL_DATA_DIRECTORY=test/testdata/` environmental variable for Watchman to initially load data from a local filesystem. The data will be refreshed normally, but not downloaded on startup.
 
 ### Change SQLite storage location
 
@@ -41,6 +41,6 @@ To change where the SQLite database is stored on disk set `SQLITE_DB_PATH` as an
 
 The size of each batch of watches to be processed (and their webhook called) can be adjusted with `WEBHOOK_BATCH_SIZE=100`. This is intended for performance improvements by using a larger batch size.
 
-### Alert on stale OFAC data
+### Alert on stale data
 
-We have an [example Prometheus alert](https://github.com/moov-io/infra/blob/07829c4842ef0c9d1824022e3e454dc7fb325469/lib/infra/14-prometheus-ofac-rules.yml#L9-L18) for being notified of stale OFAC data. This helps discover issues incase download or parsing fails.
+We have an [example Prometheus alert](https://github.com/moov-io/infra/blob/07829c4842ef0c9d1824022e3e454dc7fb325469/lib/infra/14-prometheus-watchman-rules.yml#L9-L18) for being notified of stale data. This helps discover issues incase download or parsing fails.

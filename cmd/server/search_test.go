@@ -223,7 +223,7 @@ func TestSearch_reorderSDNName(t *testing.T) {
 	}
 }
 
-// TestSearch_liveData will download the real OFAC data and run searches against the corpus.
+// TestSearch_liveData will download the real data and run searches against the corpus.
 // This test is designed to tweak match percents and results.
 func TestSearch_liveData(t *testing.T) {
 	if testing.Short() {

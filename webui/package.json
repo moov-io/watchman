@@ -1,5 +1,5 @@
 {
-  "name": "ofac-search-ui",
+  "name": "watchman-search-ui",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -14,7 +14,7 @@
   },
   "scripts": {
     "build": "react-scripts build",
-    "ofac-server": "docker run -p 8084:8084 -p 9094:9094 -it moov/ofac:latest",
+    "watchman-server": "docker run -p 8084:8084 -p 9094:9094 -it moov/watchman:latest",
     "server": "node server/index.js",
     "start": "react-scripts start",
     "test": "react-scripts test"

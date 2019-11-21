@@ -20,7 +20,7 @@ import (
 	"github.com/moov-io/base/admin"
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/base/http/bind"
-	"github.com/moov-io/ofac"
+	"github.com/moov-io/watchman"
 	"github.com/moov-io/watchman/internal/database"
 
 	"github.com/go-kit/kit/log"
@@ -35,7 +35,7 @@ var (
 
 	flagLogFormat = flag.String("log.format", "", "Format for log lines (Options: json, plain")
 
-	ofacDataRefreshInterval = 12 * time.Hour
+	dataRefreshInterval = 12 * time.Hour
 )
 
 func main() {
@@ -53,7 +53,7 @@ func main() {
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 	logger = log.With(logger, "caller", log.DefaultCaller)
 
-	logger.Log("startup", fmt.Sprintf("Starting ofac server version %s", ofac.Version))
+	logger.Log("startup", fmt.Sprintf("Starting watchman server version %s", watchman.Version))
 
 	// Channel for errors
 	errs := make(chan error)
@@ -135,16 +135,16 @@ func main() {
 
 	searcher := &searcher{logger: logger}
 
-	// Add manual OFAC data refresh endpoint
+	// Add manual data refresh endpoint
 	adminServer.AddHandler(manualRefreshPath, manualRefreshHandler(logger, searcher, downloadRepo))
 
-	// Initial download of OFAC data
+	// Initial download of data
 	if stats, err := searcher.refreshData(os.Getenv("INITIAL_DATA_DIRECTORY")); err != nil {
-		logger.Log("main", fmt.Sprintf("ERROR: failed to download/parse initial OFAC data: %v", err))
+		logger.Log("main", fmt.Sprintf("ERROR: failed to download/parse initial data: %v", err))
 		os.Exit(1)
 	} else {
 		downloadRepo.recordStats(stats)
-		logger.Log("main", fmt.Sprintf("OFAC data refreshed - Addresses=%d AltNames=%d SDNs=%d DeniedPersons=%d", stats.Addresses, stats.Alts, stats.SDNs, stats.DeniedPersons))
+		logger.Log("main", fmt.Sprintf("data refreshed - Addresses=%d AltNames=%d SDNs=%d DeniedPersons=%d", stats.Addresses, stats.Alts, stats.SDNs, stats.DeniedPersons))
 	}
 
 	// Setup Watch and Webhook database wrapper
@@ -161,8 +161,8 @@ func main() {
 
 	// Setup periodic download and re-search
 	updates := make(chan *downloadStats)
-	ofacDataRefreshInterval = getOFACRefreshInterval(logger, os.Getenv("DATA_REFRESH_INTERVAL"))
-	go searcher.periodicDataRefresh(ofacDataRefreshInterval, downloadRepo, updates)
+	dataRefreshInterval = getDataRefreshInterval(logger, os.Getenv("DATA_REFRESH_INTERVAL"))
+	go searcher.periodicDataRefresh(dataRefreshInterval, downloadRepo, updates)
 	go searcher.spawnResearching(logger, companyRepo, custRepo, watchRepo, webhookRepo, updates)
 
 	// Add searcher for HTTP routes
@@ -207,21 +207,21 @@ func addPingRoute(r *mux.Router) {
 	})
 }
 
-// getOFACRefreshInterval returns a time.Duration for how often OFAC should refresh data
+// getDataRefreshInterval returns a time.Duration for how often OFAC should refresh data
 //
 // env is the value from an environmental variable
-func getOFACRefreshInterval(logger log.Logger, env string) time.Duration {
+func getDataRefreshInterval(logger log.Logger, env string) time.Duration {
 	if env != "" {
 		if strings.EqualFold(env, "off") {
 			return 0 * time.Second
 		}
 		if dur, _ := time.ParseDuration(env); dur > 0 {
-			logger.Log("main", fmt.Sprintf("Setting OFAC data refresh interval to %v", dur))
+			logger.Log("main", fmt.Sprintf("Setting data refresh interval to %v", dur))
 			return dur
 		}
 	}
-	logger.Log("main", fmt.Sprintf("Setting OFAC data refresh interval to %v (default)", ofacDataRefreshInterval))
-	return ofacDataRefreshInterval
+	logger.Log("main", fmt.Sprintf("Setting data refresh interval to %v (default)", dataRefreshInterval))
+	return dataRefreshInterval
 }
 
 func setupWebui(logger log.Logger, r *mux.Router, basePath string) {

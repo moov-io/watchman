@@ -1,7 +1,7 @@
 version: '3'
 services:
-  ofac:
-    image: moov/ofac:latest
+  watchman:
+    image: moov/watchman:latest
     ports:
       - "8084:8084"
       - "9094:9094"

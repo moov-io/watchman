@@ -26,13 +26,13 @@ func addr(address string, local bool) string {
 		if address != DefaultApiAddress {
 			return strings.TrimSuffix(address, "/")
 		} else {
-			return "http://localhost" + bind.HTTP("ofac")
+			return "http://localhost" + bind.HTTP("watchman")
 		}
 	} else {
 		address = strings.TrimSuffix(address, "/")
 		// -address isn't changed, so assume Moov's API (needs extra path added)
 		if address == DefaultApiAddress {
-			return address + "/v1/ofac"
+			return address + "/v1/watchman"
 		}
 		return address
 	}

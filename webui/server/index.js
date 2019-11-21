@@ -16,7 +16,7 @@ app.use(
 app.use(
   "/api",
   proxy({
-    target: process.env.OFAC_ENDPOINT || "http://localhost:8084",
+    target: process.env.WATCHMAN_ENDPOINT || "http://localhost:8084",
     pathRewrite: { "^/api": "" },
     changeOrigin: true
   })

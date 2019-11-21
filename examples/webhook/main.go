@@ -14,7 +14,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/moov-io/ofac"
+	"github.com/moov-io/watchman"
 
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
@@ -31,7 +31,7 @@ func main() {
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 	logger = log.With(logger, "caller", log.DefaultCaller)
 
-	logger.Log("startup", fmt.Sprintf("Starting moov/ofac-webhook-example:%s", ofac.Version))
+	logger.Log("startup", fmt.Sprintf("Starting moov/watchman-webhook-example:%s", watchman.Version))
 
 	// Listen for application termination.
 	errs := make(chan error)

@@ -89,6 +89,8 @@ github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742/go.mod h1:bx2lN
 github.com/modern-go/reflect2 v1.0.1/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
 github.com/moov-io/base v0.10.0 h1:9A/N0E+oB5nqxTMWszN06Az1PRAkW9EgQ4UQ/94S1IU=
 github.com/moov-io/base v0.10.0/go.mod h1:pPu/TAc9PkaaegbREVEeDHsGqyAlvji9vqTuARuAnd0=
+github.com/moov-io/base v0.11.0-rc1.0.20191121181647-cd3e7a9609db h1:O6qBkf9lubIX+/7WboVLEXYKXKPx8soVRjdtuXiDDss=
+github.com/moov-io/base v0.11.0-rc1.0.20191121181647-cd3e7a9609db/go.mod h1:oXZRZBQiO7HX+Wc7Q3jJHLfkDPxrMXRbgYhURQqfXD8=
 github.com/moov-io/ofac v0.12.0 h1:wRAepVJDc4iMdZy41mMKTD/YxpfhkzSu0Mi9qoxJ2E8=
 github.com/moov-io/ofac v0.12.0/go.mod h1:WEJCy1cN57rcaIBO63kHQyu/1eSEJNN7Rh1lSRgJ6s0=
 github.com/mwitkow/go-conntrack v0.0.0-20161129095857-cc309e4a2223/go.mod h1:qRWi+5nqEBWmkhHvq77mSJWrCKwh8bxhgT7d/eI7P4U=

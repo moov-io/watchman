@@ -83,7 +83,7 @@ $ go run ./cmd/server/ # Load http://localhost:8084 in a web browser
 
 | Environmental Variable | Description | Default |
 |-----|-----|-----|
-| `DATA_REFRESH_INTERVAL` | Interval for OFAC data redownload and reparse. `off` disables this refreshing. | 12h | # TODO(adam): was renamed
+| `DATA_REFRESH_INTERVAL` | Interval for data redownload and reparse. `off` disables this refreshing. | 12h | # TODO(adam): was renamed
 | `INITIAL_DATA_DIRECTORY` | Directory filepath with initial files to use instead of downloading. Periodic downloads will replace the initial files. | Empty |
 | `WEBHOOK_BATCH_SIZE` | How many watches to read from database per batch of async searches. | 100 |
 | `LOG_FORMAT` | Format for logging lines to be written as. | Options: `json`, `plain` - Default: `plain` |
@@ -125,7 +125,7 @@ Refer to the sqlite driver documentation for [connection parameters](https://git
 
 ### Features
 
-- Download OFAC and BIS Denied Persons List (DPL) data on startup
+- Download OFAC, BIS Denied Persons List (DPL), and various other data sources on startup
   - Admin endpoint to [manually refresh OFAC and DPL data](docs/runbook.md#force-data-refresh)
 - Index data for searches
 - Async searches and notifications (webhooks)
@@ -151,8 +151,11 @@ Moov Sanction Search supports sending a webhook periodically with a free-form na
 ##### Prometheus Metrics
 
 - `http_response_duration_seconds`: A Histogram of HTTP response timings
-- `ofac_match_percentages` A Histogram which holds the match percentages with a label (`type`) of searches
+- `last_data_refresh_success`: Unix timestamp of when data was last refreshed successfully
+- `match_percentages` A Histogram which holds the match percentages with a label (`type`) of searches
    - `type`: Can be address, q, remarksID, name, altName
+- `mysql_connections`: How many MySQL connections and what status they're in.
+- `sqlite_connections`: How many sqlite connections and what status they're in.
 
 ## Getting Help
 

@@ -35,7 +35,7 @@ var (
 )
 
 // searcher holds precomputed data for each object available to search against.
-// This data comes from various US Federal agencies, such as: OFAC and BIS
+// This data comes from various US and EU Federal agencies
 type searcher struct {
 	SDNs            []*SDN
 	Addresses       []*Address
