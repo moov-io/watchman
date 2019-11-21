@@ -2,16 +2,16 @@
 // Use of this source code is governed by an Apache License
 // license that can be found in the LICENSE file.
 
-// sanctiontest is a cli tool used for testing the Moov Sanction Search service.
+// watchmantest is a cli tool used for testing the Moov Sanction Search service.
 //
 // With no arguments the contaier runs tests against the production API.
 // This tool requires an OAuth token provided by github.com/moov-io/api written
 // to the local disk, but running apitest first will write this token.
 //
 // This tool can be used to query with custom searches:
-//  $ go install ./cmd/sanctiontest
-//  $ sanctiontest -local moh
-//  2019/02/14 23:37:44.432334 main.go:44: Starting moov/sanctiontest v0.4.1-dev
+//  $ go install ./cmd/watchmantest
+//  $ watchmantest -local moh
+//  2019/02/14 23:37:44.432334 main.go:44: Starting moov/watchmantest v0.4.1-dev
 //  2019/02/14 23:37:44.432366 main.go:60: [INFO] using http://localhost:8084 for address
 //  2019/02/14 23:37:44.434534 main.go:76: [SUCCESS] ping
 //  2019/02/14 23:37:44.435204 main.go:83: [SUCCESS] last download was: 3h45m58s ago
@@ -20,7 +20,7 @@
 //  2019/02/14 23:37:44.445473 main.go:118: [SUCCESS] alt name search passed
 //  2019/02/14 23:37:44.449367 main.go:123: [SUCCESS] address search passed
 //
-// sanctiontest is not a stable tool. Please contact Moov developers if you intend to use this tool,
+// watchmantest is not a stable tool. Please contact Moov developers if you intend to use this tool,
 // otherwise we might change the tool (or remove it) without notice.
 package main
 
@@ -34,9 +34,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/moov-io/sanctionsearch"
-	moov "github.com/moov-io/sanctionsearch/client"
-	"github.com/moov-io/sanctionsearch/cmd/internal"
+	"github.com/moov-io/watchman"
+	moov "github.com/moov-io/watchman/client"
+	"github.com/moov-io/watchman/cmd/internal"
 
 	"github.com/antihax/optional"
 )
@@ -54,7 +54,7 @@ func main() {
 	flag.Parse()
 
 	log.SetFlags(log.Ldate | log.Ltime | log.LUTC | log.Lmicroseconds | log.Lshortfile)
-	log.Printf("Starting moov/sanctiontest %s", sanctionsearch.Version)
+	log.Printf("Starting moov/watchmantest %s", watchman.Version)
 
 	conf := internal.Config(*flagApiAddress, *flagLocal)
 	log.Printf("[INFO] using %s for address", conf.BasePath)

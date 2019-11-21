@@ -14,8 +14,8 @@ import (
 	"time"
 
 	moovhttp "github.com/moov-io/base/http"
-	"github.com/moov-io/sanctionsearch/internal/database"
-	"github.com/moov-io/sanctionsearch/pkg/ofac"
+	"github.com/moov-io/watchman/internal/database"
+	"github.com/moov-io/watchman/pkg/ofac"
 
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"

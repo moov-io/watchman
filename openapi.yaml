@@ -1,10 +1,10 @@
 openapi: 3.0.2
 info:
-  description: OFAC (Office of Foreign Assets Control) API is designed to facilitate the enforcement of US government economic sanctions programs required by federal law. This project implements a modern REST HTTP API for companies and organizations to obey federal law and use OFAC data in their applications.
+  description: TODO(adam): rewrite -- Moov Watchman (Office of Foreign Assets Control) API is designed to facilitate the enforcement of US government economic sanctions programs required by federal law. This project implements a modern REST HTTP API for companies and organizations to obey federal law and use OFAC data in their applications.
   version: v1
   title: OFAC API
   contact:
-    url: https://github.com/moov-io/ofac
+    url: https://github.com/moov-io/watchman
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -14,14 +14,13 @@ servers:
     description: Local development
 
 tags:
-  - name: OFAC
+  - name: Watchman
     description: Endpoints for searching individuals and corporations which US government enforces economic sanctions against and adding webhook notifications for search criteria.
 
 paths:
   /ping:
     get:
-      tags:
-        - OFAC
+      tags: ["Watchman"]
       summary: Ping the OFAC service to check if running
       operationId: ping
       responses:
@@ -31,8 +30,7 @@ paths:
   # Company Endpoints
   /companies/{companyID}:
     get:
-      tags:
-        - OFAC
+      tags: ["Watchman"]
       summary: Get information about a company, trust or organization such as addresses, alternate names, and remarks.
       operationId: getOFACCompany
       parameters:
@@ -62,8 +60,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OFACCompany'
     put:
-      tags:
-        - OFAC
+      tags: ["Watchman"]
       summary: Update a Companies sanction status to always block or always allow transactions.
       operationId: updateOFACCompanyStatus
       parameters:
@@ -96,8 +93,7 @@ paths:
           description: Company status updated
   /companies/{companyID}/watch:
     post:
-      tags:
-        - OFAC
+      tags: ["Watchman"]
       summary: Add OFAC watch on a Company
       operationId: addOFACCompanyWatch
       parameters:
@@ -136,8 +132,7 @@ paths:
           description: Company not found
   /companies/{companyID}/watch/{watchID}:
     delete:
-      tags:
-        - OFAC
+      tags: ["Watchman"]
       summary: Remove company watch
       operationId: removeOFACCompanyWatch
       parameters:
@@ -171,8 +166,7 @@ paths:
           description: Company watch removed
   /companies/watch:
     post:
-      tags:
-        - OFAC
+      tags: ["Watchman"]
       summary: Add company watch by name. The match percentage will be included in the webhook's JSON payload.
       operationId: addOFACCompanyNameWatch
       parameters:
@@ -209,8 +203,7 @@ paths:
                 $ref: '#/components/schemas/Watch'
   /companies/watch/{watchID}:
     delete:
-      tags:
-        - OFAC
+      tags: ["Watchman"]
       summary: Remove a Company name watch
       operationId: removeOFACCompanyNameWatch
       parameters:
@@ -246,8 +239,7 @@ paths:
   # Customer Endpoints
   /customers/{customerID}:
     get:
-      tags:
-        - OFAC
+      tags: ["Watchman"]
       summary: Get information about a customer, addresses, alternate names, and their SDN metadata.
       operationId: getOFACCustomer
       parameters:
@@ -277,8 +269,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OFACCustomer'
     put:
-      tags:
-        - OFAC
+      tags: ["Watchman"]
       summary: Update a Customer's sanction status to always block or always allow transactions.
       operationId: updateOFACCustomerStatus
       parameters:
@@ -311,8 +302,7 @@ paths:
           description: Customer status updated
   /customers/{customerID}/watch:
     post:
-      tags:
-        - OFAC
+      tags: ["Watchman"]
       summary: Add OFAC watch on a Customer
       operationId: addOFACCustomerWatch
       parameters:
@@ -351,8 +341,7 @@ paths:
           description: Customer not found
   /customers/{customerID}/watch/{watchID}:
     delete:
-      tags:
-        - OFAC
+      tags: ["Watchman"]
       summary: Remove customer watch
       operationId: removeOFACCustomerWatch
       parameters:
@@ -386,8 +375,7 @@ paths:
           description: Customer watch removed
   /customers/watch:
     post:
-      tags:
-        - OFAC
+      tags: ["Watchman"]
       summary: Add customer watch by name. The match percentage will be included in the webhook's JSON payload.
       operationId: addOFACCustomerNameWatch
       parameters:
@@ -424,8 +412,7 @@ paths:
                 $ref: '#/components/schemas/Watch'
   /customers/watch/{watchID}:
     delete:
-      tags:
-        - OFAC
+      tags: ["Watchman"]
       summary: Remove a Customer name watch
       operationId: removeOFACCustomerNameWatch
       parameters:
@@ -461,8 +448,7 @@ paths:
   # SDN Endpoints
   /sdn/{sdnID}:
     get:
-      tags:
-        - OFAC
+      tags: ["Watchman"]
       summary: Specially designated national
       operationId: getSDN
       parameters:
@@ -493,8 +479,7 @@ paths:
                 $ref: '#/components/schemas/SDN'
   /sdn/{sdnID}/alts:
     get:
-      tags:
-        - OFAC
+      tags: ["Watchman"]
       summary: Get alternate names for a given SDN
       operationId: getSDNAltNames
       parameters:
@@ -525,8 +510,7 @@ paths:
                 $ref: '#/components/schemas/SDNAltNames'
   /sdn/{sdnID}/addresses:
     get:
-      tags:
-        - OFAC
+      tags: ["Watchman"]
       summary: Get addresses for a given SDN
       operationId: getSDNAddresses
       parameters:
@@ -558,8 +542,7 @@ paths:
   # Search Endpoint
   /search:
     get:
-      tags:
-        - OFAC
+      tags: ["Watchman"]
       summary: Search SDN names and metadata
       operationId: search
       parameters:
@@ -663,8 +646,7 @@ paths:
   # Downloads endpoint
   /downloads:
     get:
-      tags:
-        - OFAC
+      tags: ["Watchman"]
       summary: Return list of recent downloads of OFAC data
       operationId: getLatestDownloads
       parameters:

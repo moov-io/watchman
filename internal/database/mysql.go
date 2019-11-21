@@ -69,6 +69,10 @@ var (
 			"add__denied_persons__to__ofac_download_stats",
 			"alter table ofac_download_stats add column denied_persons integer not null default 0;",
 		),
+		execsql(
+			"rename_ofac_download_stats",
+			"rename table ofac_download_stats to download_stats",
+		),
 	)
 )
 
@@ -171,14 +175,14 @@ func CreateTestMySQLDB(t *testing.T) *TestMySQLDB {
 			"MYSQL_USER=moov",
 			"MYSQL_PASSWORD=secret",
 			"MYSQL_ROOT_PASSWORD=secret",
-			"MYSQL_DATABASE=ofac",
+			"MYSQL_DATABASE=watchman",
 		},
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 	err = pool.Retry(func() error {
-		db, err := sql.Open("mysql", fmt.Sprintf("moov:secret@tcp(localhost:%s)/ofac", resource.GetPort("3306/tcp")))
+		db, err := sql.Open("mysql", fmt.Sprintf("moov:secret@tcp(localhost:%s)/watchman", resource.GetPort("3306/tcp")))
 		if err != nil {
 			return err
 		}
@@ -193,7 +197,7 @@ func CreateTestMySQLDB(t *testing.T) *TestMySQLDB {
 	logger := log.NewNopLogger()
 	address := fmt.Sprintf("tcp(localhost:%s)", resource.GetPort("3306/tcp"))
 
-	db, err := mysqlConnection(logger, "moov", "secret", address, "ofac").Connect()
+	db, err := mysqlConnection(logger, "moov", "secret", address, "watchman").Connect()
 	if err != nil {
 		t.Fatal(err)
 	}

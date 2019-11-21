@@ -3,22 +3,22 @@ VERSION := $(shell grep -Eo '(v[0-9]+[\.][0-9]+[\.][0-9]+(-[a-zA-Z0-9]*)?)' vers
 
 .PHONY: build build-server build-examples docker release check
 
-build: check build-server build-batchsearch build-sanctiontest build-examples
+build: check build-server build-batchsearch build-watchmantest build-examples
 	cd webui/ && npm install && npm run build && cd ../
 
 build-server:
-	CGO_ENABLED=1 go build -o ./bin/server github.com/moov-io/sanctionsearch/cmd/server
+	CGO_ENABLED=1 go build -o ./bin/server github.com/moov-io/watchman/cmd/server
 
 build-batchsearch:
-	CGO_ENABLED=0 go build -o ./bin/batchsearch github.com/moov-io/sanctionsearch/cmd/batchsearch
+	CGO_ENABLED=0 go build -o ./bin/batchsearch github.com/moov-io/watchman/cmd/batchsearch
 
-build-sanctiontest:
-	CGO_ENABLED=0 go build -o ./bin/sanctiontest github.com/moov-io/sanctionsearch/cmd/sanctiontest
+build-watchmantest:
+	CGO_ENABLED=0 go build -o ./bin/watchmantest github.com/moov-io/watchman/cmd/watchmantest
 
 build-examples: build-webhook-example
 
 build-webhook-example:
-	CGO_ENABLED=0 go build -o ./bin/webhook-example github.com/moov-io/sanctionsearch/examples/webhook
+	CGO_ENABLED=0 go build -o ./bin/webhook-example github.com/moov-io/watchman/examples/webhook
 
 check:
 	go fmt ./...
@@ -32,7 +32,7 @@ client:
 	OPENAPI_GENERATOR_VERSION=4.2.0 ./openapi-generator generate -i openapi.yaml -g go -o ./client
 	rm -f client/go.mod client/go.sum
 	go fmt ./...
-	go build github.com/moov-io/sanctionsearch/client
+	go build github.com/moov-io/watchman/client
 	go test ./client
 
 .PHONY: clean
@@ -43,21 +43,21 @@ clean:
 
 dist: clean client build
 ifeq ($(OS),Windows_NT)
-	CGO_ENABLED=1 GOOS=windows go build -o bin/sanctionsearch-windows-amd64.exe github.com/moov-io/sanctionsearch/cmd/server
+	CGO_ENABLED=1 GOOS=windows go build -o bin/watchman-windows-amd64.exe github.com/moov-io/watchman/cmd/server
 else
-	CGO_ENABLED=1 GOOS=$(PLATFORM) go build -o bin/sanctionsearch-$(PLATFORM)-amd64 github.com/moov-io/sanctionsearch/cmd/server
+	CGO_ENABLED=1 GOOS=$(PLATFORM) go build -o bin/watchman-$(PLATFORM)-amd64 github.com/moov-io/watchman/cmd/server
 endif
 
 docker:
 # main server Docker image
-	docker build --pull -t moov/sanctionsearch:$(VERSION) -f Dockerfile .
-	docker tag moov/sanctionsearch:$(VERSION) moov/sanctionsearch:latest
-# sanctiontest image
-	docker build --pull -t moov/sanctiontest:$(VERSION) -f ./cmd/sanctiontest/Dockerfile .
-	docker tag moov/sanctiontest:$(VERSION) moov/sanctiontest:latest
+	docker build --pull -t moov/watchman:$(VERSION) -f Dockerfile .
+	docker tag moov/watchman:$(VERSION) moov/watchman:latest
+# watchmantest image
+	docker build --pull -t moov/watchmantest:$(VERSION) -f ./cmd/watchmantest/Dockerfile .
+	docker tag moov/watchmantest:$(VERSION) moov/watchmantest:latest
 # webhook example
-	docker build --pull -t moov/sanctionsearch-webhook-example:$(VERSION) -f ./examples/webhook/Dockerfile .
-	docker tag moov/sanctionsearch-webhook-example:$(VERSION) moov/sanctionsearch-webhook-example:latest
+	docker build --pull -t moov/watchman-webhook-example:$(VERSION) -f ./examples/webhook/Dockerfile .
+	docker tag moov/watchman-webhook-example:$(VERSION) moov/watchman-webhook-example:latest
 
 release: docker AUTHORS
 	go vet ./...
@@ -65,10 +65,10 @@ release: docker AUTHORS
 	git tag -f $(VERSION)
 
 release-push:
-	docker push moov/sanctionsearch:$(VERSION)
-	docker push moov/sanctionsearch:latest
+	docker push moov/watchman:$(VERSION)
+	docker push moov/watchman:latest
 	docker push moov/batchsearch:$(VERSION)
-	docker push moov/sanctionsearch-webhook-example:$(VERSION)
+	docker push moov/watchman-webhook-example:$(VERSION)
 
 .PHONY: cover-test cover-web
 cover-test:

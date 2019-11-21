@@ -1,13 +1,13 @@
-moov-io/sanctionsearch
+moov-io/watchman
 ===
 
-[![GoDoc](https://godoc.org/github.com/moov-io/sanctionsearch?status.svg)](https://godoc.org/github.com/moov-io/sanctionsearch)
-[![Build Status](https://travis-ci.com/moov-io/sanctionsearch.svg?branch=master)](https://travis-ci.com/moov-io/sanctionsearch)
-[![Coverage Status](https://codecov.io/gh/moov-io/sanctionsearch/branch/master/graph/badge.svg)](https://codecov.io/gh/moov-io/sanctionsearch)
-[![Go Report Card](https://goreportcard.com/badge/github.com/moov-io/sanctionsearch)](https://goreportcard.com/report/github.com/moov-io/sanctionsearch)
-[![Apache 2 licensed](https://img.shields.io/badge/license-Apache2-blue.svg)](https://raw.githubusercontent.com/moov-io/sanctionsearch/master/LICENSE)
+[![GoDoc](https://godoc.org/github.com/moov-io/watchman?status.svg)](https://godoc.org/github.com/moov-io/watchman)
+[![Build Status](https://travis-ci.com/moov-io/watchman.svg?branch=master)](https://travis-ci.com/moov-io/watchman)
+[![Coverage Status](https://codecov.io/gh/moov-io/watchman/branch/master/graph/badge.svg)](https://codecov.io/gh/moov-io/watchman)
+[![Go Report Card](https://goreportcard.com/badge/github.com/moov-io/watchman)](https://goreportcard.com/report/github.com/moov-io/watchman)
+[![Apache 2 licensed](https://img.shields.io/badge/license-Apache2-blue.svg)](https://raw.githubusercontent.com/moov-io/watchman/master/LICENSE)
 
-Moov Sanction Search is an HTTP API and Go library to download, parse and offer search functions over numerous trade sanction lists from the United States and European Union Goernments or agencies. Also included is a web UI and async webhook notification service to initiate processes on remote systems.
+Moov Watchman is an HTTP API and Go library to download, parse and offer search functions over numerous trade sanction lists from the United States, European Union governments, agencies, and non profits for complying with regional laws. Also included is a web UI and async webhook notification service to initiate processes on remote systems.
 
 Lists included in search are:
 
@@ -17,19 +17,19 @@ Lists included in search are:
 
 All United States or European Union companies are required to comply with various regulations and sanction lists (such as the US Patriot Act requiring compliance with the BIS Denied Person's List). Moov's primary usage for this project is with ACH origination in our [paygate](https://github.com/moov-io/paygate) project.
 
-To get started using sanctionsearch download [the latest release](https://github.com/moov-io/sanctionsearch/releases/latest) or our [Docker image](https://hub.docker.com/r/moov/sanctionsearch/tags). We also have a [demo instance](https://moov.io/sanctionsearch/) as part of Moov's demo environment.
+To get started using watchman download [the latest release](https://github.com/moov-io/watchman/releases/latest) or our [Docker image](https://hub.docker.com/r/moov/watchman/tags). We also have a [demo instance](https://moov.io/watchman/) as part of Moov's demo environment.
 
 ```
 # Run as a binary
-$ wget https://github.com/moov-io/sanctionsearch/releases/download/v0.12.0/sanctionsearch-darwin-amd64
-$ chmod +x sanctionsearch-darwin-amd64
-$ ./sanctionsearch-darwin-amd64
-ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting sanctionsearch server version v0.12.0"
+$ wget https://github.com/moov-io/watchman/releases/download/v0.12.0/watchman-darwin-amd64
+$ chmod +x watchman-darwin-amd64
+$ ./watchman-darwin-amd64
+ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting watchman server version v0.12.0"
 ...
 
 # Run as a Docker image
-$ docker run -p 8084:8084 -p 9094:9094 -it moov/sanctionsearch:latest
-ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting sanctionsearch server version v0.12.0"
+$ docker run -p 8084:8084 -p 9094:9094 -it moov/watchman:latest
+ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting watchman server version v0.12.0"
 ...
 
 # Perform a basic search
@@ -57,9 +57,9 @@ $ curl -s localhost:8084/search?name=...
 }
 ```
 
-We offer [hosted api docs as part of Moov's tools](https://api.moov.io/#tag/Sanctions) and an [OpenAPI specification](https://github.com/moov-io/sanctionsearch/blob/master/openapi.yaml) for use with generated clients.
+We offer [hosted api docs as part of Moov's tools](https://api.moov.io/#tag/Sanctions) and an [OpenAPI specification](https://github.com/moov-io/watchman/blob/master/openapi.yaml) for use with generated clients.
 
-Docs: [docs.moov.io](https://docs.moov.io/sanctionsearch/) | [api docs](https://api.moov.io/apps/sanctionsearch/)
+Docs: [docs.moov.io](https://docs.moov.io/watchman/) | [api docs](https://api.moov.io/apps/watchman/)
 
 ### Web UI
 
@@ -70,7 +70,7 @@ Moov Sanction Search ships with a web interface for easier access searching the 
 ```
 $ make
 ...
-CGO_ENABLED=1 go build -o ./bin/server github.com/moov-io/sanctionsearch/cmd/server
+CGO_ENABLED=1 go build -o ./bin/server github.com/moov-io/watchman/cmd/server
 ...
 npm run build
 ...
@@ -84,8 +84,6 @@ $ go run ./cmd/server/ # Load http://localhost:8084 in a web browser
 | Environmental Variable | Description | Default |
 |-----|-----|-----|
 | `DATA_REFRESH_INTERVAL` | Interval for OFAC data redownload and reparse. `off` disables this refreshing. | 12h | # TODO(adam): was renamed
-| `OFAC_DOWNLOAD_TEMPLATE` | HTTP address for downloading raw OFAC files. | (OFAC website) |
-| `DPL_DOWNLOAD_TEMPLATE` | HTTP address for downloading the DPL | (BIS website) |
 | `INITIAL_DATA_DIRECTORY` | Directory filepath with initial files to use instead of downloading. Periodic downloads will replace the initial files. | Empty |
 | `WEBHOOK_BATCH_SIZE` | How many watches to read from database per batch of async searches. | 100 |
 | `LOG_FORMAT` | Format for logging lines to be written as. | Options: `json`, `plain` - Default: `plain` |
@@ -96,6 +94,13 @@ $ go run ./cmd/server/ # Load http://localhost:8084 in a web browser
 | `HTTPS_KEY_FILE`  | Filepath of a private key matching the leaf certificate from `HTTPS_CERT_FILE`. | Empty |
 | `DATABASE_TYPE` | Which database option to use (Options: `sqlite`, `mysql`) | Default: `sqlite` |
 | `WEB_ROOT` | Directory to serve web UI from | Default: `webui/` |
+
+### List Configurations
+
+| Environmental Variable | Description | Default |
+|-----|-----|-----|
+| `OFAC_DOWNLOAD_TEMPLATE` | HTTP address for downloading raw OFAC files. | (OFAC website) |
+| `DPL_DOWNLOAD_TEMPLATE` | HTTP address for downloading the DPL | (BIS website) |
 
 #### Storage
 
@@ -114,7 +119,7 @@ Refer to the mysql driver documentation for [connection parameters](https://gith
 
 ##### SQLite
 
-- `SQLITE_DB_PATH`: Local filepath location for the paygate SQLite database. (Default: `sanctionsearch.db`)
+- `SQLITE_DB_PATH`: Local filepath location for the paygate SQLite database. (Default: `watchman.db`)
 
 Refer to the sqlite driver documentation for [connection parameters](https://github.com/mattn/go-sqlite3#connection-string).
 
@@ -129,7 +134,7 @@ Refer to the sqlite driver documentation for [connection parameters](https://git
 
 #### Webhook Notifications
 
-When SancionSearch sends a [webhook](https://en.wikipedia.org/wiki/Webhook) to your application the body will contain a JSON representation of the [Company](https://godoc.org/github.com/moov-io/sanctionsearch/client#Company) or [Customer](https://godoc.org/github.com/moov-io/sanctionsearch/client#Customer) model as the body to a POST request. You can see an [example in Go](examples/webhook/webhook.go).
+When SancionSearch sends a [webhook](https://en.wikipedia.org/wiki/Webhook) to your application the body will contain a JSON representation of the [Company](https://godoc.org/github.com/moov-io/watchman/client#Company) or [Customer](https://godoc.org/github.com/moov-io/watchman/client#Customer) model as the body to a POST request. You can see an [example in Go](examples/webhook/webhook.go).
 
 An `Authorization` header will also be sent with the `authToken` provided when setting up the watch. Clients should verify this token to ensure authenticated communicated.
 

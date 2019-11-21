@@ -5,7 +5,7 @@
 // batchsearch is a cli tool used for testing batches of names against Moov's sanctions service.
 //
 // With no arguments the contaier runs tests against the production API, but we strongly ask you
-// run batchsearch against local instances of SanctionSearch.
+// run batchsearch against local instances of Watchman.
 //
 //  $ go install ./cmd/batchsearch
 //  $ batchsearch -allowed-file users.txt -blocked-file criminals.txt -threshold 0.99 -sdn-type individual -v
@@ -36,11 +36,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/antihax/optional"
-	"github.com/moov-io/sanctionsearch"
-	moov "github.com/moov-io/sanctionsearch/client"
-	"github.com/moov-io/sanctionsearch/cmd/internal"
+	"github.com/moov-io/watchman"
+	moov "github.com/moov-io/watchman/client"
+	"github.com/moov-io/watchman/cmd/internal"
 
+	"github.com/antihax/optional"
 	"go4.org/syncutil"
 )
 
@@ -67,7 +67,7 @@ func main() {
 	flag.Parse()
 
 	log.SetFlags(log.Ldate | log.Ltime | log.LUTC | log.Lmicroseconds | log.Lshortfile)
-	log.Printf("Starting moov/batchsearch %s", sanctionsearch.Version)
+	log.Printf("Starting moov/batchsearch %s", watchman.Version)
 
 	conf := internal.Config(*flagApiAddress, *flagLocal)
 	log.Printf("[INFO] using %s for address", conf.BasePath)

@@ -1,5 +1,5 @@
 FROM golang:1.13-buster as backend
-WORKDIR /go/src/github.com/moov-io/sanctionsearch
+WORKDIR /go/src/github.com/moov-io/watchman
 RUN apt-get update && apt-get install make gcc g++
 COPY . .
 ENV GO111MODULE=on
@@ -7,17 +7,17 @@ RUN go mod download
 RUN make build-server
 
 FROM node:12-buster as frontend
-COPY webui/ /sanctionsearch/
-WORKDIR /sanctionsearch/
+COPY webui/ /watchman/
+WORKDIR /watchman/
 RUN npm install
 RUN npm run build
 
 FROM debian:10
 RUN apt-get update && apt-get install -y ca-certificates
-COPY --from=backend /go/src/github.com/moov-io/sanctionsearch/bin/server /bin/server
+COPY --from=backend /go/src/github.com/moov-io/watchman/bin/server /bin/server
 
-COPY --from=frontend /sanctionsearch/build/ /sanctionsearch/
-ENV WEB_ROOT=/sanctionsearch/
+COPY --from=frontend /watchman/build/ /watchman/
+ENV WEB_ROOT=/watchman/
 
 # USER moov # TODO(adam): non-root users
 

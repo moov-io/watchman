@@ -8,7 +8,7 @@ import (
 	"context"
 	"fmt"
 
-	moov "github.com/moov-io/sanctionsearch/client"
+	moov "github.com/moov-io/watchman/client"
 
 	"github.com/antihax/optional"
 )

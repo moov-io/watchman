@@ -14,8 +14,8 @@ import (
 	"time"
 
 	moovhttp "github.com/moov-io/base/http"
-	"github.com/moov-io/sanctionsearch/pkg/dpl"
-	"github.com/moov-io/sanctionsearch/pkg/ofac"
+	"github.com/moov-io/watchman/pkg/dpl"
+	"github.com/moov-io/watchman/pkg/ofac"
 
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
@@ -231,7 +231,7 @@ func (r *sqliteDownloadRepository) recordStats(stats *downloadStats) error {
 		return errors.New("recordStats: nil downloadStats")
 	}
 
-	query := `insert into ofac_download_stats (downloaded_at, sdns, alt_names, addresses, denied_persons) values (?, ?, ?, ?, ?);`
+	query := `insert into download_stats (downloaded_at, sdns, alt_names, addresses, denied_persons) values (?, ?, ?, ?, ?);`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return err
@@ -243,7 +243,7 @@ func (r *sqliteDownloadRepository) recordStats(stats *downloadStats) error {
 }
 
 func (r *sqliteDownloadRepository) latestDownloads(limit int) ([]Download, error) {
-	query := `select downloaded_at, sdns, alt_names, addresses, denied_persons from ofac_download_stats order by downloaded_at desc limit ?;`
+	query := `select downloaded_at, sdns, alt_names, addresses, denied_persons from download_stats order by downloaded_at desc limit ?;`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return nil, err

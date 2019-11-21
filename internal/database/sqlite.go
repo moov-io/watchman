@@ -67,6 +67,10 @@ var (
 			"add_denied_persons_to_ofac_download_stats",
 			"alter table ofac_download_stats add column denied_persons default 0;",
 		),
+		execsql(
+			"rename_ofac_download_stats",
+			"alter table ofac_download_stats rename to download_stats",
+		),
 	)
 )
 
@@ -134,7 +138,7 @@ func getSqlitePath() string {
 	if path == "" || strings.Contains(path, "..") {
 		// set default if empty or trying to escape
 		// don't filepath.ABS to avoid full-fs reads
-		path = "ofac.db"
+		path = "watchman.db"
 	}
 	return path
 }
@@ -159,12 +163,12 @@ func (r *TestSQLiteDB) Close() error {
 //
 // Callers should call close on the returned *TestSQLiteDB.
 func CreateTestSqliteDB(t *testing.T) *TestSQLiteDB {
-	dir, err := ioutil.TempDir("", "ofac-sqlite")
+	dir, err := ioutil.TempDir("", "sqlite")
 	if err != nil {
 		t.Fatalf("sqlite test: %v", err)
 	}
 
-	db, err := sqliteConnection(log.NewNopLogger(), filepath.Join(dir, "ofac.db")).Connect()
+	db, err := sqliteConnection(log.NewNopLogger(), filepath.Join(dir, "watchman.db")).Connect()
 	if err != nil {
 		t.Fatalf("sqlite test: %v", err)
 	}

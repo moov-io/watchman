@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/moov-io/sanctionsearch/pkg/download"
+	"github.com/moov-io/watchman/pkg/download"
 
 	"github.com/go-kit/kit/log"
 )

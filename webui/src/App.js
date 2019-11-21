@@ -80,7 +80,8 @@ function App() {
       `}
     >
       <Container>
-        <h1>OFAC Search</h1>
+        <h1>Moov Watchman</h1>
+        <p>Moov Watchman is a service which downloads, parses and indexes numerous trade, government and non-profit lists of blocked individuals and entities to comply with those regions laws.</p>
       </Container>
       <Form onSubmit={handleSubmit} onReset={handleReset} />
       <Results data={state} />

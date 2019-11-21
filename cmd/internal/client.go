@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/moov-io/base/http/bind"
-	"github.com/moov-io/sanctionsearch"
-	moov "github.com/moov-io/sanctionsearch/client"
+	"github.com/moov-io/watchman"
+	moov "github.com/moov-io/watchman/client"
 )
 
 const (
@@ -42,7 +42,7 @@ func Config(address string, local bool) *moov.Configuration {
 	conf := moov.NewConfiguration()
 	conf.BasePath = addr(address, local)
 
-	conf.UserAgent = fmt.Sprintf("moov/sanctiontest:%s", sanctionsearch.Version)
+	conf.UserAgent = fmt.Sprintf("moov/watchman:%s", watchman.Version)
 	conf.HTTPClient = &http.Client{
 		Timeout: 10 * time.Second,
 		Transport: &http.Transport{

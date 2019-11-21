@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/moov-io/base"
-	"github.com/moov-io/sanctionsearch/internal/database"
+	"github.com/moov-io/watchman/internal/database"
 
 	"github.com/go-kit/kit/log"
 )

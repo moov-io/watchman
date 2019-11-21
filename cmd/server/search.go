@@ -18,8 +18,8 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/moov-io/sanctionsearch/pkg/dpl"
-	"github.com/moov-io/sanctionsearch/pkg/ofac"
+	"github.com/moov-io/watchman/pkg/dpl"
+	"github.com/moov-io/watchman/pkg/ofac"
 
 	"github.com/go-kit/kit/log"
 	"github.com/xrash/smetrics"
