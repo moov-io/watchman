@@ -42,13 +42,18 @@ func filterSDNs(sdns []SDN, req filterRequest) []SDN {
 		// TODO(adam): If we add more filters don't forget to also add them in values.go
 		if req.sdnType != "" {
 			if sdns[i].SDNType != "" {
-				switch {
-				// Keep this SDN if our filter value matches
-				case strings.EqualFold(sdns[i].SDNType, req.sdnType):
+				if strings.EqualFold(sdns[i].SDNType, req.sdnType) {
 					keep = true
 				}
 			} else {
-				continue // skip this SDN as the filter didn't match
+				// 'entity' is a special case value for ?sdnType in that it refers to a company or organization
+				// and not an individual, however OFAC's data files do not contain this value and we must infer
+				// it instead.
+				if sdns[i].SDNType == "" && strings.EqualFold(req.sdnType, "entity") {
+					keep = true
+				} else {
+					continue // skip this SDN as the filter didn't match
+				}
 			}
 		}
 		if req.ofacProgram != "" {

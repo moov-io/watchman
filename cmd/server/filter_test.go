@@ -67,6 +67,25 @@ var (
 			},
 		},
 	}
+	terrorGroupSDN = SDN{
+		SDN: &ofac.SDN{
+			EntityID: "13",
+			SDNName:  "Terror Group",
+			SDNType:  "",
+			Program:  "SDGT",
+		},
+	}
+	oneEmptySDNType = []SDN{
+		{
+			SDN: &ofac.SDN{
+				EntityID: "12",
+				SDNName:  "Jane Doe",
+				SDNType:  "individual",
+				Program:  "other",
+			},
+		},
+		terrorGroupSDN,
+	}
 	missingSDNType = []SDN{
 		{
 			SDN: &ofac.SDN{
@@ -88,9 +107,9 @@ var (
 )
 
 func TestFilter__sdnType(t *testing.T) {
-	sdns := filterSDNs(filterableSDNs, filterRequest{sdnType: "individual"})
+	sdns := filterSDNs(append(filterableSDNs, terrorGroupSDN), filterRequest{sdnType: "individual"})
 	if len(sdns) != 1 {
-		t.Errorf("got: %#v", sdns)
+		t.Fatalf("got: %#v", sdns)
 	}
 	if sdns[0].EntityID != "12" {
 		t.Errorf("sdns[0].EntityID=%s", sdns[0].EntityID)
@@ -107,10 +126,20 @@ func TestFilter__sdnType(t *testing.T) {
 	}
 }
 
+func TestFilter__sdnTypeEntity(t *testing.T) {
+	sdns := filterSDNs(oneEmptySDNType, filterRequest{sdnType: "entity"})
+	if len(sdns) != 1 {
+		t.Fatalf("got: %#v", sdns)
+	}
+	if sdns[0].EntityID != "13" {
+		t.Errorf("sdns[0].EntityID=%s", sdns[0].EntityID)
+	}
+}
+
 func TestFilter__program(t *testing.T) {
 	sdns := filterSDNs(filterableSDNs, filterRequest{ofacProgram: "SDGT"})
 	if len(sdns) != 1 {
-		t.Errorf("got: %#v", sdns)
+		t.Fatalf("got: %#v", sdns)
 	}
 	if sdns[0].EntityID != "13" {
 		t.Errorf("sdns[0].EntityID=%s", sdns[0].EntityID)

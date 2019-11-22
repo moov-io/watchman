@@ -627,7 +627,7 @@ paths:
           schema:
             type: string
             example: individual
-          description: Optional filter to only return SDNs whose type case-insensitively matches
+          description: Optional filter to only return SDNs whose type case-insensitively matches.
         - name: program
           in: query
           schema:

@@ -53,11 +53,16 @@ func TestValues__getValues(t *testing.T) {
 	if err := json.NewDecoder(w.Body).Decode(&values); err != nil {
 		t.Error(err)
 	}
-	if len(values) != 1 {
+	if len(values) != 2 {
 		t.Errorf("values: %v", values)
 	}
-	if values[0] != "individual" {
-		t.Errorf("values[0]=%s", values[0])
+	for i := range values {
+		switch values[i] {
+		case "individual", "entity":
+			continue
+		default:
+			t.Errorf("values[%d]=%s", i, values[i])
+		}
 	}
 }
 
