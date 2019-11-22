@@ -1,3 +1,14 @@
+## v0.13.0 (Unreleased)
+
+This project has been renamed to Moov Watchman (from Moov OFAC) to better represent coverage of multiple entity lists covering trade sanctions and regional compliance laws.
+
+The OpenAPI specification models have been renamed to include an `Ofac` prefix on their name and OFAC HTTP routes have an `/ofac/` prefix.
+
+BUILD
+
+- fix(deps): update react monorepo to v16.12.0
+- chore(deps): update dependency @material-ui/core to v4.6.1
+
 ## v0.12.0 (Released 2019-11-12)
 
 BREAKING CHANGES
