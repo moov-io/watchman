@@ -6,11 +6,14 @@ const apiGet = async path => {
 };
 
 // grab the base URL/href (IE 11 and older don't support 'new URL(..)')
-const pathname = new URL(document.baseURI).origin + "/";
+const url = new URL(document.baseURI);
+const pathname = url => {
+  return url.origin + url.pathname.replace(/\/$/, "");
+};
 
-export const search = async qs => apiGet(pathname + `/search?${qs}`);
+export const search = async qs => apiGet(pathname(url) + `/search?${qs}`);
 
-export const getSDNAlts = async sdnId => (await fetch(pathname + `/ofac/sdn/${sdnId}/alts`)).json();
-export const getSDNAddresses = async sdnId => (await fetch(pathname + `/ofac/sdn/${sdnId}/addresses`)).json();
-export const getSDNTypes = async qs => (await fetch(pathname + `/ui/values/sdnType`)).json();
-export const getOFACPrograms = async qs => (await fetch(pathname + `/ui/values/ofacProgram`)).json();
+export const getSDNAlts = async sdnId => (await fetch(pathname(url) + `/ofac/sdn/${sdnId}/alts`)).json();
+export const getSDNAddresses = async sdnId => (await fetch(pathname(url) + `/ofac/sdn/${sdnId}/addresses`)).json();
+export const getSDNTypes = async qs => (await fetch(pathname(url) + `/ui/values/sdnType`)).json();
+export const getOFACPrograms = async qs => (await fetch(pathname(url) + `/ui/values/ofacProgram`)).json();
