@@ -13,7 +13,7 @@ require (
 	github.com/prometheus/client_golang v1.2.1
 	github.com/xrash/smetrics v0.0.0-20170218160415-a3153f7040e9
 	go4.org v0.0.0-20191010144846-132d2879e1e9
-	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
+	golang.org/x/oauth2 v0.0.0-20191122200657-5d9234df094c
 	golang.org/x/text v0.3.2
 )
 
