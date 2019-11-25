@@ -161,7 +161,7 @@ paths:
           description: Company watch added
         404:
           description: Company not found
-      summary: Add OFAC watch on a Company
+      summary: Add watch on a OFAC Company
       tags:
       - Watchman
   /ofac/companies/{companyID}/watch/{watchID}:
@@ -435,7 +435,7 @@ paths:
           description: Customer watch added
         404:
           description: Customer not found
-      summary: Add OFAC watch on a Customer
+      summary: Add watch on a OFAC Customer
       tags:
       - Watchman
   /ofac/customers/{customerID}/watch/{watchID}:
@@ -833,7 +833,7 @@ paths:
           type: integer
         style: form
       - description: Optional filter to only return SDNs whose type case-insensitively
-          matches
+          matches.
         explode: true
         in: query
         name: sdnType
@@ -900,7 +900,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Downloads'
           description: Recent timestamps and counts of parsed objects
-      summary: Return list of recent downloads of OFAC data
+      summary: Return list of recent downloads of list data
       tags:
       - Watchman
   /ui/values/{key}:

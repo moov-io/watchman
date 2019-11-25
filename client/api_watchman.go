@@ -138,7 +138,7 @@ type AddOfacCompanyWatchOpts struct {
 }
 
 /*
-AddOfacCompanyWatch Add OFAC watch on a Company
+AddOfacCompanyWatch Add watch on a OFAC Company
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param companyID Company ID
  * @param ofacWatchRequest
@@ -347,7 +347,7 @@ type AddOfacCustomerWatchOpts struct {
 }
 
 /*
-AddOfacCustomerWatch Add OFAC watch on a Customer
+AddOfacCustomerWatch Add watch on a OFAC Customer
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param customerID Customer ID
  * @param ofacWatchRequest
@@ -453,7 +453,7 @@ type GetLatestDownloadsOpts struct {
 }
 
 /*
-GetLatestDownloads Return list of recent downloads of OFAC data
+GetLatestDownloads Return list of recent downloads of list data
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *GetLatestDownloadsOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
@@ -1592,7 +1592,7 @@ Search Search SDN names and metadata
  * @param "AltName" (optional.String) -  Alternate name which could correspond to a human on the SDN list. Only Alt name results will be returned.
  * @param "Id" (optional.String) -  ID value often found in remarks property of an SDN. Takes the form of 'No. NNNNN' as an alphanumeric value.
  * @param "Limit" (optional.Int32) -  Maximum results returned by a search
- * @param "SdnType" (optional.String) -  Optional filter to only return SDNs whose type case-insensitively matches
+ * @param "SdnType" (optional.String) -  Optional filter to only return SDNs whose type case-insensitively matches.
  * @param "Program" (optional.String) -  Optional filter to only return SDNs whose program case-insensitively matches
 @return Search
 */

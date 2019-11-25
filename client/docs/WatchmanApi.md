@@ -5,10 +5,10 @@ All URIs are relative to *http://localhost:8084*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**AddOfacCompanyNameWatch**](WatchmanApi.md#AddOfacCompanyNameWatch) | **Post** /ofac/companies/watch | Add company watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
-[**AddOfacCompanyWatch**](WatchmanApi.md#AddOfacCompanyWatch) | **Post** /ofac/companies/{companyID}/watch | Add OFAC watch on a Company
+[**AddOfacCompanyWatch**](WatchmanApi.md#AddOfacCompanyWatch) | **Post** /ofac/companies/{companyID}/watch | Add watch on a OFAC Company
 [**AddOfacCustomerNameWatch**](WatchmanApi.md#AddOfacCustomerNameWatch) | **Post** /ofac/customers/watch | Add customer watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
-[**AddOfacCustomerWatch**](WatchmanApi.md#AddOfacCustomerWatch) | **Post** /ofac/customers/{customerID}/watch | Add OFAC watch on a Customer
-[**GetLatestDownloads**](WatchmanApi.md#GetLatestDownloads) | **Get** /downloads | Return list of recent downloads of OFAC data
+[**AddOfacCustomerWatch**](WatchmanApi.md#AddOfacCustomerWatch) | **Post** /ofac/customers/{customerID}/watch | Add watch on a OFAC Customer
+[**GetLatestDownloads**](WatchmanApi.md#GetLatestDownloads) | **Get** /downloads | Return list of recent downloads of list data
 [**GetOfacCompany**](WatchmanApi.md#GetOfacCompany) | **Get** /ofac/companies/{companyID} | Get information about a company, trust or organization such as addresses, alternate names, and remarks.
 [**GetOfacCustomer**](WatchmanApi.md#GetOfacCustomer) | **Get** /ofac/customers/{customerID} | Get information about a customer, addresses, alternate names, and their SDN metadata.
 [**GetSDN**](WatchmanApi.md#GetSDN) | **Get** /ofac/sdn/{sdnID} | Specially designated national
@@ -76,7 +76,7 @@ No authorization required
 
 > OfacWatch AddOfacCompanyWatch(ctx, companyID, ofacWatchRequest, optional)
 
-Add OFAC watch on a Company
+Add watch on a OFAC Company
 
 ### Required Parameters
 
@@ -168,7 +168,7 @@ No authorization required
 
 > OfacWatch AddOfacCustomerWatch(ctx, customerID, ofacWatchRequest, optional)
 
-Add OFAC watch on a Customer
+Add watch on a OFAC Customer
 
 ### Required Parameters
 
@@ -214,7 +214,7 @@ No authorization required
 
 > []Download GetLatestDownloads(ctx, optional)
 
-Return list of recent downloads of OFAC data
+Return list of recent downloads of list data
 
 ### Required Parameters
 
@@ -762,7 +762,7 @@ Name | Type | Description  | Notes
  **altName** | **optional.String**| Alternate name which could correspond to a human on the SDN list. Only Alt name results will be returned. | 
  **id** | **optional.String**| ID value often found in remarks property of an SDN. Takes the form of &#39;No. NNNNN&#39; as an alphanumeric value. | 
  **limit** | **optional.Int32**| Maximum results returned by a search | 
- **sdnType** | **optional.String**| Optional filter to only return SDNs whose type case-insensitively matches | 
+ **sdnType** | **optional.String**| Optional filter to only return SDNs whose type case-insensitively matches. | 
  **program** | **optional.String**| Optional filter to only return SDNs whose program case-insensitively matches | 
 
 ### Return type

@@ -34,10 +34,10 @@ All URIs are relative to *http://localhost:8084*
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 *WatchmanApi* | [**AddOfacCompanyNameWatch**](docs/WatchmanApi.md#addofaccompanynamewatch) | **Post** /ofac/companies/watch | Add company watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
-*WatchmanApi* | [**AddOfacCompanyWatch**](docs/WatchmanApi.md#addofaccompanywatch) | **Post** /ofac/companies/{companyID}/watch | Add OFAC watch on a Company
+*WatchmanApi* | [**AddOfacCompanyWatch**](docs/WatchmanApi.md#addofaccompanywatch) | **Post** /ofac/companies/{companyID}/watch | Add watch on a OFAC Company
 *WatchmanApi* | [**AddOfacCustomerNameWatch**](docs/WatchmanApi.md#addofaccustomernamewatch) | **Post** /ofac/customers/watch | Add customer watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
-*WatchmanApi* | [**AddOfacCustomerWatch**](docs/WatchmanApi.md#addofaccustomerwatch) | **Post** /ofac/customers/{customerID}/watch | Add OFAC watch on a Customer
-*WatchmanApi* | [**GetLatestDownloads**](docs/WatchmanApi.md#getlatestdownloads) | **Get** /downloads | Return list of recent downloads of OFAC data
+*WatchmanApi* | [**AddOfacCustomerWatch**](docs/WatchmanApi.md#addofaccustomerwatch) | **Post** /ofac/customers/{customerID}/watch | Add watch on a OFAC Customer
+*WatchmanApi* | [**GetLatestDownloads**](docs/WatchmanApi.md#getlatestdownloads) | **Get** /downloads | Return list of recent downloads of list data
 *WatchmanApi* | [**GetOfacCompany**](docs/WatchmanApi.md#getofaccompany) | **Get** /ofac/companies/{companyID} | Get information about a company, trust or organization such as addresses, alternate names, and remarks.
 *WatchmanApi* | [**GetOfacCustomer**](docs/WatchmanApi.md#getofaccustomer) | **Get** /ofac/customers/{customerID} | Get information about a customer, addresses, alternate names, and their SDN metadata.
 *WatchmanApi* | [**GetSDN**](docs/WatchmanApi.md#getsdn) | **Get** /ofac/sdn/{sdnID} | Specially designated national
