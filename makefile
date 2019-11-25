@@ -67,7 +67,7 @@ release: docker AUTHORS
 release-push:
 	docker push moov/watchman:$(VERSION)
 	docker push moov/watchman:latest
-	docker push moov/batchsearch:$(VERSION)
+	docker push moov/watchmantest:$(VERSION)
 	docker push moov/watchman-webhook-example:$(VERSION)
 
 .PHONY: cover-test cover-web
