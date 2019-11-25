@@ -21,9 +21,9 @@ var (
 )
 
 func addSDNRoutes(logger log.Logger, r *mux.Router, searcher *searcher) {
-	r.Methods("GET").Path("/sdn/{sdnId}/addresses").HandlerFunc(getSDNAddresses(logger, searcher))
-	r.Methods("GET").Path("/sdn/{sdnId}/alts").HandlerFunc(getSDNAltNames(logger, searcher))
-	r.Methods("GET").Path("/sdn/{sdnId}").HandlerFunc(getSDN(logger, searcher))
+	r.Methods("GET").Path("/ofac/sdn/{sdnId}/addresses").HandlerFunc(getSDNAddresses(logger, searcher))
+	r.Methods("GET").Path("/ofac/sdn/{sdnId}/alts").HandlerFunc(getSDNAltNames(logger, searcher))
+	r.Methods("GET").Path("/ofac/sdn/{sdnId}").HandlerFunc(getSDN(logger, searcher))
 }
 
 func getSDNId(w http.ResponseWriter, r *http.Request) string {

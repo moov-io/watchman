@@ -66,7 +66,7 @@ func TestCustomers__id(t *testing.T) {
 
 	// Happy path
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/customers/random-cust-id", nil)
+	req := httptest.NewRequest("GET", "/ofac/customers/random-cust-id", nil)
 	router.Methods("GET").Path("/customers/{customerID}").HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
 		if v := getCustomerID(w, r); v != "random-cust-id" {
 			t.Errorf("got %s", v)
@@ -79,7 +79,7 @@ func TestCustomers__id(t *testing.T) {
 
 	// Unhappy case
 	w = httptest.NewRecorder()
-	req = httptest.NewRequest("GET", "/customers", nil)
+	req = httptest.NewRequest("GET", "/ofac/customers", nil)
 	router.Methods("GET").Path("/customers/{customerID}").HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
 		if v := getCustomerID(w, req); v != "" {
 			t.Errorf("didn't expect customerID, got %s", v)
@@ -116,7 +116,7 @@ func TestCustomer_get(t *testing.T) {
 
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("GET", "/customers/306", nil)
+		req := httptest.NewRequest("GET", "/ofac/customers/306", nil)
 		req.Header.Set("x-user-id", "test")
 
 		watchRepo := createTestWatchRepository(t)
@@ -165,7 +165,7 @@ func TestCustomer_EmptyHTTP(t *testing.T) {
 
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("GET", "/customers/foo", nil)
+		req := httptest.NewRequest("GET", "/ofac/customers/foo", nil)
 
 		getCustomer(nil, customerSearcher, repo)(w, req)
 		w.Flush()
@@ -192,7 +192,7 @@ func TestCustomer_addWatch(t *testing.T) {
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		w := httptest.NewRecorder()
 		body := strings.NewReader(`{"webhook": "https://moov.io", "authToken": "foo"}`)
-		req := httptest.NewRequest("POST", "/customers/foo/watch", body)
+		req := httptest.NewRequest("POST", "/ofac/customers/foo/watch", body)
 		req.Header.Set("x-user-id", "test")
 
 		watchRepo := createTestWatchRepository(t)
@@ -229,7 +229,7 @@ func TestCustomer_addWatch(t *testing.T) {
 
 func TestCustomer_addWatchNoBody(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("POST", "/customers/foo/watch", nil)
+	req := httptest.NewRequest("POST", "/ofac/customers/foo/watch", nil)
 	req.Header.Set("x-user-id", "test")
 
 	watchRepo := createTestWatchRepository(t)
@@ -254,7 +254,7 @@ func TestCustomer_addWatchMissingAuthToken(t *testing.T) {
 
 		body := strings.NewReader(`{"webhook": "https://moov.io", "authToken": ""}`)
 
-		req := httptest.NewRequest("POST", "/customers/foo/watch", body)
+		req := httptest.NewRequest("POST", "/ofac/customers/foo/watch", body)
 		req.Header.Set("x-user-id", "test")
 
 		w := httptest.NewRecorder()
@@ -287,7 +287,7 @@ func TestCustomer_addNameWatch(t *testing.T) {
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		w := httptest.NewRecorder()
 		body := strings.NewReader(`{"webhook": "https://moov.io", "authToken": "foo"}`)
-		req := httptest.NewRequest("POST", "/customers/watch?name=foo", body)
+		req := httptest.NewRequest("POST", "/ofac/customers/watch?name=foo", body)
 		req.Header.Set("x-user-id", "test")
 		req.Header.Set("x-request-id", base.ID())
 
@@ -328,7 +328,7 @@ func TestCustomer_addCustomerNameWatchNoBody(t *testing.T) {
 
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("POST", "/customers/watch?name=foo", nil)
+		req := httptest.NewRequest("POST", "/ofac/customers/watch?name=foo", nil)
 		req.Header.Set("x-user-id", "test")
 
 		watchRepo := createTestWatchRepository(t)
@@ -375,7 +375,7 @@ func TestCustomer_updateUnsafe(t *testing.T) {
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		w := httptest.NewRecorder()
 		body := strings.NewReader(`{"status": "unsafe"}`)
-		req := httptest.NewRequest("PUT", "/customers/foo", body)
+		req := httptest.NewRequest("PUT", "/ofac/customers/foo", body)
 		req.Header.Set("x-user-id", "test")
 
 		watchRepo := createTestWatchRepository(t)
@@ -408,7 +408,7 @@ func TestCustomer_updateException(t *testing.T) {
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		w := httptest.NewRecorder()
 		body := strings.NewReader(`{"status": "exception"}`)
-		req := httptest.NewRequest("PUT", "/customers/foo", body)
+		req := httptest.NewRequest("PUT", "/ofac/customers/foo", body)
 		req.Header.Set("x-user-id", "test")
 
 		watchRepo := createTestWatchRepository(t)
@@ -441,7 +441,7 @@ func TestCustomer_updateUnknown(t *testing.T) {
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		w := httptest.NewRecorder()
 		body := strings.NewReader(`{"status": "unknown"}`) // has status, but not blocked or unblocked
-		req := httptest.NewRequest("PUT", "/customers/foo", body)
+		req := httptest.NewRequest("PUT", "/ofac/customers/foo", body)
 		req.Header.Set("x-user-id", "test")
 
 		watchRepo := createTestWatchRepository(t)
@@ -473,7 +473,7 @@ func TestCustomer_updateNoUserId(t *testing.T) {
 
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("PUT", "/customers/foo", nil)
+		req := httptest.NewRequest("PUT", "/ofac/customers/foo", nil)
 
 		watchRepo := createTestWatchRepository(t)
 		defer watchRepo.close()
@@ -504,7 +504,7 @@ func TestCustomer_updateNoBody(t *testing.T) {
 
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("PUT", "/customers/foo", nil)
+		req := httptest.NewRequest("PUT", "/ofac/customers/foo", nil)
 		req.Header.Set("x-user-id", "test")
 
 		watchRepo := createTestWatchRepository(t)
@@ -536,7 +536,7 @@ func TestCustomer_removeWatch(t *testing.T) {
 
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("DELETE", "/customers/foo/watch/watch-id", nil)
+		req := httptest.NewRequest("DELETE", "/ofac/customers/foo/watch/watch-id", nil)
 		req.Header.Set("x-user-id", "test")
 
 		watchRepo := createTestWatchRepository(t)
@@ -568,7 +568,7 @@ func TestCustomer_removeNameWatch(t *testing.T) {
 
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("DELETE", "/customers/watch/foo", nil)
+		req := httptest.NewRequest("DELETE", "/ofac/customers/watch/foo", nil)
 		req.Header.Set("x-user-id", "test")
 		req.Header.Set("x-request-id", base.ID())
 

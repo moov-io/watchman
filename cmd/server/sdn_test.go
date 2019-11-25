@@ -21,7 +21,7 @@ func TestSDN__id(t *testing.T) {
 
 	// Happy path
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/sdn/random-sdn-id", nil)
+	req := httptest.NewRequest("GET", "/ofac/sdn/random-sdn-id", nil)
 	router.Methods("GET").Path("/sdn/{sdnId}").HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
 		if v := getSDNId(w, r); v != "random-sdn-id" {
 			t.Errorf("got %s", v)
@@ -53,7 +53,7 @@ func TestSDN__id(t *testing.T) {
 
 func TestSDN__Address(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/sdn/173/addresses", nil)
+	req := httptest.NewRequest("GET", "/ofac/sdn/173/addresses", nil)
 	req.Header.Set("x-user-id", "test")
 
 	router := mux.NewRouter()
@@ -79,7 +79,7 @@ func TestSDN__Address(t *testing.T) {
 
 func TestSDN__AltNames(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/sdn/4691/alts", nil)
+	req := httptest.NewRequest("GET", "/ofac/sdn/4691/alts", nil)
 	req.Header.Set("x-user-id", "test")
 
 	router := mux.NewRouter()
@@ -105,7 +105,7 @@ func TestSDN__AltNames(t *testing.T) {
 
 func TestSDN__Get(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/sdn/2681", nil)
+	req := httptest.NewRequest("GET", "/ofac/sdn/2681", nil)
 	req.Header.Set("x-user-id", "test")
 
 	router := mux.NewRouter()

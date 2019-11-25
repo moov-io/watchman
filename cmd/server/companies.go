@@ -61,14 +61,14 @@ type companyWatchResponse struct {
 }
 
 func addCompanyRoutes(logger log.Logger, r *mux.Router, searcher *searcher, companyRepo companyRepository, watchRepo *sqliteWatchRepository) {
-	r.Methods("GET").Path("/companies/{companyID}").HandlerFunc(getCompany(logger, searcher, companyRepo))
-	r.Methods("PUT").Path("/companies/{companyID}").HandlerFunc(updateCompanyStatus(logger, searcher, companyRepo))
+	r.Methods("GET").Path("/ofac/companies/{companyID}").HandlerFunc(getCompany(logger, searcher, companyRepo))
+	r.Methods("PUT").Path("/ofac/companies/{companyID}").HandlerFunc(updateCompanyStatus(logger, searcher, companyRepo))
 
-	r.Methods("POST").Path("/companies/{companyID}/watch").HandlerFunc(addCompanyWatch(logger, searcher, watchRepo))
-	r.Methods("DELETE").Path("/companies/{companyID}/watch/{watchID}").HandlerFunc(removeCompanyWatch(logger, searcher, watchRepo))
+	r.Methods("POST").Path("/ofac/companies/{companyID}/watch").HandlerFunc(addCompanyWatch(logger, searcher, watchRepo))
+	r.Methods("DELETE").Path("/ofac/companies/{companyID}/watch/{watchID}").HandlerFunc(removeCompanyWatch(logger, searcher, watchRepo))
 
-	r.Methods("POST").Path("/companies/watch").HandlerFunc(addCompanyNameWatch(logger, searcher, watchRepo))
-	r.Methods("DELETE").Path("/companies/watch/{watchID}").HandlerFunc(removeCompanyNameWatch(logger, searcher, watchRepo))
+	r.Methods("POST").Path("/ofac/companies/watch").HandlerFunc(addCompanyNameWatch(logger, searcher, watchRepo))
+	r.Methods("DELETE").Path("/ofac/companies/watch/{watchID}").HandlerFunc(removeCompanyNameWatch(logger, searcher, watchRepo))
 }
 
 func getCompanyID(w http.ResponseWriter, r *http.Request) string {

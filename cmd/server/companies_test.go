@@ -64,7 +64,7 @@ func TestCompanies__id(t *testing.T) {
 
 	// Happy path
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/companies/random-company-id", nil)
+	req := httptest.NewRequest("GET", "/ofac/companies/random-company-id", nil)
 	router.Methods("GET").Path("/companies/{companyID}").HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
 		if v := getCompanyID(w, r); v != "random-company-id" {
 			t.Errorf("got %s", v)
@@ -77,7 +77,7 @@ func TestCompanies__id(t *testing.T) {
 
 	// Unhappy case
 	w = httptest.NewRecorder()
-	req = httptest.NewRequest("GET", "/companies", nil)
+	req = httptest.NewRequest("GET", "/ofac/companies", nil)
 	router.Methods("GET").Path("/companies/{companyID}").HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
 		if v := getCompanyID(w, req); v != "" {
 			t.Errorf("didn't expect companyID, got %s", v)
@@ -125,7 +125,7 @@ func TestCompany_get(t *testing.T) {
 
 	check := func(t *testing.T, repo *sqliteCompanyRepository) {
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("GET", "/companies/21206", nil)
+		req := httptest.NewRequest("GET", "/ofac/companies/21206", nil)
 		req.Header.Set("x-user-id", "test")
 
 		watchRepo := createTestWatchRepository(t)
@@ -171,7 +171,7 @@ func TestCompany_get(t *testing.T) {
 
 func TestCompany_EmptyHTTP(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/companies/foo", nil)
+	req := httptest.NewRequest("GET", "/ofac/companies/foo", nil)
 
 	companyRepo := createTestCompanyRepository(t)
 	defer companyRepo.close()
@@ -190,7 +190,7 @@ func TestCompany_addWatch(t *testing.T) {
 	check := func(t *testing.T, repo *sqliteCompanyRepository) {
 		w := httptest.NewRecorder()
 		body := strings.NewReader(`{"webhook": "https://moov.io", "authToken": "foo"}`)
-		req := httptest.NewRequest("POST", "/companies/foo/watch", body)
+		req := httptest.NewRequest("POST", "/ofac/companies/foo/watch", body)
 		req.Header.Set("x-user-id", "test")
 
 		watchRepo := createTestWatchRepository(t)
@@ -227,7 +227,7 @@ func TestCompany_addWatch(t *testing.T) {
 
 func TestCompany_addWatchNoBody(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("POST", "/companies/foo/watch", nil)
+	req := httptest.NewRequest("POST", "/ofac/companies/foo/watch", nil)
 	req.Header.Set("x-user-id", "test")
 
 	watchRepo := createTestWatchRepository(t)
@@ -252,7 +252,7 @@ func TestCompany_addWatchMissingAuthToken(t *testing.T) {
 
 		body := strings.NewReader(`{"webhook": "https://moov.io", "authToken": ""}`)
 
-		req := httptest.NewRequest("POST", "/companies/foo/watch", body)
+		req := httptest.NewRequest("POST", "/ofac/companies/foo/watch", body)
 		req.Header.Set("x-user-id", "test")
 
 		w := httptest.NewRecorder()
@@ -285,7 +285,7 @@ func TestCompany_addNameWatch(t *testing.T) {
 	check := func(t *testing.T, repo *sqliteCompanyRepository) {
 		w := httptest.NewRecorder()
 		body := strings.NewReader(`{"webhook": "https://moov.io", "authToken": "foo"}`)
-		req := httptest.NewRequest("POST", "/companies/watch?name=foo", body)
+		req := httptest.NewRequest("POST", "/ofac/companies/watch?name=foo", body)
 		req.Header.Set("x-user-id", "test")
 		req.Header.Set("x-request-id", base.ID())
 
@@ -326,7 +326,7 @@ func TestCompany_addCompanyNameWatchNoBody(t *testing.T) {
 
 	check := func(t *testing.T, repo *sqliteCompanyRepository) {
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("POST", "/companies/watch?name=foo", nil)
+		req := httptest.NewRequest("POST", "/ofac/companies/watch?name=foo", nil)
 		req.Header.Set("x-user-id", "test")
 
 		watchRepo := createTestWatchRepository(t)
@@ -374,7 +374,7 @@ func TestCompany_updateUnsafe(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		body := strings.NewReader(`{"status": "unsafe"}`)
-		req := httptest.NewRequest("PUT", "/companies/foo", body)
+		req := httptest.NewRequest("PUT", "/ofac/companies/foo", body)
 		req.Header.Set("x-user-id", "test")
 
 		watchRepo := createTestWatchRepository(t)
@@ -408,7 +408,7 @@ func TestCompany_updateException(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		body := strings.NewReader(`{"status": "exception"}`)
-		req := httptest.NewRequest("PUT", "/companies/foo", body)
+		req := httptest.NewRequest("PUT", "/ofac/companies/foo", body)
 		req.Header.Set("x-user-id", "test")
 
 		watchRepo := createTestWatchRepository(t)
@@ -442,7 +442,7 @@ func TestCompany_updateUnknown(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		body := strings.NewReader(`{"status": "unknown"}`) // has status, but not blocked or unblocked
-		req := httptest.NewRequest("PUT", "/companies/foo", body)
+		req := httptest.NewRequest("PUT", "/ofac/companies/foo", body)
 		req.Header.Set("x-user-id", "test")
 
 		watchRepo := createTestWatchRepository(t)
@@ -474,7 +474,7 @@ func TestCompany_updateNoUserId(t *testing.T) {
 
 	check := func(t *testing.T, repo *sqliteCompanyRepository) {
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("PUT", "/companies/foo", nil)
+		req := httptest.NewRequest("PUT", "/ofac/companies/foo", nil)
 
 		watchRepo := createTestWatchRepository(t)
 		defer watchRepo.close()
@@ -505,7 +505,7 @@ func TestCompany_updateNoBody(t *testing.T) {
 
 	check := func(t *testing.T, repo *sqliteCompanyRepository) {
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("PUT", "/companies/foo", nil)
+		req := httptest.NewRequest("PUT", "/ofac/companies/foo", nil)
 		req.Header.Set("x-user-id", "test")
 
 		watchRepo := createTestWatchRepository(t)
@@ -537,7 +537,7 @@ func TestCompany_removeWatch(t *testing.T) {
 
 	check := func(t *testing.T, repo *sqliteCompanyRepository) {
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("DELETE", "/companies/foo/watch/watch-id", nil)
+		req := httptest.NewRequest("DELETE", "/ofac/companies/foo/watch/watch-id", nil)
 		req.Header.Set("x-user-id", "test")
 
 		watchRepo := createTestWatchRepository(t)
@@ -569,7 +569,7 @@ func TestCompany_removeNameWatch(t *testing.T) {
 
 	check := func(t *testing.T, repo *sqliteCompanyRepository) {
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("DELETE", "/companies/watch/foo", nil)
+		req := httptest.NewRequest("DELETE", "/ofac/companies/watch/foo", nil)
 		req.Header.Set("x-user-id", "test")
 		req.Header.Set("x-request-id", base.ID())
 

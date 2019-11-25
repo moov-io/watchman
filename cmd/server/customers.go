@@ -64,14 +64,14 @@ type customerWatchResponse struct {
 }
 
 func addCustomerRoutes(logger log.Logger, r *mux.Router, searcher *searcher, custRepo *sqliteCustomerRepository, watchRepo *sqliteWatchRepository) {
-	r.Methods("GET").Path("/customers/{customerID}").HandlerFunc(getCustomer(logger, searcher, custRepo))
-	r.Methods("PUT").Path("/customers/{customerID}").HandlerFunc(updateCustomerStatus(logger, searcher, custRepo))
+	r.Methods("GET").Path("/ofac/customers/{customerID}").HandlerFunc(getCustomer(logger, searcher, custRepo))
+	r.Methods("PUT").Path("/ofac/customers/{customerID}").HandlerFunc(updateCustomerStatus(logger, searcher, custRepo))
 
-	r.Methods("POST").Path("/customers/{customerID}/watch").HandlerFunc(addCustomerWatch(logger, searcher, watchRepo))
-	r.Methods("DELETE").Path("/customers/{customerID}/watch/{watchID}").HandlerFunc(removeCustomerWatch(logger, searcher, watchRepo))
+	r.Methods("POST").Path("/ofac/customers/{customerID}/watch").HandlerFunc(addCustomerWatch(logger, searcher, watchRepo))
+	r.Methods("DELETE").Path("/ofac/customers/{customerID}/watch/{watchID}").HandlerFunc(removeCustomerWatch(logger, searcher, watchRepo))
 
-	r.Methods("POST").Path("/customers/watch").HandlerFunc(addCustomerNameWatch(logger, searcher, watchRepo))
-	r.Methods("DELETE").Path("/customers/watch/{watchID}").HandlerFunc(removeCustomerNameWatch(logger, searcher, watchRepo))
+	r.Methods("POST").Path("/ofac/customers/watch").HandlerFunc(addCustomerNameWatch(logger, searcher, watchRepo))
+	r.Methods("DELETE").Path("/ofac/customers/watch/{watchID}").HandlerFunc(removeCustomerNameWatch(logger, searcher, watchRepo))
 }
 
 func getCustomerID(w http.ResponseWriter, r *http.Request) string {
