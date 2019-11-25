@@ -94,7 +94,7 @@ paths:
   /ofac/companies/{companyID}/watch:
     post:
       tags: ["Watchman"]
-      summary: Add OFAC watch on a Company
+      summary: Add watch on a OFAC Company
       operationId: addOfacCompanyWatch
       parameters:
         - name: X-Request-ID
@@ -302,7 +302,7 @@ paths:
   /ofac/customers/{customerID}/watch:
     post:
       tags: ["Watchman"]
-      summary: Add OFAC watch on a Customer
+      summary: Add watch on a OFAC Customer
       operationId: addOfacCustomerWatch
       parameters:
         - name: X-Request-ID
@@ -646,7 +646,7 @@ paths:
   /downloads:
     get:
       tags: ["Watchman"]
-      summary: Return list of recent downloads of OFAC data
+      summary: Return list of recent downloads of list data
       operationId: getLatestDownloads
       parameters:
         - name: X-Request-ID
