@@ -36,7 +36,7 @@ $ go doc github.com/moov-io/watchman/pkg/ofac SDN
 You can pull a working repository of our code code with git:
 
 ```
-$ midir -p moov/
+$ mkdir -p moov/
 $ cd moov/
 $ git clone git@github.com:moov-io/watchman.git
 ```
