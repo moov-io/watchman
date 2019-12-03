@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/moov-io/watchman/pkg/csl"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -113,6 +114,19 @@ func dplRecords(logger log.Logger, initialDir string) ([]*dpl.DPL, error) {
 		return nil, err
 	}
 	return dpl.Read(file)
+}
+
+func cslRecords(logger log.Logger, initialDir string) (*csl.CSL, error) {
+	file, err := csl.Download(logger, initialDir)
+	if err != nil {
+		return nil, err
+	}
+	cslRecords, err := csl.Read(file)
+	if err != nil {
+		return nil, err
+	}
+
+	return cslRecords, err
 }
 
 // refreshData reaches out to the various websites to download the latest
