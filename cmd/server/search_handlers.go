@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	moovhttp "github.com/moov-io/base/http"
@@ -179,19 +180,14 @@ func searchViaQ(logger log.Logger, searcher *searcher, name string) http.Handler
 			moovhttp.Problem(w, errNoSearchParams)
 			return
 		}
-
 		limit := extractSearchLimit(r)
 
 		// Perform multiple searches over the set of SDNs
-		sdns := searcher.FindSDNsByRemarksID(limit, name)
-		if len(sdns) == 0 {
-			sdns = searcher.TopSDNs(limit, name)
-		}
-		sdns = filterSDNs(sdns, buildFilterRequest(r.URL))
+		resp := buildFullSearchResponse(searcher, buildFilterRequest(r.URL), limit, name)
 
 		// record Prometheus metrics
-		if len(sdns) > 0 {
-			matchHist.With("type", "q").Observe(sdns[0].match)
+		if len(resp.SDNs) > 0 {
+			matchHist.With("type", "q").Observe(resp.SDNs[0].match)
 		} else {
 			matchHist.With("type", "q").Observe(0.0)
 		}
@@ -199,14 +195,52 @@ func searchViaQ(logger log.Logger, searcher *searcher, name string) http.Handler
 		// Build our big response object
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(&searchResponse{
-			SDNs:          sdns,
-			AltNames:      searcher.TopAltNames(limit, name),
-			Addresses:     searcher.TopAddresses(limit, name),
-			DeniedPersons: searcher.TopDPs(limit, name),
-			RefreshedAt:   searcher.lastRefreshedAt,
-		})
+		json.NewEncoder(w).Encode(resp)
 	}
+}
+
+// searchGather performs an inmem search with *searcher and mutates *searchResponse by setting a specific field
+type searchGather func(searcher *searcher, filters filterRequest, limit int, name string, resp *searchResponse)
+
+var (
+	gatherings = []searchGather{
+		// OFAC SDN Search
+		func(s *searcher, filters filterRequest, limit int, name string, resp *searchResponse) {
+			sdns := s.FindSDNsByRemarksID(limit, name)
+			if len(sdns) == 0 {
+				sdns = s.TopSDNs(limit, name)
+			}
+			resp.SDNs = filterSDNs(sdns, filters)
+		},
+		// OFAC SDN Alt Names
+		func(s *searcher, _ filterRequest, limit int, name string, resp *searchResponse) {
+			resp.AltNames = s.TopAltNames(limit, name)
+		},
+		// OFAC Addresses
+		func(s *searcher, _ filterRequest, limit int, name string, resp *searchResponse) {
+			resp.Addresses = s.TopAddresses(limit, name)
+		},
+		// BIS Denied Persons
+		func(s *searcher, _ filterRequest, limit int, name string, resp *searchResponse) {
+			resp.DeniedPersons = s.TopDPs(limit, name)
+		},
+	}
+)
+
+func buildFullSearchResponse(searcher *searcher, filters filterRequest, limit int, name string) *searchResponse {
+	resp := searchResponse{
+		RefreshedAt: searcher.lastRefreshedAt,
+	}
+	var wg sync.WaitGroup
+	wg.Add(len(gatherings))
+	for i := range gatherings {
+		go func(i int) {
+			gatherings[i](searcher, filters, limit, name, &resp)
+			wg.Done()
+		}(i)
+	}
+	wg.Wait()
+	return &resp
 }
 
 func searchViaAddressAndName(logger log.Logger, searcher *searcher, name string, req addressSearchRequest) http.HandlerFunc {
