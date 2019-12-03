@@ -2,6 +2,7 @@ package csl
 
 import (
 	"encoding/csv"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -21,9 +22,9 @@ func Read(path string) (*CSL, error) {
 		return nil, err
 	}
 
-	var out *CSL
+	var ssis []*SSI
 	for {
-		_, err := reader.Read()
+		record, err := reader.Read()
 		if err == io.EOF {
 			break
 		}
@@ -31,8 +32,37 @@ func Read(path string) (*CSL, error) {
 			continue
 		}
 
+		if len(record) != 28 {
+			fmt.Print(len(record))
+			continue
+		}
+
+		switch record[0] {
+		case "Sectoral Sanctions Identifications List (SSI) - Treasury Department":
+			ssis = append(ssis, unmarshalSSI(record))
+		default:
+			continue
+		}
 	}
-	return out, nil
+
+	return &CSL{
+		SSIs: ssis,
+	}, nil
+}
+
+func unmarshalSSI(record []string) *SSI {
+	return &SSI{
+		EntityID:       record[EntityNumberIdx],
+		Type:           record[TypeIdx],
+		Programs:       expandProgramsList(record[ProgramsIdx]),
+		Name:           record[NameIdx],
+		Addresses:      expandField(record[AddressesIdx]),
+		Remarks:        expandField(record[RemarksIdx]),
+		AlternateNames: expandField(record[AltNamesIdx]),
+		IDsOnRecord:    expandField(record[IDsIdx]),
+		SourceListURL:  record[SourceListURLIdx],
+		SourceInfoURL:  record[SourceInformationURLIdx],
+	}
 }
 
 // Some columns in a CSL row are actually lists delimited by ';'.

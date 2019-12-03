@@ -6,7 +6,7 @@ package csl
 
 // CSL contains each record from the Consolidate Screening List, broken down by the record's original source
 type CSL struct {
-	// []*SSI (Sectoral Sanctions Identifications List (SSI) - Treasury Department)
+	SSIs []*SSI // Sectoral Sanctions Identifications List (SSI) - Treasury Department
 	// []*EL (Entity List – Bureau of Industry and Security)
 	// []*UL (Unverified List – Bureau of Industry and Security)
 	// []*PSE (Foreign Sanctions Evaders (FSE) - Treasury Department)
@@ -15,3 +15,35 @@ type CSL struct {
 	// []*CAPTA (CAPTA (formerly Foreign Financial Institutions Subject to Part 561 - Treasury Department))
 	// []*ADL (AECA Debarred List - State Department)
 }
+
+// This is the order of the columns in the CSL
+const (
+	SourceIdx = iota
+	EntityNumberIdx
+	TypeIdx
+	ProgramsIdx
+	NameIdx
+	TitleIdx
+	AddressesIdx
+	FRNoticeIdx
+	StartDateIdx
+	EndDateIdx
+	StandardOrderIdx
+	LicenseRequirementIdx
+	LicensePolicyIdx
+	CallSignIdx
+	VesselTypeIdx
+	GrossTonnageIdx
+	GrossRegisteredTonnageIdx
+	VesselFlagIdx
+	VesselOwnerIdx
+	RemarksIdx
+	SourceListURLIdx
+	AltNamesIdx
+	CitizenshipsIdx
+	DatesOfBirthIdx
+	NationalitiesIdx
+	PlacesOfBirthIdx
+	SourceInformationURLIdx
+	IDsIdx
+)
