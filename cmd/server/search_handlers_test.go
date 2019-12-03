@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/moov-io/watchman/pkg/csl"
 	"github.com/moov-io/watchman/pkg/dpl"
 	"github.com/moov-io/watchman/pkg/ofac"
 
@@ -228,6 +229,7 @@ func TestSearch__NameAndAltName(t *testing.T) {
 		SDNs:      sdnSearcher.SDNs,
 		Addresses: addressSearcher.Addresses,
 		DPs:       dplSearcher.DPs,
+		SSIs:      ssiSearcher.SSIs,
 	}
 
 	router := mux.NewRouter()
@@ -241,10 +243,11 @@ func TestSearch__NameAndAltName(t *testing.T) {
 
 	// read response body
 	var wrapper struct {
-		SDNs          []*ofac.SDN               `json:"SDNs"`
-		AltNames      []*ofac.AlternateIdentity `json:"altNames"`
-		Addresses     []*ofac.Address           `json:"addresses"`
-		DeniedPersons []*dpl.DPL                `json:"deniedPersons"`
+		SDNs              []*ofac.SDN               `json:"SDNs"`
+		AltNames          []*ofac.AlternateIdentity `json:"altNames"`
+		Addresses         []*ofac.Address           `json:"addresses"`
+		DeniedPersons     []*dpl.DPL                `json:"deniedPersons"`
+		SectoralSanctions []*csl.SSI                `json:"sectoralSanctions"`
 	}
 	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
 		t.Fatal(err)
@@ -261,6 +264,9 @@ func TestSearch__NameAndAltName(t *testing.T) {
 	if wrapper.DeniedPersons[0].StreetAddress != "P.O. BOX 28360" {
 		t.Errorf("%#v", wrapper.DeniedPersons[0].StreetAddress)
 	}
+	if wrapper.SectoralSanctions[0].EntityID != "18782" {
+		t.Errorf("%#v", wrapper.SectoralSanctions[0].EntityID)
+	}
 }
 
 func TestSearch__Name(t *testing.T) {
@@ -268,7 +274,12 @@ func TestSearch__Name(t *testing.T) {
 	req := httptest.NewRequest("GET", "/search?name=Dr+AL+ZAWAHIRI&limit=1", nil)
 
 	router := mux.NewRouter()
-	addSearchRoutes(log.NewNopLogger(), router, sdnSearcher)
+	combinedSearcher := &searcher{
+		SDNs: sdnSearcher.SDNs,
+		DPs:  dplSearcher.DPs,
+		SSIs: ssiSearcher.SSIs,
+	}
+	addSearchRoutes(log.NewNopLogger(), router, combinedSearcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
@@ -282,23 +293,24 @@ func TestSearch__Name(t *testing.T) {
 
 	var wrapper struct {
 		SDNs []*ofac.SDN `json:"SDNs"`
+		DPs  []*dpl.DPL  `json:"deniedPersons"`
+		SSIs []*csl.SSI  `json:"sectoralSanctions"`
 	}
 	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
 		t.Fatal(err)
 	}
+	if len(wrapper.SDNs) != 1 || len(wrapper.SSIs) != 1 || len(wrapper.DPs) != 1 {
+		t.Fatalf("SDNs=%d SSIs=%d DPs=%d", len(wrapper.SDNs), len(wrapper.SSIs), len(wrapper.DPs))
+	}
 	if wrapper.SDNs[0].EntityID != "2676" {
 		t.Errorf("%#v", wrapper.SDNs[0])
 	}
-
-	// directly check searcher.TopSDNs
-	sdns := sdnSearcher.TopSDNs(1, "Dr AL ZAWAHIRI")
-	if len(sdns) != 1 {
-		t.Errorf("got SDNs: %#v", sdns)
+	if wrapper.SSIs[0].EntityID != "18782" {
+		t.Errorf("%#v", wrapper.SSIs[0])
 	}
-	if sdns[0].EntityID != "2676" {
-		t.Errorf("%#v", sdns[0])
+	if wrapper.DPs[0].Name != "AL NASER WINGS AIRLINES" {
+		t.Errorf("%#v", wrapper.DPs[0])
 	}
-	eql(t, "name match", sdns[0].match, 1.0)
 }
 
 func TestSearch__AltName(t *testing.T) {

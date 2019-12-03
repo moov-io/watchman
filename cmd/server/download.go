@@ -9,12 +9,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/moov-io/watchman/pkg/csl"
 	"io/ioutil"
 	"net/http"
 	"time"
 
 	moovhttp "github.com/moov-io/base/http"
+	"github.com/moov-io/watchman/pkg/csl"
 	"github.com/moov-io/watchman/pkg/dpl"
 	"github.com/moov-io/watchman/pkg/ofac"
 
@@ -37,19 +37,21 @@ func init() {
 // Download holds counts for each type of list data parsed from files and a
 // timestamp of when the download happened.
 type Download struct {
-	Timestamp     time.Time `json:"timestamp"`
-	SDNs          int       `json:"SDNs"`
-	Alts          int       `json:"altNames"`
-	Addresses     int       `json:"addresses"`
-	DeniedPersons int       `json:"deniedPersons"`
+	Timestamp         time.Time `json:"timestamp"`
+	SDNs              int       `json:"SDNs"`
+	Alts              int       `json:"altNames"`
+	Addresses         int       `json:"addresses"`
+	DeniedPersons     int       `json:"deniedPersons"`
+	SectoralSanctions int       `json:"sectoralSanctions"`
 }
 
 type downloadStats struct {
-	SDNs          int       `json:"SDNs"`
-	Alts          int       `json:"altNames"`
-	Addresses     int       `json:"addresses"`
-	DeniedPersons int       `json:"deniedPersons"`
-	RefreshedAt   time.Time `json:"timestamp"`
+	SDNs              int       `json:"SDNs"`
+	Alts              int       `json:"altNames"`
+	Addresses         int       `json:"addresses"`
+	DeniedPersons     int       `json:"deniedPersons"`
+	SectoralSanctions int       `json:"sectoralSanctions"`
+	RefreshedAt       time.Time `json:"timestamp"`
 }
 
 // periodicDataRefresh will forever block for interval's duration and then download and reparse the data.
@@ -69,7 +71,8 @@ func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo down
 		} else {
 			downloadRepo.recordStats(stats)
 			if s.logger != nil {
-				s.logger.Log("main", fmt.Sprintf("data refreshed - Addresses=%d AltNames=%d SDNs=%d DPL=%d", stats.Addresses, stats.Alts, stats.SDNs, stats.DeniedPersons))
+				s.logger.Log("main", fmt.Sprintf("data refreshed - Addresses=%d AltNames=%d SDNs=%d DPL=%d SSI=%d",
+					stats.Addresses, stats.Alts, stats.SDNs, stats.DeniedPersons, stats.SectoralSanctions))
 			}
 			updates <- stats // send stats for re-search and watch notifications
 		}
@@ -145,16 +148,24 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 	adds := precomputeAddresses(results.Addresses)
 	alts := precomputeAlts(results.AlternateIdentities)
 
-	dps, err := dplRecords(s.logger, initialDir)
+	deniedPersons, err := dplRecords(s.logger, initialDir)
 	if err != nil {
 		return nil, err
 	}
+	dps := precomputeDPs(deniedPersons)
+
+	csl, err := cslRecords(s.logger, initialDir)
+	if err != nil {
+		return nil, err
+	}
+	ssis := precomputeSSIs(csl.SSIs)
 
 	stats := &downloadStats{
-		SDNs:          len(sdns),
-		Alts:          len(alts),
-		Addresses:     len(adds),
-		DeniedPersons: len(dps),
+		SDNs:              len(sdns),
+		Alts:              len(alts),
+		Addresses:         len(adds),
+		DeniedPersons:     len(dps),
+		SectoralSanctions: len(csl.SSIs),
 	}
 	stats.RefreshedAt = lastRefresh(initialDir)
 
@@ -163,7 +174,8 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 	s.SDNs = sdns
 	s.Addresses = adds
 	s.Alts = alts
-	s.DPs = precomputeDPs(dps)
+	s.DPs = dps
+	s.SSIs = ssis
 	s.lastRefreshedAt = stats.RefreshedAt
 	s.Unlock()
 
@@ -245,19 +257,19 @@ func (r *sqliteDownloadRepository) recordStats(stats *downloadStats) error {
 		return errors.New("recordStats: nil downloadStats")
 	}
 
-	query := `insert into download_stats (downloaded_at, sdns, alt_names, addresses, denied_persons) values (?, ?, ?, ?, ?);`
+	query := `insert into download_stats (downloaded_at, sdns, alt_names, addresses, denied_persons, sectoral_sanctions) values (?, ?, ?, ?, ?, ?);`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(stats.RefreshedAt, stats.SDNs, stats.Alts, stats.Addresses, stats.DeniedPersons)
+	_, err = stmt.Exec(stats.RefreshedAt, stats.SDNs, stats.Alts, stats.Addresses, stats.DeniedPersons, stats.SectoralSanctions)
 	return err
 }
 
 func (r *sqliteDownloadRepository) latestDownloads(limit int) ([]Download, error) {
-	query := `select downloaded_at, sdns, alt_names, addresses, denied_persons from download_stats order by downloaded_at desc limit ?;`
+	query := `select downloaded_at, sdns, alt_names, addresses, denied_persons, sectoral_sanctions from download_stats order by downloaded_at desc limit ?;`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return nil, err
@@ -273,7 +285,7 @@ func (r *sqliteDownloadRepository) latestDownloads(limit int) ([]Download, error
 	var downloads []Download
 	for rows.Next() {
 		var dl Download
-		if err := rows.Scan(&dl.Timestamp, &dl.SDNs, &dl.Alts, &dl.Addresses, &dl.DeniedPersons); err == nil {
+		if err := rows.Scan(&dl.Timestamp, &dl.SDNs, &dl.Alts, &dl.Addresses, &dl.DeniedPersons, &dl.SectoralSanctions); err == nil {
 			downloads = append(downloads, dl)
 		}
 	}
