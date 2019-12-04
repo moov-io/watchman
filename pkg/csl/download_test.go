@@ -33,6 +33,10 @@ func TestDownload(t *testing.T) {
 }
 
 func TestDownload_initialDir(t *testing.T) {
+	if os.Getenv("TRADEGOV_API_KEY") == "" {
+		return
+	}
+
 	dir, err := ioutil.TempDir("", "iniital-dir")
 	if err != nil {
 		t.Fatal(err)
