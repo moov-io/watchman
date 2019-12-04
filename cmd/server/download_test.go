@@ -20,12 +20,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var (
-	includeCSLTests = func() bool {
-		return os.Getenv("TRADEGOV_API_KEY") != ""
-	}()
-)
-
 func TestSearcher__refreshInterval(t *testing.T) {
 	if v := getDataRefreshInterval(log.NewNopLogger(), ""); v.String() != "12h0m0s" {
 		t.Errorf("Got %v", v)
@@ -44,7 +38,7 @@ func TestSearcher__refreshInterval(t *testing.T) {
 	s.periodicDataRefresh(0*time.Second, nil, nil)
 }
 
-func TestSearcher__refreshData(t *testing.T) {
+func TestSearcher__refreshData_nonCSL(t *testing.T) {
 	if testing.Short() {
 		return
 	}
@@ -65,11 +59,6 @@ func TestSearcher__refreshData(t *testing.T) {
 	}
 	if len(s.DPs) == 0 || stats.DeniedPersons == 0 {
 		t.Errorf("empty DPs=%d or stats.DeniedPersons=%d", len(s.DPs), stats.DeniedPersons)
-	}
-	if includeCSLTests {
-		if len(s.SSIs) == 0 || stats.SectoralSanctions == 0 {
-			t.Errorf("empty SSIs=%d or stats.SectoralSanctions=%d", len(s.SSIs), stats.SectoralSanctions)
-		}
 	}
 }
 
