@@ -157,6 +157,10 @@ Moov Sanction Search supports sending a webhook periodically with a free-form na
 - `mysql_connections`: How many MySQL connections and what status they're in.
 - `sqlite_connections`: How many sqlite connections and what status they're in.
 
+## Generating a Client
+
+We use [openapi-generator](https://github.com/OpenAPITools/openapi-generator) from the [OpenAPI team](https://swagger.io/specification/) to generate API clients for popular programming languages from the API specification. To generate the Go client run `make client` from Watchman's root directory.
+
 ## Getting Help
 
 We maintain a [runbook for common issues](docs/runbook.md) and configuration options. Also, if you've encountered a security issue please contact us at [`security@moov.io`](mailto:security@moov.io).
