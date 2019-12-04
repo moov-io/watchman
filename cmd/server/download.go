@@ -155,18 +155,18 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 	}
 	dps := precomputeDPs(deniedPersons)
 
-	cslRecords, err := cslRecords(s.logger, initialDir)
+	consolidatedLists, err := cslRecords(s.logger, initialDir)
 	if err != nil {
 		return nil, err
 	}
-	ssis := precomputeSSIs(cslRecords.SSIs)
+	ssis := precomputeSSIs(consolidatedLists.SSIs)
 
 	stats := &downloadStats{
 		SDNs:              len(sdns),
 		Alts:              len(alts),
 		Addresses:         len(adds),
 		DeniedPersons:     len(dps),
-		SectoralSanctions: len(cslRecords.SSIs),
+		SectoralSanctions: len(consolidatedLists.SSIs),
 	}
 	stats.RefreshedAt = lastRefresh(initialDir)
 
