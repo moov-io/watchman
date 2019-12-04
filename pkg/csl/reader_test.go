@@ -19,6 +19,19 @@ func TestRead(t *testing.T) {
 	}
 }
 
+func TestRead_invalidRow(t *testing.T) {
+	csl, err := Read(filepath.Join("..", "..", "test", "testdata", "invalidFiles", "csl.csv"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if csl == nil {
+		t.Errorf("failed to parse csl.csv")
+	}
+	if len(csl.SSIs) != 1 {
+		t.Errorf("len(SSIs)=%d", len(csl.SSIs))
+	}
+}
+
 func Test_unmarshalSSI(t *testing.T) {
 	// row from the live CSL
 	record := []string{"Sectoral Sanctions Identifications List (SSI) - Treasury Department", "17254", "Entity", "UKRAINE-EO13662]; SYRIA", "AK TRANSNEFT OAO",
@@ -52,6 +65,7 @@ func Test_expandField(t *testing.T) {
 		input string
 		want  []string
 	}{
+		{"", []string{""}},
 		{"1021100731190, Registration ID     ; 00159025, Government Gazette Number; 1102024468, Tax ID No.; ukhta-tr.gazprom.ru, Website; azaharov@sgp.gazprom.ru, Email Address; Subject to Directive 4, Executive Order 13662 Directive Determination -",
 			[]string{"1021100731190, Registration ID", "00159025, Government Gazette Number", "1102024468, Tax ID No.", "ukhta-tr.gazprom.ru, Website",
 				"azaharov@sgp.gazprom.ru, Email Address", "Subject to Directive 4, Executive Order 13662 Directive Determination -"}},
@@ -70,6 +84,7 @@ func Test_expandProgramsList(t *testing.T) {
 		input string
 		want  []string
 	}{
+		{"", []string{""}},
 		{"IFSR] [SDGT", []string{"IFSR", "SDGT"}}, // Sometimes the CSL "programs" column contains data like "IFSR] [SDGT" instead of "IFSR; SDGT"
 		{"IFSR; SDGT", []string{"IFSR", "SDGT"}},
 		{"CYBER2; CAATSA - RUSSIA", []string{"CYBER2", "CAATSA - RUSSIA"}},

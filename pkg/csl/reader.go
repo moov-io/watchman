@@ -2,7 +2,6 @@ package csl
 
 import (
 	"encoding/csv"
-	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -17,11 +16,6 @@ func Read(path string) (*CSL, error) {
 
 	reader := csv.NewReader(f)
 
-	_, err = reader.Read() // read and discard the header row
-	if err != nil {
-		return nil, err
-	}
-
 	var ssis []*SSI
 	for {
 		record, err := reader.Read()
@@ -29,11 +23,6 @@ func Read(path string) (*CSL, error) {
 			break
 		}
 		if err != nil {
-			continue
-		}
-
-		if len(record) != 28 {
-			fmt.Print(len(record))
 			continue
 		}
 
