@@ -925,6 +925,59 @@ components:
         match:
           type: number
           example: 0.92
+    SSI:
+      description: Treasury Department Sectoral Sanctions Identifications List (SSI)
+      properties:
+        entityID:
+          type: string
+          description: The ID assigned to an entity by the Treasury Department
+          example: 1231
+        type:
+          type: string
+          description: Entity type (e.g. individual, vessel, aircraft, etc)
+          example: individual
+        programs:
+          type: array
+          items:
+            type: string
+          description: Sanction programs for which the entity is flagged
+          example: ["UKRAINE-EO13662", "SYRIA"]
+        name:
+          type: string
+          description: The name of the entity
+          example: PJSC VERKHNECHONSKNEFTEGAZ
+        addresses:
+          type: array
+          items:
+            type: string
+          description: Addresses associated with the entity
+          example: ["D. Retyum, Luzhski Raion, Leningradskaya Obl., 188230, RU", "Retiun Village, Lujskiy District, Leningrad Region, RU"]
+        remarks:
+          type: array
+          items:
+            type: string
+          description: Additional details regarding the entity
+          example: ["For more information on directives, please visit the following link: http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives.", "(Linked To: OPEN JOINT-STOCK COMPANY ROSNEFT OIL COMPANY)"]
+        alternateNames:
+          type: array
+          items:
+            type: string
+          description: Known aliases associated with the entity
+          example: ["VERKHNECHONSKNEFTEGAZ", "OJSC VERKHNECHONSKNEFTEGAZ"]
+        ids:
+          type: array
+          items:
+            type: string
+          description: IDs on file for the entity
+          example: ["Subject to Directive 4, Executive Order 13662 Directive Determination", "vcng@rosneft.ru, Email Address", "Subject to Directive 2, Executive Order 13662 Directive Determination"]
+        sourceListURL:
+          type: string
+          description: The link to the official SSI list
+          example: http://bit.ly/1MLgou0
+        sourceInfoURL:
+          type: string
+          description: The link for information regarding the source
+          example: http://bit.ly/1MLgou0
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       properties:
@@ -974,6 +1027,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DPL'
+        sectoralSanctions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SSI'
         refreshedAt:
           type: string
           format: date-time

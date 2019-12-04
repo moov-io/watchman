@@ -71,6 +71,10 @@ var (
 			"rename_ofac_download_stats",
 			"alter table ofac_download_stats rename to download_stats",
 		),
+		execsql(
+			"add_sectoral_sanctions_to_download_stats",
+			"alter table download_stats add column sectoral_sanctions default 0;",
+		),
 	)
 )
 

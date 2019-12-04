@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/moov-io/watchman/pkg/csl"
 	"github.com/moov-io/watchman/pkg/dpl"
 	"github.com/moov-io/watchman/pkg/ofac"
 
@@ -114,6 +115,34 @@ var (
 				LastUpdate:     "2002-01-28",
 				Action:         "STANDARD ORDER",
 				FRCitation:     "67 F.R. 7354 2/19/02 66 F.R. 48998 9/25/01 62 F.R. 26471 5/14/97 62 F.R. 34688 6/27/97 62 F.R. 60063 11/6/97 63 F.R. 25817 5/11/98 63 F.R. 58707 11/2/98 64 F.R. 23049 4/29/99",
+			},
+		}),
+	}
+	ssiSearcher = &searcher{
+		SSIs: precomputeSSIs([]*csl.SSI{
+			{
+				EntityID:       "18782",
+				Type:           "Entity",
+				Programs:       []string{"SYRIA", "UKRAINE-EO13662"},
+				Name:           "ROSOBORONEKSPORT OAO",
+				Addresses:      []string{"27 Stromynka ul., Moscow, 107076, RU"},
+				Remarks:        []string{"For more information on directives, please visit the following link: http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives", "(Linked To: ROSTEC)"},
+				AlternateNames: []string{"RUSSIAN DEFENSE EXPORT ROSOBORONEXPORT", "KENKYUSHO", "ROSOBORONEXPORT JSC", "ROSOBORONEKSPORT OJSC", "OJSC ROSOBORONEXPORT", "ROSOBORONEXPORT"},
+				IDsOnRecord:    []string{"1117746521452, Registration ID", "56467052, Government Gazette Number", "7718852163, Tax ID No.", "Subject to Directive 3, Executive Order 13662 Directive Determination -", "www.roe.ru, Website"},
+				SourceListURL:  "http://bit.ly/1QWTIfE",
+				SourceInfoURL:  "http://bit.ly/1MLgou0",
+			},
+			{
+				EntityID:       "18736",
+				Type:           "Entity",
+				Programs:       []string{"UKRAINE-EO13662"},
+				Name:           "VTB SPECIALIZED DEPOSITORY, CJSC",
+				Addresses:      []string{"35 Myasnitskaya Street, Moscow, 101000, RU"},
+				Remarks:        []string{"For more information on directives, please visit the following link: http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives", "(Linked To: ROSTEC)"},
+				AlternateNames: []string{"CJS VTB SPECIALIZED DEPOSITORY"},
+				IDsOnRecord:    []string{"1117746521452, Registration ID", "56467052, Government Gazette Number", "7718852163, Tax ID No.", "Subject to Directive 3, Executive Order 13662 Directive Determination -", "www.roe.ru, Website"},
+				SourceListURL:  "http://bit.ly/1QWTIfE",
+				SourceInfoURL:  "http://bit.ly/1MLgou0",
 			},
 		}),
 	}
@@ -423,6 +452,16 @@ func TestSearch__TopDPs(t *testing.T) {
 	// DPL doesn't have any entity IDs. Comparing expected address components instead
 	if dps[0].DeniedPerson.StreetAddress != "P.O. BOX 28360" || dps[0].DeniedPerson.City != "DUBAI" {
 		t.Errorf("%#v", dps[0].DeniedPerson)
+	}
+}
+
+func TestSearcher_TopSSIs(t *testing.T) {
+	ssis := ssiSearcher.TopSSIs(1, "ROSOBORONEKSPORT")
+	if len(ssis) == 0 {
+		t.Fatal("empty SSIs")
+	}
+	if ssis[0].SectoralSanction.EntityID != "18782" {
+		t.Errorf("%#v", ssis[0].SectoralSanction)
 	}
 }
 

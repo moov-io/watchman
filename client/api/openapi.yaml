@@ -1290,6 +1290,93 @@ components:
         match:
           example: 0.92
           type: number
+    SSI:
+      description: Treasury Department Sectoral Sanctions Identifications List (SSI)
+      example:
+        sourceInfoURL: http://bit.ly/1MLgou0
+        addresses:
+        - D. Retyum, Luzhski Raion, Leningradskaya Obl., 188230, RU
+        - Retiun Village, Lujskiy District, Leningrad Region, RU
+        alternateNames:
+        - VERKHNECHONSKNEFTEGAZ
+        - OJSC VERKHNECHONSKNEFTEGAZ
+        name: PJSC VERKHNECHONSKNEFTEGAZ
+        ids:
+        - Subject to Directive 4, Executive Order 13662 Directive Determination
+        - vcng@rosneft.ru, Email Address
+        - Subject to Directive 2, Executive Order 13662 Directive Determination
+        entityID: "1231"
+        programs:
+        - UKRAINE-EO13662
+        - SYRIA
+        type: individual
+        sourceListURL: http://bit.ly/1MLgou0
+        remarks:
+        - 'For more information on directives, please visit the following link: http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives.'
+        - '(Linked To: OPEN JOINT-STOCK COMPANY ROSNEFT OIL COMPANY)'
+      properties:
+        entityID:
+          description: The ID assigned to an entity by the Treasury Department
+          example: "1231"
+          type: string
+        type:
+          description: Entity type (e.g. individual, vessel, aircraft, etc)
+          example: individual
+          type: string
+        programs:
+          description: Sanction programs for which the entity is flagged
+          example:
+          - UKRAINE-EO13662
+          - SYRIA
+          items:
+            type: string
+          type: array
+        name:
+          description: The name of the entity
+          example: PJSC VERKHNECHONSKNEFTEGAZ
+          type: string
+        addresses:
+          description: Addresses associated with the entity
+          example:
+          - D. Retyum, Luzhski Raion, Leningradskaya Obl., 188230, RU
+          - Retiun Village, Lujskiy District, Leningrad Region, RU
+          items:
+            type: string
+          type: array
+        remarks:
+          description: Additional details regarding the entity
+          example:
+          - 'For more information on directives, please visit the following link:
+            http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives.'
+          - '(Linked To: OPEN JOINT-STOCK COMPANY ROSNEFT OIL COMPANY)'
+          items:
+            type: string
+          type: array
+        alternateNames:
+          description: Known aliases associated with the entity
+          example:
+          - VERKHNECHONSKNEFTEGAZ
+          - OJSC VERKHNECHONSKNEFTEGAZ
+          items:
+            type: string
+          type: array
+        ids:
+          description: IDs on file for the entity
+          example:
+          - Subject to Directive 4, Executive Order 13662 Directive Determination
+          - vcng@rosneft.ru, Email Address
+          - Subject to Directive 2, Executive Order 13662 Directive Determination
+          items:
+            type: string
+          type: array
+        sourceListURL:
+          description: The link to the official SSI list
+          example: http://bit.ly/1MLgou0
+          type: string
+        sourceInfoURL:
+          description: The link for information regarding the source
+          example: http://bit.ly/1MLgou0
+          type: string
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       example:
@@ -1400,6 +1487,51 @@ components:
           effectiveDate: 06/15/2016
           expirationDate: 06/15/2025
         refreshedAt: 2000-01-23T04:56:07.000+00:00
+        sectoralSanctions:
+        - sourceInfoURL: http://bit.ly/1MLgou0
+          addresses:
+          - D. Retyum, Luzhski Raion, Leningradskaya Obl., 188230, RU
+          - Retiun Village, Lujskiy District, Leningrad Region, RU
+          alternateNames:
+          - VERKHNECHONSKNEFTEGAZ
+          - OJSC VERKHNECHONSKNEFTEGAZ
+          name: PJSC VERKHNECHONSKNEFTEGAZ
+          ids:
+          - Subject to Directive 4, Executive Order 13662 Directive Determination
+          - vcng@rosneft.ru, Email Address
+          - Subject to Directive 2, Executive Order 13662 Directive Determination
+          entityID: "1231"
+          programs:
+          - UKRAINE-EO13662
+          - SYRIA
+          type: individual
+          sourceListURL: http://bit.ly/1MLgou0
+          remarks:
+          - 'For more information on directives, please visit the following link:
+            http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives.'
+          - '(Linked To: OPEN JOINT-STOCK COMPANY ROSNEFT OIL COMPANY)'
+        - sourceInfoURL: http://bit.ly/1MLgou0
+          addresses:
+          - D. Retyum, Luzhski Raion, Leningradskaya Obl., 188230, RU
+          - Retiun Village, Lujskiy District, Leningrad Region, RU
+          alternateNames:
+          - VERKHNECHONSKNEFTEGAZ
+          - OJSC VERKHNECHONSKNEFTEGAZ
+          name: PJSC VERKHNECHONSKNEFTEGAZ
+          ids:
+          - Subject to Directive 4, Executive Order 13662 Directive Determination
+          - vcng@rosneft.ru, Email Address
+          - Subject to Directive 2, Executive Order 13662 Directive Determination
+          entityID: "1231"
+          programs:
+          - UKRAINE-EO13662
+          - SYRIA
+          type: individual
+          sourceListURL: http://bit.ly/1MLgou0
+          remarks:
+          - 'For more information on directives, please visit the following link:
+            http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives.'
+          - '(Linked To: OPEN JOINT-STOCK COMPANY ROSNEFT OIL COMPANY)'
       properties:
         SDNs:
           items:
@@ -1416,6 +1548,10 @@ components:
         deniedPersons:
           items:
             $ref: '#/components/schemas/DPL'
+          type: array
+        sectoralSanctions:
+          items:
+            $ref: '#/components/schemas/SSI'
           type: array
         refreshedAt:
           format: date-time
