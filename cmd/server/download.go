@@ -122,7 +122,8 @@ func dplRecords(logger log.Logger, initialDir string) ([]*dpl.DPL, error) {
 func cslRecords(logger log.Logger, initialDir string) (*csl.CSL, error) {
 	file, err := csl.Download(logger, initialDir)
 	if err != nil {
-		return nil, err
+		logger.Log("download", "WARN: skipping CSL download", "description", err)
+		return &csl.CSL{}, nil
 	}
 	cslRecords, err := csl.Read(file)
 	if err != nil {
