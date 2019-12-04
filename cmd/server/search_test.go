@@ -465,6 +465,29 @@ func TestSearcher_TopSSIs(t *testing.T) {
 	}
 }
 
+func TestSearcher_TopSSIs_limit(t *testing.T) {
+	ssis := ssiSearcher.TopSSIs(2, "SPECIALIZED DEPOSITORY")
+	if len(ssis) != 2 {
+		t.Fatalf("Expected 2 results, found %d", len(ssis))
+	}
+	if ssis[0].SectoralSanction.EntityID != "18736" {
+		t.Errorf("%#v", ssis[0].SectoralSanction)
+	}
+}
+
+func TestSearcher_TopSSIs_reportAltNameWeight(t *testing.T) {
+	ssis := ssiSearcher.TopSSIs(1, "KENKYUSHO")
+	if len(ssis) == 0 {
+		t.Fatal("empty SSIs")
+	}
+	if ssis[0].SectoralSanction.EntityID != "18782" {
+		t.Errorf("%f - %#v", ssis[0].match, ssis[0].SectoralSanction)
+	}
+	if ssis[0].match != 1 {
+		t.Errorf("Expected match=1 for alt names: %f - %#v", ssis[0].match, ssis[0].SectoralSanction)
+	}
+}
+
 func TestSearch__extractIDFromRemark(t *testing.T) {
 	cases := []struct {
 		input, expected string

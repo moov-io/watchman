@@ -322,16 +322,17 @@ func (s *searcher) TopSSIs(limit int, name string) []SSI {
 	xs := newLargest(limit)
 
 	for _, ssi := range s.SSIs {
-		xs.add(&item{
+		it := &item{
 			value:  ssi,
 			weight: jaroWinkler(ssi.name, name),
-		})
-		for _, alt := range ssi.SectoralSanction.AlternateNames {
-			xs.add(&item{
-				value:  ssi,
-				weight: jaroWinkler(alt, name),
-			})
 		}
+		for _, alt := range ssi.SectoralSanction.AlternateNames {
+			currWeight := jaroWinkler(alt, name)
+			if currWeight > it.weight {
+				it.weight = currWeight
+			}
+		}
+		xs.add(it)
 	}
 
 	out := make([]SSI, 0)
@@ -343,10 +344,6 @@ func (s *searcher) TopSSIs(limit int, name string) []SSI {
 			}
 			ssi := *ss
 			ssi.match = v.weight
-			// Each SSI has been ranked based on Name AND AlternativeName, which means the same entry can appear more than once.
-			if len(out) > 0 && out[len(out)-1].SectoralSanction.EntityID == ssi.SectoralSanction.EntityID {
-				continue
-			}
 			out = append(out, ssi)
 		}
 	}
