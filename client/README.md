@@ -69,6 +69,7 @@ Class | Method | HTTP request | Description
  - [OfacWatch](docs/OfacWatch.md)
  - [OfacWatchRequest](docs/OfacWatchRequest.md)
  - [Search](docs/Search.md)
+ - [Ssi](docs/Ssi.md)
  - [UpdateOfacCompanyStatus](docs/UpdateOfacCompanyStatus.md)
  - [UpdateOfacCustomerStatus](docs/UpdateOfacCustomerStatus.md)
 

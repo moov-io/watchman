@@ -144,7 +144,8 @@ func main() {
 		os.Exit(1)
 	} else {
 		downloadRepo.recordStats(stats)
-		logger.Log("main", fmt.Sprintf("data refreshed - Addresses=%d AltNames=%d SDNs=%d DeniedPersons=%d", stats.Addresses, stats.Alts, stats.SDNs, stats.DeniedPersons))
+		logger.Log("main", fmt.Sprintf("data refreshed - Addresses=%d AltNames=%d SDNs=%d DeniedPersons=%d SectoralSanctions=%d",
+			stats.Addresses, stats.Alts, stats.SDNs, stats.DeniedPersons, stats.SectoralSanctions))
 	}
 
 	// Setup Watch and Webhook database wrapper

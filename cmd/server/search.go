@@ -18,6 +18,7 @@ import (
 	"time"
 	"unicode"
 
+	"github.com/moov-io/watchman/pkg/csl"
 	"github.com/moov-io/watchman/pkg/dpl"
 	"github.com/moov-io/watchman/pkg/ofac"
 
@@ -41,6 +42,7 @@ type searcher struct {
 	Addresses       []*Address
 	Alts            []*Alt
 	DPs             []*DP
+	SSIs            []*SSI
 	lastRefreshedAt time.Time
 	sync.RWMutex    // protects all above fields
 
@@ -307,6 +309,50 @@ func (s *searcher) TopDPs(limit int, name string) []DP {
 	return out
 }
 
+// TopSSIs searches Sectoral Sanctions records by Name and Alias
+func (s *searcher) TopSSIs(limit int, name string) []SSI {
+	name = precompute(name)
+
+	s.RLock()
+	defer s.RUnlock()
+
+	if len(s.SSIs) == 0 {
+		return nil
+	}
+	xs := newLargest(limit)
+
+	for _, ssi := range s.SSIs {
+		it := &item{
+			value:  ssi,
+			weight: jaroWinkler(ssi.name, name),
+		}
+		for _, alt := range ssi.SectoralSanction.AlternateNames {
+			if alt == "" {
+				continue
+			}
+			currWeight := jaroWinkler(alt, name)
+			if currWeight > it.weight {
+				it.weight = currWeight
+			}
+		}
+		xs.add(it)
+	}
+
+	out := make([]SSI, 0)
+	for _, thisItem := range xs.items {
+		if v := thisItem; v != nil {
+			ss, ok := v.value.(*SSI)
+			if !ok {
+				continue
+			}
+			ssi := *ss
+			ssi.match = v.weight
+			out = append(out, ssi)
+		}
+	}
+	return out
+}
+
 // SDN is ofac.SDN wrapped with precomputed search metadata
 type SDN struct {
 	*ofac.SDN
@@ -460,6 +506,38 @@ func precomputeDPs(persons []*dpl.DPL) []*DP {
 		out[i] = &DP{
 			DeniedPerson: persons[i],
 			name:         precompute(persons[i].Name),
+		}
+	}
+	return out
+}
+
+type SSI struct {
+	SectoralSanction *csl.SSI
+	match            float64
+	name             string
+}
+
+func (s SSI) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		*csl.SSI
+		Match float64 `json:"match"`
+	}{
+		s.SectoralSanction,
+		s.match,
+	})
+}
+
+func precomputeSSIs(ssis []*csl.SSI) []*SSI {
+	out := make([]*SSI, len(ssis))
+	for i, ssi := range ssis {
+		var normalizedAltNames []string
+		for _, name := range ssi.AlternateNames {
+			normalizedAltNames = append(normalizedAltNames, precompute(reorderSDNName(name, ssi.Type)))
+		}
+		ssi.AlternateNames = normalizedAltNames
+		out[i] = &SSI{
+			SectoralSanction: ssi,
+			name:             precompute(reorderSDNName(ssi.Name, ssi.Type)),
 		}
 	}
 	return out

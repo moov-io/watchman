@@ -38,12 +38,12 @@ func TestSearcher__refreshInterval(t *testing.T) {
 	s.periodicDataRefresh(0*time.Second, nil, nil)
 }
 
-func TestSearcher__refreshData(t *testing.T) {
+func TestSearcher__refreshData_nonCSL(t *testing.T) {
 	if testing.Short() {
 		return
 	}
 
-	s := &searcher{}
+	s := &searcher{logger: log.NewNopLogger()}
 	stats, err := s.refreshData("")
 	if err != nil {
 		t.Fatal(err)
@@ -57,13 +57,16 @@ func TestSearcher__refreshData(t *testing.T) {
 	if len(s.SDNs) == 0 || stats.SDNs == 0 {
 		t.Errorf("empty SDNs=%d or stats.SDNs=%d", len(s.SDNs), stats.SDNs)
 	}
+	if len(s.DPs) == 0 || stats.DeniedPersons == 0 {
+		t.Errorf("empty DPs=%d or stats.DeniedPersons=%d", len(s.DPs), stats.DeniedPersons)
+	}
 }
 
 func TestDownload_record(t *testing.T) {
 	t.Parallel()
 
 	check := func(t *testing.T, repo *sqliteDownloadRepository) {
-		stats := &downloadStats{SDNs: 1, Alts: 12, Addresses: 42, DeniedPersons: 13}
+		stats := &downloadStats{SDNs: 1, Alts: 12, Addresses: 42, DeniedPersons: 13, SectoralSanctions: 39}
 		if err := repo.recordStats(stats); err != nil {
 			t.Fatal(err)
 		}
@@ -84,6 +87,12 @@ func TestDownload_record(t *testing.T) {
 		}
 		if dl.Addresses != stats.Addresses {
 			t.Errorf("dl.Addresses=%d stats.Addresses=%d", dl.Addresses, stats.Addresses)
+		}
+		if dl.DeniedPersons != stats.DeniedPersons {
+			t.Errorf("dl.DeniedPersons=%d stats.DeniedPersons=%d", dl.DeniedPersons, stats.DeniedPersons)
+		}
+		if dl.SectoralSanctions != stats.SectoralSanctions {
+			t.Errorf("dl.SectoralSanctions=%d stats.SectoralSanctions=%d", dl.SectoralSanctions, stats.SectoralSanctions)
 		}
 	}
 
@@ -106,7 +115,7 @@ func TestDownload_route(t *testing.T) {
 		req := httptest.NewRequest("GET", "/downloads", nil)
 		req.Header.Set("x-user-id", "test")
 
-		repo.recordStats(&downloadStats{SDNs: 1, Alts: 421, Addresses: 1511, DeniedPersons: 731})
+		repo.recordStats(&downloadStats{SDNs: 1, Alts: 421, Addresses: 1511, DeniedPersons: 731, SectoralSanctions: 289})
 
 		router := mux.NewRouter()
 		addDownloadRoutes(nil, router, repo)

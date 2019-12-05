@@ -17,6 +17,7 @@ coverage.html
 # Generated files
 .tmp/
 openapi-generator*jar
+.idea
 
 *.db
 

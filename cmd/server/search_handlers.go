@@ -111,11 +111,12 @@ func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 }
 
 type searchResponse struct {
-	SDNs          []SDN     `json:"SDNs"`
-	AltNames      []Alt     `json:"altNames"`
-	Addresses     []Address `json:"addresses"`
-	DeniedPersons []DP      `json:"deniedPersons"`
-	RefreshedAt   time.Time `json:"refreshedAt"`
+	SDNs              []SDN     `json:"SDNs"`
+	AltNames          []Alt     `json:"altNames"`
+	Addresses         []Address `json:"addresses"`
+	DeniedPersons     []DP      `json:"deniedPersons"`
+	SectoralSanctions []SSI     `json:"sectoralSanctions"`
+	RefreshedAt       time.Time `json:"refreshedAt"`
 }
 
 func buildAddressCompares(req addressSearchRequest) []func(*Address) *item {
@@ -224,6 +225,10 @@ var (
 		func(s *searcher, _ filterRequest, limit int, name string, resp *searchResponse) {
 			resp.DeniedPersons = s.TopDPs(limit, name)
 		},
+		// OFAC Sectoral Sanctions Identifications
+		func(s *searcher, _ filterRequest, limit int, name string, resp *searchResponse) {
+			resp.SectoralSanctions = s.TopSSIs(limit, name)
+		},
 	}
 )
 
@@ -319,8 +324,10 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 			return
 		}
 
+		limit := extractSearchLimit(r)
+
 		// Grab the SDN's and then filter any out based on query params
-		sdns := searcher.TopSDNs(extractSearchLimit(r), nameSlug)
+		sdns := searcher.TopSDNs(limit, nameSlug)
 		sdns = filterSDNs(sdns, buildFilterRequest(r.URL))
 
 		// record Prometheus metrics
@@ -333,8 +340,10 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(&searchResponse{
-			SDNs:        sdns,
-			RefreshedAt: searcher.lastRefreshedAt,
+			SDNs:              sdns,
+			DeniedPersons:     searcher.TopDPs(limit, nameSlug),
+			SectoralSanctions: searcher.TopSSIs(limit, nameSlug),
+			RefreshedAt:       searcher.lastRefreshedAt,
 		})
 	}
 }

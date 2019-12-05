@@ -11,9 +11,12 @@ Moov Watchman is an HTTP API and Go library to download, parse and offer search 
 
 Lists included in search are:
 
-- [Office of Foreign Asset Control](https://www.treasury.gov/about/organizational-structure/offices/Pages/Office-of-Foreign-Assets-Control.aspx) (OFAC)
-   - The US Treasury department offers a [search page for OFAC records](https://sanctionssearch.ofac.treas.gov/)
-- [BIS Denied Person's List](https://bis.data.commerce.gov/dataset/Denied-Persons-List-with-Denied-US-Export-Privileg/xwtd-wd7a/data) (DPL)
+- US Treasury - Office of Foreign Assets Control (OFAC)
+  - [Specially Designated Nationals](https://www.treasury.gov/resource-center/sanctions/sdn-list/pages/default.aspx) (SDN)
+    - Includes SDN, SDN Alternative Names, SDN Addresses
+  - [Sectoral Sanctions Identifications](https://www.treasury.gov/resource-center/sanctions/SDN-List/Pages/ssi_list.aspx) (SSI)
+- US Department of Commerce - Bureau of Industry and Security (BIS)
+  - [Denied Persons List](https://bis.data.commerce.gov/dataset/Denied-Persons-List-with-Denied-US-Export-Privileg/xwtd-wd7a/data) (DPL)
 
 All United States or European Union companies are required to comply with various regulations and sanction lists (such as the US Patriot Act requiring compliance with the BIS Denied Person's List). Moov's primary usage for this project is with ACH origination in our [paygate](https://github.com/moov-io/paygate) project.
 
@@ -33,27 +36,69 @@ ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting watchman ser
 ...
 
 # Perform a basic search
-$ curl -s localhost:8084/search?name=...
+$ curl -s localhost:8084/search?q=...
 {
-  "SDNs": [
-    {
-      "entityID": "...",
-      "sdnName": "...",
-      "sdnType": "...",
-      "program": "...",
-      "title": "...",
-      "callSign": "...",
-      "vesselType": "...",
-      "tonnage": "...",
-      "grossRegisteredTonnage": "...",
-      "vesselFlag": "...",
-      "vesselOwner": "...",
-      "remarks": "..."
-    }
-  ],
-  "altNames": null,
-  "addresses": null,
-  "deniedPersons": null
+    "SDNs": [{
+        "entityID": "...",
+        "sdnName": "...",
+        "sdnType": "...",
+        "program": "...",
+        "title": "...",
+        "callSign": "...",
+        "vesselType": "...",
+        "tonnage": "...",
+        "grossRegisteredTonnage": "...",
+        "vesselFlag": "...",
+        "vesselOwner": "...",
+        "remarks": "...",
+        "match": 1
+    }],
+    "altNames": [{
+        "entityID": "...",
+        "alternateID": "...",
+        "alternateType": "...",
+        "alternateName": "...",
+        "alternateRemarks": "...",
+        "match": 0.7999999999999999
+    }],
+    "addresses": [{
+        "entityID": "...",
+        "addressID": "...",
+        "address": "...",
+        "cityStateProvincePostalCode": "...",
+        "country": "...",
+        "addressRemarks": "...",
+        "match": 0.7401785714285715
+    }],
+    "deniedPersons": [{
+        "name": "...",
+        "streetAddress": "...",
+        "city": "...",
+        "state": "...",
+        "country": "...",
+        "postalCode": "...",
+        "effectiveDate": "...",
+        "expirationDate": "...",
+        "standardOrder": "...",
+        "lastUpdate": "...",
+        "action": "...",
+        "frCitation": "...",
+        "match": 0.7268518518518519
+    }],
+    "sectoralSanctions": [{
+        "entityID": "...",
+        "type": "...",
+        "programs": ["...", "..."],
+        "name": "...",
+        "addresses": ["...", "..."],
+        "remarks": ["...", "..."],
+        "alternateNames": ["...", "..."],
+        "ids": ["...", "..."],
+        "sourceListURL": "...",
+        "sourceInfoURL": "...",
+        "match": 0.7428571428571429
+    }],
+    "refreshedAt": "2019-12-03T15:31:41.81849-07:00"
 }
 ```
 
@@ -99,8 +144,10 @@ $ go run ./cmd/server/ # Load http://localhost:8084 in a web browser
 
 | Environmental Variable | Description | Default |
 |-----|-----|-----|
-| `OFAC_DOWNLOAD_TEMPLATE` | HTTP address for downloading raw OFAC files. | (OFAC website) |
-| `DPL_DOWNLOAD_TEMPLATE` | HTTP address for downloading the DPL | (BIS website) |
+| `OFAC_DOWNLOAD_TEMPLATE` | HTTP address for downloading raw OFAC files. | `https://www.treasury.gov/ofac/downloads/%s` |
+| `DPL_DOWNLOAD_TEMPLATE` | HTTP address for downloading the DPL | `https://www.bis.doc.gov/dpl/%s` |
+| `CSL_DOWNLOAD_TEMPLATE` | HTTP address for downloading the Consolidated Screening List (CSL), which is a collection of US government sanctions lists. | `https://api.trade.gov/consolidated_screening_list/%s` |
+| `TRADEGOV_API_KEY` | REQUIRED for the CSL. API keys for api.trade.gov are free and can be obtained by [creating an account.](https://api.trade.gov/apps/store/) | N/A |
 
 #### Storage
 
@@ -181,11 +228,11 @@ Note: This project uses Go Modules, which requires Go 1.11 or higher, but we shi
 
 ## Links
 
-- [Sanctions Search Page](https://sanctionssearch.ofac.treas.gov/)
+- [OFAC Sanctions Search Page](https://sanctionssearch.ofac.treas.gov/)
 - [Subscribe for OFAC updates](https://service.govdelivery.com/accounts/USTREAS/subscriber/new)
 - [When should I call the OFAC Hotline?](https://www.treasury.gov/resource-center/faqs/Sanctions/Pages/directions.aspx)
-- [BIS Denied Persons List with Denied US Export Privileges](https://bis.data.commerce.gov/dataset/Denied-Persons-List-with-Denied-US-Export-Privileg/xwtd-wd7a/data)
-
+- [BIS Denied Persons List with Denied US Export Privileges (DPL)](https://bis.data.commerce.gov/dataset/Denied-Persons-List-with-Denied-US-Export-Privileg/xwtd-wd7a/data)
+- [Sectoral Sanctions Identifications (SSI)](https://www.treasury.gov/resource-center/sanctions/SDN-List/Pages/ssi_list.aspx)
 ## License
 
 Apache License 2.0 See [LICENSE](LICENSE) for details.
