@@ -20,5 +20,6 @@ type Search struct {
 	Addresses         []OfacEntityAddress `json:"addresses,omitempty"`
 	DeniedPersons     []Dpl               `json:"deniedPersons,omitempty"`
 	SectoralSanctions []Ssi               `json:"sectoralSanctions,omitempty"`
+	EntityList        []El                `json:"entityList,omitempty"`
 	RefreshedAt       time.Time           `json:"refreshedAt,omitempty"`
 }
