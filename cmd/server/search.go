@@ -329,7 +329,7 @@ func (s *searcher) TopSSIs(limit int, name string) []SSI {
 		}
 		for _, alt := range ssi.SectoralSanction.AlternateNames {
 			if alt == "" {
-				continue // skip empty elements
+				continue
 			}
 			currWeight := jaroWinkler(alt, name)
 			if currWeight > it.weight {
