@@ -4,10 +4,19 @@ This project has been renamed to Moov Watchman (from Moov OFAC) to better repres
 
 The OpenAPI specification models have been renamed to include an `Ofac` prefix on their name and OFAC HTTP routes have an `/ofac/` prefix.
 
+ADDITIONS
+
+- cmd/server: Add Sectoral Sanctions Identifications List via Consolidated Screening List (CSL)
+
+IMPROVEMENTS
+
+- cmd/server: concurrently search ?q=foo
+
 BUILD
 
 - fix(deps): update react monorepo to v16.12.0
-- chore(deps): update dependency @material-ui/core to v4.6.1
+- chore(deps): update dependency @material-ui/core to v4.7.1
+- build: upgrade openapi-generator to 4.2.2
 
 ## v0.12.0 (Released 2019-11-12)
 

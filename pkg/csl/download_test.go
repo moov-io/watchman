@@ -5,16 +5,17 @@
 package csl
 
 import (
-	"github.com/go-kit/kit/log"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/go-kit/kit/log"
 )
 
 func TestDownload(t *testing.T) {
-	if testing.Short() || os.Getenv("TRADEGOV_API_KEY") == "" {
+	if testing.Short() || ApiKey == "" {
 		return
 	}
 
@@ -33,7 +34,7 @@ func TestDownload(t *testing.T) {
 }
 
 func TestDownload_initialDir(t *testing.T) {
-	if os.Getenv("TRADEGOV_API_KEY") == "" {
+	if ApiKey == "" {
 		return
 	}
 
@@ -73,5 +74,12 @@ func TestDownload_initialDir(t *testing.T) {
 		}
 	} else {
 		t.Fatalf("unknown file: %v", file)
+	}
+}
+
+func Test_buildDownloadURL_parseError(t *testing.T) {
+	url, err := buildDownloadURL("\\\\://api.trade.gov/blah/blah/%s")
+	if err == nil {
+		t.Errorf("expected error, found %s", url)
 	}
 }

@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **Addresses** | [**[]OfacEntityAddress**](OfacEntityAddress.md) |  | [optional] 
 **DeniedPersons** | [**[]Dpl**](DPL.md) |  | [optional] 
 **SectoralSanctions** | [**[]Ssi**](SSI.md) |  | [optional] 
+**EntityList** | [**[]El**](EL.md) |  | [optional] 
 **RefreshedAt** | [**time.Time**](time.Time.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

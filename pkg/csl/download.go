@@ -6,11 +6,13 @@ package csl
 
 import (
 	"fmt"
-	"github.com/go-kit/kit/log"
-	"github.com/moov-io/watchman/pkg/download"
 	"net/url"
 	"os"
 	"strings"
+
+	"github.com/moov-io/watchman/pkg/download"
+
+	"github.com/go-kit/kit/log"
 )
 
 var (
@@ -20,12 +22,16 @@ var (
 		}
 		return "https://api.trade.gov/consolidated_screening_list/%s"
 	}()
+
+	ApiKey = func() string {
+		return os.Getenv("TRADEGOV_API_KEY")
+	}()
 )
 
 func Download(logger log.Logger, initialDir string) (string, error) {
 	dl := download.New(logger, download.HTTPClient)
 
-	cslURL, err := buildDownloadURL()
+	cslURL, err := buildDownloadURL(cslDownloadTemplate)
 	if err != nil {
 		return "", err
 	}
@@ -40,15 +46,15 @@ func Download(logger log.Logger, initialDir string) (string, error) {
 	return file[0], nil
 }
 
-func buildDownloadURL() (string, error) {
-	cslURL, err := url.Parse(fmt.Sprintf(cslDownloadTemplate, "search.csv"))
+func buildDownloadURL(urlStr string) (string, error) {
+	cslURL, err := url.Parse(fmt.Sprintf(urlStr, "search.csv"))
 	if err != nil {
 		return "", err
 	}
 
 	if strings.EqualFold(cslURL.Host, "api.trade.gov") { // only require api key if source is api.trade.gov
 		q := cslURL.Query()
-		keyOverride := os.Getenv("TRADEGOV_API_KEY")
+		keyOverride := ApiKey
 		if keyOverride == "" && q.Get("api_key") == "" {
 			return "", fmt.Errorf("csl download: missing api key")
 		}

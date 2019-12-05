@@ -230,6 +230,7 @@ func TestSearch__NameAndAltName(t *testing.T) {
 		Addresses: addressSearcher.Addresses,
 		DPs:       dplSearcher.DPs,
 		SSIs:      ssiSearcher.SSIs,
+		ELs:       elSearcher.ELs,
 	}
 
 	router := mux.NewRouter()
@@ -248,6 +249,7 @@ func TestSearch__NameAndAltName(t *testing.T) {
 		Addresses         []*ofac.Address           `json:"addresses"`
 		DeniedPersons     []*dpl.DPL                `json:"deniedPersons"`
 		SectoralSanctions []*csl.SSI                `json:"sectoralSanctions"`
+		ELs               []*csl.EL                 `json:"entityList"`
 	}
 	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
 		t.Fatal(err)
@@ -267,6 +269,9 @@ func TestSearch__NameAndAltName(t *testing.T) {
 	if wrapper.SectoralSanctions[0].EntityID != "18782" {
 		t.Errorf("%#v", wrapper.SectoralSanctions[0].EntityID)
 	}
+	if wrapper.ELs[0].Name != "Luqman Yasin Yunus Shgragi" {
+		t.Errorf("%#v", wrapper.ELs[0])
+	}
 }
 
 func TestSearch__Name(t *testing.T) {
@@ -278,6 +283,7 @@ func TestSearch__Name(t *testing.T) {
 		SDNs: sdnSearcher.SDNs,
 		DPs:  dplSearcher.DPs,
 		SSIs: ssiSearcher.SSIs,
+		ELs:  elSearcher.ELs,
 	}
 	addSearchRoutes(log.NewNopLogger(), router, combinedSearcher)
 	router.ServeHTTP(w, req)
@@ -295,12 +301,14 @@ func TestSearch__Name(t *testing.T) {
 		SDNs []*ofac.SDN `json:"SDNs"`
 		DPs  []*dpl.DPL  `json:"deniedPersons"`
 		SSIs []*csl.SSI  `json:"sectoralSanctions"`
+		ELs  []*csl.EL   `json:"entityList"`
 	}
 	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
 		t.Fatal(err)
 	}
-	if len(wrapper.SDNs) != 1 || len(wrapper.SSIs) != 1 || len(wrapper.DPs) != 1 {
-		t.Fatalf("SDNs=%d SSIs=%d DPs=%d", len(wrapper.SDNs), len(wrapper.SSIs), len(wrapper.DPs))
+	if len(wrapper.SDNs) != 1 || len(wrapper.SSIs) != 1 || len(wrapper.DPs) != 1 || len(wrapper.ELs) != 1 {
+		t.Fatalf("SDNs=%d SSIs=%d DPs=%d ELs=%d",
+			len(wrapper.SDNs), len(wrapper.SSIs), len(wrapper.DPs), len(wrapper.ELs))
 	}
 	if wrapper.SDNs[0].EntityID != "2676" {
 		t.Errorf("%#v", wrapper.SDNs[0])
@@ -310,6 +318,9 @@ func TestSearch__Name(t *testing.T) {
 	}
 	if wrapper.DPs[0].Name != "AL NASER WINGS AIRLINES" {
 		t.Errorf("%#v", wrapper.DPs[0])
+	}
+	if wrapper.ELs[0].Name != "Luqman Yasin Yunus Shgragi" {
+		t.Errorf("%#v", wrapper.ELs[0])
 	}
 }
 

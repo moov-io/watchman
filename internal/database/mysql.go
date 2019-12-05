@@ -77,6 +77,10 @@ var (
 			"add_sectoral_sanctions_to_download_stats",
 			"alter table download_stats add column sectoral_sanctions integer not null default 0;",
 		),
+		execsql(
+			"add__bis_entities__to_download_stats",
+			"alter table download_stats add column bis_entities integer not null default 0;",
+		),
 	)
 )
 

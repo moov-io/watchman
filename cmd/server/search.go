@@ -43,6 +43,7 @@ type searcher struct {
 	Alts            []*Alt
 	DPs             []*DP
 	SSIs            []*SSI
+	ELs             []*EL
 	lastRefreshedAt time.Time
 	sync.RWMutex    // protects all above fields
 
@@ -353,6 +354,51 @@ func (s *searcher) TopSSIs(limit int, name string) []SSI {
 	return out
 }
 
+// TopELs searches BIS Entity List records by name and alias
+func (s *searcher) TopELs(limit int, name string) []EL {
+	name = precompute(name)
+
+	s.RLock()
+	defer s.RUnlock()
+
+	if len(s.ELs) == 0 {
+		return nil
+	}
+
+	xs := newLargest(limit)
+
+	for _, el := range s.ELs {
+		it := &item{
+			value:  el,
+			weight: jaroWinkler(el.name, name),
+		}
+		for _, alt := range el.Entity.AlternateNames {
+			if alt == "" {
+				continue
+			}
+			currWeight := jaroWinkler(alt, name)
+			if currWeight > it.weight {
+				it.weight = currWeight
+			}
+		}
+		xs.add(it)
+	}
+
+	out := make([]EL, 0)
+	for _, thisItem := range xs.items {
+		if v := thisItem; v != nil {
+			ss, ok := v.value.(*EL)
+			if !ok {
+				continue
+			}
+			el := *ss
+			el.match = v.weight
+			out = append(out, el)
+		}
+	}
+	return out
+}
+
 // SDN is ofac.SDN wrapped with precomputed search metadata
 type SDN struct {
 	*ofac.SDN
@@ -538,6 +584,38 @@ func precomputeSSIs(ssis []*csl.SSI) []*SSI {
 		out[i] = &SSI{
 			SectoralSanction: ssi,
 			name:             precompute(reorderSDNName(ssi.Name, ssi.Type)),
+		}
+	}
+	return out
+}
+
+type EL struct {
+	Entity *csl.EL
+	match  float64
+	name   string
+}
+
+func (e EL) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		*csl.EL
+		Match float64 `json:"match"`
+	}{
+		e.Entity,
+		e.match,
+	})
+}
+
+func precomputeELs(els []*csl.EL) []*EL {
+	out := make([]*EL, len(els))
+	for i, el := range els {
+		var normalizedAltNames []string
+		for _, name := range el.AlternateNames {
+			normalizedAltNames = append(normalizedAltNames, precompute(name))
+		}
+		el.AlternateNames = normalizedAltNames
+		out[i] = &EL{
+			Entity: el,
+			name:   precompute(el.Name),
 		}
 	}
 	return out
