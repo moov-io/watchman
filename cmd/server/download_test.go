@@ -66,7 +66,7 @@ func TestDownload_record(t *testing.T) {
 	t.Parallel()
 
 	check := func(t *testing.T, repo *sqliteDownloadRepository) {
-		stats := &downloadStats{SDNs: 1, Alts: 12, Addresses: 42, DeniedPersons: 13, SectoralSanctions: 39}
+		stats := &downloadStats{SDNs: 1, Alts: 12, Addresses: 42, DeniedPersons: 13, SectoralSanctions: 39, EntityList: 32}
 		if err := repo.recordStats(stats); err != nil {
 			t.Fatal(err)
 		}
@@ -94,6 +94,9 @@ func TestDownload_record(t *testing.T) {
 		if dl.SectoralSanctions != stats.SectoralSanctions {
 			t.Errorf("dl.SectoralSanctions=%d stats.SectoralSanctions=%d", dl.SectoralSanctions, stats.SectoralSanctions)
 		}
+		if dl.EntityList != stats.EntityList {
+			t.Errorf("dl.EntityList=%d stats.EntityList=%d", dl.EntityList, stats.EntityList)
+		}
 	}
 
 	// SQLite tests
@@ -115,7 +118,7 @@ func TestDownload_route(t *testing.T) {
 		req := httptest.NewRequest("GET", "/downloads", nil)
 		req.Header.Set("x-user-id", "test")
 
-		repo.recordStats(&downloadStats{SDNs: 1, Alts: 421, Addresses: 1511, DeniedPersons: 731, SectoralSanctions: 289})
+		repo.recordStats(&downloadStats{SDNs: 1, Alts: 421, Addresses: 1511, DeniedPersons: 731, SectoralSanctions: 289, EntityList: 189})
 
 		router := mux.NewRouter()
 		addDownloadRoutes(nil, router, repo)

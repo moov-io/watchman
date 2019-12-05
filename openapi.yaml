@@ -978,6 +978,49 @@ components:
           type: string
           description: The link for information regarding the source
           example: http://bit.ly/1MLgou0
+    EL:
+      description: Entity List (EL) - Bureau of Industry and Security
+      properties:
+        name:
+          type: string
+          description: The name of the entity
+          example: Luhansk People¬ís Republic
+        addresses:
+          type: array
+          items:
+            type: string
+          description: Addresses associated with the entity
+          example: ["D. Retyum, Luzhski Raion, Leningradskaya Obl., 188230, RU", "Retiun Village, Lujskiy District, Leningrad Region, RU"]
+        alternateNames:
+          type: array
+          items:
+            type: string
+          description: Known aliases associated with the entity
+          example: ["VERKHNECHONSKNEFTEGAZ", "OJSC VERKHNECHONSKNEFTEGAZ"]
+        startDate:
+          type: string
+          description: Date when the restriction came into effect
+          example: 6/21/16
+        licenseRequirement:
+          type: string
+          description: Specifies the license requirement imposed on the named entity
+          example: "For all items subject to the EAR. (See ¬ß744.11 of the EAR)."
+        licensePolicy:
+          type: string
+          description: Identifies the policy BIS uses to review the licenseRequirements
+          example: "Presumption of denial."
+        frNotice:
+          type: string
+          description: Identifies the corresponding Notice in the Federal Register
+          example: 81 FR 61595
+        sourceListURL:
+          type: string
+          description: The link to the official SSI list
+          example: http://bit.ly/1MLgou0
+        sourceInfoURL:
+          type: string
+          description: The link for information regarding the source
+          example: http://bit.ly/1MLgou0
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       properties:

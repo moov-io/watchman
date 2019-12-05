@@ -43,6 +43,7 @@ type Download struct {
 	Addresses         int       `json:"addresses"`
 	DeniedPersons     int       `json:"deniedPersons"`
 	SectoralSanctions int       `json:"sectoralSanctions"`
+	EntityList        int       `json:"entityList"`
 }
 
 type downloadStats struct {
@@ -51,6 +52,7 @@ type downloadStats struct {
 	Addresses         int       `json:"addresses"`
 	DeniedPersons     int       `json:"deniedPersons"`
 	SectoralSanctions int       `json:"sectoralSanctions"`
+	EntityList        int       `json:"entityList"`
 	RefreshedAt       time.Time `json:"timestamp"`
 }
 
@@ -71,8 +73,8 @@ func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo down
 		} else {
 			downloadRepo.recordStats(stats)
 			if s.logger != nil {
-				s.logger.Log("main", fmt.Sprintf("data refreshed - Addresses=%d AltNames=%d SDNs=%d DPL=%d SSI=%d",
-					stats.Addresses, stats.Alts, stats.SDNs, stats.DeniedPersons, stats.SectoralSanctions))
+				s.logger.Log("main", fmt.Sprintf("data refreshed - Addresses=%d AltNames=%d SDNs=%d DPL=%d SSI=%d EL=%d",
+					stats.Addresses, stats.Alts, stats.SDNs, stats.DeniedPersons, stats.SectoralSanctions, stats.EntityList))
 			}
 			updates <- stats // send stats for re-search and watch notifications
 		}
@@ -160,13 +162,15 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 		return nil, err
 	}
 	ssis := precomputeSSIs(consolidatedLists.SSIs)
+	els := precomputeELs(consolidatedLists.ELs)
 
 	stats := &downloadStats{
 		SDNs:              len(sdns),
 		Alts:              len(alts),
 		Addresses:         len(adds),
 		DeniedPersons:     len(dps),
-		SectoralSanctions: len(consolidatedLists.SSIs),
+		SectoralSanctions: len(ssis),
+		EntityList:        len(els),
 	}
 	stats.RefreshedAt = lastRefresh(initialDir)
 
@@ -177,6 +181,7 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 	s.Alts = alts
 	s.DPs = dps
 	s.SSIs = ssis
+	s.ELs = els
 	s.lastRefreshedAt = stats.RefreshedAt
 	s.Unlock()
 
@@ -258,19 +263,19 @@ func (r *sqliteDownloadRepository) recordStats(stats *downloadStats) error {
 		return errors.New("recordStats: nil downloadStats")
 	}
 
-	query := `insert into download_stats (downloaded_at, sdns, alt_names, addresses, denied_persons, sectoral_sanctions) values (?, ?, ?, ?, ?, ?);`
+	query := `insert into download_stats (downloaded_at, sdns, alt_names, addresses, denied_persons, sectoral_sanctions, bis_entities) values (?, ?, ?, ?, ?, ?, ?);`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(stats.RefreshedAt, stats.SDNs, stats.Alts, stats.Addresses, stats.DeniedPersons, stats.SectoralSanctions)
+	_, err = stmt.Exec(stats.RefreshedAt, stats.SDNs, stats.Alts, stats.Addresses, stats.DeniedPersons, stats.SectoralSanctions, stats.EntityList)
 	return err
 }
 
 func (r *sqliteDownloadRepository) latestDownloads(limit int) ([]Download, error) {
-	query := `select downloaded_at, sdns, alt_names, addresses, denied_persons, sectoral_sanctions from download_stats order by downloaded_at desc limit ?;`
+	query := `select downloaded_at, sdns, alt_names, addresses, denied_persons, sectoral_sanctions, bis_entities from download_stats order by downloaded_at desc limit ?;`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return nil, err
@@ -286,7 +291,7 @@ func (r *sqliteDownloadRepository) latestDownloads(limit int) ([]Download, error
 	var downloads []Download
 	for rows.Next() {
 		var dl Download
-		if err := rows.Scan(&dl.Timestamp, &dl.SDNs, &dl.Alts, &dl.Addresses, &dl.DeniedPersons, &dl.SectoralSanctions); err == nil {
+		if err := rows.Scan(&dl.Timestamp, &dl.SDNs, &dl.Alts, &dl.Addresses, &dl.DeniedPersons, &dl.SectoralSanctions, &dl.EntityList); err == nil {
 			downloads = append(downloads, dl)
 		}
 	}

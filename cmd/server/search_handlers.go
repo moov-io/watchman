@@ -116,6 +116,7 @@ type searchResponse struct {
 	Addresses         []Address `json:"addresses"`
 	DeniedPersons     []DP      `json:"deniedPersons"`
 	SectoralSanctions []SSI     `json:"sectoralSanctions"`
+	EntityList        []EL      `json:"entityList"`
 	RefreshedAt       time.Time `json:"refreshedAt"`
 }
 
@@ -228,6 +229,10 @@ var (
 		// OFAC Sectoral Sanctions Identifications
 		func(s *searcher, _ filterRequest, limit int, name string, resp *searchResponse) {
 			resp.SectoralSanctions = s.TopSSIs(limit, name)
+		},
+		// BIS Entity List
+		func(s *searcher, _ filterRequest, limit int, name string, resp *searchResponse) {
+			resp.EntityList = s.TopELs(limit, name)
 		},
 	}
 )
@@ -343,6 +348,7 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 			SDNs:              sdns,
 			DeniedPersons:     searcher.TopDPs(limit, nameSlug),
 			SectoralSanctions: searcher.TopSSIs(limit, nameSlug),
+			EntityList:        searcher.TopELs(limit, nameSlug),
 			RefreshedAt:       searcher.lastRefreshedAt,
 		})
 	}

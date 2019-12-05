@@ -146,6 +146,32 @@ var (
 			},
 		}),
 	}
+	elSearcher = &searcher{
+		ELs: precomputeELs([]*csl.EL{
+			{
+				Name:               "Mohammad Jan Khan Mangal",
+				AlternateNames:     []string{"Air I"},
+				Addresses:          []string{"Kolola Pushta, Charahi Gul-e-Surkh, Kabul, AF", "Maidan Sahr, Hetefaq Market, Paktiya, AF"},
+				StartDate:          "11/13/19",
+				LicenceRequirement: "For all items subject to the EAR (See ¬ß744.11 of the EAR). ",
+				LicensePolicy:      "Presumption of denial.",
+				FRNotice:           "81 FR 57451",
+				SourceListURL:      "http://bit.ly/1L47xrV",
+				SourceInfoURL:      "http://bit.ly/1L47xrV",
+			},
+			{
+				Name:               "Luqman Yasin Yunus Shgragi",
+				AlternateNames:     []string{"Lkemanasel Yosef", "Luqman Sehreci."},
+				Addresses:          []string{"Savcili Mahalesi Turkmenler Caddesi No:2, Sahinbey, Gaziantep, TR", "Sanayi Mahalesi 60214 Nolu Caddesi No 11, SehitKamil, Gaziantep, TR"},
+				StartDate:          "8/23/16",
+				LicenceRequirement: "For all items subject to the EAR.  (See ¬ß744.11 of the EAR)",
+				LicensePolicy:      "Presumption of denial.",
+				FRNotice:           "81 FR 57451",
+				SourceListURL:      "http://bit.ly/1L47xrV",
+				SourceInfoURL:      "http://bit.ly/1L47xrV",
+			},
+		}),
+	}
 )
 
 func TestJaroWinkler(t *testing.T) {
@@ -485,6 +511,29 @@ func TestSearcher_TopSSIs_reportAltNameWeight(t *testing.T) {
 	}
 	if ssis[0].match != 1 {
 		t.Errorf("Expected match=1 for alt names: %f - %#v", ssis[0].match, ssis[0].SectoralSanction)
+	}
+}
+
+func TestSearcher_TopELs(t *testing.T) {
+	els := elSearcher.TopELs(1, "Khan")
+	if len(els) == 0 {
+		t.Fatal("empty ELs")
+	}
+	if els[0].Entity.Name != "Mohammad Jan Khan Mangal" {
+		t.Errorf("%#v", els[0].Entity)
+	}
+}
+
+func TestSearcher_TopELs_altName(t *testing.T) {
+	els := elSearcher.TopELs(1, "Luqman Sehreci.")
+	if len(els) == 0 {
+		t.Fatal("empty ELs")
+	}
+	if els[0].Entity.Name != "Luqman Yasin Yunus Shgragi" {
+		t.Errorf("%#v", els[0].Entity)
+	}
+	if els[0].match != 1 {
+		t.Errorf("Expected match=1 for alt names: %f - %#v", els[0].match, els[0].Entity)
 	}
 }
 
