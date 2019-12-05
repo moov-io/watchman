@@ -64,7 +64,7 @@ func unmarshalEL(row []string) *EL {
 		Addresses:          expandField(row[AddressesIdx]),
 		AlternateNames:     expandField(row[AltNamesIdx]),
 		StartDate:          row[StartDateIdx],
-		LicenceRequirement: row[LicenseRequirementIdx],
+		LicenseRequirement: row[LicenseRequirementIdx],
 		LicensePolicy:      row[LicensePolicyIdx],
 		FRNotice:           row[FRNoticeIdx],
 		SourceListURL:      row[SourceListURLIdx],

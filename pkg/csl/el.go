@@ -10,9 +10,9 @@ type EL struct {
 	Addresses []string `json:"addresses"`
 	// StartDate is the effective date
 	StartDate string `json:"startDate"`
-	// LicenceRequirement specifies the license requirements that it imposes on each listed person
-	LicenceRequirement string `json:"licenseRequirement"`
-	// LicensePolicy is the policy with which BIS reviews the requirements set forth in Licence Requirements
+	// LicenseRequirement specifies the license requirements that it imposes on each listed person
+	LicenseRequirement string `json:"licenseRequirement"`
+	// LicensePolicy is the policy with which BIS reviews the requirements set forth in License Requirements
 	LicensePolicy string `json:"licensePolicy"`
 	// FRNotice identifies the notice in the Federal Register
 	FRNotice string `json:"FRNotice"`

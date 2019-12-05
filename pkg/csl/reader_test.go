@@ -74,7 +74,7 @@ func Test_unmarshalEL(t *testing.T) {
 		AlternateNames:     []string{""},
 		Addresses:          []string{"No. 34 Mansour Street, Tehran, IR"},
 		StartDate:          "2008-09-22",
-		LicenceRequirement: "For all items subject to the EAR (See §744.11 of the EAR)",
+		LicenseRequirement: "For all items subject to the EAR (See §744.11 of the EAR)",
 		LicensePolicy:      "Presumption of denial",
 		FRNotice:           "73 FR 54506",
 		SourceListURL:      "http://bit.ly/1L47xrV",
