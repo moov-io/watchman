@@ -382,12 +382,26 @@ func (s SDN) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func precomputeSDNs(sdns []*ofac.SDN) []*SDN {
+func findAddresses(entityID string, addrs []*ofac.Address) []*ofac.Address {
+	var out []*ofac.Address
+	for i := range addrs {
+		if entityID == addrs[i].EntityID {
+			out = append(out, addrs[i])
+		}
+	}
+	return out
+}
+
+func precomputeSDNs(sdns []*ofac.SDN, addrs []*ofac.Address) []*SDN {
 	out := make([]*SDN, len(sdns))
 	for i := range sdns {
+		name := reorderSDNName(sdns[i].SDNName, sdns[i].SDNType)
+		name = removeStopwords(name, detectLanguage(name, findAddresses(sdns[i].EntityID, addrs)))
+		name = precompute(name)
+
 		out[i] = &SDN{
 			SDN:  sdns[i],
-			name: precompute(reorderSDNName(sdns[i].SDNName, sdns[i].SDNType)),
+			name: name,
 			id:   extractIDFromRemark(strings.TrimSpace(sdns[i].Remarks)),
 		}
 	}

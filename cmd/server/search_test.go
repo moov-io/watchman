@@ -72,7 +72,7 @@ var (
 				Title:    "Secretary General of DEMOCRATIC FRONT FOR THE LIBERATION OF PALESTINE - HAWATMEH FACTION",
 				Remarks:  "DOB 1933; Secretary General of DEMOCRATIC FRONT FOR THE LIBERATION OF PALESTINE - HAWATMEH FACTION.",
 			},
-		}),
+		}, nil),
 	}
 	idSearcher = &searcher{
 		SDNs: precomputeSDNs([]*ofac.SDN{
@@ -84,7 +84,7 @@ var (
 				Title:    "President of the Bolivarian Republic of Venezuela",
 				Remarks:  "DOB 23 Nov 1962; POB Caracas, Venezuela; citizen Venezuela; Gender Male; Cedula No. 5892464 (Venezuela); President of the Bolivarian Republic of Venezuela.",
 			},
-		}),
+		}, nil),
 	}
 	dplSearcher = &searcher{
 		DPs: precomputeDPs([]*dpl.DPL{

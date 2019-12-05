@@ -176,7 +176,7 @@ func TestSearch__NameAndAddress(t *testing.T) {
 				Program:  "IRAQ2",
 				Remarks:  "US FEIN CH-660-0-469-982-0 (United States); Switzerland.",
 			},
-		}),
+		}, nil),
 	}
 
 	router := mux.NewRouter()
