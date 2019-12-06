@@ -102,7 +102,7 @@ $ curl -s localhost:8084/search?q=...
 }
 ```
 
-We offer [hosted api docs as part of Moov's tools](https://api.moov.io/#tag/Sanctions) and an [OpenAPI specification](https://github.com/moov-io/watchman/blob/master/openapi.yaml) for use with generated clients.
+We offer [hosted api docs as part of Moov's tools](https://api.moov.io/#tag/Watchman) and an [OpenAPI specification](https://github.com/moov-io/watchman/blob/master/openapi.yaml) for use with generated clients.
 
 Docs: [docs.moov.io](https://docs.moov.io/watchman/) | [api docs](https://api.moov.io/apps/watchman/)
 
