@@ -1377,8 +1377,8 @@ components:
           description: The link for information regarding the source
           example: http://bit.ly/1MLgou0
           type: string
-    EL:
-      description: Entity List (EL) - Bureau of Industry and Security
+    BISEntities:
+      description: Bureau of Industry and Security Entity List
       example:
         licenseRequirement: For all items subject to the EAR. (See ¬ß744.11 of the
           EAR).
@@ -1548,7 +1548,7 @@ components:
           state: TX
           effectiveDate: 06/15/2016
           expirationDate: 06/15/2025
-        entityList:
+        bisEntities:
         - licenseRequirement: For all items subject to the EAR. (See ¬ß744.11 of the
             EAR).
           sourceInfoURL: http://bit.ly/1MLgou0
@@ -1636,17 +1636,17 @@ components:
           items:
             $ref: '#/components/schemas/OfacEntityAddress'
           type: array
-        deniedPersons:
-          items:
-            $ref: '#/components/schemas/DPL'
-          type: array
         sectoralSanctions:
           items:
             $ref: '#/components/schemas/SSI'
           type: array
-        entityList:
+        deniedPersons:
           items:
-            $ref: '#/components/schemas/EL'
+            $ref: '#/components/schemas/DPL'
+          type: array
+        bisEntities:
+          items:
+            $ref: '#/components/schemas/BISEntities'
           type: array
         refreshedAt:
           format: date-time
@@ -1690,7 +1690,8 @@ components:
         SDNs: 7414
         altNames: 9729
         addresses: 11747
-        entityList: 1391
+        deniedPersons: 842
+        bisEntities: 1391
         sectoralSanctions: 329
         timestamp: 2000-01-23T04:56:07.000+00:00
       properties:
@@ -1706,7 +1707,10 @@ components:
         sectoralSanctions:
           example: 329
           type: integer
-        entityList:
+        deniedPersons:
+          example: 842
+          type: integer
+        bisEntities:
           example: 1391
           type: integer
         timestamp:

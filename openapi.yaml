@@ -978,8 +978,8 @@ components:
           type: string
           description: The link for information regarding the source
           example: http://bit.ly/1MLgou0
-    EL:
-      description: Entity List (EL) - Bureau of Industry and Security
+    BISEntities:
+      description: Bureau of Industry and Security Entity List
       properties:
         name:
           type: string
@@ -1054,6 +1054,7 @@ components:
     Search:
       description: Search results containing SDNs, alternate names and/or addreses
       properties:
+        # OFAC
         SDNs:
           type: array
           items:
@@ -1066,18 +1067,20 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OfacEntityAddress'
-        deniedPersons:
-          type: array
-          items:
-            $ref: '#/components/schemas/DPL'
         sectoralSanctions:
           type: array
           items:
             $ref: '#/components/schemas/SSI'
-        entityList:
+        # BIS
+        deniedPersons:
           type: array
           items:
-            $ref: '#/components/schemas/EL'
+            $ref: '#/components/schemas/DPL'
+        bisEntities:
+          type: array
+          items:
+            $ref: '#/components/schemas/BISEntities'
+        # Metadata
         refreshedAt:
           type: string
           format: date-time
@@ -1110,6 +1113,7 @@ components:
     Download:
       description: Metadata and stats about downloaded OFAC data
       properties:
+        # OFAC
         SDNs:
           type: integer
           example: 7414
@@ -1122,9 +1126,14 @@ components:
         sectoralSanctions:
           type: integer
           example: 329
-        entityList:
+        # BIS
+        deniedPersons:
+          type: integer
+          example: 842
+        bisEntities:
           type: integer
           example: 1391
+        # Metadata
         timestamp:
           type: string
           format: date-time

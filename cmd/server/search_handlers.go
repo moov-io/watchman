@@ -111,13 +111,16 @@ func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 }
 
 type searchResponse struct {
+	// OFAC
 	SDNs              []SDN     `json:"SDNs"`
 	AltNames          []Alt     `json:"altNames"`
 	Addresses         []Address `json:"addresses"`
-	DeniedPersons     []DP      `json:"deniedPersons"`
 	SectoralSanctions []SSI     `json:"sectoralSanctions"`
-	EntityList        []EL      `json:"entityList"`
-	RefreshedAt       time.Time `json:"refreshedAt"`
+	// BIS
+	DeniedPersons []DP        `json:"deniedPersons"`
+	BISEntities   []BISEntity `json:"bisEntities"`
+	// Metadata
+	RefreshedAt time.Time `json:"refreshedAt"`
 }
 
 func buildAddressCompares(req addressSearchRequest) []func(*Address) *item {
@@ -222,17 +225,17 @@ var (
 		func(s *searcher, _ filterRequest, limit int, name string, resp *searchResponse) {
 			resp.Addresses = s.TopAddresses(limit, name)
 		},
-		// BIS Denied Persons
-		func(s *searcher, _ filterRequest, limit int, name string, resp *searchResponse) {
-			resp.DeniedPersons = s.TopDPs(limit, name)
-		},
 		// OFAC Sectoral Sanctions Identifications
 		func(s *searcher, _ filterRequest, limit int, name string, resp *searchResponse) {
 			resp.SectoralSanctions = s.TopSSIs(limit, name)
 		},
+		// BIS Denied Persons
+		func(s *searcher, _ filterRequest, limit int, name string, resp *searchResponse) {
+			resp.DeniedPersons = s.TopDPs(limit, name)
+		},
 		// BIS Entity List
 		func(s *searcher, _ filterRequest, limit int, name string, resp *searchResponse) {
-			resp.EntityList = s.TopELs(limit, name)
+			resp.BISEntities = s.TopBISEntities(limit, name)
 		},
 	}
 )
@@ -345,11 +348,14 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(&searchResponse{
+			// OFAC
 			SDNs:              sdns,
-			DeniedPersons:     searcher.TopDPs(limit, nameSlug),
 			SectoralSanctions: searcher.TopSSIs(limit, nameSlug),
-			EntityList:        searcher.TopELs(limit, nameSlug),
-			RefreshedAt:       searcher.lastRefreshedAt,
+			// BIS
+			DeniedPersons: searcher.TopDPs(limit, nameSlug),
+			BISEntities:   searcher.TopBISEntities(limit, nameSlug),
+			// Metadata
+			RefreshedAt: searcher.lastRefreshedAt,
 		})
 	}
 }

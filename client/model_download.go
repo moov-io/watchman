@@ -19,6 +19,7 @@ type Download struct {
 	AltNames          int32     `json:"altNames,omitempty"`
 	Addresses         int32     `json:"addresses,omitempty"`
 	SectoralSanctions int32     `json:"sectoralSanctions,omitempty"`
-	EntityList        int32     `json:"entityList,omitempty"`
+	DeniedPersons     int32     `json:"deniedPersons,omitempty"`
+	BisEntities       int32     `json:"bisEntities,omitempty"`
 	Timestamp         time.Time `json:"timestamp,omitempty"`
 }

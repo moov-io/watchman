@@ -146,8 +146,8 @@ var (
 			},
 		}),
 	}
-	elSearcher = &searcher{
-		ELs: precomputeELs([]*csl.EL{
+	bisEntitySearcher = &searcher{
+		BISEntities: precomputeBISEntities([]*csl.EL{
 			{
 				Name:               "Mohammad Jan Khan Mangal",
 				AlternateNames:     []string{"Air I"},
@@ -514,8 +514,8 @@ func TestSearcher_TopSSIs_reportAltNameWeight(t *testing.T) {
 	}
 }
 
-func TestSearcher_TopELs(t *testing.T) {
-	els := elSearcher.TopELs(1, "Khan")
+func TestSearcher_TopBISEntities(t *testing.T) {
+	els := bisEntitySearcher.TopBISEntities(1, "Khan")
 	if len(els) == 0 {
 		t.Fatal("empty ELs")
 	}
@@ -524,8 +524,8 @@ func TestSearcher_TopELs(t *testing.T) {
 	}
 }
 
-func TestSearcher_TopELs_altName(t *testing.T) {
-	els := elSearcher.TopELs(1, "Luqman Sehreci.")
+func TestSearcher_TopBISEntities_AltName(t *testing.T) {
+	els := bisEntitySearcher.TopBISEntities(1, "Luqman Sehreci.")
 	if len(els) == 0 {
 		t.Fatal("empty ELs")
 	}

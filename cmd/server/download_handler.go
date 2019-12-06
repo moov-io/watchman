@@ -10,6 +10,7 @@ import (
 	"net/http"
 
 	"github.com/go-kit/kit/log"
+	moovhttp "github.com/moov-io/base/http"
 )
 
 const (
@@ -24,12 +25,15 @@ func manualRefreshHandler(logger log.Logger, searcher *searcher, downloadRepo do
 			logger.Log("main", fmt.Sprintf("ERROR: admin: problem refreshing data: %v", err))
 			w.WriteHeader(http.StatusInternalServerError)
 		} else {
-			logger.Log("main",
-				fmt.Sprintf("admin: finished data refresh - Addresses=%d AltNames=%d SDNs=%d DeniedPersons=%d",
-					stats.Addresses, stats.Alts, stats.SDNs, stats.DeniedPersons))
-
-			downloadRepo.recordStats(stats)
-
+			if err := downloadRepo.recordStats(stats); err != nil {
+				moovhttp.Problem(w, err)
+				return
+			}
+			logger.Log(
+				"main", fmt.Sprintf("admin: finished data refreshed at %v", stats.RefreshedAt),
+				"SDNs", stats.SDNs, "AltNames", stats.Alts, "Addresses", stats.Addresses, "SSI", stats.SectoralSanctions,
+				"DPL", stats.DeniedPersons, "BISEntities", stats.BISEntities,
+			)
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(stats)
 		}

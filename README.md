@@ -71,6 +71,19 @@ $ curl -s localhost:8084/search?q=...
         "addressRemarks": "...",
         "match": 0.7401785714285715
     }],
+    "sectoralSanctions": [{
+        "entityID": "...",
+        "type": "...",
+        "programs": ["...", "..."],
+        "name": "...",
+        "addresses": ["...", "..."],
+        "remarks": ["...", "..."],
+        "alternateNames": ["...", "..."],
+        "ids": ["...", "..."],
+        "sourceListURL": "...",
+        "sourceInfoURL": "...",
+        "match": 0.7428571428571429
+    }],
     "deniedPersons": [{
         "name": "...",
         "streetAddress": "...",
@@ -86,20 +99,7 @@ $ curl -s localhost:8084/search?q=...
         "frCitation": "...",
         "match": 0.7268518518518519
     }],
-    "sectoralSanctions": [{
-        "entityID": "...",
-        "type": "...",
-        "programs": ["...", "..."],
-        "name": "...",
-        "addresses": ["...", "..."],
-        "remarks": ["...", "..."],
-        "alternateNames": ["...", "..."],
-        "ids": ["...", "..."],
-        "sourceListURL": "...",
-        "sourceInfoURL": "...",
-        "match": 0.7428571428571429
-    }],
-    "entityList": [{
+    "bisEntities": [{
         "name": "...",
         "alternateNames": ["...", "..."],
         "addresses": ["..."],
