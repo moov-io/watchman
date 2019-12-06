@@ -14,6 +14,10 @@ import (
 	"github.com/pariz/gountries"
 )
 
+const (
+	minConfidence = 0.50
+)
+
 func removeStopwords(in string, lang whatlanggo.Lang) string {
 	return strings.TrimSpace(stopwords.CleanString(strings.ToLower(in), lang.Iso6391(), false))
 }
@@ -40,9 +44,14 @@ func detectLanguage(in string, addrs []*ofac.Address) whatlanggo.Lang {
 	if len(country.Languages) == 0 || err != nil {
 		return whatlanggo.Eng
 	}
-	if len(country.Languages) == 1 {
+
+	// If the language is spoken in the country and we're somewhat confident in the original detection
+	// then return that language.
+	if info.Confidence > minConfidence {
 		for key, _ := range country.Languages {
-			return whatlanggo.CodeToLang(key) // return the only offical language
+			if strings.EqualFold(key, info.Lang.Iso6393()) {
+				return info.Lang
+			}
 		}
 	}
 
