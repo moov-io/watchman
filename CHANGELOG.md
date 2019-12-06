@@ -7,6 +7,8 @@ The OpenAPI specification models have been renamed to include an `Ofac` prefix o
 ADDITIONS
 
 - cmd/server: Add Sectoral Sanctions Identifications List via Consolidated Screening List (CSL)
+- cmd/server: Add Bureau of Industry and Security Entity List via Consolidated Screening List
+- cmd/server: Remove stopwords from OFAC SDN entity names
 
 IMPROVEMENTS
 
