@@ -723,8 +723,8 @@ paths:
         schema:
           type: string
         style: simple
-      - description: Search across Name, Alt Names, and Address fields for all SDN
-          entries. Entries may be returned in all response sub-objects.
+      - description: Search across Name, Alt Names, and SDN Address fields for all
+          available sanctions lists. Entries may be returned in all response sub-objects.
         explode: true
         in: query
         name: q
@@ -733,8 +733,8 @@ paths:
           example: John Doe
           type: string
         style: form
-      - description: Name which could correspond to a human on the SDN list. Only
-          SDN results will be returned.
+      - description: Name which could correspond to an entry on the SDN, Denied Persons,
+          Sectoral Sanctions Identifications, or BIS Entity List sanctions lists.
         explode: true
         in: query
         name: name
@@ -1377,6 +1377,68 @@ components:
           description: The link for information regarding the source
           example: http://bit.ly/1MLgou0
           type: string
+    BISEntities:
+      description: Bureau of Industry and Security Entity List
+      example:
+        licenseRequirement: For all items subject to the EAR. (See ¬ß744.11 of the
+          EAR).
+        sourceInfoURL: http://bit.ly/1MLgou0
+        addresses:
+        - D. Retyum, Luzhski Raion, Leningradskaya Obl., 188230, RU
+        - Retiun Village, Lujskiy District, Leningrad Region, RU
+        alternateNames:
+        - VERKHNECHONSKNEFTEGAZ
+        - OJSC VERKHNECHONSKNEFTEGAZ
+        licensePolicy: Presumption of denial.
+        name: Luhansk People¬ís Republic
+        sourceListURL: http://bit.ly/1MLgou0
+        startDate: 6/21/16
+        frNotice: 81 FR 61595
+      properties:
+        name:
+          description: The name of the entity
+          example: Luhansk People¬ís Republic
+          type: string
+        addresses:
+          description: Addresses associated with the entity
+          example:
+          - D. Retyum, Luzhski Raion, Leningradskaya Obl., 188230, RU
+          - Retiun Village, Lujskiy District, Leningrad Region, RU
+          items:
+            type: string
+          type: array
+        alternateNames:
+          description: Known aliases associated with the entity
+          example:
+          - VERKHNECHONSKNEFTEGAZ
+          - OJSC VERKHNECHONSKNEFTEGAZ
+          items:
+            type: string
+          type: array
+        startDate:
+          description: Date when the restriction came into effect
+          example: 6/21/16
+          type: string
+        licenseRequirement:
+          description: Specifies the license requirement imposed on the named entity
+          example: For all items subject to the EAR. (See ¬ß744.11 of the EAR).
+          type: string
+        licensePolicy:
+          description: Identifies the policy BIS uses to review the licenseRequirements
+          example: Presumption of denial.
+          type: string
+        frNotice:
+          description: Identifies the corresponding Notice in the Federal Register
+          example: 81 FR 61595
+          type: string
+        sourceListURL:
+          description: The link to the official SSI list
+          example: http://bit.ly/1MLgou0
+          type: string
+        sourceInfoURL:
+          description: The link for information regarding the source
+          example: http://bit.ly/1MLgou0
+          type: string
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       example:
@@ -1486,6 +1548,35 @@ components:
           state: TX
           effectiveDate: 06/15/2016
           expirationDate: 06/15/2025
+        bisEntities:
+        - licenseRequirement: For all items subject to the EAR. (See ¬ß744.11 of the
+            EAR).
+          sourceInfoURL: http://bit.ly/1MLgou0
+          addresses:
+          - D. Retyum, Luzhski Raion, Leningradskaya Obl., 188230, RU
+          - Retiun Village, Lujskiy District, Leningrad Region, RU
+          alternateNames:
+          - VERKHNECHONSKNEFTEGAZ
+          - OJSC VERKHNECHONSKNEFTEGAZ
+          licensePolicy: Presumption of denial.
+          name: Luhansk People¬ís Republic
+          sourceListURL: http://bit.ly/1MLgou0
+          startDate: 6/21/16
+          frNotice: 81 FR 61595
+        - licenseRequirement: For all items subject to the EAR. (See ¬ß744.11 of the
+            EAR).
+          sourceInfoURL: http://bit.ly/1MLgou0
+          addresses:
+          - D. Retyum, Luzhski Raion, Leningradskaya Obl., 188230, RU
+          - Retiun Village, Lujskiy District, Leningrad Region, RU
+          alternateNames:
+          - VERKHNECHONSKNEFTEGAZ
+          - OJSC VERKHNECHONSKNEFTEGAZ
+          licensePolicy: Presumption of denial.
+          name: Luhansk People¬ís Republic
+          sourceListURL: http://bit.ly/1MLgou0
+          startDate: 6/21/16
+          frNotice: 81 FR 61595
         refreshedAt: 2000-01-23T04:56:07.000+00:00
         sectoralSanctions:
         - sourceInfoURL: http://bit.ly/1MLgou0
@@ -1545,13 +1636,17 @@ components:
           items:
             $ref: '#/components/schemas/OfacEntityAddress'
           type: array
+        sectoralSanctions:
+          items:
+            $ref: '#/components/schemas/SSI'
+          type: array
         deniedPersons:
           items:
             $ref: '#/components/schemas/DPL'
           type: array
-        sectoralSanctions:
+        bisEntities:
           items:
-            $ref: '#/components/schemas/SSI'
+            $ref: '#/components/schemas/BISEntities'
           type: array
         refreshedAt:
           format: date-time
@@ -1595,6 +1690,9 @@ components:
         SDNs: 7414
         altNames: 9729
         addresses: 11747
+        deniedPersons: 842
+        bisEntities: 1391
+        sectoralSanctions: 329
         timestamp: 2000-01-23T04:56:07.000+00:00
       properties:
         SDNs:
@@ -1606,11 +1704,20 @@ components:
         addresses:
           example: 11747
           type: integer
+        sectoralSanctions:
+          example: 329
+          type: integer
+        deniedPersons:
+          example: 842
+          type: integer
+        bisEntities:
+          example: 1391
+          type: integer
         timestamp:
           format: date-time
           type: string
     UIKeys:
       items:
-        example: '["aircraft","individual","vessel"]'
+        example: '["entity","aircraft","individual","vessel"]'
         type: string
       type: array

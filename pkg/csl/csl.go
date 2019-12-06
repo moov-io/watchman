@@ -7,7 +7,7 @@ package csl
 // CSL contains each record from the Consolidate Screening List, broken down by the record's original source
 type CSL struct {
 	SSIs []*SSI // Sectoral Sanctions Identifications List (SSI) - Treasury Department
-	// []*EL (Entity List – Bureau of Industry and Security)
+	ELs  []*EL  // Entity List – Bureau of Industry and Security
 	// []*UL (Unverified List – Bureau of Industry and Security)
 	// []*PSE (Foreign Sanctions Evaders (FSE) - Treasury Department)
 	// []*ISN (Nonproliferation Sanctions (ISN) - State Department)

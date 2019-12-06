@@ -17,6 +17,7 @@ Lists included in search are:
   - [Sectoral Sanctions Identifications](https://www.treasury.gov/resource-center/sanctions/SDN-List/Pages/ssi_list.aspx) (SSI)
 - US Department of Commerce - Bureau of Industry and Security (BIS)
   - [Denied Persons List](https://bis.data.commerce.gov/dataset/Denied-Persons-List-with-Denied-US-Export-Privileg/xwtd-wd7a/data) (DPL)
+  - [Entity List](https://www.bis.doc.gov/index.php/policy-guidance/lists-of-parties-of-concern/entity-list) (EL)
 
 All United States or European Union companies are required to comply with various regulations and sanction lists (such as the US Patriot Act requiring compliance with the BIS Denied Person's List). Moov's primary usage for this project is with ACH origination in our [paygate](https://github.com/moov-io/paygate) project.
 
@@ -70,6 +71,19 @@ $ curl -s localhost:8084/search?q=...
         "addressRemarks": "...",
         "match": 0.7401785714285715
     }],
+    "sectoralSanctions": [{
+        "entityID": "...",
+        "type": "...",
+        "programs": ["...", "..."],
+        "name": "...",
+        "addresses": ["...", "..."],
+        "remarks": ["...", "..."],
+        "alternateNames": ["...", "..."],
+        "ids": ["...", "..."],
+        "sourceListURL": "...",
+        "sourceInfoURL": "...",
+        "match": 0.7428571428571429
+    }],
     "deniedPersons": [{
         "name": "...",
         "streetAddress": "...",
@@ -85,19 +99,18 @@ $ curl -s localhost:8084/search?q=...
         "frCitation": "...",
         "match": 0.7268518518518519
     }],
-    "sectoralSanctions": [{
-        "entityID": "...",
-        "type": "...",
-        "programs": ["...", "..."],
+    "bisEntities": [{
         "name": "...",
-        "addresses": ["...", "..."],
-        "remarks": ["...", "..."],
         "alternateNames": ["...", "..."],
-        "ids": ["...", "..."],
+        "addresses": ["..."],
+        "startDate": "...",
+        "licenseRequirement": "...",
+        "licensePolicy": "...",
+        "FRNotice": "...",
         "sourceListURL": "...",
         "sourceInfoURL": "...",
-        "match": 0.7428571428571429
-    }],
+        "match": 1
+     }],
     "refreshedAt": "2019-12-03T15:31:41.81849-07:00"
 }
 ```
@@ -232,6 +245,7 @@ Note: This project uses Go Modules, which requires Go 1.11 or higher, but we shi
 - [Subscribe for OFAC updates](https://service.govdelivery.com/accounts/USTREAS/subscriber/new)
 - [When should I call the OFAC Hotline?](https://www.treasury.gov/resource-center/faqs/Sanctions/Pages/directions.aspx)
 - [BIS Denied Persons List with Denied US Export Privileges (DPL)](https://bis.data.commerce.gov/dataset/Denied-Persons-List-with-Denied-US-Export-Privileg/xwtd-wd7a/data)
+- [BIS Entity List](https://www.bis.doc.gov/index.php/policy-guidance/lists-of-parties-of-concern/entity-list)
 - [Sectoral Sanctions Identifications (SSI)](https://www.treasury.gov/resource-center/sanctions/SDN-List/Pages/ssi_list.aspx)
 ## License
 

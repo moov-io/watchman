@@ -17,6 +17,7 @@ func Read(path string) (*CSL, error) {
 	reader := csv.NewReader(f)
 
 	var ssis []*SSI
+	var els []*EL
 	for {
 		record, err := reader.Read()
 		if err == io.EOF {
@@ -29,6 +30,8 @@ func Read(path string) (*CSL, error) {
 		switch record[0] {
 		case "Sectoral Sanctions Identifications List (SSI) - Treasury Department":
 			ssis = append(ssis, unmarshalSSI(record))
+		case "Entity List (EL) - Bureau of Industry and Security":
+			els = append(els, unmarshalEL(record))
 		default:
 			continue
 		}
@@ -36,6 +39,7 @@ func Read(path string) (*CSL, error) {
 
 	return &CSL{
 		SSIs: ssis,
+		ELs:  els,
 	}, nil
 }
 
@@ -51,6 +55,20 @@ func unmarshalSSI(record []string) *SSI {
 		IDsOnRecord:    expandField(record[IDsIdx]),
 		SourceListURL:  record[SourceListURLIdx],
 		SourceInfoURL:  record[SourceInformationURLIdx],
+	}
+}
+
+func unmarshalEL(row []string) *EL {
+	return &EL{
+		Name:               row[NameIdx],
+		Addresses:          expandField(row[AddressesIdx]),
+		AlternateNames:     expandField(row[AltNamesIdx]),
+		StartDate:          row[StartDateIdx],
+		LicenseRequirement: row[LicenseRequirementIdx],
+		LicensePolicy:      row[LicensePolicyIdx],
+		FRNotice:           row[FRNoticeIdx],
+		SourceListURL:      row[SourceListURLIdx],
+		SourceInfoURL:      row[SourceInformationURLIdx],
 	}
 }
 

@@ -17,6 +17,9 @@ func TestRead(t *testing.T) {
 	if len(csl.SSIs) != 26 { // test CSL csv file has 26 SSI entries
 		t.Errorf("len(SSIs)=%d", len(csl.SSIs))
 	}
+	if len(csl.ELs) != 22 {
+		t.Errorf("len(ELs)=%d", len(csl.ELs))
+	}
 }
 
 func TestRead_invalidRow(t *testing.T) {
@@ -29,6 +32,9 @@ func TestRead_invalidRow(t *testing.T) {
 	}
 	if len(csl.SSIs) != 1 {
 		t.Errorf("len(SSIs)=%d", len(csl.SSIs))
+	}
+	if len(csl.ELs) != 1 {
+		t.Errorf("len(ELs)=%d", len(csl.ELs))
 	}
 }
 
@@ -57,6 +63,28 @@ func Test_unmarshalSSI(t *testing.T) {
 
 	if !reflect.DeepEqual(expectedSSI, actualSSI) {
 		t.Errorf("Expected: %#v\nFound: %#v\n", expectedSSI, actualSSI)
+	}
+}
+
+func Test_unmarshalEL(t *testing.T) {
+	record := []string{"Entity List (EL) - Bureau of Industry and Security", "", "", "", "GBNTT", "", "No. 34 Mansour Street, Tehran, IR", "73 FR 54506", "2008-09-22", "", "",
+		"For all items subject to the EAR (See §744.11 of the EAR)", "Presumption of denial", "", "", "", "", "", "", "", "http://bit.ly/1L47xrV", "", "", "", "", "", "http://bit.ly/1L47xrV", ""}
+	expectedEL := &EL{
+		Name:               "GBNTT",
+		AlternateNames:     []string{""},
+		Addresses:          []string{"No. 34 Mansour Street, Tehran, IR"},
+		StartDate:          "2008-09-22",
+		LicenseRequirement: "For all items subject to the EAR (See §744.11 of the EAR)",
+		LicensePolicy:      "Presumption of denial",
+		FRNotice:           "73 FR 54506",
+		SourceListURL:      "http://bit.ly/1L47xrV",
+		SourceInfoURL:      "http://bit.ly/1L47xrV",
+	}
+
+	actualEL := unmarshalEL(record)
+
+	if !reflect.DeepEqual(expectedEL, actualEL) {
+		t.Errorf("Expected: %#v\nFound: %#v\n", expectedEL, actualEL)
 	}
 }
 

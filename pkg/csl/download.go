@@ -31,7 +31,7 @@ var (
 func Download(logger log.Logger, initialDir string) (string, error) {
 	dl := download.New(logger, download.HTTPClient)
 
-	cslURL, err := buildDownloadURL()
+	cslURL, err := buildDownloadURL(cslDownloadTemplate)
 	if err != nil {
 		return "", err
 	}
@@ -46,8 +46,8 @@ func Download(logger log.Logger, initialDir string) (string, error) {
 	return file[0], nil
 }
 
-func buildDownloadURL() (string, error) {
-	cslURL, err := url.Parse(fmt.Sprintf(cslDownloadTemplate, "search.csv"))
+func buildDownloadURL(urlStr string) (string, error) {
+	cslURL, err := url.Parse(fmt.Sprintf(urlStr, "search.csv"))
 	if err != nil {
 		return "", err
 	}

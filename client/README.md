@@ -56,6 +56,7 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [BisEntities](docs/BisEntities.md)
  - [Download](docs/Download.md)
  - [Dpl](docs/Dpl.md)
  - [Error](docs/Error.md)

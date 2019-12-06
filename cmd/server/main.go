@@ -143,9 +143,15 @@ func main() {
 		logger.Log("main", fmt.Sprintf("ERROR: failed to download/parse initial data: %v", err))
 		os.Exit(1)
 	} else {
-		downloadRepo.recordStats(stats)
-		logger.Log("main", fmt.Sprintf("data refreshed - Addresses=%d AltNames=%d SDNs=%d DeniedPersons=%d SectoralSanctions=%d",
-			stats.Addresses, stats.Alts, stats.SDNs, stats.DeniedPersons, stats.SectoralSanctions))
+		if err := downloadRepo.recordStats(stats); err != nil {
+			logger.Log("main", fmt.Sprintf("ERROR: failed to record download stats: %v", err))
+			os.Exit(1)
+		}
+		logger.Log(
+			"main", fmt.Sprintf("data refreshed at %v", stats.RefreshedAt),
+			"SDNs", stats.SDNs, "AltNames", stats.Alts, "Addresses", stats.Addresses, "SSI", stats.SectoralSanctions,
+			"DPL", stats.DeniedPersons, "BISEntities", stats.BISEntities,
+		)
 	}
 
 	// Setup Watch and Webhook database wrapper
