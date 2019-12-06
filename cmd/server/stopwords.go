@@ -54,6 +54,11 @@ func detectLanguage(in string, addrs []*ofac.Address) whatlanggo.Lang {
 			}
 		}
 	}
+	if len(country.Languages) == 1 {
+		for key, _ := range country.Languages {
+			return whatlanggo.CodeToLang(key)
+		}
+	}
 
 	// How should we pick the language for countries with multiple languages? A hardcoded map?
 	// What if we found the language whose name is closest to the country's name and returned that?

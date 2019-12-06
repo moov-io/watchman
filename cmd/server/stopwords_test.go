@@ -39,7 +39,7 @@ func TestStopwords__detect(t *testing.T) {
 
 	for i := range cases {
 		if lang := detectLanguage(cases[i].in, addrs(cases[i].country)); lang != cases[i].expected {
-			t.Errorf("in=%q country=%s lang=%v", cases[i].in, cases[i].country, lang)
+			t.Errorf("#%d in=%q country=%s lang=%v", i, cases[i].in, cases[i].country, lang)
 		}
 	}
 }
@@ -64,7 +64,7 @@ func TestStopwords__clean(t *testing.T) {
 	for i := range cases {
 		result := removeStopwords(cases[i].in, cases[i].lang)
 		if result != cases[i].expected {
-			t.Errorf("\n in=%q  lang=%v\ngot=%q", cases[i].in, cases[i].lang, result)
+			t.Errorf("\n#%d in=%q  lang=%v\ngot=%q", i, cases[i].in, cases[i].lang, result)
 		}
 	}
 }
