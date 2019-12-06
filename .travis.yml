@@ -54,10 +54,10 @@ script:
   # Just check gofmt on linux, it's the fastest builder
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then test -z $(gofmt -s -l $GOFILES); fi
   - go test ./... -race -coverprofile=coverage.txt -covermode=atomic
-  - misspell -error -locale US $GOFILES
+  - misspell -error -locale US -i "palestiniens" $GOFILES
   - gocyclo -over 20 $GOFILES
   - golint -set_exit_status $GOFILES
-  - staticcheck ./cmd/... ./internal/... .
+  - staticcheck ./cmd/... ./pkg/... ./internal/... .
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install -y mingw; export PATH=/c/tools/mingw64/bin:"$PATH";fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make docker && make test-integration; fi
 after_script:

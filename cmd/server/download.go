@@ -158,7 +158,7 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 		return nil, err
 	}
 
-	sdns := precomputeSDNs(results.SDNs)
+	sdns := precomputeSDNs(results.SDNs, results.Addresses)
 	adds := precomputeAddresses(results.Addresses)
 	alts := precomputeAlts(results.AlternateIdentities)
 

@@ -33,7 +33,7 @@ var (
 				Title:    "",
 				Remarks:  "a.k.a. 'BNC'.",
 			},
-		}),
+		}, nil),
 		Addresses: precomputeAddresses([]*ofac.Address{
 			{
 				EntityID:                    "306",

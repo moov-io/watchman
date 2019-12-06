@@ -31,7 +31,7 @@ var (
 				Program:  "SYRIA",
 				Remarks:  "Linked To: MAKHLUF, Rami.",
 			},
-		}),
+		}, nil),
 		Addresses: precomputeAddresses([]*ofac.Address{
 			{
 				EntityID:                    "21206",
