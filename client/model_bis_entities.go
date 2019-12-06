@@ -9,8 +9,8 @@
 
 package openapi
 
-// El Entity List (EL) - Bureau of Industry and Security
-type El struct {
+// BisEntities Bureau of Industry and Security Entity List
+type BisEntities struct {
 	// The name of the entity
 	Name string `json:"name,omitempty"`
 	// Addresses associated with the entity

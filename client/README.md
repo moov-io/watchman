@@ -56,9 +56,9 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [BisEntities](docs/BisEntities.md)
  - [Download](docs/Download.md)
  - [Dpl](docs/Dpl.md)
- - [El](docs/El.md)
  - [Error](docs/Error.md)
  - [OfacAlt](docs/OfacAlt.md)
  - [OfacCompany](docs/OfacCompany.md)

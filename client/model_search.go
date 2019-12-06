@@ -18,8 +18,8 @@ type Search struct {
 	SDNs              []OfacSdn           `json:"SDNs,omitempty"`
 	AltNames          []OfacAlt           `json:"altNames,omitempty"`
 	Addresses         []OfacEntityAddress `json:"addresses,omitempty"`
-	DeniedPersons     []Dpl               `json:"deniedPersons,omitempty"`
 	SectoralSanctions []Ssi               `json:"sectoralSanctions,omitempty"`
-	EntityList        []El                `json:"entityList,omitempty"`
+	DeniedPersons     []Dpl               `json:"deniedPersons,omitempty"`
+	BisEntities       []BisEntities       `json:"bisEntities,omitempty"`
 	RefreshedAt       time.Time           `json:"refreshedAt,omitempty"`
 }

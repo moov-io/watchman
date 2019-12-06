@@ -38,12 +38,17 @@ var (
 // searcher holds precomputed data for each object available to search against.
 // This data comes from various US and EU Federal agencies
 type searcher struct {
-	SDNs            []*SDN
-	Addresses       []*Address
-	Alts            []*Alt
-	DPs             []*DP
-	SSIs            []*SSI
-	ELs             []*EL
+	// OFAC
+	SDNs      []*SDN
+	Addresses []*Address
+	Alts      []*Alt
+	SSIs      []*SSI
+
+	// BIS
+	DPs         []*DP
+	BISEntities []*BISEntity
+
+	// metadata
 	lastRefreshedAt time.Time
 	sync.RWMutex    // protects all above fields
 
@@ -354,20 +359,20 @@ func (s *searcher) TopSSIs(limit int, name string) []SSI {
 	return out
 }
 
-// TopELs searches BIS Entity List records by name and alias
-func (s *searcher) TopELs(limit int, name string) []EL {
+// TopBISEntities searches BIS Entity List records by name and alias
+func (s *searcher) TopBISEntities(limit int, name string) []BISEntity {
 	name = precompute(name)
 
 	s.RLock()
 	defer s.RUnlock()
 
-	if len(s.ELs) == 0 {
+	if len(s.BISEntities) == 0 {
 		return nil
 	}
 
 	xs := newLargest(limit)
 
-	for _, el := range s.ELs {
+	for _, el := range s.BISEntities {
 		it := &item{
 			value:  el,
 			weight: jaroWinkler(el.name, name),
@@ -384,10 +389,10 @@ func (s *searcher) TopELs(limit int, name string) []EL {
 		xs.add(it)
 	}
 
-	out := make([]EL, 0)
+	out := make([]BISEntity, 0)
 	for _, thisItem := range xs.items {
 		if v := thisItem; v != nil {
-			ss, ok := v.value.(*EL)
+			ss, ok := v.value.(*BISEntity)
 			if !ok {
 				continue
 			}
@@ -589,13 +594,13 @@ func precomputeSSIs(ssis []*csl.SSI) []*SSI {
 	return out
 }
 
-type EL struct {
+type BISEntity struct {
 	Entity *csl.EL
 	match  float64
 	name   string
 }
 
-func (e EL) MarshalJSON() ([]byte, error) {
+func (e BISEntity) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		*csl.EL
 		Match float64 `json:"match"`
@@ -605,15 +610,15 @@ func (e EL) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func precomputeELs(els []*csl.EL) []*EL {
-	out := make([]*EL, len(els))
+func precomputeBISEntities(els []*csl.EL) []*BISEntity {
+	out := make([]*BISEntity, len(els))
 	for i, el := range els {
 		var normalizedAltNames []string
 		for _, name := range el.AlternateNames {
 			normalizedAltNames = append(normalizedAltNames, precompute(name))
 		}
 		el.AlternateNames = normalizedAltNames
-		out[i] = &EL{
+		out[i] = &BISEntity{
 			Entity: el,
 			name:   precompute(el.Name),
 		}
