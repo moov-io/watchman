@@ -396,7 +396,10 @@ func precomputeSDNs(sdns []*ofac.SDN, addrs []*ofac.Address) []*SDN {
 	out := make([]*SDN, len(sdns))
 	for i := range sdns {
 		name := reorderSDNName(sdns[i].SDNName, sdns[i].SDNType)
-		name = removeStopwords(name, detectLanguage(name, findAddresses(sdns[i].EntityID, addrs)))
+		if !strings.EqualFold(sdns[i].SDNType, "individual") {
+			// Never remove stopwords for an individual (aka person)
+			name = removeStopwords(name, detectLanguage(name, findAddresses(sdns[i].EntityID, addrs)))
+		}
 		name = precompute(name)
 
 		out[i] = &SDN{
