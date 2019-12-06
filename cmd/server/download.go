@@ -82,7 +82,7 @@ func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo down
 			downloadRepo.recordStats(stats)
 			if s.logger != nil {
 				s.logger.Log(
-					"main", fmt.Sprintf("data refreshed at %v", stats.RefreshedAt),
+					"main", fmt.Sprintf("data refreshed %v ago", time.Since(stats.RefreshedAt)),
 					"SDNs", stats.SDNs, "AltNames", stats.Alts, "Addresses", stats.Addresses, "SSI", stats.SectoralSanctions,
 					"DPL", stats.DeniedPersons, "BISEntities", stats.BISEntities,
 				)

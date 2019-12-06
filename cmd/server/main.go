@@ -148,7 +148,7 @@ func main() {
 			os.Exit(1)
 		}
 		logger.Log(
-			"main", fmt.Sprintf("data refreshed at %v", stats.RefreshedAt),
+			"main", fmt.Sprintf("data refreshed %v ago", time.Since(stats.RefreshedAt)),
 			"SDNs", stats.SDNs, "AltNames", stats.Alts, "Addresses", stats.Addresses, "SSI", stats.SectoralSanctions,
 			"DPL", stats.DeniedPersons, "BISEntities", stats.BISEntities,
 		)

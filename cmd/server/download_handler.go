@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-kit/kit/log"
 	moovhttp "github.com/moov-io/base/http"
@@ -30,7 +31,7 @@ func manualRefreshHandler(logger log.Logger, searcher *searcher, downloadRepo do
 				return
 			}
 			logger.Log(
-				"main", fmt.Sprintf("admin: finished data refreshed at %v", stats.RefreshedAt),
+				"main", fmt.Sprintf("admin: finished data refreshed %v ago", time.Since(stats.RefreshedAt)),
 				"SDNs", stats.SDNs, "AltNames", stats.Alts, "Addresses", stats.Addresses, "SSI", stats.SectoralSanctions,
 				"DPL", stats.DeniedPersons, "BISEntities", stats.BISEntities,
 			)
