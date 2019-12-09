@@ -8,17 +8,19 @@ ADDITIONS
 
 - cmd/server: Add Sectoral Sanctions Identifications List via Consolidated Screening List (CSL)
 - cmd/server: Add Bureau of Industry and Security Entity List via Consolidated Screening List
-- cmd/server: Remove stopwords from OFAC SDN entity names
+- cmd/server: Remove stopwords from OFAC SDN entity names, DP's, SSI, and BIS Entities
 
 IMPROVEMENTS
 
 - cmd/server: concurrently search ?q=foo
+- cmd/server: add KEEP_STOPWORDS env config
 
 BUILD
 
 - fix(deps): update react monorepo to v16.12.0
-- chore(deps): update dependency @material-ui/core to v4.7.1
+- chore(deps): update dependency @material-ui/core to v4.7.2
 - build: upgrade openapi-generator to 4.2.2
+- fix(deps): update dependency react-scripts to v3.3.0
 
 ## v0.12.0 (Released 2019-11-12)
 
