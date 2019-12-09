@@ -539,13 +539,12 @@ func (a Alt) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func precomputeAlts(alts []*ofac.AlternateIdentity, addrs []*ofac.Address) []*Alt {
+func precomputeAlts(alts []*ofac.AlternateIdentity) []*Alt {
 	out := make([]*Alt, len(alts))
 	for i := range alts {
-		name := removeStopwords(alts[i].AlternateName, detectLanguage(alts[i].AlternateName, addrs))
 		out[i] = &Alt{
 			AlternateIdentity: alts[i],
-			name:              precompute(name),
+			name:              precompute(alts[i].AlternateName),
 		}
 	}
 	return out
@@ -607,7 +606,10 @@ func precomputeSSIs(ssis []*csl.SSI) []*SSI {
 			name = reorderSDNName(name, ssi.Type)
 			name = removeStopwords(name, detectLanguage(name, nil))
 			normalizedAltNames = append(normalizedAltNames, name)
-			out[i].name = precompute(name)
+
+			if !strings.EqualFold(ssi.Type, "individual") {
+				out[i].name = precompute(name)
+			}
 		}
 		ssi.AlternateNames = normalizedAltNames
 	}

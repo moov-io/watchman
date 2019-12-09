@@ -50,7 +50,7 @@ var (
 				AlternateType: "aka",
 				AlternateName: "NATIONAL BANK OF CUBA",
 			},
-		}, nil),
+		}),
 	}
 )
 
