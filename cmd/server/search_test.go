@@ -52,7 +52,7 @@ var (
 				AlternateType: "aka",
 				AlternateName: "A.I.C. SOGO KENKYUSHO",
 			},
-		}, nil),
+		}),
 	}
 	sdnSearcher = &searcher{
 		SDNs: precomputeSDNs([]*ofac.SDN{

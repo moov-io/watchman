@@ -160,7 +160,7 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 
 	sdns := precomputeSDNs(results.SDNs, results.Addresses)
 	adds := precomputeAddresses(results.Addresses)
-	alts := precomputeAlts(results.AlternateIdentities, results.Addresses)
+	alts := precomputeAlts(results.AlternateIdentities)
 
 	deniedPersons, err := dplRecords(s.logger, initialDir)
 	if err != nil {
