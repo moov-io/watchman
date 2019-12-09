@@ -336,7 +336,7 @@ func TestSearch__Name(t *testing.T) {
 
 func TestSearch__AltName(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/search?altName=sogo+KENKYUSHO&limit=1", nil)
+	req := httptest.NewRequest("GET", "/search?altName=SOGO+KENKYUSHO&limit=1", nil)
 
 	router := mux.NewRouter()
 	addSearchRoutes(log.NewNopLogger(), router, altSearcher)
@@ -347,7 +347,7 @@ func TestSearch__AltName(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":1`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.666`) {
 		t.Error(v)
 	}
 
