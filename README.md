@@ -161,6 +161,7 @@ $ go run ./cmd/server/ # Load http://localhost:8084 in a web browser
 | `DPL_DOWNLOAD_TEMPLATE` | HTTP address for downloading the DPL | `https://www.bis.doc.gov/dpl/%s` |
 | `CSL_DOWNLOAD_TEMPLATE` | HTTP address for downloading the Consolidated Screening List (CSL), which is a collection of US government sanctions lists. | `https://api.trade.gov/consolidated_screening_list/%s` |
 | `TRADEGOV_API_KEY` | REQUIRED for the CSL. API keys for api.trade.gov are free and can be obtained by [creating an account.](https://api.trade.gov/apps/store/) | N/A |
+| `KEEP_STOPWORDS` | Boolean to keep stopwords in names. | `false` |
 
 #### Storage
 

@@ -12,6 +12,12 @@ import (
 	"github.com/abadojack/whatlanggo"
 )
 
+func TestStopwordsEnv(t *testing.T) {
+	if keepStopwords {
+		t.Errorf("KEEP_STOPWORDS is set")
+	}
+}
+
 func TestStopwords__detect(t *testing.T) {
 	addrs := func(country string) []*ofac.Address {
 		return []*ofac.Address{
