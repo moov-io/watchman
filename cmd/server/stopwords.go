@@ -5,6 +5,8 @@
 package main
 
 import (
+	"os"
+	"strconv"
 	"strings"
 
 	"github.com/moov-io/watchman/pkg/ofac"
@@ -18,7 +20,20 @@ const (
 	minConfidence = 0.50
 )
 
+var (
+	keepStopwords = func(raw string) bool {
+		if raw == "" {
+			raw = "false"
+		}
+		keep, _ := strconv.ParseBool(raw)
+		return keep
+	}(os.Getenv("KEEP_STOPWORDS"))
+)
+
 func removeStopwords(in string, lang whatlanggo.Lang) string {
+	if keepStopwords {
+		return in
+	}
 	return strings.TrimSpace(stopwords.CleanString(strings.ToLower(in), lang.Iso6391(), false))
 }
 
