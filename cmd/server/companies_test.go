@@ -48,7 +48,7 @@ var (
 				AlternateType: "aka",
 				AlternateName: "AL-HISN FIRM",
 			},
-		}),
+		}, nil),
 	}
 )
 

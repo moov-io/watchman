@@ -539,12 +539,13 @@ func (a Alt) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func precomputeAlts(alts []*ofac.AlternateIdentity) []*Alt {
+func precomputeAlts(alts []*ofac.AlternateIdentity, addrs []*ofac.Address) []*Alt {
 	out := make([]*Alt, len(alts))
 	for i := range alts {
+		name := removeStopwords(alts[i].AlternateName, detectLanguage(alts[i].AlternateName, addrs))
 		out[i] = &Alt{
 			AlternateIdentity: alts[i],
-			name:              precompute(alts[i].AlternateName),
+			name:              precompute(name),
 		}
 	}
 	return out
@@ -571,9 +572,10 @@ func (d DP) MarshalJSON() ([]byte, error) {
 func precomputeDPs(persons []*dpl.DPL) []*DP {
 	out := make([]*DP, len(persons))
 	for i := range persons {
+		name := removeStopwords(persons[i].Name, detectLanguage(persons[i].Name, nil))
 		out[i] = &DP{
 			DeniedPerson: persons[i],
-			name:         precompute(persons[i].Name),
+			name:         precompute(name),
 		}
 	}
 	return out
@@ -598,15 +600,16 @@ func (s SSI) MarshalJSON() ([]byte, error) {
 func precomputeSSIs(ssis []*csl.SSI) []*SSI {
 	out := make([]*SSI, len(ssis))
 	for i, ssi := range ssis {
+		out[i] = &SSI{SectoralSanction: ssi}
+
 		var normalizedAltNames []string
 		for _, name := range ssi.AlternateNames {
-			normalizedAltNames = append(normalizedAltNames, precompute(reorderSDNName(name, ssi.Type)))
+			name = reorderSDNName(name, ssi.Type)
+			name = removeStopwords(name, detectLanguage(name, nil))
+			normalizedAltNames = append(normalizedAltNames, name)
+			out[i].name = precompute(name)
 		}
 		ssi.AlternateNames = normalizedAltNames
-		out[i] = &SSI{
-			SectoralSanction: ssi,
-			name:             precompute(reorderSDNName(ssi.Name, ssi.Type)),
-		}
 	}
 	return out
 }
@@ -637,7 +640,7 @@ func precomputeBISEntities(els []*csl.EL) []*BISEntity {
 		el.AlternateNames = normalizedAltNames
 		out[i] = &BISEntity{
 			Entity: el,
-			name:   precompute(el.Name),
+			name:   precompute(removeStopwords(el.Name, detectLanguage(el.Name, nil))),
 		}
 	}
 	return out

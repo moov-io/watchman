@@ -52,7 +52,7 @@ var (
 				AlternateType: "aka",
 				AlternateName: "A.I.C. SOGO KENKYUSHO",
 			},
-		}),
+		}, nil),
 	}
 	sdnSearcher = &searcher{
 		SDNs: precomputeSDNs([]*ofac.SDN{
@@ -206,6 +206,9 @@ func TestJaroWinkler(t *testing.T) {
 		{"nicolas maduro moros", "nicolás maduro", 0.961},
 		{"nicolas, maduro moros", "nicolas maduro", 0.988},
 		{"nicolas, maduro moros", "nicolás maduro", 0.950},
+		// stopwords
+		{"i c sogo kenkyusho", precompute("A.I.C. SOGO KENKYUSHO"), 1.0},
+		{precompute("A.I.C. SOGO KENKYUSHO"), "sogo kenkyusho", 1.0},
 	}
 	for i := range cases {
 		v := cases[i]

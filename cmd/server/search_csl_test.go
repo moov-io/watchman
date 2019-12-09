@@ -12,10 +12,12 @@ import (
 // These tests should be skipped if the TRADEGOV_API_KEY environment variable is not set.
 
 func TestSearcher_refreshData_CSL(t *testing.T) {
-	if csl.ApiKey == "" {
+	if testing.Short() || csl.ApiKey == "" {
 		return
 	}
+
 	s := &searcher{logger: log.NewNopLogger()}
+
 	stats, err := s.refreshData("")
 	if err != nil {
 		t.Fatal(err)
