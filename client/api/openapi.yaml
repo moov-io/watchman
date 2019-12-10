@@ -985,7 +985,8 @@ components:
           sdnType: individual
           match: 0.91
           entityID: "1231"
-          program: CUBA
+          programs:
+          - CUBA
           sdnName: BANCO NACIONAL DE CUBA
           title: Title of an individual
           remarks: remarks
@@ -1070,7 +1071,8 @@ components:
           sdnType: individual
           match: 0.91
           entityID: "1231"
-          program: CUBA
+          programs:
+          - CUBA
           sdnName: BANCO NACIONAL DE CUBA
           title: Title of an individual
           remarks: remarks
@@ -1127,7 +1129,8 @@ components:
         sdnType: individual
         match: 0.91
         entityID: "1231"
-        program: CUBA
+        programs:
+        - CUBA
         sdnName: BANCO NACIONAL DE CUBA
         title: Title of an individual
         remarks: remarks
@@ -1144,9 +1147,13 @@ components:
             but underlying both is the same SDN metadata.
           example: individual
           type: string
-        program:
-          example: CUBA
-          type: string
+        programs:
+          description: Programs is the sanction programs this SDN was added from
+          example:
+          - CUBA
+          items:
+            type: string
+          type: array
         title:
           example: Title of an individual
           type: string
@@ -1482,14 +1489,16 @@ components:
         - sdnType: individual
           match: 0.91
           entityID: "1231"
-          program: CUBA
+          programs:
+          - CUBA
           sdnName: BANCO NACIONAL DE CUBA
           title: Title of an individual
           remarks: remarks
         - sdnType: individual
           match: 0.91
           entityID: "1231"
-          program: CUBA
+          programs:
+          - CUBA
           sdnName: BANCO NACIONAL DE CUBA
           title: Title of an individual
           remarks: remarks

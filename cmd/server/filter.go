@@ -57,10 +57,10 @@ func filterSDNs(sdns []SDN, req filterRequest) []SDN {
 			}
 		}
 		if req.ofacProgram != "" {
-			if sdns[i].Program != "" && strings.EqualFold(sdns[i].Program, req.ofacProgram) {
-				keep = true
-			} else {
-				continue
+			for j := range sdns[i].Programs {
+				if strings.EqualFold(sdns[i].Programs[j], req.ofacProgram) {
+					keep = true
+				}
 			}
 		}
 

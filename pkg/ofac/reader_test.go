@@ -6,6 +6,7 @@ package ofac
 
 import (
 	"path/filepath"
+	"reflect"
 	"testing"
 )
 
@@ -56,5 +57,36 @@ func TestReplaceNull(t *testing.T) {
 	ans = replaceNull([]string{"foo", " -0-"})
 	if len(ans) != 2 || ans[0] != "foo" || ans[1] != "" {
 		t.Errorf("Got %v", ans)
+	}
+}
+
+func TestCleanPrgmsList(t *testing.T) {
+	tests := []struct {
+		prgms    string
+		expected string
+	}{
+		{"SDGT] ", "SDGT"},
+		{" SDGT] [IFSR", "SDGT; IFSR"},
+		{"SDNTK] [FTO] [SDGT", "SDNTK; FTO; SDGT"},
+		{"SDNTK] [FTO] [SDGT; IFSR]", "SDNTK; FTO; SDGT; IFSR"},
+		{"[IFSR] [SDNTK] [FTO] [SDGT", "IFSR; SDNTK; FTO; SDGT"},
+	}
+
+	for _, test := range tests {
+		if actual := cleanPrgmsList(test.prgms); actual != test.expected {
+			t.Errorf("Wanted %q, got %q", test.expected, actual)
+		}
+	}
+}
+
+func TestSplitPrograms(t *testing.T) {
+	if items := splitPrograms("SGDT"); !reflect.DeepEqual(items, []string{"SGDT"}) {
+		t.Errorf("items=%v", items)
+	}
+	if items := splitPrograms("IRAN; SGDT"); !reflect.DeepEqual(items, []string{"IRAN", "SGDT"}) {
+		t.Errorf("items=%v", items)
+	}
+	if items := splitPrograms("IFSR; SDNTK; FTO; SDGT"); !reflect.DeepEqual(items, []string{"IFSR", "SDNTK", "FTO", "SDGT"}) {
+		t.Errorf("items=%v", items)
 	}
 }

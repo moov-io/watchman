@@ -809,9 +809,12 @@ components:
           description: SDN's typically represent an individual (customer) or trust/company/organization. OFAC endpoints refer to customers or companies as different entities, but underlying both is the same SDN metadata.
           type: string
           example: individual
-        program:
-          type: string
-          example: CUBA
+        programs:
+          type: array
+          items:
+            type: string
+          description: Programs is the sanction programs this SDN was added from
+          example: [CUBA]
         title:
           type: string
           example: Title of an individual

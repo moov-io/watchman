@@ -83,7 +83,9 @@ func getValues(logger log.Logger, searcher *searcher) http.HandlerFunc {
 			case "sdntype":
 				acc.add(searcher.SDNs[i].SDNType)
 			case "ofacprogram":
-				acc.add(searcher.SDNs[i].Program)
+				for j := range searcher.SDNs[i].Programs {
+					acc.add(searcher.SDNs[i].Programs[j])
+				}
 			default:
 				moovhttp.Problem(w, fmt.Errorf("unknown key: %s", key))
 				return
