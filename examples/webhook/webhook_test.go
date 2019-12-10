@@ -25,7 +25,7 @@ var (
 			EntityID: "306",
 			SDNName:  "BANCO NACIONAL DE CUBA",
 			SDNType:  "individual",
-			Program:  "CUBA",
+			Programs: []string{"CUBA"},
 			Title:    "",
 			Remarks:  "a.k.a. 'BNC'.",
 		},

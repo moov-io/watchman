@@ -28,7 +28,7 @@ var (
 			{
 				EntityID: "21206",
 				SDNName:  "AL-HISN",
-				Program:  "SYRIA",
+				Programs: []string{"SYRIA"},
 				Remarks:  "Linked To: MAKHLUF, Rami.",
 			},
 		}, nil),

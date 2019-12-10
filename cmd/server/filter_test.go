@@ -55,7 +55,7 @@ var (
 				EntityID: "12",
 				SDNName:  "Jane Doe",
 				SDNType:  "individual",
-				Program:  "other",
+				Programs: []string{"other", "barfoo"},
 			},
 		},
 		{
@@ -63,7 +63,7 @@ var (
 				EntityID: "13",
 				SDNName:  "EP-1111",
 				SDNType:  "aircraft",
-				Program:  "SDGT",
+				Programs: []string{"SDGT", "IRAN"},
 			},
 		},
 	}
@@ -72,7 +72,7 @@ var (
 			EntityID: "13",
 			SDNName:  "Terror Group",
 			SDNType:  "",
-			Program:  "SDGT",
+			Programs: []string{"SDGT"},
 		},
 	}
 	oneEmptySDNType = []SDN{
@@ -81,7 +81,7 @@ var (
 				EntityID: "12",
 				SDNName:  "Jane Doe",
 				SDNType:  "individual",
-				Program:  "other",
+				Programs: []string{"other"},
 			},
 		},
 		terrorGroupSDN,
@@ -91,7 +91,7 @@ var (
 			SDN: &ofac.SDN{
 				EntityID: "14",
 				SDNName:  "missing sdnType",
-				Program:  "SDGT",
+				Programs: []string{"SDGT"},
 			},
 		},
 	}

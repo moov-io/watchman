@@ -6,6 +6,7 @@ package ofac
 
 import (
 	"path/filepath"
+	"reflect"
 	"testing"
 )
 
@@ -75,5 +76,17 @@ func TestCleanPrgmsList(t *testing.T) {
 		if actual := cleanPrgmsList(test.prgms); actual != test.expected {
 			t.Errorf("Wanted %q, got %q", test.expected, actual)
 		}
+	}
+}
+
+func TestSplitPrograms(t *testing.T) {
+	if items := splitPrograms("SGDT"); !reflect.DeepEqual(items, []string{"SGDT"}) {
+		t.Errorf("items=%v", items)
+	}
+	if items := splitPrograms("IRAN; SGDT"); !reflect.DeepEqual(items, []string{"IRAN", "SGDT"}) {
+		t.Errorf("items=%v", items)
+	}
+	if items := splitPrograms("IFSR; SDNTK; FTO; SDGT"); !reflect.DeepEqual(items, []string{"IFSR", "SDNTK", "FTO", "SDGT"}) {
+		t.Errorf("items=%v", items)
 	}
 }

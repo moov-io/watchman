@@ -173,7 +173,7 @@ func TestSearch__NameAndAddress(t *testing.T) {
 				EntityID: "2831",
 				SDNName:  "MIDCO FINANCE S.A.",
 				SDNType:  "individual",
-				Program:  "IRAQ2",
+				Programs: []string{"IRAQ2"},
 				Remarks:  "US FEIN CH-660-0-469-982-0 (United States); Switzerland.",
 			},
 		}, nil),

@@ -12,8 +12,8 @@ type SDN struct {
 	SDNName string `json:"sdnName"`
 	// SDNType (SDN_Type) is the type of SDN
 	SDNType string `json:"sdnType"`
-	// Program is the sanctions program name
-	Program string `json:"program"`
+	// Programs is the sanction programs this SDN was added from
+	Programs []string `json:"program"`
 	// Title is the title of an individual
 	Title string `json:"title"`
 	// CallSign (Call_Sign) is vessel call sign

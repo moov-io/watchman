@@ -144,7 +144,7 @@ func csvSDNFile(path string) (*Results, error) {
 			EntityID:               record[0],
 			SDNName:                record[1],
 			SDNType:                record[2],
-			Program:                cleanPrgmsList(record[3]),
+			Programs:               splitPrograms(record[3]),
 			Title:                  record[4],
 			CallSign:               record[5],
 			VesselType:             record[6],
@@ -200,4 +200,9 @@ var prgmReplacer = strings.NewReplacer("] [", "; ", "]", "", "[", "")
 
 func cleanPrgmsList(s string) string {
 	return strings.TrimSpace(prgmReplacer.Replace(s))
+}
+
+func splitPrograms(in string) []string {
+	norm := cleanPrgmsList(in)
+	return strings.Split(norm, "; ")
 }
