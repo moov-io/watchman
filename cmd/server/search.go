@@ -8,8 +8,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
+	"os"
 	"regexp"
 	"sort"
 	"strconv"
@@ -446,7 +446,17 @@ func findAddresses(entityID string, addrs []*ofac.Address) []*ofac.Address {
 func precomputeSDNs(sdns []*ofac.SDN, addrs []*ofac.Address) []*SDN {
 	out := make([]*SDN, len(sdns))
 	for i := range sdns {
-		name := reorderSDNName(sdns[i].SDNName, sdns[i].SDNType)
+		nn := &Name{
+			Original:  sdns[i].SDNName,
+			Processed: sdns[i].SDNName,
+			sdn:       sdns[i],
+		}
+		if err := pipeline(log.NewLogfmtLogger(os.Stderr), nn); err != nil {
+			panic(err)
+		}
+
+		name := nn.Processed
+		// name := reorderSDNName(sdns[i].SDNName, sdns[i].SDNType)
 		if !strings.EqualFold(sdns[i].SDNType, "individual") {
 			// Never remove stopwords for an individual (aka person)
 			name = removeStopwords(name, detectLanguage(name, findAddresses(sdns[i].EntityID, addrs)))
@@ -465,24 +475,6 @@ func precomputeSDNs(sdns []*ofac.SDN, addrs []*ofac.Address) []*SDN {
 var (
 	surnamePrecedes = regexp.MustCompile(`(,?[\s?a-zA-Z\.]{1,})$`)
 )
-
-// reorderSDNName will take a given SDN name and if it matches a specific pattern where
-// the first name is placed after the last name (surname) to return a string where the first name
-// preceedes the last.
-//
-// Example:
-// SDN EntityID: 19147 has 'FELIX B. MADURO S.A.'
-// SDN EntityID: 22790 has 'MADURO MOROS, Nicolas'
-func reorderSDNName(name string, tpe string) string {
-	if !strings.EqualFold(tpe, "individual") {
-		return name // only reorder individual names
-	}
-	v := surnamePrecedes.FindString(name)
-	if v == "" {
-		return name // no match on 'Doe, John'
-	}
-	return strings.TrimSpace(fmt.Sprintf("%s %s", strings.TrimPrefix(v, ","), strings.TrimSuffix(name, v)))
-}
 
 // Address is ofac.Address wrapped with precomputed search metadata
 type Address struct {
