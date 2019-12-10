@@ -144,7 +144,7 @@ func csvSDNFile(path string) (*Results, error) {
 			EntityID:               record[0],
 			SDNName:                record[1],
 			SDNType:                record[2],
-			Program:                record[3],
+			Program:                cleanPrgmsList(record[3]),
 			Title:                  record[4],
 			CallSign:               record[5],
 			VesselType:             record[6],
@@ -191,4 +191,13 @@ func replaceNull(s []string) []string {
 		s[i] = strings.TrimSpace(strings.Replace(s[i], "-0-", "", -1))
 	}
 	return s
+}
+
+// Some entries in the SDN have a malformed programs list.
+// Fields containing lists are supposed to be semicolon delimited, but the programs list doesn't always follow this convention.
+// Ex: "SDGT] [IFSR" => "SDGT; IFSR", "SDNTK] [FTO] [SDGT" => "SDNTK; FTO; SDGT"
+var prgmReplacer = strings.NewReplacer("] [", "; ", "]", "", "[", "")
+
+func cleanPrgmsList(s string) string {
+	return strings.TrimSpace(prgmReplacer.Replace(s))
 }
