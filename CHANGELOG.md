@@ -4,6 +4,10 @@ This project has been renamed to Moov Watchman (from Moov OFAC) to better repres
 
 The OpenAPI specification models have been renamed to include an `Ofac` prefix on their name and OFAC HTTP routes have an `/ofac/` prefix.
 
+BREAKING CHANGES
+
+- pkg/ofac: `SDN.Program string` has been renamed to `SDN.Programs []string` and is populated with all programs an SDN was created from.
+
 ADDITIONS
 
 - cmd/server: Add Sectoral Sanctions Identifications List via Consolidated Screening List (CSL)
@@ -14,6 +18,8 @@ IMPROVEMENTS
 
 - cmd/server: concurrently search ?q=foo
 - cmd/server: add KEEP_STOPWORDS env config
+- pkg/ofac: clean up SDN programs when reading csv
+- cmd/server: handle an SDN's program list as an array in search, fixup UI values endpoint
 
 BUILD
 
