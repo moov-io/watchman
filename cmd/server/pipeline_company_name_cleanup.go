@@ -29,6 +29,7 @@ func (s *companyNameCleanupStep) apply(in *Name) error {
 var (
 	companySuffixReplacer = strings.NewReplacer(
 		" CO.", "",
+		" D.O.O.", "",
 		" INC.", "",
 		" GMBH", "",
 		" LLC", "",

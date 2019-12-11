@@ -32,6 +32,7 @@ func TestRemoveCompanyTitles(t *testing.T) {
 	cases := []struct {
 		input, expected string
 	}{
+		{"SIS D.O.O.", "SIS"},
 		{"SAI ADVISORS INC.", "SAI ADVISORS"},                                                                  // SDN 24428
 		{"COBALT REFINERY CO. INC.", "COBALT REFINERY"},                                                        // SDN 3748
 		{"AL BARAKA EXCHANGE LLC", "AL BARAKA EXCHANGE"},                                                       // SDN 6953
