@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -135,7 +136,11 @@ func main() {
 
 	searcher := &searcher{
 		logger: logger,
-		pipe:   newPipeliner(logger),
+	}
+	if debug, err := strconv.ParseBool(os.Getenv("DEBUG_NAME_PIPELINE")); debug && err == nil {
+		searcher.pipe = newPipeliner(logger)
+	} else {
+		searcher.pipe = newPipeliner(log.NewNopLogger())
 	}
 
 	// Add manual data refresh endpoint
