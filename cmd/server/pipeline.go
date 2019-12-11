@@ -92,6 +92,7 @@ func newPipeliner(logger log.Logger) *pipeliner {
 			&debugStep{logger: logger, step: &reorderSDNStep{}},
 			&debugStep{logger: logger, step: &stopwordsStep{}},
 			&debugStep{logger: logger, step: &normalizeStep{}},
+			&debugStep{logger: logger, step: &companyNameCleanupStep{}},
 		},
 	}
 }

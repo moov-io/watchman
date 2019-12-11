@@ -6,7 +6,27 @@ package main
 
 import (
 	"testing"
+
+	"github.com/moov-io/watchman/pkg/ofac"
 )
+
+func TestPipeline__companyNameCleanupStep(t *testing.T) {
+	nn := &Name{
+		Processed: "SAI ADVISORS INC.",
+		sdn: &ofac.SDN{
+			SDNType: "",
+		},
+	}
+
+	step := &companyNameCleanupStep{}
+	if err := step.apply(nn); err != nil {
+		t.Fatal(err)
+	}
+
+	if nn.Processed != "SAI ADVISORS" {
+		t.Errorf("nn.Processed=%s", nn.Processed)
+	}
+}
 
 func TestRemoveCompanyTitles(t *testing.T) {
 	cases := []struct {
