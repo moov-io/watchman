@@ -17,6 +17,7 @@ func (s *reorderSDNStep) apply(in *Name) error {
 	switch {
 	case in.sdn != nil:
 		in.Processed = reorderSDNName(in.Processed, in.sdn.SDNType)
+
 	case in.ssi != nil:
 		in.Processed = reorderSDNName(in.Processed, in.ssi.Type)
 	}

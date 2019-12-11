@@ -5,6 +5,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/moov-io/watchman/pkg/csl"
@@ -14,24 +15,29 @@ import (
 	"github.com/go-kit/kit/log"
 )
 
+// Name represents an individual or entity name to be processed for search.
 type Name struct {
-	Original  string
+	// Original is the initial value and MUST not be changed by any pipeline step.
+	Original string
+
+	// Processed is the mutable value that each pipeline step can optionally
+	// replace and is read as the input to each step.
 	Processed string
 
 	// optional metadata of where a name came from
-	sdn *ofac.SDN
-	ssi *csl.SSI
-	dp  *dpl.DPL
-	el  *csl.EL
-
+	sdn   *ofac.SDN
+	ssi   *csl.SSI
+	dp    *dpl.DPL
+	el    *csl.EL
 	addrs []*ofac.Address
 }
 
-func sdnName(sdn *ofac.SDN) *Name {
+func sdnName(sdn *ofac.SDN, addrs []*ofac.Address) *Name {
 	return &Name{
 		Original:  sdn.SDNName,
 		Processed: sdn.SDNName,
 		sdn:       sdn,
+		addrs:     addrs,
 	}
 }
 
@@ -79,7 +85,7 @@ func (ds *debugStep) apply(in *Name) error {
 	return nil
 }
 
-func newPiepliner(logger log.Logger) *pipeliner {
+func newPipeliner(logger log.Logger) *pipeliner {
 	return &pipeliner{
 		logger: logger,
 		steps: []step{
@@ -96,6 +102,9 @@ type pipeliner struct {
 }
 
 func (p *pipeliner) Do(name *Name) error {
+	if p == nil || p.steps == nil || p.logger == nil || name == nil {
+		return errors.New("nil pipeliner or Name")
+	}
 	for i := range p.steps {
 		if name == nil {
 			return fmt.Errorf("%T: nil Name", p.steps[i])

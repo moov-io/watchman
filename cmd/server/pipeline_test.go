@@ -5,6 +5,8 @@
 package main
 
 import (
+	"testing"
+
 	"github.com/go-kit/kit/log"
 )
 
@@ -14,3 +16,9 @@ var (
 		steps:  []step{},
 	}
 )
+
+func TestPipelineNoop(t *testing.T) {
+	if err := noopPipeliner.Do(&Name{}); err != nil {
+		t.Fatal(err)
+	}
+}

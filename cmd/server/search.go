@@ -443,8 +443,7 @@ func findAddresses(entityID string, addrs []*ofac.Address) []*ofac.Address {
 func precomputeSDNs(sdns []*ofac.SDN, addrs []*ofac.Address, pipe *pipeliner) []*SDN {
 	out := make([]*SDN, len(sdns))
 	for i := range sdns {
-		nn := sdnName(sdns[i])
-		nn.addrs = findAddresses(sdns[i].EntityID, addrs)
+		nn := sdnName(sdns[i], findAddresses(sdns[i].EntityID, addrs))
 
 		if err := pipe.Do(nn); err != nil {
 			pipe.logger.Log("pipeline", fmt.Sprintf("problem pipelining SDN: %v", err))

@@ -31,7 +31,7 @@ var (
 				Programs: []string{"SYRIA"},
 				Remarks:  "Linked To: MAKHLUF, Rami.",
 			},
-		}, nil, newPiepliner(log.NewNopLogger())),
+		}, nil, newPipeliner(log.NewNopLogger())),
 		Addresses: precomputeAddresses([]*ofac.Address{
 			{
 				EntityID:                    "21206",
@@ -49,6 +49,7 @@ var (
 				AlternateName: "AL-HISN FIRM",
 			},
 		}),
+		pipe: newPipeliner(log.NewNopLogger()),
 	}
 )
 

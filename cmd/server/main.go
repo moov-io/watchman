@@ -135,7 +135,7 @@ func main() {
 
 	searcher := &searcher{
 		logger: logger,
-		pipe:   newPiepliner(logger),
+		pipe:   newPipeliner(logger),
 	}
 
 	// Add manual data refresh endpoint

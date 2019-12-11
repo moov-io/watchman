@@ -37,6 +37,7 @@ func (s *stopwordsStep) apply(in *Name) error {
 	switch {
 	case in.sdn != nil && !strings.EqualFold(in.sdn.SDNType, "individual"):
 		in.Processed = removeStopwords(in.Processed, detectLanguage(in.Processed, in.addrs))
+
 	case in.ssi != nil && !strings.EqualFold(in.ssi.Type, "individual"):
 		in.Processed = removeStopwords(in.Processed, detectLanguage(in.Processed, nil))
 	}
