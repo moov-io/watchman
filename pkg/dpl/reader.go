@@ -32,6 +32,10 @@ func Read(path string) ([]*DPL, error) {
 
 	var out []*DPL
 	for _, txtLine := range lines {
+		if txtLine[1] == "Street_Address" {
+			continue // skip the headers
+		}
+
 		deniedPerson := &DPL{
 			Name:           txtLine[0],
 			StreetAddress:  txtLine[1],
