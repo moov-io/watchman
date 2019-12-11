@@ -72,7 +72,7 @@ var (
 				Title:    "Secretary General of DEMOCRATIC FRONT FOR THE LIBERATION OF PALESTINE - HAWATMEH FACTION",
 				Remarks:  "DOB 1933; Secretary General of DEMOCRATIC FRONT FOR THE LIBERATION OF PALESTINE - HAWATMEH FACTION.",
 			},
-		}, nil),
+		}, nil, newPiepliner(log.NewNopLogger())),
 	}
 	idSearcher = &searcher{
 		SDNs: precomputeSDNs([]*ofac.SDN{
@@ -84,7 +84,7 @@ var (
 				Title:    "President of the Bolivarian Republic of Venezuela",
 				Remarks:  "DOB 23 Nov 1962; POB Caracas, Venezuela; citizen Venezuela; Gender Male; Cedula No. 5892464 (Venezuela); President of the Bolivarian Republic of Venezuela.",
 			},
-		}, nil),
+		}, nil, newPiepliner(log.NewNopLogger())),
 	}
 	dplSearcher = &searcher{
 		DPs: precomputeDPs([]*dpl.DPL{
@@ -116,7 +116,7 @@ var (
 				Action:         "STANDARD ORDER",
 				FRCitation:     "67 F.R. 7354 2/19/02 66 F.R. 48998 9/25/01 62 F.R. 26471 5/14/97 62 F.R. 34688 6/27/97 62 F.R. 60063 11/6/97 63 F.R. 25817 5/11/98 63 F.R. 58707 11/2/98 64 F.R. 23049 4/29/99",
 			},
-		}),
+		}, newPiepliner(log.NewNopLogger())),
 	}
 	ssiSearcher = &searcher{
 		SSIs: precomputeSSIs([]*csl.SSI{
@@ -144,7 +144,7 @@ var (
 				SourceListURL:  "http://bit.ly/1QWTIfE",
 				SourceInfoURL:  "http://bit.ly/1MLgou0",
 			},
-		}),
+		}, newPiepliner(log.NewNopLogger())),
 	}
 	bisEntitySearcher = &searcher{
 		BISEntities: precomputeBISEntities([]*csl.EL{
@@ -170,7 +170,7 @@ var (
 				SourceListURL:      "http://bit.ly/1L47xrV",
 				SourceInfoURL:      "http://bit.ly/1L47xrV",
 			},
-		}),
+		}, newPiepliner(log.NewNopLogger())),
 	}
 )
 
@@ -238,47 +238,6 @@ func eql(t *testing.T, desc string, x, y float64) {
 func TestEql(t *testing.T) {
 	eql(t, "", 0.1, 0.1)
 	eql(t, "", 0.0001, 0.00002)
-}
-
-// TestSearch_precompute ensures we are trimming and UTF-8 normalizing strings
-// as expected. This is needed since our datafiles are normalized for us.
-func TestSearch_precompute(t *testing.T) {
-	cases := []struct {
-		input, expected string
-	}{
-		{"nicolás maduro", "nicolas maduro"},
-		{"Delcy Rodríguez", "delcy rodriguez"},
-		{"Raúl Castro", "raul castro"},
-	}
-	for i := range cases {
-		guess := precompute(cases[i].input)
-		if guess != cases[i].expected {
-			t.Errorf("precompute(%q)=%q expected %q", cases[i].input, guess, cases[i].expected)
-		}
-	}
-}
-
-func TestSearch_reorderSDNName(t *testing.T) {
-	cases := []struct {
-		input, expected string
-	}{
-		{"Jane Doe", "Jane Doe"}, // no change, control (without commas)
-		{"Doe Other, Jane", "Jane Doe Other"},
-		{"Last, First Middle", "First Middle Last"},
-		{"FELIX B. MADURO S.A.", "FELIX B. MADURO S.A."}, // keep .'s in a name
-		{"MADURO MOROS, Nicolas", "Nicolas MADURO MOROS"},
-		{"IBRAHIM, Sadr", "Sadr IBRAHIM"},
-		{"AL ZAWAHIRI, Dr. Ayman", "Dr. Ayman AL ZAWAHIRI"},
-		// Issue 115
-		{"Bush, George W", "George W Bush"},
-		{"RIZO MORENO, Jorge Luis", "Jorge Luis RIZO MORENO"},
-	}
-	for i := range cases {
-		guess := reorderSDNName(cases[i].input, "individual")
-		if guess != cases[i].expected {
-			t.Errorf("reorderSDNName(%q)=%q expected %q", cases[i].input, guess, cases[i].expected)
-		}
-	}
 }
 
 // TestSearch_liveData will download the real data and run searches against the corpus.
@@ -512,8 +471,8 @@ func TestSearcher_TopSSIs_reportAltNameWeight(t *testing.T) {
 	if ssis[0].SectoralSanction.EntityID != "18782" {
 		t.Errorf("%f - %#v", ssis[0].match, ssis[0].SectoralSanction)
 	}
-	if ssis[0].match != 1 {
-		t.Errorf("Expected match=1 for alt names: %f - %#v", ssis[0].match, ssis[0].SectoralSanction)
+	if math.Abs(1.0-ssis[0].match) > 0.001 {
+		t.Errorf("Expected match=1.0 for alt names: %f - %#v", ssis[0].match, ssis[0].SectoralSanction)
 	}
 }
 
@@ -535,8 +494,8 @@ func TestSearcher_TopBISEntities_AltName(t *testing.T) {
 	if els[0].Entity.Name != "Luqman Yasin Yunus Shgragi" {
 		t.Errorf("%#v", els[0].Entity)
 	}
-	if els[0].match != 1 {
-		t.Errorf("Expected match=1 for alt names: %f - %#v", els[0].match, els[0].Entity)
+	if math.Abs(1.0-els[0].match) > 0.001 {
+		t.Errorf("Expected match=1.0 for alt names: %f - %#v", els[0].match, els[0].Entity)
 	}
 }
 

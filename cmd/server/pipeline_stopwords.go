@@ -30,6 +30,19 @@ var (
 	}(os.Getenv("KEEP_STOPWORDS"))
 )
 
+type stopwordsStep struct {
+}
+
+func (s *stopwordsStep) apply(in *Name) error {
+	switch {
+	case in.sdn != nil && !strings.EqualFold(in.sdn.SDNType, "individual"):
+		in.Processed = removeStopwords(in.Processed, detectLanguage(in.Processed, in.addrs))
+	case in.ssi != nil && !strings.EqualFold(in.ssi.Type, "individual"):
+		in.Processed = removeStopwords(in.Processed, detectLanguage(in.Processed, nil))
+	}
+	return nil
+}
+
 func removeStopwords(in string, lang whatlanggo.Lang) string {
 	if keepStopwords {
 		return in

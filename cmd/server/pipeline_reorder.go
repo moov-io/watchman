@@ -5,8 +5,8 @@
 package main
 
 import (
-	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -14,9 +14,6 @@ type reorderSDNStep struct {
 }
 
 func (s *reorderSDNStep) apply(in *Name) error {
-	if in == nil {
-		return errors.New("reorderSDNStep: nil Name")
-	}
 	switch {
 	case in.sdn != nil:
 		in.Processed = reorderSDNName(in.Processed, in.sdn.SDNType)
@@ -25,6 +22,10 @@ func (s *reorderSDNStep) apply(in *Name) error {
 	}
 	return nil
 }
+
+var (
+	surnamePrecedes = regexp.MustCompile(`(,?[\s?a-zA-Z\.]{1,})$`)
+)
 
 // reorderSDNName will take a given SDN name and if it matches a specific pattern where
 // the first name is placed after the last name (surname) to return a string where the first name

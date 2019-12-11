@@ -8,15 +8,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
-	"os"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
-	"unicode"
 
 	"github.com/moov-io/watchman/pkg/csl"
 	"github.com/moov-io/watchman/pkg/dpl"
@@ -24,9 +22,6 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/xrash/smetrics"
-	"golang.org/x/text/runes"
-	"golang.org/x/text/transform"
-	"golang.org/x/text/unicode/norm"
 )
 
 var (
@@ -51,6 +46,8 @@ type searcher struct {
 	// metadata
 	lastRefreshedAt time.Time
 	sync.RWMutex    // protects all above fields
+
+	pipe *pipeliner
 
 	logger log.Logger
 }
@@ -443,38 +440,25 @@ func findAddresses(entityID string, addrs []*ofac.Address) []*ofac.Address {
 	return out
 }
 
-func precomputeSDNs(sdns []*ofac.SDN, addrs []*ofac.Address) []*SDN {
+func precomputeSDNs(sdns []*ofac.SDN, addrs []*ofac.Address, pipe *pipeliner) []*SDN {
 	out := make([]*SDN, len(sdns))
 	for i := range sdns {
-		nn := &Name{
-			Original:  sdns[i].SDNName,
-			Processed: sdns[i].SDNName,
-			sdn:       sdns[i],
-		}
-		if err := pipeline(log.NewLogfmtLogger(os.Stderr), nn); err != nil {
-			panic(err)
-		}
+		nn := sdnName(sdns[i])
+		nn.addrs = findAddresses(sdns[i].EntityID, addrs)
 
-		name := nn.Processed
-		// name := reorderSDNName(sdns[i].SDNName, sdns[i].SDNType)
-		if !strings.EqualFold(sdns[i].SDNType, "individual") {
-			// Never remove stopwords for an individual (aka person)
-			name = removeStopwords(name, detectLanguage(name, findAddresses(sdns[i].EntityID, addrs)))
+		if err := pipe.Do(nn); err != nil {
+			pipe.logger.Log("pipeline", fmt.Sprintf("problem pipelining SDN: %v", err))
+			continue
 		}
-		name = precompute(name)
 
 		out[i] = &SDN{
 			SDN:  sdns[i],
-			name: name,
+			name: nn.Processed,
 			id:   extractIDFromRemark(strings.TrimSpace(sdns[i].Remarks)),
 		}
 	}
 	return out
 }
-
-var (
-	surnamePrecedes = regexp.MustCompile(`(,?[\s?a-zA-Z\.]{1,})$`)
-)
 
 // Address is ofac.Address wrapped with precomputed search metadata
 type Address struct {
@@ -560,13 +544,17 @@ func (d DP) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func precomputeDPs(persons []*dpl.DPL) []*DP {
+func precomputeDPs(persons []*dpl.DPL, pipe *pipeliner) []*DP {
 	out := make([]*DP, len(persons))
 	for i := range persons {
-		name := removeStopwords(persons[i].Name, detectLanguage(persons[i].Name, nil))
+		nn := dpName(persons[i])
+		if err := pipe.Do(nn); err != nil {
+			pipe.logger.Log("pipeline", fmt.Sprintf("problem pipelining DP: %v", err))
+			continue
+		}
 		out[i] = &DP{
 			DeniedPerson: persons[i],
-			name:         precompute(name),
+			name:         nn.Processed,
 		}
 	}
 	return out
@@ -588,22 +576,30 @@ func (s SSI) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func precomputeSSIs(ssis []*csl.SSI) []*SSI {
+func precomputeSSIs(ssis []*csl.SSI, pipe *pipeliner) []*SSI {
 	out := make([]*SSI, len(ssis))
 	for i, ssi := range ssis {
-		out[i] = &SSI{SectoralSanction: ssi}
-
-		var normalizedAltNames []string
-		for _, name := range ssi.AlternateNames {
-			name = reorderSDNName(name, ssi.Type)
-			name = removeStopwords(name, detectLanguage(name, nil))
-			normalizedAltNames = append(normalizedAltNames, name)
-
-			if !strings.EqualFold(ssi.Type, "individual") {
-				out[i].name = precompute(name)
-			}
+		nn := ssiName(ssi)
+		if err := pipe.Do(nn); err != nil {
+			pipe.logger.Log("pipeline", fmt.Sprintf("problem pipelining SSI: %v", err))
+			continue
 		}
-		ssi.AlternateNames = normalizedAltNames
+
+		var altNames []string
+		for i := range ssi.AlternateNames {
+			altNN := &Name{Processed: ssi.AlternateNames[i]}
+			if err := pipe.Do(altNN); err != nil {
+				pipe.logger.Log("pipeline", fmt.Sprintf("problem pipelining alt: %v", err))
+				continue
+			}
+			altNames = append(altNames, altNN.Processed)
+		}
+		ssi.AlternateNames = altNames
+
+		out[i] = &SSI{
+			SectoralSanction: ssi,
+			name:             nn.Processed,
+		}
 	}
 	return out
 }
@@ -624,39 +620,32 @@ func (e BISEntity) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func precomputeBISEntities(els []*csl.EL) []*BISEntity {
+func precomputeBISEntities(els []*csl.EL, pipe *pipeliner) []*BISEntity {
 	out := make([]*BISEntity, len(els))
 	for i, el := range els {
-		var normalizedAltNames []string
-		for _, name := range el.AlternateNames {
-			normalizedAltNames = append(normalizedAltNames, precompute(name))
+		nn := bisEntityName(el)
+		if err := pipe.Do(nn); err != nil {
+			pipe.logger.Log("pipeline", fmt.Sprintf("problem pipelining EL: %v", err))
+			continue
 		}
-		el.AlternateNames = normalizedAltNames
+
+		var altNames []string
+		for i := range el.AlternateNames {
+			altNN := &Name{Processed: el.AlternateNames[i]}
+			if err := pipe.Do(altNN); err != nil {
+				pipe.logger.Log("pipeline", fmt.Sprintf("problem pipelining alt: %v", err))
+				continue
+			}
+			altNames = append(altNames, altNN.Processed)
+		}
+		el.AlternateNames = altNames
+
 		out[i] = &BISEntity{
 			Entity: el,
-			name:   precompute(removeStopwords(el.Name, detectLanguage(el.Name, nil))),
+			name:   nn.Processed,
 		}
 	}
 	return out
-}
-
-var (
-	punctuationReplacer = strings.NewReplacer(".", "", ",", "", "-", "", "  ", " ")
-)
-
-// precompute will lowercase each substring and remove punctuation
-//
-// This function is called on every record from the flat files and all
-// search requests (i.e. HTTP and searcher.TopNNNs methods).
-// See: https://godoc.org/golang.org/x/text/unicode/norm#Form
-// See: https://withblue.ink/2019/03/11/why-you-need-to-normalize-unicode-strings.html
-func precompute(s string) string {
-	trimmed := strings.ToLower(punctuationReplacer.Replace(s))
-
-	// UTF-8 normalization
-	t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC) // Mn: nonspacing marks
-	result, _, _ := transform.String(t, trimmed)
-	return result
 }
 
 func extractSearchLimit(r *http.Request) int {

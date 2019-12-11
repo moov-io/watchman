@@ -33,7 +33,7 @@ var (
 				Title:    "",
 				Remarks:  "a.k.a. 'BNC'.",
 			},
-		}, nil),
+		}, nil, newPiepliner(log.NewNopLogger())),
 		Addresses: precomputeAddresses([]*ofac.Address{
 			{
 				EntityID:                    "306",

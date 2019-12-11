@@ -31,7 +31,7 @@ var (
 				Programs: []string{"SYRIA"},
 				Remarks:  "Linked To: MAKHLUF, Rami.",
 			},
-		}, nil),
+		}, nil, newPiepliner(log.NewNopLogger())),
 		Addresses: precomputeAddresses([]*ofac.Address{
 			{
 				EntityID:                    "21206",
