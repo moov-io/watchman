@@ -37,7 +37,7 @@ var (
 				Country:                     "Haiti",
 			},
 		}),
-		pipe: newPipeliner(log.NewNopLogger()),
+		pipe: noLogPipeliner,
 	}
 	altSearcher = &searcher{
 		Alts: precomputeAlts([]*ofac.AlternateIdentity{
@@ -54,7 +54,7 @@ var (
 				AlternateName: "A.I.C. SOGO KENKYUSHO",
 			},
 		}),
-		pipe: newPipeliner(log.NewNopLogger()),
+		pipe: noLogPipeliner,
 	}
 	sdnSearcher = &searcher{
 		SDNs: precomputeSDNs([]*ofac.SDN{
@@ -74,8 +74,8 @@ var (
 				Title:    "Secretary General of DEMOCRATIC FRONT FOR THE LIBERATION OF PALESTINE - HAWATMEH FACTION",
 				Remarks:  "DOB 1933; Secretary General of DEMOCRATIC FRONT FOR THE LIBERATION OF PALESTINE - HAWATMEH FACTION.",
 			},
-		}, nil, newPipeliner(log.NewNopLogger())),
-		pipe: newPipeliner(log.NewNopLogger()),
+		}, nil, noLogPipeliner),
+		pipe: noLogPipeliner,
 	}
 	idSearcher = &searcher{
 		SDNs: precomputeSDNs([]*ofac.SDN{
@@ -87,8 +87,8 @@ var (
 				Title:    "President of the Bolivarian Republic of Venezuela",
 				Remarks:  "DOB 23 Nov 1962; POB Caracas, Venezuela; citizen Venezuela; Gender Male; Cedula No. 5892464 (Venezuela); President of the Bolivarian Republic of Venezuela.",
 			},
-		}, nil, newPipeliner(log.NewNopLogger())),
-		pipe: newPipeliner(log.NewNopLogger()),
+		}, nil, noLogPipeliner),
+		pipe: noLogPipeliner,
 	}
 	dplSearcher = &searcher{
 		DPs: precomputeDPs([]*dpl.DPL{
@@ -120,8 +120,8 @@ var (
 				Action:         "STANDARD ORDER",
 				FRCitation:     "67 F.R. 7354 2/19/02 66 F.R. 48998 9/25/01 62 F.R. 26471 5/14/97 62 F.R. 34688 6/27/97 62 F.R. 60063 11/6/97 63 F.R. 25817 5/11/98 63 F.R. 58707 11/2/98 64 F.R. 23049 4/29/99",
 			},
-		}, newPipeliner(log.NewNopLogger())),
-		pipe: newPipeliner(log.NewNopLogger()),
+		}, noLogPipeliner),
+		pipe: noLogPipeliner,
 	}
 	ssiSearcher = &searcher{
 		SSIs: precomputeSSIs([]*csl.SSI{
@@ -149,8 +149,8 @@ var (
 				SourceListURL:  "http://bit.ly/1QWTIfE",
 				SourceInfoURL:  "http://bit.ly/1MLgou0",
 			},
-		}, newPipeliner(log.NewNopLogger())),
-		pipe: newPipeliner(log.NewNopLogger()),
+		}, noLogPipeliner),
+		pipe: noLogPipeliner,
 	}
 	bisEntitySearcher = &searcher{
 		BISEntities: precomputeBISEntities([]*csl.EL{
@@ -176,8 +176,8 @@ var (
 				SourceListURL:      "http://bit.ly/1L47xrV",
 				SourceInfoURL:      "http://bit.ly/1L47xrV",
 			},
-		}, newPipeliner(log.NewNopLogger())),
-		pipe: newPipeliner(log.NewNopLogger()),
+		}, noLogPipeliner),
+		pipe: noLogPipeliner,
 	}
 )
 
@@ -255,7 +255,7 @@ func TestSearch_liveData(t *testing.T) {
 	}
 	searcher := &searcher{
 		logger: log.NewNopLogger(),
-		pipe:   newPipeliner(log.NewNopLogger()),
+		pipe:   noLogPipeliner,
 	}
 	if stats, err := searcher.refreshData(""); err != nil {
 		t.Fatal(err)

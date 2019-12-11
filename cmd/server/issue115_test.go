@@ -21,9 +21,9 @@ func TestIssue115__TopSDNs(t *testing.T) {
 
 	s := &searcher{
 		logger: log.NewNopLogger(),
-		pipe:   newPipeliner(log.NewNopLogger()),
+		pipe:   noLogPipeliner,
 	}
-	pipe := newPipeliner(log.NewNopLogger())
+	pipe := noLogPipeliner
 
 	// Issue 115 (https://github.com/moov-io/watchman/issues/115) talks about how "george bush" is a false positive (90%) match against
 	// several other "George ..." records. This is too sensitive and so we need to tone that down.

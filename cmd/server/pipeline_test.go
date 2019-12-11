@@ -15,6 +15,8 @@ var (
 		logger: log.NewNopLogger(),
 		steps:  []step{},
 	}
+
+	noLogPipeliner = newPipeliner(log.NewNopLogger())
 )
 
 func TestPipelineNoop(t *testing.T) {

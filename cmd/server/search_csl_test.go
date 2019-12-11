@@ -18,7 +18,7 @@ func TestSearcher_refreshData_CSL(t *testing.T) {
 
 	s := &searcher{
 		logger: log.NewNopLogger(),
-		pipe:   newPipeliner(log.NewNopLogger()),
+		pipe:   noLogPipeliner,
 	}
 
 	stats, err := s.refreshData("")

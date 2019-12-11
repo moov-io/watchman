@@ -34,7 +34,7 @@ func TestSearcher__refreshInterval(t *testing.T) {
 	// cover another branch
 	s := &searcher{
 		logger: log.NewNopLogger(),
-		pipe:   newPipeliner(log.NewNopLogger()),
+		pipe:   noLogPipeliner,
 	}
 	s.periodicDataRefresh(0*time.Second, nil, nil)
 }
@@ -46,7 +46,7 @@ func TestSearcher__refreshData_nonCSL(t *testing.T) {
 
 	s := &searcher{
 		logger: log.NewNopLogger(),
-		pipe:   newPipeliner(log.NewNopLogger()),
+		pipe:   noLogPipeliner,
 	}
 	stats, err := s.refreshData("")
 	if err != nil {

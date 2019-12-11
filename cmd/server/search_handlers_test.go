@@ -151,7 +151,7 @@ func TestSearch__NameAndAddress(t *testing.T) {
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/search?name=midco&address=rue+de+rhone&limit=1", nil)
 
-	pipe := newPipeliner(log.NewNopLogger())
+	pipe := noLogPipeliner
 	s := &searcher{
 		Addresses: precomputeAddresses([]*ofac.Address{
 			{
@@ -235,7 +235,7 @@ func TestSearch__NameAndAltName(t *testing.T) {
 		DPs:         dplSearcher.DPs,
 		BISEntities: bisEntitySearcher.BISEntities,
 		// other
-		pipe: newPipeliner(log.NewNopLogger()),
+		pipe: noLogPipeliner,
 	}
 
 	router := mux.NewRouter()
@@ -296,7 +296,7 @@ func TestSearch__Name(t *testing.T) {
 		DPs:         dplSearcher.DPs,
 		BISEntities: bisEntitySearcher.BISEntities,
 		// other
-		pipe: newPipeliner(log.NewNopLogger()),
+		pipe: noLogPipeliner,
 	}
 	addSearchRoutes(log.NewNopLogger(), router, combinedSearcher)
 	router.ServeHTTP(w, req)
