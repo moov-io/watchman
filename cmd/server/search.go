@@ -226,21 +226,48 @@ func (s *searcher) FindSDN(entityID string) *ofac.SDN {
 // what is provided to this function. It's typically used with values assigned by a local
 // government. (National ID, Drivers License, etc)
 func (s *searcher) FindSDNsByRemarksID(limit int, id string) []SDN {
+	if id == "" {
+		return nil
+	}
+
 	var out []SDN
 	for i := range s.SDNs {
-		// If our remarks ID contains a space then just see if the query ID matches any part.
-		// Otherwise ID searches need to be exact matches.
-		if strings.Contains(s.SDNs[i].id, " ") && strings.Contains(s.SDNs[i].id, id) {
-			sdn := *s.SDNs[i]
-			sdn.match = 1.0
-			out = append(out, sdn)
+		// If the SDN's remarks ID contains a space then we need to ensure "all the numeric
+		// parts have to exactly match" between our query and the parsed ID.
+		if strings.Contains(s.SDNs[i].id, " ") {
+			qParts := strings.Fields(id)
+			sdnParts := strings.Fields(s.SDNs[i].id)
+
+			matched, expected := 0, 0
+			for j := range sdnParts {
+				if n, _ := strconv.ParseInt(sdnParts[j], 10, 64); n > 0 {
+					// This part of the SDN's remarks is a number so it must exactly
+					// match to a query's part
+					expected += 1
+
+					for k := range qParts {
+						if sdnParts[j] == qParts[k] {
+							matched += 1
+						}
+					}
+				}
+			}
+
+			// If all the numeric parts match between query and SDN return the match
+			if matched == expected {
+				sdn := *s.SDNs[i]
+				sdn.match = 1.0
+				out = append(out, sdn)
+			}
 		} else {
+			// The query and remarks ID must exactly match
 			if s.SDNs[i].id == id {
 				sdn := *s.SDNs[i]
 				sdn.match = 1.0
 				out = append(out, sdn)
 			}
 		}
+
 		// quit if we're at our max result size
 		if len(out) >= limit {
 			return out
