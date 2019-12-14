@@ -562,11 +562,78 @@ func TestSearch__extractIDFromRemark(t *testing.T) {
 		{"Telephone No. 009613679153;", "009613679153"},
 		{"Tax ID No. AABA 670850 Y.", "AABA 670850"},
 		{"Phone No. 263-4-486946; Fax No. 263-4-487261.", "263-4-486946"},
+		{"D-U-N-S Number 56-558-7594; V.A.T. Number MT15388917 (Malta); Trade License No. C 24129 (Malta); Company Number 4220856; Linked To: DEBONO, Darren.", "C 24129"}, // SDN 23410
 	}
 	for i := range cases {
 		result := extractIDFromRemark(cases[i].input)
 		if cases[i].expected != result {
 			t.Errorf("input=%s expected=%s result=%s", cases[i].input, cases[i].expected, result)
 		}
+	}
+}
+
+func TestSearch__FindSDNsByRemarksID(t *testing.T) {
+	s := &searcher{
+		SDNs: []*SDN{
+			{
+				SDN: &ofac.SDN{
+					EntityID: "22790",
+				},
+				id: "Cedula No. C 5892464 (Venezuela);",
+			},
+			{
+				SDN: &ofac.SDN{
+					EntityID: "99999",
+				},
+				id: "Other",
+			},
+		},
+	}
+
+	sdns := s.FindSDNsByRemarksID(1, "5892464")
+	if len(sdns) != 1 {
+		t.Fatalf("sdns=%#v", sdns)
+	}
+	if sdns[0].EntityID != "22790" {
+		t.Errorf("sdns[0].EntityID=%v", sdns[0].EntityID)
+	}
+
+	// successful multi-part match
+	s.SDNs[0].id = "2456 7890"
+	sdns = s.FindSDNsByRemarksID(1, "2456 7890")
+	if len(sdns) != 1 {
+		t.Fatalf("sdns=%#v", sdns)
+	}
+	if sdns[0].EntityID != "22790" {
+		t.Errorf("sdns[0].EntityID=%v", sdns[0].EntityID)
+	}
+
+	// incomplete query (not enough numerical query parts)
+	sdns = s.FindSDNsByRemarksID(1, "2456")
+	if len(sdns) != 0 {
+		t.Fatalf("sdns=%#v", sdns)
+	}
+	sdns = s.FindSDNsByRemarksID(1, "7890")
+	if len(sdns) != 0 {
+		t.Fatalf("sdns=%#v", sdns)
+	}
+
+	// query doesn't match
+	sdns = s.FindSDNsByRemarksID(1, "12456")
+	if len(sdns) != 0 {
+		t.Fatalf("sdns=%#v", sdns)
+	}
+
+	// empty SDN remarks ID
+	s.SDNs[0].id = ""
+	sdns = s.FindSDNsByRemarksID(1, "12456")
+	if len(sdns) != 0 {
+		t.Fatalf("sdns=%#v", sdns)
+	}
+
+	// empty query
+	sdns = s.FindSDNsByRemarksID(1, "")
+	if len(sdns) != 0 {
+		t.Fatalf("sdns=%#v", sdns)
 	}
 }
