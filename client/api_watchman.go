@@ -1582,7 +1582,7 @@ Search Search SDN names and metadata
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
  * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
  * @param "Q" (optional.String) -  Search across Name, Alt Names, and SDN Address fields for all available sanctions lists. Entries may be returned in all response sub-objects.
- * @param "Name" (optional.String) -  Name which could correspond to an entry on the SDN, Denied Persons, Sectoral Sanctions Identifications, or BIS Entity List sanctions lists.
+ * @param "Name" (optional.String) -  Name which could correspond to an entry on the SDN, Denied Persons, Sectoral Sanctions Identifications, or BIS Entity List sanctions lists. Alt names are also searched.
  * @param "Address" (optional.String) -  Phsical address which could correspond to a human on the SDN list. Only Address results will be returned.
  * @param "City" (optional.String) -  City name as desginated by SDN guidelines. Only Address results will be returned.
  * @param "State" (optional.String) -  State name as desginated by SDN guidelines. Only Address results will be returned.

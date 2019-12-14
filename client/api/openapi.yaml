@@ -735,6 +735,7 @@ paths:
         style: form
       - description: Name which could correspond to an entry on the SDN, Denied Persons,
           Sectoral Sanctions Identifications, or BIS Entity List sanctions lists.
+          Alt names are also searched.
         explode: true
         in: query
         name: name

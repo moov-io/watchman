@@ -567,7 +567,7 @@ paths:
           schema:
             type: string
             example: Jane Smith
-          description: Name which could correspond to an entry on the SDN, Denied Persons, Sectoral Sanctions Identifications, or BIS Entity List sanctions lists.
+          description: Name which could correspond to an entry on the SDN, Denied Persons, Sectoral Sanctions Identifications, or BIS Entity List sanctions lists. Alt names are also searched.
         - name: address
           in: query
           schema:
