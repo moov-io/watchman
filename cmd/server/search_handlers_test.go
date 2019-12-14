@@ -288,6 +288,7 @@ func TestSearch__Name(t *testing.T) {
 	combinedSearcher := &searcher{
 		// OFAC
 		SDNs: sdnSearcher.SDNs,
+		Alts: altSearcher.Alts,
 		SSIs: ssiSearcher.SSIs,
 		// BIS
 		DPs:         dplSearcher.DPs,
@@ -307,8 +308,9 @@ func TestSearch__Name(t *testing.T) {
 
 	var wrapper struct {
 		// OFAC
-		SDNs []*ofac.SDN `json:"SDNs"`
-		SSIs []*csl.SSI  `json:"sectoralSanctions"`
+		SDNs []*ofac.SDN               `json:"SDNs"`
+		Alts []*ofac.AlternateIdentity `json:"altNames"`
+		SSIs []*csl.SSI                `json:"sectoralSanctions"`
 		// BIS
 		DPs []*dpl.DPL `json:"deniedPersons"`
 		ELs []*csl.EL  `json:"bisEntities"`
@@ -316,12 +318,15 @@ func TestSearch__Name(t *testing.T) {
 	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
 		t.Fatal(err)
 	}
-	if len(wrapper.SDNs) != 1 || len(wrapper.SSIs) != 1 || len(wrapper.DPs) != 1 || len(wrapper.ELs) != 1 {
-		t.Fatalf("SDNs=%d SSIs=%d DPs=%d ELs=%d",
-			len(wrapper.SDNs), len(wrapper.SSIs), len(wrapper.DPs), len(wrapper.ELs))
+	if len(wrapper.SDNs) != 1 || len(wrapper.Alts) != 1 || len(wrapper.SSIs) != 1 || len(wrapper.DPs) != 1 || len(wrapper.ELs) != 1 {
+		t.Fatalf("SDNs=%d Alts=%d SSIs=%d DPs=%d ELs=%d",
+			len(wrapper.SDNs), len(wrapper.Alts), len(wrapper.SSIs), len(wrapper.DPs), len(wrapper.ELs))
 	}
 	if wrapper.SDNs[0].EntityID != "2676" {
 		t.Errorf("%#v", wrapper.SDNs[0])
+	}
+	if wrapper.Alts[0].EntityID != "4691" {
+		t.Errorf("%#v", wrapper.Alts[0])
 	}
 	if wrapper.SSIs[0].EntityID != "18782" {
 		t.Errorf("%#v", wrapper.SSIs[0])

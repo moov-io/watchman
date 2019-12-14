@@ -350,6 +350,7 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 		json.NewEncoder(w).Encode(&searchResponse{
 			// OFAC
 			SDNs:              sdns,
+			AltNames:          searcher.TopAltNames(limit, nameSlug),
 			SectoralSanctions: searcher.TopSSIs(limit, nameSlug),
 			// BIS
 			DeniedPersons: searcher.TopDPs(limit, nameSlug),
