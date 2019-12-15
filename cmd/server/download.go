@@ -158,7 +158,7 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 		return nil, err
 	}
 
-	sdns := precomputeSDNs(results.SDNs, results.Addresses)
+	sdns := precomputeSDNs(results.SDNs, results.Addresses, s.pipe)
 	adds := precomputeAddresses(results.Addresses)
 	alts := precomputeAlts(results.AlternateIdentities)
 
@@ -166,14 +166,14 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 	if err != nil {
 		return nil, err
 	}
-	dps := precomputeDPs(deniedPersons)
+	dps := precomputeDPs(deniedPersons, s.pipe)
 
 	consolidatedLists, err := cslRecords(s.logger, initialDir)
 	if err != nil {
 		return nil, err
 	}
-	ssis := precomputeSSIs(consolidatedLists.SSIs)
-	els := precomputeBISEntities(consolidatedLists.ELs)
+	ssis := precomputeSSIs(consolidatedLists.SSIs, s.pipe)
+	els := precomputeBISEntities(consolidatedLists.ELs, s.pipe)
 
 	stats := &downloadStats{
 		// OFAC

@@ -23,7 +23,10 @@ func TestDownload__manualRefreshPath(t *testing.T) {
 	}
 
 	check := func(t *testing.T, repo *sqliteDownloadRepository) {
-		searcher := &searcher{logger: log.NewNopLogger()}
+		searcher := &searcher{
+			logger: log.NewNopLogger(),
+			pipe:   noLogPipeliner,
+		}
 
 		w := httptest.NewRecorder()
 

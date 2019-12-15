@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -133,7 +134,14 @@ func main() {
 	downloadRepo := &sqliteDownloadRepository{db, logger}
 	defer downloadRepo.close()
 
-	searcher := &searcher{logger: logger}
+	searcher := &searcher{
+		logger: logger,
+	}
+	if debug, err := strconv.ParseBool(os.Getenv("DEBUG_NAME_PIPELINE")); debug && err == nil {
+		searcher.pipe = newPipeliner(logger)
+	} else {
+		searcher.pipe = newPipeliner(log.NewNopLogger())
+	}
 
 	// Add manual data refresh endpoint
 	adminServer.AddHandler(manualRefreshPath, manualRefreshHandler(logger, searcher, downloadRepo))

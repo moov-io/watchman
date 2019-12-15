@@ -33,7 +33,7 @@ var (
 				Title:    "",
 				Remarks:  "a.k.a. 'BNC'.",
 			},
-		}, nil),
+		}, nil, noLogPipeliner),
 		Addresses: precomputeAddresses([]*ofac.Address{
 			{
 				EntityID:                    "306",
@@ -51,6 +51,7 @@ var (
 				AlternateName: "NATIONAL BANK OF CUBA",
 			},
 		}),
+		pipe: noLogPipeliner,
 	}
 )
 
