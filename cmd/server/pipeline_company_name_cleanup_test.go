@@ -48,6 +48,8 @@ func TestRemoveCompanyTitles(t *testing.T) {
 		{"DIMABE LTDA.", "DIMABE"},                                                                             // SDN 8877
 		{"ASCOTEC STEEL TRADING GMBH", "ASCOTEC STEEL TRADING"},                                                // SDN 11613
 		{"TROPIC TOURS GMBH", "TROPIC TOURS"},                                                                  // SDN 2110,
+		{"MC OVERSEAS TRADING COMPANY SA DE CV", "MC OVERSEAS TRADING COMPANY"},                                // SDN 10252
+		{"SIRJANCO TRADING L.L.C.", "SIRJANCO TRADING"},                                                        // SDN 15985
 
 		// Controls
 		{"TADBIR ECONOMIC DEVELOPMENT GROUP", "TADBIR ECONOMIC DEVELOPMENT GROUP"}, // SDN 16006
