@@ -13,6 +13,9 @@ ADDITIONS
 - cmd/server: Add Sectoral Sanctions Identifications List via Consolidated Screening List (CSL)
 - cmd/server: Add Bureau of Industry and Security Entity List via Consolidated Screening List
 - cmd/server: Remove stopwords from OFAC SDN entity names, DP's, SSI, and BIS Entities
+- cmd/server: Remove company suffixes in indexed names (such as LLC, Co., LTDA.)
+- cmd/server: add admin route to debug indexed SDN information
+  - Example: `curl http://localhost:9094/debug/sdn/16016`
 
 IMPROVEMENTS
 
@@ -20,11 +23,18 @@ IMPROVEMENTS
 - cmd/server: add KEEP_STOPWORDS env config
 - pkg/ofac: clean up SDN programs when reading csv
 - cmd/server: handle an SDN's program list as an array in search, fixup UI values endpoint
+- cmd/server: add TopAltNames to searchByName
+- cmd/server: clarify shutdown logging
+
+BUG FIXES
+
+- pkg/dpl: ignore first line of header information
+- cmd/server: match remark ID's exactly in all cases
 
 BUILD
 
 - fix(deps): update react monorepo to v16.12.0
-- chore(deps): update dependency @material-ui/core to v4.7.2
+- chore(deps): update dependency @material-ui/core to v4.8.0
 - build: upgrade openapi-generator to 4.2.2
 - fix(deps): update dependency react-scripts to v3.3.0
 
