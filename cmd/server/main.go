@@ -146,6 +146,9 @@ func main() {
 	// Add manual data refresh endpoint
 	adminServer.AddHandler(manualRefreshPath, manualRefreshHandler(logger, searcher, downloadRepo))
 
+	// Add debug routes
+	adminServer.AddHandler(debugSDNPath, debugSDNHandler(logger, searcher))
+
 	// Initial download of data
 	if stats, err := searcher.refreshData(os.Getenv("INITIAL_DATA_DIRECTORY")); err != nil {
 		logger.Log("main", fmt.Sprintf("ERROR: failed to download/parse initial data: %v", err))
