@@ -208,12 +208,19 @@ func (s *searcher) TopAltNames(limit int, alt string) []Alt {
 }
 
 func (s *searcher) FindSDN(entityID string) *ofac.SDN {
+	if sdn := s.debugSDN(entityID); sdn != nil {
+		return sdn.SDN
+	}
+	return nil
+}
+
+func (s *searcher) debugSDN(entityID string) *SDN {
 	s.RLock()
 	defer s.RUnlock()
 
 	for i := range s.SDNs {
 		if s.SDNs[i].EntityID == entityID {
-			return s.SDNs[i].SDN
+			return s.SDNs[i]
 		}
 	}
 	return nil
