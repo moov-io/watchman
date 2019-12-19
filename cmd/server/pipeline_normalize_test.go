@@ -30,6 +30,7 @@ func TestPrecompute(t *testing.T) {
 		{"nicolás maduro", "nicolas maduro"},
 		{"Delcy Rodríguez", "delcy rodriguez"},
 		{"Raúl Castro", "raul castro"},
+		{"ANGLO-CARIBBEAN ", "anglo caribbean"},
 	}
 	for i := range cases {
 		guess := precompute(cases[i].input)

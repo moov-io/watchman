@@ -28,7 +28,15 @@ func TestPipelineNoop(t *testing.T) {
 }
 
 func TestFullPipeline(t *testing.T) {
-	sdn := func(in string) *Name {
+	individual := func(in string) *Name {
+		return &Name{
+			Processed: in,
+			sdn: &ofac.SDN{
+				SDNType: "individual",
+			},
+		}
+	}
+	company := func(in string) *Name {
 		return &Name{
 			Processed: in,
 			sdn: &ofac.SDN{
@@ -41,13 +49,27 @@ func TestFullPipeline(t *testing.T) {
 		in       *Name
 		expected string
 	}{
+		// input edge cases
+		{individual(""), ""},
+		{individual(" "), ""},
+		{individual("  "), ""},
+		{company(""), ""},
+		{company(" "), ""},
+		{company("  "), ""},
+
+		// Re-order individual names
+		{individual("MADURO MOROS, Nicolas"), "nicolas maduro moros"},
+
 		// Remove Company Suffixes
-		{sdn("YAKIMA OIL TRADING, LLP"), "yakima oil trading"},                                                      // SDN 20259
-		{sdn("MKS INTERNATIONAL CO. LTD."), "mks international"},                                                    // SDN 21553
-		{sdn("SHANGHAI NORTH TRANSWAY INTERNATIONAL TRADING CO."), "shanghai north transway international trading"}, // SDN 22246
+		{company("YAKIMA OIL TRADING, LLP"), "yakima oil trading"},                                                      // SDN 20259
+		{company("MKS INTERNATIONAL CO. LTD."), "mks international"},                                                    // SDN 21553
+		{company("SHANGHAI NORTH TRANSWAY INTERNATIONAL TRADING CO."), "shanghai north transway international trading"}, // SDN 22246
 
 		// Remove stopwords
-		{sdn("INVERSIONES LA QUINTA Y CIA. LTDA."), "inversiones la quinta y cia"},
+		{company("INVERSIONES LA QUINTA Y CIA. LTDA."), "inversiones la quinta y cia"},
+
+		// Normalize ("-" -> " ")
+		{company("ANGLO-CARIBBEAN CO., LTD."), "anglo caribbean"},
 	}
 	for i := range cases {
 		if err := noLogPipeliner.Do(cases[i].in); err != nil {

@@ -56,6 +56,7 @@ func TestStopwords__clean(t *testing.T) {
 		lang     whatlanggo.Lang
 		expected string
 	}{
+		{"Trees and Trucks", whatlanggo.Eng, "trees trucks"},
 		{"COLOMBIANA DE CERDOS LTDA.", whatlanggo.Spa, "colombiana cerdos ltda"},
 		{"INVERSIONES LA QUINTA Y CIA. LTDA.", whatlanggo.Spa, "inversiones quinta y cia ltda"},
 		{"COMITE' DE BIENFAISANCE ET DE SECOURS AUX PALESTINIENS", whatlanggo.Fra, "comite' bienfaisance secours palestiniens"},
