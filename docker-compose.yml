@@ -2,6 +2,10 @@ version: '3'
 services:
   watchman:
     image: moov/watchman:latest
+    environment:
+      INITIAL_DATA_DIRECTORY: /data/
+    volumes:
+      - ./test/testdata/:/data/
     ports:
       - "8084:8084"
       - "9094:9094"
