@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	punctuationReplacer = strings.NewReplacer(".", "", ",", "", "-", "", "  ", " ")
+	punctuationReplacer = strings.NewReplacer(".", "", ",", "", "-", " ", "  ", " ")
 )
 
 type normalizeStep struct {
@@ -32,7 +32,7 @@ func (s *normalizeStep) apply(in *Name) error {
 // See: https://godoc.org/golang.org/x/text/unicode/norm#Form
 // See: https://withblue.ink/2019/03/11/why-you-need-to-normalize-unicode-strings.html
 func precompute(s string) string {
-	trimmed := strings.ToLower(punctuationReplacer.Replace(s))
+	trimmed := strings.TrimSpace(strings.ToLower(punctuationReplacer.Replace(s)))
 
 	// UTF-8 normalization
 	t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC) // Mn: nonspacing marks
