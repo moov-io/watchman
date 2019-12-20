@@ -1,4 +1,4 @@
-## v0.13.0 (Unreleased)
+## v0.13.0 (Released 2019-12-20)
 
 This project has been renamed to Moov Watchman (from Moov OFAC) to better represent coverage of multiple entity lists covering trade sanctions and regional compliance laws.
 
