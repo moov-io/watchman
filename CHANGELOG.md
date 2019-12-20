@@ -25,6 +25,7 @@ IMPROVEMENTS
 - cmd/server: handle an SDN's program list as an array in search, fixup UI values endpoint
 - cmd/server: add TopAltNames to searchByName
 - cmd/server: clarify shutdown logging
+- cmd/server: pipeline: trim spaces, split hyphenated words
 
 BUG FIXES
 
