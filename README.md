@@ -25,15 +25,15 @@ To get started using watchman download [the latest release](https://github.com/m
 
 ```
 # Run as a binary
-$ wget https://github.com/moov-io/watchman/releases/download/v0.12.0/watchman-darwin-amd64
+$ wget https://github.com/moov-io/watchman/releases/download/v0.13.0/watchman-darwin-amd64
 $ chmod +x watchman-darwin-amd64
 $ ./watchman-darwin-amd64
-ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting watchman server version v0.12.0"
+ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting watchman server version v0.13.0"
 ...
 
 # Run as a Docker image
-$ docker run -p 8084:8084 -p 9094:9094 -it moov/watchman:latest
-ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting watchman server version v0.12.0"
+$ docker run -p 8084:8084 -p 9094:9094 -it moov/watchman:v0.13.0
+ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting watchman server version v0.13.0"
 ...
 
 # Perform a basic search
