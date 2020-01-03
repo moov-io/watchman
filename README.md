@@ -214,6 +214,7 @@ Moov Sanction Search supports sending a webhook periodically with a free-form na
 
 - `http_response_duration_seconds`: A Histogram of HTTP response timings
 - `last_data_refresh_success`: Unix timestamp of when data was last refreshed successfully
+- `last_data_refresh_count`: Count of records for a given sanction or entity list
 - `match_percentages` A Histogram which holds the match percentages with a label (`type`) of searches
    - `type`: Can be address, q, remarksID, name, altName
 - `mysql_connections`: How many MySQL connections and what status they're in.
