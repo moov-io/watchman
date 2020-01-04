@@ -28,10 +28,16 @@ var (
 		Name: "last_data_refresh_success",
 		Help: "Unix timestamp of when data was last refreshed successfully",
 	}, nil)
+
+	lastDataRefreshCount = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "last_data_refresh_count",
+		Help: "Count of records for a given sanction or entity list",
+	}, []string{"source"})
 )
 
 func init() {
 	prometheus.MustRegister(lastDataRefreshSuccess)
+	prometheus.MustRegister(lastDataRefreshCount)
 }
 
 // Download holds counts for each type of list data parsed from files and a
@@ -186,6 +192,12 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 		DeniedPersons: len(dps),
 	}
 	stats.RefreshedAt = lastRefresh(initialDir)
+
+	// record prometheus metrics
+	lastDataRefreshCount.WithLabelValues("SDNs").Set(float64(len(sdns)))
+	lastDataRefreshCount.WithLabelValues("SSIs").Set(float64(len(ssis)))
+	lastDataRefreshCount.WithLabelValues("BISEntities").Set(float64(len(els)))
+	lastDataRefreshCount.WithLabelValues("DPs").Set(float64(len(dps)))
 
 	// Set new records after precomputation (to minimize lock contention)
 	s.Lock()
