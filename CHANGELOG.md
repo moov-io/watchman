@@ -2,6 +2,7 @@
 
 ADDITIONS
 
+- cmd/server: record download counts per entity type in `last_data_refresh_count` Prometheus metric
 
 IMPROVEMENTS
 
