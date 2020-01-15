@@ -15,8 +15,8 @@ require (
 	github.com/pariz/gountries v0.0.0-20191029140926-233bc78cf5b5
 	github.com/prometheus/client_golang v1.3.0
 	github.com/xrash/smetrics v0.0.0-20170218160415-a3153f7040e9
-	go4.org v0.0.0-20191010144846-132d2879e1e9
-	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6
+	go4.org v0.0.0-20200104003542-c7e774b10ea0
+	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/text v0.3.2
 	gotest.tools v2.2.0+incompatible // indirect
 )
