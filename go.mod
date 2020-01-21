@@ -10,7 +10,7 @@ require (
 	github.com/gotestyourself/gotestyourself v2.2.0+incompatible // indirect
 	github.com/lopezator/migrator v0.2.0
 	github.com/mattn/go-sqlite3 v1.13.0
-	github.com/moov-io/base v0.11.0-rc1.0.20191121181647-cd3e7a9609db
+	github.com/moov-io/base v0.11.0
 	github.com/ory/dockertest/v3 v3.5.2
 	github.com/pariz/gountries v0.0.0-20191029140926-233bc78cf5b5
 	github.com/prometheus/client_golang v1.3.0
