@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"strings"
 
 	"github.com/moov-io/watchman/pkg/download"
 
@@ -20,11 +19,7 @@ var (
 		if w := os.Getenv("CSL_DOWNLOAD_TEMPLATE"); w != "" {
 			return w
 		}
-		return "https://api.trade.gov/consolidated_screening_list/%s"
-	}()
-
-	ApiKey = func() string {
-		return os.Getenv("TRADEGOV_API_KEY")
+		return "https://api.trade.gov/static/consolidated_screening_list/%s"
 	}()
 )
 
@@ -47,24 +42,9 @@ func Download(logger log.Logger, initialDir string) (string, error) {
 }
 
 func buildDownloadURL(urlStr string) (string, error) {
-	cslURL, err := url.Parse(fmt.Sprintf(urlStr, "search.csv"))
+	cslURL, err := url.Parse(fmt.Sprintf(urlStr, "consolidated.csv"))
 	if err != nil {
 		return "", err
 	}
-
-	if strings.EqualFold(cslURL.Host, "api.trade.gov") { // only require api key if source is api.trade.gov
-		q := cslURL.Query()
-		keyOverride := ApiKey
-		if keyOverride == "" && q.Get("api_key") == "" {
-			return "", fmt.Errorf("csl download: missing api key")
-		}
-
-		if q.Get("api_key") == "" { // download template did not include api key
-			q.Set("api_key", keyOverride)
-		}
-
-		cslURL.RawQuery = q.Encode()
-	}
-
 	return cslURL.String(), nil
 }

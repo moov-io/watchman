@@ -15,7 +15,7 @@ import (
 )
 
 func TestDownload(t *testing.T) {
-	if testing.Short() || ApiKey == "" {
+	if testing.Short() {
 		return
 	}
 
@@ -34,10 +34,6 @@ func TestDownload(t *testing.T) {
 }
 
 func TestDownload_initialDir(t *testing.T) {
-	if ApiKey == "" {
-		return
-	}
-
 	dir, err := ioutil.TempDir("", "iniital-dir")
 	if err != nil {
 		t.Fatal(err)
