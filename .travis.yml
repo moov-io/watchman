@@ -40,6 +40,10 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget -O staticcheck.tar.gz https://github.com/dominikh/go-tools/releases/download/2019.2.3/staticcheck_linux_amd64.tar.gz; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then wget -O staticcheck.tar.gz https://github.com/dominikh/go-tools/releases/download/2019.2.3/staticcheck_darwin_amd64.tar.gz; fi
   - tar xf staticcheck.tar.gz && cp ./staticcheck/staticcheck ./bin/staticcheck
+  # nancy (vulnerable dependencies)
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then curl -L -o ./bin/nancy https://github.com/sonatype-nexus-community/nancy/releases/download/v0.0.41/nancy-linux.amd64-v0.0.41; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then curl -L -o ./bin/nancy https://github.com/sonatype-nexus-community/nancy/releases/download/v0.0.41/nancy-darwin.amd64-v0.0.41; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then chmod +x ./bin/nancy; fi
   # golint
   - go get -u golang.org/x/lint/golint
   # gocyclo
@@ -58,6 +62,7 @@ script:
   - gocyclo -over 20 $GOFILES
   - golint -set_exit_status $GOFILES
   - staticcheck ./cmd/... ./pkg/... ./internal/... .
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then go list -m all | ./bin/nancy; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install -y mingw; export PATH=/c/tools/mingw64/bin:"$PATH";fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make docker && make test-integration; fi
 after_script:
