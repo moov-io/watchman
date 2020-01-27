@@ -11,7 +11,7 @@ require (
 	github.com/lopezator/migrator v0.2.0
 	github.com/mattn/go-sqlite3 v1.13.0
 	github.com/moov-io/base v0.11.0
-	github.com/ory/dockertest/v3 v3.5.2
+	github.com/ory/dockertest/v3 v3.5.4
 	github.com/pariz/gountries v0.0.0-20191029140926-233bc78cf5b5
 	github.com/prometheus/client_golang v1.3.0
 	github.com/xrash/smetrics v0.0.0-20170218160415-a3153f7040e9
