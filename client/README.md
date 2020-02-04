@@ -59,7 +59,6 @@ Class | Method | HTTP request | Description
  - [BisEntities](docs/BisEntities.md)
  - [Download](docs/Download.md)
  - [Dpl](docs/Dpl.md)
- - [Error](docs/Error.md)
  - [OfacAlt](docs/OfacAlt.md)
  - [OfacCompany](docs/OfacCompany.md)
  - [OfacCompanyStatus](docs/OfacCompanyStatus.md)
@@ -73,6 +72,7 @@ Class | Method | HTTP request | Description
  - [Ssi](docs/Ssi.md)
  - [UpdateOfacCompanyStatus](docs/UpdateOfacCompanyStatus.md)
  - [UpdateOfacCustomerStatus](docs/UpdateOfacCustomerStatus.md)
+ - [WatchmanError](docs/WatchmanError.md)
 
 
 ## Documentation For Authorization

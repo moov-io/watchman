@@ -715,7 +715,7 @@ components:
         error:
           type: string
           description: An error message describing the problem intended for humans.
-          example: Unknown key
+          example: Validation error(s) present.
     OfacCompany:
       description: OFAC Company and metadata
       properties:

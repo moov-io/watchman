@@ -937,14 +937,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/WatchmanError'
           description: Invalid key
       summary: Return an ordered distinct list of keys for an SDN property.
       tags:
       - Watchman
 components:
   schemas:
-    Error:
+    WatchmanError:
       properties:
         error:
           description: An error message describing the problem intended for humans.
