@@ -1,4 +1,4 @@
-# WatchmanError
+# Error
 
 ## Properties
 

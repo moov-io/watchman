@@ -9,8 +9,8 @@
 
 package openapi
 
-// WatchmanError struct for WatchmanError
-type WatchmanError struct {
+// Error struct for Error
+type Error struct {
 	// An error message describing the problem intended for humans.
 	Error string `json:"error"`
 }

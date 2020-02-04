@@ -937,21 +937,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WatchmanError'
+                $ref: '#/components/schemas/Error'
           description: Invalid key
       summary: Return an ordered distinct list of keys for an SDN property.
       tags:
       - Watchman
 components:
   schemas:
-    WatchmanError:
-      properties:
-        error:
-          description: An error message describing the problem intended for humans.
-          example: Unknown key
-          type: string
-      required:
-      - error
     OfacCompany:
       description: OFAC Company and metadata
       example:
@@ -1731,3 +1723,11 @@ components:
         example: '["entity","aircraft","individual","vessel"]'
         type: string
       type: array
+    Error:
+      properties:
+        error:
+          description: An error message describing the problem intended for humans.
+          example: Validation error(s) present.
+          type: string
+      required:
+      - error

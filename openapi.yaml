@@ -704,18 +704,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: 'https://raw.githubusercontent.com/moov-io/api/master/openapi-common.yaml#/components/schemas/Error'
 
 components:
   schemas:
-    Error:
-      required:
-        - error
-      properties:
-        error:
-          type: string
-          description: An error message describing the problem intended for humans.
-          example: Validation error(s) present.
     OfacCompany:
       description: OFAC Company and metadata
       properties:
