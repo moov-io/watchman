@@ -11,7 +11,6 @@ package admin
 
 import (
 	_context "context"
-	"fmt"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
@@ -44,7 +43,7 @@ func (a *AdminApiService) DebugSDN(ctx _context.Context, sdnId string) (DebugSdn
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/debug/sdn/{sdnId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"sdnId"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", sdnId)), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"sdnId"+"}", _neturl.QueryEscape(parameterToString(sdnId, "")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -139,7 +138,6 @@ func (a *AdminApiService) GetVersion(ctx _context.Context) (string, *_nethttp.Re
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/version"
-
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
@@ -223,7 +221,6 @@ func (a *AdminApiService) RefreshData(ctx _context.Context) (DataRefresh, *_neth
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/data/refresh"
-
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}

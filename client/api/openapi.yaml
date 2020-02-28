@@ -25,7 +25,7 @@ paths:
     get:
       operationId: ping
       responses:
-        200:
+        "200":
           description: Service is running properly
       summary: Ping the Watchman service to check if running
       tags:
@@ -62,7 +62,7 @@ paths:
           type: string
         style: simple
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
@@ -109,7 +109,7 @@ paths:
               $ref: '#/components/schemas/UpdateOfacCompanyStatus'
         required: true
       responses:
-        200:
+        "200":
           description: Company status updated
       summary: Update a Companies sanction status to always block or always allow
         transactions.
@@ -153,13 +153,13 @@ paths:
               $ref: '#/components/schemas/OfacWatchRequest'
         required: true
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/OfacWatch'
           description: Company watch added
-        404:
+        "404":
           description: Company not found
       summary: Add watch on a OFAC Company
       tags:
@@ -205,7 +205,7 @@ paths:
           type: string
         style: simple
       responses:
-        200:
+        "200":
           description: Company watch removed
       summary: Remove company watch
       tags:
@@ -248,7 +248,7 @@ paths:
               $ref: '#/components/schemas/OfacWatchRequest'
         required: true
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
@@ -299,7 +299,7 @@ paths:
           type: string
         style: form
       responses:
-        200:
+        "200":
           description: Company watch removed
       summary: Remove a Company name watch
       tags:
@@ -336,7 +336,7 @@ paths:
           type: string
         style: simple
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
@@ -383,7 +383,7 @@ paths:
               $ref: '#/components/schemas/UpdateOfacCustomerStatus'
         required: true
       responses:
-        200:
+        "200":
           description: Customer status updated
       summary: Update a Customer's sanction status to always block or always allow
         transactions.
@@ -427,13 +427,13 @@ paths:
               $ref: '#/components/schemas/OfacWatchRequest'
         required: true
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/OfacWatch'
           description: Customer watch added
-        404:
+        "404":
           description: Customer not found
       summary: Add watch on a OFAC Customer
       tags:
@@ -479,7 +479,7 @@ paths:
           type: string
         style: simple
       responses:
-        200:
+        "200":
           description: Customer watch removed
       summary: Remove customer watch
       tags:
@@ -522,7 +522,7 @@ paths:
               $ref: '#/components/schemas/OfacWatchRequest'
         required: true
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
@@ -573,7 +573,7 @@ paths:
           type: string
         style: form
       responses:
-        200:
+        "200":
           description: Company or Customer watch removed
       summary: Remove a Customer name watch
       tags:
@@ -610,7 +610,7 @@ paths:
           type: string
         style: simple
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
@@ -651,7 +651,7 @@ paths:
           type: string
         style: simple
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
@@ -692,7 +692,7 @@ paths:
           type: string
         style: simple
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
@@ -854,7 +854,7 @@ paths:
           type: string
         style: form
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
@@ -895,7 +895,7 @@ paths:
           type: integer
         style: form
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
@@ -927,13 +927,13 @@ paths:
           type: integer
         style: form
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UIKeys'
           description: Ordered and distinct list of values for an SDN property
-        400:
+        "400":
           content:
             application/json:
               schema:
@@ -1227,7 +1227,7 @@ components:
         city: THREE RIVERS
         postalCode: "78071"
         match: 0.92
-        standardOrder: Y
+        standardOrder: "Y"
         frCitation: 81.F.R. 40658 6/22/2016
         streetAddress: 'REGISTER NUMBER: 78795-379, FEDERAL CORRECTIONAL INSTITUTION,
           P.O. BOX 4200'
@@ -1273,7 +1273,7 @@ components:
         standardOrder:
           description: Denotes whether or not the Denied Person was added by a standard
             order
-          example: Y
+          example: "Y"
           type: string
         lastUpdate:
           description: Most recent date when the Denied Person record was updated
@@ -1526,7 +1526,7 @@ components:
           city: THREE RIVERS
           postalCode: "78071"
           match: 0.92
-          standardOrder: Y
+          standardOrder: "Y"
           frCitation: 81.F.R. 40658 6/22/2016
           streetAddress: 'REGISTER NUMBER: 78795-379, FEDERAL CORRECTIONAL INSTITUTION,
             P.O. BOX 4200'
@@ -1540,7 +1540,7 @@ components:
           city: THREE RIVERS
           postalCode: "78071"
           match: 0.92
-          standardOrder: Y
+          standardOrder: "Y"
           frCitation: 81.F.R. 40658 6/22/2016
           streetAddress: 'REGISTER NUMBER: 78795-379, FEDERAL CORRECTIONAL INSTITUTION,
             P.O. BOX 4200'

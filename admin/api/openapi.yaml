@@ -21,7 +21,7 @@ paths:
     get:
       operationId: getVersion
       responses:
-        200:
+        "200":
           content:
             text/plain:
               schema:
@@ -35,13 +35,13 @@ paths:
     post:
       operationId: refreshData
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DataRefresh'
           description: Data successfully refreshed
-        400:
+        "400":
           content:
             application/json:
               schema:
@@ -64,13 +64,13 @@ paths:
           type: string
         style: simple
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DebugSDN'
           description: SDN with debug information
-        400:
+        "400":
           content:
             application/json:
               schema:
