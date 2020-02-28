@@ -24,6 +24,16 @@ check:
 	go fmt ./...
 	@mkdir -p ./bin/
 
+.PHONY: admin
+admin:
+# Versions from https://github.com/OpenAPITools/openapi-generator/releases
+	@chmod +x ./openapi-generator
+	@rm -rf ./admin
+	OPENAPI_GENERATOR_VERSION=4.2.0 ./openapi-generator generate --package-name admin -i openapi-admin.yaml -g go -o ./admin
+	rm -f admin/go.mod admin/go.sum
+	go fmt ./...
+	go test ./admin
+
 .PHONY: client
 client:
 # Versions from https://github.com/OpenAPITools/openapi-generator/releases
@@ -37,11 +47,10 @@ client:
 
 .PHONY: clean
 clean:
-	@rm -rf client/
-	@rm -rf bin/
+	@rm -rf admin/ bin/ client/
 	@rm -f openapi-generator-cli-*.jar
 
-dist: clean client build
+dist: clean admin client build
 ifeq ($(OS),Windows_NT)
 	CGO_ENABLED=1 GOOS=windows go build -o bin/watchman-windows-amd64.exe github.com/moov-io/watchman/cmd/server
 else

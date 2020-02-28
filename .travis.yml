@@ -51,7 +51,7 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then wget -O ./bin/gocyclo https://github.com/adamdecaf/gocyclo/releases/download/2019-08-09/gocyclo-darwin-amd64; fi
   - chmod +x ./bin/gocyclo
 before_script:
-  - GOFILES=$(find . -type f -name '*.go' | grep -v vendor | grep -v client)
+  - GOFILES=$(find . -type f -name '*.go' | grep -v vendor | grep -v admin | grep -v client)
   - go mod tidy
   - make
 script:
@@ -70,6 +70,7 @@ after_script:
   - make clean-integration
 after_success:
   - bash <(curl -s https://codecov.io/bash) -X fix
+  - make admin
   - make client
   - make docker
 before_deploy:
