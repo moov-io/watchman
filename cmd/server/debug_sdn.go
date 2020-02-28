@@ -30,7 +30,7 @@ func debugSDNHandler(logger log.Logger, searcher *searcher) http.HandlerFunc {
 		}
 
 		var response struct {
-			SDN   *SDN
+			SDN   *SDN `json:"SDN"`
 			Debug struct {
 				IndexedName     string `json:"indexedName"`
 				ParsedRemarksID string `json:"parsedRemarksId"`

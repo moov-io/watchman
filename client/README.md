@@ -1,4 +1,4 @@
-# Go API client for openapi
+# Go API client for client
 
 Moov Watchman is an HTTP API and Go library to download, parse and offer search functions over numerous trade sanction lists from the United States, European Union governments, agencies, and non profits for complying with regional laws. Also included is a web UI and async webhook notification service to initiate processes on remote systems.
 
@@ -24,7 +24,7 @@ go get github.com/antihax/optional
 Put the package under your project folder and add the following in import:
 
 ```golang
-import "./openapi"
+import "./client"
 ```
 
 ## Documentation for API Endpoints
@@ -78,6 +78,7 @@ Class | Method | HTTP request | Description
 ## Documentation For Authorization
 
  Endpoints do not require authorization.
+
 
 
 ## Author
