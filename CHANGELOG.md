@@ -25,6 +25,13 @@ BUILD
 - chore(deps): update module prometheus/client_golang to v1.4.0
 - chore(deps): update mui monorepo to v4.9.1
 
+## v0.13.2 (Released 2020-03-03)
+
+IMPROVEMENTS
+
+- ofac: allow unescaped inner quotes in SDN comments records
+- ofac: add filename and more logging context for debugging refresh errors
+
 ## v0.13.1 (Released 2020-01-28)
 
 IMPROVEMENTS
