@@ -167,7 +167,9 @@ func csvSDNCommentsFile(path string) (*Results, error) {
 	defer f.Close()
 
 	// Read File into a Variable
-	lines, err := csv.NewReader(f).ReadAll()
+	r := csv.NewReader(f)
+	r.LazyQuotes = true
+	lines, err := r.ReadAll()
 	if err != nil {
 		return nil, err
 	}
