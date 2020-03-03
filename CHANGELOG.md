@@ -6,11 +6,24 @@ ADDITIONS
 
 IMPROVEMENTS
 
+- pkg/csl: use endpoint to download which doesn't require an api key
+- build: run sonatype-nexus-community/nancy in CI
+- api,client: use shared Error model
+- admin,client: fix package names, upgrade openapi-generator to 4.2.3
 
 BUG FIXES
 
+- ofac: allow unescaped inner quotes in SDN comments records
 
 BUILD
+
+- build: update Copyright headers for 2020
+- build: upgrade mysql client to 1.5
+- chore(deps): update dependency @material-ui/core to v4.9.4
+- chore(deps): update golang docker tag to v1.14
+- chore(deps): update module moov-io/base to v0.11.0
+- chore(deps): update module prometheus/client_golang to v1.4.0
+- chore(deps): update mui monorepo to v4.9.1
 
 ## v0.13.1 (Released 2020-01-28)
 
