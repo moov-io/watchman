@@ -5,6 +5,7 @@
 package ofac
 
 import (
+	"io/ioutil"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -88,5 +89,27 @@ func TestSplitPrograms(t *testing.T) {
 	}
 	if items := splitPrograms("IFSR; SDNTK; FTO; SDGT"); !reflect.DeepEqual(items, []string{"IFSR", "SDNTK", "FTO", "SDGT"}) {
 		t.Errorf("items=%v", items)
+	}
+}
+
+func TestSDNComments(t *testing.T) {
+	fd, err := ioutil.TempFile("", "sdn-csv")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := fd.Write([]byte(`28264,"hone Number 8613314257947; alt. Phone Number 8618004121000; Identification Number 210302198701102136 (China); a.k.a. "blackjack1987"; a.k.a. "khaleesi"; Linked To: LAZARUS GROUP."`)); err != nil {
+		t.Fatal(err)
+	}
+
+	// read with lazy quotes enabled
+	if res, err := csvSDNCommentsFile(fd.Name()); err != nil {
+		t.Errorf("unexpected error: %v", err)
+	} else {
+		if len(res.SDNComments) != 1 {
+			t.Errorf("SDNComments=%#v", res.SDNComments)
+		}
+		for i := range res.SDNComments {
+			t.Logf("\ncomment #%d\n entity=%s\n remarks=%v", i, res.SDNComments[i].EntityID, res.SDNComments[i].RemarksExtended)
+		}
 	}
 }
