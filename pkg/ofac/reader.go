@@ -19,13 +19,32 @@ import (
 func Read(path string) (*Results, error) {
 	switch filepath.Base(path) {
 	case "add.csv":
-		return csvAddressFile(path)
+		res, err := csvAddressFile(path)
+		if err != nil {
+			return res, fmt.Errorf("add.csv: %v", err)
+		}
+		return res, err
+
 	case "alt.csv":
-		return csvAlternateIdentityFile(path)
+		res, err := csvAlternateIdentityFile(path)
+		if err != nil {
+			return res, fmt.Errorf("alt.csv: %v", err)
+		}
+		return res, err
+
 	case "sdn.csv":
-		return csvSDNFile(path)
+		res, err := csvSDNFile(path)
+		if err != nil {
+			return res, fmt.Errorf("sdn.csv: %v", err)
+		}
+		return res, err
+
 	case "sdn_comments.csv":
-		return csvSDNCommentsFile(path)
+		res, err := csvSDNCommentsFile(path)
+		if err != nil {
+			return res, fmt.Errorf("sdn_comments.csv: %v", err)
+		}
+		return res, err
 	}
 	return nil, fmt.Errorf("unknown file %s", path)
 }
