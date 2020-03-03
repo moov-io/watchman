@@ -16,6 +16,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/moov-io/watchman"
+
 	"github.com/go-kit/kit/log"
 )
 
@@ -109,18 +111,28 @@ func (dl *Downloader) GetFiles(initialDir string, namesAndSources map[string]str
 
 			// Allow a couple retries for various sources (some are flakey)
 			for i := 0; i < 3; i++ {
-				resp, err := dl.HTTP.Get(downloadURL)
+				req, err := http.NewRequest("GET", downloadURL, nil)
+				if err != nil {
+					dl.Logger.Log("download", fmt.Sprintf("error building HTTP request: %v", err))
+					return
+				}
+				req.Header.Set("User-Agent", fmt.Sprintf("moov-io/watchman:%v", watchman.Version))
+
+				resp, err := dl.HTTP.Do(req)
 				if err != nil {
 					time.Sleep(100 * time.Millisecond)
 					continue // retry
 				}
+
 				// Copy resp.Body into a file in our temp dir
 				fd, err := os.Create(filepath.Join(dir, filename))
 				if err != nil {
 					resp.Body.Close()
 					return
 				}
+
 				io.Copy(fd, resp.Body) // copy file contents
+
 				// close the open files
 				fd.Close()
 				resp.Body.Close()
