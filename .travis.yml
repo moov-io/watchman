@@ -44,8 +44,8 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then curl -L -o ./bin/nancy https://github.com/sonatype-nexus-community/nancy/releases/download/v0.1.0/nancy-linux.amd64-v0.1.0; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then curl -L -o ./bin/nancy https://github.com/sonatype-nexus-community/nancy/releases/download/v0.1.0/nancy-darwin.amd64-v0.1.0; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then chmod +x ./bin/nancy; fi
-  # golint
-  - go get -u golang.org/x/lint/golint
+  # golangci-lint
+  - wget -O - -q https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s v1.23.8
   # gocyclo
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget -O ./bin/gocyclo https://github.com/adamdecaf/gocyclo/releases/download/2019-08-09/gocyclo-linux-amd64; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then wget -O ./bin/gocyclo https://github.com/adamdecaf/gocyclo/releases/download/2019-08-09/gocyclo-darwin-amd64; fi
@@ -60,7 +60,7 @@ script:
   - go test ./... -race -coverprofile=coverage.txt -covermode=atomic
   - misspell -error -locale US -i "palestiniens" $GOFILES
   - gocyclo -over 20 $GOFILES
-  - golint -set_exit_status $GOFILES
+  - ./bin/golangci-lint run --skip-dirs="(admin|client)" --timeout=2m --disable=errcheck
   - staticcheck ./cmd/... ./pkg/... ./internal/... .
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then go list -m all | ./bin/nancy; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install -y mingw; export PATH=/c/tools/mingw64/bin:"$PATH";fi
