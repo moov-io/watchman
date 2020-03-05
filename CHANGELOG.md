@@ -10,6 +10,7 @@ IMPROVEMENTS
 - build: run sonatype-nexus-community/nancy in CI
 - api,client: use shared Error model
 - admin,client: fix package names, upgrade openapi-generator to 4.2.3
+- download: set custom User-Agent header
 
 BUG FIXES
 
@@ -17,6 +18,7 @@ BUG FIXES
 
 BUILD
 
+- build: don't 'make docker' twice
 - build: update Copyright headers for 2020
 - build: upgrade mysql client to 1.5
 - chore(deps): update dependency @material-ui/core to v4.9.4
