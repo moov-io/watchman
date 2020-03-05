@@ -3,9 +3,6 @@ dist: xenial
 sudo: true
 services:
   - docker
-env:
-  matrix:
-  - GO111MODULE=on
 matrix:
   allow_failures:
   - go: master
