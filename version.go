@@ -4,4 +4,4 @@
 
 package watchman
 
-const Version = "v0.14.0-dev"
+const Version = "v0.14.0-rc1"
