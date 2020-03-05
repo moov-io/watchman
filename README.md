@@ -32,7 +32,7 @@ ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting watchman ser
 ...
 
 # Run as a Docker image
-$ docker run -p 8084:8084 -p 9094:9094 -it moov/watchman:v0.13.0
+$ docker run -p 8084:8084 -p 9094:9094 -it moov/watchman:latest
 ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting watchman server version v0.13.0"
 ...
 
