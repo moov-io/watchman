@@ -239,7 +239,7 @@ Twitter [@moov_io](https://twitter.com/moov_io)	| You can follow Moov.IO's Twitt
 
 Yes please! Please review our [Contributing guide](CONTRIBUTING.md) and [Code of Conduct](https://github.com/moov-io/ach/blob/master/CODE_OF_CONDUCT.md) to get started! Checkout our [issues for first time contributors](https://github.com/moov-io/watchman/contribute) for something to help out with.
 
-Note: This project uses Go Modules, which requires Go 1.11 or higher, but we ship the vendor directory in our repository.
+Note: This project uses Go Modules, which uses Go 1.14 or higher, but we ship the vendor directory in our repository.
 
 ## Links
 

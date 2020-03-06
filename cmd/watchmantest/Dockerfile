@@ -1,10 +1,8 @@
 FROM golang:1.14-alpine as builder
 RUN apk add -U make git
 RUN adduser -D -g '' --shell /bin/false moov
-
 WORKDIR /go/src/github.com/moov-io/watchman
 COPY . .
-ENV GO111MODULE=on
 RUN go mod download
 RUN make build-watchmantest
 USER moov
