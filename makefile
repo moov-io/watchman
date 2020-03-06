@@ -47,7 +47,7 @@ client:
 
 .PHONY: clean
 clean:
-	@rm -rf admin/ bin/ client/
+	@rm -rf bin/
 	@rm -f openapi-generator-cli-*.jar
 
 dist: clean admin client build
