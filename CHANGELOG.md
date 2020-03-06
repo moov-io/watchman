@@ -11,6 +11,7 @@ IMPROVEMENTS
 - api,client: use shared Error model
 - admin,client: fix package names, upgrade openapi-generator to 4.2.3
 - download: set custom User-Agent header
+- all: misc test cleanup from staticcheck
 
 BUG FIXES
 
@@ -18,9 +19,12 @@ BUG FIXES
 
 BUILD
 
+- build: upgrade to Go 1.14.x
+- build: upgrade staticcheck to 2020.1.3
 - build: don't 'make docker' twice
 - build: update Copyright headers for 2020
 - build: upgrade mysql client to 1.5
+- build: don't wipe both generated dirs on 'make clean'
 - chore(deps): update dependency @material-ui/core to v4.9.4
 - chore(deps): update golang docker tag to v1.14
 - chore(deps): update module moov-io/base to v0.11.0
