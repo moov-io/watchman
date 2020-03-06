@@ -58,7 +58,7 @@ script:
   - misspell -error -locale US -i "palestiniens" $GOFILES
   - gocyclo -over 20 $GOFILES
   - ./bin/golangci-lint run --skip-dirs="(admin|client)" --timeout=2m --disable=errcheck
-  - staticcheck ./cmd/... ./pkg/... ./internal/... .
+  - staticcheck . ./cmd/... ./examples/... ./internal/... ./pkg/... ./test/...
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then go list -m all | ./bin/nancy; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install -y mingw; export PATH=/c/tools/mingw64/bin:"$PATH";fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make docker && make test-integration; fi

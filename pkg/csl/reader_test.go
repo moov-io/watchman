@@ -12,7 +12,7 @@ func TestRead(t *testing.T) {
 		t.Fatal(err)
 	}
 	if csl == nil {
-		t.Errorf("failed to parse csl.csv")
+		t.Fatal("failed to parse csl.csv")
 	}
 	if len(csl.SSIs) != 26 { // test CSL csv file has 26 SSI entries
 		t.Errorf("len(SSIs)=%d", len(csl.SSIs))
@@ -28,7 +28,7 @@ func TestRead_invalidRow(t *testing.T) {
 		t.Fatal(err)
 	}
 	if csl == nil {
-		t.Errorf("failed to parse csl.csv")
+		t.Fatal("failed to parse csl.csv")
 	}
 	if len(csl.SSIs) != 1 {
 		t.Errorf("len(SSIs)=%d", len(csl.SSIs))

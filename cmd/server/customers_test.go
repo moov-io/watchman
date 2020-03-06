@@ -624,7 +624,7 @@ func TestCustomerRepository(t *testing.T) {
 			t.Error(err)
 		}
 		if status == nil {
-			t.Errorf("empty CustomerStatus")
+			t.Fatal("empty CustomerStatus")
 		}
 		if status.UserID == "" || string(status.Status) == "" {
 			t.Errorf("invalid CustomerStatus: %#v", status)
@@ -645,7 +645,7 @@ func TestCustomerRepository(t *testing.T) {
 			t.Error(err)
 		}
 		if status == nil {
-			t.Errorf("empty CustomerStatus")
+			t.Fatal("empty CustomerStatus")
 		}
 		if status.UserID == "" || string(status.Status) == "" {
 			t.Errorf("invalid CustomerStatus: %#v", status)
