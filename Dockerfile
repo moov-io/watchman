@@ -2,7 +2,6 @@ FROM golang:1.14-buster as backend
 WORKDIR /go/src/github.com/moov-io/watchman
 RUN apt-get update && apt-get install make gcc g++
 COPY . .
-ENV GO111MODULE=on
 RUN go mod download
 RUN make build-server
 

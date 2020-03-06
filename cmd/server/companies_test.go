@@ -625,7 +625,7 @@ func TestCompanyRepository(t *testing.T) {
 			t.Error(err)
 		}
 		if status == nil {
-			t.Errorf("empty CompanyStatus")
+			t.Fatal("empty CompanyStatus")
 		}
 		if status.UserID == "" || string(status.Status) == "" {
 			t.Errorf("invalid CompanyStatus: %#v", status)
@@ -646,7 +646,7 @@ func TestCompanyRepository(t *testing.T) {
 			t.Error(err)
 		}
 		if status == nil {
-			t.Errorf("empty CompanyStatus")
+			t.Fatal("empty CompanyStatus")
 		}
 		if status.UserID == "" || string(status.Status) == "" {
 			t.Errorf("invalid CompanyStatus: %#v", status)
