@@ -61,6 +61,8 @@ docker:
 # main server Docker image
 	docker build --pull -t moov/watchman:$(VERSION) -f Dockerfile .
 	docker tag moov/watchman:$(VERSION) moov/watchman:latest
+# Watchman image with static files
+	docker build --pull -t moov/watchman:static -f Dockerfile-static .
 # watchmantest image
 	docker build --pull -t moov/watchmantest:$(VERSION) -f ./cmd/watchmantest/Dockerfile .
 	docker tag moov/watchmantest:$(VERSION) moov/watchmantest:latest
@@ -76,6 +78,7 @@ release: docker AUTHORS
 release-push:
 	docker push moov/watchman:$(VERSION)
 	docker push moov/watchman:latest
+	docker push moov/watchman:static
 	docker push moov/watchmantest:$(VERSION)
 	docker push moov/watchman-webhook-example:$(VERSION)
 
