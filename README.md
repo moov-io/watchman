@@ -23,6 +23,8 @@ All United States or European Union companies are required to comply with variou
 
 To get started using watchman download [the latest release](https://github.com/moov-io/watchman/releases/latest) or our [Docker image](https://hub.docker.com/r/moov/watchman/tags). We also have a [demo instance](https://moov.io/watchman/) as part of Moov's demo environment.
 
+Note: We also offer a `moov/watchman:static` Docker image with files from 2019. This image can be useful for faster local testing or consistent results.
+
 ```
 # Run as a binary
 $ wget https://github.com/moov-io/watchman/releases/download/v0.13.0/watchman-darwin-amd64
