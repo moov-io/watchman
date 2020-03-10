@@ -223,6 +223,8 @@ Moov Sanction Search supports sending a webhook periodically with a free-form na
 
 We use [openapi-generator](https://github.com/OpenAPITools/openapi-generator) from the [OpenAPI team](https://swagger.io/specification/) to generate API clients for popular programming languages from the API specification. To generate the Go client run `make client` from Watchman's root directory.
 
+To generate the admin Go client run `make admin`.
+
 ## Getting Help
 
 We maintain a [runbook for common issues](docs/runbook.md) and configuration options. Also, if you've encountered a security issue please contact us at [`security@moov.io`](mailto:security@moov.io).
