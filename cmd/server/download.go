@@ -157,6 +157,10 @@ func cslRecords(logger log.Logger, initialDir string) (*csl.CSL, error) {
 func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 	if s.logger != nil {
 		s.logger.Log("download", "Starting refresh of data")
+
+		if initialDir != "" {
+			s.logger.Log("download", fmt.Sprintf("reading files from %s", initialDir))
+		}
 	}
 
 	results, err := ofacRecords(s.logger, initialDir)
