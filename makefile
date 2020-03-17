@@ -4,7 +4,11 @@ VERSION := $(shell grep -Eo '(v[0-9]+[\.][0-9]+[\.][0-9]+(-[a-zA-Z0-9]*)?)' vers
 .PHONY: build build-server build-examples docker release check
 
 build: check build-server build-batchsearch build-watchmantest build-examples
+ifeq ($(OS),Windows_NT)
+	@echo "Skipping webui build on Windows."
+else
 	cd webui/ && npm install && npm run build && cd ../
+endif
 
 build-server:
 	CGO_ENABLED=1 go build -o ./bin/server github.com/moov-io/watchman/cmd/server
@@ -26,6 +30,9 @@ check:
 
 .PHONY: admin
 admin:
+ifeq ($(OS),Windows_NT)
+	@echo "Please generate ./admin/ on macOS or Linux, currently unsupported on windows."
+else
 # Versions from https://github.com/OpenAPITools/openapi-generator/releases
 	@chmod +x ./openapi-generator
 	@rm -rf ./admin
@@ -33,9 +40,13 @@ admin:
 	rm -f admin/go.mod admin/go.sum
 	go fmt ./...
 	go test ./admin
+endif
 
 .PHONY: client
 client:
+ifeq ($(OS),Windows_NT)
+	@echo "Please generate ./client/ on macOS or Linux, currently unsupported on windows."
+else
 # Versions from https://github.com/OpenAPITools/openapi-generator/releases
 	@chmod +x ./openapi-generator
 	@rm -rf ./client
@@ -44,15 +55,19 @@ client:
 	go fmt ./...
 	go build github.com/moov-io/watchman/client
 	go test ./client
+endif
 
 .PHONY: clean
 clean:
-	@rm -rf bin/
-	@rm -f openapi-generator-cli-*.jar
+ifeq ($(OS),Windows_NT)
+	@echo "Skipping cleanup on Windows, currently unsupported."
+else
+	@rm -rf bin/ openapi-generator-cli-*.jar
+endif
 
 dist: clean admin client build
 ifeq ($(OS),Windows_NT)
-	CGO_ENABLED=1 GOOS=windows go build -o bin/watchman-windows-amd64.exe github.com/moov-io/watchman/cmd/server
+	CGO_ENABLED=1 GOOS=windows go build -o bin/watchman.exe github.com/moov-io/watchman/cmd/server
 else
 	CGO_ENABLED=1 GOOS=$(PLATFORM) go build -o bin/watchman-$(PLATFORM)-amd64 github.com/moov-io/watchman/cmd/server
 endif

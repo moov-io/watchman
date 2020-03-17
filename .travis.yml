@@ -21,54 +21,60 @@ matrix:
       directories:
         - "/Users/travis/Library/Caches/go-build"
         - "webui/node_modules/"
-  # - os: windows
-  #   go: 1.14.x
+  - os: windows
+    go: 1.14.x
 before_install:
   # Setup node.js
-  - nvm install stable && nvm use stable
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then nvm install stable && nvm use stable; fi
   # Setup directory for binaries
   - mkdir ./bin
   - export PATH=$PATH:$PWD/bin
   # Misspell
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget -O misspell.tar.gz https://github.com/client9/misspell/releases/download/v0.3.4/misspell_0.3.4_linux_64bit.tar.gz; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then wget -O misspell.tar.gz https://github.com/client9/misspell/releases/download/v0.3.4/misspell_0.3.4_mac_64bit.tar.gz; fi
-  - tar xf misspell.tar.gz && cp ./misspell ./bin/misspell
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then tar xf misspell.tar.gz && cp ./misspell ./bin/misspell; fi
   # staticcheck
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget -O staticcheck.tar.gz https://github.com/dominikh/go-tools/releases/download/2020.1.3/staticcheck_linux_amd64.tar.gz; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then wget -O staticcheck.tar.gz https://github.com/dominikh/go-tools/releases/download/2020.1.3/staticcheck_darwin_amd64.tar.gz; fi
-  - tar xf staticcheck.tar.gz && cp ./staticcheck/staticcheck ./bin/staticcheck
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then tar xf staticcheck.tar.gz && cp ./staticcheck/staticcheck ./bin/staticcheck; fi
   # nancy (vulnerable dependencies)
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then curl -L -o ./bin/nancy https://github.com/sonatype-nexus-community/nancy/releases/download/v0.1.0/nancy-linux.amd64-v0.1.0; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then curl -L -o ./bin/nancy https://github.com/sonatype-nexus-community/nancy/releases/download/v0.1.0/nancy-darwin.amd64-v0.1.0; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then chmod +x ./bin/nancy; fi
   # golangci-lint
-  - wget -O - -q https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s v1.23.8
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then wget -O - -q https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s v1.23.8; fi
   # gocyclo
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget -O ./bin/gocyclo https://github.com/adamdecaf/gocyclo/releases/download/2019-08-09/gocyclo-linux-amd64; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then wget -O ./bin/gocyclo https://github.com/adamdecaf/gocyclo/releases/download/2019-08-09/gocyclo-darwin-amd64; fi
-  - chmod +x ./bin/gocyclo
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then chmod +x ./bin/gocyclo; fi
 before_script:
   - GOFILES=$(find . -type f -name '*.go' | grep -v vendor | grep -v admin | grep -v client)
   - go mod tidy
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install -y make; fi
   - make
 script:
   # Just check gofmt on linux, it's the fastest builder
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then test -z $(gofmt -s -l $GOFILES); fi
-  - go test ./... -race -coverprofile=coverage.txt -covermode=atomic
-  - misspell -error -locale US -i "palestiniens" $GOFILES
-  - gocyclo -over 20 $GOFILES
-  - ./bin/golangci-lint run --skip-dirs="(admin|client)" --timeout=2m --disable=errcheck
-  - staticcheck . ./cmd/... ./examples/... ./internal/... ./pkg/... ./test/...
+  # go test
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then go test ./... -race -short -coverprofile=coverage.txt -covermode=atomic; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then go test ./... -race -coverprofile=coverage.txt -covermode=atomic; fi
+  # various linters
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then misspell -error -locale US -i "palestiniens" $GOFILES; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then gocyclo -over 20 $GOFILES; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then ./bin/golangci-lint run --skip-dirs="(admin|client)" --timeout=2m --disable=errcheck; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then staticcheck . ./cmd/... ./examples/... ./internal/... ./pkg/... ./test/...; fi
   - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then go list -m all | ./bin/nancy; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install -y mingw; export PATH=/c/tools/mingw64/bin:"$PATH";fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make docker && make test-integration; fi
 after_script:
-  - docker-compose logs
-  - make clean-integration
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then docker-compose logs; fi
+  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then make clean-integration; fi
 after_success:
   - bash <(curl -s https://codecov.io/bash) -X fix
   - make admin
   - make client
+  # Ensure no changes are unstaged in ./admin/ or ./client/ after generating their codeg
+  - git diff-index --quiet HEAD -- ./admin/ ./client/
 before_deploy:
   - make dist
 deploy:
@@ -78,14 +84,15 @@ deploy:
   file_glob: true
   file:
     - bin/watchman-*
+    - bin/watchman.exe
   on:
     repo: moov-io/watchman
     tags: true
     go: 1.14.x
   skip_cleanup: true
 after_deploy:
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  - make release-push
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make release-push; fi
 notifications:
   slack:
     secure: aX1Wt+WcuSLKIg02HzarFp57l+KaPKxOwFf7cuaKyaCdvnf8XuLd+/yWwYSXZTeqgZ9PE6MxQHh+j3JT9du0Uo4BXQbcF6WMF/VwrN1qOCGeJvNr+RAHGqodcfWDRKLzxgcY7AMwGVbXA2ECfJiWYaXVlSojSXwPUGlWUdq83hCwjs5qSR/AFlHEYmaTWnSu53nvBDzoc+25PnUnNRLrZAo2zmVijyozxXVZ5E+uVZrpX/zDZjlZbCDMTnMTcLfPm+Dz5li9QY20LQX8eXJN4RaC/mBEIOashN/7A6Pnh5JioSVQ2WuPhRoCG81yMxQkZulIbJ4XGynWDVFdoKeXSHMrI5PX+q396n9sxEeEhAwi0nv48Mb4MmXKXUliNZ1yr+kxGPPkU/I3BGYXdA23iaTh/0pc/AuTFO7GSwf4MoRCCMI4nm47rFcA+3fcwGwNVcAG0YzsgMfriXXzuBXm2sEU4Ix6rEo7RQHQ1uOI0wT1EiET3x4iANRsoN1cu//FfEz1se/MpWLMZuAP4glaXbz0jxcET/2rM+g54ydPDscS4mcOiTyhAzlG79lMWFPCC2u5nqOH7ZGz1/oEb2uxTbVpPsKYrIRctOs6sp35rVjVIscMFEOmi5m/TUu7wtdGavvbZ7t3AfnPns1M995r6IK9ibRY2kETnGmU/ao+z7E=
