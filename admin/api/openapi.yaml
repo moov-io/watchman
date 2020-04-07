@@ -19,6 +19,7 @@ tags:
 paths:
   /version:
     get:
+      description: Show the current version of Watchman
       operationId: getVersion
       responses:
         "200":
@@ -28,7 +29,7 @@ paths:
                 example: v0.13.1
                 type: string
           description: The current version running
-      summary: Show the current version
+      summary: Get Version
       tags:
       - Admin
   /data/refresh:
@@ -52,6 +53,7 @@ paths:
       - Admin
   /debug/sdn/{sdnId}:
     get:
+      description: Get an SDN and search index debug information
       operationId: debugSDN
       parameters:
       - description: SDN ID
@@ -76,7 +78,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: See error message
-      summary: Get an SDN and index debug information
+      summary: Debug SDN
       tags:
       - Admin
 components:

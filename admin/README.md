@@ -34,8 +34,8 @@ All URIs are relative to *http://localhost:9094*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*AdminApi* | [**DebugSDN**](docs/AdminApi.md#debugsdn) | **Get** /debug/sdn/{sdnId} | Get an SDN and index debug information
-*AdminApi* | [**GetVersion**](docs/AdminApi.md#getversion) | **Get** /version | Show the current version
+*AdminApi* | [**DebugSDN**](docs/AdminApi.md#debugsdn) | **Get** /debug/sdn/{sdnId} | Debug SDN
+*AdminApi* | [**GetVersion**](docs/AdminApi.md#getversion) | **Get** /version | Get Version
 *AdminApi* | [**RefreshData**](docs/AdminApi.md#refreshdata) | **Post** /data/refresh | Download and reindex all data sources
 
 

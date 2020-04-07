@@ -23,15 +23,18 @@ tags:
 paths:
   /ping:
     get:
+      description: Check the Watchman service is running
       operationId: ping
       responses:
         "200":
           description: Service is running properly
-      summary: Ping the Watchman service to check if running
+      summary: Ping Watchman
       tags:
       - Watchman
   /ofac/companies/{companyID}:
     get:
+      description: Get information about a company, trust or organization such as
+        addresses, alternate names, and remarks.
       operationId: getOfacCompany
       parameters:
       - description: Optional Request ID allows application developer to trace requests
@@ -68,11 +71,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/OfacCompany'
           description: Company and associated metadata
-      summary: Get information about a company, trust or organization such as addresses,
-        alternate names, and remarks.
+      summary: Get company
       tags:
       - Watchman
     put:
+      description: Update a Companies sanction status to always block or always allow
+        transactions.
       operationId: updateOfacCompanyStatus
       parameters:
       - description: Optional Request ID allows application developer to trace requests
@@ -111,12 +115,12 @@ paths:
       responses:
         "200":
           description: Company status updated
-      summary: Update a Companies sanction status to always block or always allow
-        transactions.
+      summary: Update company
       tags:
       - Watchman
   /ofac/companies/{companyID}/watch:
     post:
+      description: Add name watch on a OFAC Company
       operationId: addOfacCompanyWatch
       parameters:
       - description: Optional Request ID allows application developer to trace requests
@@ -161,11 +165,12 @@ paths:
           description: Company watch added
         "404":
           description: Company not found
-      summary: Add watch on a OFAC Company
+      summary: Watch OFAC company
       tags:
       - Watchman
   /ofac/companies/{companyID}/watch/{watchID}:
     delete:
+      description: Delete a company name watch
       operationId: removeOfacCompanyWatch
       parameters:
       - description: Optional Request ID allows application developer to trace requests
@@ -212,6 +217,8 @@ paths:
       - Watchman
   /ofac/companies/watch:
     post:
+      description: Watch a company by its name. The match percentage will be included
+        in the webhook's JSON payload.
       operationId: addOfacCompanyNameWatch
       parameters:
       - description: Optional Request ID allows application developer to trace requests
@@ -254,8 +261,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OfacWatch'
           description: Company watch applied
-      summary: Add company watch by name. The match percentage will be included in
-        the webhook's JSON payload.
+      summary: Watch company
       tags:
       - Watchman
   /ofac/companies/watch/{watchID}:
@@ -301,11 +307,13 @@ paths:
       responses:
         "200":
           description: Company watch removed
-      summary: Remove a Company name watch
+      summary: Remove a company watch
       tags:
       - Watchman
   /ofac/customers/{customerID}:
     get:
+      description: Get information about a customer, addresses, alternate names, and
+        their SDN metadata.
       operationId: getOfacCustomer
       parameters:
       - description: Optional Request ID allows application developer to trace requests
@@ -342,11 +350,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/OfacCustomer'
           description: Customer and associated metadata
-      summary: Get information about a customer, addresses, alternate names, and their
-        SDN metadata.
+      summary: Get Customer
       tags:
       - Watchman
     put:
+      description: Update a Customer sanction status to always block or always allow
+        transactions.
       operationId: updateOfacCustomerStatus
       parameters:
       - description: Optional Request ID allows application developer to trace requests
@@ -385,12 +394,12 @@ paths:
       responses:
         "200":
           description: Customer status updated
-      summary: Update a Customer's sanction status to always block or always allow
-        transactions.
+      summary: Update customer
       tags:
       - Watchman
   /ofac/customers/{customerID}/watch:
     post:
+      description: Add name watch on a OFAC Customer
       operationId: addOfacCustomerWatch
       parameters:
       - description: Optional Request ID allows application developer to trace requests
@@ -435,11 +444,12 @@ paths:
           description: Customer watch added
         "404":
           description: Customer not found
-      summary: Add watch on a OFAC Customer
+      summary: Watch OFAC customer
       tags:
       - Watchman
   /ofac/customers/{customerID}/watch/{watchID}:
     delete:
+      description: Delete a customer name watch
       operationId: removeOfacCustomerWatch
       parameters:
       - description: Optional Request ID allows application developer to trace requests
@@ -486,6 +496,8 @@ paths:
       - Watchman
   /ofac/customers/watch:
     post:
+      description: Watch a customer by its name. The match percentage will be included
+        in the webhook's JSON payload.
       operationId: addOfacCustomerNameWatch
       parameters:
       - description: Optional Request ID allows application developer to trace requests
@@ -528,8 +540,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OfacWatch'
           description: Customer watch applied
-      summary: Add customer watch by name. The match percentage will be included in
-        the webhook's JSON payload.
+      summary: Watch customer
       tags:
       - Watchman
   /ofac/customers/watch/{watchID}:
@@ -575,11 +586,12 @@ paths:
       responses:
         "200":
           description: Company or Customer watch removed
-      summary: Remove a Customer name watch
+      summary: remove a customer watch
       tags:
       - Watchman
   /ofac/sdn/{sdnID}:
     get:
+      description: Get SDN details
       operationId: getSDN
       parameters:
       - description: Optional Request ID allows application developer to trace requests
@@ -616,7 +628,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OfacSDN'
           description: SDN metadata
-      summary: Specially designated national
+      summary: Get SDN
       tags:
       - Watchman
   /ofac/sdn/{sdnID}/alts:
@@ -657,7 +669,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OfacSDNAltNames'
           description: SDN alternate names
-      summary: Get alternate names for a given SDN
+      summary: Get SDN alt names
       tags:
       - Watchman
   /ofac/sdn/{sdnID}/addresses:
@@ -698,7 +710,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OfacEntityAddresses'
           description: SDN addresses
-      summary: Get addresses for a given SDN
+      summary: Get SDN addresses
       tags:
       - Watchman
   /search:
@@ -860,11 +872,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Search'
           description: SDNs returned from a search
-      summary: Search SDN names and metadata
+      summary: Search SDNs
       tags:
       - Watchman
   /downloads:
     get:
+      description: Return list of recent downloads of list data
       operationId: getLatestDownloads
       parameters:
       - description: Optional Request ID allows application developer to trace requests
@@ -901,11 +914,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Downloads'
           description: Recent timestamps and counts of parsed objects
-      summary: Return list of recent downloads of list data
+      summary: Get latest downloads
       tags:
       - Watchman
   /ui/values/{key}:
     get:
+      description: Return an ordered distinct list of keys for an SDN property.
       operationId: getUIValues
       parameters:
       - description: SDN property to lookup. Values are sdnType, ofacProgram
@@ -939,7 +953,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Invalid key
-      summary: Return an ordered distinct list of keys for an SDN property.
+      summary: Get UI values
       tags:
       - Watchman
 components:

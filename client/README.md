@@ -33,25 +33,25 @@ All URIs are relative to *http://localhost:8084*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*WatchmanApi* | [**AddOfacCompanyNameWatch**](docs/WatchmanApi.md#addofaccompanynamewatch) | **Post** /ofac/companies/watch | Add company watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
-*WatchmanApi* | [**AddOfacCompanyWatch**](docs/WatchmanApi.md#addofaccompanywatch) | **Post** /ofac/companies/{companyID}/watch | Add watch on a OFAC Company
-*WatchmanApi* | [**AddOfacCustomerNameWatch**](docs/WatchmanApi.md#addofaccustomernamewatch) | **Post** /ofac/customers/watch | Add customer watch by name. The match percentage will be included in the webhook&#39;s JSON payload.
-*WatchmanApi* | [**AddOfacCustomerWatch**](docs/WatchmanApi.md#addofaccustomerwatch) | **Post** /ofac/customers/{customerID}/watch | Add watch on a OFAC Customer
-*WatchmanApi* | [**GetLatestDownloads**](docs/WatchmanApi.md#getlatestdownloads) | **Get** /downloads | Return list of recent downloads of list data
-*WatchmanApi* | [**GetOfacCompany**](docs/WatchmanApi.md#getofaccompany) | **Get** /ofac/companies/{companyID} | Get information about a company, trust or organization such as addresses, alternate names, and remarks.
-*WatchmanApi* | [**GetOfacCustomer**](docs/WatchmanApi.md#getofaccustomer) | **Get** /ofac/customers/{customerID} | Get information about a customer, addresses, alternate names, and their SDN metadata.
-*WatchmanApi* | [**GetSDN**](docs/WatchmanApi.md#getsdn) | **Get** /ofac/sdn/{sdnID} | Specially designated national
-*WatchmanApi* | [**GetSDNAddresses**](docs/WatchmanApi.md#getsdnaddresses) | **Get** /ofac/sdn/{sdnID}/addresses | Get addresses for a given SDN
-*WatchmanApi* | [**GetSDNAltNames**](docs/WatchmanApi.md#getsdnaltnames) | **Get** /ofac/sdn/{sdnID}/alts | Get alternate names for a given SDN
-*WatchmanApi* | [**GetUIValues**](docs/WatchmanApi.md#getuivalues) | **Get** /ui/values/{key} | Return an ordered distinct list of keys for an SDN property.
-*WatchmanApi* | [**Ping**](docs/WatchmanApi.md#ping) | **Get** /ping | Ping the Watchman service to check if running
-*WatchmanApi* | [**RemoveOfacCompanyNameWatch**](docs/WatchmanApi.md#removeofaccompanynamewatch) | **Delete** /ofac/companies/watch/{watchID} | Remove a Company name watch
+*WatchmanApi* | [**AddOfacCompanyNameWatch**](docs/WatchmanApi.md#addofaccompanynamewatch) | **Post** /ofac/companies/watch | Watch company
+*WatchmanApi* | [**AddOfacCompanyWatch**](docs/WatchmanApi.md#addofaccompanywatch) | **Post** /ofac/companies/{companyID}/watch | Watch OFAC company
+*WatchmanApi* | [**AddOfacCustomerNameWatch**](docs/WatchmanApi.md#addofaccustomernamewatch) | **Post** /ofac/customers/watch | Watch customer
+*WatchmanApi* | [**AddOfacCustomerWatch**](docs/WatchmanApi.md#addofaccustomerwatch) | **Post** /ofac/customers/{customerID}/watch | Watch OFAC customer
+*WatchmanApi* | [**GetLatestDownloads**](docs/WatchmanApi.md#getlatestdownloads) | **Get** /downloads | Get latest downloads
+*WatchmanApi* | [**GetOfacCompany**](docs/WatchmanApi.md#getofaccompany) | **Get** /ofac/companies/{companyID} | Get company
+*WatchmanApi* | [**GetOfacCustomer**](docs/WatchmanApi.md#getofaccustomer) | **Get** /ofac/customers/{customerID} | Get Customer
+*WatchmanApi* | [**GetSDN**](docs/WatchmanApi.md#getsdn) | **Get** /ofac/sdn/{sdnID} | Get SDN
+*WatchmanApi* | [**GetSDNAddresses**](docs/WatchmanApi.md#getsdnaddresses) | **Get** /ofac/sdn/{sdnID}/addresses | Get SDN addresses
+*WatchmanApi* | [**GetSDNAltNames**](docs/WatchmanApi.md#getsdnaltnames) | **Get** /ofac/sdn/{sdnID}/alts | Get SDN alt names
+*WatchmanApi* | [**GetUIValues**](docs/WatchmanApi.md#getuivalues) | **Get** /ui/values/{key} | Get UI values
+*WatchmanApi* | [**Ping**](docs/WatchmanApi.md#ping) | **Get** /ping | Ping Watchman
+*WatchmanApi* | [**RemoveOfacCompanyNameWatch**](docs/WatchmanApi.md#removeofaccompanynamewatch) | **Delete** /ofac/companies/watch/{watchID} | Remove a company watch
 *WatchmanApi* | [**RemoveOfacCompanyWatch**](docs/WatchmanApi.md#removeofaccompanywatch) | **Delete** /ofac/companies/{companyID}/watch/{watchID} | Remove company watch
-*WatchmanApi* | [**RemoveOfacCustomerNameWatch**](docs/WatchmanApi.md#removeofaccustomernamewatch) | **Delete** /ofac/customers/watch/{watchID} | Remove a Customer name watch
+*WatchmanApi* | [**RemoveOfacCustomerNameWatch**](docs/WatchmanApi.md#removeofaccustomernamewatch) | **Delete** /ofac/customers/watch/{watchID} | remove a customer watch
 *WatchmanApi* | [**RemoveOfacCustomerWatch**](docs/WatchmanApi.md#removeofaccustomerwatch) | **Delete** /ofac/customers/{customerID}/watch/{watchID} | Remove customer watch
-*WatchmanApi* | [**Search**](docs/WatchmanApi.md#search) | **Get** /search | Search SDN names and metadata
-*WatchmanApi* | [**UpdateOfacCompanyStatus**](docs/WatchmanApi.md#updateofaccompanystatus) | **Put** /ofac/companies/{companyID} | Update a Companies sanction status to always block or always allow transactions.
-*WatchmanApi* | [**UpdateOfacCustomerStatus**](docs/WatchmanApi.md#updateofaccustomerstatus) | **Put** /ofac/customers/{customerID} | Update a Customer&#39;s sanction status to always block or always allow transactions.
+*WatchmanApi* | [**Search**](docs/WatchmanApi.md#search) | **Get** /search | Search SDNs
+*WatchmanApi* | [**UpdateOfacCompanyStatus**](docs/WatchmanApi.md#updateofaccompanystatus) | **Put** /ofac/companies/{companyID} | Update company
+*WatchmanApi* | [**UpdateOfacCustomerStatus**](docs/WatchmanApi.md#updateofaccustomerstatus) | **Put** /ofac/customers/{customerID} | Update customer
 
 
 ## Documentation For Models
