@@ -22,7 +22,8 @@ paths:
   /version:
     get:
       tags: ["Admin"]
-      summary: Show the current version
+      summary: Get Version
+      description: Show the current version of Watchman
       operationId: getVersion
       responses:
         '200':
@@ -53,7 +54,8 @@ paths:
   /debug/sdn/{sdnId}:
     get:
       tags: ["Admin"]
-      summary: Get an SDN and index debug information
+      summary: Debug SDN
+      description: Get an SDN and search index debug information
       operationId: debugSDN
       parameters:
         - name: sdnId

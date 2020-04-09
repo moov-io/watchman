@@ -20,8 +20,9 @@ tags:
 paths:
   /ping:
     get:
-      tags: ["Watchman"]
-      summary: Ping the Watchman service to check if running
+      tags: [Watchman]
+      summary: Ping Watchman
+      description: Check the Watchman service is running
       operationId: ping
       responses:
         '200':
@@ -30,8 +31,9 @@ paths:
   # Company Endpoints
   /ofac/companies/{companyID}:
     get:
-      tags: ["Watchman"]
-      summary: Get information about a company, trust or organization such as addresses, alternate names, and remarks.
+      tags: [Watchman]
+      summary: Get company
+      description: Get information about a company, trust or organization such as addresses, alternate names, and remarks.
       operationId: getOfacCompany
       parameters:
         - name: X-Request-ID
@@ -60,8 +62,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/OfacCompany'
     put:
-      tags: ["Watchman"]
-      summary: Update a Companies sanction status to always block or always allow transactions.
+      tags: [Watchman]
+      summary: Update company
+      description: Update a Companies sanction status to always block or always allow transactions.
       operationId: updateOfacCompanyStatus
       parameters:
         - name: X-Request-ID
@@ -93,8 +96,9 @@ paths:
           description: Company status updated
   /ofac/companies/{companyID}/watch:
     post:
-      tags: ["Watchman"]
-      summary: Add watch on a OFAC Company
+      tags: [Watchman]
+      summary: Watch OFAC company
+      description: Add name watch on a OFAC Company
       operationId: addOfacCompanyWatch
       parameters:
         - name: X-Request-ID
@@ -132,8 +136,9 @@ paths:
           description: Company not found
   /ofac/companies/{companyID}/watch/{watchID}:
     delete:
-      tags: ["Watchman"]
+      tags: [Watchman]
       summary: Remove company watch
+      description: Delete a company name watch
       operationId: removeOfacCompanyWatch
       parameters:
         - name: X-Request-ID
@@ -166,8 +171,9 @@ paths:
           description: Company watch removed
   /ofac/companies/watch:
     post:
-      tags: ["Watchman"]
-      summary: Add company watch by name. The match percentage will be included in the webhook's JSON payload.
+      tags: [Watchman]
+      summary: Watch company
+      description: Watch a company by its name. The match percentage will be included in the webhook's JSON payload.
       operationId: addOfacCompanyNameWatch
       parameters:
         - name: X-Request-ID
@@ -203,8 +209,8 @@ paths:
                 $ref: '#/components/schemas/OfacWatch'
   /ofac/companies/watch/{watchID}:
     delete:
-      tags: ["Watchman"]
-      summary: Remove a Company name watch
+      tags: [Watchman]
+      summary: Remove a company watch
       operationId: removeOfacCompanyNameWatch
       parameters:
         - name: X-Request-ID
@@ -238,8 +244,9 @@ paths:
   # Customer Endpoints
   /ofac/customers/{customerID}:
     get:
-      tags: ["Watchman"]
-      summary: Get information about a customer, addresses, alternate names, and their SDN metadata.
+      tags: [Watchman]
+      summary: Get Customer
+      description: Get information about a customer, addresses, alternate names, and their SDN metadata.
       operationId: getOfacCustomer
       parameters:
         - name: X-Request-ID
@@ -268,8 +275,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/OfacCustomer'
     put:
-      tags: ["Watchman"]
-      summary: Update a Customer's sanction status to always block or always allow transactions.
+      tags: [Watchman]
+      summary: Update customer
+      description: Update a Customer sanction status to always block or always allow transactions.
       operationId: updateOfacCustomerStatus
       parameters:
         - name: X-Request-ID
@@ -301,8 +309,9 @@ paths:
           description: Customer status updated
   /ofac/customers/{customerID}/watch:
     post:
-      tags: ["Watchman"]
-      summary: Add watch on a OFAC Customer
+      tags: [Watchman]
+      summary: Watch OFAC customer
+      description: Add name watch on a OFAC Customer
       operationId: addOfacCustomerWatch
       parameters:
         - name: X-Request-ID
@@ -340,8 +349,9 @@ paths:
           description: Customer not found
   /ofac/customers/{customerID}/watch/{watchID}:
     delete:
-      tags: ["Watchman"]
+      tags: [Watchman]
       summary: Remove customer watch
+      description: Delete a customer name watch
       operationId: removeOfacCustomerWatch
       parameters:
         - name: X-Request-ID
@@ -374,8 +384,9 @@ paths:
           description: Customer watch removed
   /ofac/customers/watch:
     post:
-      tags: ["Watchman"]
-      summary: Add customer watch by name. The match percentage will be included in the webhook's JSON payload.
+      tags: [Watchman]
+      summary: Watch customer
+      description: Watch a customer by its name. The match percentage will be included in the webhook's JSON payload.
       operationId: addOfacCustomerNameWatch
       parameters:
         - name: X-Request-ID
@@ -411,8 +422,8 @@ paths:
                 $ref: '#/components/schemas/OfacWatch'
   /ofac/customers/watch/{watchID}:
     delete:
-      tags: ["Watchman"]
-      summary: Remove a Customer name watch
+      tags: [Watchman]
+      summary: remove a customer watch
       operationId: removeOfacCustomerNameWatch
       parameters:
         - name: X-Request-ID
@@ -447,8 +458,9 @@ paths:
   # SDN Endpoints
   /ofac/sdn/{sdnID}:
     get:
-      tags: ["Watchman"]
-      summary: Specially designated national
+      tags: [Watchman]
+      summary: Get SDN
+      description: Get SDN details
       operationId: getSDN
       parameters:
         - name: X-Request-ID
@@ -478,8 +490,8 @@ paths:
                 $ref: '#/components/schemas/OfacSDN'
   /ofac/sdn/{sdnID}/alts:
     get:
-      tags: ["Watchman"]
-      summary: Get alternate names for a given SDN
+      tags: [Watchman]
+      summary: Get SDN alt names
       operationId: getSDNAltNames
       parameters:
         - name: X-Request-ID
@@ -509,8 +521,8 @@ paths:
                 $ref: '#/components/schemas/OfacSDNAltNames'
   /ofac/sdn/{sdnID}/addresses:
     get:
-      tags: ["Watchman"]
-      summary: Get addresses for a given SDN
+      tags: [Watchman]
+      summary: Get SDN addresses
       operationId: getSDNAddresses
       parameters:
         - name: X-Request-ID
@@ -541,8 +553,8 @@ paths:
   # Search Endpoint
   /search:
     get:
-      tags: ["Watchman"]
-      summary: Search SDN names and metadata
+      tags: [Watchman]
+      summary: Search SDNs
       operationId: search
       parameters:
         - name: X-Request-ID
@@ -645,8 +657,9 @@ paths:
   # Downloads endpoint
   /downloads:
     get:
-      tags: ["Watchman"]
-      summary: Return list of recent downloads of list data
+      tags: [Watchman]
+      summary: Get latest downloads
+      description: Return list of recent downloads of list data
       operationId: getLatestDownloads
       parameters:
         - name: X-Request-ID
@@ -675,8 +688,9 @@ paths:
                 $ref: '#/components/schemas/Downloads'
   /ui/values/{key}:
     get:
-      tags: ["Watchman"]
-      summary: Return an ordered distinct list of keys for an SDN property.
+      tags: [Watchman]
+      summary: Get UI values
+      description: Return an ordered distinct list of keys for an SDN property.
       operationId: getUIValues
       parameters:
         - in: path

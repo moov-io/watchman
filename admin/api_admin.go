@@ -26,7 +26,8 @@ var (
 type AdminApiService service
 
 /*
-DebugSDN Get an SDN and index debug information
+DebugSDN Debug SDN
+Get an SDN and search index debug information
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param sdnId SDN ID
 @return DebugSdn
@@ -122,7 +123,8 @@ func (a *AdminApiService) DebugSDN(ctx _context.Context, sdnId string) (DebugSdn
 }
 
 /*
-GetVersion Show the current version
+GetVersion Get Version
+Show the current version of Watchman
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 @return string
 */

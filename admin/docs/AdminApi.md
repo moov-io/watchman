@@ -4,8 +4,8 @@ All URIs are relative to *http://localhost:9094*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**DebugSDN**](AdminApi.md#DebugSDN) | **Get** /debug/sdn/{sdnId} | Get an SDN and index debug information
-[**GetVersion**](AdminApi.md#GetVersion) | **Get** /version | Show the current version
+[**DebugSDN**](AdminApi.md#DebugSDN) | **Get** /debug/sdn/{sdnId} | Debug SDN
+[**GetVersion**](AdminApi.md#GetVersion) | **Get** /version | Get Version
 [**RefreshData**](AdminApi.md#RefreshData) | **Post** /data/refresh | Download and reindex all data sources
 
 
@@ -14,7 +14,9 @@ Method | HTTP request | Description
 
 > DebugSdn DebugSDN(ctx, sdnId)
 
-Get an SDN and index debug information
+Debug SDN
+
+Get an SDN and search index debug information
 
 ### Required Parameters
 
@@ -46,7 +48,9 @@ No authorization required
 
 > string GetVersion(ctx, )
 
-Show the current version
+Get Version
+
+Show the current version of Watchman
 
 ### Required Parameters
 
