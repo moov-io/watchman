@@ -2,16 +2,20 @@
 
 ADDITIONS
 
+- build: add moov/watchman:static image for better test instances
+- cmd/server: add version handler to admin HTTP server
 - cmd/server: record download counts per entity type in `last_data_refresh_count` Prometheus metric
 
 IMPROVEMENTS
 
-- pkg/csl: use endpoint to download which doesn't require an api key
-- build: run sonatype-nexus-community/nancy in CI
-- api,client: use shared Error model
 - admin,client: fix package names, upgrade openapi-generator to 4.2.3
-- download: set custom User-Agent header
 - all: misc test cleanup from staticcheck
+- api,client: use shared Error model
+- api,client: use shorter API summaries
+- build: run sonatype-nexus-community/nancy in CI
+- build: setup windows CI and releases
+- download: set custom User-Agent header
+- pkg/csl: use endpoint to download which doesn't require an api key
 
 BUG FIXES
 
@@ -25,7 +29,7 @@ BUILD
 - build: update Copyright headers for 2020
 - build: upgrade mysql client to 1.5
 - build: don't wipe both generated dirs on 'make clean'
-- chore(deps): update dependency @material-ui/core to v4.9.4
+- chore(deps): update dependency @material-ui/core to v4.9.9
 - chore(deps): update golang docker tag to v1.14
 - chore(deps): update module moov-io/base to v0.11.0
 - chore(deps): update module prometheus/client_golang to v1.4.0
