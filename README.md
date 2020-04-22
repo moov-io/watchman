@@ -9,6 +9,10 @@ moov-io/watchman
 
 Moov Watchman is an HTTP API and Go library to download, parse and offer search functions over numerous trade sanction lists from the United States, European Union governments, agencies, and non profits for complying with regional laws. Also included is a web UI and async webhook notification service to initiate processes on remote systems.
 
+Checkout our [demo instance of Watchman](https://moov.io/watchman) or the [OpenAPI specification](https://github.com/moov-io/watchman/blob/master/openapi.yaml) for use with your favorite language.
+
+Docs: [docs.moov.io](https://docs.moov.io/watchman/) | [api docs](https://moov-io.github.io/watchman/) | [admin api docs](https://moov-io.github.io/watchman/admin/)
+
 Lists included in search are:
 
 - US Treasury - Office of Foreign Assets Control (OFAC)
@@ -116,10 +120,6 @@ $ curl -s localhost:8084/search?q=...
     "refreshedAt": "2019-12-03T15:31:41.81849-07:00"
 }
 ```
-
-Checkout our [demo instance of Watchman](https://moov.io/watchman) or the [OpenAPI specification](https://github.com/moov-io/watchman/blob/master/openapi.yaml) for use with your favorite language.
-
-Docs: [docs.moov.io](https://docs.moov.io/watchman/) | [api docs](https://moov-io.github.io/watchman/) | [admin api docs](https://moov-io.github.io/watchman/admin/)
 
 ### Web UI
 
