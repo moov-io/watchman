@@ -117,9 +117,9 @@ $ curl -s localhost:8084/search?q=...
 }
 ```
 
-We offer [hosted api docs as part of Moov's tools](https://api.moov.io/#tag/Watchman) and an [OpenAPI specification](https://github.com/moov-io/watchman/blob/master/openapi.yaml) for use with generated clients.
+Checkout our [demo instance of Watchman](https://moov.io/watchman) or the [OpenAPI specification](https://github.com/moov-io/watchman/blob/master/openapi.yaml) for use with your favorite language.
 
-Docs: [docs.moov.io](https://docs.moov.io/watchman/) | [api docs](https://api.moov.io/apps/watchman/)
+Docs: [docs.moov.io](https://docs.moov.io/watchman/) | [api docs](https://moov-io.github.io/watchman/) | [admin api docs](https://moov-io.github.io/watchman/admin/)
 
 ### Web UI
 
