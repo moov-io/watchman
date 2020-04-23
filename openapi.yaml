@@ -720,6 +720,41 @@ paths:
               schema:
                 $ref: 'https://raw.githubusercontent.com/moov-io/api/master/openapi-common.yaml#/components/schemas/Error'
 
+  # Watch Endpoints
+  /ofac/sdn/watches/{watchID}:
+    get:
+      tags: [Watchman]
+      summary: Get OFAC Watch History
+      description: Return the latest OFAC search results for the specified watchID
+      operationId: getOFACWatchHistory
+      parameters:
+        - in: path
+          name: watchID
+          description: watchID identifier to get history for
+          required: true
+          schema:
+            type: string
+            example: 4fbe880f
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            example: 25
+          description: Maximum results returned by a search
+      responses:
+        '200':
+          description: Ordered list of OFAC search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OfacWatchHistory'
+        '400':
+          description: Problem getting OFAC watch history, see error
+          content:
+            application/json:
+              schema:
+                $ref: 'https://raw.githubusercontent.com/moov-io/api/master/openapi-common.yaml#/components/schemas/Error'
+
 components:
   schemas:
     OfacCompany:
@@ -1152,3 +1187,40 @@ components:
       items:
         type: string
         example: ["entity", "aircraft", "individual", "vessel"]
+    OfacWatchHistory:
+      properties:
+        watchID:
+          type: string
+          example: 6c5443f9
+        type:
+          type: string
+          example: customer_name
+          enum:
+            - customer_name
+            - company_name
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/OfacSearch'
+    OfacSearch:
+      properties:
+        entityID:
+          type: string
+          description: SDN EntityID of the Entity
+          example: "2141"
+        sdnName:
+          type: string
+          description: Name of the SDN entity
+          example: John Smith
+        sdnType:
+          type: string
+          description: SDN entity type
+          example: Individual
+        match:
+          type: number
+          example: 0.91
+          description: Percentage of similarity between the Customer name and this OFAC entity
+        createdAt:
+          type: string
+          format: date-time
+          example: '2016-08-29T09:12:33.001Z'
