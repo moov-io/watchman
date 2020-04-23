@@ -210,7 +210,7 @@ paths:
   /ofac/companies/watch/{watchID}:
     delete:
       tags: [Watchman]
-      summary: Remove a company watch
+      summary: Remove company watch
       operationId: removeOfacCompanyNameWatch
       parameters:
         - name: X-Request-ID
@@ -241,6 +241,7 @@ paths:
       responses:
         '200':
           description: Company watch removed
+
   # Customer Endpoints
   /ofac/customers/{customerID}:
     get:
@@ -423,7 +424,7 @@ paths:
   /ofac/customers/watch/{watchID}:
     delete:
       tags: [Watchman]
-      summary: remove a customer watch
+      summary: Remove customer watch
       operationId: removeOfacCustomerNameWatch
       parameters:
         - name: X-Request-ID
