@@ -21,7 +21,7 @@ require (
 	go4.org v0.0.0-20200104003542-c7e774b10ea0
 	golang.org/x/net v0.0.0-20200114155413-6afb5195e5aa // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
-	golang.org/x/text v0.3.2
+	golang.org/x/text v0.3.3
 	gotest.tools v2.2.0+incompatible // indirect
 )
 
