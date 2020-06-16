@@ -24,9 +24,15 @@ build-examples: build-webhook-example
 build-webhook-example:
 	CGO_ENABLED=0 go build -o ./bin/webhook-example github.com/moov-io/watchman/examples/webhook
 
+.PHONY: check
 check:
-	go fmt ./...
-	@mkdir -p ./bin/
+ifeq ($(OS),Windows_NT)
+	@echo "Skipping checks on Windows, currently unsupported."
+else
+	@wget -O lint-project.sh https://raw.githubusercontent.com/moov-io/infra/master/go/lint-project.sh
+	@chmod +x ./lint-project.sh
+	MISSPELL_IGNORE="palestiniens,palestinians" ./lint-project.sh
+endif
 
 .PHONY: admin
 admin:
