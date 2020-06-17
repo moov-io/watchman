@@ -10,9 +10,13 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 coverage.html
+coverage.txt
 *.out
 
 /bin/
+/lint-project.sh
+misspell*
+staticcheck*
 
 # Generated files
 .tmp/
