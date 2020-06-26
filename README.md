@@ -11,7 +11,7 @@ Moov Watchman is an HTTP API and Go library to download, parse and offer search 
 
 Checkout our [demo instance of Watchman](https://moov.io/watchman/) or the [OpenAPI specification](https://github.com/moov-io/watchman/blob/master/openapi.yaml) for use with your favorite language.
 
-Docs: [docs.moov.io](https://docs.moov.io/watchman/) | [api docs](https://moov-io.github.io/watchman/) | [admin api docs](https://moov-io.github.io/watchman/admin/)
+Docs: [Project](https://moov-io.github.io/watchman/) | [API Endpoints](https://moov-io.github.io/watchman/api/) | [Admin API Endpoints](https://moov-io.github.io/watchman/admin/)
 
 Lists included in search are:
 
@@ -233,7 +233,7 @@ We maintain a [runbook for common issues](docs/runbook.md) and configuration opt
 
  channel | info
  ------- | -------
- [Project Documentation](https://docs.moov.io/) | Our project documentation available online.
+ [Project Documentation](https://moov-io.github.io/watchman/) | Our project documentation available online.
  Google Group [moov-users](https://groups.google.com/forum/#!forum/moov-users)| The Moov users Google group is for contributors other people contributing to the Moov project. You can join them without a google account by sending an email to [moov-users+subscribe@googlegroups.com](mailto:moov-users+subscribe@googlegroups.com). After receiving the join-request message, you can simply reply to that to confirm the subscription.
 Twitter [@moov_io](https://twitter.com/moov_io)	| You can follow Moov.IO's Twitter feed to get updates on our project(s). You can also tweet us questions or just share blogs or stories.
 [GitHub Issue](https://github.com/moov-io) | If you are able to reproduce a problem please open a GitHub Issue under the specific project that caused the error.
