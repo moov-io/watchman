@@ -227,6 +227,10 @@ We use [openapi-generator](https://github.com/OpenAPITools/openapi-generator) fr
 
 To generate the admin Go client run `make admin`.
 
+## Reporting blocks to OFAC
+
+OFAC requires annual reports of blocked entities and [offers guidance for this report](https://www.treasury.gov/resource-center/sanctions/Documents/ofac_blocked_property_guidance.pdf). Section [31 C.F.R. § 501.603(b)(2)](https://www.ecfr.gov/cgi-bin/text-idx?SID=be4f2a1608abec5d93170fb03af99939&mc=true&node=se31.3.501_1603&rgn=div8) requires this annual report.
+
 ## Getting Help
 
 We maintain a [runbook for common issues](docs/runbook.md) and configuration options. Also, if you've encountered a security issue please contact us at [`security@moov.io`](mailto:security@moov.io).
