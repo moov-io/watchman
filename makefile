@@ -68,7 +68,7 @@ clean:
 ifeq ($(OS),Windows_NT)
 	@echo "Skipping cleanup on Windows, currently unsupported."
 else
-	@rm -rf bin/ openapi-generator-cli-*.jar
+	@rm -rf bin/ coverage.txt lint-project.sh misspell* spellcheck* openapi-generator-cli-*.jar
 endif
 
 dist: clean admin client build
