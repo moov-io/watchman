@@ -1,5 +1,6 @@
-# Step one: build scapresults
-FROM registry.access.redhat.com/ubi8/go-toolset as builder
+FROM quay.io/fedora/fedora:33-x86_64 as builder
+RUN yum install -y make golang wget
+WORKDIR /opt/app-root/src/
 COPY . .
 RUN make build
 
