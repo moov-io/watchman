@@ -20,6 +20,12 @@ jobs:
         go-version: ^1.14
       id: go
 
+    - name: Setup Node / NPM
+      if: runner.os == 'Linux'
+      uses: actions/setup-node@v2-beta
+      with:
+        node-version: '14'
+
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
 
