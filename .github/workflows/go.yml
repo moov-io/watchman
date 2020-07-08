@@ -47,4 +47,4 @@ jobs:
 
     - name: Docker Build
       if: runner.os == 'Linux'
-      run: make docker && make test-integration && make clean-integration
+      run: make docker && make build-batchsearch && make test-integration && make clean-integration
