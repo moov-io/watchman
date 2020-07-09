@@ -3,7 +3,7 @@ VERSION := $(shell grep -Eo '(v[0-9]+[\.][0-9]+[\.][0-9]+(-[a-zA-Z0-9]*)?)' vers
 
 .PHONY: build build-server build-examples docker release check
 
-build: check build-server build-batchsearch build-watchmantest build-examples
+build: build-server build-batchsearch build-watchmantest build-examples
 ifeq ($(OS),Windows_NT)
 	@echo "Skipping webui build on Windows."
 else
