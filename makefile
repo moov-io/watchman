@@ -106,6 +106,10 @@ release-push:
 	docker push moov/watchmantest:$(VERSION)
 	docker push moov/watchman-webhook-example:$(VERSION)
 
+quay-push:
+	docker push quay.io/moov/watchman:$(VERSION)
+	docker push quay.io/moov/watchman:latest
+
 .PHONY: cover-test cover-web
 cover-test:
 	go test -coverprofile=cover.out ./...
