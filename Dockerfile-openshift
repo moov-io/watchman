@@ -1,0 +1,16 @@
+FROM quay.io/fedora/fedora:33-x86_64 as builder
+RUN yum install -y golang make npm wget
+WORKDIR /opt/app-root/src/
+COPY . .
+RUN make build
+
+FROM registry.access.redhat.com/ubi8/ubi-minimal
+
+ARG VERSION=unknown
+LABEL maintainer="Moov <support@moov.io>"
+LABEL name="watchman"
+LABEL version=$VERSION
+
+COPY --from=builder /opt/app-root/src/bin/server /bin/server
+
+ENTRYPOINT ["/bin/server"]
