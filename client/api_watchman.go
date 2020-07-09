@@ -1236,7 +1236,7 @@ type RemoveOfacCompanyNameWatchOpts struct {
 }
 
 /*
-RemoveOfacCompanyNameWatch Remove a company watch
+RemoveOfacCompanyNameWatch Remove company watch
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param watchID Watch ID, used to identify a specific watch
  * @param name Company name watch
@@ -1404,7 +1404,7 @@ type RemoveOfacCustomerNameWatchOpts struct {
 }
 
 /*
-RemoveOfacCustomerNameWatch remove a customer watch
+RemoveOfacCustomerNameWatch Remove customer watch
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param watchID Watch ID, used to identify a specific watch
  * @param name Customer or Company name watch

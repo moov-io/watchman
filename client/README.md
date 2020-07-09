@@ -45,9 +45,9 @@ Class | Method | HTTP request | Description
 *WatchmanApi* | [**GetSDNAltNames**](docs/WatchmanApi.md#getsdnaltnames) | **Get** /ofac/sdn/{sdnID}/alts | Get SDN alt names
 *WatchmanApi* | [**GetUIValues**](docs/WatchmanApi.md#getuivalues) | **Get** /ui/values/{key} | Get UI values
 *WatchmanApi* | [**Ping**](docs/WatchmanApi.md#ping) | **Get** /ping | Ping Watchman
-*WatchmanApi* | [**RemoveOfacCompanyNameWatch**](docs/WatchmanApi.md#removeofaccompanynamewatch) | **Delete** /ofac/companies/watch/{watchID} | Remove a company watch
+*WatchmanApi* | [**RemoveOfacCompanyNameWatch**](docs/WatchmanApi.md#removeofaccompanynamewatch) | **Delete** /ofac/companies/watch/{watchID} | Remove company watch
 *WatchmanApi* | [**RemoveOfacCompanyWatch**](docs/WatchmanApi.md#removeofaccompanywatch) | **Delete** /ofac/companies/{companyID}/watch/{watchID} | Remove company watch
-*WatchmanApi* | [**RemoveOfacCustomerNameWatch**](docs/WatchmanApi.md#removeofaccustomernamewatch) | **Delete** /ofac/customers/watch/{watchID} | remove a customer watch
+*WatchmanApi* | [**RemoveOfacCustomerNameWatch**](docs/WatchmanApi.md#removeofaccustomernamewatch) | **Delete** /ofac/customers/watch/{watchID} | Remove customer watch
 *WatchmanApi* | [**RemoveOfacCustomerWatch**](docs/WatchmanApi.md#removeofaccustomerwatch) | **Delete** /ofac/customers/{customerID}/watch/{watchID} | Remove customer watch
 *WatchmanApi* | [**Search**](docs/WatchmanApi.md#search) | **Get** /search | Search SDNs
 *WatchmanApi* | [**UpdateOfacCompanyStatus**](docs/WatchmanApi.md#updateofaccompanystatus) | **Put** /ofac/companies/{companyID} | Update company

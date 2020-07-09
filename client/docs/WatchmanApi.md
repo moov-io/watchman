@@ -16,9 +16,9 @@ Method | HTTP request | Description
 [**GetSDNAltNames**](WatchmanApi.md#GetSDNAltNames) | **Get** /ofac/sdn/{sdnID}/alts | Get SDN alt names
 [**GetUIValues**](WatchmanApi.md#GetUIValues) | **Get** /ui/values/{key} | Get UI values
 [**Ping**](WatchmanApi.md#Ping) | **Get** /ping | Ping Watchman
-[**RemoveOfacCompanyNameWatch**](WatchmanApi.md#RemoveOfacCompanyNameWatch) | **Delete** /ofac/companies/watch/{watchID} | Remove a company watch
+[**RemoveOfacCompanyNameWatch**](WatchmanApi.md#RemoveOfacCompanyNameWatch) | **Delete** /ofac/companies/watch/{watchID} | Remove company watch
 [**RemoveOfacCompanyWatch**](WatchmanApi.md#RemoveOfacCompanyWatch) | **Delete** /ofac/companies/{companyID}/watch/{watchID} | Remove company watch
-[**RemoveOfacCustomerNameWatch**](WatchmanApi.md#RemoveOfacCustomerNameWatch) | **Delete** /ofac/customers/watch/{watchID} | remove a customer watch
+[**RemoveOfacCustomerNameWatch**](WatchmanApi.md#RemoveOfacCustomerNameWatch) | **Delete** /ofac/customers/watch/{watchID} | Remove customer watch
 [**RemoveOfacCustomerWatch**](WatchmanApi.md#RemoveOfacCustomerWatch) | **Delete** /ofac/customers/{customerID}/watch/{watchID} | Remove customer watch
 [**Search**](WatchmanApi.md#Search) | **Get** /search | Search SDNs
 [**UpdateOfacCompanyStatus**](WatchmanApi.md#UpdateOfacCompanyStatus) | **Put** /ofac/companies/{companyID} | Update company
@@ -568,7 +568,7 @@ No authorization required
 
 > RemoveOfacCompanyNameWatch(ctx, watchID, name, optional)
 
-Remove a company watch
+Remove company watch
 
 ### Required Parameters
 
@@ -662,7 +662,7 @@ No authorization required
 
 > RemoveOfacCustomerNameWatch(ctx, watchID, name, optional)
 
-remove a customer watch
+Remove customer watch
 
 ### Required Parameters
 
