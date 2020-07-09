@@ -1,3 +1,11 @@
+## v0.14.1 (Released 2020-07-08)
+
+BUILD
+
+- build: add OpenShift docker image
+- build: upgrade golang.org/x/text to v0.3.3
+- chore(deps): update dependency @material-ui/core to v4.11.0
+
 ## v0.14.0 (Released 2020-04-14)
 
 ADDITIONS
