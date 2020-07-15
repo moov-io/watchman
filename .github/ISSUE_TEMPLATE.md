@@ -1,6 +1,6 @@
 <!-- Please fill out the following questions, thanks! -->
 
-PayGate Version: ``
+Watchman Version: ``
 
 **What were you trying to do?**
 
