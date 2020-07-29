@@ -708,6 +708,10 @@ func jaroWinkler(s1, s2 string) float64 {
 		for i := 1; i < len(parts); i++ {
 			if score := smetrics.JaroWinkler(word, parts[i], 0.7, 4); score > max {
 				max = score
+			} else {
+				if word == parts[i] {
+					max = 1.0
+				}
 			}
 		}
 		return max
