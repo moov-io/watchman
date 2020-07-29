@@ -39,7 +39,7 @@ func TestSearcher__refreshInterval(t *testing.T) {
 	s.periodicDataRefresh(0*time.Second, nil, nil)
 }
 
-func TestSearcher__refreshData_nonCSL(t *testing.T) {
+func TestSearcher__refreshData(t *testing.T) {
 	if testing.Short() {
 		return
 	}
@@ -63,6 +63,12 @@ func TestSearcher__refreshData_nonCSL(t *testing.T) {
 	}
 	if len(s.DPs) == 0 || stats.DeniedPersons == 0 {
 		t.Errorf("empty DPs=%d or stats.DeniedPersons=%d", len(s.DPs), stats.DeniedPersons)
+	}
+	if len(s.SSIs) == 0 || stats.SectoralSanctions == 0 {
+		t.Errorf("empty SSIs=%d or stats.SectoralSanctions=%d", len(s.SSIs), stats.SectoralSanctions)
+	}
+	if len(s.BISEntities) == 0 || stats.BISEntities == 0 {
+		t.Errorf("empty searcher.BISEntities=%d or stats.BISEntities=%d", len(s.BISEntities), stats.BISEntities)
 	}
 }
 

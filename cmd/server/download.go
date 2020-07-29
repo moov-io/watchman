@@ -148,7 +148,6 @@ func cslRecords(logger log.Logger, initialDir string) (*csl.CSL, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return cslRecords, err
 }
 
