@@ -123,3 +123,20 @@ func Test_expandProgramsList(t *testing.T) {
 		}
 	}
 }
+
+func TestCSL__UniqueIDs(t *testing.T) {
+	// CSL datafiles have added a unique identifier as the first column.
+	// We need verify the old and new file formats can be parsed.
+
+	records, err := Read(filepath.Join("..", "..", "test", "testdata", "csl-unique-ids.csv"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if n := len(records.SSIs); n != 290 {
+		t.Errorf("got %d SSI records", n)
+	}
+	if n := len(records.ELs); n != 1332 {
+		t.Errorf("got %d EL records", n)
+	}
+}
