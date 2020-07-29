@@ -27,13 +27,16 @@ func Read(path string) (*CSL, error) {
 			continue
 		}
 
-		switch record[0] {
-		case "Sectoral Sanctions Identifications List (SSI) - Treasury Department":
-			ssis = append(ssis, unmarshalSSI(record))
-		case "Entity List (EL) - Bureau of Industry and Security":
-			els = append(els, unmarshalEL(record))
-		default:
-			continue
+		// CSL datafiles have added a unique identifier as the first column. Thus
+		// we need to check either column 0 or 1 contains the identifier.
+		for i := 0; i <= 1; i++ {
+			switch record[i] {
+			case "Sectoral Sanctions Identifications List (SSI) - Treasury Department":
+				ssis = append(ssis, unmarshalSSI(record))
+
+			case "Entity List (EL) - Bureau of Industry and Security":
+				els = append(els, unmarshalEL(record))
+			}
 		}
 	}
 
