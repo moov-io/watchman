@@ -186,21 +186,21 @@ func TestJaroWinkler(t *testing.T) {
 		s1, s2 string
 		match  float64
 	}{
-		{"wei, zhao", "wei, Zhao", 0.942},
+		{"wei, zhao", "wei, Zhao", 0.917},
 		{"WEI, Zhao", "WEI, Zhao", 1.0},
 		{"WEI Zhao", "WEI Zhao", 1.0},
 		{strings.ToLower("WEI Zhao"), precompute("WEI, Zhao"), 1.0},
 		// make sure jaroWinkler is communative
-		{"jane doe", "jan lahore", 0.471},
-		{"jan lahore", "jane doe", 0.707},
+		{"jane doe", "jan lahore", 0.721},
+		{"jan lahore", "jane doe", 0.776},
 		// real world case
 		{"john doe", "paul john", 0.764},
-		{"john doe", "john othername", 0.764},
+		{"john doe", "john othername", 0.815},
 		// close match
 		{"jane doe", "jane doe2", 0.971},
 		// real-ish world examples
 		{"kalamity linden", "kala limited", 0.771},
-		{"kala limited", "kalamity linden", 0.771},
+		{"kala limited", "kalamity linden", 0.795},
 		// examples used in demos / commonly
 		{"nicolas", "nicolas", 1.0},
 		{"nicolas moros maduro", "nicolas maduro", 1.0},
