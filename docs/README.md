@@ -63,19 +63,32 @@ Webhook URLs MUST be secure (https://...) and an `Authorization` header is sent 
 
 ## FAQ
 
-[FAQ](https://www.treasury.gov/resource-center/faqs/Sanctions/Pages/ques_index.aspx)
+<dl>
+<dt>How are entities from the list indexed and used in search</dt>
+<dd>
+  Entities from sanction lists and other data files are folded through various pre-computations prior to inclusion in the search index.
+  What this means is the following steps (in order):
 
-[General Questions](https://www.treasury.gov/resource-center/faqs/Sanctions/Pages/faq_general.aspx)
+   - SDN Reordering
+      - Each SDN name of an individual is re-ordered from "MADURO MOROS, Nicolas" to "Nicolas MADURO MOROS"
+   - Company Name Cleanup
+      - Suffixes from company names such as: "CO.", "INC.", "L.L.C.", etc are removed
+   - Stopword Removal
+      - [Stopwords](https://en.wikipedia.org/wiki/Stop_words) are removed. See [bbalet/stopwords](https://github.com/bbalet/stopwords) for a full list of supported languages and words subject to removal.
+   - UTF-8 Normalization
+      - Punctuation is removed along with extra spaces on both ends of the entity name.
+      - Using [Go's /x/text normalization](https://godoc.org/golang.org/x/text/unicode/norm#Form) methods we consolidate entity names and search queries for better searching across multiple languages.
 
-[Sanctions Compliance](https://www.treasury.gov/resource-center/faqs/Sanctions/Pages/faq_compliance.aspx)
+</dd>
+</dl>
 
-[Sanction List and Files](https://www.treasury.gov/resource-center/faqs/Sanctions/Pages/faq_lists.aspx)
+### Links
 
-[Iran Sanctions](https://www.treasury.gov/resource-center/faqs/Sanctions/Pages/faq_iran.aspx)
-
-[Other Sanction Programs](https://www.treasury.gov/resource-center/faqs/Sanctions/Pages/faq_other.aspx)
-
-[U.S. DEPARTMENT OF THE TREASURY](https://www.treasury.gov/resource-center/faqs/Sanctions/Pages/faq_general.aspx#basic)
+- [US Sanctions Search FAQ](https://www.treasury.gov/resource-center/faqs/Sanctions/Pages/ques_index.aspx)
+- [US Sanctions Search General Questions](https://www.treasury.gov/resource-center/faqs/Sanctions/Pages/faq_general.aspx)
+- [US Sanctions Compliance](https://www.treasury.gov/resource-center/faqs/Sanctions/Pages/faq_compliance.aspx)
+- [US Sanction List and Files](https://www.treasury.gov/resource-center/faqs/Sanctions/Pages/faq_lists.aspx)
+- [US DEPARTMENT OF THE TREASURY](https://www.treasury.gov/resource-center/faqs/Sanctions/Pages/faq_general.aspx#basic)
 
 ## Getting Help
 
