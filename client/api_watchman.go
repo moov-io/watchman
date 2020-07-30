@@ -460,7 +460,7 @@ Return list of recent downloads of list data
  * @param optional nil or *GetLatestDownloadsOpts - Optional Parameters:
  * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the systems logs
  * @param "XUserID" (optional.String) -  Optional User ID used to perform this search
- * @param "Limit" (optional.Int32) -  Maximum results returned by a search
+ * @param "Limit" (optional.Int32) -  Maximum number of downloads to return sorted by their timestamp in decending order.
 @return []Download
 */
 func (a *WatchmanApiService) GetLatestDownloads(ctx _context.Context, localVarOptionals *GetLatestDownloadsOpts) ([]Download, *_nethttp.Response, error) {
@@ -1069,7 +1069,7 @@ Return an ordered distinct list of keys for an SDN property.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param key SDN property to lookup. Values are sdnType, ofacProgram
  * @param optional nil or *GetUIValuesOpts - Optional Parameters:
- * @param "Limit" (optional.Int32) -  Maximum results returned by a search
+ * @param "Limit" (optional.Int32) -  Maximum number of UI keys returned
 @return []string
 */
 func (a *WatchmanApiService) GetUIValues(ctx _context.Context, key string, localVarOptionals *GetUIValuesOpts) ([]string, *_nethttp.Response, error) {
@@ -1236,7 +1236,7 @@ type RemoveOfacCompanyNameWatchOpts struct {
 }
 
 /*
-RemoveOfacCompanyNameWatch Remove a company watch
+RemoveOfacCompanyNameWatch Remove company watch
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param watchID Watch ID, used to identify a specific watch
  * @param name Company name watch
@@ -1404,7 +1404,7 @@ type RemoveOfacCustomerNameWatchOpts struct {
 }
 
 /*
-RemoveOfacCustomerNameWatch remove a customer watch
+RemoveOfacCustomerNameWatch Remove customer watch
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param watchID Watch ID, used to identify a specific watch
  * @param name Customer or Company name watch
@@ -1600,7 +1600,7 @@ Search Search SDNs
  * @param "Country" (optional.String) -  Country name as desginated by SDN guidelines. Only Address results will be returned.
  * @param "AltName" (optional.String) -  Alternate name which could correspond to a human on the SDN list. Only Alt name results will be returned.
  * @param "Id" (optional.String) -  ID value often found in remarks property of an SDN. Takes the form of 'No. NNNNN' as an alphanumeric value.
- * @param "Limit" (optional.Int32) -  Maximum results returned by a search
+ * @param "Limit" (optional.Int32) -  Maximum results returned by a search. Results are sorted by their match percentage in decending order.
  * @param "SdnType" (optional.String) -  Optional filter to only return SDNs whose type case-insensitively matches.
  * @param "Program" (optional.String) -  Optional filter to only return SDNs whose program case-insensitively matches
 @return Search

@@ -307,7 +307,7 @@ paths:
       responses:
         "200":
           description: Company watch removed
-      summary: Remove a company watch
+      summary: Remove company watch
       tags:
       - Watchman
   /ofac/customers/{customerID}:
@@ -586,7 +586,7 @@ paths:
       responses:
         "200":
           description: Company or Customer watch removed
-      summary: remove a customer watch
+      summary: Remove customer watch
       tags:
       - Watchman
   /ofac/sdn/{sdnID}:
@@ -836,7 +836,8 @@ paths:
           example: "10517860"
           type: string
         style: form
-      - description: Maximum results returned by a search
+      - description: Maximum results returned by a search. Results are sorted by their
+          match percentage in decending order.
         explode: true
         in: query
         name: limit
@@ -898,7 +899,8 @@ paths:
         schema:
           type: string
         style: simple
-      - description: Maximum results returned by a search
+      - description: Maximum number of downloads to return sorted by their timestamp
+          in decending order.
         explode: true
         in: query
         name: limit
@@ -931,7 +933,7 @@ paths:
           example: sdnType
           type: string
         style: simple
-      - description: Maximum results returned by a search
+      - description: Maximum number of UI keys returned
         explode: true
         in: query
         name: limit

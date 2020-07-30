@@ -16,9 +16,9 @@ Method | HTTP request | Description
 [**GetSDNAltNames**](WatchmanApi.md#GetSDNAltNames) | **Get** /ofac/sdn/{sdnID}/alts | Get SDN alt names
 [**GetUIValues**](WatchmanApi.md#GetUIValues) | **Get** /ui/values/{key} | Get UI values
 [**Ping**](WatchmanApi.md#Ping) | **Get** /ping | Ping Watchman
-[**RemoveOfacCompanyNameWatch**](WatchmanApi.md#RemoveOfacCompanyNameWatch) | **Delete** /ofac/companies/watch/{watchID} | Remove a company watch
+[**RemoveOfacCompanyNameWatch**](WatchmanApi.md#RemoveOfacCompanyNameWatch) | **Delete** /ofac/companies/watch/{watchID} | Remove company watch
 [**RemoveOfacCompanyWatch**](WatchmanApi.md#RemoveOfacCompanyWatch) | **Delete** /ofac/companies/{companyID}/watch/{watchID} | Remove company watch
-[**RemoveOfacCustomerNameWatch**](WatchmanApi.md#RemoveOfacCustomerNameWatch) | **Delete** /ofac/customers/watch/{watchID} | remove a customer watch
+[**RemoveOfacCustomerNameWatch**](WatchmanApi.md#RemoveOfacCustomerNameWatch) | **Delete** /ofac/customers/watch/{watchID} | Remove customer watch
 [**RemoveOfacCustomerWatch**](WatchmanApi.md#RemoveOfacCustomerWatch) | **Delete** /ofac/customers/{customerID}/watch/{watchID} | Remove customer watch
 [**Search**](WatchmanApi.md#Search) | **Get** /search | Search SDNs
 [**UpdateOfacCompanyStatus**](WatchmanApi.md#UpdateOfacCompanyStatus) | **Put** /ofac/companies/{companyID} | Update company
@@ -243,7 +243,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
  **xUserID** | **optional.String**| Optional User ID used to perform this search | 
- **limit** | **optional.Int32**| Maximum results returned by a search | 
+ **limit** | **optional.Int32**| Maximum number of downloads to return sorted by their timestamp in decending order. | 
 
 ### Return type
 
@@ -514,7 +514,7 @@ Optional parameters are passed through a pointer to a GetUIValuesOpts struct
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **limit** | **optional.Int32**| Maximum results returned by a search | 
+ **limit** | **optional.Int32**| Maximum number of UI keys returned | 
 
 ### Return type
 
@@ -568,7 +568,7 @@ No authorization required
 
 > RemoveOfacCompanyNameWatch(ctx, watchID, name, optional)
 
-Remove a company watch
+Remove company watch
 
 ### Required Parameters
 
@@ -662,7 +662,7 @@ No authorization required
 
 > RemoveOfacCustomerNameWatch(ctx, watchID, name, optional)
 
-remove a customer watch
+Remove customer watch
 
 ### Required Parameters
 
@@ -785,7 +785,7 @@ Name | Type | Description  | Notes
  **country** | **optional.String**| Country name as desginated by SDN guidelines. Only Address results will be returned. | 
  **altName** | **optional.String**| Alternate name which could correspond to a human on the SDN list. Only Alt name results will be returned. | 
  **id** | **optional.String**| ID value often found in remarks property of an SDN. Takes the form of &#39;No. NNNNN&#39; as an alphanumeric value. | 
- **limit** | **optional.Int32**| Maximum results returned by a search | 
+ **limit** | **optional.Int32**| Maximum results returned by a search. Results are sorted by their match percentage in decending order. | 
  **sdnType** | **optional.String**| Optional filter to only return SDNs whose type case-insensitively matches. | 
  **program** | **optional.String**| Optional filter to only return SDNs whose program case-insensitively matches | 
 
