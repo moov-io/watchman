@@ -2,7 +2,7 @@
 
 Moov Watchman is an HTTP API and Go library to download, parse and offer search functions over numerous trade sanction lists from the United States, European Union governments, agencies, and non profits for complying with regional laws. Also included is a web UI and async webhook notification service to initiate processes on remote systems.
 
-[source: U.S. DEPARTMENT OF THE TREASURY](https://www.treasury.gov/resource-center/faqs/Sanctions/Pages/faq_general.aspx#basic)
+[API Endpoints](https://moov-io.github.io/watchman/api/) | [Admin API Endpoints](https://moov-io.github.io/watchman/admin/)
 
 ![](images/webui.png)
 
@@ -74,6 +74,8 @@ Webhook URLs MUST be secure (https://...) and an `Authorization` header is sent 
 [Iran Sanctions](https://www.treasury.gov/resource-center/faqs/Sanctions/Pages/faq_iran.aspx)
 
 [Other Sanction Programs](https://www.treasury.gov/resource-center/faqs/Sanctions/Pages/faq_other.aspx)
+
+[U.S. DEPARTMENT OF THE TREASURY](https://www.treasury.gov/resource-center/faqs/Sanctions/Pages/faq_general.aspx#basic)
 
 ## Getting Help
 
