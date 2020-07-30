@@ -634,7 +634,7 @@ paths:
           schema:
             type: integer
             example: 25
-          description: Maximum results returned by a search
+          description: Maximum results returned by a search. Results are sorted by their match percentage in decending order.
         - name: sdnType
           in: query
           schema:
@@ -679,7 +679,7 @@ paths:
           schema:
             type: integer
             example: 25
-          description: Maximum results returned by a search
+          description: Maximum number of downloads to return sorted by their timestamp in decending order.
       responses:
         '200':
           description: Recent timestamps and counts of parsed objects
@@ -706,7 +706,7 @@ paths:
           schema:
             type: integer
             example: 25
-          description: Maximum results returned by a search
+          description: Maximum number of UI keys returned
       responses:
         '200':
           description: Ordered and distinct list of values for an SDN property
