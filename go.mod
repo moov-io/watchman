@@ -18,7 +18,7 @@ require (
 	github.com/pariz/gountries v0.0.0-20200430155801-1c6a393df9c7
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.7.1
-	github.com/xrash/smetrics v0.0.0-20200723181607-f06e43cca1ab
+	github.com/xrash/smetrics v0.0.0-20200730060457-89a2a8a1fb0b
 	go4.org v0.0.0-20200411211856-f5505b9728dd
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/text v0.3.3
