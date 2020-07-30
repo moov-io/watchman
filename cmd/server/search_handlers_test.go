@@ -88,7 +88,7 @@ func TestSearch__AddressMulti(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.921`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.925`) {
 		t.Errorf("%#v", v)
 	}
 }
@@ -106,7 +106,7 @@ func TestSearch__AddressProvidence(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.947`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.950`) {
 		t.Errorf("%#v", v)
 	}
 }
@@ -124,7 +124,7 @@ func TestSearch__AddressCity(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.947`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.950`) {
 		t.Errorf("%#v", v)
 	}
 }
@@ -142,7 +142,7 @@ func TestSearch__AddressState(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.947`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.950`) {
 		t.Errorf("%#v", v)
 	}
 }
@@ -278,7 +278,7 @@ func TestSearch__NameAndAltName(t *testing.T) {
 	if wrapper.DeniedPersons[0].StreetAddress != "P.O. BOX 28360" {
 		t.Errorf("%#v", wrapper.DeniedPersons[0].StreetAddress)
 	}
-	if wrapper.BISEntities[0].Name != "Luqman Yasin Yunus Shgragi" {
+	if wrapper.BISEntities[0].Name != "Mohammad Jan Khan Mangal" {
 		t.Errorf("%#v", wrapper.BISEntities[0])
 	}
 }

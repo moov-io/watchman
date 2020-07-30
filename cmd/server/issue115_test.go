@@ -31,12 +31,12 @@ func TestIssue115__TopSDNs(t *testing.T) {
 	// was 89.6% match
 	s.SDNs = precomputeSDNs([]*ofac.SDN{{EntityID: "2680", SDNName: "HABBASH, George", SDNType: "INDIVIDUAL"}}, nil, pipe)
 	out := s.TopSDNs(1, "george bush")
-	eql(t, "issue115: top SDN 2680", out[0].match, 0.500)
+	eql(t, "issue115: top SDN 2680", out[0].match, 0.732)
 
 	// was 88.3% match
 	s.SDNs = precomputeSDNs([]*ofac.SDN{{EntityID: "9432", SDNName: "CHIWESHE, George", SDNType: "INDIVIDUAL"}}, nil, pipe)
 	out = s.TopSDNs(1, "george bush")
-	eql(t, "issue115: top SDN 18996", out[0].match, 0.729)
+	eql(t, "issue115: top SDN 18996", out[0].match, 0.764)
 
 	// another example
 	s.SDNs = precomputeSDNs([]*ofac.SDN{{EntityID: "0", SDNName: "Bush, George W", SDNType: "INDIVIDUAL"}}, nil, pipe)
