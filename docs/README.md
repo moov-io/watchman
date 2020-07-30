@@ -63,24 +63,32 @@ Webhook URLs MUST be secure (https://...) and an `Authorization` header is sent 
 
 ## FAQ
 
-<dl>
-<dt>How are entities from the list indexed and used in search</dt>
-<dd>
-  Entities from sanction lists and other data files are folded through various pre-computations prior to inclusion in the search index.
-  What this means is the following steps (in order):
-
-   - SDN Reordering
-      - Each SDN name of an individual is re-ordered from "MADURO MOROS, Nicolas" to "Nicolas MADURO MOROS"
-   - Company Name Cleanup
-      - Suffixes from company names such as: "CO.", "INC.", "L.L.C.", etc are removed
-   - Stopword Removal
-      - [Stopwords](https://en.wikipedia.org/wiki/Stop_words) are removed. See [bbalet/stopwords](https://github.com/bbalet/stopwords) for a full list of supported languages and words subject to removal.
-   - UTF-8 Normalization
-      - Punctuation is removed along with extra spaces on both ends of the entity name.
-      - Using [Go's /x/text normalization](https://godoc.org/golang.org/x/text/unicode/norm#Form) methods we consolidate entity names and search queries for better searching across multiple languages.
-
-</dd>
-</dl>
+<ul>
+    <li>How are entities from the list indexed and used in search?</li>
+    <ul>
+        <li>
+            Entities from sanction lists and other data files are folded through various pre-computations prior to inclusion in the search index.
+            What this means is the following steps (in order):
+            <p>
+                <strong>SDN Reordering</strong><br />
+                Each SDN name of an individual is re-ordered from "MADURO MOROS, Nicolas" to "Nicolas MADURO MOROS"
+            </p>
+            <p>
+                <strong>Company Name Cleanup</strong><br />
+                Suffixes from company names such as: "CO.", "INC.", "L.L.C.", etc are removed
+            </p>
+            <p>
+                <strong>Stopword Removal</strong><br />
+                <a href="https://en.wikipedia.org/wiki/Stop_words">Stopwords</a> are removed. See <a href="https://github.com/bbalet/stopwords">bbalet/stopwords</a> for a full list of supported languages and words subject to removal.
+            </p>
+            <p>
+                <strong>UTF-8 Normalization</strong><br />
+                Punctuation is removed along with extra spaces on both ends of the entity name.
+                Using <a href="https://godoc.org/golang.org/x/text/unicode/norm#Form">Go's /x/text normalization</a> methods we consolidate entity names and search queries for better searching across multiple languages.
+            </p>
+        </li>
+    </ul>
+</ul>
 
 ### Links
 
