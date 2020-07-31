@@ -4,6 +4,14 @@ BREAKING CHANGES
 
 Watchman has upgraded the implementation of the Jaro-Winkler string comparison algorithm to fix bugs and match the original paper's reference implementation. After upgrading Watchman you will notice higher match percentages for most comparisons. See [pull request #282](https://github.com/moov-io/watchman/pull/282) for the change.
 
+IMPROVEMENTS
+
+- csl: fix reader to handle files with unique IDs
+
+BUILD
+
+- webui: run 'npm audit fix'
+
 ## v0.14.2 (Released 2020-07-08)
 
 BUILD
