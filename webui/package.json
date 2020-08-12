@@ -9,7 +9,7 @@
     "http-proxy-middleware": "0.21.0",
     "react": "16.13.1",
     "react-dom": "16.13.1",
-    "react-scripts": "3.4.1",
+    "react-scripts": "3.4.3",
     "winston": "3.3.3"
   },
   "scripts": {
@@ -39,7 +39,7 @@
   "devDependencies": {
     "@material-ui/core": "4.11.0",
     "@material-ui/icons": "4.9.1",
-    "ramda": "0.27.0",
+    "ramda": "0.27.1",
     "styled-components": "4.4.1"
   }
 }
