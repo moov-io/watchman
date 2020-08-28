@@ -7,12 +7,14 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"database/sql"
 	"flag"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"strings"
 	"syscall"
@@ -37,6 +39,8 @@ var (
 	flagLogFormat = flag.String("log.format", "", "Format for log lines (Options: json, plain")
 
 	dataRefreshInterval = 12 * time.Hour
+
+	dbType = os.Getenv("DATABASE_TYPE")
 )
 
 func main() {
@@ -66,7 +70,7 @@ func main() {
 	}()
 
 	// Setup database connection
-	db, err := database.New(logger, os.Getenv("DATABASE_TYPE"))
+	db, err := database.New(logger, dbType)
 	if err != nil {
 		logger.Log("main", fmt.Sprintf("database problem: %v", err))
 		os.Exit(1)
@@ -132,7 +136,7 @@ func main() {
 	defer adminServer.Shutdown()
 
 	// Setup download repository
-	downloadRepo := &sqliteDownloadRepository{db, logger}
+	downloadRepo := getDownloadRepo(dbType, db, logger)
 	defer downloadRepo.close()
 
 	searcher := &searcher{
@@ -166,17 +170,21 @@ func main() {
 		)
 	}
 
+	logger.Log("main", fmt.Sprintf("Setting up default database connection to %s", dbType))
+
 	// Setup Watch and Webhook database wrapper
-	watchRepo := &sqliteWatchRepository{db, logger}
+	watchRepo := getWatchRepo(dbType, db, logger)
 	defer watchRepo.close()
-	webhookRepo := &sqliteWebhookRepository{db}
+	webhookRepo := getWebhookRepo(dbType, db)
 	defer webhookRepo.close()
 
 	// Setup company / customer repositories
-	companyRepo := &sqliteCompanyRepository{db, logger}
+	companyRepo := getCompanyRepo(dbType, db, logger)
 	defer companyRepo.close()
-	custRepo := &sqliteCustomerRepository{db, logger}
+	custRepo := getCustomerRepo(dbType, db, logger)
 	defer custRepo.close()
+
+	logger.Log("main", fmt.Sprintf("custRepo is of type %s", reflect.TypeOf(custRepo)))
 
 	// Setup periodic download and re-search
 	updates := make(chan *downloadStats)
@@ -253,4 +261,13 @@ func setupWebui(logger log.Logger, r *mux.Router, basePath string) {
 		os.Exit(1)
 	}
 	r.PathPrefix("/").Handler(http.StripPrefix(basePath, http.FileServer(http.Dir(dir))))
+}
+
+func getCustomerRepo(dbType string, db *sql.DB, logger log.Logger) customerRepository {
+	if dbType == "postgres" {
+		return &postgresCustomerRepository{db, logger}
+	} else if dbType == "mysql" {
+		return nil
+	}
+	return &sqliteCustomerRepository{db, logger}
 }

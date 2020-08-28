@@ -22,7 +22,7 @@ staticcheck*
 .tmp/
 openapi-generator*jar
 .idea
-
+/vendor/
 *.db
 
 webui/build/

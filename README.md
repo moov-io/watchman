@@ -152,7 +152,7 @@ $ go run ./cmd/server/ # Load http://localhost:8084 in a web browser
 | `HTTP_ADMIN_BIND_ADDRESS` | Address to bind admin HTTP server on. This overrides the command-line flag `-admin.addr`. | Default: `:9094` |
 | `HTTPS_CERT_FILE` | Filepath containing a certificate (or intermediate chain) to be served by the HTTP server. Requires all traffic be over secure HTTP. | Empty |
 | `HTTPS_KEY_FILE`  | Filepath of a private key matching the leaf certificate from `HTTPS_CERT_FILE`. | Empty |
-| `DATABASE_TYPE` | Which database option to use (Options: `sqlite`, `mysql`) | Default: `sqlite` |
+| `DATABASE_TYPE` | Which database option to use (Options: `sqlite`, `mysql`, `postgres`) | Default: `sqlite` |
 | `WEB_ROOT` | Directory to serve web UI from | Default: `webui/` |
 
 ### List Configurations
@@ -174,7 +174,7 @@ Based on `DATABASE_TYPE` the following environment variables will be read to con
 - `MYSQL_ADDRESS`: TCP address for connecting to the mysql server. (example: `tcp(hostname:3306)`)
 - `MYSQL_DATABASE`: Name of database to connect into.
 - `MYSQL_PASSWORD`: Password of user account for authentication.
-- `MYSQL_USER`: Username used for authentication,
+- `MYSQL_USER`: Username used for authentication.
 
 Refer to the mysql driver documentation for [connection parameters](https://github.com/go-sql-driver/mysql#dsn-data-source-name).
 
@@ -186,6 +186,15 @@ Refer to the mysql driver documentation for [connection parameters](https://gith
 
 Refer to the sqlite driver documentation for [connection parameters](https://github.com/mattn/go-sqlite3#connection-string).
 
+##### Postgres
+
+- `POSTGRES_DB`: Name of database to connect into.
+- `PGSSLMODE`: Chose what SSL connection option to use. (Default: disable)
+- `POSTGRES_PASSWORD`: Password of user account for authentication.
+- `POSTGRES_USER`: Username used for authentication.
+- `POSTGRES_ADDRESS`: Address of server in the form of address:port (example: localhost:5432).
+
+Refer to the Postgres documentation for [environment variables](https://www.postgresql.org/docs/11/libpq-envars.html).
 ### Features
 
 - Download OFAC, BIS Denied Persons List (DPL), and various other data sources on startup

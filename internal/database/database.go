@@ -21,6 +21,8 @@ func New(logger log.Logger, _type string) (*sql.DB, error) {
 		return sqliteConnection(logger, getSqlitePath()).Connect()
 	case "mysql":
 		return mysqlConnection(logger, os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_ADDRESS"), os.Getenv("MYSQL_DATABASE")).Connect()
+	case "postgres":
+		return postgresConnection(logger, os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("POSTGRES_ADDRESS"), os.Getenv("POSTGRES_DATABASE")).Connect()
 	}
 	return nil, fmt.Errorf("unknown database type %q", _type)
 }
@@ -38,5 +40,5 @@ func execsql(name, raw string) *migrator.MigrationNoTx {
 // UniqueViolation returns true when the provided error matches a database error
 // for duplicate entries (violating a unique table constraint).
 func UniqueViolation(err error) bool {
-	return MySQLUniqueViolation(err) || SqliteUniqueViolation(err)
+	return PostgresUniqueViolation(err) || MySQLUniqueViolation(err) || SqliteUniqueViolation(err)
 }

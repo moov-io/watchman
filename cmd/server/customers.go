@@ -5,7 +5,6 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,7 +13,6 @@ import (
 	"time"
 
 	moovhttp "github.com/moov-io/base/http"
-	"github.com/moov-io/watchman/internal/database"
 	"github.com/moov-io/watchman/pkg/ofac"
 
 	"github.com/go-kit/kit/log"
@@ -63,7 +61,7 @@ type customerWatchResponse struct {
 	WatchID string `json:"watchID"`
 }
 
-func addCustomerRoutes(logger log.Logger, r *mux.Router, searcher *searcher, custRepo *sqliteCustomerRepository, watchRepo *sqliteWatchRepository) {
+func addCustomerRoutes(logger log.Logger, r *mux.Router, searcher *searcher, custRepo customerRepository, watchRepo watchRepository) {
 	r.Methods("GET").Path("/ofac/customers/{customerID}").HandlerFunc(getCustomer(logger, searcher, custRepo))
 	r.Methods("PUT").Path("/ofac/customers/{customerID}").HandlerFunc(updateCustomerStatus(logger, searcher, custRepo))
 
@@ -109,77 +107,6 @@ func getCustomerByID(id string, searcher *searcher, custRepo customerRepository)
 	}, nil
 }
 
-// customerRepository holds the current status (i.e. unsafe or exception) for a given customer
-// (individual) and is expected to save metadata about each time the status is changed.
-type customerRepository interface {
-	getCustomerStatus(customerID string) (*CustomerStatus, error)
-	upsertCustomerStatus(customerID string, status *CustomerStatus) error
-}
-
-type sqliteCustomerRepository struct {
-	db     *sql.DB
-	logger log.Logger
-}
-
-func (r *sqliteCustomerRepository) close() error {
-	return r.db.Close()
-}
-
-func (r *sqliteCustomerRepository) getCustomerStatus(customerID string) (*CustomerStatus, error) {
-	if customerID == "" {
-		return nil, errors.New("getCustomerStatus: no Customer.ID")
-	}
-	query := `select user_id, note, status, created_at from customer_status where customer_id = ? and deleted_at is null order by created_at desc limit 1;`
-	stmt, err := r.db.Prepare(query)
-	if err != nil {
-		return nil, err
-	}
-	defer stmt.Close()
-
-	row := stmt.QueryRow(customerID)
-
-	var status CustomerStatus
-	err = row.Scan(&status.UserID, &status.Note, &status.Status, &status.CreatedAt)
-	if err != nil && !strings.Contains(err.Error(), "no rows in result set") {
-		return nil, fmt.Errorf("getCustomerStatus: %v", err)
-	}
-	if status.UserID == "" {
-		return nil, nil // not found
-	}
-	return &status, nil
-}
-
-func (r *sqliteCustomerRepository) upsertCustomerStatus(customerID string, status *CustomerStatus) error {
-	tx, err := r.db.Begin()
-	if err != nil {
-		return fmt.Errorf("upsertCustomerStatus: begin: %v", err)
-	}
-
-	query := `insert into customer_status (customer_id, user_id, note, status, created_at) values (?, ?, ?, ?, ?);`
-	stmt, err := r.db.Prepare(query)
-	if err != nil {
-		return fmt.Errorf("upsertCustomerStatus: prepare error=%v rollback=%v", err, tx.Rollback())
-	}
-	_, err = stmt.Exec(customerID, status.UserID, status.Note, status.Status, status.CreatedAt)
-	stmt.Close()
-	if err == nil {
-		return tx.Commit()
-	}
-	if database.UniqueViolation(err) {
-		query = `update customer_status set note = ?, status = ? where customer_id = ? and user_id = ?`
-		stmt, err = tx.Prepare(query)
-		if err != nil {
-			return fmt.Errorf("upsertCustomerStatus: inner prepare error=%v rollback=%v", err, tx.Rollback())
-		}
-		_, err := stmt.Exec(status.Note, status.Status, customerID, status.UserID)
-		stmt.Close()
-		if err != nil {
-			return fmt.Errorf("upsertCustomerStatus: unique error=%v rollback=%v", err, tx.Rollback())
-		}
-	}
-	return tx.Commit()
-}
-
 func getCustomer(logger log.Logger, searcher *searcher, custRepo customerRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w = wrapResponseWriter(logger, w, r)
@@ -205,7 +132,7 @@ func getCustomer(logger log.Logger, searcher *searcher, custRepo customerReposit
 	}
 }
 
-func addCustomerNameWatch(logger log.Logger, searcher *searcher, repo *sqliteWatchRepository) http.HandlerFunc {
+func addCustomerNameWatch(logger log.Logger, searcher *searcher, repo watchRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w = wrapResponseWriter(logger, w, r)
 
@@ -249,7 +176,7 @@ func addCustomerNameWatch(logger log.Logger, searcher *searcher, repo *sqliteWat
 	}
 }
 
-func addCustomerWatch(logger log.Logger, searcher *searcher, repo *sqliteWatchRepository) http.HandlerFunc {
+func addCustomerWatch(logger log.Logger, searcher *searcher, repo watchRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w = wrapResponseWriter(logger, w, r)
 
@@ -341,7 +268,7 @@ func updateCustomerStatus(logger log.Logger, searcher *searcher, custRepo custom
 	}
 }
 
-func removeCustomerWatch(logger log.Logger, searcher *searcher, repo *sqliteWatchRepository) http.HandlerFunc {
+func removeCustomerWatch(logger log.Logger, searcher *searcher, repo watchRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w = wrapResponseWriter(logger, w, r)
 
@@ -361,7 +288,7 @@ func removeCustomerWatch(logger log.Logger, searcher *searcher, repo *sqliteWatc
 	}
 }
 
-func removeCustomerNameWatch(logger log.Logger, searcher *searcher, repo *sqliteWatchRepository) http.HandlerFunc {
+func removeCustomerNameWatch(logger log.Logger, searcher *searcher, repo watchRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w = wrapResponseWriter(logger, w, r)
 

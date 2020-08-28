@@ -6,7 +6,6 @@ package main
 
 import (
 	"bytes"
-	"database/sql"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -82,28 +81,4 @@ func validateWebhook(raw string) (string, error) {
 		return "", fmt.Errorf("%s is not an HTTPS url", u.String())
 	}
 	return u.String(), nil
-}
-
-type webhookRepository interface {
-	recordWebhook(watchID string, attemptedAt time.Time, status int) error
-}
-
-type sqliteWebhookRepository struct {
-	db *sql.DB
-}
-
-func (r *sqliteWebhookRepository) close() error {
-	return r.db.Close()
-}
-
-func (r *sqliteWebhookRepository) recordWebhook(watchID string, attemptedAt time.Time, status int) error {
-	query := `insert into webhook_stats (watch_id, attempted_at, status) values (?, ?, ?);`
-	stmt, err := r.db.Prepare(query)
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(watchID, attemptedAt, status)
-	return err
 }

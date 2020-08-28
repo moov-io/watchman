@@ -5,7 +5,6 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,7 +13,6 @@ import (
 	"time"
 
 	moovhttp "github.com/moov-io/base/http"
-	"github.com/moov-io/watchman/internal/database"
 	"github.com/moov-io/watchman/pkg/ofac"
 
 	"github.com/go-kit/kit/log"
@@ -60,7 +58,7 @@ type companyWatchResponse struct {
 	WatchID string `json:"watchID"`
 }
 
-func addCompanyRoutes(logger log.Logger, r *mux.Router, searcher *searcher, companyRepo companyRepository, watchRepo *sqliteWatchRepository) {
+func addCompanyRoutes(logger log.Logger, r *mux.Router, searcher *searcher, companyRepo companyRepository, watchRepo watchRepository) {
 	r.Methods("GET").Path("/ofac/companies/{companyID}").HandlerFunc(getCompany(logger, searcher, companyRepo))
 	r.Methods("PUT").Path("/ofac/companies/{companyID}").HandlerFunc(updateCompanyStatus(logger, searcher, companyRepo))
 
@@ -103,77 +101,6 @@ func getCompanyByID(id string, searcher *searcher, repo companyRepository) (*Com
 		Alts:      searcher.FindAlts(100, id),
 		Status:    status,
 	}, nil
-}
-
-// companyRepository holds the current status (i.e. unsafe or exception) for a given company and
-// is expected to save metadata about each time the status is changed.
-type companyRepository interface {
-	getCompanyStatus(companyID string) (*CompanyStatus, error)
-	upsertCompanyStatus(companyID string, status *CompanyStatus) error
-}
-
-type sqliteCompanyRepository struct {
-	db     *sql.DB
-	logger log.Logger
-}
-
-func (r *sqliteCompanyRepository) close() error {
-	return r.db.Close()
-}
-
-func (r *sqliteCompanyRepository) getCompanyStatus(companyID string) (*CompanyStatus, error) {
-	if companyID == "" {
-		return nil, errors.New("getCompanyStatus: no Company.ID")
-	}
-	query := `select user_id, note, status, created_at from company_status where company_id = ? and deleted_at is null order by created_at desc limit 1;`
-	stmt, err := r.db.Prepare(query)
-	if err != nil {
-		return nil, err
-	}
-	defer stmt.Close()
-
-	row := stmt.QueryRow(companyID)
-
-	var status CompanyStatus
-	err = row.Scan(&status.UserID, &status.Note, &status.Status, &status.CreatedAt)
-	if err != nil && !strings.Contains(err.Error(), "no rows in result set") {
-		return nil, fmt.Errorf("getCompanyStatus: %v", err)
-	}
-	if status.UserID == "" {
-		return nil, nil // not found
-	}
-	return &status, nil
-}
-
-func (r *sqliteCompanyRepository) upsertCompanyStatus(companyID string, status *CompanyStatus) error {
-	tx, err := r.db.Begin()
-	if err != nil {
-		return fmt.Errorf("upsertCompanyStatus: begin: %v", err)
-	}
-
-	query := `insert into company_status (company_id, user_id, note, status, created_at) values (?, ?, ?, ?, ?);`
-	stmt, err := tx.Prepare(query)
-	if err != nil {
-		return fmt.Errorf("upsertCompanyStatus: prepare error=%v rollback=%v", err, tx.Rollback())
-	}
-	_, err = stmt.Exec(companyID, status.UserID, status.Note, status.Status, status.CreatedAt)
-	stmt.Close()
-	if err == nil {
-		return tx.Commit()
-	}
-	if database.UniqueViolation(err) {
-		query = `update company_status set note = ?, status = ? where company_id = ? and user_id = ?;`
-		stmt, err = tx.Prepare(query)
-		if err != nil {
-			return fmt.Errorf("upsertCompanyStatus: inner prepare error=%v rollback=%v", err, tx.Rollback())
-		}
-		_, err := stmt.Exec(status.Note, status.Status, companyID, status.UserID)
-		stmt.Close()
-		if err != nil {
-			return fmt.Errorf("upsertCompanyStatus: unique error=%v rollback=%v", err, tx.Rollback())
-		}
-	}
-	return tx.Commit()
 }
 
 func getCompany(logger log.Logger, searcher *searcher, companyRepo companyRepository) http.HandlerFunc {
