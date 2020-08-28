@@ -7,7 +7,6 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"database/sql"
 	"flag"
 	"fmt"
 	"net/http"
@@ -261,13 +260,4 @@ func setupWebui(logger log.Logger, r *mux.Router, basePath string) {
 		os.Exit(1)
 	}
 	r.PathPrefix("/").Handler(http.StripPrefix(basePath, http.FileServer(http.Dir(dir))))
-}
-
-func getCustomerRepo(dbType string, db *sql.DB, logger log.Logger) customerRepository {
-	if dbType == "postgres" {
-		return &postgresCustomerRepository{db, logger}
-	} else if dbType == "mysql" {
-		return nil
-	}
-	return &sqliteCustomerRepository{db, logger}
 }

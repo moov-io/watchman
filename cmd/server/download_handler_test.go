@@ -22,7 +22,7 @@ func TestDownload__manualRefreshPath(t *testing.T) {
 		return
 	}
 
-	check := func(t *testing.T, repo *sqliteDownloadRepository) {
+	check := func(t *testing.T, repo *genericDownloadRepository) {
 		searcher := &searcher{
 			logger: log.NewNopLogger(),
 			pipe:   noLogPipeliner,
@@ -51,10 +51,10 @@ func TestDownload__manualRefreshPath(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &sqliteDownloadRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericDownloadRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &sqliteDownloadRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericDownloadRepository{mysqlDB.DB, log.NewNopLogger()})
 }

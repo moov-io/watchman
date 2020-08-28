@@ -65,7 +65,7 @@ var (
 		),
 		execsql(
 			"create_webhook_stats",
-			`create table if not exists webhook_stats(watch_id varchar(40), attempted_at timestamp(6), status varchar(10));`,
+			`create table if not exists webhook_stats(watch_id varchar(40), attempted_at timestamp(6), status int4);`,
 		),
 		execsql(
 			"add__denied_persons__to__ofac_download_stats",

@@ -75,7 +75,7 @@ func TestSearcher__refreshData(t *testing.T) {
 func TestDownload_record(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *sqliteDownloadRepository) {
+	check := func(t *testing.T, repo *genericDownloadRepository) {
 		stats := &downloadStats{
 			SDNs: 1, Alts: 12, Addresses: 42, SectoralSanctions: 39,
 			DeniedPersons: 13, BISEntities: 32,
@@ -115,18 +115,18 @@ func TestDownload_record(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &sqliteDownloadRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericDownloadRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &sqliteDownloadRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericDownloadRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestDownload_route(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *sqliteDownloadRepository) {
+	check := func(t *testing.T, repo *genericDownloadRepository) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("GET", "/downloads", nil)
 		req.Header.Set("x-user-id", "test")
@@ -154,12 +154,12 @@ func TestDownload_route(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &sqliteDownloadRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericDownloadRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &sqliteDownloadRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericDownloadRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestDownload__lastRefresh(t *testing.T) {

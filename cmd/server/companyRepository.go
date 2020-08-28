@@ -18,16 +18,16 @@ type companyRepository interface {
 }
 
 // SQLite implementation of company repository
-type sqliteCompanyRepository struct {
+type genericCompanyRepository struct {
 	db     *sql.DB
 	logger log.Logger
 }
 
-func (r *sqliteCompanyRepository) close() error {
+func (r *genericCompanyRepository) close() error {
 	return r.db.Close()
 }
 
-func (r *sqliteCompanyRepository) getCompanyStatus(companyID string) (*CompanyStatus, error) {
+func (r *genericCompanyRepository) getCompanyStatus(companyID string) (*CompanyStatus, error) {
 	if companyID == "" {
 		return nil, errors.New("getCompanyStatus: no Company.ID")
 	}
@@ -39,7 +39,7 @@ func (r *sqliteCompanyRepository) getCompanyStatus(companyID string) (*CompanySt
 	return queryCompanyStatus(companyID, stmt, err)
 }
 
-func (r *sqliteCompanyRepository) upsertCompanyStatus(companyID string, status *CompanyStatus) error {
+func (r *genericCompanyRepository) upsertCompanyStatus(companyID string, status *CompanyStatus) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return fmt.Errorf("upsertCompanyStatus: begin: %v", err)
@@ -79,15 +79,6 @@ func (r *postgresCompanyRepository) upsertCompanyStatus(companyID string, status
 
 	query := `insert into company_status (company_id, user_id, note, status, created_at) values ($1, $2, $3, $4, $5);`
 	return insertCompanyStatus(companyID, status, err, tx, query)
-}
-
-func getCompanyRepo(dbType string, db *sql.DB, logger log.Logger) companyRepository {
-	if dbType == "postgres" {
-		return &postgresCompanyRepository{db, logger}
-	} else if dbType == "mysql" {
-		return nil
-	}
-	return &sqliteCompanyRepository{db, logger}
 }
 
 // Common access code across DB
@@ -130,4 +121,15 @@ func insertCompanyStatus(companyID string, status *CompanyStatus, err error, tx 
 		}
 	}
 	return tx.Commit()
+}
+
+// This function will return a companyRepository for a specific database that requires specific handling of
+// queries such as Postgres and Oracle. Other databases such as SQLite and MySQL will get a generic repository.
+func getCompanyRepo(dbType string, db *sql.DB, logger log.Logger) companyRepository {
+	switch dbType {
+	case "postgres":
+		return &postgresCompanyRepository{db, logger}
+	default:
+		return &genericCompanyRepository{db, logger}
+	}
 }

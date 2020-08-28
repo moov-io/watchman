@@ -12,16 +12,16 @@ type downloadRepository interface {
 	close() error
 }
 
-type sqliteDownloadRepository struct {
+type genericDownloadRepository struct {
 	db     *sql.DB
 	logger log.Logger
 }
 
-func (r *sqliteDownloadRepository) close() error {
+func (r *genericDownloadRepository) close() error {
 	return r.db.Close()
 }
 
-func (r *sqliteDownloadRepository) recordStats(stats *downloadStats) error {
+func (r *genericDownloadRepository) recordStats(stats *downloadStats) error {
 	if stats == nil {
 		return errors.New("recordStats: nil downloadStats")
 	}
@@ -37,7 +37,7 @@ func (r *sqliteDownloadRepository) recordStats(stats *downloadStats) error {
 	return err
 }
 
-func (r *sqliteDownloadRepository) latestDownloads(limit int) ([]Download, error) {
+func (r *genericDownloadRepository) latestDownloads(limit int) ([]Download, error) {
 	query := `select downloaded_at, sdns, alt_names, addresses, sectoral_sanctions, denied_persons, bis_entities from download_stats order by downloaded_at desc limit ?;`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
@@ -110,11 +110,13 @@ func (r *postgresDownloadRepository) latestDownloads(limit int) ([]Download, err
 	return downloads, rows.Err()
 }
 
+// This function will return a downloadRepository for a specific database that requires specific handling of
+// queries such as Postgres and Oracle. Other databases such as SQLite and MySQL will get a generic repository.
 func getDownloadRepo(dbType string, db *sql.DB, logger log.Logger) downloadRepository {
-	if dbType == "postgres" {
-		return &postgresDownloadRepository{db, logger}
-	} else if dbType == "mysql" {
-		return nil
+	switch dbType {
+	case "postgres":
+		return &postgresDownloadRepository{db: db, logger: logger}
+	default:
+		return &genericDownloadRepository{db: db, logger: logger}
 	}
-	return &sqliteDownloadRepository{db, logger}
 }

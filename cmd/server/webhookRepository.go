@@ -10,15 +10,15 @@ type webhookRepository interface {
 	close() error
 }
 
-type sqliteWebhookRepository struct {
+type genericWebhookRepository struct {
 	db *sql.DB
 }
 
-func (r *sqliteWebhookRepository) close() error {
+func (r *genericWebhookRepository) close() error {
 	return r.db.Close()
 }
 
-func (r *sqliteWebhookRepository) recordWebhook(watchID string, attemptedAt time.Time, status int) error {
+func (r *genericWebhookRepository) recordWebhook(watchID string, attemptedAt time.Time, status int) error {
 	query := `insert into webhook_stats (watch_id, attempted_at, status) values (?, ?, ?);`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
@@ -51,11 +51,13 @@ func (r *postgresWebhookRepository) recordWebhook(watchID string, attemptedAt ti
 	return err
 }
 
+// This function will return a webhookRepository for a specific database that requires specific handling of
+// queries such as Postgres and Oracle. Other databases such as SQLite and MySQL will get a generic repository.
 func getWebhookRepo(dbType string, db *sql.DB) webhookRepository {
-	if dbType == "postgres" {
+	switch dbType {
+	case "postgres":
 		return &postgresWebhookRepository{db}
-	} else if dbType == "mysql" {
-		return nil
+	default:
+		return &genericWebhookRepository{db}
 	}
-	return &sqliteWebhookRepository{db}
 }

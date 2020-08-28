@@ -18,16 +18,16 @@ type customerRepository interface {
 }
 
 // SQLite Version of the customer repository
-type sqliteCustomerRepository struct {
+type genericCustomerRepository struct {
 	db     *sql.DB
 	logger log.Logger
 }
 
-func (r *sqliteCustomerRepository) close() error {
+func (r *genericCustomerRepository) close() error {
 	return r.db.Close()
 }
 
-func (r *sqliteCustomerRepository) getCustomerStatus(customerID string) (*CustomerStatus, error) {
+func (r *genericCustomerRepository) getCustomerStatus(customerID string) (*CustomerStatus, error) {
 	if customerID == "" {
 		return nil, errors.New("getCustomerStatus: no Customer.ID")
 	}
@@ -36,7 +36,7 @@ func (r *sqliteCustomerRepository) getCustomerStatus(customerID string) (*Custom
 	return queryCustomerStatus(customerID, err, stmt)
 }
 
-func (r *sqliteCustomerRepository) upsertCustomerStatus(customerID string, status *CustomerStatus) error {
+func (r *genericCustomerRepository) upsertCustomerStatus(customerID string, status *CustomerStatus) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return fmt.Errorf("upsertCustomerStatus: begin: %v", err)
@@ -120,4 +120,15 @@ func insertCustomerStatus(customerID string, status *CustomerStatus, err error, 
 		}
 	}
 	return tx.Commit()
+}
+
+// This function will return a customerRepository for a specific database that requires specific handling of
+// queries such as Postgres and Oracle. Other databases such as SQLite and MySQL will get a generic repository.
+func getCustomerRepo(dbType string, db *sql.DB, logger log.Logger) customerRepository {
+	switch dbType {
+	case "postgres":
+		return &postgresCustomerRepository{db, logger}
+	default:
+		return &genericCustomerRepository{db, logger}
+	}
 }

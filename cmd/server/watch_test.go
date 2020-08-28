@@ -13,17 +13,17 @@ import (
 	"github.com/go-kit/kit/log"
 )
 
-func createTestWatchRepository(t *testing.T) *sqliteWatchRepository {
+func createTestWatchRepository(t *testing.T) *genericWatchRepository {
 	t.Helper()
 
 	db := database.CreateTestSqliteDB(t)
-	return &sqliteWatchRepository{db.DB, log.NewNopLogger()}
+	return &genericWatchRepository{db.DB, log.NewNopLogger()}
 }
 
 func TestCompanyWatch(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *sqliteWatchRepository) {
+	check := func(t *testing.T, repo *genericWatchRepository) {
 		companyID := base.ID()
 		if err := repo.removeCompanyWatch(companyID, base.ID()); err != nil {
 			t.Errorf("expected no error: %v", err)
@@ -47,18 +47,18 @@ func TestCompanyWatch(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &sqliteWatchRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericWatchRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &sqliteWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericWatchRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompanyNameWatch(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *sqliteWatchRepository) {
+	check := func(t *testing.T, repo *genericWatchRepository) {
 		if err := repo.removeCompanyNameWatch(base.ID()); err != nil {
 			t.Errorf("expected no error: %v", err)
 		}
@@ -82,18 +82,18 @@ func TestCompanyNameWatch(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &sqliteWatchRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericWatchRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &sqliteWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericWatchRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCustomerWatch(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *sqliteWatchRepository) {
+	check := func(t *testing.T, repo *genericWatchRepository) {
 		customerID := base.ID()
 		if err := repo.removeCustomerWatch(customerID, base.ID()); err != nil {
 			t.Errorf("expected no error: %v", err)
@@ -117,18 +117,18 @@ func TestCustomerWatch(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &sqliteWatchRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericWatchRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &sqliteWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericWatchRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCustomerNameWatch(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *sqliteWatchRepository) {
+	check := func(t *testing.T, repo *genericWatchRepository) {
 		if err := repo.removeCustomerNameWatch(base.ID()); err != nil {
 			t.Errorf("expected no error: %v", err)
 		}
@@ -152,18 +152,18 @@ func TestCustomerNameWatch(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &sqliteWatchRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericWatchRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &sqliteWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericWatchRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestWatchCursor_ID(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *sqliteWatchRepository) {
+	check := func(t *testing.T, repo *genericWatchRepository) {
 		cur := repo.getWatchesCursor(log.NewNopLogger(), 4) // batchSize is divided in 4 parts to equally grab customer, customer name, company, and company name watches
 
 		// insert some watches
@@ -204,18 +204,18 @@ func TestWatchCursor_ID(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &sqliteWatchRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericWatchRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &sqliteWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericWatchRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestWatchCursor_Names(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *sqliteWatchRepository) {
+	check := func(t *testing.T, repo *genericWatchRepository) {
 		cur := repo.getWatchesCursor(log.NewNopLogger(), 4)
 
 		// insert some watches
@@ -262,10 +262,10 @@ func TestWatchCursor_Names(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &sqliteWatchRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericWatchRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &sqliteWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericWatchRepository{mysqlDB.DB, log.NewNopLogger()})
 }
