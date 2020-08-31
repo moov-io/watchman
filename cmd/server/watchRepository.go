@@ -33,19 +33,20 @@ type watchRepository interface {
 	close() error
 }
 
-////////////////////////////
-//sqlite implementation
-////////////////////////////
-type genericWatchRepository struct {
+////////////////////////////////////////////////////////
+// generic implementation for most
+// databases (SQLite, MySQL)
+////////////////////////////////////////////////////////
+type genericSQLWatchRepository struct {
 	db     *sql.DB
 	logger log.Logger
 }
 
-func (r *genericWatchRepository) close() error {
+func (r *genericSQLWatchRepository) close() error {
 	return r.db.Close()
 }
 
-func (r *genericWatchRepository) getWatchesCursor(logger log.Logger, batchSize int) *watchCursor {
+func (r *genericSQLWatchRepository) getWatchesCursor(logger log.Logger, batchSize int) *watchCursor {
 	return &watchCursor{
 		batchSize: batchSize,
 		db:        r.db,
@@ -55,7 +56,7 @@ func (r *genericWatchRepository) getWatchesCursor(logger log.Logger, batchSize i
 
 // Company methods -SQLite
 
-func (r *genericWatchRepository) addCompanyWatch(companyID string, params watchRequest) (string, error) {
+func (r *genericSQLWatchRepository) addCompanyWatch(companyID string, params watchRequest) (string, error) {
 	if companyID == "" {
 		return "", errNoCompanyID
 	}
@@ -66,7 +67,7 @@ func (r *genericWatchRepository) addCompanyWatch(companyID string, params watchR
 	return insertCompanyWatch(companyID, params, err, stmt, id)
 }
 
-func (r *genericWatchRepository) removeCompanyWatch(companyID string, watchID string) error {
+func (r *genericSQLWatchRepository) removeCompanyWatch(companyID string, watchID string) error {
 	if watchID == "" {
 		return errNoWatchID
 	}
@@ -76,13 +77,13 @@ func (r *genericWatchRepository) removeCompanyWatch(companyID string, watchID st
 	return updateCompanyWatch(companyID, watchID, err, stmt)
 }
 
-func (r *genericWatchRepository) addCompanyNameWatch(name string, webhook string, authToken string) (string, error) {
+func (r *genericSQLWatchRepository) addCompanyNameWatch(name string, webhook string, authToken string) (string, error) {
 	query := `insert into company_name_watches (id, name, webhook, auth_token, created_at) values (?, ?, ?, ?, ?);`
 	stmt, err := r.db.Prepare(query)
 	return insertCompanyNameWatch(name, webhook, authToken, err, stmt)
 }
 
-func (r *genericWatchRepository) removeCompanyNameWatch(watchID string) error {
+func (r *genericSQLWatchRepository) removeCompanyNameWatch(watchID string) error {
 	if watchID == "" {
 		return errNoWatchID
 	}
@@ -94,7 +95,7 @@ func (r *genericWatchRepository) removeCompanyNameWatch(watchID string) error {
 
 // Customer methods - SQLite
 
-func (r *genericWatchRepository) addCustomerWatch(customerID string, params watchRequest) (string, error) {
+func (r *genericSQLWatchRepository) addCustomerWatch(customerID string, params watchRequest) (string, error) {
 	r.logger.Log("Repository is of type %s", reflect.TypeOf(r).String())
 	if customerID == "" {
 		return "", errNoCustomerID
@@ -106,7 +107,7 @@ func (r *genericWatchRepository) addCustomerWatch(customerID string, params watc
 	return insertCustomerWatch(customerID, params, err, stmt, id)
 }
 
-func (r *genericWatchRepository) removeCustomerWatch(customerID string, watchID string) error {
+func (r *genericSQLWatchRepository) removeCustomerWatch(customerID string, watchID string) error {
 	if watchID == "" {
 		return errNoWatchID
 	}
@@ -116,13 +117,13 @@ func (r *genericWatchRepository) removeCustomerWatch(customerID string, watchID 
 	return updateCustomerWatch(customerID, watchID, err, stmt)
 }
 
-func (r *genericWatchRepository) addCustomerNameWatch(name string, webhook string, authToken string) (string, error) {
+func (r *genericSQLWatchRepository) addCustomerNameWatch(name string, webhook string, authToken string) (string, error) {
 	query := `insert into customer_name_watches (id, name, webhook, auth_token, created_at) values (?, ?, ?, ?, ?);`
 	stmt, err := r.db.Prepare(query)
 	return insertCustomerNameWatch(name, webhook, authToken, err, stmt)
 }
 
-func (r *genericWatchRepository) removeCustomerNameWatch(watchID string) error {
+func (r *genericSQLWatchRepository) removeCustomerNameWatch(watchID string) error {
 	if watchID == "" {
 		return errNoWatchID
 	}
@@ -531,6 +532,6 @@ func getWatchRepo(dbType string, db *sql.DB, logger log.Logger) watchRepository 
 	case "postgres":
 		return &postgresWatchRepository{db, logger}
 	default:
-		return &genericWatchRepository{db, logger}
+		return &genericSQLWatchRepository{db, logger}
 	}
 }

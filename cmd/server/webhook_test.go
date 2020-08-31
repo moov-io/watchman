@@ -139,7 +139,7 @@ func TestWebhook_call(t *testing.T) {
 func TestWebhook_record(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *genericWebhookRepository) {
+	check := func(t *testing.T, repo *genericSQLWebhookRepository) {
 		if err := repo.recordWebhook(base.ID(), time.Now(), 200); err != nil {
 			t.Fatal(err)
 		}
@@ -148,10 +148,10 @@ func TestWebhook_record(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &genericWebhookRepository{sqliteDB.DB})
+	check(t, &genericSQLWebhookRepository{sqliteDB.DB})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &genericWebhookRepository{mysqlDB.DB})
+	check(t, &genericSQLWebhookRepository{mysqlDB.DB})
 }

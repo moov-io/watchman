@@ -17,17 +17,20 @@ type customerRepository interface {
 	close() error
 }
 
-// SQLite Version of the customer repository
-type genericCustomerRepository struct {
+////////////////////////////////////////////////////////
+// generic implementation for most
+// databases (SQLite, MySQL)
+////////////////////////////////////////////////////////
+type genericSQLCustomerRepository struct {
 	db     *sql.DB
 	logger log.Logger
 }
 
-func (r *genericCustomerRepository) close() error {
+func (r *genericSQLCustomerRepository) close() error {
 	return r.db.Close()
 }
 
-func (r *genericCustomerRepository) getCustomerStatus(customerID string) (*CustomerStatus, error) {
+func (r *genericSQLCustomerRepository) getCustomerStatus(customerID string) (*CustomerStatus, error) {
 	if customerID == "" {
 		return nil, errors.New("getCustomerStatus: no Customer.ID")
 	}
@@ -36,7 +39,7 @@ func (r *genericCustomerRepository) getCustomerStatus(customerID string) (*Custo
 	return queryCustomerStatus(customerID, err, stmt)
 }
 
-func (r *genericCustomerRepository) upsertCustomerStatus(customerID string, status *CustomerStatus) error {
+func (r *genericSQLCustomerRepository) upsertCustomerStatus(customerID string, status *CustomerStatus) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return fmt.Errorf("upsertCustomerStatus: begin: %v", err)
@@ -47,7 +50,9 @@ func (r *genericCustomerRepository) upsertCustomerStatus(customerID string, stat
 	return insertCustomerStatus(customerID, status, err, tx, stmt, query)
 }
 
-// Postgres Version of the customer repository
+////////////////////////////////////////////////////////
+// postgres implementation
+////////////////////////////////////////////////////////
 type postgresCustomerRepository struct {
 	db     *sql.DB
 	logger log.Logger
@@ -129,6 +134,6 @@ func getCustomerRepo(dbType string, db *sql.DB, logger log.Logger) customerRepos
 	case "postgres":
 		return &postgresCustomerRepository{db, logger}
 	default:
-		return &genericCustomerRepository{db, logger}
+		return &genericSQLCustomerRepository{db, logger}
 	}
 }

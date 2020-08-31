@@ -17,29 +17,30 @@ type companyRepository interface {
 	close() error
 }
 
-// SQLite implementation of company repository
-type genericCompanyRepository struct {
+////////////////////////////////////////////////////////
+// generic implementation for most
+// databases (SQLite, MySQL)
+////////////////////////////////////////////////////////
+type genericSQLCompanyRepository struct {
 	db     *sql.DB
 	logger log.Logger
 }
 
-func (r *genericCompanyRepository) close() error {
+func (r *genericSQLCompanyRepository) close() error {
 	return r.db.Close()
 }
 
-func (r *genericCompanyRepository) getCompanyStatus(companyID string) (*CompanyStatus, error) {
+func (r *genericSQLCompanyRepository) getCompanyStatus(companyID string) (*CompanyStatus, error) {
 	if companyID == "" {
 		return nil, errors.New("getCompanyStatus: no Company.ID")
 	}
 	query := `select user_id, note, status, created_at from company_status where company_id = ? and deleted_at is null order by created_at desc limit 1;`
 	stmt, err := r.db.Prepare(query)
-	if err != nil {
-		return nil, err
-	}
+
 	return queryCompanyStatus(companyID, stmt, err)
 }
 
-func (r *genericCompanyRepository) upsertCompanyStatus(companyID string, status *CompanyStatus) error {
+func (r *genericSQLCompanyRepository) upsertCompanyStatus(companyID string, status *CompanyStatus) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return fmt.Errorf("upsertCompanyStatus: begin: %v", err)
@@ -49,7 +50,9 @@ func (r *genericCompanyRepository) upsertCompanyStatus(companyID string, status 
 	return insertCompanyStatus(companyID, status, err, tx, query)
 }
 
-// Postgres implementation of company repository
+////////////////////////////////////////////////////////
+// postgres implementation
+////////////////////////////////////////////////////////
 type postgresCompanyRepository struct {
 	db     *sql.DB
 	logger log.Logger
@@ -65,9 +68,7 @@ func (r *postgresCompanyRepository) getCompanyStatus(companyID string) (*Company
 	}
 	query := `select user_id, note, status, created_at from company_status where company_id = $1 and deleted_at is null order by created_at desc limit 1;`
 	stmt, err := r.db.Prepare(query)
-	if err != nil {
-		return nil, err
-	}
+
 	return queryCompanyStatus(companyID, stmt, err)
 }
 
@@ -82,7 +83,22 @@ func (r *postgresCompanyRepository) upsertCompanyStatus(companyID string, status
 }
 
 // Common access code across DB
+
+// This function will return a companyRepository for a specific database that requires specific handling of
+// queries such as Postgres and Oracle. Other databases such as SQLite and MySQL will get a generic repository.
+func getCompanyRepo(dbType string, db *sql.DB, logger log.Logger) companyRepository {
+	switch dbType {
+	case "postgres":
+		return &postgresCompanyRepository{db, logger}
+	default:
+		return &genericSQLCompanyRepository{db, logger}
+	}
+}
+
 func queryCompanyStatus(companyID string, stmt *sql.Stmt, err error) (*CompanyStatus, error) {
+	if err != nil {
+		return nil, err
+	}
 	defer stmt.Close()
 
 	row := stmt.QueryRow(companyID)
@@ -121,15 +137,4 @@ func insertCompanyStatus(companyID string, status *CompanyStatus, err error, tx 
 		}
 	}
 	return tx.Commit()
-}
-
-// This function will return a companyRepository for a specific database that requires specific handling of
-// queries such as Postgres and Oracle. Other databases such as SQLite and MySQL will get a generic repository.
-func getCompanyRepo(dbType string, db *sql.DB, logger log.Logger) companyRepository {
-	switch dbType {
-	case "postgres":
-		return &postgresCompanyRepository{db, logger}
-	default:
-		return &genericCompanyRepository{db, logger}
-	}
 }

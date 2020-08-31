@@ -53,11 +53,11 @@ var (
 	}
 )
 
-func createTestCompanyRepository(t *testing.T) *genericCompanyRepository {
+func createTestCompanyRepository(t *testing.T) *genericSQLCompanyRepository {
 	t.Helper()
 
 	db := database.CreateTestSqliteDB(t)
-	return &genericCompanyRepository{db.DB, log.NewNopLogger()}
+	return &genericSQLCompanyRepository{db.DB, log.NewNopLogger()}
 }
 
 func TestCompanies__id(t *testing.T) {
@@ -98,7 +98,7 @@ func TestCompanies__id(t *testing.T) {
 func TestCompany_getById(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *genericCompanyRepository) {
+	check := func(t *testing.T, repo *genericSQLCompanyRepository) {
 		// make sure we only return SDNType != "individual"
 		// We do this by proviing a searcher with individual results
 		company, err := getCompanyByID("306", customerSearcher, repo)
@@ -113,18 +113,18 @@ func TestCompany_getById(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &genericCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &genericCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_get(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *genericCompanyRepository) {
+	check := func(t *testing.T, repo *genericSQLCompanyRepository) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("GET", "/ofac/companies/21206", nil)
 		req.Header.Set("x-user-id", "test")
@@ -162,12 +162,12 @@ func TestCompany_get(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &genericCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &genericCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_EmptyHTTP(t *testing.T) {
@@ -188,7 +188,7 @@ func TestCompany_EmptyHTTP(t *testing.T) {
 func TestCompany_addWatch(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *genericCompanyRepository) {
+	check := func(t *testing.T, repo *genericSQLCompanyRepository) {
 		w := httptest.NewRecorder()
 		body := strings.NewReader(`{"webhook": "https://moov.io", "authToken": "foo"}`)
 		req := httptest.NewRequest("POST", "/ofac/companies/foo/watch", body)
@@ -218,12 +218,12 @@ func TestCompany_addWatch(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &genericCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &genericCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_addWatchNoBody(t *testing.T) {
@@ -247,7 +247,7 @@ func TestCompany_addWatchNoBody(t *testing.T) {
 func TestCompany_addWatchMissingAuthToken(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *genericCompanyRepository) {
+	check := func(t *testing.T, repo *genericSQLCompanyRepository) {
 		watchRepo := createTestWatchRepository(t)
 		defer watchRepo.close()
 
@@ -272,18 +272,18 @@ func TestCompany_addWatchMissingAuthToken(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &genericCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &genericCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_addNameWatch(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *genericCompanyRepository) {
+	check := func(t *testing.T, repo *genericSQLCompanyRepository) {
 		w := httptest.NewRecorder()
 		body := strings.NewReader(`{"webhook": "https://moov.io", "authToken": "foo"}`)
 		req := httptest.NewRequest("POST", "/ofac/companies/watch?name=foo", body)
@@ -314,18 +314,18 @@ func TestCompany_addNameWatch(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &genericCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &genericCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_addCompanyNameWatchNoBody(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *genericCompanyRepository) {
+	check := func(t *testing.T, repo *genericSQLCompanyRepository) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("POST", "/ofac/companies/watch?name=foo", nil)
 		req.Header.Set("x-user-id", "test")
@@ -360,18 +360,18 @@ func TestCompany_addCompanyNameWatchNoBody(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &genericCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &genericCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_updateUnsafe(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *genericCompanyRepository) {
+	check := func(t *testing.T, repo *genericSQLCompanyRepository) {
 		w := httptest.NewRecorder()
 
 		body := strings.NewReader(`{"status": "unsafe"}`)
@@ -394,18 +394,18 @@ func TestCompany_updateUnsafe(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &genericCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &genericCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_updateException(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *genericCompanyRepository) {
+	check := func(t *testing.T, repo *genericSQLCompanyRepository) {
 		w := httptest.NewRecorder()
 
 		body := strings.NewReader(`{"status": "exception"}`)
@@ -428,18 +428,18 @@ func TestCompany_updateException(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &genericCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &genericCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_updateUnknown(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *genericCompanyRepository) {
+	check := func(t *testing.T, repo *genericSQLCompanyRepository) {
 		w := httptest.NewRecorder()
 
 		body := strings.NewReader(`{"status": "unknown"}`) // has status, but not blocked or unblocked
@@ -462,18 +462,18 @@ func TestCompany_updateUnknown(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &genericCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &genericCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_updateNoUserId(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *genericCompanyRepository) {
+	check := func(t *testing.T, repo *genericSQLCompanyRepository) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("PUT", "/ofac/companies/foo", nil)
 
@@ -493,18 +493,18 @@ func TestCompany_updateNoUserId(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &genericCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &genericCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_updateNoBody(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *genericCompanyRepository) {
+	check := func(t *testing.T, repo *genericSQLCompanyRepository) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("PUT", "/ofac/companies/foo", nil)
 		req.Header.Set("x-user-id", "test")
@@ -525,18 +525,18 @@ func TestCompany_updateNoBody(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &genericCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &genericCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_removeWatch(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *genericCompanyRepository) {
+	check := func(t *testing.T, repo *genericSQLCompanyRepository) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("DELETE", "/ofac/companies/foo/watch/watch-id", nil)
 		req.Header.Set("x-user-id", "test")
@@ -557,18 +557,18 @@ func TestCompany_removeWatch(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &genericCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &genericCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompany_removeNameWatch(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *genericCompanyRepository) {
+	check := func(t *testing.T, repo *genericSQLCompanyRepository) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("DELETE", "/ofac/companies/watch/foo", nil)
 		req.Header.Set("x-user-id", "test")
@@ -590,18 +590,18 @@ func TestCompany_removeNameWatch(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &genericCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &genericCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
 
 func TestCompanyRepository(t *testing.T) {
 	t.Parallel()
 
-	check := func(t *testing.T, repo *genericCompanyRepository) {
+	check := func(t *testing.T, repo *genericSQLCompanyRepository) {
 		companyID, userID := base.ID(), base.ID()
 
 		status, err := repo.getCompanyStatus(companyID)
@@ -668,10 +668,10 @@ func TestCompanyRepository(t *testing.T) {
 	// SQLite tests
 	sqliteDB := database.CreateTestSqliteDB(t)
 	defer sqliteDB.Close()
-	check(t, &genericCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
-	check(t, &genericCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
 }
