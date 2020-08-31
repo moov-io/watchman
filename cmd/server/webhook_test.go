@@ -136,6 +136,19 @@ func TestWebhook_call(t *testing.T) {
 	}
 }
 
+func TestWebhook__CallErr(t *testing.T) {
+	var body bytes.Buffer
+	body.WriteString(`{"foo": "bar"}`)
+
+	status, err := callWebhook("watchID", &body, "https://localhost/12345", "12345")
+	if err == nil {
+		t.Fatal(err)
+	}
+	if status != 0 {
+		t.Errorf("bogus HTTP status: %d", status)
+	}
+}
+
 func TestWebhook_record(t *testing.T) {
 	t.Parallel()
 
