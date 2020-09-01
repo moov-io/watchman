@@ -57,10 +57,11 @@ func callWebhook(watchID string, body *bytes.Buffer, webhook string, authToken s
 	defer webhookGate.Done()
 
 	resp, err := webhookHTTPClient.Do(req)
-	if resp == nil {
-		return 500, fmt.Errorf("internal server error calling %s %s: %v", webhook, watchID, err)
-	}
-	if err != nil {
+
+	if resp == nil || err != nil {
+		if resp == nil {
+			return 0, fmt.Errorf("unable to call webhook: %v", err)
+		}
 		return resp.StatusCode, fmt.Errorf("HTTP problem with watch %s: %v", watchID, err)
 	}
 	resp.Body.Close()
