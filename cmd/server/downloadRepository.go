@@ -12,10 +12,14 @@ type downloadRepository interface {
 	close() error
 }
 
-////////////////////////////////////////////////////////
-// generic implementation for most
-// databases (SQLite, MySQL)
-////////////////////////////////////////////////////////
+const (
+	genericInsertDownloadStats = `insert into download_stats (downloaded_at, sdns, alt_names, addresses, sectoral_sanctions, denied_persons, bis_entities) values (?, ?, ?, ?, ?, ?, ?);`
+	genericSelectDownloadStats = `select downloaded_at, sdns, alt_names, addresses, sectoral_sanctions, denied_persons, bis_entities from download_stats order by downloaded_at desc limit ?;`
+
+	postgresInsertDownloadStats = `insert into download_stats (downloaded_at, sdns, alt_names, addresses, sectoral_sanctions, denied_persons, bis_entities) values ($1, $2, $3, $4, $5, $6, $7);`
+	postgresSelectDownloadStats = `select downloaded_at, sdns, alt_names, addresses, sectoral_sanctions, denied_persons, bis_entities from download_stats order by downloaded_at desc limit ?;`
+)
+
 type genericSQLDownloadRepository struct {
 	db     *sql.DB
 	logger log.Logger
@@ -30,59 +34,12 @@ func (r *genericSQLDownloadRepository) recordStats(stats *downloadStats) error {
 		return errors.New("recordStats: nil downloadStats")
 	}
 
-	query := `insert into download_stats (downloaded_at, sdns, alt_names, addresses, sectoral_sanctions, denied_persons, bis_entities) values (?, ?, ?, ?, ?, ?, ?);`
-	stmt, err := r.db.Prepare(query)
-	return insertDownloadStat(stats, err, stmt)
-}
-
-func (r *genericSQLDownloadRepository) latestDownloads(limit int) ([]Download, error) {
-	query := `select downloaded_at, sdns, alt_names, addresses, sectoral_sanctions, denied_persons, bis_entities from download_stats order by downloaded_at desc limit ?;`
-	stmt, err := r.db.Prepare(query)
-	return selectLatestDownload(limit, err, stmt)
-}
-
-////////////////////////////////////////////////////////
-// postgres implementation
-////////////////////////////////////////////////////////
-type postgresDownloadRepository struct {
-	db     *sql.DB
-	logger log.Logger
-}
-
-func (r *postgresDownloadRepository) close() error {
-	return r.db.Close()
-}
-
-func (r *postgresDownloadRepository) recordStats(stats *downloadStats) error {
-	if stats == nil {
-		return errors.New("recordStats: nil downloadStats")
-	}
-
-	query := `insert into download_stats (downloaded_at, sdns, alt_names, addresses, sectoral_sanctions, denied_persons, bis_entities) values ($1, $2, $3, $4, $5, $6, $7);`
-	stmt, err := r.db.Prepare(query)
-	return insertDownloadStat(stats, err, stmt)
-}
-
-func (r *postgresDownloadRepository) latestDownloads(limit int) ([]Download, error) {
-	query := `select downloaded_at, sdns, alt_names, addresses, sectoral_sanctions, denied_persons, bis_entities from download_stats order by downloaded_at desc limit ?;`
-	stmt, err := r.db.Prepare(query)
-	return selectLatestDownload(limit, err, stmt)
-}
-
-// Common Code across DB implemation
-
-// This function will return a downloadRepository for a specific database that requires specific handling of
-// queries such as Postgres and Oracle. Other databases such as SQLite and MySQL will get a generic repository.
-func getDownloadRepo(dbType string, db *sql.DB, logger log.Logger) downloadRepository {
+	query := genericInsertDownloadStats
 	switch dbType {
-	case "postgres":
-		return &postgresDownloadRepository{db: db, logger: logger}
-	default:
-		return &genericSQLDownloadRepository{db: db, logger: logger}
+	case `postgres`:
+		query = postgresInsertDownloadStats
 	}
-}
-
-func insertDownloadStat(stats *downloadStats, err error, stmt *sql.Stmt) error {
+	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return err
 	}
@@ -92,7 +49,13 @@ func insertDownloadStat(stats *downloadStats, err error, stmt *sql.Stmt) error {
 	return err
 }
 
-func selectLatestDownload(limit int, err error, stmt *sql.Stmt) ([]Download, error) {
+func (r *genericSQLDownloadRepository) latestDownloads(limit int) ([]Download, error) {
+	query := genericSelectDownloadStats
+	switch dbType {
+	case `postgres`:
+		query = postgresSelectDownloadStats
+	}
+	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return nil, err
 	}

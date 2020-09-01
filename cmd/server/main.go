@@ -13,7 +13,6 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
-	"reflect"
 	"strconv"
 	"strings"
 	"syscall"
@@ -135,7 +134,7 @@ func main() {
 	defer adminServer.Shutdown()
 
 	// Setup download repository
-	downloadRepo := getDownloadRepo(dbType, db, logger)
+	downloadRepo := &genericSQLDownloadRepository{db, logger}
 	defer downloadRepo.close()
 
 	searcher := &searcher{
@@ -172,18 +171,16 @@ func main() {
 	logger.Log("main", fmt.Sprintf("Setting up default database connection to %s", dbType))
 
 	// Setup Watch and Webhook database wrapper
-	watchRepo := getWatchRepo(dbType, db, logger)
+	watchRepo := &genericSQLWatchRepository{db, logger}
 	defer watchRepo.close()
-	webhookRepo := getWebhookRepo(dbType, db)
+	webhookRepo := &genericSQLWebhookRepository{db}
 	defer webhookRepo.close()
 
 	// Setup company / customer repositories
-	companyRepo := getCompanyRepo(dbType, db, logger)
+	companyRepo := &genericSQLCompanyRepository{db, logger}
 	defer companyRepo.close()
-	custRepo := getCustomerRepo(dbType, db, logger)
+	custRepo := &genericSQLCustomerRepository{db, logger}
 	defer custRepo.close()
-
-	logger.Log("main", fmt.Sprintf("custRepo is of type %s", reflect.TypeOf(custRepo)))
 
 	// Setup periodic download and re-search
 	updates := make(chan *downloadStats)

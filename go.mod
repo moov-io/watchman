@@ -3,6 +3,7 @@ module github.com/moov-io/watchman
 require (
 	github.com/abadojack/whatlanggo v1.0.1
 	github.com/antihax/optional v1.0.0
+	github.com/axw/gocov v1.0.0 // indirect
 	github.com/bbalet/stopwords v1.0.0
 	github.com/cenkalti/backoff/v3 v3.2.2 // indirect
 	github.com/containerd/continuity v0.0.0-20200710164510-efbc4488d8fe // indirect
@@ -12,6 +13,7 @@ require (
 	github.com/jackc/pgx/v4 v4.8.1
 	github.com/lib/pq v1.3.0 // indirect
 	github.com/lopezator/migrator v0.3.0
+	github.com/matm/gocov-html v0.0.0-20200509184451-71874e2e203b // indirect
 	github.com/mattn/go-sqlite3 v1.14.0
 	github.com/moov-io/base v0.11.0
 	github.com/opencontainers/go-digest v1.0.0 // indirect

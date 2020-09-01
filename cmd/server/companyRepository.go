@@ -17,10 +17,14 @@ type companyRepository interface {
 	close() error
 }
 
-////////////////////////////////////////////////////////
-// generic implementation for most
-// databases (SQLite, MySQL)
-////////////////////////////////////////////////////////
+const (
+	genericSelectCompanyStatus = `select user_id, note, status, created_at from company_status where company_id = ? and deleted_at is null order by created_at desc limit 1;`
+	genericInsertCompanyStatus = `insert into company_status (company_id, user_id, note, status, created_at) values (?, ?, ?, ?, ?);`
+
+	postgresSelectCompanyStatus = `select user_id, note, status, created_at from company_status where company_id = $1 and deleted_at is null order by created_at desc limit 1;`
+	postgresInsertCompanyStatus = `insert into company_status (company_id, user_id, note, status, created_at) values ($1, $2, $3, $4, $5);`
+)
+
 type genericSQLCompanyRepository struct {
 	db     *sql.DB
 	logger log.Logger
@@ -34,68 +38,13 @@ func (r *genericSQLCompanyRepository) getCompanyStatus(companyID string) (*Compa
 	if companyID == "" {
 		return nil, errors.New("getCompanyStatus: no Company.ID")
 	}
-	query := `select user_id, note, status, created_at from company_status where company_id = ? and deleted_at is null order by created_at desc limit 1;`
-	stmt, err := r.db.Prepare(query)
-
-	return queryCompanyStatus(companyID, stmt, err)
-}
-
-func (r *genericSQLCompanyRepository) upsertCompanyStatus(companyID string, status *CompanyStatus) error {
-	tx, err := r.db.Begin()
-	if err != nil {
-		return fmt.Errorf("upsertCompanyStatus: begin: %v", err)
-	}
-
-	query := `insert into company_status (company_id, user_id, note, status, created_at) values (?, ?, ?, ?, ?);`
-	return insertCompanyStatus(companyID, status, err, tx, query)
-}
-
-////////////////////////////////////////////////////////
-// postgres implementation
-////////////////////////////////////////////////////////
-type postgresCompanyRepository struct {
-	db     *sql.DB
-	logger log.Logger
-}
-
-func (r *postgresCompanyRepository) close() error {
-	return r.db.Close()
-}
-
-func (r *postgresCompanyRepository) getCompanyStatus(companyID string) (*CompanyStatus, error) {
-	if companyID == "" {
-		return nil, errors.New("getCompanyStatus: no Company.ID")
-	}
-	query := `select user_id, note, status, created_at from company_status where company_id = $1 and deleted_at is null order by created_at desc limit 1;`
-	stmt, err := r.db.Prepare(query)
-
-	return queryCompanyStatus(companyID, stmt, err)
-}
-
-func (r *postgresCompanyRepository) upsertCompanyStatus(companyID string, status *CompanyStatus) error {
-	tx, err := r.db.Begin()
-	if err != nil {
-		return fmt.Errorf("upsertCompanyStatus: begin: %v", err)
-	}
-
-	query := `insert into company_status (company_id, user_id, note, status, created_at) values ($1, $2, $3, $4, $5);`
-	return insertCompanyStatus(companyID, status, err, tx, query)
-}
-
-// Common access code across DB
-
-// This function will return a companyRepository for a specific database that requires specific handling of
-// queries such as Postgres and Oracle. Other databases such as SQLite and MySQL will get a generic repository.
-func getCompanyRepo(dbType string, db *sql.DB, logger log.Logger) companyRepository {
+	query := genericSelectCompanyStatus
 	switch dbType {
-	case "postgres":
-		return &postgresCompanyRepository{db, logger}
-	default:
-		return &genericSQLCompanyRepository{db, logger}
+	case `postgres`:
+		query = postgresSelectCompanyStatus
 	}
-}
+	stmt, err := r.db.Prepare(query)
 
-func queryCompanyStatus(companyID string, stmt *sql.Stmt, err error) (*CompanyStatus, error) {
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +63,17 @@ func queryCompanyStatus(companyID string, stmt *sql.Stmt, err error) (*CompanySt
 	return &status, nil
 }
 
-func insertCompanyStatus(companyID string, status *CompanyStatus, err error, tx *sql.Tx, query string) error {
+func (r *genericSQLCompanyRepository) upsertCompanyStatus(companyID string, status *CompanyStatus) error {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return fmt.Errorf("upsertCompanyStatus: begin: %v", err)
+	}
+
+	query := genericInsertCompanyStatus
+	switch dbType {
+	case `postgres`:
+		query = postgresInsertCompanyStatus
+	}
 	stmt, err := tx.Prepare(query)
 	if err != nil {
 		return fmt.Errorf("upsertCompanyStatus: prepare error=%v rollback=%v", err, tx.Rollback())
