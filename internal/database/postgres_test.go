@@ -11,8 +11,55 @@ import (
 	"github.com/go-kit/kit/log"
 )
 
-func TestPostgres__basic(t *testing.T) {
-	db := CreateTestPostgresDB(t)
+// Test against postgres 11.0
+func TestPostgres__basic_11(t *testing.T) {
+	db := CreateTestPostgresDB(t, "11.0")
+	defer db.Close()
+
+	if err := db.DB.Ping(); err != nil {
+		t.Fatal(err)
+	}
+
+	// create a phony Postgres
+	m := postgresConnection(log.NewNopLogger(), "user", "pass", "127.0.0.1:4432", "watchman")
+
+	conn, err := m.Connect()
+	defer func() {
+		if conn != nil {
+			conn.Close()
+		}
+	}()
+	if conn != nil || err == nil {
+		t.Fatalf("conn=%#v expected error", conn)
+	}
+}
+
+// Test against postgres 10.0
+func TestPostgres__basic_10(t *testing.T) {
+	db := CreateTestPostgresDB(t, "10.0")
+	defer db.Close()
+
+	if err := db.DB.Ping(); err != nil {
+		t.Fatal(err)
+	}
+
+	// create a phony Postgres
+	m := postgresConnection(log.NewNopLogger(), "user", "pass", "127.0.0.1:4432", "watchman")
+
+	conn, err := m.Connect()
+	defer func() {
+		if conn != nil {
+			conn.Close()
+		}
+	}()
+	if conn != nil || err == nil {
+		t.Fatalf("conn=%#v expected error", conn)
+	}
+}
+
+// Test against postgres 9.1
+func TestPostgres__basic_91(t *testing.T) {
+	db := CreateTestPostgresDB(t, "9.1")
 	defer db.Close()
 
 	if err := db.DB.Ping(); err != nil {

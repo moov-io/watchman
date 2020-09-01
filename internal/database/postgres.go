@@ -161,7 +161,7 @@ func (r *TestPostgresDB) Close() error {
 // as a clean Postgres database. All migrations are ran on the db before.
 //
 // Callers should call close on the returned *TestPostgresDB.
-func CreateTestPostgresDB(t *testing.T) *TestPostgresDB {
+func CreateTestPostgresDB(t *testing.T, version string) *TestPostgresDB {
 	if testing.Short() {
 		t.Skip("-short flag enabled")
 	}
@@ -175,7 +175,7 @@ func CreateTestPostgresDB(t *testing.T) *TestPostgresDB {
 	}
 	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
 		Repository: "postgres",
-		Tag:        "11.0",
+		Tag:        version,
 		Env: []string{
 			"POSTGRES_PASSWORD=secret",
 			"POSTGRES_DB=watchman",

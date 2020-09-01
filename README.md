@@ -186,7 +186,7 @@ Refer to the mysql driver documentation for [connection parameters](https://gith
 
 Refer to the sqlite driver documentation for [connection parameters](https://github.com/mattn/go-sqlite3#connection-string).
 
-##### Postgres
+##### Postgres ( Version 9.1 and above)
 
 - `POSTGRES_DB`: Name of database to connect into.
 - `PGSSLMODE`: Chose what SSL connection option to use. (Default: disable)
