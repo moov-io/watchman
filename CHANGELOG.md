@@ -1,3 +1,15 @@
+## v0.14.3 (Released 2020-09-01)
+
+BUG FIXES
+
+- csl: fix reader to handle files with unique IDs
+- search: reference appropriate SDN for webhook body
+- webhooks: handle nil Response without a panic
+
+BUILD
+
+- webui: run 'npm audit fix'
+
 ## v0.14.2 (Released 2020-07-08)
 
 BUILD
