@@ -12,7 +12,7 @@ import (
 )
 
 // Test against postgres 11.0
-func TestPostgres__basic_11(t *testing.T) {
+func TestPostgres__basic_11_0(t *testing.T) {
 	db := CreateTestPostgresDB(t, "11.0")
 	defer db.Close()
 
@@ -35,7 +35,7 @@ func TestPostgres__basic_11(t *testing.T) {
 }
 
 // Test against postgres 10.0
-func TestPostgres__basic_10(t *testing.T) {
+func TestPostgres__basic_10_0(t *testing.T) {
 	db := CreateTestPostgresDB(t, "10.0")
 	defer db.Close()
 
@@ -58,7 +58,7 @@ func TestPostgres__basic_10(t *testing.T) {
 }
 
 // Test against postgres 9.1
-func TestPostgres__basic_91(t *testing.T) {
+func TestPostgres__basic_9_1(t *testing.T) {
 	db := CreateTestPostgresDB(t, "9.1")
 	defer db.Close()
 
