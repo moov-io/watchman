@@ -167,4 +167,9 @@ func TestWebhook_record(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &genericSQLWebhookRepository{mysqlDB.DB})
+
+	// Postgres tests
+	postgres := database.CreateTestMySQLDB(t)
+	defer postgres.Close()
+	check(t, &genericSQLWebhookRepository{postgres.DB})
 }

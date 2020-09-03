@@ -53,6 +53,11 @@ func TestCompanyWatch(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &genericSQLWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+
+	// Postgres tests
+	postgres := database.CreateTestPostgresDB(t)
+	defer postgres.Close()
+	check(t, &genericSQLWatchRepository{postgres.DB, log.NewNopLogger()})
 }
 
 func TestCompanyNameWatch(t *testing.T) {
@@ -88,6 +93,11 @@ func TestCompanyNameWatch(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &genericSQLWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+
+	// Postgres tests
+	postgres := database.CreateTestPostgresDB(t)
+	defer postgres.Close()
+	check(t, &genericSQLWatchRepository{postgres.DB, log.NewNopLogger()})
 }
 
 func TestCustomerWatch(t *testing.T) {
@@ -123,6 +133,11 @@ func TestCustomerWatch(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &genericSQLWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+
+	// Postgres tests
+	postgres := database.CreateTestPostgresDB(t)
+	defer postgres.Close()
+	check(t, &genericSQLWatchRepository{postgres.DB, log.NewNopLogger()})
 }
 
 func TestCustomerNameWatch(t *testing.T) {
@@ -158,6 +173,11 @@ func TestCustomerNameWatch(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &genericSQLWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+
+	// Postgres tests
+	postgres := database.CreateTestPostgresDB(t)
+	defer postgres.Close()
+	check(t, &genericSQLWatchRepository{postgres.DB, log.NewNopLogger()})
 }
 
 func TestWatchCursor_ID(t *testing.T) {
@@ -210,6 +230,11 @@ func TestWatchCursor_ID(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &genericSQLWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+
+	// Postgres tests
+	postgres := database.CreateTestPostgresDB(t)
+	defer postgres.Close()
+	check(t, &genericSQLWatchRepository{postgres.DB, log.NewNopLogger()})
 }
 
 func TestWatchCursor_Names(t *testing.T) {
@@ -268,4 +293,9 @@ func TestWatchCursor_Names(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &genericSQLWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+
+	// Postgres tests
+	postgres := database.CreateTestPostgresDB(t)
+	defer postgres.Close()
+	check(t, &genericSQLWatchRepository{postgres.DB, log.NewNopLogger()})
 }

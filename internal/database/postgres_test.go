@@ -13,53 +13,7 @@ import (
 
 // Test against postgres 11.0
 func TestPostgres__basic_12(t *testing.T) {
-	db := CreateTestPostgresDB(t, "12.4")
-	defer db.Close()
-
-	if err := db.DB.Ping(); err != nil {
-		t.Fatal(err)
-	}
-
-	// create a phony Postgres
-	m := postgresConnection(log.NewNopLogger(), "user", "pass", "127.0.0.1:4432", "watchman")
-
-	conn, err := m.Connect()
-	defer func() {
-		if conn != nil {
-			conn.Close()
-		}
-	}()
-	if conn != nil || err == nil {
-		t.Fatalf("conn=%#v expected error", conn)
-	}
-}
-
-// Test against postgres 11.9
-func TestPostgres__basic_11(t *testing.T) {
-	db := CreateTestPostgresDB(t, "11.9")
-	defer db.Close()
-
-	if err := db.DB.Ping(); err != nil {
-		t.Fatal(err)
-	}
-
-	// create a phony Postgres
-	m := postgresConnection(log.NewNopLogger(), "user", "pass", "127.0.0.1:4432", "watchman")
-
-	conn, err := m.Connect()
-	defer func() {
-		if conn != nil {
-			conn.Close()
-		}
-	}()
-	if conn != nil || err == nil {
-		t.Fatalf("conn=%#v expected error", conn)
-	}
-}
-
-// Test against postgres 10.0
-func TestPostgres__basic_10(t *testing.T) {
-	db := CreateTestPostgresDB(t, "10.14")
+	db := CreateTestPostgresDB(t)
 	defer db.Close()
 
 	if err := db.DB.Ping(); err != nil {

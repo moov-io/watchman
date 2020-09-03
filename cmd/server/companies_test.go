@@ -119,6 +119,11 @@ func TestCompany_getById(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+
+	// Postgres tests
+	postgres := database.CreateTestPostgresDB(t)
+	defer postgres.Close()
+	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
 
 func TestCompany_get(t *testing.T) {
@@ -168,6 +173,11 @@ func TestCompany_get(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+
+	// Postgres tests
+	postgres := database.CreateTestPostgresDB(t)
+	defer postgres.Close()
+	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
 
 func TestCompany_EmptyHTTP(t *testing.T) {
@@ -224,6 +234,11 @@ func TestCompany_addWatch(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+
+	// Postgres tests
+	postgres := database.CreateTestPostgresDB(t)
+	defer postgres.Close()
+	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
 
 func TestCompany_addWatchNoBody(t *testing.T) {
@@ -278,6 +293,11 @@ func TestCompany_addWatchMissingAuthToken(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+
+	// Postgres tests
+	postgres := database.CreateTestPostgresDB(t)
+	defer postgres.Close()
+	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
 
 func TestCompany_addNameWatch(t *testing.T) {
@@ -320,6 +340,11 @@ func TestCompany_addNameWatch(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+
+	// Postgres tests
+	postgres := database.CreateTestPostgresDB(t)
+	defer postgres.Close()
+	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
 
 func TestCompany_addCompanyNameWatchNoBody(t *testing.T) {
@@ -366,6 +391,11 @@ func TestCompany_addCompanyNameWatchNoBody(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+
+	// Postgres tests
+	postgres := database.CreateTestPostgresDB(t)
+	defer postgres.Close()
+	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
 
 func TestCompany_updateUnsafe(t *testing.T) {
@@ -400,6 +430,11 @@ func TestCompany_updateUnsafe(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+
+	// Postgres tests
+	postgres := database.CreateTestPostgresDB(t)
+	defer postgres.Close()
+	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
 
 func TestCompany_updateException(t *testing.T) {
@@ -434,6 +469,11 @@ func TestCompany_updateException(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+
+	// Postgres tests
+	postgres := database.CreateTestPostgresDB(t)
+	defer postgres.Close()
+	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
 
 func TestCompany_updateUnknown(t *testing.T) {
@@ -468,6 +508,11 @@ func TestCompany_updateUnknown(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+
+	// Postgres tests
+	postgres := database.CreateTestPostgresDB(t)
+	defer postgres.Close()
+	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
 
 func TestCompany_updateNoUserId(t *testing.T) {
@@ -499,6 +544,11 @@ func TestCompany_updateNoUserId(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+
+	// Postgres tests
+	postgres := database.CreateTestPostgresDB(t)
+	defer postgres.Close()
+	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
 
 func TestCompany_updateNoBody(t *testing.T) {
@@ -531,6 +581,11 @@ func TestCompany_updateNoBody(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+
+	// Postgres tests
+	postgres := database.CreateTestPostgresDB(t)
+	defer postgres.Close()
+	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
 
 func TestCompany_removeWatch(t *testing.T) {
@@ -563,6 +618,11 @@ func TestCompany_removeWatch(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+
+	// Postgres tests
+	postgres := database.CreateTestPostgresDB(t)
+	defer postgres.Close()
+	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
 
 func TestCompany_removeNameWatch(t *testing.T) {
@@ -596,6 +656,11 @@ func TestCompany_removeNameWatch(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+
+	// Postgres tests
+	postgres := database.CreateTestPostgresDB(t)
+	defer postgres.Close()
+	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
 
 func TestCompanyRepository(t *testing.T) {
@@ -674,4 +739,9 @@ func TestCompanyRepository(t *testing.T) {
 	mysqlDB := database.CreateTestMySQLDB(t)
 	defer mysqlDB.Close()
 	check(t, &genericSQLCompanyRepository{mysqlDB.DB, log.NewNopLogger()})
+
+	// Postgres tests
+	postgres := database.CreateTestPostgresDB(t)
+	defer postgres.Close()
+	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
