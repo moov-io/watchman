@@ -81,7 +81,7 @@ func TestPostgres__basic_10(t *testing.T) {
 }
 
 func TestPostgresUniqueViolation(t *testing.T) {
-	err := errors.New(`problem upserting depository="534ff5dba099ba334eeedd54773d11733ababdf5", userId="d341ee56453abb34ac899871ee266cd88321aa23": [Err] ERROR:  duplicate key value violates unique constraint "depository"`)
+	err := errors.New(`problem upserting depository="534ff5dba099ba334eeedd54773d11733ababdf5", userId="d341ee56453abb34ac899871ee266cd88321aa23": [Err] ERROR:  duplicate key value violates unique constraint`)
 	if !UniqueViolation(err) {
 		t.Error("should have matched unique violation")
 	}

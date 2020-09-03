@@ -216,7 +216,7 @@ func CreateTestPostgresDB(t *testing.T, version string) *TestPostgresDB {
 // PostgresUniqueViolation returns true when the provided error matches the Postgres code
 // for duplicate entries (violating a unique table constraint).
 func PostgresUniqueViolation(err error) bool {
-	match := strings.Contains(err.Error(), fmt.Sprintf("[Err] ERROR:  duplicate key value violates unique constraint"))
+	match := strings.Contains(err.Error(), "[Err] ERROR:  duplicate key value violates unique constraint")
 	if e, ok := err.(*pgx.SerializationError); ok {
 		return match || e.Error() == postgresErrDuplicateKey
 	}
