@@ -15,9 +15,14 @@ import (
 
 func createTestWatchRepository(t *testing.T) *genericSQLWatchRepository {
 	t.Helper()
-
-	db := database.CreateTestSqliteDB(t)
-	return &genericSQLWatchRepository{db.DB, log.NewNopLogger()}
+	switch dbType {
+	case `postgres`:
+		db := database.CreateTestPostgresDB(t)
+		return &genericSQLWatchRepository{db.DB, log.NewNopLogger()}
+	default:
+		db := database.CreateTestSqliteDB(t)
+		return &genericSQLWatchRepository{db.DB, log.NewNopLogger()}
+	}
 }
 
 func TestCompanyWatch(t *testing.T) {

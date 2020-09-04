@@ -58,8 +58,15 @@ var (
 func createTestCustomerRepository(t *testing.T) *genericSQLCustomerRepository {
 	t.Helper()
 
-	db := database.CreateTestSqliteDB(t)
-	return &genericSQLCustomerRepository{db.DB, log.NewNopLogger()}
+	switch dbType {
+	case `postgres`:
+		db := database.CreateTestPostgresDB(t)
+		return &genericSQLCustomerRepository{db.DB, log.NewNopLogger()}
+	default:
+		db := database.CreateTestSqliteDB(t)
+		return &genericSQLCustomerRepository{db.DB, log.NewNopLogger()}
+	}
+
 }
 
 func TestCustomers__id(t *testing.T) {
