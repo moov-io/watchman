@@ -123,7 +123,7 @@ func TestDownload_record(t *testing.T) {
 	check(t, &genericSQLDownloadRepository{mysqlDB.DB, log.NewNopLogger()})
 
 	// Postgres tests
-	postgres := database.CreateTestMySQLDB(t)
+	postgres := database.CreateTestPostgresDB(t)
 	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLDownloadRepository{postgres.DB, log.NewNopLogger()})
@@ -168,7 +168,7 @@ func TestDownload_route(t *testing.T) {
 	check(t, &genericSQLDownloadRepository{mysqlDB.DB, log.NewNopLogger()})
 
 	// Postgres tests
-	postgres := database.CreateTestMySQLDB(t)
+	postgres := database.CreateTestPostgresDB(t)
 	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLDownloadRepository{postgres.DB, log.NewNopLogger()})

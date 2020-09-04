@@ -169,7 +169,7 @@ func TestWebhook_record(t *testing.T) {
 	check(t, &genericSQLWebhookRepository{mysqlDB.DB})
 
 	// Postgres tests
-	postgres := database.CreateTestMySQLDB(t)
+	postgres := database.CreateTestPostgresDB(t)
 	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLWebhookRepository{postgres.DB})
