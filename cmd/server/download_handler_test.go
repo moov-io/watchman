@@ -61,5 +61,6 @@ func TestDownload__manualRefreshPath(t *testing.T) {
 	// Postgres tests
 	postgres := database.CreateTestPostgresDB(t)
 	defer postgres.Close()
+	dbType = `postgres`
 	check(t, &genericSQLDownloadRepository{postgres.DB, log.NewNopLogger()})
 }

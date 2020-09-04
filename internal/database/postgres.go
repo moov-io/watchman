@@ -19,7 +19,6 @@ import (
 	"github.com/lopezator/migrator"
 	"github.com/moov-io/base/docker"
 	"github.com/ory/dockertest/v3"
-	dtdocker "github.com/ory/dockertest/v3/docker"
 	stdprom "github.com/prometheus/client_golang/prometheus"
 )
 
@@ -68,19 +67,19 @@ var (
 		),
 		execsql(
 			"add__denied_persons__to__ofac_download_stats",
-			"alter table ofac_download_stats add column denied_persons int4 not null default 0;",
+			`alter table ofac_download_stats add column denied_persons int4 not null default 0;`,
 		),
 		execsql(
 			"rename_ofac_download_stats",
-			"alter table ofac_download_stats rename to download_stats",
+			`alter table ofac_download_stats rename to download_stats`,
 		),
 		execsql(
 			"add_sectoral_sanctions_to_download_stats",
-			"alter table download_stats add column sectoral_sanctions int4 not null default 0;",
+			`alter table download_stats add column sectoral_sanctions int4 not null default 0;`,
 		),
 		execsql(
 			"add__bis_entities__to_download_stats",
-			"alter table download_stats add column bis_entities int4 not null default 0;",
+			`alter table download_stats add column bis_entities int4 not null default 0;`,
 		),
 	)
 )
@@ -180,18 +179,12 @@ func CreateTestPostgresDB(t *testing.T) *TestPostgresDB {
 			"POSTGRES_DB=watchman",
 			"PGSSLMODE=disable",
 		},
-		ExposedPorts: []string{"5432"},
-		PortBindings: map[dtdocker.Port][]dtdocker.PortBinding{
-			"5432": {
-				{HostIP: "0.0.0.0", HostPort: "5432"},
-			},
-		},
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 	err = pool.Retry(func() error {
-		db, err := sql.Open("pgx", fmt.Sprintf("postgres://postgres:secret@localhost:%s/%s?sslmode=disable", resource.GetPort("5432/tcp"), "watchman"))
+		db, err := sql.Open("pgx", fmt.Sprintf("postgres://postgres:secret@localhost:%s/watchman?sslmode=disable", resource.GetPort("5432/tcp")))
 		if err != nil {
 			return err
 		}
@@ -204,7 +197,7 @@ func CreateTestPostgresDB(t *testing.T) *TestPostgresDB {
 	}
 
 	logger := log.NewNopLogger()
-	address := fmt.Sprintf("localhost:%s", "5432") //resource.GetPort("5432/tcp"))
+	address := fmt.Sprintf("localhost:%s", resource.GetPort("5432/tcp"))
 
 	db, err := postgresConnection(logger, "postgres", "secret", address, "watchman").Connect()
 	if err != nil {

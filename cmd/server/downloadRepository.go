@@ -17,7 +17,7 @@ const (
 	genericSelectDownloadStats = `select downloaded_at, sdns, alt_names, addresses, sectoral_sanctions, denied_persons, bis_entities from download_stats order by downloaded_at desc limit ?;`
 
 	postgresInsertDownloadStats = `insert into download_stats (downloaded_at, sdns, alt_names, addresses, sectoral_sanctions, denied_persons, bis_entities) values ($1, $2, $3, $4, $5, $6, $7);`
-	postgresSelectDownloadStats = `select downloaded_at, sdns, alt_names, addresses, sectoral_sanctions, denied_persons, bis_entities from download_stats order by downloaded_at desc limit ?;`
+	postgresSelectDownloadStats = `select downloaded_at, sdns, alt_names, addresses, sectoral_sanctions, denied_persons, bis_entities from download_stats order by downloaded_at desc limit $1;`
 )
 
 type genericSQLDownloadRepository struct {

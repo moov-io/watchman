@@ -12,7 +12,7 @@ import (
 )
 
 // Test against postgres 11.0
-func TestPostgres__basic_12(t *testing.T) {
+func TestPostgres__basic(t *testing.T) {
 	db := CreateTestPostgresDB(t)
 	defer db.Close()
 

@@ -122,6 +122,7 @@ func TestCompany_getById(t *testing.T) {
 
 	// Postgres tests
 	postgres := database.CreateTestPostgresDB(t)
+	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
@@ -176,6 +177,7 @@ func TestCompany_get(t *testing.T) {
 
 	// Postgres tests
 	postgres := database.CreateTestPostgresDB(t)
+	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
@@ -237,6 +239,7 @@ func TestCompany_addWatch(t *testing.T) {
 
 	// Postgres tests
 	postgres := database.CreateTestPostgresDB(t)
+	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
@@ -296,6 +299,7 @@ func TestCompany_addWatchMissingAuthToken(t *testing.T) {
 
 	// Postgres tests
 	postgres := database.CreateTestPostgresDB(t)
+	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
@@ -343,6 +347,7 @@ func TestCompany_addNameWatch(t *testing.T) {
 
 	// Postgres tests
 	postgres := database.CreateTestPostgresDB(t)
+	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
@@ -394,6 +399,7 @@ func TestCompany_addCompanyNameWatchNoBody(t *testing.T) {
 
 	// Postgres tests
 	postgres := database.CreateTestPostgresDB(t)
+	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
@@ -433,6 +439,7 @@ func TestCompany_updateUnsafe(t *testing.T) {
 
 	// Postgres tests
 	postgres := database.CreateTestPostgresDB(t)
+	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
@@ -472,6 +479,7 @@ func TestCompany_updateException(t *testing.T) {
 
 	// Postgres tests
 	postgres := database.CreateTestPostgresDB(t)
+	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
@@ -511,6 +519,7 @@ func TestCompany_updateUnknown(t *testing.T) {
 
 	// Postgres tests
 	postgres := database.CreateTestPostgresDB(t)
+	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
@@ -547,6 +556,7 @@ func TestCompany_updateNoUserId(t *testing.T) {
 
 	// Postgres tests
 	postgres := database.CreateTestPostgresDB(t)
+	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
@@ -584,6 +594,7 @@ func TestCompany_updateNoBody(t *testing.T) {
 
 	// Postgres tests
 	postgres := database.CreateTestPostgresDB(t)
+	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
@@ -621,6 +632,7 @@ func TestCompany_removeWatch(t *testing.T) {
 
 	// Postgres tests
 	postgres := database.CreateTestPostgresDB(t)
+	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
@@ -659,6 +671,7 @@ func TestCompany_removeNameWatch(t *testing.T) {
 
 	// Postgres tests
 	postgres := database.CreateTestPostgresDB(t)
+	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }
@@ -742,6 +755,7 @@ func TestCompanyRepository(t *testing.T) {
 
 	// Postgres tests
 	postgres := database.CreateTestPostgresDB(t)
+	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLCompanyRepository{postgres.DB, log.NewNopLogger()})
 }

@@ -56,6 +56,7 @@ func TestCompanyWatch(t *testing.T) {
 
 	// Postgres tests
 	postgres := database.CreateTestPostgresDB(t)
+	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLWatchRepository{postgres.DB, log.NewNopLogger()})
 }
@@ -96,6 +97,7 @@ func TestCompanyNameWatch(t *testing.T) {
 
 	// Postgres tests
 	postgres := database.CreateTestPostgresDB(t)
+	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLWatchRepository{postgres.DB, log.NewNopLogger()})
 }
@@ -136,6 +138,7 @@ func TestCustomerWatch(t *testing.T) {
 
 	// Postgres tests
 	postgres := database.CreateTestPostgresDB(t)
+	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLWatchRepository{postgres.DB, log.NewNopLogger()})
 }
@@ -176,6 +179,7 @@ func TestCustomerNameWatch(t *testing.T) {
 
 	// Postgres tests
 	postgres := database.CreateTestPostgresDB(t)
+	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLWatchRepository{postgres.DB, log.NewNopLogger()})
 }
@@ -233,6 +237,7 @@ func TestWatchCursor_ID(t *testing.T) {
 
 	// Postgres tests
 	postgres := database.CreateTestPostgresDB(t)
+	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLWatchRepository{postgres.DB, log.NewNopLogger()})
 }
@@ -296,6 +301,7 @@ func TestWatchCursor_Names(t *testing.T) {
 
 	// Postgres tests
 	postgres := database.CreateTestPostgresDB(t)
+	dbType = `postgres`
 	defer postgres.Close()
 	check(t, &genericSQLWatchRepository{postgres.DB, log.NewNopLogger()})
 }
