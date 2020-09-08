@@ -84,6 +84,10 @@ func (s *searcher) spawnResearching(logger log.Logger, companyRepo companyReposi
 					s.logger.Log("search", fmt.Sprintf("async: watch %s: %v", watches[i].id, err))
 					continue // skip to next watch since we failed somewhere
 				}
+				if body == nil {
+					s.logger.Log("search", fmt.Sprintf("async: no body rendered for watchID=%s - skipping", watches[i].id))
+					continue
+				}
 
 				// Send HTTP webhook
 				now := time.Now()
