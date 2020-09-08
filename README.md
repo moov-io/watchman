@@ -25,24 +25,20 @@ Lists included in search are:
 
 All United States or European Union companies are required to comply with various regulations and sanction lists (such as the US Patriot Act requiring compliance with the BIS Denied Person's List). Moov's primary usage for this project is with ACH origination in our [paygate](https://github.com/moov-io/paygate) project.
 
-To get started using watchman download [the latest release](https://github.com/moov-io/watchman/releases/latest) or our [Docker image](https://hub.docker.com/r/moov/watchman/tags). We also have a [demo instance](https://moov.io/watchman/) as part of Moov's demo environment. We also have docker images for [OpenShift](https://quay.io/repository/moov/watchman?tab=tags).
+To get started using Watchman try our [Docker image](https://hub.docker.com/r/moov/watchman/tags) (or [OpenShift](https://quay.io/repository/moov/watchman?tab=tags) images) with the steps below. We also have a [demo instance](https://moov.io/watchman/) as part of Moov's demo environment. We offer [binary downloads](https://github.com/moov-io/watchman/releases/latest) without the included WebUI as well
 
 Note: We also offer a `moov/watchman:static` Docker image with files from 2019. This image can be useful for faster local testing or consistent results.
 
-```
-# Run as a binary
-$ wget https://github.com/moov-io/watchman/releases/download/v0.14.0/watchman-darwin-amd64
-$ chmod +x watchman-darwin-amd64
-$ ./watchman-darwin-amd64
-ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting watchman server version v0.14.0"
-...
+#### Run as a Docker image
 
-# Run as a Docker image
+```
 $ docker run -p 8084:8084 -p 9094:9094 -it moov/watchman:latest
 ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting watchman server version v0.14.0"
-...
+```
 
-# Perform a basic search
+#### Perform a basic search
+
+```
 $ curl -s localhost:8084/search?q=...
 {
     "SDNs": [{
@@ -119,6 +115,15 @@ $ curl -s localhost:8084/search?q=...
      }],
     "refreshedAt": "2019-12-03T15:31:41.81849-07:00"
 }
+```
+
+#### Run as a binary
+
+```
+$ wget https://github.com/moov-io/watchman/releases/download/v0.14.0/watchman-darwin-amd64
+$ chmod +x watchman-darwin-amd64
+$ ./watchman-darwin-amd64
+ts=2019-02-05T00:03:31.9583844Z caller=main.go:42 startup="Starting watchman server version v0.14.0"
 ```
 
 ### Web UI
