@@ -4,9 +4,15 @@ BREAKING CHANGES
 
 Watchman has upgraded the implementation of the Jaro-Winkler string comparison algorithm to fix bugs and match the original paper's reference implementation. After upgrading Watchman you will notice higher match percentages for most comparisons. See [pull request #282](https://github.com/moov-io/watchman/pull/282) for the change.
 
+BUG FIXES
+
+- search: skip calling webhooks if we don't render a body
+- search: test body creation in async methods
+
 BUILD
 
 - chore(deps): update golang docker tag to v1.15
+- docs: re-order "getting started" to suggest docker image
 
 ## v0.14.3 (Released 2020-09-01)
 
