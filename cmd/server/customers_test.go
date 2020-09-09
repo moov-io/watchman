@@ -51,7 +51,8 @@ var (
 				AlternateName: "NATIONAL BANK OF CUBA",
 			},
 		}),
-		pipe: noLogPipeliner,
+		pipe:   noLogPipeliner,
+		logger: log.NewNopLogger(),
 	}
 )
 

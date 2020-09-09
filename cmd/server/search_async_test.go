@@ -19,6 +19,80 @@ func TestSearchAsync_batchSize(t *testing.T) {
 	}
 }
 
+func TestSearchAsync__renderBody(t *testing.T) {
+	w := watch{
+		id:           "12345",
+		customerID:   "306",
+		customerName: "BANCO NACIONAL DE CUBA",
+		webhook:      "https://example.com",
+		authToken:    "secret-value",
+	}
+
+	companyRepo := createTestCompanyRepository(t)
+	defer companyRepo.close()
+	customerRepo := createTestCustomerRepository(t)
+	defer customerRepo.close()
+
+	body, err := customerSearcher.renderBody(w, companyRepo, customerRepo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if body == nil {
+		t.Fatal("nil Body")
+	}
+
+	w = watch{
+		id:          "54321",
+		companyID:   "21206",
+		companyName: "AL-HISN",
+		webhook:     "https://moov.io",
+		authToken:   "hidden",
+	}
+	body, err = companySearcher.renderBody(w, companyRepo, customerRepo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if body == nil {
+		t.Fatal("nil Body")
+	}
+}
+
+func TestSearchAsync__renderBodyName(t *testing.T) {
+	w := watch{
+		id:           "12345",
+		customerName: "BANCO NACIONAL DE CUBA",
+		webhook:      "https://example.com",
+		authToken:    "secret-value",
+	}
+
+	companyRepo := createTestCompanyRepository(t)
+	defer companyRepo.close()
+	customerRepo := createTestCustomerRepository(t)
+	defer customerRepo.close()
+
+	body, err := customerSearcher.renderBody(w, companyRepo, customerRepo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if body == nil {
+		t.Fatal("nil Body")
+	}
+
+	w = watch{
+		id:          "54321",
+		companyName: "AL-HISN",
+		webhook:     "https://moov.io",
+		authToken:   "hidden",
+	}
+	body, err = companySearcher.renderBody(w, companyRepo, customerRepo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if body == nil {
+		t.Fatal("nil Body")
+	}
+}
+
 func TestSearchAsync_getCompanyBody(t *testing.T) {
 	repo := createTestCompanyRepository(t)
 	defer repo.close()
