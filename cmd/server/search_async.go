@@ -47,42 +47,10 @@ func (s *searcher) spawnResearching(logger log.Logger, companyRepo companyReposi
 				break
 			}
 			for i := range watches {
-				var body *bytes.Buffer
-				var err error
-
-				// Perform a query (ID watches) or search (name watches) and encode the model in JSON for calling the webhook.
-				switch {
-				case watches[i].customerID != "":
-					s.logger.Log("search", fmt.Sprintf("async: watch %s for customer %s found", watches[i].id, watches[i].customerID))
-					body, err = getCustomerBody(s, watches[i].id, watches[i].customerID, 1.0, custRepo)
-
-				case watches[i].customerName != "":
-					s.logger.Log("search", fmt.Sprintf("async: name watch '%s' for customer %s found", watches[i].customerName, watches[i].id))
-					sdns := s.TopSDNs(5, watches[i].customerName)
-					for j := range sdns {
-						if strings.EqualFold(sdns[j].SDNType, "individual") {
-							body, err = getCustomerBody(s, watches[i].id, sdns[j].EntityID, sdns[j].match, custRepo)
-							break
-						}
-					}
-
-				case watches[i].companyID != "":
-					s.logger.Log("search", fmt.Sprintf("async: watch %s for company %s found", watches[i].id, watches[i].companyID))
-					body, err = getCompanyBody(s, watches[i].id, watches[i].companyID, 1.0, companyRepo)
-
-				case watches[i].companyName != "":
-					s.logger.Log("search", fmt.Sprintf("async: name watch '%s' for company %s found", watches[i].companyName, watches[i].id))
-					sdns := s.TopSDNs(5, watches[i].companyName)
-					for j := range sdns {
-						if !strings.EqualFold(sdns[j].SDNType, "individual") {
-							body, err = getCompanyBody(s, watches[i].id, sdns[j].EntityID, sdns[j].match, companyRepo)
-							break
-						}
-					}
-				}
+				body, err := s.renderBody(watches[i], companyRepo, custRepo)
 				if err != nil {
 					s.logger.Log("search", fmt.Sprintf("async: watch %s: %v", watches[i].id, err))
-					continue // skip to next watch since we failed somewhere
+					continue
 				}
 				if body == nil {
 					s.logger.Log("search", fmt.Sprintf("async: no body rendered for watchID=%s - skipping", watches[i].id))
@@ -101,6 +69,38 @@ func (s *searcher) spawnResearching(logger log.Logger, companyRepo companyReposi
 			}
 		}
 	}
+}
+
+func (s *searcher) renderBody(w watch, companyRepo companyRepository, custRepo customerRepository) (*bytes.Buffer, error) {
+	// Perform a query (ID watches) or search (name watches) and encode the model in JSON for calling the webhook.
+	switch {
+	case w.customerID != "":
+		s.logger.Log("search", fmt.Sprintf("async: watch %s for customer %s found", w.id, w.customerID))
+		return getCustomerBody(s, w.id, w.customerID, 1.0, custRepo)
+
+	case w.customerName != "":
+		s.logger.Log("search", fmt.Sprintf("async: name watch '%s' for customer %s found", w.customerName, w.id))
+		sdns := s.TopSDNs(5, w.customerName)
+		for j := range sdns {
+			if strings.EqualFold(sdns[j].SDNType, "individual") {
+				return getCustomerBody(s, w.id, sdns[j].EntityID, sdns[j].match, custRepo)
+			}
+		}
+
+	case w.companyID != "":
+		s.logger.Log("search", fmt.Sprintf("async: watch %s for company %s found", w.id, w.companyID))
+		return getCompanyBody(s, w.id, w.companyID, 1.0, companyRepo)
+
+	case w.companyName != "":
+		s.logger.Log("search", fmt.Sprintf("async: name watch '%s' for company %s found", w.companyName, w.id))
+		sdns := s.TopSDNs(5, w.companyName)
+		for j := range sdns {
+			if !strings.EqualFold(sdns[j].SDNType, "individual") {
+				return getCompanyBody(s, w.id, sdns[j].EntityID, sdns[j].match, companyRepo)
+			}
+		}
+	}
+	return nil, nil
 }
 
 // getCustomerBody returns the JSON encoded form of a given customer by their EntityID

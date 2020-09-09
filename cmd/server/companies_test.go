@@ -49,7 +49,8 @@ var (
 				AlternateName: "AL-HISN FIRM",
 			},
 		}),
-		pipe: noLogPipeliner,
+		pipe:   noLogPipeliner,
+		logger: log.NewNopLogger(),
 	}
 )
 
