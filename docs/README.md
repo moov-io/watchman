@@ -4,52 +4,19 @@ Moov Watchman is an HTTP API and Go library to download, parse and offer search 
 
 [Live Demo](https://demo.moov.io/watchman/) | [API Endpoints](https://moov-io.github.io/watchman/api/) | [Admin API Endpoints](https://moov-io.github.io/watchman/admin/)
 
-![](images/webui.png)
+## Table of Contents
 
-## Running Moov Watchman
-
-You can download a [binary from GitHub](https://github.com/moov-io/watchman/releases) or a [Docker image](https://hub.docker.com/r/moov/watchman) for Watchman. Once downloaded you can start making requests against Watchman. The service will download the latest data on startup.
-
-```
-$ docker run -p 8084:8084 -p 9094:9094 -it moov/watchman:latest
-ts=2019-10-01T20:35:31.301254Z caller=main.go:54 startup="Starting watchman server version v0.13.0"
-ts=2019-10-01T20:35:31.301338Z caller=database.go:18 database="looking for  database provider"
-ts=2019-10-01T20:35:31.301376Z caller=sqlite.go:119 main="sqlite version 3.25.2"
-ts=2019-10-01T20:35:31.302651Z caller=download.go:80 download="Starting refresh of data"
-ts=2019-10-01T20:35:31.302651Z caller=main.go:118 admin="listening on :9094"
-ts=2019-10-01T20:35:31.530729Z caller=download.go:132 download="Finished refresh of data"
-ts=2019-10-01T20:35:31.532927Z caller=main.go:142 main="data refreshed - Addresses=11696 AltNames=9682 SDNs=7379 DeniedPersons=547"
-ts=2019-10-01T20:35:31.532962Z caller=main.go:218 main="Setting data refresh interval to 12h0m0s (default)"
-ts=2019-10-01T20:35:31.533312Z caller=main.go:182 startup="binding to :8084 for HTTP server"
-
-$ curl -s localhost:8084/search?name=...
-{
-  "SDNs": [
-    {
-      "entityID": "...",
-      "sdnName": "...",
-      "sdnType": "...",
-      "program": "...",
-      "title": "...",
-      "callSign": "...",
-      "vesselType": "...",
-      "tonnage": "...",
-      "grossRegisteredTonnage": "...",
-      "vesselFlag": "...",
-      "vesselOwner": "...",
-      "remarks": "..."
-    }
-  ],
-  "altNames": null,
-  "addresses": null
-}
-```
-
-An SDN (or entity) is an individual, group, or company which has or could do business with United States companies or individuals. US law requires checking OFAC data before transactions.
+- [Searching](./search.md)
+- [Production Runbook](./runbook.md)
+- [Pre-compute Pipeline](./pipeline.md)
+- [High Availability](./ha.md)
+- [File Structure](./file-structure.md)
 
 ## Web Interface
 
-Moov Watchman provides a web interface for easy browsing of the SDN and related data for mobile and desktop clients. Simply load the address of Watchman in a browser.
+Moov Watchman provides a [web interface](./webui.md) for easy browsing of the SDN and related data for mobile and desktop clients. Simply load the address of Watchman in a browser.
+
+![](images/webui.png)
 
 ## API Documentation
 
