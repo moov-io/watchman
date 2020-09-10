@@ -2,6 +2,21 @@
 
 Moov's Watchman product offers numerous search options for inspecting the SDN and related data.
 
+### Supported Combinations
+
+- All fields
+   - `?q=<string>`
+- Name Search
+   - `?name=<string>`
+   - An Address can be included
+      - `address=<string>&city=<string>&state=<string>&providence=<string>&zip=<string>&country=<string>`
+- ID search
+   - `?id=<string>`
+- Alt Name search
+   - `?altName=<string>`
+- Address search
+   - `&address=<string>&city=<string>&state=<string>&providence=<string>&zip=<string>&country=<string>`
+
 ### All In One
 
 The most common endpoint for searching across all data Watchman has indexed. To perform this search make an HTTP query like the following:
