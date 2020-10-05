@@ -196,6 +196,9 @@ func csvSDNCommentsFile(path string) (*Results, error) {
 	// Loop through lines & turn into object
 	var out []*SDNComments
 	for _, csvLine := range lines {
+		if len(csvLine) != 2 {
+			continue
+		}
 		csvLine := replaceNull(csvLine)
 		out = append(out, &SDNComments{
 			EntityID:        csvLine[0],
