@@ -1,4 +1,18 @@
-## v0.15.0 (Unreleased)
+## v0.15.1 (Released 2020-10-05)
+
+BUG FIXES
+
+- pkg/ofac: skip sdn_comments.csv lines if they contain the incorrect number of fields
+
+IMPROVEMENTS
+
+- docs/search: include supported combinations of query params
+
+BUILD
+
+- admin,client: update codegen, reference base Error model
+
+## v0.15.0 (Released 2020-09-09)
 
 BREAKING CHANGES
 
