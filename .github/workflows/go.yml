@@ -33,10 +33,10 @@ jobs:
       if: runner.os == 'Windows'
       run: choco install -y make mingw
 
-    - name: Generate Code
-      run: make admin && make client
-      # Ensure no changes are unstaged in ./admin/ or ./client/ after generating their codeg
-      # git diff-index --quiet HEAD -- ./admin/ ./client/
+    # - name: Generate Code
+    #   run: make admin && make client
+    #   # Ensure no changes are unstaged in ./admin/ or ./client/ after generating their codeg
+    #   # git diff-index --quiet HEAD -- ./admin/ ./client/
 
     - name: Check
       run: make build && make check

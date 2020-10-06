@@ -36,32 +36,24 @@ endif
 
 .PHONY: admin
 admin:
-ifeq ($(OS),Windows_NT)
-	@echo "Please generate ./admin/ on macOS or Linux, currently unsupported on windows."
-else
-# Versions from https://github.com/OpenAPITools/openapi-generator/releases
-	@chmod +x ./openapi-generator
 	@rm -rf ./admin
-	OPENAPI_GENERATOR_VERSION=4.2.3 ./openapi-generator generate --package-name admin -i openapi-admin.yaml -g go -o ./admin
-	rm -f admin/go.mod admin/go.sum
-	go fmt ./...
-	go test ./admin
-endif
+	docker run --rm \
+		-u $(USERID):$(GROUPID) \
+		-v ${PWD}:/local openapitools/openapi-generator-cli:v4.3.1 batch -- /local/.openapi-generator/admin-generator-config.yml
+	rm -f ./admin/go.mod ./admin/go.sum
+	gofmt -w ./admin/
+	go build github.com/moov-io/watchman/admin
 
 .PHONY: client
 client:
-ifeq ($(OS),Windows_NT)
-	@echo "Please generate ./client/ on macOS or Linux, currently unsupported on windows."
-else
-# Versions from https://github.com/OpenAPITools/openapi-generator/releases
-	@chmod +x ./openapi-generator
 	@rm -rf ./client
-	OPENAPI_GENERATOR_VERSION=4.2.3 ./openapi-generator generate --package-name client -i openapi.yaml -g go -o ./client
-	rm -f client/go.mod client/go.sum
-	go fmt ./...
+	docker run --rm \
+		-u $(USERID):$(GROUPID) \
+		-v ${PWD}:/local openapitools/openapi-generator-cli:v4.3.1 batch -- /local/.openapi-generator/client-generator-config.yml
+	rm -f ./client/go.mod ./client/go.sum
+	gofmt -w ./client/
 	go build github.com/moov-io/watchman/client
-	go test ./client
-endif
+
 
 .PHONY: clean
 clean:
@@ -71,7 +63,7 @@ else
 	@rm -rf ./bin/ cover.out coverage.txt lint-project.sh misspell* staticcheck* openapi-generator-cli-*.jar
 endif
 
-dist: clean admin client build
+dist: clean build
 ifeq ($(OS),Windows_NT)
 	CGO_ENABLED=1 GOOS=windows go build -o bin/watchman.exe github.com/moov-io/watchman/cmd/server
 else

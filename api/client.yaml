@@ -61,6 +61,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OfacCompany'
+        '400':
+          description: Error occured, see response body.
+          content:
+            application/json:
+              schema:
+                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
+
     put:
       tags: [Watchman]
       summary: Update company
@@ -94,6 +101,13 @@ paths:
       responses:
         '200':
           description: Company status updated
+        '400':
+          description: Error occured, see response body.
+          content:
+            application/json:
+              schema:
+                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
+
   /ofac/companies/{companyID}/watch:
     post:
       tags: [Watchman]
@@ -132,8 +146,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OfacWatch'
+        '400':
+          description: Error occured, see response body.
+          content:
+            application/json:
+              schema:
+                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
         '404':
           description: Company not found
+
   /ofac/companies/{companyID}/watch/{watchID}:
     delete:
       tags: [Watchman]
@@ -169,6 +190,13 @@ paths:
       responses:
         '200':
           description: Company watch removed
+        '400':
+          description: Error occured, see response body.
+          content:
+            application/json:
+              schema:
+                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
+
   /ofac/companies/watch:
     post:
       tags: [Watchman]
@@ -207,6 +235,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OfacWatch'
+        '400':
+          description: Error occured, see response body.
+          content:
+            application/json:
+              schema:
+                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
+
   /ofac/companies/watch/{watchID}:
     delete:
       tags: [Watchman]
@@ -241,6 +276,12 @@ paths:
       responses:
         '200':
           description: Company watch removed
+        '400':
+          description: Error occured, see response body.
+          content:
+            application/json:
+              schema:
+                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
 
   # Customer Endpoints
   /ofac/customers/{customerID}:
@@ -275,6 +316,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OfacCustomer'
+        '400':
+          description: Error occured, see response body.
+          content:
+            application/json:
+              schema:
+                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
+
     put:
       tags: [Watchman]
       summary: Update customer
@@ -308,6 +356,13 @@ paths:
       responses:
         '200':
           description: Customer status updated
+        '400':
+          description: Error occured, see response body.
+          content:
+            application/json:
+              schema:
+                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
+
   /ofac/customers/{customerID}/watch:
     post:
       tags: [Watchman]
@@ -346,8 +401,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OfacWatch'
+        '400':
+          description: Error occured, see response body.
+          content:
+            application/json:
+              schema:
+                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
         '404':
           description: Customer not found
+
   /ofac/customers/{customerID}/watch/{watchID}:
     delete:
       tags: [Watchman]
@@ -383,6 +445,13 @@ paths:
       responses:
         '200':
           description: Customer watch removed
+        '400':
+          description: Error occured, see response body.
+          content:
+            application/json:
+              schema:
+                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
+
   /ofac/customers/watch:
     post:
       tags: [Watchman]
@@ -421,6 +490,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OfacWatch'
+        '400':
+          description: Error occured, see response body.
+          content:
+            application/json:
+              schema:
+                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
+
   /ofac/customers/watch/{watchID}:
     delete:
       tags: [Watchman]
@@ -455,6 +531,12 @@ paths:
       responses:
         '200':
           description: Company or Customer watch removed
+        '400':
+          description: Error occured, see response body.
+          content:
+            application/json:
+              schema:
+                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
 
   # SDN Endpoints
   /ofac/sdn/{sdnID}:
@@ -489,6 +571,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OfacSDN'
+        '400':
+          description: Error occured, see response body.
+          content:
+            application/json:
+              schema:
+                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
+
   /ofac/sdn/{sdnID}/alts:
     get:
       tags: [Watchman]
@@ -520,6 +609,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OfacSDNAltNames'
+        '400':
+          description: Error occured, see response body.
+          content:
+            application/json:
+              schema:
+                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
+
   /ofac/sdn/{sdnID}/addresses:
     get:
       tags: [Watchman]
@@ -551,6 +647,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OfacEntityAddresses'
+        '400':
+          description: Error occured, see response body.
+          content:
+            application/json:
+              schema:
+                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
+
   # Search Endpoint
   /search:
     get:
@@ -654,6 +757,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Search'
+        '400':
+          description: Error occured, see response body.
+          content:
+            application/json:
+              schema:
+                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
 
   # Downloads endpoint
   /downloads:
@@ -687,6 +796,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Downloads'
+        '400':
+          description: Error occured, see response body.
+          content:
+            application/json:
+              schema:
+                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
   /ui/values/{key}:
     get:
       tags: [Watchman]
@@ -715,11 +830,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/UIKeys'
         '400':
-          description: Invalid key
+          description: Error occured, see response body.
           content:
             application/json:
               schema:
-                $ref: 'https://raw.githubusercontent.com/moov-io/api/master/openapi-common.yaml#/components/schemas/Error'
+                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
 
 components:
   schemas:
