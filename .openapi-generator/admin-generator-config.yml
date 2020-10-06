@@ -1,0 +1,9 @@
+inputSpec: /local/api/admin.yaml
+outputDir: /local/admin
+generatorName: go
+artifactId: "watchman-admin"
+gitUserId: moov-io
+gitRepoId: "watchman"
+additionalProperties:
+  isGoSubmodule: true
+  packageName: admin

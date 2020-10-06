@@ -50,7 +50,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: 'https://raw.githubusercontent.com/moov-io/api/master/openapi-common.yaml#/components/schemas/Error'
+                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
   /debug/sdn/{sdnId}:
     get:
       tags: ["Admin"]
@@ -77,7 +77,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: 'https://raw.githubusercontent.com/moov-io/api/master/openapi-common.yaml#/components/schemas/Error'
+                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
 
 components:
   schemas:
@@ -94,7 +94,7 @@ components:
     DebugSDN:
       properties:
         SDN:
-          $ref: './openapi.yaml#/components/schemas/OfacSDN'
+          $ref: './client.yaml#/components/schemas/OfacSDN'
         debug:
           $ref: '#/components/schemas/SDNDebugMetadata'
     DataRefresh:

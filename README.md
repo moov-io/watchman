@@ -9,7 +9,7 @@ moov-io/watchman
 
 Moov Watchman is an HTTP API and Go library to download, parse and offer search functions over numerous trade sanction lists from the United States, European Union governments, agencies, and non profits for complying with regional laws. Also included is a web UI and async webhook notification service to initiate processes on remote systems.
 
-Checkout our [demo instance of Watchman](https://moov.io/watchman/) or the [OpenAPI specification](https://github.com/moov-io/watchman/blob/master/openapi.yaml) for use with your favorite language.
+Checkout our [demo instance of Watchman](https://moov.io/watchman/) or the [OpenAPI specification](https://moov-io.github.io/watchman/api/) for use with your favorite language.
 
 Docs: [Project](https://moov-io.github.io/watchman/) | [API Endpoints](https://moov-io.github.io/watchman/api/) | [Admin API Endpoints](https://moov-io.github.io/watchman/admin/)
 
