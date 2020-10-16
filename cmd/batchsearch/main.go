@@ -101,6 +101,7 @@ func main() {
 			os.Exit(int(n))
 		}
 	}
+	log.Println("[SUCCESS] all tests passed")
 }
 
 func ping(ctx context.Context, api *moov.APIClient) error {
