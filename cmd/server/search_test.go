@@ -391,7 +391,7 @@ func TestSearch__TopAddresses(t *testing.T) {
 }
 
 func TestSearch__TopAddressFn(t *testing.T) {
-	addresses := addressSearcher.TopAddressesFn(1, topAddressesCountry("United Kingdom"))
+	addresses := TopAddressesFn(1, addressSearcher.Addresses, topAddressesCountry("United Kingdom"))
 	if len(addresses) == 0 {
 		t.Fatal("empty Addresses")
 	}

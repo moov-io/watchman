@@ -33,7 +33,7 @@ func TestSearch__Address(t *testing.T) {
 	}
 
 	if v := w.Body.String(); !strings.Contains(v, `"match":1`) {
-		t.Errorf("%#v", v)
+		t.Fatalf("%#v", v)
 	}
 
 	var wrapper struct {
@@ -41,6 +41,9 @@ func TestSearch__Address(t *testing.T) {
 	}
 	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
 		t.Fatal(err)
+	}
+	if len(wrapper.Addresses) == 0 {
+		t.Fatal("found no addresses")
 	}
 	if wrapper.Addresses[0].EntityID != "173" {
 		t.Errorf("%#v", wrapper.Addresses[0])
@@ -216,8 +219,9 @@ func TestSearch__NameAndAddress(t *testing.T) {
 	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
 		t.Fatal(err)
 	}
-	if len(wrapper.SDNs) != 0 || len(wrapper.Addresses) != 0 {
-		t.Fatalf("sdns=%#v addresses=%#v", wrapper.SDNs[0], wrapper.Addresses[0])
+	if len(wrapper.SDNs) != 1 || len(wrapper.Addresses) != 1 {
+		t.Errorf("sdns=%#v", wrapper.SDNs[0])
+		t.Fatalf("addresses=%#v", wrapper.Addresses[0])
 	}
 }
 

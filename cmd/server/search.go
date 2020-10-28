@@ -69,7 +69,10 @@ func (s *searcher) FindAddresses(limit int, id string) []*ofac.Address {
 }
 
 func (s *searcher) TopAddresses(limit int, reqAddress string) []Address {
-	return s.TopAddressesFn(limit, topAddressesAddress(reqAddress))
+	s.RLock()
+	defer s.RUnlock()
+
+	return TopAddressesFn(limit, s.Addresses, topAddressesAddress(reqAddress))
 }
 
 var (
@@ -121,23 +124,46 @@ var (
 	}
 )
 
-// TopAddressesFn performs an Address search over an arbitrary member of Address. It's mainly used to rank
-// and search over .Country, .CityStateProvincePostalCode.
+// FilterCountries returns Addresses that match a given country name.
 //
-// compare takes an Address (from s.Addresses) and is expected to extract some property to be compared
-// against a captured parameter (in a closure calling compare) to return an *item for final sorting.
-// See searchByAddress in search_handlers.go for an example
-func (s *searcher) TopAddressesFn(limit int, compare func(*Address) *item) []Address {
+// If name is blank all Addresses are returned.
+//
+// This filtering ignore case differences, but does require the name matches
+// to the underlying data.
+func (s *searcher) FilterCountries(name string) []*Address {
 	s.RLock()
 	defer s.RUnlock()
 
 	if len(s.Addresses) == 0 {
 		return nil
 	}
-	xs := newLargest(limit)
 
+	if name == "" {
+		out := make([]*Address, len(s.Addresses))
+		copy(out, s.Addresses)
+		return out
+	}
+	var out []*Address
 	for i := range s.Addresses {
-		xs.add(compare(s.Addresses[i]))
+		if strings.EqualFold(s.Addresses[i].country, name) {
+			out = append(out, s.Addresses[i])
+		}
+	}
+	return out
+}
+
+// TopAddressesFn performs a ranked search over an arbitrary set of Address fields.
+//
+// compare takes an Address (from s.Addresses) and is expected to extract some property to be compared
+// against a captured parameter (in a closure calling compare) to return an *item for final sorting.
+// See searchByAddress in search_handlers.go for an example
+func TopAddressesFn(limit int, addresses []*Address, compare func(*Address) *item) []Address {
+	if len(addresses) == 0 {
+		return nil
+	}
+	xs := newLargest(limit)
+	for i := range addresses {
+		xs.add(compare(addresses[i]))
 	}
 	return largestToAddresses(xs)
 }
