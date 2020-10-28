@@ -1,3 +1,12 @@
+## v0.15.3 (Released 2020-10-28)
+
+BUG FIXES
+
+- search: filter countries rather than rank
+   - Previously we would only include the top N (`?limit` query param) results by country which could exclude valid search results from the final returend list. Now we filter the list and rank according to all data records matching the specified country.
+- search: OR NameAndAddress results
+   - Previous we would use AND semantics for returning "name and address" results even though they populated two different JSON arrays. Now we return the highest N `SDNs` and `Addresses` when both query params are specified.
+
 ## v0.15.2 (Released 2020-10-28)
 
 BUG FIXES
