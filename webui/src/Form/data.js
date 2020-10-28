@@ -1,71 +1,7 @@
-import { makeOptionData } from "utils";
-
-export const types = ["All", "Aircraft", "Entity", "Individual", "Vessel"];
-export const typeOptionData = makeOptionData(types);
-
-const programs = [
-  "All",
-  "561-Related",
-  "BALKANS",
-  "BELARUS",
-  "BURUNDI",
-  "CAATSA - RUSSIA",
-  "CAR",
-  "CUBA",
-  "CYBER2",
-  "DARFUR",
-  "DPRK",
-  "DPRK2",
-  "DPRK3",
-  "DPRK4",
-  "DRCONGO",
-  "FSE-IR",
-  "FSE-SY",
-  "FTO",
-  "GLOMAG",
-  "HIFPAA",
-  "HRIT-IR",
-  "HRIT-SY",
-  "IFCA",
-  "IFSR",
-  "IRAN",
-  "IRAN-EO13846",
-  "IRAN-EO13876",
-  "IRAN-HR",
-  "IRAN-TRA",
-  "IRAQ2",
-  "IRAQ3",
-  "IRGC",
-  "ISA",
-  "LEBANON",
-  "LIBYA2",
-  "LIBYA3",
-  "MAGNIT",
-  "NICARAGUA",
-  "NICARAGUA-NHRAA",
-  "NPWMD",
-  "NS-PLC",
-  "SDGT",
-  "SDNT",
-  "SDNTK",
-  "SDT",
-  "SOMALIA",
-  "SOUTH SUDAN",
-  "SYRIA",
-  "TCO",
-  "UKRAINE-EO13660",
-  "UKRAINE-EO13661",
-  "UKRAINE-EO13662",
-  "UKRAINE-EO13685",
-  "VENEZUELA",
-  "VENEZUELA-EO13850",
-  "YEMEN",
-  "ZIMBABWE"
-];
-export const programOptionData = makeOptionData(programs);
+import { allOption } from "./options";
+import { makeOptionData } from "../utils";
 
 const countries = [
-  "All",
   "Afghanistan",
   "Albania",
   "Algeria",
@@ -236,7 +172,7 @@ const countries = [
   "Zimbabwe"
 ];
 
-export const countryOptionData = makeOptionData(countries);
+export const countryOptionData = [allOption, ...makeOptionData(countries)];
 
 export const lists = ["All", "Non-SDN", "SDN"];
 export const listOptionData = makeOptionData(lists);

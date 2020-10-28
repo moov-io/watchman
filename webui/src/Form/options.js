@@ -3,7 +3,7 @@ import * as R from "ramda";
 import { getSDNTypes, getOFACPrograms } from "api";
 import { makeOptionData } from "utils";
 
-const allOption = { val: "", name: "All" };
+export const allOption = { val: "", name: "All" };
 
 const buildUseOptions = api => () => {
   const initialState = { loading: false, values: [] };
