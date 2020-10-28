@@ -1,3 +1,20 @@
+## v0.15.2 (Released 2020-10-28)
+
+BUG FIXES
+
+- webui: fix Country "All" value so it's not passed through to query params
+
+IMPROVEMENTS
+
+- batchsearch: include final success message
+- webui: fix warnings after react upgrade
+- webui: include a links section in the header
+
+BUILD
+
+- fix(deps): update react monorepo to v16.14.0
+- webui: run "npm audit fix"
+
 ## v0.15.1 (Released 2020-10-05)
 
 BUG FIXES
