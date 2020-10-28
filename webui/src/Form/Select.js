@@ -5,7 +5,7 @@ import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 
-export default ({ label, id, options, ...props }) => (
+const render = ({ label, id, options, ...props }) => (
   <FormControl
     css={`
       && {
@@ -23,3 +23,5 @@ export default ({ label, id, options, ...props }) => (
     </MSelect>
   </FormControl>
 );
+
+export default render;

@@ -3,7 +3,7 @@ import styled from "styled-components/macro"; // eslint-disable-line no-unused-v
 import MSlider from "@material-ui/core/Slider";
 import Typography from "@material-ui/core/Typography";
 
-export default ({ label, ...props }) => (
+const render = ({ label, ...props }) => (
   <div
     css={`
       width: 100%;
@@ -20,3 +20,5 @@ export default ({ label, ...props }) => (
     <MSlider {...props} />
   </div>
 );
+
+export default render;

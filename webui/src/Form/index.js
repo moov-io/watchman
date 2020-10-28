@@ -55,6 +55,7 @@ const initialValues = {
   // score: 100
 };
 
+// eslint-disable-next-line
 export default ({ onSubmit, onReset }) => {
   const [values, setValues] = React.useState(initialValues);
 
@@ -80,6 +81,7 @@ export default ({ onSubmit, onReset }) => {
     onReset();
   };
 
+  // eslint-disable-next-line
   const submit = useCallback(onSubmit, []);
   useEffect(() => {
     const { search } = window.location;

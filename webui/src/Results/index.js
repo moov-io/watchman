@@ -7,7 +7,7 @@ import { Addresses } from "./Addresses";
 import { DeniedPersons } from "./DeniedPersons";
 import { isNilOrEmpty } from "utils";
 
-export default ({ data }) => {
+const render = ({ data }) => {
   const { loading, error, results } = data;
   if (loading)
     return (
@@ -33,3 +33,5 @@ export default ({ data }) => {
     </C.Container>
   );
 };
+
+export default render;
