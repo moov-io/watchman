@@ -163,7 +163,9 @@ func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchReq
 		// TODO(adam): Is there something in the (SDN?) files which signal to block an entire country? (i.e. Needing to block Iran all together)
 		// https://www.treasury.gov/resource-center/sanctions/CivPen/Documents/20190327_decker_settlement.pdf
 		compares := buildAddressCompares(req)
-		resp.Addresses = searcher.TopAddressesFn(limit, multiAddressCompare(compares...))
+
+		filtered := searcher.FilterCountries(req.Country)
+		resp.Addresses = TopAddressesFn(limit, filtered, multiAddressCompare(compares...))
 
 		// record Prometheus metrics
 		if len(resp.Addresses) > 0 {
@@ -266,23 +268,15 @@ func searchViaAddressAndName(logger log.Logger, searcher *searcher, name string,
 
 		limit := extractSearchLimit(r)
 
-		// Grab the top SDNs by name and top addresses
-		sdns := filterSDNs(searcher.TopSDNs(limit, name), buildFilterRequest(r.URL))
-
-		compares := buildAddressCompares(req)
-		addresses := searcher.TopAddressesFn(limit, multiAddressCompare(compares...))
-
 		resp := &searchResponse{
 			RefreshedAt: searcher.lastRefreshedAt,
 		}
-		for i := range sdns {
-			for j := range addresses {
-				if sdns[i].EntityID == addresses[j].Address.EntityID {
-					resp.SDNs = append(resp.SDNs, sdns[i])
-					resp.Addresses = append(resp.Addresses, addresses[j])
-				}
-			}
-		}
+
+		resp.SDNs = filterSDNs(searcher.TopSDNs(limit, name), buildFilterRequest(r.URL))
+
+		compares := buildAddressCompares(req)
+		filtered := searcher.FilterCountries(req.Country)
+		resp.Addresses = TopAddressesFn(limit, filtered, multiAddressCompare(compares...))
 
 		// record Prometheus metrics
 		if len(resp.SDNs) > 0 && len(resp.Addresses) > 0 {
