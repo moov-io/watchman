@@ -738,7 +738,7 @@ paths:
             type: integer
             example: 25
           description: Maximum results returned by a search. Results are sorted by their match percentage in decending order.
-        - name: sdnType
+        - name: SdnType
           in: query
           schema:
             type: string
@@ -927,10 +927,9 @@ components:
         sdnName:
           type: string
           example: BANCO NACIONAL DE CUBA
-        sdnType:
-          description: SDN's typically represent an individual (customer) or trust/company/organization. OFAC endpoints refer to customers or companies as different entities, but underlying both is the same SDN metadata.
-          type: string
-          example: individual
+        SdnType:
+          description: 'OFAC endpoints refer to individuals or entities separately.'
+          $ref: '#/components/schemas/OfacType'
         programs:
           type: array
           items:
@@ -996,6 +995,14 @@ components:
         match:
           type: number
           example: 0.91
+    OfacType:
+      description: 'Used for classifying SDNs or SSI identities — typically represents an individual or company'
+      type: string
+      enum:
+        - individual
+        - entity
+        - vessel
+        - aircraft
     DPL:
       description: BIS Denied Persons List item
       properties:
@@ -1058,9 +1065,7 @@ components:
           description: The ID assigned to an entity by the Treasury Department
           example: 1231
         type:
-          type: string
-          description: Entity type (e.g. individual, vessel, aircraft, etc)
-          example: individual
+          $ref: '#/components/schemas/OfacType'
         programs:
           type: array
           items:
@@ -1266,5 +1271,4 @@ components:
     UIKeys:
       type: array
       items:
-        type: string
-        example: ["entity", "aircraft", "individual", "vessel"]
+        $ref: '#/components/schemas/OfacType'

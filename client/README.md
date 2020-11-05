@@ -67,6 +67,7 @@ Class | Method | HTTP request | Description
  - [OfacCustomerStatus](docs/OfacCustomerStatus.md)
  - [OfacEntityAddress](docs/OfacEntityAddress.md)
  - [OfacSdn](docs/OfacSdn.md)
+ - [OfacType](docs/OfacType.md)
  - [OfacWatch](docs/OfacWatch.md)
  - [OfacWatchRequest](docs/OfacWatchRequest.md)
  - [Search](docs/Search.md)

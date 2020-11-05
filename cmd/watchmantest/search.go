@@ -8,7 +8,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
 
 	moov "github.com/moov-io/watchman/client"
 
@@ -36,7 +35,7 @@ func searchByName(ctx context.Context, api *moov.APIClient, name string) (*moov.
 	}
 
 	// Find Customer or company
-	if strings.EqualFold(search.SDNs[0].SdnType, "individual") {
+	if search.SDNs[0].SdnType == moov.OFACTYPE_INDIVIDUAL {
 		if err := getCustomer(ctx, api, search.SDNs[0].EntityID); err != nil {
 			return nil, err
 		}

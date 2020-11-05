@@ -7,3 +7,4 @@ gitRepoId: "watchman"
 additionalProperties:
   isGoSubmodule: true
   packageName: client
+  enumClassPrefix: true

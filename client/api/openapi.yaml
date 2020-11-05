@@ -940,7 +940,7 @@ paths:
           matches.
         explode: true
         in: query
-        name: sdnType
+        name: SdnType
         required: false
         schema:
           example: individual
@@ -1093,7 +1093,6 @@ components:
           alternateName: NATIONAL BANK OF CUBA
         ID: 9574756b
         sdn:
-          sdnType: individual
           match: 0.91
           entityID: "1231"
           programs:
@@ -1179,7 +1178,6 @@ components:
           alternateName: NATIONAL BANK OF CUBA
         ID: 9574756b
         sdn:
-          sdnType: individual
           match: 0.91
           entityID: "1231"
           programs:
@@ -1237,7 +1235,6 @@ components:
     OfacSDN:
       description: Specially designated national from OFAC list
       example:
-        sdnType: individual
         match: 0.91
         entityID: "1231"
         programs:
@@ -1252,12 +1249,8 @@ components:
         sdnName:
           example: BANCO NACIONAL DE CUBA
           type: string
-        sdnType:
-          description: SDN's typically represent an individual (customer) or trust/company/organization.
-            OFAC endpoints refer to customers or companies as different entities,
-            but underlying both is the same SDN metadata.
-          example: individual
-          type: string
+        SdnType:
+          $ref: '#/components/schemas/OfacType'
         programs:
           description: Programs is the sanction programs this SDN was added from
           example:
@@ -1338,6 +1331,15 @@ components:
         match:
           example: 0.91
           type: number
+    OfacType:
+      description: Used for classifying SDNs or SSI identities — typically represents
+        an individual or company
+      enum:
+      - individual
+      - entity
+      - vessel
+      - aircraft
+      type: string
     DPL:
       description: BIS Denied Persons List item
       example:
@@ -1427,7 +1429,6 @@ components:
         programs:
         - UKRAINE-EO13662
         - SYRIA
-        type: individual
         sourceListURL: http://bit.ly/1MLgou0
         remarks:
         - 'For more information on directives, please visit the following link: http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives.'
@@ -1438,9 +1439,7 @@ components:
           example: "1231"
           type: string
         type:
-          description: Entity type (e.g. individual, vessel, aircraft, etc)
-          example: individual
-          type: string
+          $ref: '#/components/schemas/OfacType'
         programs:
           description: Sanction programs for which the entity is flagged
           example:
@@ -1597,16 +1596,14 @@ components:
       description: Search results containing SDNs, alternate names and/or addreses
       example:
         SDNs:
-        - sdnType: individual
-          match: 0.91
+        - match: 0.91
           entityID: "1231"
           programs:
           - CUBA
           sdnName: BANCO NACIONAL DE CUBA
           title: Title of an individual
           remarks: remarks
-        - sdnType: individual
-          match: 0.91
+        - match: 0.91
           entityID: "1231"
           programs:
           - CUBA
@@ -1715,7 +1712,6 @@ components:
           programs:
           - UKRAINE-EO13662
           - SYRIA
-          type: individual
           sourceListURL: http://bit.ly/1MLgou0
           remarks:
           - 'For more information on directives, please visit the following link:
@@ -1737,7 +1733,6 @@ components:
           programs:
           - UKRAINE-EO13662
           - SYRIA
-          type: individual
           sourceListURL: http://bit.ly/1MLgou0
           remarks:
           - 'For more information on directives, please visit the following link:
@@ -1838,8 +1833,7 @@ components:
           type: string
     UIKeys:
       items:
-        example: '["entity","aircraft","individual","vessel"]'
-        type: string
+        $ref: '#/components/schemas/OfacType'
       type: array
     Error:
       properties:

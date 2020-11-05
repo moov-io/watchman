@@ -1070,16 +1070,16 @@ Return an ordered distinct list of keys for an SDN property.
  * @param key SDN property to lookup. Values are sdnType, ofacProgram
  * @param optional nil or *GetUIValuesOpts - Optional Parameters:
  * @param "Limit" (optional.Int32) -  Maximum number of UI keys returned
-@return []string
+@return []OfacType
 */
-func (a *WatchmanApiService) GetUIValues(ctx _context.Context, key string, localVarOptionals *GetUIValuesOpts) ([]string, *_nethttp.Response, error) {
+func (a *WatchmanApiService) GetUIValues(ctx _context.Context, key string, localVarOptionals *GetUIValuesOpts) ([]OfacType, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  []string
+		localVarReturnValue  []OfacType
 	)
 
 	// create path and map variables
@@ -1681,7 +1681,7 @@ func (a *WatchmanApiService) Search(ctx _context.Context, localVarOptionals *Sea
 		localVarQueryParams.Add("limit", parameterToString(localVarOptionals.Limit.Value(), ""))
 	}
 	if localVarOptionals != nil && localVarOptionals.SdnType.IsSet() {
-		localVarQueryParams.Add("sdnType", parameterToString(localVarOptionals.SdnType.Value(), ""))
+		localVarQueryParams.Add("SdnType", parameterToString(localVarOptionals.SdnType.Value(), ""))
 	}
 	if localVarOptionals != nil && localVarOptionals.Program.IsSet() {
 		localVarQueryParams.Add("program", parameterToString(localVarOptionals.Program.Value(), ""))

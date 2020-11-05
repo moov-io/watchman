@@ -12,9 +12,8 @@ package client
 // Ssi Treasury Department Sectoral Sanctions Identifications List (SSI)
 type Ssi struct {
 	// The ID assigned to an entity by the Treasury Department
-	EntityID string `json:"entityID,omitempty"`
-	// Entity type (e.g. individual, vessel, aircraft, etc)
-	Type string `json:"type,omitempty"`
+	EntityID string   `json:"entityID,omitempty"`
+	Type     OfacType `json:"type,omitempty"`
 	// Sanction programs for which the entity is flagged
 	Programs []string `json:"programs,omitempty"`
 	// The name of the entity
