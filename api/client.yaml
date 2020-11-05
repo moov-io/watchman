@@ -738,7 +738,7 @@ paths:
             type: integer
             example: 25
           description: Maximum results returned by a search. Results are sorted by their match percentage in decending order.
-        - name: SdnType
+        - name: sdnType
           in: query
           schema:
             type: string
@@ -927,8 +927,7 @@ components:
         sdnName:
           type: string
           example: BANCO NACIONAL DE CUBA
-        SdnType:
-          description: 'OFAC endpoints refer to individuals or entities separately.'
+        sdnType:
           $ref: '#/components/schemas/OfacType'
         programs:
           type: array

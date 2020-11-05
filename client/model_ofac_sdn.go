@@ -13,7 +13,7 @@ package client
 type OfacSdn struct {
 	EntityID string   `json:"entityID,omitempty"`
 	SdnName  string   `json:"sdnName,omitempty"`
-	SdnType  OfacType `json:"SdnType,omitempty"`
+	SdnType  OfacType `json:"sdnType,omitempty"`
 	// Programs is the sanction programs this SDN was added from
 	Programs []string `json:"programs,omitempty"`
 	Title    string   `json:"title,omitempty"`

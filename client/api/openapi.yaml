@@ -940,7 +940,7 @@ paths:
           matches.
         explode: true
         in: query
-        name: SdnType
+        name: sdnType
         required: false
         schema:
           example: individual
@@ -1249,7 +1249,7 @@ components:
         sdnName:
           example: BANCO NACIONAL DE CUBA
           type: string
-        SdnType:
+        sdnType:
           $ref: '#/components/schemas/OfacType'
         programs:
           description: Programs is the sanction programs this SDN was added from

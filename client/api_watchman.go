@@ -1681,7 +1681,7 @@ func (a *WatchmanApiService) Search(ctx _context.Context, localVarOptionals *Sea
 		localVarQueryParams.Add("limit", parameterToString(localVarOptionals.Limit.Value(), ""))
 	}
 	if localVarOptionals != nil && localVarOptionals.SdnType.IsSet() {
-		localVarQueryParams.Add("SdnType", parameterToString(localVarOptionals.SdnType.Value(), ""))
+		localVarQueryParams.Add("sdnType", parameterToString(localVarOptionals.SdnType.Value(), ""))
 	}
 	if localVarOptionals != nil && localVarOptionals.Program.IsSet() {
 		localVarQueryParams.Add("program", parameterToString(localVarOptionals.Program.Value(), ""))
