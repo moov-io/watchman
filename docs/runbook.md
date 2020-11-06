@@ -45,7 +45,7 @@ The size of each batch of watches to be processed (and their webhook called) can
 
 ### Alert on stale data
 
-We have an [example Prometheus alert](https://github.com/moov-io/infra/blob/07829c4842ef0c9d1824022e3e454dc7fb325469/lib/infra/14-prometheus-watchman-rules.yml#L9-L18) for being notified of stale data. This helps discover issues incase download or parsing fails.
+We have an [example Prometheus alert](https://github.com/moov-io/infra/blob/eb0072393756e4b9d8d67eda98db0fab0b05f00b/lib/infra/14-prometheus-rules.yml#L57-L65) for being notified of stale data. This helps discover issues incase download or parsing fails.
 
 ![](./images/stale-data-metrics.png)
 
