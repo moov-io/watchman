@@ -1070,16 +1070,16 @@ Return an ordered distinct list of keys for an SDN property.
  * @param key SDN property to lookup. Values are sdnType, ofacProgram
  * @param optional nil or *GetUIValuesOpts - Optional Parameters:
  * @param "Limit" (optional.Int32) -  Maximum number of UI keys returned
-@return []string
+@return []SdnType
 */
-func (a *WatchmanApiService) GetUIValues(ctx _context.Context, key string, localVarOptionals *GetUIValuesOpts) ([]string, *_nethttp.Response, error) {
+func (a *WatchmanApiService) GetUIValues(ctx _context.Context, key string, localVarOptionals *GetUIValuesOpts) ([]SdnType, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  []string
+		localVarReturnValue  []SdnType
 	)
 
 	// create path and map variables

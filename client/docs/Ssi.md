@@ -5,7 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **EntityID** | **string** | The ID assigned to an entity by the Treasury Department | [optional] 
-**Type** | **string** | Entity type (e.g. individual, vessel, aircraft, etc) | [optional] 
+**Type** | [**SsiType**](SsiType.md) |  | [optional] 
 **Programs** | **[]string** | Sanction programs for which the entity is flagged | [optional] 
 **Name** | **string** | The name of the entity | [optional] 
 **Addresses** | **[]string** | Addresses associated with the entity | [optional] 

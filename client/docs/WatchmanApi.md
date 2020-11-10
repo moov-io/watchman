@@ -491,7 +491,7 @@ No authorization required
 
 ## GetUIValues
 
-> []string GetUIValues(ctx, key, optional)
+> []SdnType GetUIValues(ctx, key, optional)
 
 Get UI values
 
@@ -518,7 +518,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**[]string**
+[**[]SdnType**](SdnType.md)
 
 ### Authorization
 

@@ -6,7 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **EntityID** | **string** |  | [optional] 
 **SdnName** | **string** |  | [optional] 
-**SdnType** | **string** | SDN&#39;s typically represent an individual (customer) or trust/company/organization. OFAC endpoints refer to customers or companies as different entities, but underlying both is the same SDN metadata. | [optional] 
+**SdnType** | [**SdnType**](SdnType.md) |  | [optional] 
 **Programs** | **[]string** | Programs is the sanction programs this SDN was added from | [optional] 
 **Title** | **string** |  | [optional] 
 **Remarks** | **string** |  | [optional] 

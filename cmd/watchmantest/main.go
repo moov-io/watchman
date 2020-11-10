@@ -31,7 +31,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/moov-io/watchman"
@@ -99,7 +98,7 @@ func main() {
 	}
 
 	// Add watch on the SDN
-	if strings.EqualFold(sdn.SdnType, "individual") {
+	if sdn.SdnType == moov.SDNTYPE_INDIVIDUAL {
 		if err := addCustomerWatch(ctx, api, sdn.EntityID, *flagWebhook); err != nil {
 			log.Fatalf("[FAILURE] problem adding customer watch: %v", err)
 		} else {
