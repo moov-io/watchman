@@ -6,7 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **EntityID** | **string** |  | [optional] 
 **SdnName** | **string** |  | [optional] 
-**SdnType** | [**OfacType**](OfacType.md) |  | [optional] 
+**SdnType** | [**SdnType**](SdnType.md) |  | [optional] 
 **Programs** | **[]string** | Programs is the sanction programs this SDN was added from | [optional] 
 **Title** | **string** |  | [optional] 
 **Remarks** | **string** |  | [optional] 

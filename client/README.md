@@ -67,11 +67,12 @@ Class | Method | HTTP request | Description
  - [OfacCustomerStatus](docs/OfacCustomerStatus.md)
  - [OfacEntityAddress](docs/OfacEntityAddress.md)
  - [OfacSdn](docs/OfacSdn.md)
- - [OfacType](docs/OfacType.md)
  - [OfacWatch](docs/OfacWatch.md)
  - [OfacWatchRequest](docs/OfacWatchRequest.md)
+ - [SdnType](docs/SdnType.md)
  - [Search](docs/Search.md)
  - [Ssi](docs/Ssi.md)
+ - [SsiType](docs/SsiType.md)
  - [UpdateOfacCompanyStatus](docs/UpdateOfacCompanyStatus.md)
  - [UpdateOfacCustomerStatus](docs/UpdateOfacCustomerStatus.md)
 

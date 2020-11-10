@@ -98,7 +98,7 @@ func main() {
 	}
 
 	// Add watch on the SDN
-	if sdn.SdnType == moov.OFACTYPE_INDIVIDUAL {
+	if sdn.SdnType == moov.SDNTYPE_INDIVIDUAL {
 		if err := addCustomerWatch(ctx, api, sdn.EntityID, *flagWebhook); err != nil {
 			log.Fatalf("[FAILURE] problem adding customer watch: %v", err)
 		} else {

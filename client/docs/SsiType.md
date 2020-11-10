@@ -1,4 +1,4 @@
-# OfacType
+# SsiType
 
 ## Properties
 

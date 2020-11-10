@@ -9,13 +9,11 @@
 
 package client
 
-// OfacType Used for classifying SDNs or SSI identities — typically represents an individual or company
-type OfacType string
+// SsiType Used for classifying SSIs
+type SsiType string
 
-// List of OfacType
+// List of SsiType
 const (
-	OFACTYPE_INDIVIDUAL OfacType = "individual"
-	OFACTYPE_ENTITY     OfacType = "entity"
-	OFACTYPE_VESSEL     OfacType = "vessel"
-	OFACTYPE_AIRCRAFT   OfacType = "aircraft"
+	SSITYPE_INDIVIDUAL SsiType = "individual"
+	SSITYPE_ENTITY     SsiType = "entity"
 )

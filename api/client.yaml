@@ -928,7 +928,7 @@ components:
           type: string
           example: BANCO NACIONAL DE CUBA
         sdnType:
-          $ref: '#/components/schemas/OfacType'
+          $ref: '#/components/schemas/SdnType'
         programs:
           type: array
           items:
@@ -994,14 +994,20 @@ components:
         match:
           type: number
           example: 0.91
-    OfacType:
-      description: 'Used for classifying SDNs or SSI identities — typically represents an individual or company'
+    SdnType:
+      description: 'Used for classifying SDNs — typically represents an individual or company'
       type: string
       enum:
         - individual
         - entity
         - vessel
         - aircraft
+    SsiType:
+      description: 'Used for classifying SSIs'
+      type: string
+      enum:
+        - individual
+        - entity
     DPL:
       description: BIS Denied Persons List item
       properties:
@@ -1064,7 +1070,7 @@ components:
           description: The ID assigned to an entity by the Treasury Department
           example: 1231
         type:
-          $ref: '#/components/schemas/OfacType'
+          $ref: '#/components/schemas/SsiType'
         programs:
           type: array
           items:
@@ -1270,4 +1276,4 @@ components:
     UIKeys:
       type: array
       items:
-        $ref: '#/components/schemas/OfacType'
+        $ref: '#/components/schemas/SdnType'

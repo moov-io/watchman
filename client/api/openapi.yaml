@@ -1250,7 +1250,7 @@ components:
           example: BANCO NACIONAL DE CUBA
           type: string
         sdnType:
-          $ref: '#/components/schemas/OfacType'
+          $ref: '#/components/schemas/SdnType'
         programs:
           description: Programs is the sanction programs this SDN was added from
           example:
@@ -1331,14 +1331,20 @@ components:
         match:
           example: 0.91
           type: number
-    OfacType:
-      description: Used for classifying SDNs or SSI identities — typically represents
-        an individual or company
+    SdnType:
+      description: Used for classifying SDNs — typically represents an individual
+        or company
       enum:
       - individual
       - entity
       - vessel
       - aircraft
+      type: string
+    SsiType:
+      description: Used for classifying SSIs
+      enum:
+      - individual
+      - entity
       type: string
     DPL:
       description: BIS Denied Persons List item
@@ -1439,7 +1445,7 @@ components:
           example: "1231"
           type: string
         type:
-          $ref: '#/components/schemas/OfacType'
+          $ref: '#/components/schemas/SsiType'
         programs:
           description: Sanction programs for which the entity is flagged
           example:
@@ -1833,7 +1839,7 @@ components:
           type: string
     UIKeys:
       items:
-        $ref: '#/components/schemas/OfacType'
+        $ref: '#/components/schemas/SdnType'
       type: array
     Error:
       properties:

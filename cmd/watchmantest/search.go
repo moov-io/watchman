@@ -35,7 +35,7 @@ func searchByName(ctx context.Context, api *moov.APIClient, name string) (*moov.
 	}
 
 	// Find Customer or company
-	if search.SDNs[0].SdnType == moov.OFACTYPE_INDIVIDUAL {
+	if search.SDNs[0].SdnType == moov.SDNTYPE_INDIVIDUAL {
 		if err := getCustomer(ctx, api, search.SDNs[0].EntityID); err != nil {
 			return nil, err
 		}
