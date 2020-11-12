@@ -1,3 +1,10 @@
+## v0.16.0 (Unreleased)
+
+ADDITIONS
+
+- api,client: add SdnType and SsiType models
+- server: Add `last_data_refresh_failure{source="SDNs"}` Prometheus metric
+
 ## v0.15.3 (Released 2020-10-28)
 
 BUG FIXES
