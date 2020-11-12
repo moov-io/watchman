@@ -8,6 +8,7 @@ Moov Watchman is an HTTP API and Go library to download, parse and offer search 
 
 - [Searching](./search.md)
 - [Production Runbook](./runbook.md)
+   - [Prometheus Metrics](./metrics.md)
 - [Pre-compute Pipeline](./pipeline.md)
 - [High Availability](./ha.md)
 - [File Structure](./file-structure.md)
