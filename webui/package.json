@@ -9,7 +9,7 @@
     "http-proxy-middleware": "0.21.0",
     "react": "16.14.0",
     "react-dom": "16.14.0",
-    "react-scripts": "^4.0.0",
+    "react-scripts": "4.0.0",
     "winston": "3.3.3"
   },
   "scripts": {
