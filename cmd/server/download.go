@@ -29,6 +29,11 @@ var (
 		Help: "Unix timestamp of when data was last refreshed successfully",
 	}, nil)
 
+	lastDataRefreshFailure = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "last_data_refresh_failure",
+		Help: "Unix timestamp of the most recent failure to refresh data",
+	}, []string{"source"})
+
 	lastDataRefreshCount = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "last_data_refresh_count",
 		Help: "Count of records for a given sanction or entity list",
@@ -38,6 +43,7 @@ var (
 func init() {
 	prometheus.MustRegister(lastDataRefreshSuccess)
 	prometheus.MustRegister(lastDataRefreshCount)
+	prometheus.MustRegister(lastDataRefreshFailure)
 }
 
 // Download holds counts for each type of list data parsed from files and a
@@ -162,8 +168,12 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 		}
 	}
 
+	lastDataRefreshFailure.WithLabelValues("SDNs").Set(float64(time.Now().Unix()))
+
 	results, err := ofacRecords(s.logger, initialDir)
 	if err != nil {
+		lastDataRefreshFailure.WithLabelValues("SDNs").Set(float64(time.Now().Unix()))
+
 		return nil, fmt.Errorf("OFAC records: %v", err)
 	}
 
@@ -173,12 +183,16 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 
 	deniedPersons, err := dplRecords(s.logger, initialDir)
 	if err != nil {
+		lastDataRefreshFailure.WithLabelValues("DPs").Set(float64(time.Now().Unix()))
+
 		return nil, fmt.Errorf("DPL records: %v", err)
 	}
 	dps := precomputeDPs(deniedPersons, s.pipe)
 
 	consolidatedLists, err := cslRecords(s.logger, initialDir)
 	if err != nil {
+		lastDataRefreshFailure.WithLabelValues("CSL").Set(float64(time.Now().Unix()))
+
 		return nil, fmt.Errorf("CSL records: %v", err)
 	}
 	ssis := precomputeSSIs(consolidatedLists.SSIs, s.pipe)
