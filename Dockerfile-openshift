@@ -1,10 +1,17 @@
-FROM quay.io/fedora/fedora:33-x86_64 as builder
-RUN yum install -y golang make npm wget
+FROM quay.io/fedora/fedora:34-x86_64 as builder
+RUN yum install -y golang make npm wget glibc
 WORKDIR /opt/app-root/src/
 COPY . .
 RUN make build
 
-FROM registry.access.redhat.com/ubi8/ubi-minimal
+FROM node:14-buster as frontend
+COPY webui/ /watchman/
+WORKDIR /watchman/
+RUN npm install
+RUN npm run build
+
+FROM quay.io/fedora/fedora:34-x86_64
+RUN yum install -y glibc
 
 ARG VERSION=unknown
 LABEL maintainer="Moov <support@moov.io>"
@@ -12,5 +19,8 @@ LABEL name="watchman"
 LABEL version=$VERSION
 
 COPY --from=builder /opt/app-root/src/bin/server /bin/server
+
+COPY --from=frontend /watchman/build/ /watchman/
+ENV WEB_ROOT=/watchman/
 
 ENTRYPOINT ["/bin/server"]

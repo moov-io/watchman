@@ -70,19 +70,24 @@ else
 	CGO_ENABLED=1 GOOS=$(PLATFORM) go build -o bin/watchman-$(PLATFORM)-amd64 github.com/moov-io/watchman/cmd/server
 endif
 
-docker: clean
-# main server Docker image
+docker: clean docker-hub docker-openshift docker-static docker-watchmantest docker-webhook
+
+docker-hub:
 	docker build --pull -t moov/watchman:$(VERSION) -f Dockerfile .
 	docker tag moov/watchman:$(VERSION) moov/watchman:latest
-# OpenShift Docker image
+
+docker-openshift:
 	docker build --pull -t quay.io/moov/watchman:$(VERSION) -f Dockerfile-openshift --build-arg VERSION=$(VERSION) .
 	docker tag quay.io/moov/watchman:$(VERSION) quay.io/moov/watchman:latest
-# Watchman image with static files
+
+docker-static:
 	docker build --pull -t moov/watchman:static -f Dockerfile-static .
-# watchmantest image
+
+docker-watchmantest:
 	docker build --pull -t moov/watchmantest:$(VERSION) -f ./cmd/watchmantest/Dockerfile .
 	docker tag moov/watchmantest:$(VERSION) moov/watchmantest:latest
-# webhook example
+
+docker-webhook:
 	docker build --pull -t moov/watchman-webhook-example:$(VERSION) -f ./examples/webhook/Dockerfile .
 	docker tag moov/watchman-webhook-example:$(VERSION) moov/watchman-webhook-example:latest
 
