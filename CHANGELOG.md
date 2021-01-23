@@ -1,4 +1,4 @@
-## v0.16.0 (Unreleased)
+## v0.16.0 (Released 2021-01-22)
 
 ADDITIONS
 
