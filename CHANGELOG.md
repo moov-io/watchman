@@ -3,7 +3,17 @@
 ADDITIONS
 
 - api,client: add SdnType and SsiType models
+- docs: include a page for prometheus metrics
 - server: Add `last_data_refresh_failure{source="SDNs"}` Prometheus metric
+
+BUG FIXES
+
+- build: fixup OpenShift image, rely on glibc
+
+BUILD
+
+- chore(deps): update mui monorepo to v4.11.2
+- fix(deps): pin dependency react-scripts to 4.0.0
 
 ## v0.15.3 (Released 2020-10-28)
 
