@@ -30,6 +30,7 @@ func TestDebug__SDN(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		bs, _ := ioutil.ReadAll(resp.Body)

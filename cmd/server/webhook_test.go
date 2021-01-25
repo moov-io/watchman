@@ -70,6 +70,8 @@ func TestWebhook_retry(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer resp.Body.Close()
+
 	bs, _ = ioutil.ReadAll(resp.Body)
 	if !bytes.Contains(bs, []byte("didn't redirect")) {
 		t.Errorf("resp.Body=%s", string(bs))
