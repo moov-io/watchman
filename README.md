@@ -1,17 +1,33 @@
-moov-io/watchman
-===
+[![Moov Banner Logo](https://user-images.githubusercontent.com/20115216/104214617-885b3c80-53ec-11eb-8ce0-9fc745fb5bfc.png)](https://github.com/moov-io)
+
+<p align="center">
+  <a href="https://moov-io.github.io/watchman/">Project Documentation</a>
+  ·
+  <a href="https://moov-io.github.io/watchman/api/#overview">API Endpoints</a> <a href="https://moov-io.github.io/watchman/admin/">(Admin Endpoints)</a>
+  ·
+  <a href="https://slack.moov.io/">Community</a>
+  ·
+  <a href="https://moov.io/blog/">Blog</a>
+  <br>
+  <br>
+</p>
 
 [![GoDoc](https://godoc.org/github.com/moov-io/watchman?status.svg)](https://godoc.org/github.com/moov-io/watchman)
 [![Build Status](https://github.com/moov-io/watchman/workflows/Go/badge.svg)](https://github.com/moov-io/watchman/actions)
 [![Coverage Status](https://codecov.io/gh/moov-io/watchman/branch/master/graph/badge.svg)](https://codecov.io/gh/moov-io/watchman)
 [![Go Report Card](https://goreportcard.com/badge/github.com/moov-io/watchman)](https://goreportcard.com/report/github.com/moov-io/watchman)
-[![Apache 2 licensed](https://img.shields.io/badge/license-Apache2-blue.svg)](https://raw.githubusercontent.com/moov-io/watchman/master/LICENSE)
+[![Repo Size](https://img.shields.io/github/languages/code-size/moov-io/watchman?label=project%20size)](https://github.com/moov-io/watchman)
+[![Apache 2 License](https://img.shields.io/badge/license-Apache2-blue.svg)](https://raw.githubusercontent.com/moov-io/ach/master/LICENSE)
+[![Slack Channel](https://slack.moov.io/badge.svg?bg=e01563&fgColor=fffff)](https://slack.moov.io/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/moov/watchman)](https://hub.docker.com/r/moov/watchman)
+[![GitHub Stars](https://img.shields.io/github/stars/moov-io/watchman)](https://github.com/moov-io/watchman)
+[![Twitter](https://img.shields.io/twitter/follow/moov_io?style=social)](https://twitter.com/moov_io?lang=en)
 
-Moov Watchman is an HTTP API and Go library to download, parse and offer search functions over numerous trade sanction lists from the United States, European Union governments, agencies, and non profits for complying with regional laws. Also included is a web UI and async webhook notification service to initiate processes on remote systems.
+# moov-io/watchman
 
-Checkout our [demo instance of Watchman](https://moov.io/watchman/) or the [OpenAPI specification](https://moov-io.github.io/watchman/api/) for use with your favorite language.
+Moov's mission is to give developers an easy way to create and integrate bank processing into their own software products. Our open source projects are each focused on solving a single responsibility in financial services and designed around performance, scalability, and ease-of-use.
 
-Docs: [Project](https://moov-io.github.io/watchman/) | [API Endpoints](https://moov-io.github.io/watchman/api/) | [Admin API Endpoints](https://moov-io.github.io/watchman/admin/)
+Moov Watchman offers download, parse, and search functions over numerous trade sanction lists from the United States, European Union governments, agencies, and nonprofits for complying with regional laws. Also included is a [web UI](#in-browser-watchman-servce) and an async [webhook notification service](#webhook-notifications) to initiate processes on remote systems.
 
 Lists included in search are:
 
@@ -24,6 +40,10 @@ Lists included in search are:
   - [Entity List](https://www.bis.doc.gov/index.php/policy-guidance/lists-of-parties-of-concern/entity-list) (EL)
 
 All United States or European Union companies are required to comply with various regulations and sanction lists (such as the US Patriot Act requiring compliance with the BIS Denied Person's List). Moov's primary usage for this project is with ACH origination in our [paygate](https://github.com/moov-io/paygate) project.
+
+## Project Status
+
+Moov Watchman is actively used in multiple production environments. Please star the project if you are interested in its progress. If you have layers above Watchman to simplify tasks, perform business operations, or found bugs we would appreciate an issue or pull request. Thanks!
 
 To get started using Watchman try our [Docker image](https://hub.docker.com/r/moov/watchman/tags) (or [OpenShift](https://quay.io/repository/moov/watchman?tab=tags) images) with the steps below. We also have a [demo instance](https://moov.io/watchman/) as part of Moov's demo environment. We offer [binary downloads](https://github.com/moov-io/watchman/releases/latest) without the included WebUI as well
 
