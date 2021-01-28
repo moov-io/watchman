@@ -1,6 +1,6 @@
 ## Prometheus Metrics
 
-This list represents the series of Prometheus metrics that Watchman reports. All metrics are served on the admin server (`:9094/metrics` by defailt). Outside of this list the standard Go metrics are reported.
+This list represents the series of Prometheus metrics that Watchman reports. All metrics are served on the admin server (`:9094/metrics` by default). Outside of this list the standard Go metrics are reported.
 
 ### Last Data Refresh Count
 

@@ -49,14 +49,14 @@ Example: `AMD CO. LTD AGENCY` into `AMD AGENCY`
 
 **Stopwords Removal**
 
-This step remove stopwords from SDN and SSI entities. [Stopwords](https://en.wikipedia.org/wiki/Stop_words) are typically the most common words in languages and don't convey nessary information in a sentence. They are more typically used for grammatical correctness and thus can be ignored in search rankings.
+This step removes stopwords from SDN and SSI entities. [Stopwords](https://en.wikipedia.org/wiki/Stop_words) are typically the most common words in languages and don't convey necessary information in a sentence. They are more typically used for grammatical correctness and thus can be ignored in search rankings.
 
 Example: `COLOMBIANA DE CERDOS LTDA.` into `colombiana cerdos ltda`
 Example: `Trees and Trucks` into `trees trucks`
 
 **Normalization**
 
-This step "normalizes" all text passed to it by converting it to lowercase, removing punctuation, and [UTF-8 Normalization](https://en.wikipedia.org/wiki/Unicode_equivalence#Normalization) to support searching non-english names with English letters. Watchman has a primary focus on American business which often performs this same conversion as a result of human or computer systems.
+This step "normalizes" all text passed to it by converting it to lowercase, removing punctuation, and applying [UTF-8 Normalization](https://en.wikipedia.org/wiki/Unicode_equivalence#Normalization) to support searching non-English names with English letters. Watchman has a primary focus on American business which often performs this same conversion as a result of human or computer systems.
 
 Example: `Raúl Castro` into `raul castro`
 
