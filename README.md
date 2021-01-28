@@ -27,7 +27,7 @@
 
 Moov's mission is to give developers an easy way to create and integrate bank processing into their own software products. Our open source projects are each focused on solving a single responsibility in financial services and designed around performance, scalability, and ease of use.
 
-Moov Watchman offers download, parse, and search functions over numerous trade sanction lists from the United States, European Union governments, agencies, and nonprofits for complying with regional laws. Also included is a [web UI](#in-browser-watchman-search) and an async [webhook notification service](#webhook-notifications) to initiate processes on remote systems.
+Moov Watchman offers download, parse, and search functions over numerous trade sanction lists from the United States, agencies, and nonprofits for complying with regional laws. Also included is a [web UI](#in-browser-watchman-search) and an async [webhook notification service](#webhook-notifications) to initiate processes on remote systems.
 
 Lists included in search are:
 
@@ -261,7 +261,7 @@ $ go doc github.com/moov-io/watchman/client Search
 
 Using our [in-browser utility](https://oss.moov.io/watchman/), you can instantly perform advanced Watchman searches. Simply fill search fields and generate a detailed report that includes match percentage, alternative names, effective/expiration dates, IDs, addresses, and other useful information. This tool is particularly useful for completing quick searches with the aid of a intutive interface.
 
-## Reporting blocks to OFAC
+## Reporting Blocks to OFAC
 
 OFAC requires annual reports of blocked entities and [offers guidance for this report](https://www.treasury.gov/resource-center/sanctions/Documents/ofac_blocked_property_guidance.pdf). Section [31 C.F.R. § 501.603(b)(2)](https://www.ecfr.gov/cgi-bin/text-idx?SID=be4f2a1608abec5d93170fb03af99939&mc=true&node=se31.3.501_1603&rgn=div8) requires this annual report.
 
@@ -282,7 +282,7 @@ We maintain a [runbook for common issues](docs/runbook.md) and configuration opt
  ------- | -------
 [Project Documentation](https://moov-io.github.io/watchman/) | Our project documentation available online.
 Twitter [@moov_io](https://twitter.com/moov_io)	| You can follow Moov.IO's Twitter feed to get updates on our project(s). You can also tweet us questions or just share blogs or stories.
-[GitHub Issue](https://github.com/moov-io) | If you are able to reproduce a problem please open a GitHub Issue under the specific project that caused the error.
+[GitHub Issue](https://github.com/moov-io/watchman/issues) | If you are able to reproduce a problem please open a GitHub Issue under the specific project that caused the error.
 [moov-io slack](https://slack.moov.io/) | Join our slack channel to have an interactive discussion about the development of the project.
 
 ## Supported and Tested Platforms
