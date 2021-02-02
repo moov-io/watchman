@@ -1,3 +1,9 @@
+## v0.16.1 (Released 2021-02-02)
+
+BUILD
+
+- fix: upgrade react-scripts from 4.0.0 to 4.0.1
+
 ## v0.16.0 (Released 2021-01-22)
 
 ADDITIONS
