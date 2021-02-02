@@ -1,5 +1,5 @@
 FROM quay.io/fedora/fedora:34-x86_64 as builder
-RUN yum install -y golang make npm wget glibc
+RUN yum install -y git golang make npm wget glibc
 WORKDIR /opt/app-root/src/
 COPY . .
 RUN make build
