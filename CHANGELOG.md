@@ -1,3 +1,17 @@
+## v0.17.0 (Released 2021-02-05)
+
+ADDITIONS
+
+- search: introduce `EXACT_MATCH_FAVORITISM` config to optionally boost match rates
+
+IMPROVEMENTS
+
+- docs: lots of fixups and clarifications
+
+BUG FIXES
+
+- csl: fix parsing with newer CSV format
+
 ## v0.16.2 (Released 2021-02-02)
 
 BUILD
