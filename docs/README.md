@@ -33,39 +33,36 @@ Webhook URLs MUST be secure (https://...) and an `Authorization` header is sent 
 
 ## FAQ
 
-<ul>
-    <li>How are entities from the list indexed and used in search?</li>
+<h4>How are entities from the list indexed and used in search?</h4>
+<p>
+    Entities from sanction lists and other data files are folded through various pre-computations prior to inclusion in the search index.
+    This means the following steps will occur (in order):
     <ul>
         <li>
-            Entities from sanction lists and other data files are folded through various pre-computations prior to inclusion in the search index.
-            This means the following steps will occur (in order):
-            <p>
-                <strong>SDN Reordering</strong><br />
-                Each individual's SDN name is re-ordered (Example: from "MADURO MOROS, Nicolas" to "Nicolas MADURO MOROS").
-            </p>
-            <p>
-                <strong>Company Name Cleanup</strong><br />
-                Suffixes from company names such as: "CO.", "INC.", "L.L.C.", etc are removed.
-            </p>
-            <p>
-                <strong>Stopword Removal</strong><br />
-                <a href="https://en.wikipedia.org/wiki/Stop_words">Stopwords</a> are removed. See <a href="https://github.com/bbalet/stopwords">bbalet/stopwords</a> for a full list of supported languages and words subject to removal.
-            </p>
-            <p>
-                <strong>UTF-8 Normalization</strong><br />
-                Punctuation is removed along with extra spaces on both ends of the entity name.
-                Using <a href="https://godoc.org/golang.org/x/text/unicode/norm#Form">Go's /x/text normalization</a> methods we consolidate entity names and search queries for better searching across multiple languages.
-            </p>
+            <strong>SDN Reordering</strong><br />
+            Each individual's SDN name is re-ordered (Example: from "MADURO MOROS, Nicolas" to "Nicolas MADURO MOROS").
         </li>
-    </ul>
-    <li>Why are exact matches of words not ranked higher?</li>
-    <ul>
         <li>
-            Watchman offers an environmental variable called `EXACT_MATCH_FAVORITISM` that can adjust the weight of exact matches within a query.
-            This value is a percentage (float64) added to exact matches prior to computing the final match percentage. Try using 0.1, 0.25 or 0.5 with your testing.
+            <strong>Company Name Cleanup</strong><br />
+            Suffixes from company names such as: "CO.", "INC.", "L.L.C.", etc are removed.
+        </li>
+        <li>
+            <strong>Stopword Removal</strong><br />
+            <a href="https://en.wikipedia.org/wiki/Stop_words">Stopwords</a> are removed. See <a href="https://github.com/bbalet/stopwords">bbalet/stopwords</a> for a full list of supported languages and words subject to removal.
+        </li>
+        <li>
+            <strong>UTF-8 Normalization</strong><br />
+            Punctuation is removed along with extra spaces on both ends of the entity name.
+            Using <a href="https://godoc.org/golang.org/x/text/unicode/norm#Form">Go's /x/text normalization</a> methods we consolidate entity names and search queries for better searching across multiple languages.
         </li>
     </ul>
-</ul>
+</p>
+
+<h4>Why are exact matches of words not ranked higher?</h4>
+<p>
+    Watchman offers an environmental variable called `EXACT_MATCH_FAVORITISM` that can adjust the weight of exact matches within a query.
+    This value is a percentage (float64) added to exact matches prior to computing the final match percentage. Try using 0.1, 0.25 or 0.5 with your testing.
+</p>
 
 ## Links
 
