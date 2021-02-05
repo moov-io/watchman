@@ -96,7 +96,7 @@ func Test__Issue326EL(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fd.WriteString(`764ecc9bd00a36930e6bfba2e65ffe3f8e96a123,Entity List (EL) - Bureau of Industry and Security,,,,Huawei Cloud Beijing,,"Beijing, CN",85 FR 51603,2020-08-20,,,"For all items subject to the EAR, see §§ 736.2(b)(3)(vi), and 744.11 of the EAR, EXCEPT for technology subject to the EAR that is designated as EAR99, or controlled on the Commerce Control List for anti-terrorism reasons only, when released to members of a standards organization (see §772.1) for the purpose of contributing to the revision or development of a standard (see §772.1).",Presumption of denial.,,,,,,,,http://bit.ly/1L47xrV,"",,,,,http://bit.ly/1L47xrV,`)
+	fd.WriteString(`764ecc9bd00a36930e6bfba2e65ffe3f8e96a123,Entity List (EL) - Bureau of Industry and Security,,,,Huawei Cloud Beijing,,"Beijing, CN",85 FR 51603,2020-08-20,,,"For all items subject to the EAR, see §§ 736.2(b)(3)(vi), and 744.11 of the EAR, EXCEPT for technology subject to the EAR that is designated as EAR99, or controlled on the Commerce Control List for anti-terrorism reasons only, when released to members of a standards organization (see §772.1) for the purpose of contributing to the revision or development of a standard (see §772.1).",Presumption of denial.,,,,,,,,http://bit.ly/1L47xrV,"",,,,,http://bit.ly/1L47xrV,`)
 	if err := fd.Sync(); err != nil {
 		t.Fatal(err)
 	}
