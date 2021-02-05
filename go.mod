@@ -16,6 +16,7 @@ require (
 	github.com/ory/dockertest/v3 v3.6.1
 	github.com/pariz/gountries v0.0.0-20200430155801-1c6a393df9c7
 	github.com/prometheus/client_golang v1.8.0
+	github.com/stretchr/testify v1.6.1
 	github.com/xrash/smetrics v0.0.0-20200730060457-89a2a8a1fb0b
 	go4.org v0.0.0-20200411211856-f5505b9728dd
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43

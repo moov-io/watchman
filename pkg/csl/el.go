@@ -2,6 +2,8 @@ package csl
 
 // EL is the Entity List (EL) - Bureau of Industry and Security
 type EL struct {
+	// ID is the unique identifier for the entity
+	ID string `json:"id"`
 	// Name is the primary name of the entity
 	Name string `json:"name"`
 	// AlternateNames is a list of aliases associated with the entity
