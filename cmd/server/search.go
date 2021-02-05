@@ -10,12 +10,14 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/moov-io/base/strx"
 	"github.com/moov-io/watchman/pkg/csl"
 	"github.com/moov-io/watchman/pkg/dpl"
 	"github.com/moov-io/watchman/pkg/ofac"
@@ -721,7 +723,16 @@ func extractSearchLimit(r *http.Request) int {
 	return limit
 }
 
-// jaroWrinkler runs the similarly named algorithm over the two input strings and averages their match percentages
+var (
+	exactMatchFavoritism = readExactMatchFavoritism(os.Getenv("EXACT_MATCH_FAVORITISM"))
+)
+
+func readExactMatchFavoritism(input string) float64 {
+	weight, _ := strconv.ParseFloat(strx.Or(input, "0.0"), 32)
+	return weight
+}
+
+// jaroWinkler runs the similarly named algorithm over the two input strings and averages their match percentages
 // according to the second string (assumed to be the user's query)
 //
 // For more details see https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance
@@ -746,7 +757,11 @@ func jaroWinkler(s1, s2 string) float64 {
 
 	var scores []float64
 	for i := range s1Parts {
-		scores = append(scores, maxMatch(s1Parts[i], s2Parts))
+		max := maxMatch(s1Parts[i], s2Parts)
+		if max >= 1.0 {
+			max += exactMatchFavoritism
+		}
+		scores = append(scores, max)
 	}
 
 	// average the highest N scores where N is the words in our query (s2).
@@ -759,6 +774,7 @@ func jaroWinkler(s1, s2 string) float64 {
 	for i := range scores {
 		sum += scores[i]
 	}
+
 	return sum / float64(len(scores))
 }
 
