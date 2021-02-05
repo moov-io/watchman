@@ -23,7 +23,7 @@ Moov Watchman provides a [web interface](./webui.md) for easy browsing of the SD
 
 ## API Documentation
 
-See our documentation for Watchman's [API](https://moov-io.github.io/watchman/api/) or [admin endpoints](https://api.moov.io/admin/watchman/).
+See our documentation for Watchman's [API](https://moov-io.github.io/watchman/api/) or [admin endpoints](https://moov-io.github.io/watchman/admin/).
 
 ## Webhooks
 
@@ -56,6 +56,13 @@ Webhook URLs MUST be secure (https://...) and an `Authorization` header is sent 
                 Punctuation is removed along with extra spaces on both ends of the entity name.
                 Using <a href="https://godoc.org/golang.org/x/text/unicode/norm#Form">Go's /x/text normalization</a> methods we consolidate entity names and search queries for better searching across multiple languages.
             </p>
+        </li>
+    </ul>
+    <li>Why are exact matches of words not ranked higher?</li>
+    <ul>
+        <li>
+            Watchman offers an environmental variable called `EXACT_MATCH_FAVORITISM` that can adjust the weight of exact matches within a query.
+            This value is a percentage (float64) added to exact matches prior to computing the final match percentage. Try using 0.1, 0.25 or 0.5 with your testing.
         </li>
     </ul>
 </ul>
