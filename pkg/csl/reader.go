@@ -32,10 +32,10 @@ func Read(path string) (*CSL, error) {
 		for i := 0; i <= 1; i++ {
 			switch record[i] {
 			case "Sectoral Sanctions Identifications List (SSI) - Treasury Department":
-				ssis = append(ssis, unmarshalSSI(record))
+				ssis = append(ssis, unmarshalSSI(record, i))
 
 			case "Entity List (EL) - Bureau of Industry and Security":
-				els = append(els, unmarshalEL(record))
+				els = append(els, unmarshalEL(record, i))
 			}
 		}
 	}
@@ -46,32 +46,37 @@ func Read(path string) (*CSL, error) {
 	}, nil
 }
 
-func unmarshalSSI(record []string) *SSI {
+func unmarshalSSI(record []string, offset int) *SSI {
 	return &SSI{
-		EntityID:       record[EntityNumberIdx],
-		Type:           record[TypeIdx],
-		Programs:       expandProgramsList(record[ProgramsIdx]),
-		Name:           record[NameIdx],
-		Addresses:      expandField(record[AddressesIdx]),
-		Remarks:        expandField(record[RemarksIdx]),
-		AlternateNames: expandField(record[AltNamesIdx]),
-		IDsOnRecord:    expandField(record[IDsIdx]),
-		SourceListURL:  record[SourceListURLIdx],
-		SourceInfoURL:  record[SourceInformationURLIdx],
+		EntityID:       record[EntityNumberIdx+offset],
+		Type:           record[TypeIdx+offset],
+		Programs:       expandProgramsList(record[ProgramsIdx+offset]),
+		Name:           record[NameIdx+offset],
+		Addresses:      expandField(record[AddressesIdx+offset]),
+		Remarks:        expandField(record[RemarksIdx+offset]),
+		AlternateNames: expandField(record[AltNamesIdx+offset]),
+		IDsOnRecord:    expandField(record[IDsIdx+offset]),
+		SourceListURL:  record[SourceListURLIdx+offset],
+		SourceInfoURL:  record[SourceInformationURLIdx+offset],
 	}
 }
 
-func unmarshalEL(row []string) *EL {
+func unmarshalEL(row []string, offset int) *EL {
+	id := ""
+	if offset == 1 {
+		id = row[0] // set the ID from the newer CSV format
+	}
 	return &EL{
-		Name:               row[NameIdx],
-		Addresses:          expandField(row[AddressesIdx]),
-		AlternateNames:     expandField(row[AltNamesIdx]),
-		StartDate:          row[StartDateIdx],
-		LicenseRequirement: row[LicenseRequirementIdx],
-		LicensePolicy:      row[LicensePolicyIdx],
-		FRNotice:           row[FRNoticeIdx],
-		SourceListURL:      row[SourceListURLIdx],
-		SourceInfoURL:      row[SourceInformationURLIdx],
+		ID:                 id,
+		Name:               row[NameIdx+offset],
+		Addresses:          expandField(row[AddressesIdx+offset]),
+		AlternateNames:     expandField(row[AltNamesIdx+offset]),
+		StartDate:          row[StartDateIdx+offset],
+		LicenseRequirement: row[LicenseRequirementIdx+offset],
+		LicensePolicy:      row[LicensePolicyIdx+offset],
+		FRNotice:           row[FRNoticeIdx+offset],
+		SourceListURL:      row[SourceListURLIdx+offset],
+		SourceInfoURL:      row[SourceInformationURLIdx+offset],
 	}
 }
 
@@ -81,7 +86,9 @@ func unmarshalEL(row []string) *EL {
 func expandField(addrs string) []string {
 	var result []string
 	for _, a := range strings.Split(addrs, ";") {
-		result = append(result, strings.TrimSpace(a))
+		if res := strings.TrimSpace(a); res != "" {
+			result = append(result, res)
+		}
 	}
 	return result
 }
