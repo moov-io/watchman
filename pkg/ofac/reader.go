@@ -15,7 +15,7 @@ import (
 
 // Read will consume the file at path and attempt to parse it was a CSV OFAC file.
 //
-// For more details on the raw OFAC files see https://docs.moov.io/watchman/file-structure/
+// For more details on the raw OFAC files see https://moov-io.github.io/watchman/file-structure.html
 func Read(path string) (*Results, error) {
 	switch filepath.Base(path) {
 	case "add.csv":
