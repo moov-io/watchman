@@ -1,8 +1,16 @@
-## Search
+---
+layout: page
+title: Search Options
+hide_hero: true
+show_sidebar: false
+menubar: docs-menu
+---
+
+# Search
 
 Moov Watchman offers numerous search options for inspecting the SDN and related data.
 
-### Supported Combinations
+## Supported Combinations
 
 - All fields
    - `?q=<string>`
@@ -17,7 +25,7 @@ Moov Watchman offers numerous search options for inspecting the SDN and related 
 - Address search
    - `&address=<string>&city=<string>&state=<string>&providence=<string>&zip=<string>&country=<string>`
 
-### All In One
+## All In One
 
 The most common endpoint for searching across all data Watchman has indexed. To perform this search make an HTTP query like the following:
 
@@ -82,7 +90,7 @@ $ curl -s 'http://localhost:8084/search?q=nicolas+maduro&limit=1' | jq .
 }
 ```
 
-### SDN Names
+## SDN Names
 
 This search operation will only return results matching SDN names from your query:
 
@@ -112,7 +120,7 @@ $ curl -s 'http://localhost:8084/search?name=nicolas+maduro&limit=1' | jq .
 }
 ```
 
-### SDN Remark IDs
+## SDN Remark IDs
 
 SDN Remarks contain semi-structured data which Watchman attempts to parse. One common element of this data is a National or Governmental ID which uniquely identifies an entity.
 
@@ -142,7 +150,7 @@ $ curl -s 'http://localhost:8084/search?id=5892464&limit=1' | jq .
 }
 ```
 
-### SDN Alternate Names
+## SDN Alternate Names
 
 Often an entity will have multiple names which are in the OFAC dataset:
 
@@ -185,7 +193,7 @@ $ curl -s 'http://localhost:8084/sdn/306' | jq .
 }
 ```
 
-### SDN Addresses
+## SDN Addresses
 
 An address can also be a query against the OFAC data. There are multiple query parameters available here to further refine results:
 

@@ -1,4 +1,12 @@
-## Pipeline
+---
+layout: page
+title: Precomputation Pipeline
+hide_hero: true
+show_sidebar: false
+menubar: docs-menu
+---
+
+# Pipeline
 
 Watchman performs various operations on records prior to their inclusion in the search index and offers some inspection capabilities into the search index.
 
@@ -13,7 +21,7 @@ ts=2019-12-19T17:11:25.325613Z caller=pipeline.go:84 pipeline=*main.normalizeSte
 
 Note: Some record types are skipped in pipeline steps.
 
-### Debugging SDNs
+## Debugging SDNs
 
 For a more precise inspection of a specific SDN record, call the following endpoint. The `debug` object is included along with the SDN in question.
 
@@ -33,9 +41,9 @@ $ curl -s localhost:9094/debug/sdn/16016 | jq .
 }
 ```
 
-### Pipeline Steps
+## Pipeline Steps
 
-**Re-ordering of individual names**
+**Reordering of Individual Names**
 
 This step processes SDN and SSI entries to rearrange their name into a "first middle last" ordering.
 
