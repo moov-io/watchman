@@ -68,4 +68,4 @@ This step "normalizes" all text passed to it by converting it to lowercase, remo
 
 Example: `Raúl Castro` into `raul castro`
 
-More information: https://withblue.ink/2019/03/11/why-you-need-to-normalize-unicode-strings.html
+More information: [Why You Need to Normalize Unicode Strings](https://withblue.ink/2019/03/11/why-you-need-to-normalize-unicode-strings.html)

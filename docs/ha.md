@@ -12,9 +12,7 @@ Watchman doesn't currently support operating in a high availability (HA) mode. T
 
 Given these assumptions we've chosen to focus on Watchman's vertical scaling (add CPUs and memory) instead of clustering. Currently two instances of Watchman will write over each other and send duplicate webhook notifications.
 
-## Dependencies
-
-### Database
+## Database Dependency
 
 When Watchman is connected to a MySQL instance the database will need to be deployed in an acceptable manner for replication, failure recovery, and backups.
 
