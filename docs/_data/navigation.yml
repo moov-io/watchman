@@ -1,0 +1,20 @@
+- name: API
+  link: https://moov-io.github.io/watchman/api
+- name: Go
+  link: https://pkg.go.dev/github.com/moov-io/watchman#section-documentation
+- name: Demo
+  link: https://oss.moov.io/watchman/
+- name: Community
+  link: https://slack.moov.io/
+- name: Other Projects
+  dropdown:
+    - name: Moov ACH
+      link: https://moov-io.github.io/ach/
+    - name: Moov Image Cash Letter
+      link: https://moov-io.github.io/imagecashletter/
+    - name: Moov Metro 2
+      link: https://moov-io.github.io/metro2/
+    - name: Moov Fed
+      link: https://moov-io.github.io/fed/
+    - name: Moov Wire
+      link: https://moov-io.github.io/wire/
