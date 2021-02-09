@@ -274,6 +274,7 @@ OFAC requires annual reports of blocked entities and [offers guidance for this r
 - [BIS Denied Persons List with Denied US Export Privileges (DPL)](https://bis.data.commerce.gov/dataset/Denied-Persons-List-with-Denied-US-Export-Privileg/xwtd-wd7a/data)
 - [BIS Entity List](https://www.bis.doc.gov/index.php/policy-guidance/lists-of-parties-of-concern/entity-list)
 - [Sectoral Sanctions Identifications (SSI)](https://www.treasury.gov/resource-center/sanctions/SDN-List/Pages/ssi_list.aspx)
+- [US Sanctions Search FAQ](https://home.treasury.gov/policy-issues/financial-sanctions/faqs#basic)
 
 ## Getting Help
 
