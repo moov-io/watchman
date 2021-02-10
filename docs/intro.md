@@ -11,7 +11,7 @@ menubar: docs-menu
 The Watchman project implements an HTTP server and [Go library](https://pkg.go.dev/github.com/moov-io/watchman) for searching, parsing, and downloading lists. We also have an [example](https://pkg.go.dev/github.com/moov-io/watchman/examples) of the webhook service. Below, you can find a detailed list of features offered by Watchman:
 
 - Download OFAC, BIS Denied Persons List (DPL), and various other data sources on startup
-  - Admin endpoint to [manually refresh OFAC and DPL data](docs/runbook.md#force-data-refresh)
+  - Admin endpoint to [manually refresh OFAC and DPL data](https://moov-io.github.io/watchman/runbook/#force-data-refresh)
 - Index data for searches
 - Async searches and notifications (webhooks)
 - Manual overrides to mark a `Company` or `Customer` as `unsafe` (blocked) or `exception` (never blocked).
