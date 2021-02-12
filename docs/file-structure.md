@@ -1,7 +1,12 @@
+---
+layout: page
+title: File Structure
+hide_hero: true
+show_sidebar: false
+menubar: docs-menu
+---
 
-### Specially Designated National (SDN)
-
-## CSV Data Specifications
+# CSV Data Specifications - Specially Designated National (SDN)
 
 Format *.csv consists of records separated by carriage returns (ASCII character 
 13), with fields (values) within records delimited by the "," (comma) symbol 
