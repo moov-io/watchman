@@ -1,4 +1,4 @@
-FROM golang:1.15-buster as backend
+FROM golang:1.16-buster as backend
 WORKDIR /go/src/github.com/moov-io/watchman
 RUN apt-get update && apt-get install make gcc g++
 COPY . .
