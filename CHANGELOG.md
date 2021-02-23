@@ -1,3 +1,9 @@
+## v0.17.1 (Released 2021-02-23)
+
+IMPROVEMENTS
+
+- chore(deps): update golang docker tag to v1.16
+
 ## v0.17.0 (Released 2021-02-05)
 
 ADDITIONS
