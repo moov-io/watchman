@@ -16,6 +16,7 @@ import (
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/watchman/internal/database"
 	"github.com/moov-io/watchman/pkg/ofac"
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
@@ -23,7 +24,20 @@ import (
 
 var (
 	errNoCompanyID = errors.New("no Company ID found")
+
+	companyWatchMetrics = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "active_company_watch_count",
+		Help: "Current number of active company watch",
+	})
+	companyNameWatchMetrics = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "active_company_name_watch_count",
+		Help: "Current number of active company name watch",
+	})
 )
+
+func init() {
+	prometheus.MustRegister(companyWatchMetrics, companyNameWatchMetrics)
+}
 
 // Company is a company on one or more SDN list(s)
 type Company struct {
@@ -280,6 +294,7 @@ func addCompanyWatch(logger log.Logger, searcher *searcher, repo watchRepository
 		}
 
 		requestID, userID := moovhttp.GetRequestID(r), moovhttp.GetUserID(r)
+		companyWatchMetrics.Inc()
 		logger.Log("companies", fmt.Sprintf("added watch for company=%s", companyID), "requestID", requestID, "userID", userID)
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -302,6 +317,7 @@ func removeCompanyWatch(logger log.Logger, searcher *searcher, repo watchReposit
 		}
 
 		requestID, userID := moovhttp.GetRequestID(r), moovhttp.GetUserID(r)
+		companyWatchMetrics.Dec()
 		logger.Log("companies", fmt.Sprintf("removed company=%s watch=%s", companyID, watchID), "requestID", requestID, "userID", userID)
 
 		w.WriteHeader(http.StatusOK)
@@ -340,6 +356,7 @@ func addCompanyNameWatch(logger log.Logger, searcher *searcher, repo watchReposi
 
 		if requestID := moovhttp.GetRequestID(r); requestID != "" {
 			userID := moovhttp.GetUserID(r)
+			companyNameWatchMetrics.Inc()
 			logger.Log("companies", "added company name watch", "requestID", requestID, "userID", userID)
 		}
 
@@ -364,6 +381,7 @@ func removeCompanyNameWatch(logger log.Logger, searcher *searcher, repo watchRep
 
 		if requestID := moovhttp.GetRequestID(r); requestID != "" {
 			userID := moovhttp.GetUserID(r)
+			companyNameWatchMetrics.Dec()
 			logger.Log("companies", fmt.Sprintf("removed company name watch=%s", watchID), "requestID", requestID, "userID", userID)
 		}
 

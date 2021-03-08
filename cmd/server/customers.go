@@ -16,6 +16,7 @@ import (
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/watchman/internal/database"
 	"github.com/moov-io/watchman/pkg/ofac"
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
@@ -26,7 +27,20 @@ var (
 	errNoCustomerID = errors.New("no Customer ID found")
 	errNoNameParam  = errors.New("no name parameter found")
 	errNoUserID     = errors.New("no userID (X-User-Id header) found")
+
+	customerWatchMetrics = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "active_customer_watch_count",
+		Help: "Current number of active customer watch",
+	})
+	customerNameWatchMetrics = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "active_customer_name_watch_count",
+		Help: "Current number of active customer name watch",
+	})
 )
+
+func init() {
+	prometheus.MustRegister(customerWatchMetrics, customerNameWatchMetrics)
+}
 
 // Customer is an individual on one or more SDN list(s)
 type Customer struct {
@@ -237,6 +251,7 @@ func addCustomerNameWatch(logger log.Logger, searcher *searcher, repo *sqliteWat
 
 		if requestID := moovhttp.GetRequestID(r); requestID != "" {
 			userID := moovhttp.GetUserID(r)
+			customerNameWatchMetrics.Inc()
 			logger.Log("customers", "added customer name watch", "requestID", requestID, "userID", userID)
 		}
 
@@ -278,6 +293,7 @@ func addCustomerWatch(logger log.Logger, searcher *searcher, repo *sqliteWatchRe
 
 		if requestID := moovhttp.GetRequestID(r); requestID != "" {
 			userID := moovhttp.GetUserID(r)
+			customerWatchMetrics.Inc()
 			logger.Log("customers", "added customer name watch", "requestID", requestID, "userID", userID)
 		}
 
@@ -355,8 +371,8 @@ func removeCustomerWatch(logger log.Logger, searcher *searcher, repo *sqliteWatc
 		}
 
 		requestID, userID := moovhttp.GetRequestID(r), moovhttp.GetUserID(r)
+		customerWatchMetrics.Dec()
 		logger.Log("customers", fmt.Sprintf("removed customer=%s watch", customerID), "requestID", requestID, "userID", userID)
-
 		w.WriteHeader(http.StatusOK)
 	}
 }
@@ -375,6 +391,7 @@ func removeCustomerNameWatch(logger log.Logger, searcher *searcher, repo *sqlite
 		}
 		if requestID := moovhttp.GetRequestID(r); requestID != "" {
 			userID := moovhttp.GetUserID(r)
+			customerNameWatchMetrics.Dec()
 			logger.Log("customers", "removed customer name watch", "requestID", requestID, "userID", userID)
 		}
 		w.WriteHeader(http.StatusOK)
