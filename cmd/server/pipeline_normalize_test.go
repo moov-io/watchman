@@ -24,18 +24,18 @@ func TestPipeline__normalizeStep(t *testing.T) {
 // TestPrecompute ensures we are trimming and UTF-8 normalizing strings
 // as expected. This is needed since our datafiles are normalized for us.
 func TestPrecompute(t *testing.T) {
-	cases := []struct {
-		input, expected string
+	tests := []struct {
+		name, input, expected string
 	}{
-		{"nicolás maduro", "nicolas maduro"},
-		{"Delcy Rodríguez", "delcy rodriguez"},
-		{"Raúl Castro", "raul castro"},
-		{"ANGLO-CARIBBEAN ", "anglo caribbean"},
+		{"remove accents", "nicolás maduro", "nicolas maduro"},
+		{"convert IAcute", "Delcy Rodríguez", "delcy rodriguez"},
+		{"issue 58", "Raúl Castro", "raul castro"},
+		{"remove hyphen", "ANGLO-CARIBBEAN ", "anglo caribbean"},
 	}
-	for i := range cases {
-		guess := precompute(cases[i].input)
-		if guess != cases[i].expected {
-			t.Errorf("precompute(%q)=%q expected %q", cases[i].input, guess, cases[i].expected)
+	for i, tc := range tests {
+		guess := precompute(tc.input)
+		if guess != tc.expected {
+			t.Errorf("case: %d name: %s precompute(%q)=%q expected %q", i, tc.name, tc.input, guess, tc.expected)
 		}
 	}
 }
