@@ -114,8 +114,8 @@ cover-web:
 	go tool cover -html=cover.out
 
 clean-integration:
-	docker-compose kill
-	docker-compose rm -v -f
+	docker-compose down -v
+	docker container ls -a
 
 test-integration: clean-integration
 	docker-compose up -d
