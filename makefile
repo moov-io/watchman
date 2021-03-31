@@ -114,8 +114,11 @@ cover-web:
 	go tool cover -html=cover.out
 
 clean-integration:
-	docker-compose down -v
+	docker-compose kill
+	docker-compose rm -v -f
 	docker container ls -a
+	sudo lsof -i:8084 ## see a specific port such as 22 ##
+	sudo lsof -i -P -n | grep LISTEN
 
 test-integration: clean-integration
 	docker-compose up -d
