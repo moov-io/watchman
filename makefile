@@ -118,7 +118,7 @@ clean-integration:
 	docker-compose rm -v -f
 	sudo lsof -i:8084 ## see a specific port such as 22 ##
 	sudo lsof -i -P -n | grep LISTEN
-	pkill mono # this service is occupying port 8084
+	sudo pkill mono # this service is occupying port 8084
 	sudo lsof -i:8084 ## see a specific port such as 22 ##
 	sudo lsof -i -P -n | grep LISTEN
 
