@@ -6,6 +6,7 @@ require (
 	github.com/bbalet/stopwords v1.0.0
 	github.com/cenkalti/backoff/v3 v3.2.2 // indirect
 	github.com/containerd/continuity v0.0.0-20200710164510-efbc4488d8fe // indirect
+	github.com/docker/docker v1.4.2-0.20200213202729-31a86c4ab209
 	github.com/go-kit/kit v0.10.0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gogo/protobuf v1.3.2 // indirect

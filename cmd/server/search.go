@@ -164,9 +164,19 @@ func TopAddressesFn(limit int, addresses []*Address, compare func(*Address) *ite
 		return nil
 	}
 	xs := newLargest(limit)
+
+	var wg sync.WaitGroup
+	wg.Add(len(addresses))
+
 	for i := range addresses {
-		xs.add(compare(addresses[i]))
+		go func(i int) {
+			defer wg.Done()
+			xs.add(compare(addresses[i]))
+		}(i)
 	}
+
+	wg.Wait()
+
 	return largestToAddresses(xs)
 }
 
@@ -213,12 +223,19 @@ func (s *searcher) TopAltNames(limit int, alt string) []Alt {
 	}
 	xs := newLargest(limit)
 
+	var wg sync.WaitGroup
+	wg.Add(len(s.Alts))
+
 	for i := range s.Alts {
-		xs.add(&item{
-			value:  s.Alts[i],
-			weight: jaroWinkler(s.Alts[i].name, alt),
-		})
+		go func(i int) {
+			defer wg.Done()
+			xs.add(&item{
+				value:  s.Alts[i],
+				weight: jaroWinkler(s.Alts[i].name, alt),
+			})
+		}(i)
 	}
+	wg.Wait()
 
 	out := make([]Alt, 0)
 	for i := range xs.items {
@@ -319,12 +336,19 @@ func (s *searcher) TopSDNs(limit int, name string) []SDN {
 	}
 	xs := newLargest(limit)
 
+	var wg sync.WaitGroup
+	wg.Add(len(s.SDNs))
+
 	for i := range s.SDNs {
-		xs.add(&item{
-			value:  s.SDNs[i],
-			weight: jaroWinkler(s.SDNs[i].name, name),
-		})
+		go func(i int) {
+			defer wg.Done()
+			xs.add(&item{
+				value:  s.SDNs[i],
+				weight: jaroWinkler(s.SDNs[i].name, name),
+			})
+		}(i)
 	}
+	wg.Wait()
 
 	out := make([]SDN, 0)
 	for i := range xs.items {
@@ -352,12 +376,19 @@ func (s *searcher) TopDPs(limit int, name string) []DP {
 	}
 	xs := newLargest(limit)
 
-	for _, dp := range s.DPs {
-		xs.add(&item{
-			value:  dp,
-			weight: jaroWinkler(dp.name, name),
-		})
+	var wg sync.WaitGroup
+	wg.Add(len(s.DPs))
+
+	for i := range s.DPs {
+		go func(i int) {
+			defer wg.Done()
+			xs.add(&item{
+				value:  s.DPs[i],
+				weight: jaroWinkler(s.DPs[i].name, name),
+			})
+		}(i)
 	}
+	wg.Wait()
 
 	out := make([]DP, 0)
 	for _, thisItem := range xs.items {
@@ -386,22 +417,29 @@ func (s *searcher) TopSSIs(limit int, name string) []SSI {
 	}
 	xs := newLargest(limit)
 
-	for _, ssi := range s.SSIs {
-		it := &item{
-			value:  ssi,
-			weight: jaroWinkler(ssi.name, name),
-		}
-		for _, alt := range ssi.SectoralSanction.AlternateNames {
-			if alt == "" {
-				continue
+	var wg sync.WaitGroup
+	wg.Add(len(s.SSIs))
+
+	for i := range s.SSIs {
+		go func(i int) {
+			defer wg.Done()
+			it := &item{
+				value:  s.SSIs[i],
+				weight: jaroWinkler(s.SSIs[i].name, name),
 			}
-			currWeight := jaroWinkler(alt, name)
-			if currWeight > it.weight {
-				it.weight = currWeight
+			for _, alt := range s.SSIs[i].SectoralSanction.AlternateNames {
+				if alt == "" {
+					continue
+				}
+				currWeight := jaroWinkler(alt, name)
+				if currWeight > it.weight {
+					it.weight = currWeight
+				}
 			}
-		}
-		xs.add(it)
+			xs.add(it)
+		}(i)
 	}
+	wg.Wait()
 
 	out := make([]SSI, 0)
 	for _, thisItem := range xs.items {
@@ -431,22 +469,31 @@ func (s *searcher) TopBISEntities(limit int, name string) []BISEntity {
 
 	xs := newLargest(limit)
 
-	for _, el := range s.BISEntities {
-		it := &item{
-			value:  el,
-			weight: jaroWinkler(el.name, name),
-		}
-		for _, alt := range el.Entity.AlternateNames {
-			if alt == "" {
-				continue
+	var wg sync.WaitGroup
+	wg.Add(len(s.BISEntities))
+
+	for i := range s.BISEntities {
+		go func(i int) {
+			defer wg.Done()
+
+			it := &item{
+				value:  s.BISEntities[i],
+				weight: jaroWinkler(s.BISEntities[i].name, name),
 			}
-			currWeight := jaroWinkler(alt, name)
-			if currWeight > it.weight {
-				it.weight = currWeight
+			for _, alt := range s.BISEntities[i].Entity.AlternateNames {
+				if alt == "" {
+					continue
+				}
+				currWeight := jaroWinkler(alt, name)
+				if currWeight > it.weight {
+					it.weight = currWeight
+				}
 			}
-		}
-		xs.add(it)
+
+			xs.add(it)
+		}(i)
 	}
+	wg.Wait()
 
 	out := make([]BISEntity, 0)
 	for _, thisItem := range xs.items {

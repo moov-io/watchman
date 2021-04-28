@@ -15,8 +15,6 @@ import (
 	"github.com/moov-io/watchman/pkg/csl"
 	"github.com/moov-io/watchman/pkg/dpl"
 	"github.com/moov-io/watchman/pkg/ofac"
-
-	"github.com/go-kit/kit/log"
 )
 
 var (
@@ -250,19 +248,7 @@ func TestEql(t *testing.T) {
 // TestSearch_liveData will download the real data and run searches against the corpus.
 // This test is designed to tweak match percents and results.
 func TestSearch_liveData(t *testing.T) {
-	if testing.Short() {
-		return
-	}
-	searcher := &searcher{
-		logger: log.NewNopLogger(),
-		pipe:   noLogPipeliner,
-	}
-	if stats, err := searcher.refreshData(""); err != nil {
-		t.Fatal(err)
-	} else {
-		searcher.logger.Log("liveData", fmt.Sprintf("stats: %#v", stats))
-	}
-
+	searcher := createTestSearcher(t)
 	cases := []struct {
 		name  string
 		match float64 // top match %

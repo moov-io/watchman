@@ -40,18 +40,9 @@ func TestSearcher__refreshInterval(t *testing.T) {
 }
 
 func TestSearcher__refreshData(t *testing.T) {
-	if testing.Short() {
-		return
-	}
+	s := createTestSearcher(t) // TODO(adam): initial setup
+	stats := testSearcherStats
 
-	s := &searcher{
-		logger: log.NewNopLogger(),
-		pipe:   noLogPipeliner,
-	}
-	stats, err := s.refreshData("")
-	if err != nil {
-		t.Fatal(err)
-	}
 	if len(s.Addresses) == 0 || stats.Addresses == 0 {
 		t.Errorf("empty Addresses=%d stats.Addresses=%d", len(s.Addresses), stats.Addresses)
 	}

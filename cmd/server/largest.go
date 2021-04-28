@@ -4,6 +4,8 @@
 
 package main
 
+import "sync"
+
 // item represents an arbitrary value with an associated weight
 type item struct {
 	value  interface{}
@@ -23,9 +25,13 @@ func newLargest(capacity int) *largest {
 type largest struct {
 	items    []*item
 	capacity int
+	mu       sync.Mutex
 }
 
 func (xs *largest) add(it *item) {
+	xs.mu.Lock()
+	defer xs.mu.Unlock()
+
 	for i := range xs.items {
 		if xs.items[i] == nil {
 			xs.items[i] = it // insert if we found empty slot
