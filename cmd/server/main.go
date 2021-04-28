@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"syscall"
@@ -32,15 +33,17 @@ var (
 	httpAddr  = flag.String("http.addr", bind.HTTP("ofac"), "HTTP listen address")
 	adminAddr = flag.String("admin.addr", bind.Admin("ofac"), "Admin HTTP listen address")
 
-	flagBasePath = flag.String("base-path", "/", "Base path to serve HTTP routes and webui from")
-
+	flagBasePath  = flag.String("base-path", "/", "Base path to serve HTTP routes and webui from")
 	flagLogFormat = flag.String("log.format", "", "Format for log lines (Options: json, plain")
+	flagMaxProcs  = flag.Int("max-procs", runtime.NumCPU(), "Maximum number of CPUs used for search and endpoints")
 
 	dataRefreshInterval = 12 * time.Hour
 )
 
 func main() {
 	flag.Parse()
+
+	runtime.GOMAXPROCS(*flagMaxProcs)
 
 	var logger log.Logger
 	if v := os.Getenv("LOG_FORMAT"); v != "" {
