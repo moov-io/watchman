@@ -155,33 +155,32 @@ func TestSearch__NameAndAddress(t *testing.T) {
 	req := httptest.NewRequest("GET", "/search?name=midco&address=rue+de+rhone&limit=1", nil)
 
 	pipe := noLogPipeliner
-	s := &searcher{
-		Addresses: precomputeAddresses([]*ofac.Address{
-			{
-				EntityID:                    "2831",
-				AddressID:                   "1965",
-				Address:                     "57 Rue du Rhone",
-				CityStateProvincePostalCode: "Geneva CH-1204",
-				Country:                     "Switzerland",
-			},
-			{
-				EntityID:                    "173",
-				AddressID:                   "129",
-				Address:                     "Ibex House, The Minories",
-				CityStateProvincePostalCode: "London EC3N 1DY",
-				Country:                     "United Kingdom",
-			},
-		}),
-		SDNs: precomputeSDNs([]*ofac.SDN{
-			{
-				EntityID: "2831",
-				SDNName:  "MIDCO FINANCE S.A.",
-				SDNType:  "individual",
-				Programs: []string{"IRAQ2"},
-				Remarks:  "US FEIN CH-660-0-469-982-0 (United States); Switzerland.",
-			},
-		}, nil, pipe),
-	}
+	s := newSearcher(log.NewNopLogger(), pipe, 1)
+	s.Addresses = precomputeAddresses([]*ofac.Address{
+		{
+			EntityID:                    "2831",
+			AddressID:                   "1965",
+			Address:                     "57 Rue du Rhone",
+			CityStateProvincePostalCode: "Geneva CH-1204",
+			Country:                     "Switzerland",
+		},
+		{
+			EntityID:                    "173",
+			AddressID:                   "129",
+			Address:                     "Ibex House, The Minories",
+			CityStateProvincePostalCode: "London EC3N 1DY",
+			Country:                     "United Kingdom",
+		},
+	})
+	s.SDNs = precomputeSDNs([]*ofac.SDN{
+		{
+			EntityID: "2831",
+			SDNName:  "MIDCO FINANCE S.A.",
+			SDNType:  "individual",
+			Programs: []string{"IRAQ2"},
+			Remarks:  "US FEIN CH-660-0-469-982-0 (United States); Switzerland.",
+		},
+	}, nil, noLogPipeliner)
 
 	router := mux.NewRouter()
 	addSearchRoutes(log.NewNopLogger(), router, s)
@@ -229,18 +228,15 @@ func TestSearch__NameAndAltName(t *testing.T) {
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/search?limit=1&q=nayif", nil)
 
-	s := &searcher{
-		// OFAC
-		SDNs:      sdnSearcher.SDNs,
-		Alts:      altSearcher.Alts,
-		Addresses: addressSearcher.Addresses,
-		SSIs:      ssiSearcher.SSIs,
-		// BIS
-		DPs:         dplSearcher.DPs,
-		BISEntities: bisEntitySearcher.BISEntities,
-		// other
-		pipe: noLogPipeliner,
-	}
+	s := newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	// OFAC
+	s.SDNs = sdnSearcher.SDNs
+	s.Alts = altSearcher.Alts
+	s.Addresses = addressSearcher.Addresses
+	s.SSIs = ssiSearcher.SSIs
+	// BIS
+	s.DPs = dplSearcher.DPs
+	s.BISEntities = bisEntitySearcher.BISEntities
 
 	router := mux.NewRouter()
 	addSearchRoutes(log.NewNopLogger(), router, s)
@@ -292,17 +288,15 @@ func TestSearch__Name(t *testing.T) {
 	req := httptest.NewRequest("GET", "/search?name=Dr+AL+ZAWAHIRI&limit=1", nil)
 
 	router := mux.NewRouter()
-	combinedSearcher := &searcher{
-		// OFAC
-		SDNs: sdnSearcher.SDNs,
-		Alts: altSearcher.Alts,
-		SSIs: ssiSearcher.SSIs,
-		// BIS
-		DPs:         dplSearcher.DPs,
-		BISEntities: bisEntitySearcher.BISEntities,
-		// other
-		pipe: noLogPipeliner,
-	}
+	combinedSearcher := newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	// OFAC
+	combinedSearcher.SDNs = sdnSearcher.SDNs
+	combinedSearcher.Alts = altSearcher.Alts
+	combinedSearcher.SSIs = ssiSearcher.SSIs
+	// BIS
+	combinedSearcher.DPs = dplSearcher.DPs
+	combinedSearcher.BISEntities = bisEntitySearcher.BISEntities
+
 	addSearchRoutes(log.NewNopLogger(), router, combinedSearcher)
 	router.ServeHTTP(w, req)
 	w.Flush()

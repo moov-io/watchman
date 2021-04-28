@@ -23,38 +23,39 @@ import (
 var (
 	// customerSearcher is a searcher instance with one individual entity contained. It's designed to be used
 	// in tests that expect an individual SDN.
-	customerSearcher = &searcher{
-		SDNs: precomputeSDNs([]*ofac.SDN{
-			{
-				EntityID: "306",
-				SDNName:  "BANCO NACIONAL DE CUBA",
-				SDNType:  "individual",
-				Programs: []string{"CUBA"},
-				Title:    "",
-				Remarks:  "a.k.a. 'BNC'.",
-			},
-		}, nil, noLogPipeliner),
-		Addresses: precomputeAddresses([]*ofac.Address{
-			{
-				EntityID:                    "306",
-				AddressID:                   "201",
-				Address:                     "Dai-Ichi Bldg. 6th Floor, 10-2 Nihombashi, 2-chome, Chuo-ku",
-				CityStateProvincePostalCode: "Tokyo 103",
-				Country:                     "Japan",
-			},
-		}),
-		Alts: precomputeAlts([]*ofac.AlternateIdentity{
-			{
-				EntityID:      "306",
-				AlternateID:   "220",
-				AlternateType: "aka",
-				AlternateName: "NATIONAL BANK OF CUBA",
-			},
-		}),
-		pipe:   noLogPipeliner,
-		logger: log.NewNopLogger(),
-	}
+	customerSearcher *searcher
 )
+
+func init() {
+	customerSearcher = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	customerSearcher.SDNs = precomputeSDNs([]*ofac.SDN{
+		{
+			EntityID: "306",
+			SDNName:  "BANCO NACIONAL DE CUBA",
+			SDNType:  "individual",
+			Programs: []string{"CUBA"},
+			Title:    "",
+			Remarks:  "a.k.a. 'BNC'.",
+		},
+	}, nil, noLogPipeliner)
+	customerSearcher.Addresses = precomputeAddresses([]*ofac.Address{
+		{
+			EntityID:                    "306",
+			AddressID:                   "201",
+			Address:                     "Dai-Ichi Bldg. 6th Floor, 10-2 Nihombashi, 2-chome, Chuo-ku",
+			CityStateProvincePostalCode: "Tokyo 103",
+			Country:                     "Japan",
+		},
+	})
+	customerSearcher.Alts = precomputeAlts([]*ofac.AlternateIdentity{
+		{
+			EntityID:      "306",
+			AlternateID:   "220",
+			AlternateType: "aka",
+			AlternateName: "NATIONAL BANK OF CUBA",
+		},
+	})
+}
 
 func createTestCustomerRepository(t *testing.T) *sqliteCustomerRepository {
 	t.Helper()

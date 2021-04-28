@@ -21,174 +21,160 @@ import (
 
 var (
 	// Live Searcher
-	testLiveSearcher = &searcher{
-		logger: log.NewNopLogger(),
-		pipe:   noLogPipeliner,
-	}
+	testLiveSearcher  = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
 	testSearcherStats *downloadStats
 	testSearcherOnce  sync.Once
 
 	// Mock Searchers
-	addressSearcher = &searcher{
-		Addresses: precomputeAddresses([]*ofac.Address{
-			{
-				EntityID:                    "173",
-				AddressID:                   "129",
-				Address:                     "Ibex House, The Minories",
-				CityStateProvincePostalCode: "London EC3N 1DY",
-				Country:                     "United Kingdom",
-			},
-			{
-				EntityID:                    "735",
-				AddressID:                   "447",
-				Address:                     "Piarco Airport",
-				CityStateProvincePostalCode: "Port au Prince",
-				Country:                     "Haiti",
-			},
-		}),
-		pipe: noLogPipeliner,
-	}
-	altSearcher = &searcher{
-		Alts: precomputeAlts([]*ofac.AlternateIdentity{
-			{ // Real OFAC entry
-				EntityID:      "559",
-				AlternateID:   "481",
-				AlternateType: "aka",
-				AlternateName: "CIMEX",
-			},
-			{
-				EntityID:      "4691",
-				AlternateID:   "3887",
-				AlternateType: "aka",
-				AlternateName: "A.I.C. SOGO KENKYUSHO",
-			},
-		}),
-		pipe: noLogPipeliner,
-	}
-	sdnSearcher = &searcher{
-		SDNs: precomputeSDNs([]*ofac.SDN{
-			{
-				EntityID: "2676",
-				SDNName:  "AL ZAWAHIRI, Dr. Ayman",
-				SDNType:  "individual",
-				Programs: []string{"SDGT", "SDT"},
-				Title:    "Operational and Military Leader of JIHAD GROUP",
-				Remarks:  "DOB 19 Jun 1951; POB Giza, Egypt; Passport 1084010 (Egypt); alt. Passport 19820215; Operational and Military Leader of JIHAD GROUP.",
-			},
-			{
-				EntityID: "2681",
-				SDNName:  "HAWATMA, Nayif",
-				SDNType:  "individual",
-				Programs: []string{"SDT"},
-				Title:    "Secretary General of DEMOCRATIC FRONT FOR THE LIBERATION OF PALESTINE - HAWATMEH FACTION",
-				Remarks:  "DOB 1933; Secretary General of DEMOCRATIC FRONT FOR THE LIBERATION OF PALESTINE - HAWATMEH FACTION.",
-			},
-		}, nil, noLogPipeliner),
-		pipe: noLogPipeliner,
-	}
-	idSearcher = &searcher{
-		SDNs: precomputeSDNs([]*ofac.SDN{
-			{
-				EntityID: "22790",
-				SDNName:  "MADURO MOROS, Nicolas",
-				SDNType:  "individual",
-				Programs: []string{"VENEZUELA"},
-				Title:    "President of the Bolivarian Republic of Venezuela",
-				Remarks:  "DOB 23 Nov 1962; POB Caracas, Venezuela; citizen Venezuela; Gender Male; Cedula No. 5892464 (Venezuela); President of the Bolivarian Republic of Venezuela.",
-			},
-		}, nil, noLogPipeliner),
-		pipe: noLogPipeliner,
-	}
-	dplSearcher = &searcher{
-		DPs: precomputeDPs([]*dpl.DPL{
-			{
-				Name:           "AL NASER WINGS AIRLINES",
-				StreetAddress:  "P.O. BOX 28360",
-				City:           "DUBAI",
-				State:          "",
-				Country:        "AE",
-				PostalCode:     "",
-				EffectiveDate:  "06/05/2019",
-				ExpirationDate: "12/03/2019",
-				StandardOrder:  "Y",
-				LastUpdate:     "2019-06-12",
-				Action:         "FR NOTICE ADDED, TDO RENEWAL, F.R. NOTICE ADDED, TDO RENEWAL ADDED, TDO RENEWAL ADDED, F.R. NOTICE ADDED",
-				FRCitation:     "82 F.R. 61745 12/29/2017,  83F.R. 28801 6/21/2018, 84 F.R. 27233 6/12/2019",
-			},
-			{
-				Name:           "PRESTON JOHN ENGEBRETSON",
-				StreetAddress:  "12725 ROYAL DRIVE",
-				City:           "STAFFORD",
-				State:          "TX",
-				Country:        "US",
-				PostalCode:     "77477",
-				EffectiveDate:  "01/24/2002",
-				ExpirationDate: "01/24/2027",
-				StandardOrder:  "Y",
-				LastUpdate:     "2002-01-28",
-				Action:         "STANDARD ORDER",
-				FRCitation:     "67 F.R. 7354 2/19/02 66 F.R. 48998 9/25/01 62 F.R. 26471 5/14/97 62 F.R. 34688 6/27/97 62 F.R. 60063 11/6/97 63 F.R. 25817 5/11/98 63 F.R. 58707 11/2/98 64 F.R. 23049 4/29/99",
-			},
-		}, noLogPipeliner),
-		pipe: noLogPipeliner,
-	}
-	ssiSearcher = &searcher{
-		SSIs: precomputeSSIs([]*csl.SSI{
-			{
-				EntityID:       "18782",
-				Type:           "Entity",
-				Programs:       []string{"SYRIA", "UKRAINE-EO13662"},
-				Name:           "ROSOBORONEKSPORT OAO",
-				Addresses:      []string{"27 Stromynka ul., Moscow, 107076, RU"},
-				Remarks:        []string{"For more information on directives, please visit the following link: http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives", "(Linked To: ROSTEC)"},
-				AlternateNames: []string{"RUSSIAN DEFENSE EXPORT ROSOBORONEXPORT", "KENKYUSHO", "ROSOBORONEXPORT JSC", "ROSOBORONEKSPORT OJSC", "OJSC ROSOBORONEXPORT", "ROSOBORONEXPORT"},
-				IDsOnRecord:    []string{"1117746521452, Registration ID", "56467052, Government Gazette Number", "7718852163, Tax ID No.", "Subject to Directive 3, Executive Order 13662 Directive Determination -", "www.roe.ru, Website"},
-				SourceListURL:  "http://bit.ly/1QWTIfE",
-				SourceInfoURL:  "http://bit.ly/1MLgou0",
-			},
-			{
-				EntityID:       "18736",
-				Type:           "Entity",
-				Programs:       []string{"UKRAINE-EO13662"},
-				Name:           "VTB SPECIALIZED DEPOSITORY, CJSC",
-				Addresses:      []string{"35 Myasnitskaya Street, Moscow, 101000, RU"},
-				Remarks:        []string{"For more information on directives, please visit the following link: http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives", "(Linked To: ROSTEC)"},
-				AlternateNames: []string{"CJS VTB SPECIALIZED DEPOSITORY"},
-				IDsOnRecord:    []string{"1117746521452, Registration ID", "56467052, Government Gazette Number", "7718852163, Tax ID No.", "Subject to Directive 3, Executive Order 13662 Directive Determination -", "www.roe.ru, Website"},
-				SourceListURL:  "http://bit.ly/1QWTIfE",
-				SourceInfoURL:  "http://bit.ly/1MLgou0",
-			},
-		}, noLogPipeliner),
-		pipe: noLogPipeliner,
-	}
-	bisEntitySearcher = &searcher{
-		BISEntities: precomputeBISEntities([]*csl.EL{
-			{
-				Name:               "Mohammad Jan Khan Mangal",
-				AlternateNames:     []string{"Air I"},
-				Addresses:          []string{"Kolola Pushta, Charahi Gul-e-Surkh, Kabul, AF", "Maidan Sahr, Hetefaq Market, Paktiya, AF"},
-				StartDate:          "11/13/19",
-				LicenseRequirement: "For all items subject to the EAR (See ¬ß744.11 of the EAR). ",
-				LicensePolicy:      "Presumption of denial.",
-				FRNotice:           "81 FR 57451",
-				SourceListURL:      "http://bit.ly/1L47xrV",
-				SourceInfoURL:      "http://bit.ly/1L47xrV",
-			},
-			{
-				Name:               "Luqman Yasin Yunus Shgragi",
-				AlternateNames:     []string{"Lkemanasel Yosef", "Luqman Sehreci."},
-				Addresses:          []string{"Savcili Mahalesi Turkmenler Caddesi No:2, Sahinbey, Gaziantep, TR", "Sanayi Mahalesi 60214 Nolu Caddesi No 11, SehitKamil, Gaziantep, TR"},
-				StartDate:          "8/23/16",
-				LicenseRequirement: "For all items subject to the EAR.  (See ¬ß744.11 of the EAR)",
-				LicensePolicy:      "Presumption of denial.",
-				FRNotice:           "81 FR 57451",
-				SourceListURL:      "http://bit.ly/1L47xrV",
-				SourceInfoURL:      "http://bit.ly/1L47xrV",
-			},
-		}, noLogPipeliner),
-		pipe: noLogPipeliner,
-	}
+	addressSearcher   = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	altSearcher       = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	sdnSearcher       = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	idSearcher        = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	dplSearcher       = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	ssiSearcher       = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	bisEntitySearcher = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
 )
+
+func init() {
+	addressSearcher.Addresses = precomputeAddresses([]*ofac.Address{
+		{
+			EntityID:                    "173",
+			AddressID:                   "129",
+			Address:                     "Ibex House, The Minories",
+			CityStateProvincePostalCode: "London EC3N 1DY",
+			Country:                     "United Kingdom",
+		},
+		{
+			EntityID:                    "735",
+			AddressID:                   "447",
+			Address:                     "Piarco Airport",
+			CityStateProvincePostalCode: "Port au Prince",
+			Country:                     "Haiti",
+		},
+	})
+	altSearcher.Alts = precomputeAlts([]*ofac.AlternateIdentity{
+		{ // Real OFAC entry
+			EntityID:      "559",
+			AlternateID:   "481",
+			AlternateType: "aka",
+			AlternateName: "CIMEX",
+		},
+		{
+			EntityID:      "4691",
+			AlternateID:   "3887",
+			AlternateType: "aka",
+			AlternateName: "A.I.C. SOGO KENKYUSHO",
+		},
+	})
+	sdnSearcher.SDNs = precomputeSDNs([]*ofac.SDN{
+		{
+			EntityID: "2676",
+			SDNName:  "AL ZAWAHIRI, Dr. Ayman",
+			SDNType:  "individual",
+			Programs: []string{"SDGT", "SDT"},
+			Title:    "Operational and Military Leader of JIHAD GROUP",
+			Remarks:  "DOB 19 Jun 1951; POB Giza, Egypt; Passport 1084010 (Egypt); alt. Passport 19820215; Operational and Military Leader of JIHAD GROUP.",
+		},
+		{
+			EntityID: "2681",
+			SDNName:  "HAWATMA, Nayif",
+			SDNType:  "individual",
+			Programs: []string{"SDT"},
+			Title:    "Secretary General of DEMOCRATIC FRONT FOR THE LIBERATION OF PALESTINE - HAWATMEH FACTION",
+			Remarks:  "DOB 1933; Secretary General of DEMOCRATIC FRONT FOR THE LIBERATION OF PALESTINE - HAWATMEH FACTION.",
+		},
+	}, nil, noLogPipeliner)
+	idSearcher.SDNs = precomputeSDNs([]*ofac.SDN{
+		{
+			EntityID: "22790",
+			SDNName:  "MADURO MOROS, Nicolas",
+			SDNType:  "individual",
+			Programs: []string{"VENEZUELA"},
+			Title:    "President of the Bolivarian Republic of Venezuela",
+			Remarks:  "DOB 23 Nov 1962; POB Caracas, Venezuela; citizen Venezuela; Gender Male; Cedula No. 5892464 (Venezuela); President of the Bolivarian Republic of Venezuela.",
+		},
+	}, nil, noLogPipeliner)
+	dplSearcher.DPs = precomputeDPs([]*dpl.DPL{
+		{
+			Name:           "AL NASER WINGS AIRLINES",
+			StreetAddress:  "P.O. BOX 28360",
+			City:           "DUBAI",
+			State:          "",
+			Country:        "AE",
+			PostalCode:     "",
+			EffectiveDate:  "06/05/2019",
+			ExpirationDate: "12/03/2019",
+			StandardOrder:  "Y",
+			LastUpdate:     "2019-06-12",
+			Action:         "FR NOTICE ADDED, TDO RENEWAL, F.R. NOTICE ADDED, TDO RENEWAL ADDED, TDO RENEWAL ADDED, F.R. NOTICE ADDED",
+			FRCitation:     "82 F.R. 61745 12/29/2017,  83F.R. 28801 6/21/2018, 84 F.R. 27233 6/12/2019",
+		},
+		{
+			Name:           "PRESTON JOHN ENGEBRETSON",
+			StreetAddress:  "12725 ROYAL DRIVE",
+			City:           "STAFFORD",
+			State:          "TX",
+			Country:        "US",
+			PostalCode:     "77477",
+			EffectiveDate:  "01/24/2002",
+			ExpirationDate: "01/24/2027",
+			StandardOrder:  "Y",
+			LastUpdate:     "2002-01-28",
+			Action:         "STANDARD ORDER",
+			FRCitation:     "67 F.R. 7354 2/19/02 66 F.R. 48998 9/25/01 62 F.R. 26471 5/14/97 62 F.R. 34688 6/27/97 62 F.R. 60063 11/6/97 63 F.R. 25817 5/11/98 63 F.R. 58707 11/2/98 64 F.R. 23049 4/29/99",
+		},
+	}, noLogPipeliner)
+	ssiSearcher.SSIs = precomputeSSIs([]*csl.SSI{
+		{
+			EntityID:       "18782",
+			Type:           "Entity",
+			Programs:       []string{"SYRIA", "UKRAINE-EO13662"},
+			Name:           "ROSOBORONEKSPORT OAO",
+			Addresses:      []string{"27 Stromynka ul., Moscow, 107076, RU"},
+			Remarks:        []string{"For more information on directives, please visit the following link: http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives", "(Linked To: ROSTEC)"},
+			AlternateNames: []string{"RUSSIAN DEFENSE EXPORT ROSOBORONEXPORT", "KENKYUSHO", "ROSOBORONEXPORT JSC", "ROSOBORONEKSPORT OJSC", "OJSC ROSOBORONEXPORT", "ROSOBORONEXPORT"},
+			IDsOnRecord:    []string{"1117746521452, Registration ID", "56467052, Government Gazette Number", "7718852163, Tax ID No.", "Subject to Directive 3, Executive Order 13662 Directive Determination -", "www.roe.ru, Website"},
+			SourceListURL:  "http://bit.ly/1QWTIfE",
+			SourceInfoURL:  "http://bit.ly/1MLgou0",
+		},
+		{
+			EntityID:       "18736",
+			Type:           "Entity",
+			Programs:       []string{"UKRAINE-EO13662"},
+			Name:           "VTB SPECIALIZED DEPOSITORY, CJSC",
+			Addresses:      []string{"35 Myasnitskaya Street, Moscow, 101000, RU"},
+			Remarks:        []string{"For more information on directives, please visit the following link: http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives", "(Linked To: ROSTEC)"},
+			AlternateNames: []string{"CJS VTB SPECIALIZED DEPOSITORY"},
+			IDsOnRecord:    []string{"1117746521452, Registration ID", "56467052, Government Gazette Number", "7718852163, Tax ID No.", "Subject to Directive 3, Executive Order 13662 Directive Determination -", "www.roe.ru, Website"},
+			SourceListURL:  "http://bit.ly/1QWTIfE",
+			SourceInfoURL:  "http://bit.ly/1MLgou0",
+		},
+	}, noLogPipeliner)
+	bisEntitySearcher.BISEntities = precomputeBISEntities([]*csl.EL{
+		{
+			Name:               "Mohammad Jan Khan Mangal",
+			AlternateNames:     []string{"Air I"},
+			Addresses:          []string{"Kolola Pushta, Charahi Gul-e-Surkh, Kabul, AF", "Maidan Sahr, Hetefaq Market, Paktiya, AF"},
+			StartDate:          "11/13/19",
+			LicenseRequirement: "For all items subject to the EAR (See ¬ß744.11 of the EAR). ",
+			LicensePolicy:      "Presumption of denial.",
+			FRNotice:           "81 FR 57451",
+			SourceListURL:      "http://bit.ly/1L47xrV",
+			SourceInfoURL:      "http://bit.ly/1L47xrV",
+		},
+		{
+			Name:               "Luqman Yasin Yunus Shgragi",
+			AlternateNames:     []string{"Lkemanasel Yosef", "Luqman Sehreci."},
+			Addresses:          []string{"Savcili Mahalesi Turkmenler Caddesi No:2, Sahinbey, Gaziantep, TR", "Sanayi Mahalesi 60214 Nolu Caddesi No 11, SehitKamil, Gaziantep, TR"},
+			StartDate:          "8/23/16",
+			LicenseRequirement: "For all items subject to the EAR.  (See ¬ß744.11 of the EAR)",
+			LicensePolicy:      "Presumption of denial.",
+			FRNotice:           "81 FR 57451",
+			SourceListURL:      "http://bit.ly/1L47xrV",
+			SourceInfoURL:      "http://bit.ly/1L47xrV",
+		},
+	}, noLogPipeliner)
+}
 
 func createTestSearcher(t *testing.T) *searcher {
 	if testing.Short() {
@@ -564,20 +550,19 @@ func TestSearch__extractIDFromRemark(t *testing.T) {
 }
 
 func TestSearch__FindSDNsByRemarksID(t *testing.T) {
-	s := &searcher{
-		SDNs: []*SDN{
-			{
-				SDN: &ofac.SDN{
-					EntityID: "22790",
-				},
-				id: "Cedula No. C 5892464 (Venezuela);",
+	s := newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	s.SDNs = []*SDN{
+		{
+			SDN: &ofac.SDN{
+				EntityID: "22790",
 			},
-			{
-				SDN: &ofac.SDN{
-					EntityID: "99999",
-				},
-				id: "Other",
+			id: "Cedula No. C 5892464 (Venezuela);",
+		},
+		{
+			SDN: &ofac.SDN{
+				EntityID: "99999",
 			},
+			id: "Other",
 		},
 	}
 

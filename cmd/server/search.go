@@ -24,6 +24,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/xrash/smetrics"
+	"go4.org/syncutil"
 )
 
 var (
@@ -48,10 +49,19 @@ type searcher struct {
 	// metadata
 	lastRefreshedAt time.Time
 	sync.RWMutex    // protects all above fields
+	*syncutil.Gate  // limits concurrent processing
 
 	pipe *pipeliner
 
 	logger log.Logger
+}
+
+func newSearcher(logger log.Logger, pipeline *pipeliner, workers int) *searcher {
+	return &searcher{
+		logger: logger,
+		pipe:   pipeline,
+		Gate:   syncutil.NewGate(workers),
+	}
 }
 
 func (s *searcher) FindAddresses(limit int, id string) []*ofac.Address {
@@ -227,8 +237,10 @@ func (s *searcher) TopAltNames(limit int, alt string) []Alt {
 	wg.Add(len(s.Alts))
 
 	for i := range s.Alts {
+		s.Gate.Start()
 		go func(i int) {
 			defer wg.Done()
+			defer s.Gate.Done()
 			xs.add(&item{
 				value:  s.Alts[i],
 				weight: jaroWinkler(s.Alts[i].name, alt),
@@ -340,8 +352,10 @@ func (s *searcher) TopSDNs(limit int, name string) []SDN {
 	wg.Add(len(s.SDNs))
 
 	for i := range s.SDNs {
+		s.Gate.Start()
 		go func(i int) {
 			defer wg.Done()
+			defer s.Gate.Done()
 			xs.add(&item{
 				value:  s.SDNs[i],
 				weight: jaroWinkler(s.SDNs[i].name, name),
@@ -380,8 +394,10 @@ func (s *searcher) TopDPs(limit int, name string) []DP {
 	wg.Add(len(s.DPs))
 
 	for i := range s.DPs {
+		s.Gate.Start()
 		go func(i int) {
 			defer wg.Done()
+			defer s.Gate.Done()
 			xs.add(&item{
 				value:  s.DPs[i],
 				weight: jaroWinkler(s.DPs[i].name, name),
@@ -421,8 +437,10 @@ func (s *searcher) TopSSIs(limit int, name string) []SSI {
 	wg.Add(len(s.SSIs))
 
 	for i := range s.SSIs {
+		s.Gate.Start()
 		go func(i int) {
 			defer wg.Done()
+			defer s.Gate.Done()
 			it := &item{
 				value:  s.SSIs[i],
 				weight: jaroWinkler(s.SSIs[i].name, name),
@@ -473,8 +491,10 @@ func (s *searcher) TopBISEntities(limit int, name string) []BISEntity {
 	wg.Add(len(s.BISEntities))
 
 	for i := range s.BISEntities {
+		s.Gate.Start()
 		go func(i int) {
 			defer wg.Done()
+			defer s.Gate.Done()
 
 			it := &item{
 				value:  s.BISEntities[i],

@@ -19,11 +19,8 @@ func TestIssue115__TopSDNs(t *testing.T) {
 	score = jaroWinkler("g", "geoergebush")
 	eql(t, "g vs geoergebush", score, 0.697)
 
-	s := &searcher{
-		logger: log.NewNopLogger(),
-		pipe:   noLogPipeliner,
-	}
 	pipe := noLogPipeliner
+	s := newSearcher(log.NewNopLogger(), pipe, 1)
 
 	// Issue 115 (https://github.com/moov-io/watchman/issues/115) talks about how "george bush" is a false positive (90%) match against
 	// several other "George ..." records. This is too sensitive and so we need to tone that down.

@@ -23,36 +23,37 @@ import (
 var (
 	// companySearcher is a searcher instance with one company entity contained. It's designed to be used
 	// in tests that expect a non-individual SDN.
-	companySearcher = &searcher{
-		SDNs: precomputeSDNs([]*ofac.SDN{
-			{
-				EntityID: "21206",
-				SDNName:  "AL-HISN",
-				Programs: []string{"SYRIA"},
-				Remarks:  "Linked To: MAKHLUF, Rami.",
-			},
-		}, nil, noLogPipeliner),
-		Addresses: precomputeAddresses([]*ofac.Address{
-			{
-				EntityID:                    "21206",
-				AddressID:                   "32272",
-				Address:                     "Jurmana",
-				CityStateProvincePostalCode: "Damascus",
-				Country:                     "Syria",
-			},
-		}),
-		Alts: precomputeAlts([]*ofac.AlternateIdentity{
-			{
-				EntityID:      "21206",
-				AlternateID:   "33627",
-				AlternateType: "aka",
-				AlternateName: "AL-HISN FIRM",
-			},
-		}),
-		pipe:   noLogPipeliner,
-		logger: log.NewNopLogger(),
-	}
+	companySearcher *searcher
 )
+
+func init() {
+	companySearcher = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	companySearcher.SDNs = precomputeSDNs([]*ofac.SDN{
+		{
+			EntityID: "21206",
+			SDNName:  "AL-HISN",
+			Programs: []string{"SYRIA"},
+			Remarks:  "Linked To: MAKHLUF, Rami.",
+		},
+	}, nil, noLogPipeliner)
+	companySearcher.Addresses = precomputeAddresses([]*ofac.Address{
+		{
+			EntityID:                    "21206",
+			AddressID:                   "32272",
+			Address:                     "Jurmana",
+			CityStateProvincePostalCode: "Damascus",
+			Country:                     "Syria",
+		},
+	})
+	companySearcher.Alts = precomputeAlts([]*ofac.AlternateIdentity{
+		{
+			EntityID:      "21206",
+			AlternateID:   "33627",
+			AlternateType: "aka",
+			AlternateName: "AL-HISN FIRM",
+		},
+	})
+}
 
 func createTestCompanyRepository(t *testing.T) *sqliteCompanyRepository {
 	t.Helper()

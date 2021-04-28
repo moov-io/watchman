@@ -32,10 +32,7 @@ func TestSearcher__refreshInterval(t *testing.T) {
 	}
 
 	// cover another branch
-	s := &searcher{
-		logger: log.NewNopLogger(),
-		pipe:   noLogPipeliner,
-	}
+	s := newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
 	s.periodicDataRefresh(0*time.Second, nil, nil)
 }
 

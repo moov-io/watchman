@@ -36,6 +36,7 @@ var (
 	flagBasePath  = flag.String("base-path", "/", "Base path to serve HTTP routes and webui from")
 	flagLogFormat = flag.String("log.format", "", "Format for log lines (Options: json, plain")
 	flagMaxProcs  = flag.Int("max-procs", runtime.NumCPU(), "Maximum number of CPUs used for search and endpoints")
+	flagWorkers   = flag.Int("workers", 1024, "Maximum number of goroutines used for search")
 
 	dataRefreshInterval = 12 * time.Hour
 )
@@ -138,14 +139,13 @@ func main() {
 	downloadRepo := &sqliteDownloadRepository{db, logger}
 	defer downloadRepo.close()
 
-	searcher := &searcher{
-		logger: logger,
-	}
+	var pipeline *pipeliner
 	if debug, err := strconv.ParseBool(os.Getenv("DEBUG_NAME_PIPELINE")); debug && err == nil {
-		searcher.pipe = newPipeliner(logger)
+		pipeline = newPipeliner(logger)
 	} else {
-		searcher.pipe = newPipeliner(log.NewNopLogger())
+		pipeline = newPipeliner(log.NewNopLogger())
 	}
+	searcher := newSearcher(logger, pipeline, *flagWorkers)
 
 	// Add manual data refresh endpoint
 	adminServer.AddHandler(manualRefreshPath, manualRefreshHandler(logger, searcher, downloadRepo))
