@@ -10,14 +10,25 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"strings"
+	"sync"
 	"testing"
 
+	"github.com/go-kit/kit/log"
 	"github.com/moov-io/watchman/pkg/csl"
 	"github.com/moov-io/watchman/pkg/dpl"
 	"github.com/moov-io/watchman/pkg/ofac"
 )
 
 var (
+	// Live Searcher
+	testLiveSearcher = &searcher{
+		logger: log.NewNopLogger(),
+		pipe:   noLogPipeliner,
+	}
+	testSearcherStats *downloadStats
+	testSearcherOnce  sync.Once
+
+	// Mock Searchers
 	addressSearcher = &searcher{
 		Addresses: precomputeAddresses([]*ofac.Address{
 			{
@@ -178,6 +189,33 @@ var (
 		pipe: noLogPipeliner,
 	}
 )
+
+func createTestSearcher(t *testing.T) *searcher {
+	if testing.Short() {
+		t.Skip("-short enabled")
+	}
+
+	testSearcherOnce.Do(func() {
+		stats, err := testLiveSearcher.refreshData("")
+		if err != nil {
+			t.Fatal(err)
+		}
+		testSearcherStats = stats
+	})
+
+	return testLiveSearcher
+}
+
+func createBenchmarkSearcher(b *testing.B) *searcher {
+	testSearcherOnce.Do(func() {
+		stats, err := testLiveSearcher.refreshData("")
+		if err != nil {
+			b.Fatal(err)
+		}
+		testSearcherStats = stats
+	})
+	return testLiveSearcher
+}
 
 func TestJaroWinkler(t *testing.T) {
 	cases := []struct {
