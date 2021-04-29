@@ -8,7 +8,7 @@ require (
 	github.com/containerd/continuity v0.0.0-20200710164510-efbc4488d8fe // indirect
 	github.com/docker/docker v1.4.2-0.20200213202729-31a86c4ab209
 	github.com/go-kit/kit v0.10.0
-	github.com/go-sql-driver/mysql v1.5.0
+	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/lopezator/migrator v0.3.0
@@ -19,10 +19,10 @@ require (
 	github.com/pariz/gountries v0.0.0-20200430155801-1c6a393df9c7
 	github.com/prometheus/client_golang v1.8.0
 	github.com/stretchr/testify v1.6.1
-	github.com/xrash/smetrics v0.0.0-20200730060457-89a2a8a1fb0b
+	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673
 	go4.org v0.0.0-20200411211856-f5505b9728dd
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
-	golang.org/x/text v0.3.3
+	golang.org/x/text v0.3.6
 )
 
 go 1.13
