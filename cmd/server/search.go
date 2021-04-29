@@ -57,6 +57,7 @@ type searcher struct {
 }
 
 func newSearcher(logger log.Logger, pipeline *pipeliner, workers int) *searcher {
+	logger.Log("search", fmt.Sprintf("allowing only %d workers", workers))
 	return &searcher{
 		logger: logger,
 		pipe:   pipeline,
