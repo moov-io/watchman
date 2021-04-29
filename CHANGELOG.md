@@ -1,3 +1,13 @@
+## v0.18.0 (Released 2021-04-29)
+
+IMPROVEMENTS
+
+- cmd/server: concurrently search instead of serial iterations
+
+BUILD
+
+- build: upgrade github.com/gogo/protobuf to v1.3.2
+
 ## v0.17.1 (Released 2021-02-23)
 
 IMPROVEMENTS
