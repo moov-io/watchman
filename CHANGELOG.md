@@ -1,3 +1,14 @@
+## v0.18.1 (Released 2021-05-20)
+
+BUG FIXES
+
+- csl: don't panic if list comes back invalid
+
+BUILD
+
+- build(deps): bump rexml from 3.2.4 to 3.2.5 in /docs
+- chore(deps): update dependency @material-ui/core to v4.11.4
+
 ## v0.18.0 (Released 2021-04-29)
 
 IMPROVEMENTS
