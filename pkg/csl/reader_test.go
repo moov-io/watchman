@@ -2,11 +2,13 @@ package csl
 
 import (
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRead(t *testing.T) {
@@ -23,6 +25,21 @@ func TestRead(t *testing.T) {
 	if len(csl.ELs) != 22 {
 		t.Errorf("len(ELs)=%d", len(csl.ELs))
 	}
+}
+
+func TestRead_missingRow(t *testing.T) {
+	fd, err := ioutil.TempFile("", "csl-missing.csv")
+	require.NoError(t, err)
+	t.Cleanup(func() { os.Remove(fd.Name()) })
+
+	_, err = fd.Write([]byte(`  \n invalid  \n  \n`))
+	require.NoError(t, err)
+
+	resp, err := Read(fd.Name())
+	require.NoError(t, err)
+
+	require.Len(t, resp.SSIs, 0)
+	require.Len(t, resp.ELs, 0)
 }
 
 func TestRead_invalidRow(t *testing.T) {

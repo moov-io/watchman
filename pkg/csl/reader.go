@@ -26,6 +26,9 @@ func Read(path string) (*CSL, error) {
 		if err != nil {
 			continue
 		}
+		if len(record) <= 1 {
+			continue // skip empty records
+		}
 
 		// CSL datafiles have added a unique identifier as the first column. Thus
 		// we need to check either column 0 or 1 contains the identifier.
