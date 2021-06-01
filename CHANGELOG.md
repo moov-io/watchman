@@ -1,5 +1,5 @@
 ## v0.18.2 (Released 2021-06-01)
-g
+
 BUG FIXES
 
 - cmd/server: nil check on webhook response body prior to Close
