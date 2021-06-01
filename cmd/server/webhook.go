@@ -64,7 +64,9 @@ func callWebhook(watchID string, body *bytes.Buffer, webhook string, authToken s
 		}
 		return resp.StatusCode, fmt.Errorf("HTTP problem with watch %s: %v", watchID, err)
 	}
-	resp.Body.Close()
+	if resp.Body != nil {
+		resp.Body.Close()
+	}
 	if resp.StatusCode > 299 || resp.StatusCode < 200 {
 		return resp.StatusCode, fmt.Errorf("callWebhook: bogus status code: %d", resp.StatusCode)
 	}
