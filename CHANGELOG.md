@@ -1,3 +1,13 @@
+## v0.18.2 (Released 2021-06-01)
+g
+BUG FIXES
+
+- cmd/server: nil check on webhook response body prior to Close
+
+BUILD
+
+- build(deps): bump nokogiri from 1.11.1 to 1.11.5 in /docs
+
 ## v0.18.1 (Released 2021-05-20)
 
 BUG FIXES
