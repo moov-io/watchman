@@ -1605,6 +1605,7 @@ type SearchOpts struct {
 	Country    optional.String
 	AltName    optional.String
 	Id         optional.String
+	MinMatch   optional.Float32
 	Limit      optional.Int32
 	SdnType    optional.String
 	Program    optional.String
@@ -1626,6 +1627,7 @@ Search Search SDNs
  * @param "Country" (optional.String) -  Country name as desginated by SDN guidelines. Only Address results will be returned.
  * @param "AltName" (optional.String) -  Alternate name which could correspond to a human on the SDN list. Only Alt name results will be returned.
  * @param "Id" (optional.String) -  ID value often found in remarks property of an SDN. Takes the form of 'No. NNNNN' as an alphanumeric value.
+ * @param "MinMatch" (optional.Float32) -  Match percentage that search query must obtain for results to be returned.
  * @param "Limit" (optional.Int32) -  Maximum results returned by a search. Results are sorted by their match percentage in decending order.
  * @param "SdnType" (optional.String) -  Optional filter to only return SDNs whose type case-insensitively matches.
  * @param "Program" (optional.String) -  Optional filter to only return SDNs whose program case-insensitively matches
@@ -1676,6 +1678,9 @@ func (a *WatchmanApiService) Search(ctx _context.Context, localVarOptionals *Sea
 	}
 	if localVarOptionals != nil && localVarOptionals.Id.IsSet() {
 		localVarQueryParams.Add("id", parameterToString(localVarOptionals.Id.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.MinMatch.IsSet() {
+		localVarQueryParams.Add("minMatch", parameterToString(localVarOptionals.MinMatch.Value(), ""))
 	}
 	if localVarOptionals != nil && localVarOptionals.Limit.IsSet() {
 		localVarQueryParams.Add("limit", parameterToString(localVarOptionals.Limit.Value(), ""))

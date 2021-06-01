@@ -785,6 +785,7 @@ Name | Type | Description  | Notes
  **country** | **optional.String**| Country name as desginated by SDN guidelines. Only Address results will be returned. | 
  **altName** | **optional.String**| Alternate name which could correspond to a human on the SDN list. Only Alt name results will be returned. | 
  **id** | **optional.String**| ID value often found in remarks property of an SDN. Takes the form of &#39;No. NNNNN&#39; as an alphanumeric value. | 
+ **minMatch** | **optional.Float32**| Match percentage that search query must obtain for results to be returned. | 
  **limit** | **optional.Int32**| Maximum results returned by a search. Results are sorted by their match percentage in decending order. | 
  **sdnType** | **optional.String**| Optional filter to only return SDNs whose type case-insensitively matches. | 
  **program** | **optional.String**| Optional filter to only return SDNs whose program case-insensitively matches | 

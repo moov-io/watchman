@@ -13,10 +13,11 @@ type item struct {
 }
 
 // newLargest returns a `largest` instance which can be used to track items with the highest weights
-func newLargest(capacity int) *largest {
+func newLargest(capacity int, minMatch float64) *largest {
 	return &largest{
 		items:    make([]*item, capacity),
 		capacity: capacity,
+		minMatch: minMatch,
 	}
 }
 
@@ -25,12 +26,17 @@ func newLargest(capacity int) *largest {
 type largest struct {
 	items    []*item
 	capacity int
+	minMatch float64
 	mu       sync.Mutex
 }
 
 func (xs *largest) add(it *item) {
 	xs.mu.Lock()
 	defer xs.mu.Unlock()
+
+	if it.weight < xs.minMatch {
+		return // skip item as it's below our threshold
+	}
 
 	for i := range xs.items {
 		if xs.items[i] == nil {

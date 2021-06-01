@@ -16,7 +16,7 @@ func init() {
 }
 
 func TestLargest(t *testing.T) {
-	xs := newLargest(10)
+	xs := newLargest(10, 0.0)
 
 	min := 10000.0
 	for i := 0; i < 1000; i++ {
@@ -47,7 +47,7 @@ func TestLargest(t *testing.T) {
 // TestLargest_MaxOrdering will test the ordering of 1.0 values to see
 // if they hold their insert ordering.
 func TestLargest_MaxOrdering(t *testing.T) {
-	xs := newLargest(10)
+	xs := newLargest(10, 0.0)
 
 	xs.add(&item{value: "A", weight: 0.99})
 	xs.add(&item{value: "B", weight: 1.0})
@@ -77,6 +77,24 @@ func TestLargest_MaxOrdering(t *testing.T) {
 	for i := 5; i < 10; i++ {
 		if xs.items[i] != nil {
 			t.Errorf("#%d was non-nil: %#v", i, xs.items[i])
+		}
+	}
+}
+
+func TestLargest__MinMatch(t *testing.T) {
+	xs := newLargest(2, 0.95)
+
+	xs.add(&item{value: "A", weight: 0.94})
+	xs.add(&item{value: "B", weight: 1.0})
+	xs.add(&item{value: "C", weight: 0.95})
+	xs.add(&item{value: "D", weight: 0.09})
+
+	if n := len(xs.items); n != 2 {
+		t.Fatalf("found %d of %d expected images", n, 2)
+	}
+	for i := range xs.items {
+		if xs.items[i].weight < 0.95 {
+			t.Errorf("items[%d] has weight of %.2f", i, xs.items[i].weight)
 		}
 	}
 }

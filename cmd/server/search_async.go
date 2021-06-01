@@ -80,7 +80,7 @@ func (s *searcher) renderBody(w watch, companyRepo companyRepository, custRepo c
 
 	case w.customerName != "":
 		s.logger.Log("search", fmt.Sprintf("async: name watch '%s' for customer %s found", w.customerName, w.id))
-		sdns := s.TopSDNs(5, w.customerName)
+		sdns := s.TopSDNs(5, 0.00, w.customerName)
 		for j := range sdns {
 			if strings.EqualFold(sdns[j].SDNType, "individual") {
 				return getCustomerBody(s, w.id, sdns[j].EntityID, sdns[j].match, custRepo)
@@ -93,7 +93,7 @@ func (s *searcher) renderBody(w watch, companyRepo companyRepository, custRepo c
 
 	case w.companyName != "":
 		s.logger.Log("search", fmt.Sprintf("async: name watch '%s' for company %s found", w.companyName, w.id))
-		sdns := s.TopSDNs(5, w.companyName)
+		sdns := s.TopSDNs(5, 0.00, w.companyName)
 		for j := range sdns {
 			if !strings.EqualFold(sdns[j].SDNType, "individual") {
 				return getCompanyBody(s, w.id, sdns[j].EntityID, sdns[j].match, companyRepo)
