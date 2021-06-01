@@ -46,8 +46,7 @@ func getSDNAddresses(logger log.Logger, searcher *searcher) http.HandlerFunc {
 
 		addresses := searcher.FindAddresses(limit, id)
 
-		requestID, userID := moovhttp.GetRequestID(r), moovhttp.GetUserID(r)
-		logger.Log("sdn", fmt.Sprintf("get sdn=%s addresses", id), "requestID", requestID, "userID", userID)
+		logger.Log("sdn", fmt.Sprintf("get sdn=%s addresses", id), "requestID", moovhttp.GetRequestID(r))
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
@@ -69,8 +68,7 @@ func getSDNAltNames(logger log.Logger, searcher *searcher) http.HandlerFunc {
 
 		alts := searcher.FindAlts(limit, id)
 
-		requestID, userID := moovhttp.GetRequestID(r), moovhttp.GetUserID(r)
-		logger.Log("sdn", fmt.Sprintf("get sdn=%s alt names", id), "requestID", requestID, "userID", userID)
+		logger.Log("sdn", fmt.Sprintf("get sdn=%s alt names", id), "requestID", moovhttp.GetRequestID(r))
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
@@ -95,8 +93,7 @@ func getSDN(logger log.Logger, searcher *searcher) http.HandlerFunc {
 			return
 		}
 
-		requestID, userID := moovhttp.GetRequestID(r), moovhttp.GetUserID(r)
-		logger.Log("sdn", fmt.Sprintf("get sdn=%s", id), "requestID", requestID, "userID", userID)
+		logger.Log("sdn", fmt.Sprintf("get sdn=%s", id), "requestID", moovhttp.GetRequestID(r))
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)

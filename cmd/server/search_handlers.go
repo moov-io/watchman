@@ -62,11 +62,11 @@ func readAddressSearchRequest(u *url.URL) addressSearchRequest {
 func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w = wrapResponseWriter(logger, w, r)
-		requestID, userID := moovhttp.GetRequestID(r), moovhttp.GetUserID(r)
+		requestID := moovhttp.GetRequestID(r)
 
 		// Search over all fields
 		if q := strings.TrimSpace(r.URL.Query().Get("q")); q != "" {
-			logger.Log("search", fmt.Sprintf("searching all names and address for %s", q), "requestID", requestID, "userID", userID)
+			logger.Log("search", fmt.Sprintf("searching all names and address for %s", q), "requestID", requestID)
 			searchViaQ(logger, searcher, q)(w, r)
 			return
 		}
@@ -81,26 +81,26 @@ func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 		// Search by Name
 		if name := strings.TrimSpace(r.URL.Query().Get("name")); name != "" {
 			if req := readAddressSearchRequest(r.URL); !req.empty() {
-				logger.Log("search", fmt.Sprintf("searching SDN names='%s' and addresses", name), "requestID", requestID, "userID", userID)
+				logger.Log("search", fmt.Sprintf("searching SDN names='%s' and addresses", name), "requestID", requestID)
 				searchViaAddressAndName(logger, searcher, name, req)(w, r)
 				return
 			}
 
-			logger.Log("search", fmt.Sprintf("searching SDN names for %s", name), "requestID", requestID, "userID", userID)
+			logger.Log("search", fmt.Sprintf("searching SDN names for %s", name), "requestID", requestID)
 			searchByName(logger, searcher, name)(w, r)
 			return
 		}
 
 		// Search by Alt Name
 		if alt := strings.TrimSpace(r.URL.Query().Get("altName")); alt != "" {
-			logger.Log("search", fmt.Sprintf("searching SDN alt names for %s", alt), "requestID", requestID, "userID", userID)
+			logger.Log("search", fmt.Sprintf("searching SDN alt names for %s", alt), "requestID", requestID)
 			searchByAltName(logger, searcher, alt)(w, r)
 			return
 		}
 
 		// Search Addresses
 		if req := readAddressSearchRequest(r.URL); !req.empty() {
-			logger.Log("search", fmt.Sprintf("searching address for %#v", req), "requestID", requestID, "userID", userID)
+			logger.Log("search", fmt.Sprintf("searching address for %#v", req), "requestID", requestID)
 			searchByAddress(logger, searcher, req)(w, r)
 			return
 		}

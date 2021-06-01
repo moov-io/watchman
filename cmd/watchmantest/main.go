@@ -46,7 +46,6 @@ var (
 	flagWebhook    = flag.String("webhook", "https://moov.io/watchman", "Secure HTTP address for webhooks")
 
 	flagRequestID = flag.String("request-id", "", "Override what is set for the X-Request-ID HTTP header")
-	flagUserID    = flag.String("user-id", "", "Override what is set for the X-User-ID HTTP header")
 )
 
 func main() {
@@ -148,7 +147,6 @@ func latestDownload(ctx context.Context, api *moov.APIClient) (time.Time, error)
 	opts := &moov.GetLatestDownloadsOpts{
 		Limit:      optional.NewInt32(1),
 		XRequestID: optional.NewString(*flagRequestID),
-		XUserID:    optional.NewString(*flagUserID),
 	}
 	downloads, resp, err := api.WatchmanApi.GetLatestDownloads(ctx, opts)
 	if err != nil {

@@ -122,7 +122,7 @@ func TestDownload_route(t *testing.T) {
 		repo.recordStats(&downloadStats{SDNs: 1, Alts: 421, Addresses: 1511, DeniedPersons: 731, SectoralSanctions: 289, BISEntities: 189})
 
 		router := mux.NewRouter()
-		addDownloadRoutes(nil, router, repo)
+		addDownloadRoutes(log.NewNopLogger(), router, repo)
 		router.ServeHTTP(w, req)
 		w.Flush()
 

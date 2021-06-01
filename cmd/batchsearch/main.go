@@ -56,7 +56,6 @@ var (
 	flagSdnType = flag.String("sdn-type", "individual", "sdnType query param")
 
 	flagRequestID = flag.String("request-id", "", "Override what is set for the X-Request-ID HTTP header")
-	flagUserID    = flag.String("user-id", "", "Override what is set for the X-User-ID HTTP header")
 
 	flagVerbose = flag.Bool("v", false, "Enable detailed logging")
 
@@ -202,7 +201,6 @@ func searchByName(api *moov.APIClient, name string) (float64, error) {
 		Name:       optional.NewString(name),
 		SdnType:    optional.NewString(*flagSdnType),
 		XRequestID: optional.NewString(*flagRequestID),
-		XUserID:    optional.NewString(*flagUserID),
 	}
 
 	ctx, cancelFunc := context.WithTimeout(context.TODO(), 5*time.Second)

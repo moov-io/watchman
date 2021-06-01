@@ -47,14 +47,6 @@ paths:
           example: 94c825ee
           type: string
         style: simple
-      - description: Optional User ID used to perform this search
-        explode: false
-        in: header
-        name: X-User-ID
-        required: false
-        schema:
-          type: string
-        style: simple
       - description: Company ID
         explode: false
         in: path
@@ -95,7 +87,7 @@ paths:
           example: 94c825ee
           type: string
         style: simple
-      - description: Optional User ID used to perform this search
+      - description: User ID used to perform this search
         explode: false
         in: header
         name: X-User-ID
@@ -143,14 +135,6 @@ paths:
         required: false
         schema:
           example: 94c825ee
-          type: string
-        style: simple
-      - description: Optional User ID used to perform this search
-        explode: false
-        in: header
-        name: X-User-ID
-        required: false
-        schema:
           type: string
         style: simple
       - description: Company ID
@@ -201,14 +185,6 @@ paths:
           example: 94c825ee
           type: string
         style: simple
-      - description: Optional User ID used to perform this search
-        explode: false
-        in: header
-        name: X-User-ID
-        required: false
-        schema:
-          type: string
-        style: simple
       - description: Company ID
         explode: false
         in: path
@@ -255,14 +231,6 @@ paths:
           example: 94c825ee
           type: string
         style: simple
-      - description: Optional User ID used to perform this search
-        explode: false
-        in: header
-        name: X-User-ID
-        required: false
-        schema:
-          type: string
-        style: simple
       - description: Company name used to match and send watch notifications
         explode: true
         in: query
@@ -306,14 +274,6 @@ paths:
         required: false
         schema:
           example: 94c825ee
-          type: string
-        style: simple
-      - description: Optional User ID used to perform this search
-        explode: false
-        in: header
-        name: X-User-ID
-        required: false
-        schema:
           type: string
         style: simple
       - description: Watch ID, used to identify a specific watch
@@ -362,14 +322,6 @@ paths:
           example: 94c825ee
           type: string
         style: simple
-      - description: Optional User ID used to perform this search
-        explode: false
-        in: header
-        name: X-User-ID
-        required: false
-        schema:
-          type: string
-        style: simple
       - description: Customer ID
         explode: false
         in: path
@@ -410,7 +362,7 @@ paths:
           example: 94c825ee
           type: string
         style: simple
-      - description: Optional User ID used to perform this search
+      - description: User ID used to perform this search
         explode: false
         in: header
         name: X-User-ID
@@ -458,14 +410,6 @@ paths:
         required: false
         schema:
           example: 94c825ee
-          type: string
-        style: simple
-      - description: Optional User ID used to perform this search
-        explode: false
-        in: header
-        name: X-User-ID
-        required: false
-        schema:
           type: string
         style: simple
       - description: Customer ID
@@ -516,14 +460,6 @@ paths:
           example: 94c825ee
           type: string
         style: simple
-      - description: Optional User ID used to perform this search
-        explode: false
-        in: header
-        name: X-User-ID
-        required: false
-        schema:
-          type: string
-        style: simple
       - description: Customer ID
         explode: false
         in: path
@@ -568,14 +504,6 @@ paths:
         required: false
         schema:
           example: 94c825ee
-          type: string
-        style: simple
-      - description: Optional User ID used to perform this search
-        explode: false
-        in: header
-        name: X-User-ID
-        required: false
-        schema:
           type: string
         style: simple
       - description: Individual name used to match and send watch notifications
@@ -623,14 +551,6 @@ paths:
           example: 94c825ee
           type: string
         style: simple
-      - description: Optional User ID used to perform this search
-        explode: false
-        in: header
-        name: X-User-ID
-        required: false
-        schema:
-          type: string
-        style: simple
       - description: Watch ID, used to identify a specific watch
         explode: false
         in: path
@@ -676,14 +596,6 @@ paths:
           example: 94c825ee
           type: string
         style: simple
-      - description: Optional User ID used to perform this search
-        explode: false
-        in: header
-        name: X-User-ID
-        required: false
-        schema:
-          type: string
-        style: simple
       - description: SDN ID
         explode: false
         in: path
@@ -721,14 +633,6 @@ paths:
         required: false
         schema:
           example: 94c825ee
-          type: string
-        style: simple
-      - description: Optional User ID used to perform this search
-        explode: false
-        in: header
-        name: X-User-ID
-        required: false
-        schema:
           type: string
         style: simple
       - description: SDN ID
@@ -770,14 +674,6 @@ paths:
           example: 94c825ee
           type: string
         style: simple
-      - description: Optional User ID used to perform this search
-        explode: false
-        in: header
-        name: X-User-ID
-        required: false
-        schema:
-          type: string
-        style: simple
       - description: SDN ID
         explode: false
         in: path
@@ -815,14 +711,6 @@ paths:
         required: false
         schema:
           example: 94c825ee
-          type: string
-        style: simple
-      - description: Optional User ID used to perform this search
-        explode: false
-        in: header
-        name: X-User-ID
-        required: false
-        schema:
           type: string
         style: simple
       - description: Search across Name, Alt Names, and SDN Address fields for all
@@ -985,14 +873,6 @@ paths:
         required: false
         schema:
           example: 94c825ee
-          type: string
-        style: simple
-      - description: Optional User ID used to perform this search
-        explode: false
-        in: header
-        name: X-User-ID
-        required: false
-        schema:
           type: string
         style: simple
       - description: Maximum number of downloads to return sorted by their timestamp
@@ -1845,7 +1725,7 @@ components:
       properties:
         error:
           description: An error message describing the problem intended for humans.
-          example: Validation error(s) present.
+          example: Example error, see description
           type: string
       required:
       - error

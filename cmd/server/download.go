@@ -275,10 +275,7 @@ func getLatestDownloads(logger log.Logger, repo downloadRepository) http.Handler
 			return
 		}
 
-		if requestID := moovhttp.GetRequestID(r); requestID != "" {
-			userID := moovhttp.GetUserID(r)
-			logger.Log("download", "get latest downloads", "requestID", requestID, "userID", userID)
-		}
+		logger.Log("download", "get latest downloads", "requestID", moovhttp.GetRequestID(r))
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
