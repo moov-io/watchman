@@ -42,11 +42,6 @@ paths:
           schema:
             type: string
             example: 94c825ee
-        - name: X-User-ID
-          in: header
-          description: Optional User ID used to perform this search
-          schema:
-            type: string
         - name: companyID
           in: path
           description: Company ID
@@ -82,7 +77,7 @@ paths:
             example: 94c825ee
         - name: X-User-ID
           in: header
-          description: Optional User ID used to perform this search
+          description: User ID used to perform this search
           schema:
             type: string
         - name: companyID
@@ -121,11 +116,6 @@ paths:
           schema:
             type: string
             example: 94c825ee
-        - name: X-User-ID
-          in: header
-          description: Optional User ID used to perform this search
-          schema:
-            type: string
         - name: companyID
           in: path
           description: Company ID
@@ -168,11 +158,6 @@ paths:
           schema:
             type: string
             example: 94c825ee
-        - name: X-User-ID
-          in: header
-          description: Optional User ID used to perform this search
-          schema:
-            type: string
         - name: companyID
           in: path
           description: Company ID
@@ -210,11 +195,6 @@ paths:
           schema:
             type: string
             example: 94c825ee
-        - name: X-User-ID
-          in: header
-          description: Optional User ID used to perform this search
-          schema:
-            type: string
         - name: name
           in: query
           required: true
@@ -254,11 +234,6 @@ paths:
           schema:
             type: string
             example: 94c825ee
-        - name: X-User-ID
-          in: header
-          description: Optional User ID used to perform this search
-          schema:
-            type: string
         - name: watchID
           in: path
           description: Watch ID, used to identify a specific watch
@@ -297,11 +272,6 @@ paths:
           schema:
             type: string
             example: 94c825ee
-        - name: X-User-ID
-          in: header
-          description: Optional User ID used to perform this search
-          schema:
-            type: string
         - name: customerID
           in: path
           description: Customer ID
@@ -337,7 +307,7 @@ paths:
             example: 94c825ee
         - name: X-User-ID
           in: header
-          description: Optional User ID used to perform this search
+          description: User ID used to perform this search
           schema:
             type: string
         - name: customerID
@@ -376,11 +346,6 @@ paths:
           schema:
             type: string
             example: 94c825ee
-        - name: X-User-ID
-          in: header
-          description: Optional User ID used to perform this search
-          schema:
-            type: string
         - name: customerID
           in: path
           description: Customer ID
@@ -423,11 +388,6 @@ paths:
           schema:
             type: string
             example: 94c825ee
-        - name: X-User-ID
-          in: header
-          description: Optional User ID used to perform this search
-          schema:
-            type: string
         - name: customerID
           in: path
           description: Customer ID
@@ -465,11 +425,6 @@ paths:
           schema:
             type: string
             example: 94c825ee
-        - name: X-User-ID
-          in: header
-          description: Optional User ID used to perform this search
-          schema:
-            type: string
         - name: name
           in: query
           required: true
@@ -509,11 +464,6 @@ paths:
           schema:
             type: string
             example: 94c825ee
-        - name: X-User-ID
-          in: header
-          description: Optional User ID used to perform this search
-          schema:
-            type: string
         - name: watchID
           in: path
           description: Watch ID, used to identify a specific watch
@@ -552,11 +502,6 @@ paths:
           schema:
             type: string
             example: 94c825ee
-        - name: X-User-ID
-          in: header
-          description: Optional User ID used to perform this search
-          schema:
-            type: string
         - in: path
           name: sdnID
           required: true
@@ -590,11 +535,6 @@ paths:
           schema:
             type: string
             example: 94c825ee
-        - name: X-User-ID
-          in: header
-          description: Optional User ID used to perform this search
-          schema:
-            type: string
         - in: path
           name: sdnID
           description: SDN ID
@@ -628,11 +568,6 @@ paths:
           schema:
             type: string
             example: 94c825ee
-        - name: X-User-ID
-          in: header
-          description: Optional User ID used to perform this search
-          schema:
-            type: string
         - in: path
           name: sdnID
           description: SDN ID
@@ -667,11 +602,6 @@ paths:
           schema:
             type: string
             example: 94c825ee
-        - name: X-User-ID
-          in: header
-          description: Optional User ID used to perform this search
-          schema:
-            type: string
         - name: q
           in: query
           schema:
@@ -778,11 +708,6 @@ paths:
           schema:
             type: string
             example: 94c825ee
-        - name: X-User-ID
-          in: header
-          description: Optional User ID used to perform this search
-          schema:
-            type: string
         - name: limit
           in: query
           schema:

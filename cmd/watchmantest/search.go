@@ -21,7 +21,6 @@ func searchByName(ctx context.Context, api *moov.APIClient, name string) (*moov.
 		Limit:      optional.NewInt32(2),
 		Name:       optional.NewString(name),
 		XRequestID: optional.NewString(*flagRequestID),
-		XUserID:    optional.NewString(*flagUserID),
 	}
 
 	search, resp, err := api.WatchmanApi.Search(ctx, opts)
@@ -54,7 +53,6 @@ func searchByAltName(ctx context.Context, api *moov.APIClient, alt string) error
 		AltName:    optional.NewString(alt),
 		Limit:      optional.NewInt32(2),
 		XRequestID: optional.NewString(*flagRequestID),
-		XUserID:    optional.NewString(*flagUserID),
 	}
 
 	search, resp, err := api.WatchmanApi.Search(ctx, opts)
@@ -76,7 +74,6 @@ func searchByAddress(ctx context.Context, api *moov.APIClient, address string) e
 		Address:    optional.NewString(address),
 		Limit:      optional.NewInt32(2),
 		XRequestID: optional.NewString(*flagRequestID),
-		XUserID:    optional.NewString(*flagUserID),
 	}
 
 	search, resp, err := api.WatchmanApi.Search(ctx, opts)

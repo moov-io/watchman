@@ -22,7 +22,6 @@ func addCompanyWatch(ctx context.Context, api *moov.APIClient, id string, webhoo
 	}
 	opts := &moov.AddOfacCompanyWatchOpts{
 		XRequestID: optional.NewString(*flagRequestID),
-		XUserID:    optional.NewString(*flagUserID),
 	}
 	watch, resp, err := api.WatchmanApi.AddOfacCompanyWatch(ctx, id, req, opts)
 	if err != nil {
@@ -33,7 +32,6 @@ func addCompanyWatch(ctx context.Context, api *moov.APIClient, id string, webhoo
 	// remove watch
 	resp, err = api.WatchmanApi.RemoveOfacCompanyWatch(ctx, id, watch.WatchID, &moov.RemoveOfacCompanyWatchOpts{
 		XRequestID: optional.NewString(*flagRequestID),
-		XUserID:    optional.NewString(*flagUserID),
 	})
 	if err != nil {
 		return fmt.Errorf("addCompanyWatch: remove: %v", err)
@@ -50,7 +48,6 @@ func addCustomerWatch(ctx context.Context, api *moov.APIClient, id string, webho
 	}
 	opts := &moov.AddOfacCustomerWatchOpts{
 		XRequestID: optional.NewString(*flagRequestID),
-		XUserID:    optional.NewString(*flagUserID),
 	}
 	watch, resp, err := api.WatchmanApi.AddOfacCustomerWatch(ctx, id, req, opts)
 	if err != nil {
@@ -61,7 +58,6 @@ func addCustomerWatch(ctx context.Context, api *moov.APIClient, id string, webho
 	// remove watch
 	resp, err = api.WatchmanApi.RemoveOfacCustomerWatch(ctx, id, watch.WatchID, &moov.RemoveOfacCustomerWatchOpts{
 		XRequestID: optional.NewString(*flagRequestID),
-		XUserID:    optional.NewString(*flagUserID),
 	})
 	if err != nil {
 		return fmt.Errorf("addCustomerWatch: remove: %v", err)
