@@ -280,8 +280,9 @@ func TestSearch_liveData(t *testing.T) {
 		{"Nicolas MADURO", 1.0},
 		{"nicolas maduro", 1.0},
 	}
+	keeper := keepSDN(filterRequest{})
 	for i := range cases {
-		sdns := searcher.TopSDNs(1, 0.00, cases[i].name)
+		sdns := searcher.TopSDNs(1, 0.00, cases[i].name, keeper)
 		if len(sdns) == 0 {
 			t.Errorf("name=%q got no results", cases[i].name)
 		}
@@ -441,7 +442,8 @@ func TestSearch__FindSDN(t *testing.T) {
 }
 
 func TestSearch__TopSDNs(t *testing.T) {
-	sdns := sdnSearcher.TopSDNs(1, 0.00, "Ayman ZAWAHIRI")
+	keeper := keepSDN(filterRequest{})
+	sdns := sdnSearcher.TopSDNs(1, 0.00, "Ayman ZAWAHIRI", keeper)
 	if len(sdns) == 0 {
 		t.Fatal("empty SDNs")
 	}

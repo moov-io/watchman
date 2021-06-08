@@ -21,18 +21,21 @@ func TestIssue115__TopSDNs(t *testing.T) {
 
 	pipe := noLogPipeliner
 	s := newSearcher(log.NewNopLogger(), pipe, 1)
+	keeper := keepSDN(filterRequest{})
 
 	// Issue 115 (https://github.com/moov-io/watchman/issues/115) talks about how "george bush" is a false positive (90%) match against
 	// several other "George ..." records. This is too sensitive and so we need to tone that down.
 
 	// was 89.6% match
 	s.SDNs = precomputeSDNs([]*ofac.SDN{{EntityID: "2680", SDNName: "HABBASH, George", SDNType: "INDIVIDUAL"}}, nil, pipe)
-	out := s.TopSDNs(1, 0.00, "george bush")
+
+	out := s.TopSDNs(1, 0.00, "george bush", keeper)
 	eql(t, "issue115: top SDN 2680", out[0].match, 0.732)
 
 	// was 88.3% match
 	s.SDNs = precomputeSDNs([]*ofac.SDN{{EntityID: "9432", SDNName: "CHIWESHE, George", SDNType: "INDIVIDUAL"}}, nil, pipe)
-	out = s.TopSDNs(1, 0.00, "george bush")
+
+	out = s.TopSDNs(1, 0.00, "george bush", keeper)
 	eql(t, "issue115: top SDN 18996", out[0].match, 0.764)
 
 	// another example
@@ -41,9 +44,9 @@ func TestIssue115__TopSDNs(t *testing.T) {
 		t.Errorf("s.SDNs[0].name=%s", s.SDNs[0].name)
 	}
 
-	out = s.TopSDNs(1, 0.00, "george bush")
+	out = s.TopSDNs(1, 0.00, "george w bush", keeper)
 	eql(t, "issue115: top SDN 0", out[0].match, 1.0)
 
-	out = s.TopSDNs(1, 0.00, "george w bush")
+	out = s.TopSDNs(1, 0.00, "george bush", keeper)
 	eql(t, "issue115: top SDN 0", out[0].match, 1.0)
 }

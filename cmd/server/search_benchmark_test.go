@@ -43,10 +43,11 @@ func BenchmarkSearch__DPs(b *testing.B) {
 func BenchmarkSearch__SDNs(b *testing.B) {
 	b.StopTimer()
 	searcher := createBenchmarkSearcher(b)
+	keeper := keepSDN(filterRequest{})
 	b.StartTimer()
 
 	for i := 0; i < b.N; i++ {
-		searcher.TopSDNs(10, 0.0, randomName())
+		searcher.TopSDNs(10, 0.0, randomName(), keeper)
 	}
 }
 

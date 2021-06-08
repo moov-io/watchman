@@ -72,6 +72,8 @@ func (s *searcher) spawnResearching(logger log.Logger, companyRepo companyReposi
 }
 
 func (s *searcher) renderBody(w watch, companyRepo companyRepository, custRepo customerRepository) (*bytes.Buffer, error) {
+	keeper := keepSDN(filterRequest{})
+
 	// Perform a query (ID watches) or search (name watches) and encode the model in JSON for calling the webhook.
 	switch {
 	case w.customerID != "":
@@ -80,7 +82,7 @@ func (s *searcher) renderBody(w watch, companyRepo companyRepository, custRepo c
 
 	case w.customerName != "":
 		s.logger.Log("search", fmt.Sprintf("async: name watch '%s' for customer %s found", w.customerName, w.id))
-		sdns := s.TopSDNs(5, 0.00, w.customerName)
+		sdns := s.TopSDNs(5, 0.00, w.customerName, keeper)
 		for j := range sdns {
 			if strings.EqualFold(sdns[j].SDNType, "individual") {
 				return getCustomerBody(s, w.id, sdns[j].EntityID, sdns[j].match, custRepo)
@@ -93,7 +95,7 @@ func (s *searcher) renderBody(w watch, companyRepo companyRepository, custRepo c
 
 	case w.companyName != "":
 		s.logger.Log("search", fmt.Sprintf("async: name watch '%s' for company %s found", w.companyName, w.id))
-		sdns := s.TopSDNs(5, 0.00, w.companyName)
+		sdns := s.TopSDNs(5, 0.00, w.companyName, keeper)
 		for j := range sdns {
 			if !strings.EqualFold(sdns[j].SDNType, "individual") {
 				return getCompanyBody(s, w.id, sdns[j].EntityID, sdns[j].match, companyRepo)

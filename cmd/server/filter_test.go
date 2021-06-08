@@ -49,7 +49,7 @@ func TestFilter__buildFilterRequest(t *testing.T) {
 }
 
 var (
-	filterableSDNs = []SDN{
+	filterableSDNs = []*SDN{
 		{
 			SDN: &ofac.SDN{
 				EntityID: "12",
@@ -67,7 +67,7 @@ var (
 			},
 		},
 	}
-	terrorGroupSDN = SDN{
+	terrorGroupSDN = &SDN{
 		SDN: &ofac.SDN{
 			EntityID: "13",
 			SDNName:  "Terror Group",
@@ -75,7 +75,7 @@ var (
 			Programs: []string{"SDGT"},
 		},
 	}
-	oneEmptySDNType = []SDN{
+	oneEmptySDNType = []*SDN{
 		{
 			SDN: &ofac.SDN{
 				EntityID: "12",
@@ -86,7 +86,7 @@ var (
 		},
 		terrorGroupSDN,
 	}
-	missingSDNType = []SDN{
+	missingSDNType = []*SDN{
 		{
 			SDN: &ofac.SDN{
 				EntityID: "14",
@@ -95,7 +95,7 @@ var (
 			},
 		},
 	}
-	missingProgram = []SDN{
+	missingProgram = []*SDN{
 		{
 			SDN: &ofac.SDN{
 				EntityID: "15",

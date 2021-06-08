@@ -112,7 +112,7 @@ func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 
 type searchResponse struct {
 	// OFAC
-	SDNs              []SDN     `json:"SDNs"`
+	SDNs              []*SDN    `json:"SDNs"`
 	AltNames          []Alt     `json:"altNames"`
 	Addresses         []Address `json:"addresses"`
 	SectoralSanctions []SSI     `json:"sectoralSanctions"`
@@ -217,7 +217,7 @@ var (
 		func(s *searcher, filters filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			sdns := s.FindSDNsByRemarksID(limit, name)
 			if len(sdns) == 0 {
-				sdns = s.TopSDNs(limit, minMatch, name)
+				sdns = s.TopSDNs(limit, minMatch, name, keepSDN(filters))
 			}
 			resp.SDNs = filterSDNs(sdns, filters)
 		},
@@ -274,7 +274,7 @@ func searchViaAddressAndName(logger log.Logger, searcher *searcher, name string,
 			RefreshedAt: searcher.lastRefreshedAt,
 		}
 
-		resp.SDNs = filterSDNs(searcher.TopSDNs(limit, minMatch, name), buildFilterRequest(r.URL))
+		resp.SDNs = searcher.TopSDNs(limit, minMatch, name, keepSDN(buildFilterRequest(r.URL)))
 
 		compares := buildAddressCompares(req)
 		filtered := searcher.FilterCountries(req.Country)
@@ -333,8 +333,7 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 		minMatch := extractSearchMinMatch(r)
 
 		// Grab the SDN's and then filter any out based on query params
-		sdns := searcher.TopSDNs(limit, minMatch, nameSlug)
-		sdns = filterSDNs(sdns, buildFilterRequest(r.URL))
+		sdns := searcher.TopSDNs(limit, minMatch, nameSlug, keepSDN(buildFilterRequest(r.URL)))
 
 		// record Prometheus metrics
 		if len(sdns) > 0 {
