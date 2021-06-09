@@ -9,6 +9,8 @@ import (
 	"math/rand"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 func init() {
@@ -82,19 +84,13 @@ func TestLargest_MaxOrdering(t *testing.T) {
 }
 
 func TestLargest__MinMatch(t *testing.T) {
-	xs := newLargest(2, 0.95)
+	xs := newLargest(2, 0.96)
 
 	xs.add(&item{value: "A", weight: 0.94})
 	xs.add(&item{value: "B", weight: 1.0})
 	xs.add(&item{value: "C", weight: 0.95})
 	xs.add(&item{value: "D", weight: 0.09})
 
-	if n := len(xs.items); n != 2 {
-		t.Fatalf("found %d of %d expected images", n, 2)
-	}
-	for i := range xs.items {
-		if xs.items[i].weight < 0.95 {
-			t.Errorf("items[%d] has weight of %.2f", i, xs.items[i].weight)
-		}
-	}
+	require.Equal(t, "B", xs.items[0].value)
+	require.Nil(t, xs.items[1])
 }
