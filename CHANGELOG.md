@@ -1,3 +1,21 @@
+## v0.19.0 (Released 2021-06-10)
+
+This release improves search results by filtering as part of scoring instead of after the fact.
+Users should see more results returned for queries now.
+
+ADDITIONS
+
+- cmd/server: add `?minMatch=0.95` query param for searching
+
+IMPROVEMENTS
+
+- cmd/server: remove unneeded X-User-ID HTTP headers
+- cmd/server: filter as part of searching, not after the fact
+
+BUILD
+
+- build: split CI into multiple jobs for parallel runs
+
 ## v0.18.2 (Released 2021-06-01)
 
 BUG FIXES
