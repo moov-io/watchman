@@ -1,0 +1,34 @@
+name: Openshift
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: Go Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04]
+    steps:
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.16
+      id: go
+
+    - name: Setup Node / NPM
+      if: runner.os == 'Linux'
+      uses: actions/setup-node@v2-beta
+      with:
+        node-version: '14'
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: Docker Build
+      if: runner.os == 'Linux'
+      run: make docker-openshift

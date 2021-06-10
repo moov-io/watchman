@@ -1,4 +1,4 @@
-name: Go
+name: Static Docker Image
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-18.04, macos-latest, windows-latest]
+        os: [ubuntu-18.04]
     steps:
     - name: Set up Go 1.x
       uses: actions/setup-go@v2
@@ -33,18 +33,6 @@ jobs:
       if: runner.os == 'Windows'
       run: choco install -y make mingw
 
-    # - name: Generate Code
-    #   run: make admin && make client
-    #   # Ensure no changes are unstaged in ./admin/ or ./client/ after generating their codeg
-    #   # git diff-index --quiet HEAD -- ./admin/ ./client/
-
-    - name: Check
-      run: make build && make check
-
-    - name: Upload Code Coverage
-      if: runner.os == 'Linux'
-      run: bash <(curl -s https://codecov.io/bash)
-
     - name: Docker Build
       if: runner.os == 'Linux'
-      run: make docker && make build-batchsearch && make test-integration && make clean-integration
+      run: make docker-static
