@@ -135,8 +135,23 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
 
-    - name: Docker
-      run: make docker
+    - name: Clean
+      run: make clean
+
+    - name: Docker Hub
+      run: make docker-hub
+
+    - name: Docker Openshift
+      run: make docker-openshift
+
+    - name: Docker Static
+      run: make docker-static
+
+    - name: Docker watchmantest
+      run: make docker-watchmantest
+
+    - name: Docker Webhook Example
+      run: make docker-webhook
 
     - name: Docker Push
       run: |+
