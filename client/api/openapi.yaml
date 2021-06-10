@@ -814,6 +814,17 @@ paths:
           example: "10517860"
           type: string
         style: form
+      - description: Match percentage that search query must obtain for results to
+          be returned.
+        explode: true
+        in: query
+        name: minMatch
+        required: false
+        schema:
+          example: 0.95
+          format: float
+          type: number
+        style: form
       - description: Maximum results returned by a search. Results are sorted by their
           match percentage in decending order.
         explode: true

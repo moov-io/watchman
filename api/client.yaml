@@ -662,6 +662,13 @@ paths:
             type: string
             example: '10517860'
           description: ID value often found in remarks property of an SDN. Takes the form of 'No. NNNNN' as an alphanumeric value.
+        - name: minMatch
+          in: query
+          schema:
+            type: number
+            format: float
+            example: 0.95
+          description: Match percentage that search query must obtain for results to be returned.
         - name: limit
           in: query
           schema:

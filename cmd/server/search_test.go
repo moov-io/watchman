@@ -281,7 +281,7 @@ func TestSearch_liveData(t *testing.T) {
 		{"nicolas maduro", 1.0},
 	}
 	for i := range cases {
-		sdns := searcher.TopSDNs(1, cases[i].name)
+		sdns := searcher.TopSDNs(1, 0.00, cases[i].name)
 		if len(sdns) == 0 {
 			t.Errorf("name=%q got no results", cases[i].name)
 		}
@@ -391,7 +391,7 @@ func TestSearch__FindAddresses(t *testing.T) {
 }
 
 func TestSearch__TopAddresses(t *testing.T) {
-	addresses := addressSearcher.TopAddresses(1, "Piarco Air")
+	addresses := addressSearcher.TopAddresses(1, 0.00, "Piarco Air")
 	if len(addresses) == 0 {
 		t.Fatal("empty Addresses")
 	}
@@ -401,7 +401,7 @@ func TestSearch__TopAddresses(t *testing.T) {
 }
 
 func TestSearch__TopAddressFn(t *testing.T) {
-	addresses := TopAddressesFn(1, addressSearcher.Addresses, topAddressesCountry("United Kingdom"))
+	addresses := TopAddressesFn(1, 0.00, addressSearcher.Addresses, topAddressesCountry("United Kingdom"))
 	if len(addresses) == 0 {
 		t.Fatal("empty Addresses")
 	}
@@ -421,7 +421,7 @@ func TestSearch__FindAlts(t *testing.T) {
 }
 
 func TestSearch__TopAlts(t *testing.T) {
-	alts := altSearcher.TopAltNames(1, "SOGO KENKYUSHO")
+	alts := altSearcher.TopAltNames(1, 0.00, "SOGO KENKYUSHO")
 	if len(alts) == 0 {
 		t.Fatal("empty AltNames")
 	}
@@ -441,7 +441,7 @@ func TestSearch__FindSDN(t *testing.T) {
 }
 
 func TestSearch__TopSDNs(t *testing.T) {
-	sdns := sdnSearcher.TopSDNs(1, "Ayman ZAWAHIRI")
+	sdns := sdnSearcher.TopSDNs(1, 0.00, "Ayman ZAWAHIRI")
 	if len(sdns) == 0 {
 		t.Fatal("empty SDNs")
 	}
@@ -451,7 +451,7 @@ func TestSearch__TopSDNs(t *testing.T) {
 }
 
 func TestSearch__TopDPs(t *testing.T) {
-	dps := dplSearcher.TopDPs(1, "NASER AIRLINES")
+	dps := dplSearcher.TopDPs(1, 0.00, "NASER AIRLINES")
 	if len(dps) == 0 {
 		t.Fatal("empty DPs")
 	}
@@ -462,7 +462,7 @@ func TestSearch__TopDPs(t *testing.T) {
 }
 
 func TestSearcher_TopSSIs(t *testing.T) {
-	ssis := ssiSearcher.TopSSIs(1, "ROSOBORONEKSPORT")
+	ssis := ssiSearcher.TopSSIs(1, 0.00, "ROSOBORONEKSPORT")
 	if len(ssis) == 0 {
 		t.Fatal("empty SSIs")
 	}
@@ -472,7 +472,7 @@ func TestSearcher_TopSSIs(t *testing.T) {
 }
 
 func TestSearcher_TopSSIs_limit(t *testing.T) {
-	ssis := ssiSearcher.TopSSIs(2, "SPECIALIZED DEPOSITORY")
+	ssis := ssiSearcher.TopSSIs(2, 0.00, "SPECIALIZED DEPOSITORY")
 	if len(ssis) != 2 {
 		t.Fatalf("Expected 2 results, found %d", len(ssis))
 	}
@@ -482,7 +482,7 @@ func TestSearcher_TopSSIs_limit(t *testing.T) {
 }
 
 func TestSearcher_TopSSIs_reportAltNameWeight(t *testing.T) {
-	ssis := ssiSearcher.TopSSIs(1, "KENKYUSHO")
+	ssis := ssiSearcher.TopSSIs(1, 0.00, "KENKYUSHO")
 	if len(ssis) == 0 {
 		t.Fatal("empty SSIs")
 	}
@@ -495,7 +495,7 @@ func TestSearcher_TopSSIs_reportAltNameWeight(t *testing.T) {
 }
 
 func TestSearcher_TopBISEntities(t *testing.T) {
-	els := bisEntitySearcher.TopBISEntities(1, "Khan")
+	els := bisEntitySearcher.TopBISEntities(1, 0.00, "Khan")
 	if len(els) == 0 {
 		t.Fatal("empty ELs")
 	}
@@ -505,7 +505,7 @@ func TestSearcher_TopBISEntities(t *testing.T) {
 }
 
 func TestSearcher_TopBISEntities_AltName(t *testing.T) {
-	els := bisEntitySearcher.TopBISEntities(1, "Luqman Sehreci.")
+	els := bisEntitySearcher.TopBISEntities(1, 0.00, "Luqman Sehreci.")
 	if len(els) == 0 {
 		t.Fatal("empty ELs")
 	}

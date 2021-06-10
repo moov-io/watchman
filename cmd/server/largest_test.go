@@ -9,6 +9,8 @@ import (
 	"math/rand"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 func init() {
@@ -16,7 +18,7 @@ func init() {
 }
 
 func TestLargest(t *testing.T) {
-	xs := newLargest(10)
+	xs := newLargest(10, 0.0)
 
 	min := 10000.0
 	for i := 0; i < 1000; i++ {
@@ -47,7 +49,7 @@ func TestLargest(t *testing.T) {
 // TestLargest_MaxOrdering will test the ordering of 1.0 values to see
 // if they hold their insert ordering.
 func TestLargest_MaxOrdering(t *testing.T) {
-	xs := newLargest(10)
+	xs := newLargest(10, 0.0)
 
 	xs.add(&item{value: "A", weight: 0.99})
 	xs.add(&item{value: "B", weight: 1.0})
@@ -79,4 +81,16 @@ func TestLargest_MaxOrdering(t *testing.T) {
 			t.Errorf("#%d was non-nil: %#v", i, xs.items[i])
 		}
 	}
+}
+
+func TestLargest__MinMatch(t *testing.T) {
+	xs := newLargest(2, 0.96)
+
+	xs.add(&item{value: "A", weight: 0.94})
+	xs.add(&item{value: "B", weight: 1.0})
+	xs.add(&item{value: "C", weight: 0.95})
+	xs.add(&item{value: "D", weight: 0.09})
+
+	require.Equal(t, "B", xs.items[0].value)
+	require.Nil(t, xs.items[1])
 }

@@ -81,11 +81,11 @@ func (s *searcher) FindAddresses(limit int, id string) []*ofac.Address {
 	return out
 }
 
-func (s *searcher) TopAddresses(limit int, reqAddress string) []Address {
+func (s *searcher) TopAddresses(limit int, minMatch float64, reqAddress string) []Address {
 	s.RLock()
 	defer s.RUnlock()
 
-	return TopAddressesFn(limit, s.Addresses, topAddressesAddress(reqAddress))
+	return TopAddressesFn(limit, minMatch, s.Addresses, topAddressesAddress(reqAddress))
 }
 
 var (
@@ -170,11 +170,11 @@ func (s *searcher) FilterCountries(name string) []*Address {
 // compare takes an Address (from s.Addresses) and is expected to extract some property to be compared
 // against a captured parameter (in a closure calling compare) to return an *item for final sorting.
 // See searchByAddress in search_handlers.go for an example
-func TopAddressesFn(limit int, addresses []*Address, compare func(*Address) *item) []Address {
+func TopAddressesFn(limit int, minMatch float64, addresses []*Address, compare func(*Address) *item) []Address {
 	if len(addresses) == 0 {
 		return nil
 	}
-	xs := newLargest(limit)
+	xs := newLargest(limit, minMatch)
 
 	var wg sync.WaitGroup
 	wg.Add(len(addresses))
@@ -223,7 +223,7 @@ func (s *searcher) FindAlts(limit int, id string) []*ofac.AlternateIdentity {
 	return out
 }
 
-func (s *searcher) TopAltNames(limit int, alt string) []Alt {
+func (s *searcher) TopAltNames(limit int, minMatch float64, alt string) []Alt {
 	alt = precompute(alt)
 
 	s.RLock()
@@ -232,7 +232,7 @@ func (s *searcher) TopAltNames(limit int, alt string) []Alt {
 	if len(s.Alts) == 0 {
 		return nil
 	}
-	xs := newLargest(limit)
+	xs := newLargest(limit, minMatch)
 
 	var wg sync.WaitGroup
 	wg.Add(len(s.Alts))
@@ -338,7 +338,7 @@ func (s *searcher) FindSDNsByRemarksID(limit int, id string) []SDN {
 	return out
 }
 
-func (s *searcher) TopSDNs(limit int, name string) []SDN {
+func (s *searcher) TopSDNs(limit int, minMatch float64, name string) []SDN {
 	name = precompute(name)
 
 	s.RLock()
@@ -347,7 +347,7 @@ func (s *searcher) TopSDNs(limit int, name string) []SDN {
 	if len(s.SDNs) == 0 {
 		return nil
 	}
-	xs := newLargest(limit)
+	xs := newLargest(limit, minMatch)
 
 	var wg sync.WaitGroup
 	wg.Add(len(s.SDNs))
@@ -380,7 +380,7 @@ func (s *searcher) TopSDNs(limit int, name string) []SDN {
 	return out
 }
 
-func (s *searcher) TopDPs(limit int, name string) []DP {
+func (s *searcher) TopDPs(limit int, minMatch float64, name string) []DP {
 	name = precompute(name)
 
 	s.RLock()
@@ -389,7 +389,7 @@ func (s *searcher) TopDPs(limit int, name string) []DP {
 	if len(s.DPs) == 0 {
 		return nil
 	}
-	xs := newLargest(limit)
+	xs := newLargest(limit, minMatch)
 
 	var wg sync.WaitGroup
 	wg.Add(len(s.DPs))
@@ -423,7 +423,7 @@ func (s *searcher) TopDPs(limit int, name string) []DP {
 }
 
 // TopSSIs searches Sectoral Sanctions records by Name and Alias
-func (s *searcher) TopSSIs(limit int, name string) []SSI {
+func (s *searcher) TopSSIs(limit int, minMatch float64, name string) []SSI {
 	name = precompute(name)
 
 	s.RLock()
@@ -432,7 +432,7 @@ func (s *searcher) TopSSIs(limit int, name string) []SSI {
 	if len(s.SSIs) == 0 {
 		return nil
 	}
-	xs := newLargest(limit)
+	xs := newLargest(limit, minMatch)
 
 	var wg sync.WaitGroup
 	wg.Add(len(s.SSIs))
@@ -476,7 +476,7 @@ func (s *searcher) TopSSIs(limit int, name string) []SSI {
 }
 
 // TopBISEntities searches BIS Entity List records by name and alias
-func (s *searcher) TopBISEntities(limit int, name string) []BISEntity {
+func (s *searcher) TopBISEntities(limit int, minMatch float64, name string) []BISEntity {
 	name = precompute(name)
 
 	s.RLock()
@@ -486,7 +486,7 @@ func (s *searcher) TopBISEntities(limit int, name string) []BISEntity {
 		return nil
 	}
 
-	xs := newLargest(limit)
+	xs := newLargest(limit, minMatch)
 
 	var wg sync.WaitGroup
 	wg.Add(len(s.BISEntities))
@@ -789,6 +789,14 @@ func extractSearchLimit(r *http.Request) int {
 		limit = hardResultsLimit
 	}
 	return limit
+}
+
+func extractSearchMinMatch(r *http.Request) float64 {
+	if v := r.URL.Query().Get("minMatch"); v != "" {
+		n, _ := strconv.ParseFloat(v, 64)
+		return n
+	}
+	return 0.00
 }
 
 var (
