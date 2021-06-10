@@ -11,10 +11,9 @@ package admin
 
 // OfacSdn Specially designated national from OFAC list
 type OfacSdn struct {
-	EntityID string `json:"entityID,omitempty"`
-	SdnName  string `json:"sdnName,omitempty"`
-	// SDN's typically represent an individual (customer) or trust/company/organization. OFAC endpoints refer to customers or companies as different entities, but underlying both is the same SDN metadata.
-	SdnType string `json:"sdnType,omitempty"`
+	EntityID string  `json:"entityID,omitempty"`
+	SdnName  string  `json:"sdnName,omitempty"`
+	SdnType  SdnType `json:"sdnType,omitempty"`
 	// Programs is the sanction programs this SDN was added from
 	Programs []string `json:"programs,omitempty"`
 	Title    string   `json:"title,omitempty"`

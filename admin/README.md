@@ -46,6 +46,7 @@ Class | Method | HTTP request | Description
  - [Error](docs/Error.md)
  - [OfacSdn](docs/OfacSdn.md)
  - [SdnDebugMetadata](docs/SdnDebugMetadata.md)
+ - [SdnType](docs/SdnType.md)
 
 
 ## Documentation For Authorization

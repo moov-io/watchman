@@ -102,7 +102,6 @@ components:
           indexedName: mohammad moghisseh
           parsedRemarksId: "3603251708570001"
         SDN:
-          sdnType: individual
           match: 0.91
           entityID: "1231"
           programs:
@@ -156,14 +155,13 @@ components:
       properties:
         error:
           description: An error message describing the problem intended for humans.
-          example: Validation error(s) present.
+          example: Example error, see description
           type: string
       required:
       - error
     OfacSDN:
       description: Specially designated national from OFAC list
       example:
-        sdnType: individual
         match: 0.91
         entityID: "1231"
         programs:
@@ -179,11 +177,7 @@ components:
           example: BANCO NACIONAL DE CUBA
           type: string
         sdnType:
-          description: SDN's typically represent an individual (customer) or trust/company/organization.
-            OFAC endpoints refer to customers or companies as different entities,
-            but underlying both is the same SDN metadata.
-          example: individual
-          type: string
+          $ref: '#/components/schemas/SdnType'
         programs:
           description: Programs is the sanction programs this SDN was added from
           example:
@@ -200,3 +194,12 @@ components:
           description: Remarks on SDN and often additional information about the SDN
           example: 0.91
           type: number
+    SdnType:
+      description: Used for classifying SDNs — typically represents an individual
+        or company
+      enum:
+      - individual
+      - entity
+      - vessel
+      - aircraft
+      type: string
