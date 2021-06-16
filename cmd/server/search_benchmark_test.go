@@ -51,7 +51,19 @@ func BenchmarkSearch__SDNsBasic(b *testing.B) {
 	}
 }
 
-func BenchmarkSearch__SDNsMinMatch(b *testing.B) {
+func BenchmarkSearch__SDNsMinMatch50(b *testing.B) {
+	b.StopTimer()
+	minMatch := 0.50
+	searcher := createBenchmarkSearcher(b)
+	keeper := keepSDN(filterRequest{})
+	b.StartTimer()
+
+	for i := 0; i < b.N; i++ {
+		searcher.TopSDNs(10, minMatch, randomName(), keeper)
+	}
+}
+
+func BenchmarkSearch__SDNsMinMatch95(b *testing.B) {
 	b.StopTimer()
 	minMatch := 0.95
 	searcher := createBenchmarkSearcher(b)
