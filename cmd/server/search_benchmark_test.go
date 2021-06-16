@@ -40,7 +40,7 @@ func BenchmarkSearch__DPs(b *testing.B) {
 	}
 }
 
-func BenchmarkSearch__SDNs(b *testing.B) {
+func BenchmarkSearch__SDNsBasic(b *testing.B) {
 	b.StopTimer()
 	searcher := createBenchmarkSearcher(b)
 	keeper := keepSDN(filterRequest{})
@@ -48,6 +48,45 @@ func BenchmarkSearch__SDNs(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		searcher.TopSDNs(10, 0.0, randomName(), keeper)
+	}
+}
+
+func BenchmarkSearch__SDNsMinMatch(b *testing.B) {
+	b.StopTimer()
+	minMatch := 0.95
+	searcher := createBenchmarkSearcher(b)
+	keeper := keepSDN(filterRequest{})
+	b.StartTimer()
+
+	for i := 0; i < b.N; i++ {
+		searcher.TopSDNs(10, minMatch, randomName(), keeper)
+	}
+}
+
+func BenchmarkSearch__SDNsEntity(b *testing.B) {
+	b.StopTimer()
+	searcher := createBenchmarkSearcher(b)
+	keeper := keepSDN(filterRequest{
+		sdnType: "entity",
+	})
+	b.StartTimer()
+
+	for i := 0; i < b.N; i++ {
+		searcher.TopSDNs(10, 0.0, randomName(), keeper)
+	}
+}
+
+func BenchmarkSearch__SDNsComplex(b *testing.B) {
+	b.StopTimer()
+	minMatch := 0.95
+	searcher := createBenchmarkSearcher(b)
+	keeper := keepSDN(filterRequest{
+		sdnType: "entity",
+	})
+	b.StartTimer()
+
+	for i := 0; i < b.N; i++ {
+		searcher.TopSDNs(10, minMatch, randomName(), keeper)
 	}
 }
 
