@@ -1,6 +1,6 @@
 openapi: 3.0.2
 info:
-  description: Moov Watchman is an HTTP API and Go library to download, parse and offer search functions over numerous trade sanction lists from the United States, European Union governments, agencies, and non profits for complying with regional laws. Also included is a web UI and async webhook notification service to initiate processes on remote systems.
+  description: Moov Watchman offers download, parse, and search functions over numerous U.S. trade sanction lists for complying with regional laws. Also included is a web UI and async webhook notification service to initiate processes on remote systems.
   version: v1
   title: Watchman API
   contact:
@@ -15,14 +15,14 @@ servers:
 
 tags:
   - name: Watchman
-    description: Endpoints for searching individuals and corporations which US government enforces economic sanctions against and adding webhook notifications for search criteria.
+    description: Endpoints for searching individuals and corporations that the U.S. government enforces economic sanctions against and adding webhook notifications for search criteria.
 
 paths:
   /ping:
     get:
       tags: [Watchman]
-      summary: Ping Watchman
-      description: Check the Watchman service is running
+      summary: Ping Watchman service
+      description: Check if the Watchman service is running.
       operationId: ping
       responses:
         '200':
@@ -33,12 +33,12 @@ paths:
     get:
       tags: [Watchman]
       summary: Get company
-      description: Get information about a company, trust or organization such as addresses, alternate names, and remarks.
+      description: Get information about a company, trust, or organization such as addresses, alternate names, and remarks.
       operationId: getOfacCompany
       parameters:
         - name: X-Request-ID
           in: header
-          description: Optional Request ID allows application developer to trace requests through the systems logs
+          description: Optional Request ID allows application developer to trace requests through the system's logs
           schema:
             type: string
             example: 94c825ee
@@ -57,7 +57,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OfacCompany'
         '400':
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
           content:
             application/json:
               schema:
@@ -66,12 +66,12 @@ paths:
     put:
       tags: [Watchman]
       summary: Update company
-      description: Update a Companies sanction status to always block or always allow transactions.
+      description: Update a Company's sanction status to always block or always allow transactions.
       operationId: updateOfacCompanyStatus
       parameters:
         - name: X-Request-ID
           in: header
-          description: Optional Request ID allows application developer to trace requests through the systems logs
+          description: Optional Request ID allows application developer to trace requests through the system's logs
           schema:
             type: string
             example: 94c825ee
@@ -97,7 +97,7 @@ paths:
         '200':
           description: Company status updated
         '400':
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
           content:
             application/json:
               schema:
@@ -107,12 +107,12 @@ paths:
     post:
       tags: [Watchman]
       summary: Watch OFAC company
-      description: Add name watch on a OFAC Company
+      description: Add ID watch on an OFAC Company.
       operationId: addOfacCompanyWatch
       parameters:
         - name: X-Request-ID
           in: header
-          description: Optional Request ID allows application developer to trace requests through the systems logs
+          description: Optional Request ID allows application developer to trace requests through the system's logs
           schema:
             type: string
             example: 94c825ee
@@ -137,7 +137,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OfacWatch'
         '400':
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
           content:
             application/json:
               schema:
@@ -149,12 +149,12 @@ paths:
     delete:
       tags: [Watchman]
       summary: Remove company watch
-      description: Delete a company name watch
+      description: Delete a company ID watch.
       operationId: removeOfacCompanyWatch
       parameters:
         - name: X-Request-ID
           in: header
-          description: Optional Request ID allows application developer to trace requests through the systems logs
+          description: Optional Request ID allows application developer to trace requests through the system's logs
           schema:
             type: string
             example: 94c825ee
@@ -176,7 +176,7 @@ paths:
         '200':
           description: Company watch removed
         '400':
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
           content:
             application/json:
               schema:
@@ -191,7 +191,7 @@ paths:
       parameters:
         - name: X-Request-ID
           in: header
-          description: Optional Request ID allows application developer to trace requests through the systems logs
+          description: Optional Request ID allows application developer to trace requests through the system's logs
           schema:
             type: string
             example: 94c825ee
@@ -216,7 +216,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OfacWatch'
         '400':
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
           content:
             application/json:
               schema:
@@ -226,11 +226,12 @@ paths:
     delete:
       tags: [Watchman]
       summary: Remove company watch
+      description: Delete a company name watch.
       operationId: removeOfacCompanyNameWatch
       parameters:
         - name: X-Request-ID
           in: header
-          description: Optional Request ID allows application developer to trace requests through the systems logs
+          description: Optional Request ID allows application developer to trace requests through the system's logs
           schema:
             type: string
             example: 94c825ee
@@ -252,7 +253,7 @@ paths:
         '200':
           description: Company watch removed
         '400':
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
           content:
             application/json:
               schema:
@@ -262,13 +263,13 @@ paths:
   /ofac/customers/{customerID}:
     get:
       tags: [Watchman]
-      summary: Get Customer
-      description: Get information about a customer, addresses, alternate names, and their SDN metadata.
+      summary: Get customer
+      description: Get information about a customer's addresses, alternate names, and SDN metadata.
       operationId: getOfacCustomer
       parameters:
         - name: X-Request-ID
           in: header
-          description: Optional Request ID allows application developer to trace requests through the systems logs
+          description: Optional Request ID allows application developer to trace requests through the system's logs
           schema:
             type: string
             example: 94c825ee
@@ -287,7 +288,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OfacCustomer'
         '400':
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
           content:
             application/json:
               schema:
@@ -301,7 +302,7 @@ paths:
       parameters:
         - name: X-Request-ID
           in: header
-          description: Optional Request ID allows application developer to trace requests through the systems logs
+          description: Optional Request ID allows application developer to trace requests through the system's logs
           schema:
             type: string
             example: 94c825ee
@@ -327,7 +328,7 @@ paths:
         '200':
           description: Customer status updated
         '400':
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
           content:
             application/json:
               schema:
@@ -337,12 +338,12 @@ paths:
     post:
       tags: [Watchman]
       summary: Watch OFAC customer
-      description: Add name watch on a OFAC Customer
+      description: Add ID watch on an OFAC Customer.
       operationId: addOfacCustomerWatch
       parameters:
         - name: X-Request-ID
           in: header
-          description: Optional Request ID allows application developer to trace requests through the systems logs
+          description: Optional Request ID allows application developer to trace requests through the system's logs
           schema:
             type: string
             example: 94c825ee
@@ -367,7 +368,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OfacWatch'
         '400':
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
           content:
             application/json:
               schema:
@@ -379,12 +380,12 @@ paths:
     delete:
       tags: [Watchman]
       summary: Remove customer watch
-      description: Delete a customer name watch
+      description: Delete a customer ID watch.
       operationId: removeOfacCustomerWatch
       parameters:
         - name: X-Request-ID
           in: header
-          description: Optional Request ID allows application developer to trace requests through the systems logs
+          description: Optional Request ID allows application developer to trace requests through the system's logs
           schema:
             type: string
             example: 94c825ee
@@ -406,7 +407,7 @@ paths:
         '200':
           description: Customer watch removed
         '400':
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
           content:
             application/json:
               schema:
@@ -421,7 +422,7 @@ paths:
       parameters:
         - name: X-Request-ID
           in: header
-          description: Optional Request ID allows application developer to trace requests through the systems logs
+          description: Optional Request ID allows application developer to trace requests through the system's logs
           schema:
             type: string
             example: 94c825ee
@@ -446,7 +447,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OfacWatch'
         '400':
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
           content:
             application/json:
               schema:
@@ -456,11 +457,12 @@ paths:
     delete:
       tags: [Watchman]
       summary: Remove customer watch
+      description: Delete a customer name watch.
       operationId: removeOfacCustomerNameWatch
       parameters:
         - name: X-Request-ID
           in: header
-          description: Optional Request ID allows application developer to trace requests through the systems logs
+          description: Optional Request ID allows application developer to trace requests through the system's logs
           schema:
             type: string
             example: 94c825ee
@@ -482,7 +484,7 @@ paths:
         '200':
           description: Company or Customer watch removed
         '400':
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
           content:
             application/json:
               schema:
@@ -498,7 +500,7 @@ paths:
       parameters:
         - name: X-Request-ID
           in: header
-          description: Optional Request ID allows application developer to trace requests through the systems logs
+          description: Optional Request ID allows application developer to trace requests through the system's logs
           schema:
             type: string
             example: 94c825ee
@@ -517,7 +519,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OfacSDN'
         '400':
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
           content:
             application/json:
               schema:
@@ -531,7 +533,7 @@ paths:
       parameters:
         - name: X-Request-ID
           in: header
-          description: Optional Request ID allows application developer to trace requests through the systems logs
+          description: Optional Request ID allows application developer to trace requests through the system's logs
           schema:
             type: string
             example: 94c825ee
@@ -550,7 +552,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OfacSDNAltNames'
         '400':
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
           content:
             application/json:
               schema:
@@ -564,7 +566,7 @@ paths:
       parameters:
         - name: X-Request-ID
           in: header
-          description: Optional Request ID allows application developer to trace requests through the systems logs
+          description: Optional Request ID allows application developer to trace requests through the system's logs
           schema:
             type: string
             example: 94c825ee
@@ -583,7 +585,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/OfacEntityAddresses'
         '400':
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
           content:
             application/json:
               schema:
@@ -598,7 +600,7 @@ paths:
       parameters:
         - name: X-Request-ID
           in: header
-          description: Optional Request ID allows application developer to trace requests through the systems logs
+          description: Optional Request ID allows application developer to trace requests through the system's logs
           schema:
             type: string
             example: 94c825ee
@@ -619,7 +621,7 @@ paths:
           schema:
             type: string
             example: 123 83rd Ave
-          description: Phsical address which could correspond to a human on the SDN list. Only Address results will be returned.
+          description: Physical address which could correspond to a human on the SDN list. Only Address results will be returned.
         - name: city
           in: query
           schema:
@@ -686,7 +688,7 @@ paths:
           schema:
             type: string
             example: SDGT
-          description: Optional filter to only return SDNs whose program case-insensitively matches
+          description: Optional filter to only return SDNs whose program case-insensitively matches.
       responses:
         '200':
           description: SDNs returned from a search
@@ -695,7 +697,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Search'
         '400':
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
           content:
             application/json:
               schema:
@@ -706,12 +708,12 @@ paths:
     get:
       tags: [Watchman]
       summary: Get latest downloads
-      description: Return list of recent downloads of list data
+      description: Return list of recent downloads of list data.
       operationId: getLatestDownloads
       parameters:
         - name: X-Request-ID
           in: header
-          description: Optional Request ID allows application developer to trace requests through the systems logs
+          description: Optional Request ID allows application developer to trace requests through the system's logs
           schema:
             type: string
             example: 94c825ee
@@ -729,7 +731,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Downloads'
         '400':
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
           content:
             application/json:
               schema:
@@ -762,7 +764,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/UIKeys'
         '400':
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
           content:
             application/json:
               schema:
@@ -809,7 +811,7 @@ components:
         createdAt:
           type: string
           format: date-time
-          example: 2006-01-02T15:04:05Z07:00
+          example: "2006-01-02T15:04:05"
     OfacCustomer:
       description: OFAC Customer and metadata
       properties:
@@ -849,13 +851,13 @@ components:
         createdAt:
           type: string
           format: date-time
-          example: 2006-01-02T15:04:05Z07:00
+          example: "2006-01-02T15:04:05"
     OfacSDN:
       description: Specially designated national from OFAC list
       properties:
         entityID:
           type: string
-          example: 1231
+          example: "1231"
         sdnName:
           type: string
           example: BANCO NACIONAL DE CUBA
@@ -872,10 +874,12 @@ components:
           example: Title of an individual
         remarks:
           type: string
+          description: Remarks on SDN and often additional information about the SDN
+          example: Additional info
         match:
           type: number
+          description: Match percentage of search query
           example: 0.91
-          description: Remarks on SDN and often additional information about the SDN
     OfacEntityAddresses:
       type: array
       items:
@@ -885,10 +889,10 @@ components:
       properties:
         entityID:
           type: string
-          example: 2112
+          example: "2112"
         addressID:
           type: string
-          example: 201
+          example: "201"
         address:
           type: string
           example: 123 73th St
@@ -900,6 +904,7 @@ components:
           example: Japan
         match:
           type: number
+          description: Match percentage of search query
           example: 0.91
     OfacSDNAltNames:
       type: array
@@ -910,10 +915,10 @@ components:
       properties:
         entityID:
           type: string
-          example: 306
+          example: "306"
         alternateID:
           type: string
-          example: 220
+          example: "220"
         alternateType:
           type: string
           example: aka
@@ -925,6 +930,7 @@ components:
           example: Extra information
         match:
           type: number
+          description: Match percentage of search query
           example: 0.91
     SdnType:
       description: 'Used for classifying SDNs — typically represents an individual or company'
@@ -945,7 +951,7 @@ components:
       properties:
         name:
           type: string
-          description: Name of the Denied Person
+          description: Denied Person's name
           example: ISMAEL RETA
         streetAddress:
           type: string
@@ -962,11 +968,11 @@ components:
         country:
           type: string
           description: "Denied Person's country"
-          example: ""
+          example: "United States"
         postalCode:
           type: string
           description: "Denied Person's postal code"
-          example: 78071
+          example: "78071"
         effectiveDate:
           type: string
           description: Date when denial came into effect
@@ -981,7 +987,7 @@ components:
           example: 'Y'
         lastUpdate:
           type: string
-          description: Most recent date when the Denied Person record was updated
+          description: Date when the Denied Person's record was most recently updated
           example: '2016-06-22'
         action:
           type: string
@@ -993,6 +999,7 @@ components:
           example: '81.F.R. 40658 6/22/2016'
         match:
           type: number
+          description: Match percentage of search query
           example: 0.92
     SSI:
       description: Treasury Department Sectoral Sanctions Identifications List (SSI)
@@ -1000,7 +1007,7 @@ components:
         entityID:
           type: string
           description: The ID assigned to an entity by the Treasury Department
-          example: 1231
+          example: "1231"
         type:
           $ref: '#/components/schemas/SsiType'
         programs:
@@ -1092,7 +1099,7 @@ components:
       description: Request body to update a company status.
       properties:
         status:
-          description: manual override of company/SDN sanction status
+          description: Manual override of company/SDN sanction status
           type: string
           enum:
             - unsafe
@@ -1107,7 +1114,7 @@ components:
       description: Request body to update a customers status.
       properties:
         status:
-          description: manual override of customer/SDN sanction status
+          description: Manual override of customer/SDN sanction status
           type: string
           enum:
             - unsafe
@@ -1119,7 +1126,7 @@ components:
       required:
         - status
     Search:
-      description: Search results containing SDNs, alternate names and/or addreses
+      description: Search results containing SDNs, alternate names, and/or addreses
       properties:
         # OFAC
         SDNs:
@@ -1151,7 +1158,7 @@ components:
         refreshedAt:
           type: string
           format: date-time
-          example: 2006-01-02T15:04:05Z07:00
+          example: "2006-01-02T15:04:05"
     OfacWatch:
       description: Customer or Company watch
       properties:
@@ -1204,8 +1211,9 @@ components:
         timestamp:
           type: string
           format: date-time
-          example: 2006-01-02T15:04:05Z07:00
+          example: "2006-01-02T15:04:05"
     UIKeys:
       type: array
       items:
         $ref: '#/components/schemas/SdnType'
+      uniqueItems: true
