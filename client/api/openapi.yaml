@@ -2,11 +2,10 @@ openapi: 3.0.2
 info:
   contact:
     url: https://github.com/moov-io/watchman
-  description: Moov Watchman is an HTTP API and Go library to download, parse and
-    offer search functions over numerous trade sanction lists from the United States,
-    European Union governments, agencies, and non profits for complying with regional
-    laws. Also included is a web UI and async webhook notification service to initiate
-    processes on remote systems.
+  description: Moov Watchman offers download, parse, and search functions over numerous
+    U.S. trade sanction lists for complying with regional laws. Also included is a
+    web UI and async webhook notification service to initiate processes on remote
+    systems.
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -16,29 +15,29 @@ servers:
 - description: Local development
   url: http://localhost:8084
 tags:
-- description: Endpoints for searching individuals and corporations which US government
-    enforces economic sanctions against and adding webhook notifications for search
-    criteria.
+- description: Endpoints for searching individuals and corporations that the U.S.
+    government enforces economic sanctions against and adding webhook notifications
+    for search criteria.
   name: Watchman
 paths:
   /ping:
     get:
-      description: Check the Watchman service is running
+      description: Check if the Watchman service is running.
       operationId: ping
       responses:
         "200":
           description: Service is running properly
-      summary: Ping Watchman
+      summary: Ping Watchman service
       tags:
       - Watchman
   /ofac/companies/{companyID}:
     get:
-      description: Get information about a company, trust or organization such as
+      description: Get information about a company, trust, or organization such as
         addresses, alternate names, and remarks.
       operationId: getOfacCompany
       parameters:
       - description: Optional Request ID allows application developer to trace requests
-          through the systems logs
+          through the system's logs
         explode: false
         in: header
         name: X-Request-ID
@@ -68,17 +67,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
       summary: Get company
       tags:
       - Watchman
     put:
-      description: Update a Companies sanction status to always block or always allow
+      description: Update a Company's sanction status to always block or always allow
         transactions.
       operationId: updateOfacCompanyStatus
       parameters:
       - description: Optional Request ID allows application developer to trace requests
-          through the systems logs
+          through the system's logs
         explode: false
         in: header
         name: X-Request-ID
@@ -118,17 +117,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
       summary: Update company
       tags:
       - Watchman
   /ofac/companies/{companyID}/watch:
     post:
-      description: Add name watch on a OFAC Company
+      description: Add ID watch on an OFAC Company.
       operationId: addOfacCompanyWatch
       parameters:
       - description: Optional Request ID allows application developer to trace requests
-          through the systems logs
+          through the system's logs
         explode: false
         in: header
         name: X-Request-ID
@@ -164,7 +163,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
         "404":
           description: Company not found
       summary: Watch OFAC company
@@ -172,11 +171,11 @@ paths:
       - Watchman
   /ofac/companies/{companyID}/watch/{watchID}:
     delete:
-      description: Delete a company name watch
+      description: Delete a company ID watch.
       operationId: removeOfacCompanyWatch
       parameters:
       - description: Optional Request ID allows application developer to trace requests
-          through the systems logs
+          through the system's logs
         explode: false
         in: header
         name: X-Request-ID
@@ -211,7 +210,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
       summary: Remove company watch
       tags:
       - Watchman
@@ -222,7 +221,7 @@ paths:
       operationId: addOfacCompanyNameWatch
       parameters:
       - description: Optional Request ID allows application developer to trace requests
-          through the systems logs
+          through the system's logs
         explode: false
         in: header
         name: X-Request-ID
@@ -258,16 +257,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
       summary: Watch company
       tags:
       - Watchman
   /ofac/companies/watch/{watchID}:
     delete:
+      description: Delete a company name watch.
       operationId: removeOfacCompanyNameWatch
       parameters:
       - description: Optional Request ID allows application developer to trace requests
-          through the systems logs
+          through the system's logs
         explode: false
         in: header
         name: X-Request-ID
@@ -302,18 +302,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
       summary: Remove company watch
       tags:
       - Watchman
   /ofac/customers/{customerID}:
     get:
-      description: Get information about a customer, addresses, alternate names, and
-        their SDN metadata.
+      description: Get information about a customer's addresses, alternate names,
+        and SDN metadata.
       operationId: getOfacCustomer
       parameters:
       - description: Optional Request ID allows application developer to trace requests
-          through the systems logs
+          through the system's logs
         explode: false
         in: header
         name: X-Request-ID
@@ -343,8 +343,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Error occured, see response body.
-      summary: Get Customer
+          description: Error occurred, see response body.
+      summary: Get customer
       tags:
       - Watchman
     put:
@@ -353,7 +353,7 @@ paths:
       operationId: updateOfacCustomerStatus
       parameters:
       - description: Optional Request ID allows application developer to trace requests
-          through the systems logs
+          through the system's logs
         explode: false
         in: header
         name: X-Request-ID
@@ -393,17 +393,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
       summary: Update customer
       tags:
       - Watchman
   /ofac/customers/{customerID}/watch:
     post:
-      description: Add name watch on a OFAC Customer
+      description: Add ID watch on an OFAC Customer.
       operationId: addOfacCustomerWatch
       parameters:
       - description: Optional Request ID allows application developer to trace requests
-          through the systems logs
+          through the system's logs
         explode: false
         in: header
         name: X-Request-ID
@@ -439,7 +439,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
         "404":
           description: Customer not found
       summary: Watch OFAC customer
@@ -447,11 +447,11 @@ paths:
       - Watchman
   /ofac/customers/{customerID}/watch/{watchID}:
     delete:
-      description: Delete a customer name watch
+      description: Delete a customer ID watch.
       operationId: removeOfacCustomerWatch
       parameters:
       - description: Optional Request ID allows application developer to trace requests
-          through the systems logs
+          through the system's logs
         explode: false
         in: header
         name: X-Request-ID
@@ -486,7 +486,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
       summary: Remove customer watch
       tags:
       - Watchman
@@ -497,7 +497,7 @@ paths:
       operationId: addOfacCustomerNameWatch
       parameters:
       - description: Optional Request ID allows application developer to trace requests
-          through the systems logs
+          through the system's logs
         explode: false
         in: header
         name: X-Request-ID
@@ -533,16 +533,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
       summary: Watch customer
       tags:
       - Watchman
   /ofac/customers/watch/{watchID}:
     delete:
+      description: Delete a customer name watch.
       operationId: removeOfacCustomerNameWatch
       parameters:
       - description: Optional Request ID allows application developer to trace requests
-          through the systems logs
+          through the system's logs
         explode: false
         in: header
         name: X-Request-ID
@@ -577,7 +578,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
       summary: Remove customer watch
       tags:
       - Watchman
@@ -587,7 +588,7 @@ paths:
       operationId: getSDN
       parameters:
       - description: Optional Request ID allows application developer to trace requests
-          through the systems logs
+          through the system's logs
         explode: false
         in: header
         name: X-Request-ID
@@ -617,7 +618,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
       summary: Get SDN
       tags:
       - Watchman
@@ -626,7 +627,7 @@ paths:
       operationId: getSDNAltNames
       parameters:
       - description: Optional Request ID allows application developer to trace requests
-          through the systems logs
+          through the system's logs
         explode: false
         in: header
         name: X-Request-ID
@@ -656,7 +657,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
       summary: Get SDN alt names
       tags:
       - Watchman
@@ -665,7 +666,7 @@ paths:
       operationId: getSDNAddresses
       parameters:
       - description: Optional Request ID allows application developer to trace requests
-          through the systems logs
+          through the system's logs
         explode: false
         in: header
         name: X-Request-ID
@@ -695,7 +696,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
       summary: Get SDN addresses
       tags:
       - Watchman
@@ -704,7 +705,7 @@ paths:
       operationId: search
       parameters:
       - description: Optional Request ID allows application developer to trace requests
-          through the systems logs
+          through the system's logs
         explode: false
         in: header
         name: X-Request-ID
@@ -734,7 +735,7 @@ paths:
           example: Jane Smith
           type: string
         style: form
-      - description: Phsical address which could correspond to a human on the SDN
+      - description: Physical address which could correspond to a human on the SDN
           list. Only Address results will be returned.
         explode: true
         in: query
@@ -846,7 +847,7 @@ paths:
           type: string
         style: form
       - description: Optional filter to only return SDNs whose program case-insensitively
-          matches
+          matches.
         explode: true
         in: query
         name: program
@@ -867,17 +868,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
       summary: Search SDNs
       tags:
       - Watchman
   /downloads:
     get:
-      description: Return list of recent downloads of list data
+      description: Return list of recent downloads of list data.
       operationId: getLatestDownloads
       parameters:
       - description: Optional Request ID allows application developer to trace requests
-          through the systems logs
+          through the system's logs
         explode: false
         in: header
         name: X-Request-ID
@@ -908,7 +909,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
       summary: Get latest downloads
       tags:
       - Watchman
@@ -947,7 +948,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Error occured, see response body.
+          description: Error occurred, see response body.
       summary: Get UI values
       tags:
       - Watchman
@@ -990,7 +991,7 @@ components:
           - CUBA
           sdnName: BANCO NACIONAL DE CUBA
           title: Title of an individual
-          remarks: remarks
+          remarks: Additional info
         status:
           note: Incorrect match
           createdAt: 2000-01-23T04:56:07.000+00:00
@@ -1075,7 +1076,7 @@ components:
           - CUBA
           sdnName: BANCO NACIONAL DE CUBA
           title: Title of an individual
-          remarks: remarks
+          remarks: Additional info
         status:
           note: Incorrect match
           createdAt: 2000-01-23T04:56:07.000+00:00
@@ -1132,7 +1133,7 @@ components:
         - CUBA
         sdnName: BANCO NACIONAL DE CUBA
         title: Title of an individual
-        remarks: remarks
+        remarks: Additional info
       properties:
         entityID:
           example: "1231"
@@ -1153,9 +1154,11 @@ components:
           example: Title of an individual
           type: string
         remarks:
+          description: Remarks on SDN and often additional information about the SDN
+          example: Additional info
           type: string
         match:
-          description: Remarks on SDN and often additional information about the SDN
+          description: Match percentage of search query
           example: 0.91
           type: number
     OfacEntityAddresses:
@@ -1188,6 +1191,7 @@ components:
           example: Japan
           type: string
         match:
+          description: Match percentage of search query
           example: 0.91
           type: number
     OfacSDNAltNames:
@@ -1220,6 +1224,7 @@ components:
           example: Extra information
           type: string
         match:
+          description: Match percentage of search query
           example: 0.91
           type: number
     SdnType:
@@ -1240,7 +1245,7 @@ components:
     DPL:
       description: BIS Denied Persons List item
       example:
-        country: country
+        country: United States
         city: THREE RIVERS
         postalCode: "78071"
         match: 0.92
@@ -1256,7 +1261,7 @@ components:
         expirationDate: 06/15/2025
       properties:
         name:
-          description: Name of the Denied Person
+          description: Denied Person's name
           example: ISMAEL RETA
           type: string
         streetAddress:
@@ -1274,6 +1279,7 @@ components:
           type: string
         country:
           description: Denied Person's country
+          example: United States
           type: string
         postalCode:
           description: Denied Person's postal code
@@ -1293,7 +1299,7 @@ components:
           example: "Y"
           type: string
         lastUpdate:
-          description: Most recent date when the Denied Person record was updated
+          description: Date when the Denied Person's record was most recently updated
           example: 2016-06-22
           type: string
         action:
@@ -1305,6 +1311,7 @@ components:
           example: 81.F.R. 40658 6/22/2016
           type: string
         match:
+          description: Match percentage of search query
           example: 0.92
           type: number
     SSI:
@@ -1460,7 +1467,7 @@ components:
         status: unsafe
       properties:
         status:
-          description: manual override of company/SDN sanction status
+          description: Manual override of company/SDN sanction status
           enum:
           - unsafe
           - exception
@@ -1478,7 +1485,7 @@ components:
         status: unsafe
       properties:
         status:
-          description: manual override of customer/SDN sanction status
+          description: Manual override of customer/SDN sanction status
           enum:
           - unsafe
           - exception
@@ -1490,7 +1497,7 @@ components:
       required:
       - status
     Search:
-      description: Search results containing SDNs, alternate names and/or addreses
+      description: Search results containing SDNs, alternate names, and/or addreses
       example:
         SDNs:
         - match: 0.91
@@ -1499,14 +1506,14 @@ components:
           - CUBA
           sdnName: BANCO NACIONAL DE CUBA
           title: Title of an individual
-          remarks: remarks
+          remarks: Additional info
         - match: 0.91
           entityID: "1231"
           programs:
           - CUBA
           sdnName: BANCO NACIONAL DE CUBA
           title: Title of an individual
-          remarks: remarks
+          remarks: Additional info
         altNames:
         - alternateID: "220"
           alternateRemarks: Extra information
@@ -1534,7 +1541,7 @@ components:
           entityID: "2112"
           addressID: "201"
         deniedPersons:
-        - country: country
+        - country: United States
           city: THREE RIVERS
           postalCode: "78071"
           match: 0.92
@@ -1548,7 +1555,7 @@ components:
           state: TX
           effectiveDate: 06/15/2016
           expirationDate: 06/15/2025
-        - country: country
+        - country: United States
           city: THREE RIVERS
           postalCode: "78071"
           match: 0.92
@@ -1732,6 +1739,7 @@ components:
       items:
         $ref: '#/components/schemas/SdnType'
       type: array
+      uniqueItems: true
     Error:
       properties:
         error:

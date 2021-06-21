@@ -10,12 +10,12 @@ Method | HTTP request | Description
 [**AddOfacCustomerWatch**](WatchmanApi.md#AddOfacCustomerWatch) | **Post** /ofac/customers/{customerID}/watch | Watch OFAC customer
 [**GetLatestDownloads**](WatchmanApi.md#GetLatestDownloads) | **Get** /downloads | Get latest downloads
 [**GetOfacCompany**](WatchmanApi.md#GetOfacCompany) | **Get** /ofac/companies/{companyID} | Get company
-[**GetOfacCustomer**](WatchmanApi.md#GetOfacCustomer) | **Get** /ofac/customers/{customerID} | Get Customer
+[**GetOfacCustomer**](WatchmanApi.md#GetOfacCustomer) | **Get** /ofac/customers/{customerID} | Get customer
 [**GetSDN**](WatchmanApi.md#GetSDN) | **Get** /ofac/sdn/{sdnID} | Get SDN
 [**GetSDNAddresses**](WatchmanApi.md#GetSDNAddresses) | **Get** /ofac/sdn/{sdnID}/addresses | Get SDN addresses
 [**GetSDNAltNames**](WatchmanApi.md#GetSDNAltNames) | **Get** /ofac/sdn/{sdnID}/alts | Get SDN alt names
 [**GetUIValues**](WatchmanApi.md#GetUIValues) | **Get** /ui/values/{key} | Get UI values
-[**Ping**](WatchmanApi.md#Ping) | **Get** /ping | Ping Watchman
+[**Ping**](WatchmanApi.md#Ping) | **Get** /ping | Ping Watchman service
 [**RemoveOfacCompanyNameWatch**](WatchmanApi.md#RemoveOfacCompanyNameWatch) | **Delete** /ofac/companies/watch/{watchID} | Remove company watch
 [**RemoveOfacCompanyWatch**](WatchmanApi.md#RemoveOfacCompanyWatch) | **Delete** /ofac/companies/{companyID}/watch/{watchID} | Remove company watch
 [**RemoveOfacCustomerNameWatch**](WatchmanApi.md#RemoveOfacCustomerNameWatch) | **Delete** /ofac/customers/watch/{watchID} | Remove customer watch
@@ -53,7 +53,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
- **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+ **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the system&#39;s logs | 
 
 ### Return type
 
@@ -79,7 +79,7 @@ No authorization required
 
 Watch OFAC company
 
-Add name watch on a OFAC Company
+Add ID watch on an OFAC Company.
 
 ### Required Parameters
 
@@ -100,7 +100,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
- **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+ **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the system&#39;s logs | 
 
 ### Return type
 
@@ -147,7 +147,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
- **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+ **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the system&#39;s logs | 
 
 ### Return type
 
@@ -173,7 +173,7 @@ No authorization required
 
 Watch OFAC customer
 
-Add name watch on a OFAC Customer
+Add ID watch on an OFAC Customer.
 
 ### Required Parameters
 
@@ -194,7 +194,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
- **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+ **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the system&#39;s logs | 
 
 ### Return type
 
@@ -220,7 +220,7 @@ No authorization required
 
 Get latest downloads
 
-Return list of recent downloads of list data
+Return list of recent downloads of list data.
 
 ### Required Parameters
 
@@ -237,7 +237,7 @@ Optional parameters are passed through a pointer to a GetLatestDownloadsOpts str
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+ **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the system&#39;s logs | 
  **limit** | **optional.Int32**| Maximum number of downloads to return sorted by their timestamp in decending order. | 
 
 ### Return type
@@ -264,7 +264,7 @@ No authorization required
 
 Get company
 
-Get information about a company, trust or organization such as addresses, alternate names, and remarks.
+Get information about a company, trust, or organization such as addresses, alternate names, and remarks.
 
 ### Required Parameters
 
@@ -283,7 +283,7 @@ Optional parameters are passed through a pointer to a GetOfacCompanyOpts struct
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+ **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the system&#39;s logs | 
 
 ### Return type
 
@@ -307,9 +307,9 @@ No authorization required
 
 > OfacCustomer GetOfacCustomer(ctx, customerID, optional)
 
-Get Customer
+Get customer
 
-Get information about a customer, addresses, alternate names, and their SDN metadata.
+Get information about a customer's addresses, alternate names, and SDN metadata.
 
 ### Required Parameters
 
@@ -328,7 +328,7 @@ Optional parameters are passed through a pointer to a GetOfacCustomerOpts struct
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+ **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the system&#39;s logs | 
 
 ### Return type
 
@@ -373,7 +373,7 @@ Optional parameters are passed through a pointer to a GetSDNOpts struct
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+ **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the system&#39;s logs | 
 
 ### Return type
 
@@ -416,7 +416,7 @@ Optional parameters are passed through a pointer to a GetSDNAddressesOpts struct
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+ **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the system&#39;s logs | 
 
 ### Return type
 
@@ -459,7 +459,7 @@ Optional parameters are passed through a pointer to a GetSDNAltNamesOpts struct
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+ **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the system&#39;s logs | 
 
 ### Return type
 
@@ -528,9 +528,9 @@ No authorization required
 
 > Ping(ctx, )
 
-Ping Watchman
+Ping Watchman service
 
-Check the Watchman service is running
+Check if the Watchman service is running.
 
 ### Required Parameters
 
@@ -560,6 +560,8 @@ No authorization required
 
 Remove company watch
 
+Delete a company name watch.
+
 ### Required Parameters
 
 
@@ -579,7 +581,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
- **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+ **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the system&#39;s logs | 
 
 ### Return type
 
@@ -605,7 +607,7 @@ No authorization required
 
 Remove company watch
 
-Delete a company name watch
+Delete a company ID watch.
 
 ### Required Parameters
 
@@ -626,7 +628,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
- **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+ **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the system&#39;s logs | 
 
 ### Return type
 
@@ -652,6 +654,8 @@ No authorization required
 
 Remove customer watch
 
+Delete a customer name watch.
+
 ### Required Parameters
 
 
@@ -671,7 +675,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
- **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+ **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the system&#39;s logs | 
 
 ### Return type
 
@@ -697,7 +701,7 @@ No authorization required
 
 Remove customer watch
 
-Delete a customer name watch
+Delete a customer ID watch.
 
 ### Required Parameters
 
@@ -718,7 +722,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
- **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+ **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the system&#39;s logs | 
 
 ### Return type
 
@@ -759,10 +763,10 @@ Optional parameters are passed through a pointer to a SearchOpts struct
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+ **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the system&#39;s logs | 
  **q** | **optional.String**| Search across Name, Alt Names, and SDN Address fields for all available sanctions lists. Entries may be returned in all response sub-objects. | 
  **name** | **optional.String**| Name which could correspond to an entry on the SDN, Denied Persons, Sectoral Sanctions Identifications, or BIS Entity List sanctions lists. Alt names are also searched. | 
- **address** | **optional.String**| Phsical address which could correspond to a human on the SDN list. Only Address results will be returned. | 
+ **address** | **optional.String**| Physical address which could correspond to a human on the SDN list. Only Address results will be returned. | 
  **city** | **optional.String**| City name as desginated by SDN guidelines. Only Address results will be returned. | 
  **state** | **optional.String**| State name as desginated by SDN guidelines. Only Address results will be returned. | 
  **providence** | **optional.String**| Providence name as desginated by SDN guidelines. Only Address results will be returned. | 
@@ -773,7 +777,7 @@ Name | Type | Description  | Notes
  **minMatch** | **optional.Float32**| Match percentage that search query must obtain for results to be returned. | 
  **limit** | **optional.Int32**| Maximum results returned by a search. Results are sorted by their match percentage in decending order. | 
  **sdnType** | **optional.String**| Optional filter to only return SDNs whose type case-insensitively matches. | 
- **program** | **optional.String**| Optional filter to only return SDNs whose program case-insensitively matches | 
+ **program** | **optional.String**| Optional filter to only return SDNs whose program case-insensitively matches. | 
 
 ### Return type
 
@@ -799,7 +803,7 @@ No authorization required
 
 Update company
 
-Update a Companies sanction status to always block or always allow transactions.
+Update a Company's sanction status to always block or always allow transactions.
 
 ### Required Parameters
 
@@ -820,7 +824,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
- **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+ **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the system&#39;s logs | 
  **xUserID** | **optional.String**| User ID used to perform this search | 
 
 ### Return type
@@ -868,7 +872,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
- **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the systems logs | 
+ **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the system&#39;s logs | 
  **xUserID** | **optional.String**| User ID used to perform this search | 
 
 ### Return type
