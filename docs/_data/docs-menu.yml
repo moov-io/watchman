@@ -1,4 +1,4 @@
-- label: Getting Started
+- label: Getting started
   items:
     - name: Overview
       link: /
@@ -11,27 +11,27 @@
       link: /usage-docker/
     - name: Google Cloud Run
       link: /usage-google-cloud/
-    - name: Webhook Notifications
+    - name: Webhook notifications
       link: /webhook-notifications/
-    - name: API Configuration
+    - name: API configuration
       link: /usage-configuration/
-    - name: Go Library
+    - name: Go library
       link: /usage-go/
 
-- label: Watchman Search
+- label: Watchman search
   items:
-    - name: File Structure
+    - name: File structure
       link: /file-structure/
-    - name: Search Options
+    - name: Search options
       link: /search/
-    - name: Precomputation Pipeline
+    - name: Precomputation pipeline
       link: /pipeline/
-    - name: High Availability
+    - name: High availability
       link: /ha/
 
-- label: Production and Monitoring
+- label: Production and monitoring
   items:
-    - name: Production Runbook
+    - name: Production runbook
       link: /runbook/
-    - name: Prometheus Metrics
+    - name: Prometheus metrics
       link: /metrics/

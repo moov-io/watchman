@@ -21,7 +21,7 @@
 [![Slack Channel](https://slack.moov.io/badge.svg?bg=e01563&fgColor=fffff)](https://slack.moov.io/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/moov/watchman)](https://hub.docker.com/r/moov/watchman)
 [![GitHub Stars](https://img.shields.io/github/stars/moov-io/watchman)](https://github.com/moov-io/watchman)
-[![Twitter](https://img.shields.io/twitter/follow/moov_io?style=social)](https://twitter.com/moov_io?lang=en)
+[![Twitter](https://img.shields.io/twitter/follow/moov?style=social)](https://twitter.com/moov?lang=en)
 
 # moov-io/watchman
 
@@ -41,24 +41,24 @@ Lists included in search are:
 
 All United States and European Union companies are required to comply with various regulations and sanction lists (such as the US Patriot Act requiring compliance with the BIS Denied Persons List). Moov's primary usage for this project is with ACH origination in our [paygate](https://github.com/moov-io/paygate) project.
 
-## Table of Contents
+## Table of contents
 
-- [Project Status](#project-status)
+- [Project status](#project-status)
 - [Usage](#usage)
   - As an API
     - [Docker](#docker) ([Config](#configuration-settings))
     - [Google Cloud](#google-cloud-run) ([Config](#configuration-settings))
-    - [Webhook Notifications](#webhook-notifications)
-    - [Data Persistence](#data-persistence)
-  - [As a Go Module](#go-library)
-  - [As an In-Browser Search Tool](#in-browser-watchman-search)
-- [Useful Resources](#useful-resources)
-- [Getting Help](#getting-help)
-- [Supported and Tested Platforms](#supported-and-tested-platforms)
+    - [Webhook notifications](#webhook-notifications)
+    - [Data persistence](#data-persistence)
+  - [As a Go module](#go-library)
+  - [As an in-browser search tool](#in-browser-watchman-search)
+- [Useful resources](#useful-resources)
+- [Getting help](#getting-help)
+- [Supported and tested platforms](#supported-and-tested-platforms)
 - [Contributing](#contributing)
-- [Related Projects](#related-projects)
+- [Related projects](#related-projects)
 
-## Project Status
+## Project status
 
 Moov Watchman is actively used in multiple production environments. Please star the project if you are interested in its progress. If you have layers above Watchman to simplify tasks, perform business operations, or found bugs we would appreciate an issue or pull request. Thanks!
 
@@ -167,7 +167,7 @@ You should get this response:
 PONG
 ```
 
-### Configuration Settings
+### Configuration settings
 
 | Environmental Variable | Description | Default |
 |-----|-----|-----|
@@ -184,7 +184,7 @@ PONG
 | `DATABASE_TYPE` | Which database option to use (Options: `sqlite`, `mysql`). | Default: `sqlite` |
 | `WEB_ROOT` | Directory to serve web UI from. | Default: `webui/` |
 
-#### List Configurations
+#### List configurations
 
 | Environmental Variable | Description | Default |
 |-----|-----|-----|
@@ -215,7 +215,7 @@ Refer to the MySQL driver documentation for [connection parameters](https://gith
 
 Refer to the SQLite driver documentation for [connection parameters](https://github.com/mattn/go-sqlite3#connection-string).
 
-#### Webhook Notifications
+#### Webhook notifications
 
 When Watchman sends a [webhook](https://en.wikipedia.org/wiki/Webhook) to your application, the body will contain a JSON representation of the [Company](https://godoc.org/github.com/moov-io/watchman/client#OfacCompany) or [Customer](https://godoc.org/github.com/moov-io/watchman/client#OfacCustomer) model as the body to a POST request. You can see an [example in Go](examples/webhook/webhook.go).
 
@@ -223,7 +223,7 @@ An `Authorization` header will also be sent with the `authToken` provided when s
 
 Webhook notifications are ran after the OFAC data is successfully refreshed, which is determined by the `DATA_REFRESH_INTERVAL` environmental variable.
 
-##### Watching a specific Customer or Company by ID
+##### Watching a specific customer or company by ID
 
 Moov Watchman supports sending a webhook periodically when a specific [Company](https://moov-io.github.io/watchman/api/#post-/ofac/companies/-companyID-/watch) or [Customer](https://moov-io.github.io/watchman/api/#post-/ofac/customers/-customerID-/watch) is to be watched. This is designed to update another system about an OFAC entry's sanction status.
 
@@ -231,7 +231,7 @@ Moov Watchman supports sending a webhook periodically when a specific [Company](
 
 Moov Watchman supports sending a webhook periodically with a free-form name of a [Company](https://moov-io.github.io/watchman/api/#post-/ofac/companies/watch) or [Customer](https://moov-io.github.io/watchman/api/#post-/ofac/customers/watch). This allows external applications to be notified when an entity matching that name is added to the OFAC list. The match percentage will be included in the JSON payload.
 
-#### Prometheus Metrics
+#### Prometheus metrics
 
 - `http_response_duration_seconds`: A histogram of HTTP response timings.
 - `last_data_refresh_success`: Unix timestamp of when data was last refreshed successfully.
@@ -241,11 +241,11 @@ Moov Watchman supports sending a webhook periodically with a free-form name of a
 - `mysql_connections`: Number of MySQL connections and their statuses.
 - `sqlite_connections`: Number of SQLite connections and their statuses.
 
-### Data Persistence
+### Data persistence
 
 By design, Watchman  **does not persist** (save) any data about the search queries or actions created. The only storage occurs in memory of the process and upon restart Watchman will have no files or data saved. Also, no in-memory encryption of the data is performed.
 
-### Go Library
+### Go library
 
 This project uses [Go Modules](https://github.com/golang/go/wiki/Modules) and uses Go v1.14 or higher. See [Golang's install instructions](https://golang.org/doc/install) for help setting up Go. You can download the source code and we offer [tagged and released versions](https://github.com/moov-io/watchman/releases/latest) as well. We highly recommend you use a tagged release for production.
 
@@ -258,15 +258,15 @@ $ go get -u github.com/moov-io/watchman
 $ go doc github.com/moov-io/watchman/client Search
 ```
 
-### In-Browser Watchman Search
+### In-browser Watchman search
 
 Using our [in-browser utility](https://oss.moov.io/watchman/), you can instantly perform advanced Watchman searches. Simply fill search fields and generate a detailed report that includes match percentage, alternative names, effective/expiration dates, IDs, addresses, and other useful information. This tool is particularly useful for completing quick searches with the aid of a intutive interface.
 
-## Reporting Blocks to OFAC
+## Reporting blocks to OFAC
 
 OFAC requires annual reports of blocked entities and [offers guidance for this report](https://www.treasury.gov/resource-center/sanctions/Documents/ofac_blocked_property_guidance.pdf). Section [31 C.F.R. § 501.603(b)(2)](https://www.ecfr.gov/cgi-bin/text-idx?SID=be4f2a1608abec5d93170fb03af99939&mc=true&node=se31.3.501_1603&rgn=div8) requires this annual report.
 
-## Useful Resources
+## Useful resources
 
 - [OFAC Sanctions Search Page](https://sanctionssearch.ofac.treas.gov/)
 - [Subscribe for OFAC email updates](https://service.govdelivery.com/accounts/USTREAS/subscriber/new)
@@ -276,18 +276,18 @@ OFAC requires annual reports of blocked entities and [offers guidance for this r
 - [Sectoral Sanctions Identifications (SSI)](https://home.treasury.gov/policy-issues/financial-sanctions/consolidated-sanctions-list/sectoral-sanctions-identifications-ssi-list)
 - [US Sanctions Search FAQ](https://home.treasury.gov/policy-issues/financial-sanctions/faqs#basic)
 
-## Getting Help
+## Getting help
 
 We maintain a [runbook for common issues](docs/runbook.md) and configuration options. Also, if you've encountered a security issue please contact us at [`security@moov.io`](mailto:security@moov.io).
 
  channel | info
  ------- | -------
 [Project Documentation](https://moov-io.github.io/watchman/) | Our project documentation available online.
-Twitter [@moov_io](https://twitter.com/moov_io)	| You can follow Moov.IO's Twitter feed to get updates on our project(s). You can also tweet us questions or just share blogs or stories.
+Twitter [@moov](https://twitter.com/moov)	| You can follow Moov.io's Twitter feed to get updates on our project(s). You can also tweet us questions or just share blogs or stories.
 [GitHub Issue](https://github.com/moov-io/watchman/issues) | If you are able to reproduce a problem please open a GitHub Issue under the specific project that caused the error.
 [moov-io slack](https://slack.moov.io/) | Join our slack channel to have an interactive discussion about the development of the project.
 
-## Supported and Tested Platforms
+## Supported and tested platforms
 
 - 64-bit Linux (Ubuntu, Debian), macOS, and Windows
 
@@ -307,7 +307,7 @@ To make a release of ach simply open a pull request with `CHANGELOG.md` and `ver
 
 We maintain a comprehensive suite of unit tests and recommend table-driven testing when a particular function warrants several very similar test cases. To run all test files in the current directory, use `go test`. Current overall coverage can be found on [Codecov](https://app.codecov.io/gh/moov-io/watchman/).
 
-## Related Projects
+## Related projects
 As part of Moov's initiative to offer open source fintech infrastructure, we have a large collection of active projects you may find useful:
 
 - [Moov Fed](https://github.com/moov-io/fed) implements utility services for searching the United States Federal Reserve System such as ABA routing numbers, financial institution name lookup, and FedACH and Fedwire routing information.
