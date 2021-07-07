@@ -1,12 +1,12 @@
 ---
 layout: page
-title: API Configuration
+title: API configuration
 hide_hero: true
 show_sidebar: false
 menubar: docs-menu
 ---
 
-# Configuration Settings
+# Configuration settings
 
 | Environmental Variable | Description | Default |
 |-----|-----|-----|
@@ -23,7 +23,7 @@ menubar: docs-menu
 | `DATABASE_TYPE` | Which database option to use (Options: `sqlite`, `mysql`). | Default: `sqlite` |
 | `WEB_ROOT` | Directory to serve web UI from. | Default: `webui/` |
 
-## List Configurations
+## List configurations
 
 | Environmental Variable | Description | Default |
 |-----|-----|-----|
@@ -54,6 +54,6 @@ Refer to the MySQL driver documentation for [connection parameters](https://gith
 
 Refer to the SQLite driver documentation for [connection parameters](https://github.com/mattn/go-sqlite3#connection-string).
 
-## Data Persistence
+## Data persistence
 
 By design, Watchman  **does not persist** (save) any data about the search queries or actions created. The only storage occurs in memory of the process and upon restart Watchman will have no files or data saved. Also, no in-memory encryption of the data is performed.

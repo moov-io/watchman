@@ -1,12 +1,12 @@
 ---
 layout: page
-title: File Structure
+title: File structure
 hide_hero: true
 show_sidebar: false
 menubar: docs-menu
 ---
 
-# CSV Data Specifications - Specially Designated National (SDN)
+# CSV data specifications - Specially Designated National (SDN)
 
 Format *.csv consists of records separated by carriage returns (ASCII character 
 13), with fields (values) within records delimited by the "," (comma) symbol 
@@ -29,7 +29,7 @@ Due to the nature, urgency, and sensitivity of the programs  which OFAC
 administers and enforces, it may not always be possible to  provide advanced
 notice to users of format changes to the database  structure.
 
-## CSV Files
+## CSV files
 
 Comma delimited: sdn.csv, add.csv, alt.csv, sdn_comments.csv
  
@@ -87,6 +87,6 @@ Comma delimited: sdn.csv, add.csv, alt.csv, sdn_comments.csv
 | Text value quotes | " | 34 | |
 | Null | -0- | 45, 48, 45 | |
 
-## ASCII Table and Description
+## ASCII table and description
 
 [ASCII Table and Description](http://www.asciitable.com/)

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Webhook Notifications
+title: Webhook notifications
 hide_hero: true
 show_sidebar: false
 menubar: docs-menu
@@ -18,7 +18,7 @@ An `Authorization` header will also be sent with the `authToken` provided when s
 
 Webhook notifications are ran after the OFAC data is successfully refreshed, which is determined by the `DATA_REFRESH_INTERVAL` environmental variable.
 
-## Watching a specific Customer or Company by ID
+## Watching a specific customer or company by ID
 
 Moov Watchman supports sending a webhook periodically when a specific [Company](https://moov-io.github.io/watchman/api/#post-/ofac/companies/-companyID-/watch) or [Customer](https://moov-io.github.io/watchman/api/#post-/ofac/customers/-customerID-/watch) is to be watched. This is designed to update another system about an OFAC entry's sanction status.
 

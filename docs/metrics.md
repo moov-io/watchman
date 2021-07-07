@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Prometheus Metrics
+title: Prometheus metrics
 hide_hero: true
 show_sidebar: false
 menubar: docs-menu
@@ -10,7 +10,7 @@ menubar: docs-menu
 
 This list represents the series of Prometheus metrics that Watchman reports. All metrics are served on the admin server (`:9094/metrics` by default). Outside of this list, the standard Go metrics are reported.
 
-## Last Data Refresh Count
+## Last data refresh count
 
 `last_data_refresh_count` holds the count of records parsed from the latest download and indexing of the specified data source.
 
@@ -23,7 +23,7 @@ last_data_refresh_count{source="SDNs"} 8497
 last_data_refresh_count{source="SSIs"} 290
 ```
 
-## Last Data Refresh Success
+## Last data refresh success
 
 `last_data_refresh_success` holds a unix timestamp of the last successful data refresh.
 
@@ -33,7 +33,7 @@ last_data_refresh_count{source="SSIs"} 290
 last_data_refresh_success 1.604635215e+09
 ```
 
-## Last Data Refresh Failure
+## Last data refresh failure
 
 `last_data_refresh_failure` holds a unix timestamp of the last data refresh that failed.
 
@@ -43,7 +43,7 @@ last_data_refresh_success 1.604635215e+09
 last_data_refresh_failure{source="SDNs"} 1.60520363e+09
 ```
 
-## Match Percentages
+## Match percentages
 
 This histogram holds the results of searches performed. The exposed types represent the differnet endpoints and query parameters used such as: `address`, `addressname`, `altName`, `name`, `q`, `remarksID`.
 
@@ -60,7 +60,7 @@ match_percentages_sum{type="address"} 2277.222222222333
 match_percentages_count{type="address"} 2927
 ```
 
-## MySQL Connections
+## MySQL connections
 
 `mysql_connections` represents the current count of idle, active, and open connections to the configured MySQL database.
 

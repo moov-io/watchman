@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Precomputation Pipeline
+title: Precomputation pipeline
 hide_hero: true
 show_sidebar: false
 menubar: docs-menu
@@ -41,21 +41,21 @@ $ curl -s localhost:9094/debug/sdn/16016 | jq .
 }
 ```
 
-## Pipeline Steps
+## Pipeline steps
 
-**Reordering of Individual Names**
+**Reordering of individual names**
 
 This step processes SDN and SSI entries to rearrange their name into a "first middle last" ordering.
 
 Example: `MADURO MOROS, Nicolas` into `Nicolas MADURO MOROS`
 
-**Company Name Cleanup**
+**Company name cleanup**
 
 This step strips SDN and SSI company suffixes/titles from their indexed name. The original name from their source file is never changed.
 
 Example: `AMD CO. LTD AGENCY` into `AMD AGENCY`
 
-**Stopwords Removal**
+**Stopwords removal**
 
 This step removes stopwords from SDN and SSI entities. [Stopwords](https://en.wikipedia.org/wiki/Stop_words) are typically the most common words in languages and don't convey necessary information in a sentence. They are more typically used for grammatical correctness and thus can be ignored in search rankings.
 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Production Runbook
+title: Production runbook
 hide_hero: true
 show_sidebar: false
 menubar: docs-menu
@@ -8,7 +8,7 @@ menubar: docs-menu
 
 # Runbook
 
-## Change Data refresh frequency
+## Change data refresh frequency
 
 `DATA_REFRESH_INTERVAL=1h0m0s` can be set to refresh data more or less often. The value should match Go's `time.ParseDuration` syntax.
 

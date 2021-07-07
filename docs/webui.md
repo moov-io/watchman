@@ -16,7 +16,7 @@ Results will be returned down below and each SDN can be expanded to show related
 
 ![](images/expand.png)
 
-### UI Developers
+### UI developers
 
 Watchman has an endpoint for returning an ordered and distinct set of values for various columns of the original data. This is helpful in designing UIs so that dropdowns and more intuitive designs can be created from the Watchman service. Currently, only `sdnType` and `program` are supported, but please [request additional columns to be supported](https://github.com/moov-io/watchman/issues/new?title=values:%20{{column}}%20request).
 
