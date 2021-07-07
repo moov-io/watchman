@@ -61,83 +61,45 @@ func (dl *Downloader) GetFiles(initialDir string, namesAndSources map[string]str
 		dl.Logger = log.NewNopLogger()
 	}
 
-	// Create a temporary directory for downloads
-	dir, err := ioutil.TempDir("", "downloader")
-	if err != nil {
-		return nil, fmt.Errorf("downloader: unable to make temp dir: %v", err)
+	// Check the initial directory for files we don't need to download
+	var dir string
+	if initialDir != "" {
+		dir = initialDir // empty, but use it as a directory
+	}
+	// Create a temporary directory for downloads if needed
+	if dir == "" {
+		temp, err := ioutil.TempDir("", "downloader")
+		if err != nil {
+			return nil, fmt.Errorf("downloader: unable to make temp dir: %v", err)
+		}
+		dir = temp
 	}
 
-	// Check the initial directory for files we don't need to download
-	if initialDir == "" {
-		initialDir = dir // empty, but use it as a directory
-	}
-	localFiles, err := ioutil.ReadDir(initialDir)
+	localFiles, err := ioutil.ReadDir(dir)
 	if err != nil {
-		return nil, fmt.Errorf("readdir %s: %v", initialDir, err)
+		return nil, fmt.Errorf("readdir %s: %v", dir, err)
 	}
 
 	var wg sync.WaitGroup
 	wg.Add(len(namesAndSources))
 	for name, source := range namesAndSources {
+		// Check if we have the file locally first
+		found := false
+		for i := range localFiles {
+			if strings.EqualFold(filepath.Base(localFiles[i].Name()), name) {
+				found = true
+				break
+			}
+		}
+		// Skip downloading this file since we found it
+		if found {
+			wg.Done()
+			continue
+		}
+		// Download missing files
 		go func(wg *sync.WaitGroup, filename, downloadURL string) {
 			defer wg.Done()
-
-			// Check if we have the file locally first
-			for i := range localFiles {
-				if strings.EqualFold(filepath.Base(localFiles[i].Name()), filename) {
-					in, err := os.Open(filepath.Join(initialDir, localFiles[i].Name()))
-					if err != nil {
-						dl.Logger.Log("download", fmt.Errorf("problem opening local file %s: %v", localFiles[i].Name(), err))
-						return
-					}
-					// Copy the local file to our output directory
-					out, err := os.Create(filepath.Join(dir, filename))
-					if err != nil {
-						dl.Logger.Log("download", fmt.Errorf("problem creating out file (from local) %s: %v", filename, err))
-						in.Close()
-						return
-					}
-					if n, err := io.Copy(out, in); err != nil { // copy file contents
-						dl.Logger.Log("download", fmt.Errorf("copied (n=%d) from local file %s: %v", n, filename, err))
-						return
-					}
-
-					in.Close()
-					out.Close()
-
-					return // quit as we've copied instead of downloading
-				}
-			}
-
-			// Allow a couple retries for various sources (some are flakey)
-			for i := 0; i < 3; i++ {
-				req, err := http.NewRequest("GET", downloadURL, nil)
-				if err != nil {
-					dl.Logger.Log("download", fmt.Sprintf("error building HTTP request: %v", err))
-					return
-				}
-				req.Header.Set("User-Agent", fmt.Sprintf("moov-io/watchman:%v", watchman.Version))
-
-				resp, err := dl.HTTP.Do(req)
-				if err != nil {
-					time.Sleep(100 * time.Millisecond)
-					continue // retry
-				}
-
-				// Copy resp.Body into a file in our temp dir
-				fd, err := os.Create(filepath.Join(dir, filename))
-				if err != nil {
-					resp.Body.Close()
-					return
-				}
-
-				io.Copy(fd, resp.Body) // copy file contents
-
-				// close the open files
-				fd.Close()
-				resp.Body.Close()
-				return // quit after successful download
-			}
+			dl.retryDownload(dir, filename, downloadURL)
 		}(&wg, name, source)
 	}
 
@@ -145,9 +107,8 @@ func (dl *Downloader) GetFiles(initialDir string, namesAndSources map[string]str
 
 	// count files and error if the count isn't what we expected
 	fds, err := ioutil.ReadDir(dir)
-	if err != nil || len(fds) != len(namesAndSources) {
-		matched, missing := compareNames(fds, namesAndSources)
-		return nil, fmt.Errorf("DPL: problem downloading (matched=%v missing=%v): err=%v", matched, missing, err)
+	if err != nil {
+		return nil, fmt.Errorf("problem reading data directory: %v", err)
 	}
 	var out []string
 	for i := range fds {
@@ -156,30 +117,34 @@ func (dl *Downloader) GetFiles(initialDir string, namesAndSources map[string]str
 	return out, nil
 }
 
-func compareNames(found []os.FileInfo, expected map[string]string) (string, string) {
-	var matched []string
-	var missing []string
+func (dl *Downloader) retryDownload(dir, filename, downloadURL string) {
+	// Allow a couple retries for various sources (some are flakey)
+	for i := 0; i < 3; i++ {
+		req, err := http.NewRequest("GET", downloadURL, nil)
+		if err != nil {
+			dl.Logger.Log("download", fmt.Sprintf("error building HTTP request: %v", err))
+			return
+		}
+		req.Header.Set("User-Agent", fmt.Sprintf("moov-io/watchman:%v", watchman.Version))
 
-	for k := range expected {
-		wasFound := false
-		for i := range found {
-			filename := filepath.Base(found[i].Name())
-			if k == filename {
-				wasFound = true
-				matched = append(matched, filename)
-				break
-			}
+		resp, err := dl.HTTP.Do(req)
+		if err != nil {
+			time.Sleep(100 * time.Millisecond)
+			continue // retry
 		}
-		if !wasFound {
-			missing = append(missing, k)
-		}
-	}
-	for i := range found {
-		filename := filepath.Base(found[i].Name())
-		if _, exists := expected[filename]; !exists {
-			missing = append(missing, filename)
-		}
-	}
 
-	return strings.Join(matched, ", "), strings.Join(missing, ", ")
+		// Copy resp.Body into a file in our temp dir
+		fd, err := os.Create(filepath.Join(dir, filename))
+		if err != nil {
+			resp.Body.Close()
+			return
+		}
+
+		io.Copy(fd, resp.Body) // copy file contents
+
+		// close the open files
+		fd.Close()
+		resp.Body.Close()
+		return // quit after successful download
+	}
 }
