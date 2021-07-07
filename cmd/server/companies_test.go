@@ -350,7 +350,9 @@ func TestCompany_addCompanyNameWatchNoBody(t *testing.T) {
 			t.Errorf("bad state reset: %d", w.Code)
 		}
 
-		req.URL.Query().Set("name", "")
+		req = httptest.NewRequest("POST", "/ofac/companies/watch", nil)
+		req.Header.Set("x-user-id", "test")
+
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -619,7 +621,6 @@ func TestCompanyRepository(t *testing.T) {
 		if err := repo.upsertCompanyStatus(companyID, status); err != nil {
 			t.Errorf("addCompanyBlock: shouldn't error, but got %v", err)
 		}
-		status = nil
 
 		// verify
 		status, err = repo.getCompanyStatus(companyID)
@@ -641,7 +642,6 @@ func TestCompanyRepository(t *testing.T) {
 		if err := repo.upsertCompanyStatus(companyID, status); err != nil {
 			t.Errorf("addCompanyBlock: shouldn't error, but got %v", err)
 		}
-		status = nil
 
 		status, err = repo.getCompanyStatus(companyID)
 		if err != nil {

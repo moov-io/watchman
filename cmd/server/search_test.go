@@ -9,6 +9,7 @@ import (
 	"math"
 	"net/http/httptest"
 	"net/url"
+	"path/filepath"
 	"strings"
 	"sync"
 	"testing"
@@ -194,7 +195,7 @@ func createTestSearcher(t *testing.T) *searcher {
 
 func createBenchmarkSearcher(b *testing.B) *searcher {
 	testSearcherOnce.Do(func() {
-		stats, err := testLiveSearcher.refreshData("")
+		stats, err := testLiveSearcher.refreshData(filepath.Join("..", "..", "test", "testdata", "bench"))
 		if err != nil {
 			b.Fatal(err)
 		}

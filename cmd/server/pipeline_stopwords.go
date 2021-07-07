@@ -30,8 +30,7 @@ var (
 	}(os.Getenv("KEEP_STOPWORDS"))
 )
 
-type stopwordsStep struct {
-}
+type stopwordsStep struct{}
 
 func (s *stopwordsStep) apply(in *Name) error {
 	switch {
