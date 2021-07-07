@@ -7,6 +7,7 @@ package dpl
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/moov-io/watchman/pkg/download"
 
@@ -33,5 +34,10 @@ func Download(logger log.Logger, initialDir string) (string, error) {
 	if len(files) == 0 || err != nil {
 		return "", fmt.Errorf("dpl download: %v", err)
 	}
-	return files[0], nil
+	for i := range files {
+		if filepath.Base(files[i]) == "dpl.txt" {
+			return files[i], nil
+		}
+	}
+	return "", nil
 }

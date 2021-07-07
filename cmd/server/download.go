@@ -126,11 +126,12 @@ func ofacRecords(logger log.Logger, initialDir string) (*ofac.Results, error) {
 			if err != nil {
 				return nil, fmt.Errorf("read and replace: %v", err)
 			}
-
-			res.Addresses = append(res.Addresses, rr.Addresses...)
-			res.AlternateIdentities = append(res.AlternateIdentities, rr.AlternateIdentities...)
-			res.SDNs = append(res.SDNs, rr.SDNs...)
-			res.SDNComments = append(res.SDNComments, rr.SDNComments...)
+			if rr != nil {
+				res.Addresses = append(res.Addresses, rr.Addresses...)
+				res.AlternateIdentities = append(res.AlternateIdentities, rr.AlternateIdentities...)
+				res.SDNs = append(res.SDNs, rr.SDNs...)
+				res.SDNComments = append(res.SDNComments, rr.SDNComments...)
+			}
 		}
 	}
 	return res, err

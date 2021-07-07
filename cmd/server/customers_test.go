@@ -352,7 +352,9 @@ func TestCustomer_addCustomerNameWatchNoBody(t *testing.T) {
 			t.Errorf("bad state reset: %d", w.Code)
 		}
 
-		req.URL.Query().Set("name", "")
+		req = httptest.NewRequest("POST", "/ofac/customers/watch", nil)
+		req.Header.Set("x-user-id", "test")
+
 		router.ServeHTTP(w, req)
 		w.Flush()
 
@@ -618,7 +620,6 @@ func TestCustomerRepository(t *testing.T) {
 		if err := repo.upsertCustomerStatus(customerID, status); err != nil {
 			t.Errorf("addCustomerBlock: shouldn't error, but got %v", err)
 		}
-		status = nil
 
 		// verify
 		status, err = repo.getCustomerStatus(customerID)
@@ -640,7 +641,6 @@ func TestCustomerRepository(t *testing.T) {
 		if err := repo.upsertCustomerStatus(customerID, status); err != nil {
 			t.Errorf("addCustomerBlock: shouldn't error, but got %v", err)
 		}
-		status = nil
 
 		status, err = repo.getCustomerStatus(customerID)
 		if err != nil {
