@@ -11,7 +11,7 @@ WORKDIR /watchman/
 RUN npm install
 RUN npm run build
 
-FROM debian:10
+FROM debian:buster-20210621-slim
 LABEL maintainer="Moov <support@moov.io>"
 
 RUN apt-get update && apt-get install -y ca-certificates
