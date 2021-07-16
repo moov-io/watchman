@@ -1,3 +1,26 @@
+## v0.19.1 (Released 2021-07-16)
+
+BUG FIXES
+
+- cmd/server: nil check on setting updated records
+- download: fixup reading of initial dir rather than downloading
+- dpl: find file rather than assume its index
+
+IMPROVEMENTS
+
+- cmd/server: misc improvements from linters
+
+BUILD
+
+- build(deps): bump addressable from 2.7.0 to 2.8.0 in /docs
+- chore(deps): update dependency @material-ui/core to v4.12.1
+- cmd/server: add benchmark for ?minMatch=0.50
+- cmd/server: add benchmarks for various SDN search queries
+- fix(deps): update react monorepo to v17
+- fix: Dockerfile to reduce vulnerabilities
+- fix: upgrade react-scripts from 4.0.1 to 4.0.3
+- test: add static set of files for benchmarks
+
 ## v0.19.0 (Released 2021-06-10)
 
 This release improves search results by filtering as part of scoring instead of after the fact.
