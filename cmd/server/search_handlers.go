@@ -112,13 +112,16 @@ func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 
 type searchResponse struct {
 	// OFAC
-	SDNs              []*SDN    `json:"SDNs"`
-	AltNames          []Alt     `json:"altNames"`
-	Addresses         []Address `json:"addresses"`
-	SectoralSanctions []SSI     `json:"sectoralSanctions"`
+	SDNs      []*SDN    `json:"SDNs"`
+	AltNames  []Alt     `json:"altNames"`
+	Addresses []Address `json:"addresses"`
+
+	// Consolidated Screening List
+	SectoralSanctions []SSI `json:"sectoralSanctions"`
 	// BIS
 	DeniedPersons []DP        `json:"deniedPersons"`
 	BISEntities   []BISEntity `json:"bisEntities"`
+
 	// Metadata
 	RefreshedAt time.Time `json:"refreshedAt"`
 }
