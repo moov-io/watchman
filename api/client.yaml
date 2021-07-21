@@ -1052,6 +1052,10 @@ components:
           type: string
           description: The link for information regarding the source
           example: http://bit.ly/1MLgou0
+        match:
+          type: number
+          description: Match percentage of search query
+          example: 0.91
     BISEntities:
       description: Bureau of Industry and Security Entity List
       properties:
@@ -1095,6 +1099,10 @@ components:
           type: string
           description: The link for information regarding the source
           example: http://bit.ly/1MLgou0
+        match:
+          type: number
+          description: Match percentage of search query
+          example: 0.91
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       properties:

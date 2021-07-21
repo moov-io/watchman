@@ -30,4 +30,6 @@ type Ssi struct {
 	SourceListURL string `json:"sourceListURL,omitempty"`
 	// The link for information regarding the source
 	SourceInfoURL string `json:"sourceInfoURL,omitempty"`
+	// Match percentage of search query
+	Match float32 `json:"match,omitempty"`
 }
