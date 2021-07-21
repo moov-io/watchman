@@ -1,3 +1,14 @@
+## v0.19.2 (Released 2021-07-21)
+
+IMPROVEMENTS
+
+- cmd/server: add `match` score to OpenAPI search entities
+- cmd/server: document CSL separation in struct
+
+BUILD
+
+- chore(deps): update dependency @material-ui/core to v4.12.2
+
 ## v0.19.1 (Released 2021-07-16)
 
 BUG FIXES
