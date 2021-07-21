@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **Ids** | **[]string** | IDs on file for the entity | [optional] 
 **SourceListURL** | **string** | The link to the official SSI list | [optional] 
 **SourceInfoURL** | **string** | The link for information regarding the source | [optional] 
+**Match** | **float32** | Match percentage of search query | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

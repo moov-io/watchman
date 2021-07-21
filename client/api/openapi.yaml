@@ -1325,6 +1325,7 @@ components:
         - VERKHNECHONSKNEFTEGAZ
         - OJSC VERKHNECHONSKNEFTEGAZ
         name: PJSC VERKHNECHONSKNEFTEGAZ
+        match: 0.91
         ids:
         - Subject to Directive 4, Executive Order 13662 Directive Determination
         - vcng@rosneft.ru, Email Address
@@ -1398,6 +1399,10 @@ components:
           description: The link for information regarding the source
           example: http://bit.ly/1MLgou0
           type: string
+        match:
+          description: Match percentage of search query
+          example: 0.91
+          type: number
     BISEntities:
       description: Bureau of Industry and Security Entity List
       example:
@@ -1412,6 +1417,7 @@ components:
         - OJSC VERKHNECHONSKNEFTEGAZ
         licensePolicy: Presumption of denial.
         name: Luhansk People¬ís Republic
+        match: 0.91
         sourceListURL: http://bit.ly/1MLgou0
         startDate: 6/21/16
         frNotice: 81 FR 61595
@@ -1460,6 +1466,10 @@ components:
           description: The link for information regarding the source
           example: http://bit.ly/1MLgou0
           type: string
+        match:
+          description: Match percentage of search query
+          example: 0.91
+          type: number
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       example:
@@ -1581,6 +1591,7 @@ components:
           - OJSC VERKHNECHONSKNEFTEGAZ
           licensePolicy: Presumption of denial.
           name: Luhansk People¬ís Republic
+          match: 0.91
           sourceListURL: http://bit.ly/1MLgou0
           startDate: 6/21/16
           frNotice: 81 FR 61595
@@ -1595,6 +1606,7 @@ components:
           - OJSC VERKHNECHONSKNEFTEGAZ
           licensePolicy: Presumption of denial.
           name: Luhansk People¬ís Republic
+          match: 0.91
           sourceListURL: http://bit.ly/1MLgou0
           startDate: 6/21/16
           frNotice: 81 FR 61595
@@ -1608,6 +1620,7 @@ components:
           - VERKHNECHONSKNEFTEGAZ
           - OJSC VERKHNECHONSKNEFTEGAZ
           name: PJSC VERKHNECHONSKNEFTEGAZ
+          match: 0.91
           ids:
           - Subject to Directive 4, Executive Order 13662 Directive Determination
           - vcng@rosneft.ru, Email Address
@@ -1629,6 +1642,7 @@ components:
           - VERKHNECHONSKNEFTEGAZ
           - OJSC VERKHNECHONSKNEFTEGAZ
           name: PJSC VERKHNECHONSKNEFTEGAZ
+          match: 0.91
           ids:
           - Subject to Directive 4, Executive Order 13662 Directive Determination
           - vcng@rosneft.ru, Email Address
