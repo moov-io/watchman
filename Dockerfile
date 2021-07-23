@@ -1,6 +1,6 @@
 FROM golang:1.16-buster as backend
 WORKDIR /go/src/github.com/moov-io/watchman
-RUN apt-get update && apt-get install make gcc g++
+RUN apt-get update && apt-get upgrade -y && apt-get install make gcc g++
 COPY . .
 RUN go mod download
 RUN make build-server
@@ -11,10 +11,10 @@ WORKDIR /watchman/
 RUN npm install
 RUN npm run build
 
-FROM debian:10.10-slim
+FROM debian:stable-slim
 LABEL maintainer="Moov <support@moov.io>"
 
-RUN apt-get update && apt-get install -y ca-certificates
+RUN apt-get update && apt-get upgrade -y && apt-get install -y ca-certificates
 COPY --from=backend /go/src/github.com/moov-io/watchman/bin/server /bin/server
 
 COPY --from=frontend /watchman/build/ /watchman/
