@@ -33,8 +33,13 @@ jobs:
       if: runner.os == 'Windows'
       run: choco install -y make mingw
 
+    - name: Build
+      run: make build
+
     - name: Check
-      run: make build && make check
+      run: make check
+      env:
+        GOLANGCI_LINTERS: gosec
 
     - name: Upload Code Coverage
       if: runner.os == 'Linux'

@@ -42,7 +42,7 @@ func TestDownloader__initialDir(t *testing.T) {
 
 	mk := func(t *testing.T, name string, body string) {
 		path := filepath.Join(dir, name)
-		if err := ioutil.WriteFile(path, []byte(body), 0644); err != nil {
+		if err := ioutil.WriteFile(path, []byte(body), 0600); err != nil {
 			t.Fatalf("writing %s: %v", path, err)
 		}
 	}

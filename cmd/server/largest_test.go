@@ -17,6 +17,11 @@ func init() {
 	rand.Seed(time.Now().Unix())
 }
 
+func randomWeight() float64 {
+	//nolint:gosec
+	return float64(rand.Intn(1000))
+}
+
 func TestLargest(t *testing.T) {
 	xs := newLargest(10, 0.0)
 
@@ -24,7 +29,7 @@ func TestLargest(t *testing.T) {
 	for i := 0; i < 1000; i++ {
 		it := &item{
 			value:  i,
-			weight: float64(rand.Intn(1000)),
+			weight: randomWeight(),
 		}
 		xs.add(it)
 		min = math.Min(min, it.weight)
