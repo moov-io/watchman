@@ -46,7 +46,7 @@ func Read(path string) (*Results, error) {
 		}
 		return res, err
 	}
-	return nil, fmt.Errorf("unknown file %s", path)
+	return nil, nil
 }
 
 type Results struct {
