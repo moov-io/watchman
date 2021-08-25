@@ -17,6 +17,8 @@ The Watchman project implements an HTTP server and [Go library](https://pkg.go.d
 - Manual overrides to mark a `Company` or `Customer` as `unsafe` (blocked) or `exception` (never blocked).
 - Library for OFAC and BIS DPL data to download and parse their custom files
 
+Searching across all sanction lists Watchman uses the [Jaro–Winkler](https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance) algorithm to score the probability of each search query matching a list entry. This follows after what the [US Treasury OFAC Search](https://home.treasury.gov/policy-issues/financial-sanctions/faqs/topic/1636) uses and what is [recommended in academic literature](https://www.wseas.org/multimedia/journals/computers/2015/a965705-699.pdf).
+
 ## FAQ
 
 ### How are entities from the list indexed and used in search?
