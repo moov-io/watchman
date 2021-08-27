@@ -1,3 +1,25 @@
+## v0.20.0 (Released 2021-08-27)
+
+Watchman v0.20.0 improves scoring by reducing false positives. There are two changes implemented in this
+release to achive better scoring. First is to keep a more accurate list of scores for our query, which means
+longer queries will return more accurate results than before. Second is that we will always score at least two
+words, which helps to reduce false positives from "first last" queries.
+
+IMPROVEMENTS
+
+- docs/intro: mention jaro-winkler is used and why
+- search: properly keep top N word scores, match at least two words
+
+BUG FIXES
+
+- ofac: skip error with shared initial directory
+
+BUILD
+
+- build: use debian stable's slim image
+- fix: Dockerfile to reduce vulnerabilities
+- meta: fixup from gosec linters
+
 ## v0.19.2 (Released 2021-07-21)
 
 IMPROVEMENTS
