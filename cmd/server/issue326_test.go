@@ -22,11 +22,11 @@ func TestIssue326(t *testing.T) {
 	score = jaroWinkler(india, precompute("Huawei"))
 	assert.Equal(t, score, 0.5592063492063492)
 	score = jaroWinkler(india, precompute("Huawei Technologies"))
-	assert.Equal(t, score, 0.7559523809523809)
+	assert.Equal(t, score, 0.6903174603174603)
 
 	// Investment
 	score = jaroWinkler(investment, precompute("Huawei"))
 	assert.Equal(t, score, 0.3788888888888889)
 	score = jaroWinkler(investment, precompute("Huawei Technologies"))
-	assert.Equal(t, score, 0.8041666666666667)
+	assert.Equal(t, score, 0.7377777777777779)
 }

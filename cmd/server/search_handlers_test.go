@@ -93,7 +93,7 @@ func TestSearch__AddressMulti(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.925`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.8847`) {
 		t.Errorf("%#v", v)
 	}
 }
@@ -111,7 +111,7 @@ func TestSearch__AddressProvidence(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.950`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.923`) {
 		t.Errorf("%#v", v)
 	}
 }
@@ -129,7 +129,7 @@ func TestSearch__AddressCity(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.950`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.923`) {
 		t.Errorf("%#v", v)
 	}
 }
@@ -147,7 +147,7 @@ func TestSearch__AddressState(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.950`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.923`) {
 		t.Errorf("%#v", v)
 	}
 }
@@ -357,7 +357,7 @@ func TestSearch__AltName(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":1`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.666`) {
 		t.Error(v)
 	}
 

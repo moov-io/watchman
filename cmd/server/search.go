@@ -846,8 +846,8 @@ func jaroWinkler(s1, s2 string) float64 {
 
 	// average the highest N scores where N is the words in our query (s2).
 	sort.Float64s(scores)
-	if len(s1Parts) > len(s2Parts) {
-		scores = scores[len(s2Parts)-1:]
+	if len(s1Parts) > len(s2Parts) && len(s2Parts) > 2 {
+		scores = scores[len(s1Parts)-len(s2Parts):]
 	}
 
 	var sum float64

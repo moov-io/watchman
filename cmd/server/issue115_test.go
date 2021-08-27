@@ -48,5 +48,5 @@ func TestIssue115__TopSDNs(t *testing.T) {
 	eql(t, "issue115: top SDN 0", out[0].match, 1.0)
 
 	out = s.TopSDNs(1, 0.00, "george bush", keeper)
-	eql(t, "issue115: top SDN 0", out[0].match, 1.0)
+	eql(t, "issue115: top SDN 0", out[0].match, 0.667)
 }
