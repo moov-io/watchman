@@ -1,3 +1,12 @@
+## v0.21.0 (Released 2021-09-29)
+
+Release v0.21.0 applies pre-computation steps to SDN alternate names which was previously missing. This impacts
+match performance for only those results.
+
+BUG FIXES
+
+- search: apply pipline steps to SDN alt names (#375)
+
 ## v0.20.0 (Released 2021-08-27)
 
 Watchman v0.20.0 improves scoring by reducing false positives. There are two changes implemented in this
