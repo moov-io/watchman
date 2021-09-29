@@ -52,7 +52,7 @@ func init() {
 			AlternateType: "aka",
 			AlternateName: "AL-HISN FIRM",
 		},
-	})
+	}, noLogPipeliner)
 }
 
 func createTestCompanyRepository(t *testing.T) *sqliteCompanyRepository {

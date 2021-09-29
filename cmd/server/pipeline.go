@@ -41,6 +41,13 @@ func sdnName(sdn *ofac.SDN, addrs []*ofac.Address) *Name {
 	}
 }
 
+func altName(alt *ofac.AlternateIdentity) *Name {
+	return &Name{
+		Original:  alt.AlternateName,
+		Processed: alt.AlternateName,
+	}
+}
+
 func ssiName(ssi *csl.SSI) *Name {
 	return &Name{
 		Original:  ssi.Name,
