@@ -54,7 +54,7 @@ func init() {
 			AlternateType: "aka",
 			AlternateName: "NATIONAL BANK OF CUBA",
 		},
-	})
+	}, noLogPipeliner)
 }
 
 func createTestCustomerRepository(t *testing.T) *sqliteCustomerRepository {

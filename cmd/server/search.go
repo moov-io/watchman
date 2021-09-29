@@ -648,12 +648,19 @@ func (a Alt) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func precomputeAlts(alts []*ofac.AlternateIdentity) []*Alt {
+func precomputeAlts(alts []*ofac.AlternateIdentity, pipe *pipeliner) []*Alt {
 	out := make([]*Alt, len(alts))
 	for i := range alts {
+		an := altName(alts[i])
+
+		if err := pipe.Do(an); err != nil {
+			pipe.logger.Log("pipeline", fmt.Sprintf("problem pipelining SDN: %v", err))
+			continue
+		}
+
 		out[i] = &Alt{
 			AlternateIdentity: alts[i],
-			name:              precompute(alts[i].AlternateName),
+			name:              an.Processed,
 		}
 	}
 	return out

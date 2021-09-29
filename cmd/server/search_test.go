@@ -66,7 +66,7 @@ func init() {
 			AlternateType: "aka",
 			AlternateName: "A.I.C. SOGO KENKYUSHO",
 		},
-	})
+	}, noLogPipeliner)
 	sdnSearcher.SDNs = precomputeSDNs([]*ofac.SDN{
 		{
 			EntityID: "2676",
@@ -247,7 +247,28 @@ func TestJaroWinkler(t *testing.T) {
 		{"africada financial services bureau change", "skylight services inc", 0.806},
 		{"africada financial services bureau change", "skylight financial services", 0.887},
 		{"africada financial services bureau change", "skylight financial services inc", 0.79},
-		// stopwords
+
+		// stopwords tests
+		{"the group for the preservation of the holy sites", "the bridgespan group", 1.00},
+		{precompute("the group for the preservation of the holy sites"), precompute("the bridgespan group"), 1.00},
+		{"group preservation holy sites", "bridgespan group", 0.689},
+		{"the group for the preservation of the holy sites", "the logan group", 1.00},
+		{precompute("the group for the preservation of the holy sites"), precompute("the logan group"), 1.00},
+		{"group preservation holy sites", "logan group", 0.478},
+		{"the group for the preservation of the holy sites", "the anything group", 1.00},
+		{precompute("the group for the preservation of the holy sites"), precompute("the anything group"), 1.00},
+		{"group preservation holy sites", "anything group", 0.617},
+		{"the group for the preservation of the holy sites", "the hello world group", 1.00},
+		{precompute("the group for the preservation of the holy sites"), precompute("the hello world group"), 1.00},
+		{"group preservation holy sites", "hello world group", 0.687},
+		{"the group for the preservation of the holy sites", "the group", 0.67},
+		{precompute("the group for the preservation of the holy sites"), precompute("the group"), 0.67},
+		{"group preservation holy sites", "group", 0.460},
+		{"the group for the preservation of the holy sites", "The flibbity jibbity flobbity jobbity grobbity zobbity group", 0.699},
+		{precompute("the group for the preservation of the holy sites"), precompute("the flibbity jibbity flobbity jobbity grobbity zobbity group"), .783},
+		{"group preservation holy sites", "flibbity jibbity flobbity jobbity grobbity zobbity group", 0.590},
+
+		// precompute
 		{"i c sogo kenkyusho", precompute("A.I.C. SOGO KENKYUSHO"), 0.667},
 		{precompute("A.I.C. SOGO KENKYUSHO"), "sogo kenkyusho", 0.667},
 	}
