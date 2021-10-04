@@ -1,4 +1,4 @@
-## v0.21.1 (Released 2021-09-29)
+## v0.21.1 (Released 2021-10-04)
 
 Release v0.21.1 applies bugfix to pre-computation steps to SDN alternate names.
 
