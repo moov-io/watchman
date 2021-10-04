@@ -5,6 +5,7 @@
 package main
 
 import (
+	"github.com/moov-io/watchman/pkg/csl"
 	"testing"
 
 	"github.com/moov-io/watchman/pkg/ofac"
@@ -73,5 +74,58 @@ func TestStopwords__clean(t *testing.T) {
 		if result != cases[i].expected {
 			t.Errorf("\n#%d in=%q  lang=%v\ngot=%q", i, cases[i].in, cases[i].lang, result)
 		}
+	}
+}
+
+func TestStopwords__apply(t *testing.T) {
+	cases := []struct {
+		testName string
+		in       *Name
+		expected string
+	}{
+		{
+			testName: "type missing",
+			in:       &Name{Processed: "Trees and Trucks"},
+			expected: "Trees and Trucks",
+		},
+		{
+			testName: "alt name",
+			in:       &Name{Processed: "Trees and Trucks", alt: &ofac.AlternateIdentity{}},
+			expected: "trees trucks",
+		},
+		{
+			testName: "sdn individual",
+			in:       &Name{Processed: "Trees and Trucks", sdn: &ofac.SDN{SDNType: "individual"}},
+			expected: "Trees and Trucks",
+		},
+		{
+			testName: "sdn business",
+			in:       &Name{Processed: "Trees and Trucks", sdn: &ofac.SDN{SDNType: "business"}},
+			expected: "trees trucks",
+		},
+		{
+			testName: "ssi individual",
+			in:       &Name{Processed: "Trees and Trucks", ssi: &csl.SSI{Type: "individual"}},
+			expected: "Trees and Trucks",
+		},
+		{
+			testName: "ssi business",
+			in:       &Name{Processed: "Trees and Trucks", ssi: &csl.SSI{Type: "business"}},
+			expected: "trees trucks",
+		},
+	}
+
+	for _, test := range cases {
+		t.Run(test.testName, func(t *testing.T) {
+			stopwords := stopwordsStep{}
+			err := stopwords.apply(test.in)
+			if err != nil {
+				t.Errorf("\n#%v in=%v err=%v", test.testName, test.in, err)
+			}
+
+			if test.in.Processed != test.expected {
+				t.Errorf("\n#%v expected=%v got=%v", test.testName, test.expected, test.in.Processed)
+			}
+		})
 	}
 }
