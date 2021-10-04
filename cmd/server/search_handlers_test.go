@@ -357,7 +357,7 @@ func TestSearch__AltName(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.666`) {
+	if v := w.Body.String(); !strings.Contains(v, `"match":0.5`) {
 		t.Error(v)
 	}
 
