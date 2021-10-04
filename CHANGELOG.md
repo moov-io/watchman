@@ -1,3 +1,11 @@
+## v0.21.1 (Released 2021-09-29)
+
+Release v0.21.1 applies bugfix to pre-computation steps to SDN alternate names.
+
+BUG FIXES
+
+- search: bugfix for pipeline steps to SDN alt names (#376)
+
 ## v0.21.0 (Released 2021-09-29)
 
 Release v0.21.0 applies pre-computation steps to SDN alternate names which was previously missing. This impacts
