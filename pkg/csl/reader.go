@@ -2,6 +2,7 @@ package csl
 
 import (
 	"encoding/csv"
+	"errors"
 	"io"
 	"os"
 	"strings"
@@ -20,12 +21,20 @@ func Read(path string) (*CSL, error) {
 	var els []*EL
 	for {
 		record, err := reader.Read()
-		if err == io.EOF {
-			break
-		}
 		if err != nil {
-			continue
+			// reached the last line
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			// malformed row
+			if errors.Is(err, csv.ErrFieldCount) ||
+				errors.Is(err, csv.ErrBareQuote) ||
+				errors.Is(err, csv.ErrQuote) {
+				continue
+			}
+			return nil, err
 		}
+
 		if len(record) <= 1 {
 			continue // skip empty records
 		}

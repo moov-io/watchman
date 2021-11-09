@@ -6,11 +6,12 @@ package dpl
 
 import (
 	"encoding/csv"
+	"errors"
 	"io"
 	"os"
 )
 
-// Reader parses DPL records from a TXT file and populates the associated arrays.
+// Read parses DPL records from a TXT file and populates the associated arrays.
 //
 // For more details on the raw DPL files see https://moov-io.github.io/watchman/file-structure.html
 func Read(path string) ([]*DPL, error) {
@@ -30,13 +31,19 @@ func Read(path string) ([]*DPL, error) {
 	for {
 		line, err := reader.Read()
 		if err != nil {
-			if err == io.EOF {
-				break
+			if err != nil {
+				// reached the last line
+				if errors.Is(err, io.EOF) {
+					break
+				}
+				// malformed row
+				if errors.Is(err, csv.ErrFieldCount) ||
+					errors.Is(err, csv.ErrBareQuote) ||
+					errors.Is(err, csv.ErrQuote) {
+					continue
+				}
+				return nil, err
 			}
-			if err == csv.ErrFieldCount {
-				continue
-			}
-			return out, err
 		}
 
 		if len(line) < 12 || (len(line) >= 2 && line[1] == "Street_Address") {

@@ -6,6 +6,7 @@ package ofac
 
 import (
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -77,11 +78,18 @@ func csvAddressFile(path string) (*Results, error) {
 	reader := csv.NewReader(f)
 	for {
 		record, err := reader.Read()
-		if err != nil && err == csv.ErrFieldCount {
-			continue
-		}
-		if err == io.EOF { // TODO(Adam): add max line count break here also
-			break
+		if err != nil {
+			// reached the last line
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			// malformed row
+			if errors.Is(err, csv.ErrFieldCount) ||
+				errors.Is(err, csv.ErrBareQuote) ||
+				errors.Is(err, csv.ErrQuote) {
+				continue
+			}
+			return nil, err
 		}
 		if len(record) != 6 {
 			continue
@@ -114,11 +122,18 @@ func csvAlternateIdentityFile(path string) (*Results, error) {
 	reader := csv.NewReader(f)
 	for {
 		record, err := reader.Read()
-		if err != nil && err == csv.ErrFieldCount {
-			continue
-		}
-		if err == io.EOF { // TODO(adam)
-			break
+		if err != nil {
+			// reached the last line
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			// malformed row
+			if errors.Is(err, csv.ErrFieldCount) ||
+				errors.Is(err, csv.ErrBareQuote) ||
+				errors.Is(err, csv.ErrQuote) {
+				continue
+			}
+			return nil, err
 		}
 		if len(record) != 5 {
 			continue
@@ -149,11 +164,18 @@ func csvSDNFile(path string) (*Results, error) {
 	reader := csv.NewReader(f)
 	for {
 		record, err := reader.Read()
-		if err != nil && err == csv.ErrFieldCount {
-			continue
-		}
-		if err == io.EOF { // TODO(Adam): add max line count break here also
-			break
+		if err != nil {
+			// reached the last line
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			// malformed row
+			if errors.Is(err, csv.ErrFieldCount) ||
+				errors.Is(err, csv.ErrBareQuote) ||
+				errors.Is(err, csv.ErrQuote) {
+				continue
+			}
+			return nil, err
 		}
 		if len(record) != 12 {
 			continue
@@ -194,13 +216,17 @@ func csvSDNCommentsFile(path string) (*Results, error) {
 	for {
 		line, err := r.Read()
 		if err != nil {
-			if err == io.EOF {
+			// reached the last line
+			if errors.Is(err, io.EOF) {
 				break
 			}
-			if err == csv.ErrFieldCount {
+			// malformed row
+			if errors.Is(err, csv.ErrFieldCount) ||
+				errors.Is(err, csv.ErrBareQuote) ||
+				errors.Is(err, csv.ErrQuote) {
 				continue
 			}
-			return &Results{SDNComments: out}, nil
+			return nil, err
 		}
 		if len(line) != 2 {
 			continue
