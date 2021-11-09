@@ -18,7 +18,12 @@ func TestDPL__read(t *testing.T) {
 		t.Errorf("found %d DPL records", len(dpls))
 	}
 
-	if _, err := Read(filepath.Join("..", "..", "test", "testdata", "sdn.csv")); err == nil {
-		t.Error("expected error")
+	// this file is formatted incorrectly for DPL, so we expect all rows to be skipped
+	got, err := Read(filepath.Join("..", "..", "test", "testdata", "sdn.csv"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 0 {
+		t.Errorf("found %d DPL records, wanted 0", len(got))
 	}
 }
