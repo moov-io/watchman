@@ -200,7 +200,7 @@ func csvSDNCommentsFile(path string) (*Results, error) {
 			if err == csv.ErrFieldCount {
 				continue
 			}
-			goto quit
+			return &Results{SDNComments: out}, nil
 		}
 		if len(line) != 2 {
 			continue
@@ -211,7 +211,6 @@ func csvSDNCommentsFile(path string) (*Results, error) {
 			RemarksExtended: line[1],
 		})
 	}
-quit:
 	return &Results{SDNComments: out}, nil
 }
 
