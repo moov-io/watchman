@@ -5,9 +5,9 @@
 package main
 
 import (
-	"github.com/moov-io/watchman/pkg/csl"
 	"testing"
 
+	"github.com/moov-io/watchman/pkg/csl"
 	"github.com/moov-io/watchman/pkg/ofac"
 
 	"github.com/abadojack/whatlanggo"
@@ -35,7 +35,7 @@ func TestStopwords__detect(t *testing.T) {
 	}{
 		{"COLOMBIANA DE CERDOS LTDA.", "Colombia", whatlanggo.Spa},
 		{"INVERSIONES LA QUINTA Y CIA. LTDA.", "Colombia", whatlanggo.Spa},
-		{"COMITE' DE BIENFAISANCE ET DE SECOURS AUX PALESTINIENS", "France", whatlanggo.Fra},
+		{"COMITE' DE BIENFAISANCE ET DE SECOURS AUX PALESTINIENS", "France", whatlanggo.Fra}, //nolint:misspell
 		{"WELFARE AND DEVELOPMENT ORGANIZATION OF JAMAAT-UD-DAWAH FOR QUR'AN AND SUNNAH", "Pakistan", whatlanggo.Eng},
 		{"WAQFIYA RI'AYA AL-USRA AL-FILISTINYA WA AL-LUBNANYA", "Lebanon", whatlanggo.Eng},
 		{"PREDUZECE ZA TRGOVINU NA VELIKO I MALO PARTIZAN TECH DOO BEOGRAD-SAVSKI VENAC", "Serbia", whatlanggo.Srp},
@@ -60,7 +60,7 @@ func TestStopwords__clean(t *testing.T) {
 		{"Trees and Trucks", whatlanggo.Eng, "trees trucks"},
 		{"COLOMBIANA DE CERDOS LTDA.", whatlanggo.Spa, "colombiana cerdos ltda"},
 		{"INVERSIONES LA QUINTA Y CIA. LTDA.", whatlanggo.Spa, "inversiones quinta y cia ltda"},
-		{"COMITE' DE BIENFAISANCE ET DE SECOURS AUX PALESTINIENS", whatlanggo.Fra, "comite' bienfaisance secours palestiniens"},
+		{"COMITE' DE BIENFAISANCE ET DE SECOURS AUX PALESTINIENS", whatlanggo.Fra, "comite' bienfaisance secours palestiniens"}, //nolint:misspell
 		{"WELFARE AND DEVELOPMENT ORGANIZATION OF JAMAAT-UD-DAWAH FOR QUR'AN AND SUNNAH", whatlanggo.Eng, "welfare development organization jamaat-ud-dawah qur'an sunnah"},
 		{"WAQFIYA RI'AYA AL-USRA AL-FILISTINYA WA AL-LUBNANYA", whatlanggo.Eng, "waqfiya ri'aya al-usra al-filistinya wa al-lubnanya"},
 		{"PREDUZECE ZA TRGOVINU NA VELIKO I MALO PARTIZAN TECH DOO BEOGRAD-SAVSKI VENAC", whatlanggo.Srp, "preduzece za trgovinu na veliko i malo partizan tech doo beograd-savski venac"},
