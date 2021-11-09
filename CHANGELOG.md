@@ -1,3 +1,12 @@
+## v0.21.2 (Released 2021-11-09)
+
+IMPROVEMENTS
+
+- build: enable gosec and coverage linter
+- fix: DPL records could have invalid characters, add length guards
+- fix: ignore misspell checks on valid test data
+- fix: ofac SDN comments file has invalid characters / column counts
+
 ## v0.21.1 (Released 2021-10-04)
 
 Release v0.21.1 applies bugfix to pre-computation steps to SDN alternate names.
