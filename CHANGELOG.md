@@ -1,3 +1,9 @@
+## v0.21.3 (Released 2021-11-10)
+
+IMPROVEMENTS
+
+- fix: skip malformed rows in input files (#379)
+
 ## v0.21.2 (Released 2021-11-09)
 
 IMPROVEMENTS
