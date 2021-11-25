@@ -157,7 +157,7 @@ func (r *sqliteCompanyRepository) upsertCompanyStatus(companyID string, status *
 		return fmt.Errorf("upsertCompanyStatus: prepare error=%v rollback=%v", err, tx.Rollback())
 	}
 	_, err = stmt.Exec(companyID, status.UserID, status.Note, status.Status, status.CreatedAt)
-	stmt.Close()
+	defer stmt.Close()
 	if err == nil {
 		return tx.Commit()
 	}
@@ -168,7 +168,7 @@ func (r *sqliteCompanyRepository) upsertCompanyStatus(companyID string, status *
 			return fmt.Errorf("upsertCompanyStatus: inner prepare error=%v rollback=%v", err, tx.Rollback())
 		}
 		_, err := stmt.Exec(status.Note, status.Status, companyID, status.UserID)
-		stmt.Close()
+		defer stmt.Close()
 		if err != nil {
 			return fmt.Errorf("upsertCompanyStatus: unique error=%v rollback=%v", err, tx.Rollback())
 		}
