@@ -194,7 +194,7 @@ PONG
 | `DPL_DOWNLOAD_TEMPLATE` | HTTP address for downloading the DPL. | `https://www.bis.doc.gov/dpl/%s` |
 | `CSL_DOWNLOAD_TEMPLATE` | HTTP address for downloading the Consolidated Screening List (CSL), which is a collection of US government sanctions lists. | `https://api.trade.gov/consolidated_screening_list/%s` |
 | `KEEP_STOPWORDS` | Boolean to keep stopwords in names. | `false` |
-| `DEBUG_NAME_PIPELINE` | Boolean to pring debug messages for each name (SDN, SSI) processing step. | `false` |
+| `DEBUG_NAME_PIPELINE` | Boolean to print debug messages for each name (SDN, SSI) processing step. | `false` |
 
 #### Storage
 
@@ -221,9 +221,9 @@ Refer to the SQLite driver documentation for [connection parameters](https://git
 
 When Watchman sends a [webhook](https://en.wikipedia.org/wiki/Webhook) to your application, the body will contain a JSON representation of the [Company](https://godoc.org/github.com/moov-io/watchman/client#OfacCompany) or [Customer](https://godoc.org/github.com/moov-io/watchman/client#OfacCustomer) model as the body to a POST request. You can see an [example in Go](examples/webhook/webhook.go).
 
-An `Authorization` header will also be sent with the `authToken` provided when setting up the watch. Clients should verify this token to ensure authenticated communicated.
+An `Authorization` header will also be sent with the `authToken` provided when setting up the watch. Clients should verify this token to ensure authenticated communication.
 
-Webhook notifications are ran after the OFAC data is successfully refreshed, which is determined by the `DATA_REFRESH_INTERVAL` environmental variable.
+Webhook notifications are run after the OFAC data is successfully refreshed, which is determined by the `DATA_REFRESH_INTERVAL` environmental variable.
 
 ##### Watching a specific customer or company by ID
 
@@ -262,7 +262,7 @@ $ go doc github.com/moov-io/watchman/client Search
 
 ### In-browser Watchman search
 
-Using our [in-browser utility](https://oss.moov.io/watchman/), you can instantly perform advanced Watchman searches. Simply fill search fields and generate a detailed report that includes match percentage, alternative names, effective/expiration dates, IDs, addresses, and other useful information. This tool is particularly useful for completing quick searches with the aid of a intutive interface.
+Using our [in-browser utility](https://oss.moov.io/watchman/), you can instantly perform advanced Watchman searches. Simply fill search fields and generate a detailed report that includes match percentage, alternative names, effective/expiration dates, IDs, addresses, and other useful information. This tool is particularly useful for completing quick searches with the aid of a intuitive interface.
 
 ## Reporting blocks to OFAC
 
