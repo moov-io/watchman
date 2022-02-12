@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "express": "4.17.1",
+    "express": "4.17.2",
     "express-winston": "3.4.0",
     "history": "4.10.1",
     "http-proxy-middleware": "0.21.0",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-scripts": "4.0.3",
-    "winston": "3.3.3"
+    "winston": "3.6.0"
   },
   "scripts": {
     "build": "react-scripts build",
@@ -39,7 +39,7 @@
   "devDependencies": {
     "@material-ui/core": "4.12.3",
     "@material-ui/icons": "4.11.2",
-    "ramda": "0.27.1",
+    "ramda": "0.28.0",
     "styled-components": "4.4.1"
   }
 }
