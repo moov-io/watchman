@@ -22,10 +22,10 @@ import (
 	"github.com/moov-io/base/admin"
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/base/http/bind"
+	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman"
 	"github.com/moov-io/watchman/internal/database"
 
-	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
 )
 
@@ -51,14 +51,12 @@ func main() {
 		*flagLogFormat = v
 	}
 	if strings.ToLower(*flagLogFormat) == "json" {
-		logger = log.NewJSONLogger(os.Stderr)
+		logger = log.NewJSONLogger()
 	} else {
-		logger = log.NewLogfmtLogger(os.Stderr)
+		logger = log.NewDefaultLogger()
 	}
-	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
-	logger = log.With(logger, "caller", log.DefaultCaller)
 
-	logger.Log("startup", fmt.Sprintf("Starting watchman server version %s", watchman.Version))
+	logger.Logf("Starting watchman server version %s", watchman.Version)
 
 	// Channel for errors
 	errs := make(chan error)
@@ -72,12 +70,12 @@ func main() {
 	// Setup database connection
 	db, err := database.New(logger, os.Getenv("DATABASE_TYPE"))
 	if err != nil {
-		logger.Log("main", fmt.Sprintf("database problem: %v", err))
+		logger.Logf("database problem: %v", err)
 		os.Exit(1)
 	}
 	defer func() {
 		if err := db.Close(); err != nil {
-			logger.Log("main", err)
+			logger.LogError(err)
 		}
 	}()
 
@@ -113,7 +111,7 @@ func main() {
 	}
 	shutdownServer := func() {
 		if err := serve.Shutdown(context.TODO()); err != nil {
-			logger.Log("shutdown", err)
+			logger.LogError(err)
 		}
 	}
 
@@ -126,10 +124,10 @@ func main() {
 	adminServer := admin.NewServer(*adminAddr)
 	adminServer.AddVersionHandler(watchman.Version) // Setup 'GET /version'
 	go func() {
-		logger.Log("admin", fmt.Sprintf("listening on %s", adminServer.BindAddr()))
+		logger.Logf("listening on %s", adminServer.BindAddr())
 		if err := adminServer.Listen(); err != nil {
 			err = fmt.Errorf("problem starting admin http: %v", err)
-			logger.Log("admin", err)
+			logger.LogError(err)
 			errs <- fmt.Errorf("admin shutdown: %v", err)
 		}
 	}()
@@ -155,18 +153,21 @@ func main() {
 
 	// Initial download of data
 	if stats, err := searcher.refreshData(os.Getenv("INITIAL_DATA_DIRECTORY")); err != nil {
-		logger.Log("main", fmt.Sprintf("ERROR: failed to download/parse initial data: %v", err))
+		logger.LogErrorf("ERROR: failed to download/parse initial data: %v", err)
 		os.Exit(1)
 	} else {
 		if err := downloadRepo.recordStats(stats); err != nil {
-			logger.Log("main", fmt.Sprintf("ERROR: failed to record download stats: %v", err))
+			logger.LogErrorf("ERROR: failed to record download stats: %v", err)
 			os.Exit(1)
 		}
-		logger.Log(
-			"main", fmt.Sprintf("data refreshed %v ago", time.Since(stats.RefreshedAt)),
-			"SDNs", stats.SDNs, "AltNames", stats.Alts, "Addresses", stats.Addresses, "SSI", stats.SectoralSanctions,
-			"DPL", stats.DeniedPersons, "BISEntities", stats.BISEntities,
-		)
+		logger.Info().With(log.Fields{
+			"SDNs":        log.Int(stats.SDNs),
+			"AltNames":    log.Int(stats.Alts),
+			"Addresses":   log.Int(stats.Addresses),
+			"SSI":         log.Int(stats.SectoralSanctions),
+			"DPL":         log.Int(stats.DeniedPersons),
+			"BISEntities": log.Int(stats.BISEntities),
+		}).Logf("data refreshed %v ago", time.Since(stats.RefreshedAt))
 	}
 
 	// Setup Watch and Webhook database wrapper
@@ -201,14 +202,14 @@ func main() {
 	// Start business logic HTTP server
 	go func() {
 		if certFile, keyFile := os.Getenv("HTTPS_CERT_FILE"), os.Getenv("HTTPS_KEY_FILE"); certFile != "" && keyFile != "" {
-			logger.Log("startup", fmt.Sprintf("binding to %s for secure HTTP server", *httpAddr))
+			logger.Logf("binding to %s for secure HTTP server", *httpAddr)
 			if err := serve.ListenAndServeTLS(certFile, keyFile); err != nil {
-				logger.Log("exit", fmt.Sprintf("https shutdown: %v", err))
+				logger.LogErrorf("https shutdown: %v", err)
 			}
 		} else {
-			logger.Log("startup", fmt.Sprintf("binding to %s for HTTP server", *httpAddr))
+			logger.Logf("binding to %s for HTTP server", *httpAddr)
 			if err := serve.ListenAndServe(); err != nil {
-				logger.Log("exit", fmt.Sprintf("http shutdown: %v", err))
+				logger.LogErrorf("http shutdown: %v", err)
 			}
 		}
 	}()
@@ -216,7 +217,7 @@ func main() {
 	// Block/Wait for an error
 	if err := <-errs; err != nil {
 		shutdownServer()
-		logger.Log("exit", fmt.Sprintf("final exit: %v", err))
+		logger.LogErrorf("final exit: %v", err)
 	}
 }
 
@@ -238,11 +239,11 @@ func getDataRefreshInterval(logger log.Logger, env string) time.Duration {
 			return 0 * time.Second
 		}
 		if dur, _ := time.ParseDuration(env); dur > 0 {
-			logger.Log("main", fmt.Sprintf("Setting data refresh interval to %v", dur))
+			logger.Logf("Setting data refresh interval to %v", dur)
 			return dur
 		}
 	}
-	logger.Log("main", fmt.Sprintf("Setting data refresh interval to %v (default)", dataRefreshInterval))
+	logger.Logf("Setting data refresh interval to %v (default)", dataRefreshInterval)
 	return dataRefreshInterval
 }
 
@@ -252,7 +253,7 @@ func setupWebui(logger log.Logger, r *mux.Router, basePath string) {
 		dir = filepath.Join("webui", "build")
 	}
 	if _, err := os.Stat(dir); err != nil {
-		logger.Log("main", fmt.Sprintf("problem with webui=%s: %v", dir, err))
+		logger.Logf("problem with webui=%s: %v", dir, err)
 		os.Exit(1)
 	}
 	r.PathPrefix("/").Handler(http.StripPrefix(basePath, http.FileServer(http.Dir(dir))))

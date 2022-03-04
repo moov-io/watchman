@@ -16,9 +16,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman"
-
-	"github.com/go-kit/kit/log"
 )
 
 var (
@@ -122,7 +121,7 @@ func (dl *Downloader) retryDownload(dir, filename, downloadURL string) {
 	for i := 0; i < 3; i++ {
 		req, err := http.NewRequest("GET", downloadURL, nil)
 		if err != nil {
-			dl.Logger.Log("download", fmt.Sprintf("error building HTTP request: %v", err))
+			dl.Logger.Error().LogErrorf("error building HTTP request: %v", err)
 			return
 		}
 		req.Header.Set("User-Agent", fmt.Sprintf("moov-io/watchman:%v", watchman.Version))

@@ -14,10 +14,10 @@ import (
 	"time"
 
 	moovhttp "github.com/moov-io/base/http"
+	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/internal/database"
 	"github.com/moov-io/watchman/pkg/ofac"
 
-	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
 )
 
@@ -188,7 +188,10 @@ func getCompany(logger log.Logger, searcher *searcher, companyRepo companyReposi
 			moovhttp.Problem(w, err)
 			return
 		}
-		logger.Log("companies", fmt.Sprintf("getting companies=%s", id), "requestID", moovhttp.GetRequestID(r))
+
+		logger.Info().With(log.Fields{
+			"requestID": log.String(moovhttp.GetRequestID(r)),
+		}).Logf("getting companies=%s", id)
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
@@ -235,10 +238,14 @@ func updateCompanyStatus(logger log.Logger, searcher *searcher, companyRepo comp
 				moovhttp.Problem(w, err)
 				return
 			}
-			logger.Log("companies", fmt.Sprintf("updated company=%s status", companyID), "requestID", moovhttp.GetRequestID(r))
+
+			logger.Info().With(log.Fields{
+				"requestID": log.String(moovhttp.GetRequestID(r)),
+			}).Logf("updated company=%s status", companyID)
 
 			w.WriteHeader(http.StatusOK)
 			return
+
 		default:
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusBadRequest)
@@ -277,7 +284,9 @@ func addCompanyWatch(logger log.Logger, searcher *searcher, repo watchRepository
 			return
 		}
 
-		logger.Log("companies", fmt.Sprintf("added watch for company=%s", companyID), "requestID", moovhttp.GetRequestID(r))
+		logger.Info().With(log.Fields{
+			"requestID": log.String(moovhttp.GetRequestID(r)),
+		}).Logf("added watch for company=%s", companyID)
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
@@ -298,7 +307,9 @@ func removeCompanyWatch(logger log.Logger, searcher *searcher, repo watchReposit
 			return
 		}
 
-		logger.Log("companies", fmt.Sprintf("removed company=%s watch=%s", companyID, watchID), "requestID", moovhttp.GetRequestID(r))
+		logger.Info().With(log.Fields{
+			"requestID": log.String(moovhttp.GetRequestID(r)),
+		}).Logf("removed company=%s watch=%s", companyID, watchID)
 
 		w.WriteHeader(http.StatusOK)
 	}
@@ -334,7 +345,9 @@ func addCompanyNameWatch(logger log.Logger, searcher *searcher, repo watchReposi
 			return
 		}
 
-		logger.Log("companies", "added company name watch", "requestID", moovhttp.GetRequestID(r))
+		logger.Info().With(log.Fields{
+			"requestID": log.String(moovhttp.GetRequestID(r)),
+		}).Log("added company name watch")
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
@@ -355,7 +368,9 @@ func removeCompanyNameWatch(logger log.Logger, searcher *searcher, repo watchRep
 			return
 		}
 
-		logger.Log("companies", fmt.Sprintf("removed company name watch=%s", watchID), "requestID", moovhttp.GetRequestID(r))
+		logger.Info().With(log.Fields{
+			"requestID": log.String(moovhttp.GetRequestID(r)),
+		}).Logf("removed company name watch=%s", watchID)
 
 		w.WriteHeader(http.StatusOK)
 	}

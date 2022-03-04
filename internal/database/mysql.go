@@ -13,8 +13,8 @@ import (
 	"time"
 
 	"github.com/moov-io/base/docker"
+	"github.com/moov-io/base/log"
 
-	"github.com/go-kit/kit/log"
 	kitprom "github.com/go-kit/kit/metrics/prometheus"
 	gomysql "github.com/go-sql-driver/mysql"
 	"github.com/lopezator/migrator"

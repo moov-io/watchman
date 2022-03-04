@@ -11,9 +11,8 @@ import (
 	"testing"
 
 	"github.com/moov-io/base"
+	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/internal/database"
-
-	"github.com/go-kit/kit/log"
 )
 
 func TestDownload__manualRefreshPath(t *testing.T) {

@@ -14,9 +14,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman"
 
-	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
 )
 
@@ -27,11 +27,8 @@ var (
 func main() {
 	flag.Parse()
 
-	logger := log.NewLogfmtLogger(os.Stderr)
-	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
-	logger = log.With(logger, "caller", log.DefaultCaller)
-
-	logger.Log("startup", fmt.Sprintf("Starting moov/watchman-webhook-example:%s", watchman.Version))
+	logger := log.NewDefaultLogger()
+	logger.Logf("Starting moov/watchman-webhook-example:%s", watchman.Version)
 
 	// Listen for application termination.
 	errs := make(chan error)
@@ -56,22 +53,22 @@ func main() {
 	}
 	shutdownServer := func() {
 		if err := serve.Shutdown(context.TODO()); err != nil {
-			logger.Log("shutdown", err)
+			logger.LogError(err)
 		}
 	}
 	defer shutdownServer()
 
 	// Start main HTTP server
 	go func() {
-		logger.Log("transport", "HTTP", "addr", *httpAddr)
+		logger.Logf("listening on %s", *httpAddr)
 		if err := serve.ListenAndServe(); err != nil {
-			logger.Log("main", err)
+			logger.LogError(err)
 		}
 	}()
 
 	// Wait for app shutdown
 	if err := <-errs; err != nil {
-		logger.Log("exit", err)
+		logger.LogError(err)
 	}
 	os.Exit(0)
 }

@@ -14,10 +14,10 @@ import (
 	"time"
 
 	moovhttp "github.com/moov-io/base/http"
+	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/internal/database"
 	"github.com/moov-io/watchman/pkg/ofac"
 
-	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
 )
 
@@ -193,8 +193,10 @@ func getCustomer(logger log.Logger, searcher *searcher, custRepo customerReposit
 			return
 		}
 
-		requestID, userID := moovhttp.GetRequestID(r), moovhttp.GetUserID(r)
-		logger.Log("customers", fmt.Sprintf("get customer=%s", id), "requestID", requestID, "userID", userID)
+		logger.With(log.Fields{
+			"requestID": log.String(moovhttp.GetRequestID(r)),
+			"userID":    log.String(moovhttp.GetUserID(r)),
+		}).Logf("get customer=%s", id)
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
@@ -235,10 +237,10 @@ func addCustomerNameWatch(logger log.Logger, searcher *searcher, repo *sqliteWat
 			return
 		}
 
-		if requestID := moovhttp.GetRequestID(r); requestID != "" {
-			userID := moovhttp.GetUserID(r)
-			logger.Log("customers", "added customer name watch", "requestID", requestID, "userID", userID)
-		}
+		logger.With(log.Fields{
+			"requestID": log.String(moovhttp.GetRequestID(r)),
+			"userID":    log.String(moovhttp.GetUserID(r)),
+		}).Log("added customer name watch")
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
@@ -276,10 +278,10 @@ func addCustomerWatch(logger log.Logger, searcher *searcher, repo *sqliteWatchRe
 			return
 		}
 
-		if requestID := moovhttp.GetRequestID(r); requestID != "" {
-			userID := moovhttp.GetUserID(r)
-			logger.Log("customers", "added customer name watch", "requestID", requestID, "userID", userID)
-		}
+		logger.With(log.Fields{
+			"requestID": log.String(moovhttp.GetRequestID(r)),
+			"userID":    log.String(moovhttp.GetUserID(r)),
+		}).Log("added customer name watch")
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
@@ -328,8 +330,10 @@ func updateCustomerStatus(logger log.Logger, searcher *searcher, custRepo custom
 				return
 			}
 
-			requestID := moovhttp.GetRequestID(r)
-			logger.Log("customers", fmt.Sprintf("updated customer=%s status", custID), "requestID", requestID, "userID", userID)
+			logger.With(log.Fields{
+				"requestID": log.String(moovhttp.GetRequestID(r)),
+				"userID":    log.String(userID),
+			}).Logf("updated customer=%s status", custID)
 
 			w.WriteHeader(http.StatusOK)
 			return
@@ -354,7 +358,10 @@ func removeCustomerWatch(logger log.Logger, searcher *searcher, repo *sqliteWatc
 			return
 		}
 
-		logger.Log("customers", fmt.Sprintf("removed customer=%s watch", customerID), "requestID", moovhttp.GetRequestID(r))
+		logger.With(log.Fields{
+			"requestID": log.String(moovhttp.GetRequestID(r)),
+			"userID":    log.String(moovhttp.GetUserID(r)),
+		}).Logf("removed customer=%s watch", customerID)
 
 		w.WriteHeader(http.StatusOK)
 	}
@@ -372,7 +379,10 @@ func removeCustomerNameWatch(logger log.Logger, searcher *searcher, repo *sqlite
 			moovhttp.Problem(w, err)
 			return
 		}
-		logger.Log("customers", "removed customer name watch", "requestID", moovhttp.GetRequestID(r))
+		logger.With(log.Fields{
+			"requestID": log.String(moovhttp.GetRequestID(r)),
+			"userID":    log.String(moovhttp.GetUserID(r)),
+		}).Log("removed customer name watch")
 		w.WriteHeader(http.StatusOK)
 	}
 }

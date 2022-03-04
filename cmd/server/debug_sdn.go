@@ -6,12 +6,10 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	moovhttp "github.com/moov-io/base/http"
-
-	"github.com/go-kit/kit/log"
+	"github.com/moov-io/base/log"
 )
 
 const (
@@ -26,7 +24,9 @@ func debugSDNHandler(logger log.Logger, searcher *searcher) http.HandlerFunc {
 		}
 
 		if requestID := moovhttp.GetRequestID(r); requestID != "" {
-			logger.Log("admin", fmt.Sprintf("debug route for SDN=%s", sdnID), "requestID", requestID)
+			logger.Info().With(log.Fields{
+				"requestID": log.String(requestID),
+			}).Logf("debug route for SDN=%s", sdnID)
 		}
 
 		var response struct {

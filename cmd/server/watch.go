@@ -12,8 +12,8 @@ import (
 
 	"github.com/moov-io/base"
 	moovhttp "github.com/moov-io/base/http"
+	"github.com/moov-io/base/log"
 
-	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
 )
 
@@ -244,26 +244,26 @@ func (cur *watchCursor) Next() ([]watch, error) {
 	// Companies
 	companyWatches, err := cur.getCompanyBatch(limit)
 	if err != nil {
-		cur.logger.Log("watchCursor", "problem reading company watches", "error", err)
+		cur.logger.LogErrorf("problem reading company watches: %v", err)
 	}
 	watches = append(watches, companyWatches...)
 
 	companyNameWatches, err := cur.getCompanyNameBatch(limit)
 	if err != nil {
-		cur.logger.Log("watchCursor", "problem reading company name watches", "error", err)
+		cur.logger.LogErrorf("problem reading company name watches: %v", err)
 	}
 	watches = append(watches, companyNameWatches...)
 
 	// Customers
 	customerWatches, err := cur.getCustomerBatch(limit)
 	if err != nil {
-		cur.logger.Log("watchCursor", "problem reading customer watches", "error", err)
+		cur.logger.LogErrorf("problem reading customer watches: %v", err)
 	}
 	watches = append(watches, customerWatches...)
 
 	customerNameWatches, err := cur.getCustomerNameBatch(limit)
 	if err != nil {
-		cur.logger.Log("watchCursor", "problem reading customer name watches", "error", err)
+		cur.logger.LogErrorf("problem reading customer name watches: %v", err)
 	}
 	watches = append(watches, customerNameWatches...)
 

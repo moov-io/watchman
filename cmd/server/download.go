@@ -14,11 +14,11 @@ import (
 	"time"
 
 	moovhttp "github.com/moov-io/base/http"
+	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/pkg/csl"
 	"github.com/moov-io/watchman/pkg/dpl"
 	"github.com/moov-io/watchman/pkg/ofac"
 
-	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -80,7 +80,7 @@ type downloadStats struct {
 // Download stats are recorded as part of a successful re-download and parse.
 func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo downloadRepository, updates chan *downloadStats) {
 	if interval == 0*time.Second {
-		s.logger.Log("download", fmt.Sprintf("not scheduling periodic refreshing duration=%v", interval))
+		s.logger.Logf("not scheduling periodic refreshing duration=%v", interval)
 		return
 	}
 	for {
@@ -88,16 +88,19 @@ func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo down
 		stats, err := s.refreshData("")
 		if err != nil {
 			if s.logger != nil {
-				s.logger.Log("main", fmt.Sprintf("ERROR: refreshing data: %v", err))
+				s.logger.Info().Logf("ERROR: refreshing data: %v", err)
 			}
 		} else {
 			downloadRepo.recordStats(stats)
 			if s.logger != nil {
-				s.logger.Log(
-					"main", fmt.Sprintf("data refreshed %v ago", time.Since(stats.RefreshedAt)),
-					"SDNs", stats.SDNs, "AltNames", stats.Alts, "Addresses", stats.Addresses, "SSI", stats.SectoralSanctions,
-					"DPL", stats.DeniedPersons, "BISEntities", stats.BISEntities,
-				)
+				s.logger.Info().With(log.Fields{
+					"SDNs":        log.Int(stats.SDNs),
+					"AltNames":    log.Int(stats.Alts),
+					"Addresses":   log.Int(stats.Addresses),
+					"SSI":         log.Int(stats.SectoralSanctions),
+					"DPL":         log.Int(stats.DeniedPersons),
+					"BISEntities": log.Int(stats.BISEntities),
+				}).Logf("data refreshed %v ago", time.Since(stats.RefreshedAt))
 			}
 			updates <- stats // send stats for re-search and watch notifications
 		}
@@ -151,7 +154,7 @@ func dplRecords(logger log.Logger, initialDir string) ([]*dpl.DPL, error) {
 func cslRecords(logger log.Logger, initialDir string) (*csl.CSL, error) {
 	file, err := csl.Download(logger, initialDir)
 	if err != nil {
-		logger.Log("download", "WARN: skipping CSL download", "description", err)
+		logger.Warn().LogErrorf("skipping CSL download: %v", err)
 		return &csl.CSL{}, nil
 	}
 	cslRecords, err := csl.Read(file)
@@ -165,10 +168,10 @@ func cslRecords(logger log.Logger, initialDir string) (*csl.CSL, error) {
 // files, runs each list's parser, and index data for searches.
 func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 	if s.logger != nil {
-		s.logger.Log("download", "Starting refresh of data")
+		s.logger.Log("Starting refresh of data")
 
 		if initialDir != "" {
-			s.logger.Log("download", fmt.Sprintf("reading files from %s", initialDir))
+			s.logger.Logf("reading files from %s", initialDir)
 		}
 	}
 
@@ -235,7 +238,7 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 	s.Unlock()
 
 	if s.logger != nil {
-		s.logger.Log("download", "Finished refresh of data")
+		s.logger.Log("Finished refresh of data")
 	}
 
 	// record successful data refresh
@@ -279,7 +282,9 @@ func getLatestDownloads(logger log.Logger, repo downloadRepository) http.Handler
 			return
 		}
 
-		logger.Log("download", "get latest downloads", "requestID", moovhttp.GetRequestID(r))
+		logger.Info().With(log.Fields{
+			"requestID": log.String(moovhttp.GetRequestID(r)),
+		}).Log("get latest downloads")
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)

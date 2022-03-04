@@ -7,9 +7,8 @@ package main
 import (
 	"testing"
 
+	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/pkg/ofac"
-
-	"github.com/go-kit/kit/log"
 )
 
 func TestIssue115__TopSDNs(t *testing.T) {

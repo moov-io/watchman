@@ -6,7 +6,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"math"
 	"net/http"
 	"net/url"
@@ -15,8 +14,8 @@ import (
 	"time"
 
 	moovhttp "github.com/moov-io/base/http"
+	"github.com/moov-io/base/log"
 
-	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics/prometheus"
 	"github.com/gorilla/mux"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
@@ -66,14 +65,18 @@ func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 
 		// Search over all fields
 		if q := strings.TrimSpace(r.URL.Query().Get("q")); q != "" {
-			logger.Log("search", fmt.Sprintf("searching all names and address for %s", q), "requestID", requestID)
+			logger.Info().With(log.Fields{
+				"requestID": log.String(requestID),
+			}).Logf("searching all names and address for %s", q)
 			searchViaQ(logger, searcher, q)(w, r)
 			return
 		}
 
 		// Search by ID (found in an SDN's Remarks property)
 		if id := strings.TrimSpace(r.URL.Query().Get("id")); id != "" {
-			logger.Log("search", fmt.Sprintf("searching SDNs by remarks ID for %s", id))
+			logger.Info().With(log.Fields{
+				"requestID": log.String(requestID),
+			}).Logf("searching SDNs by remarks ID for %s", id)
 			searchByRemarksID(logger, searcher, id)(w, r)
 			return
 		}
@@ -81,26 +84,34 @@ func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 		// Search by Name
 		if name := strings.TrimSpace(r.URL.Query().Get("name")); name != "" {
 			if req := readAddressSearchRequest(r.URL); !req.empty() {
-				logger.Log("search", fmt.Sprintf("searching SDN names='%s' and addresses", name), "requestID", requestID)
+				logger.Info().With(log.Fields{
+					"requestID": log.String(requestID),
+				}).Logf("searching SDN names='%s' and addresses", name)
 				searchViaAddressAndName(logger, searcher, name, req)(w, r)
 				return
 			}
 
-			logger.Log("search", fmt.Sprintf("searching SDN names for %s", name), "requestID", requestID)
+			logger.Info().With(log.Fields{
+				"requestID": log.String(requestID),
+			}).Logf("searching SDN names for %s", name)
 			searchByName(logger, searcher, name)(w, r)
 			return
 		}
 
 		// Search by Alt Name
 		if alt := strings.TrimSpace(r.URL.Query().Get("altName")); alt != "" {
-			logger.Log("search", fmt.Sprintf("searching SDN alt names for %s", alt), "requestID", requestID)
+			logger.Info().With(log.Fields{
+				"requestID": log.String(requestID),
+			}).Logf("searching SDN alt names for %s", alt)
 			searchByAltName(logger, searcher, alt)(w, r)
 			return
 		}
 
 		// Search Addresses
 		if req := readAddressSearchRequest(r.URL); !req.empty() {
-			logger.Log("search", fmt.Sprintf("searching address for %#v", req), "requestID", requestID)
+			logger.Info().With(log.Fields{
+				"requestID": log.String(requestID),
+			}).Logf("searching address for %#v", req)
 			searchByAddress(logger, searcher, req)(w, r)
 			return
 		}
