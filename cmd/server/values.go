@@ -12,8 +12,8 @@ import (
 	"strings"
 
 	moovhttp "github.com/moov-io/base/http"
+	"github.com/moov-io/base/log"
 
-	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
 )
 

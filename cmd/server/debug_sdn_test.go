@@ -12,8 +12,7 @@ import (
 
 	"github.com/moov-io/base"
 	"github.com/moov-io/base/admin"
-
-	"github.com/go-kit/kit/log"
+	"github.com/moov-io/base/log"
 )
 
 func TestDebug__SDN(t *testing.T) {

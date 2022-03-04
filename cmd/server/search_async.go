@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-kit/kit/log"
+	"github.com/moov-io/base/log"
 )
 
 var (
@@ -39,7 +39,7 @@ func readWebhookBatchSize(str string) int {
 // Since watches are used to post list data via webhooks they are used as catalysts in other systems.
 func (s *searcher) spawnResearching(logger log.Logger, companyRepo companyRepository, custRepo customerRepository, watchRepo watchRepository, webhookRepo webhookRepository, updates chan *downloadStats) {
 	for range updates {
-		s.logger.Log("search", "async: starting re-search of watches")
+		s.logger.Log("async: starting re-search of watches")
 		cursor := watchRepo.getWatchesCursor(logger, watchResearchBatchSize)
 		for {
 			watches, _ := cursor.Next()
@@ -49,11 +49,11 @@ func (s *searcher) spawnResearching(logger log.Logger, companyRepo companyReposi
 			for i := range watches {
 				body, err := s.renderBody(watches[i], companyRepo, custRepo)
 				if err != nil {
-					s.logger.Log("search", fmt.Sprintf("async: watch %s: %v", watches[i].id, err))
+					s.logger.Logf("async: watch %s: %v", watches[i].id, err)
 					continue
 				}
 				if body == nil {
-					s.logger.Log("search", fmt.Sprintf("async: no body rendered for watchID=%s - skipping", watches[i].id))
+					s.logger.Logf("async: no body rendered for watchID=%s - skipping", watches[i].id)
 					continue
 				}
 
@@ -61,10 +61,10 @@ func (s *searcher) spawnResearching(logger log.Logger, companyRepo companyReposi
 				now := time.Now()
 				status, err := callWebhook(watches[i].id, body, watches[i].webhook, watches[i].authToken)
 				if err != nil {
-					s.logger.Log("search", fmt.Errorf("async: problem writing watch (%s) webhook status: %v", watches[i].id, err))
+					s.logger.Logf("async: problem writing watch (%s) webhook status: %v", watches[i].id, err)
 				}
 				if err := webhookRepo.recordWebhook(watches[i].id, now, status); err != nil {
-					s.logger.Log("search", fmt.Errorf("async: problem writing watch (%s) webhook status: %v", watches[i].id, err))
+					s.logger.Logf("async: problem writing watch (%s) webhook status: %v", watches[i].id, err)
 				}
 			}
 		}
@@ -77,11 +77,11 @@ func (s *searcher) renderBody(w watch, companyRepo companyRepository, custRepo c
 	// Perform a query (ID watches) or search (name watches) and encode the model in JSON for calling the webhook.
 	switch {
 	case w.customerID != "":
-		s.logger.Log("search", fmt.Sprintf("async: watch %s for customer %s found", w.id, w.customerID))
+		s.logger.Logf("async: watch %s for customer %s found", w.id, w.customerID)
 		return getCustomerBody(s, w.id, w.customerID, 1.0, custRepo)
 
 	case w.customerName != "":
-		s.logger.Log("search", fmt.Sprintf("async: name watch '%s' for customer %s found", w.customerName, w.id))
+		s.logger.Logf("async: name watch '%s' for customer %s found", w.customerName, w.id)
 		sdns := s.TopSDNs(5, 0.00, w.customerName, keeper)
 		for j := range sdns {
 			if strings.EqualFold(sdns[j].SDNType, "individual") {
@@ -90,11 +90,11 @@ func (s *searcher) renderBody(w watch, companyRepo companyRepository, custRepo c
 		}
 
 	case w.companyID != "":
-		s.logger.Log("search", fmt.Sprintf("async: watch %s for company %s found", w.id, w.companyID))
+		s.logger.Logf("async: watch %s for company %s found", w.id, w.companyID)
 		return getCompanyBody(s, w.id, w.companyID, 1.0, companyRepo)
 
 	case w.companyName != "":
-		s.logger.Log("search", fmt.Sprintf("async: name watch '%s' for company %s found", w.companyName, w.id))
+		s.logger.Logf("async: name watch '%s' for company %s found", w.companyName, w.id)
 		sdns := s.TopSDNs(5, 0.00, w.companyName, keeper)
 		for j := range sdns {
 			if !strings.EqualFold(sdns[j].SDNType, "individual") {

@@ -17,12 +17,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/moov-io/base/log"
 	"github.com/moov-io/base/strx"
 	"github.com/moov-io/watchman/pkg/csl"
 	"github.com/moov-io/watchman/pkg/dpl"
 	"github.com/moov-io/watchman/pkg/ofac"
 
-	"github.com/go-kit/kit/log"
 	"github.com/xrash/smetrics"
 	"go4.org/syncutil"
 )
@@ -57,11 +57,13 @@ type searcher struct {
 }
 
 func newSearcher(logger log.Logger, pipeline *pipeliner, workers int) *searcher {
-	logger.Log("search", fmt.Sprintf("allowing only %d workers", workers))
+	logger.Logf("allowing only %d workers for search", workers)
 	return &searcher{
-		logger: logger,
-		pipe:   pipeline,
-		Gate:   syncutil.NewGate(workers),
+		logger: logger.With(log.Fields{
+			"component": log.String("pipeline"),
+		}),
+		pipe: pipeline,
+		Gate: syncutil.NewGate(workers),
 	}
 }
 
@@ -580,7 +582,7 @@ func precomputeSDNs(sdns []*ofac.SDN, addrs []*ofac.Address, pipe *pipeliner) []
 		nn := sdnName(sdns[i], findAddresses(sdns[i].EntityID, addrs))
 
 		if err := pipe.Do(nn); err != nil {
-			pipe.logger.Log("pipeline", fmt.Sprintf("problem pipelining SDN: %v", err))
+			pipe.logger.Logf("pipeline", fmt.Sprintf("problem pipelining SDN: %v", err))
 			continue
 		}
 
@@ -654,7 +656,7 @@ func precomputeAlts(alts []*ofac.AlternateIdentity, pipe *pipeliner) []*Alt {
 		an := altName(alts[i])
 
 		if err := pipe.Do(an); err != nil {
-			pipe.logger.Log("pipeline", fmt.Sprintf("problem pipelining SDN: %v", err))
+			pipe.logger.LogErrorf("problem pipelining SDN: %v", err)
 			continue
 		}
 
@@ -689,7 +691,7 @@ func precomputeDPs(persons []*dpl.DPL, pipe *pipeliner) []*DP {
 	for i := range persons {
 		nn := dpName(persons[i])
 		if err := pipe.Do(nn); err != nil {
-			pipe.logger.Log("pipeline", fmt.Sprintf("problem pipelining DP: %v", err))
+			pipe.logger.LogErrorf("problem pipelining DP: %v", err)
 			continue
 		}
 		out[i] = &DP{
@@ -721,7 +723,7 @@ func precomputeSSIs(ssis []*csl.SSI, pipe *pipeliner) []*SSI {
 	for i, ssi := range ssis {
 		nn := ssiName(ssi)
 		if err := pipe.Do(nn); err != nil {
-			pipe.logger.Log("pipeline", fmt.Sprintf("problem pipelining SSI: %v", err))
+			pipe.logger.LogErrorf("problem pipelining SSI: %v", err)
 			continue
 		}
 
@@ -729,7 +731,7 @@ func precomputeSSIs(ssis []*csl.SSI, pipe *pipeliner) []*SSI {
 		for i := range ssi.AlternateNames {
 			altNN := &Name{Processed: ssi.AlternateNames[i]}
 			if err := pipe.Do(altNN); err != nil {
-				pipe.logger.Log("pipeline", fmt.Sprintf("problem pipelining alt: %v", err))
+				pipe.logger.LogErrorf("problem pipelining alt: %v", err)
 				continue
 			}
 			altNames = append(altNames, altNN.Processed)
@@ -765,7 +767,7 @@ func precomputeBISEntities(els []*csl.EL, pipe *pipeliner) []*BISEntity {
 	for i, el := range els {
 		nn := bisEntityName(el)
 		if err := pipe.Do(nn); err != nil {
-			pipe.logger.Log("pipeline", fmt.Sprintf("problem pipelining EL: %v", err))
+			pipe.logger.LogErrorf("problem pipelining EL: %v", err)
 			continue
 		}
 
@@ -773,7 +775,7 @@ func precomputeBISEntities(els []*csl.EL, pipe *pipeliner) []*BISEntity {
 		for i := range el.AlternateNames {
 			altNN := &Name{Processed: el.AlternateNames[i]}
 			if err := pipe.Do(altNN); err != nil {
-				pipe.logger.Log("pipeline", fmt.Sprintf("problem pipelining alt: %v", err))
+				pipe.logger.LogErrorf("problem pipelining alt: %v", err)
 				continue
 			}
 			altNames = append(altNames, altNN.Processed)

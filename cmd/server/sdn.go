@@ -7,12 +7,11 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 
 	moovhttp "github.com/moov-io/base/http"
+	"github.com/moov-io/base/log"
 
-	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
 )
 
@@ -46,7 +45,9 @@ func getSDNAddresses(logger log.Logger, searcher *searcher) http.HandlerFunc {
 
 		addresses := searcher.FindAddresses(limit, id)
 
-		logger.Log("sdn", fmt.Sprintf("get sdn=%s addresses", id), "requestID", moovhttp.GetRequestID(r))
+		logger.Info().With(log.Fields{
+			"requestID": log.String(moovhttp.GetRequestID(r)),
+		}).Logf("get sdn=%s addresses", id)
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
@@ -68,7 +69,9 @@ func getSDNAltNames(logger log.Logger, searcher *searcher) http.HandlerFunc {
 
 		alts := searcher.FindAlts(limit, id)
 
-		logger.Log("sdn", fmt.Sprintf("get sdn=%s alt names", id), "requestID", moovhttp.GetRequestID(r))
+		logger.Info().With(log.Fields{
+			"requestID": log.String(moovhttp.GetRequestID(r)),
+		}).Logf("get sdn=%s alt names", id)
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
@@ -93,7 +96,9 @@ func getSDN(logger log.Logger, searcher *searcher) http.HandlerFunc {
 			return
 		}
 
-		logger.Log("sdn", fmt.Sprintf("get sdn=%s", id), "requestID", moovhttp.GetRequestID(r))
+		logger.Info().With(log.Fields{
+			"requestID": log.String(moovhttp.GetRequestID(r)),
+		}).Logf("get sdn=%s", id)
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)

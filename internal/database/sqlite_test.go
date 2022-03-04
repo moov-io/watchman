@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/go-kit/kit/log"
+	"github.com/moov-io/base/log"
 )
 
 func TestSQLite__basic(t *testing.T) {

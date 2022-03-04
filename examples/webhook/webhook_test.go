@@ -12,9 +12,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/pkg/ofac"
 
-	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
 )
 

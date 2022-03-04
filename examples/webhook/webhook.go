@@ -12,9 +12,9 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/pkg/ofac"
 
-	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
 )
 
@@ -38,7 +38,7 @@ func addWebhookRoute(logger log.Logger, r *mux.Router) {
 	r.Methods("POST").Path("/ofac").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		bs, err := ioutil.ReadAll(io.LimitReader(r.Body, 5*1024*1024))
 		if err != nil {
-			logger.Log("webhook", fmt.Sprintf("problem reading request: %v", err))
+			logger.Logf("problem reading request: %v", err)
 
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusBadRequest)
@@ -46,16 +46,16 @@ func addWebhookRoute(logger log.Logger, r *mux.Router) {
 		}
 
 		if cust := readCustomer(bytes.NewReader(bs)); cust != nil {
-			logger.Log("webhook", fmt.Sprintf("got webhook for Customer %s (%s) match=%.2f", cust.ID, cust.SDN.SDNName, cust.Match))
+			logger.Logf("got webhook for Customer %s (%s) match=%.2f", cust.ID, cust.SDN.SDNName, cust.Match)
 			w.WriteHeader(http.StatusOK)
 			return
 		}
 		if company := readCompany(bytes.NewReader(bs)); company != nil {
-			logger.Log("webhook", fmt.Sprintf("got webhook for Company %s (%s) match=%.2f", company.ID, company.SDN.SDNName, company.Match))
+			logger.Logf("got webhook for Company %s (%s) match=%.2f", company.ID, company.SDN.SDNName, company.Match)
 			w.WriteHeader(http.StatusOK)
 		}
 
-		logger.Log("webhook", "malformed webhook request")
+		logger.Log("malformed webhook request")
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(`{"error": "malformed JSON"}`))

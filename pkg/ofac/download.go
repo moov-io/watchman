@@ -8,9 +8,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/pkg/download"
-
-	"github.com/go-kit/kit/log"
 )
 
 var (

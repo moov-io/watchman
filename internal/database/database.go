@@ -10,17 +10,25 @@ import (
 	"os"
 	"strings"
 
-	"github.com/go-kit/kit/log"
+	"github.com/moov-io/base/log"
+
 	"github.com/lopezator/migrator"
 )
 
 func New(logger log.Logger, _type string) (*sql.DB, error) {
-	logger.Log("database", fmt.Sprintf("looking for %s database provider", _type))
+	logger.Logf("looking for %s database provider", _type)
+
 	switch strings.ToLower(_type) {
 	case "sqlite", "":
-		return sqliteConnection(logger, getSqlitePath()).Connect()
+		return sqliteConnection(logger.With(log.Fields{
+			"database": log.String("sqlite"),
+		}), getSqlitePath()).Connect()
+
 	case "mysql":
-		return mysqlConnection(logger, os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_ADDRESS"), os.Getenv("MYSQL_DATABASE")).Connect()
+		return mysqlConnection(logger.With(log.Fields{
+			"database": log.String("mysql"),
+		}), os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_ADDRESS"), os.Getenv("MYSQL_DATABASE")).Connect()
+
 	}
 	return nil, fmt.Errorf("unknown database type %q", _type)
 }

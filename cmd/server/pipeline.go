@@ -8,11 +8,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/pkg/csl"
 	"github.com/moov-io/watchman/pkg/dpl"
 	"github.com/moov-io/watchman/pkg/ofac"
-
-	"github.com/go-kit/kit/log"
 )
 
 // Name represents an individual or entity name to be processed for search.
@@ -86,11 +85,14 @@ type debugStep struct {
 
 func (ds *debugStep) apply(in *Name) error {
 	if err := ds.step.apply(in); err != nil {
-		// TODO(adam): PII log, we can't have this
-		ds.logger.Log("pipeline", fmt.Sprintf("%T encountered error: %v", ds.step, err), "original", in.Original)
-		return err
+		return ds.logger.Info().With(log.Fields{
+			"original": log.String(in.Original),
+		}).LogErrorf("%T encountered error: %v", ds.step, err).Err()
 	}
-	ds.logger.Log("pipeline", fmt.Sprintf("%T", ds.step), "result", in.Processed, "original", in.Original) // TODO(adam): PII log
+	ds.logger.Info().With(log.Fields{
+		"original": log.String(in.Original),
+		"result":   log.String(in.Processed),
+	}).Logf("%T", ds.step)
 	return nil
 }
 

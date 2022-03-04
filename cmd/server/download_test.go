@@ -14,9 +14,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/internal/database"
 
-	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
 )
 
