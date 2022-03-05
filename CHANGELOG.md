@@ -1,3 +1,20 @@
+## v0.21.4 (Released 2022-03-04)
+
+IMPROVEMENTS
+
+- all: update logging to moov-io/base using better structures and key/value pairs
+
+BUILD
+
+- Improve code coverage and fix errors form gosec
+- Upgrade to Go 1.17
+- Upgrade github.com/go-kit/kit to v0.12.0
+- Upgrade github.com/mattn/go-sqlite3 to v1.14.11
+- Upgrade github.com/moov-io/base to v0.27.5
+- Upgrade github.com/ory/dockertest/v3 to v3.8.1
+- Upgrade github.com/pariz/gountries to v0.1.5
+- Upgrade github.com/prometheus/client_golang to v1.12.1
+
 ## v0.21.3 (Released 2021-11-10)
 
 IMPROVEMENTS
