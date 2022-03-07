@@ -12,7 +12,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/lopezator/migrator v0.3.0
 	github.com/mattn/go-sqlite3 v1.14.12
-	github.com/moov-io/base v0.27.5
+	github.com/moov-io/base v0.28.1
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/ory/dockertest/v3 v3.8.1
 	github.com/pariz/gountries v0.1.5
