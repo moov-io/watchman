@@ -17,10 +17,10 @@ require (
 	github.com/ory/dockertest/v3 v3.8.1
 	github.com/pariz/gountries v0.1.5
 	github.com/prometheus/client_golang v1.12.1
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673
 	go4.org v0.0.0-20201209231011-d4a079459e60
-	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b
+	golang.org/x/oauth2 v0.0.0-20220309155454-6242fa91716a
 	golang.org/x/text v0.3.7
 	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
 	gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2 // indirect
