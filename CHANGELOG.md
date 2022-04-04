@@ -1,3 +1,12 @@
+## v0.21.5 (Released 2022-04-04)
+
+BUILD
+
+- build(deps): bump lodash from 4.17.19 to 4.17.21 in /webui
+- build(deps): bump minimist from 1.2.5 to 1.2.6 in /webui
+- fix(deps): update module github.com/moov-io/base to v0.28.1
+- fix(deps): update react monorepo to v18
+
 ## v0.21.4 (Released 2022-03-04)
 
 IMPROVEMENTS
