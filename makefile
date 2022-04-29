@@ -40,7 +40,7 @@ admin:
 	docker run --rm \
 		-u $(USERID):$(GROUPID) \
 		-v ${PWD}:/local openapitools/openapi-generator-cli:v4.3.1 batch -- /local/.openapi-generator/admin-generator-config.yml
-	rm -f ./admin/go.mod ./admin/go.sum
+	rm -f ./admin/go.mod ./admin/go.sum ./admin/.travis.yml
 	gofmt -w ./admin/
 	go build github.com/moov-io/watchman/admin
 
@@ -50,7 +50,7 @@ client:
 	docker run --rm \
 		-u $(USERID):$(GROUPID) \
 		-v ${PWD}:/local openapitools/openapi-generator-cli:v4.3.1 batch -- /local/.openapi-generator/client-generator-config.yml
-	rm -f ./client/go.mod ./client/go.sum
+	rm -f ./client/go.mod ./client/go.sum ./client/.travis.yml
 	gofmt -w ./client/
 	go build github.com/moov-io/watchman/client
 
