@@ -8,17 +8,20 @@ import (
 	"strings"
 )
 
-func Read(path string) (*CSL, error) {
-	f, err := os.Open(path)
+func ReadFile(path string) (*CSL, error) {
+	fd, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer fd.Close()
 
-	reader := csv.NewReader(f)
+	return Parse(fd)
+}
 
-	var ssis []*SSI
-	var els []*EL
+func Parse(r io.Reader) (*CSL, error) {
+	reader := csv.NewReader(r)
+
+	var report CSL
 	for {
 		record, err := reader.Read()
 		if err != nil {
@@ -44,18 +47,41 @@ func Read(path string) (*CSL, error) {
 		for i := 0; i <= 1; i++ {
 			switch record[i] {
 			case "Sectoral Sanctions Identifications List (SSI) - Treasury Department":
-				ssis = append(ssis, unmarshalSSI(record, i))
+				report.SSIs = append(report.SSIs, unmarshalSSI(record, i))
 
 			case "Entity List (EL) - Bureau of Industry and Security":
-				els = append(els, unmarshalEL(record, i))
+				report.ELs = append(report.ELs, unmarshalEL(record, i))
+
+			case "Military End User (MEU) List - Bureau of Industry and Security":
+				// TODO(adam):
+
+			case "Unverified List (UVL) - Bureau of Industry and Security":
+				// TODO(adam):
+
+			case "Nonproliferation Sanctions (ISN) - State Department":
+				// TODO(adam):
+
+			case "AECA Debarred List": // TODO: Not found
+				// TODO(adam): there is 'ITAR Debarred (DTC) - State Department'
+
+			case "Foreign Sanctions Evaders (FSE) - Treasury Department":
+				// TODO(adam):
+
+			case "Palestinian Legislative Council List (PLC) - Treasury Department":
+				// TODO(adam):
+
+			case "Capta List (CAP) - Treasury Department":
+				// TODO(adam):
+
+			case "Non-SDN Menu-Based Sanctions List (NS-MBS List) - Treasury Department":
+				// TODO(adam):
+
+			case "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department":
+				// TODO(adam):
 			}
 		}
 	}
-
-	return &CSL{
-		SSIs: ssis,
-		ELs:  els,
-	}, nil
+	return &report, nil
 }
 
 func unmarshalSSI(record []string, offset int) *SSI {

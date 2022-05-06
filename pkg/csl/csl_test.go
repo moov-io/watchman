@@ -27,7 +27,7 @@ func TestCSL(t *testing.T) {
 	file, err := Download(logger, dir)
 	require.NoError(t, err)
 
-	cslRecords, err := Read(file)
+	cslRecords, err := ReadFile(file)
 	require.NoError(t, err)
 
 	if len(cslRecords.SSIs) == 0 {

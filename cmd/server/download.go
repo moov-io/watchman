@@ -157,7 +157,7 @@ func cslRecords(logger log.Logger, initialDir string) (*csl.CSL, error) {
 		logger.Warn().LogErrorf("skipping CSL download: %v", err)
 		return &csl.CSL{}, nil
 	}
-	cslRecords, err := csl.Read(file)
+	cslRecords, err := csl.ReadFile(file)
 	if err != nil {
 		return nil, err
 	}
