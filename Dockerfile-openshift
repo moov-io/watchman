@@ -4,7 +4,7 @@ WORKDIR /opt/app-root/src/
 COPY . .
 RUN make build
 
-FROM node:14-buster as frontend
+FROM node:16-buster as frontend
 COPY webui/ /watchman/
 WORKDIR /watchman/
 RUN npm install
