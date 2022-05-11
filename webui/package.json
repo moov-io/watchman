@@ -16,7 +16,7 @@
     "build": "react-scripts build",
     "watchman-server": "docker run -p 8084:8084 -p 9094:9094 -it moov/watchman:latest",
     "server": "node server/index.js",
-    "start": "react-scripts start",
+    "start": "react-scripts --openssl-legacy-provider start",
     "test": "react-scripts test"
   },
   "eslintConfig": {

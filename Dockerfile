@@ -5,7 +5,7 @@ COPY . .
 RUN go mod download
 RUN make build-server
 
-FROM node:16-buster as frontend
+FROM node:18-buster as frontend
 COPY webui/ /watchman/
 WORKDIR /watchman/
 RUN npm install
