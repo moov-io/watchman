@@ -51,4 +51,8 @@ jobs:
 
     - name: Tests
       if: runner.os == 'Linux'
-      run: make build-batchsearch && make test-integration && make clean-integration
+      run: make build-batchsearch && make test-integration
+
+    - name: Test Cleanup
+      if: runner.os == 'Linux' && always()
+      run: make clean-integration
