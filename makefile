@@ -7,7 +7,7 @@ build: build-server build-batchsearch build-watchmantest build-examples
 ifeq ($(OS),Windows_NT)
 	@echo "Skipping webui build on Windows."
 else
-	cd webui/ && npm install && npm run build && cd ../
+	cd webui/ && npm install --legacy-peer-deps && npm run build && cd ../
 endif
 
 build-server:
