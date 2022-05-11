@@ -5,10 +5,10 @@ COPY . .
 RUN go mod download
 RUN make build-server
 
-FROM node:12-buster as frontend
+FROM node:18-buster as frontend
 COPY webui/ /watchman/
 WORKDIR /watchman/
-RUN npm install
+RUN npm install --legacy-peer-deps
 RUN npm run build
 
 FROM debian:stable-slim

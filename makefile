@@ -7,7 +7,7 @@ build: build-server build-batchsearch build-watchmantest build-examples
 ifeq ($(OS),Windows_NT)
 	@echo "Skipping webui build on Windows."
 else
-	cd webui/ && npm install && npm run build && cd ../
+	cd webui/ && npm install --legacy-peer-deps && npm run build && cd ../
 endif
 
 build-server:
@@ -114,8 +114,7 @@ cover-web:
 	go tool cover -html=cover.out
 
 clean-integration:
-	docker-compose kill
-	docker-compose rm -v -f
+	docker-compose kill && docker-compose rm -v -f
 
 test-integration: clean-integration
 	docker-compose up -d

@@ -1,16 +1,16 @@
-FROM quay.io/fedora/fedora:34-x86_64 as builder
+FROM quay.io/fedora/fedora:37-x86_64 as builder
 RUN yum install -y git golang make npm wget glibc
 WORKDIR /opt/app-root/src/
 COPY . .
 RUN make build
 
-FROM node:14-buster as frontend
+FROM node:18-buster as frontend
 COPY webui/ /watchman/
 WORKDIR /watchman/
-RUN npm install
+RUN npm install --legacy-peer-deps
 RUN npm run build
 
-FROM quay.io/fedora/fedora:34-x86_64
+FROM quay.io/fedora/fedora:37-x86_64
 RUN yum install -y glibc
 
 ARG VERSION=unknown

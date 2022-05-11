@@ -9,14 +9,14 @@
     "http-proxy-middleware": "0.21.0",
     "react": "18.1.0",
     "react-dom": "18.1.0",
-    "react-scripts": "4.0.3",
+    "react-scripts": "^5.0.1",
     "winston": "3.6.0"
   },
   "scripts": {
     "build": "react-scripts build",
     "watchman-server": "docker run -p 8084:8084 -p 9094:9094 -it moov/watchman:latest",
     "server": "node server/index.js",
-    "start": "react-scripts start",
+    "start": "react-scripts --openssl-legacy-provider start",
     "test": "react-scripts test"
   },
   "eslintConfig": {
