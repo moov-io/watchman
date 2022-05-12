@@ -54,8 +54,9 @@ jobs:
     - name: Ubuntu 20.04 Cleanup
       if: runner.os == 'Linux'
       run: |
-       sudo systemctl stop mono-xsp4.service || true
-       sudo systemctl disable mono-xsp4.service || true
+        sudo systemctl disable mono-xsp4.service || true
+        sudo systemctl stop mono-xsp4.service || true
+        sudo killall mono || true
 
     - name: Tests
       if: runner.os == 'Linux'
