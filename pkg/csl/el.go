@@ -1,5 +1,7 @@
 package csl
 
+import "encoding/json"
+
 // EL is the Entity List (EL) - Bureau of Industry and Security
 type EL struct {
 	// ID is the unique identifier for the entity
@@ -22,4 +24,20 @@ type EL struct {
 	SourceListURL string `json:"sourceListURL"`
 	// SourceInfoURL is a link to information about the list
 	SourceInfoURL string `json:"sourceInfoURL"`
+}
+
+func (el EL) MarshalJSON() ([]byte, error) {
+	type Aux EL
+	return json.Marshal(Aux{
+		ID:                 el.ID,
+		Name:               el.Name,
+		AlternateNames:     el.AlternateNames,
+		Addresses:          el.Addresses,
+		StartDate:          el.StartDate,
+		LicenseRequirement: el.LicenseRequirement,
+		LicensePolicy:      el.LicensePolicy,
+		FRNotice:           el.FRNotice,
+		SourceListURL:      el.SourceListURL,
+		SourceInfoURL:      el.SourceInfoURL,
+	})
 }

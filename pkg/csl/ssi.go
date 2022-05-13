@@ -1,5 +1,7 @@
 package csl
 
+import "encoding/json"
+
 // SSI is the Sectoral Sanctions Identifications List - Treasury Department
 type SSI struct {
 	// EntityID (ent_num) is the unique record identifier/unique listing identifier
@@ -22,4 +24,20 @@ type SSI struct {
 	SourceListURL string `json:"sourceListURL"`
 	// SourceInfoURL is a link to information about the list
 	SourceInfoURL string `json:"sourceInfoURL"`
+}
+
+func (ssi SSI) MarshalJSON() ([]byte, error) {
+	type Aux SSI
+	return json.Marshal(Aux{
+		EntityID:       ssi.EntityID,
+		Type:           ssi.Type,
+		Programs:       ssi.Programs,
+		Name:           ssi.Name,
+		Addresses:      ssi.Addresses,
+		Remarks:        ssi.Remarks,
+		AlternateNames: ssi.AlternateNames,
+		IDsOnRecord:    ssi.IDsOnRecord,
+		SourceListURL:  ssi.SourceListURL,
+		SourceInfoURL:  ssi.SourceInfoURL,
+	})
 }
