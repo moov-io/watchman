@@ -36,6 +36,9 @@ jobs:
     - name: Build
       run: make build
 
+    - name: Setup
+      run: docker-compose up -d mysql
+
     - name: Check
       run: make check
       env:

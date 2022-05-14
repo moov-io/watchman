@@ -166,7 +166,6 @@ func TestWebhook_record(t *testing.T) {
 	check(t, &sqliteWebhookRepository{sqliteDB.DB})
 
 	// MySQL tests
-	mysqlDB := database.CreateTestMySQLDB(t)
-	defer mysqlDB.Close()
-	check(t, &sqliteWebhookRepository{mysqlDB.DB})
+	mysqlDB := database.TestMySQLConnection(t)
+	check(t, &sqliteWebhookRepository{mysqlDB})
 }

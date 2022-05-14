@@ -25,10 +25,17 @@ func New(logger log.Logger, _type string) (*sql.DB, error) {
 		}), getSqlitePath()).Connect()
 
 	case "mysql":
-		return mysqlConnection(logger.With(log.Fields{
-			"database": log.String("mysql"),
-		}), os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_ADDRESS"), os.Getenv("MYSQL_DATABASE")).Connect()
-
+		return NewMySQLConnection(
+			logger.With(log.Fields{
+				"database": log.String("mysql"),
+			}),
+			MySQLConfig{
+				Address:  os.Getenv("MYSQL_ADDRESS"),
+				Username: os.Getenv("MYSQL_USER"),
+				Password: os.Getenv("MYSQL_PASSWORD"),
+				Database: os.Getenv("MYSQL_DATABASE"),
+			},
+		)
 	}
 	return nil, fmt.Errorf("unknown database type %q", _type)
 }

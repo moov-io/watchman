@@ -106,9 +106,8 @@ func TestDownload_record(t *testing.T) {
 	check(t, &sqliteDownloadRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
-	mysqlDB := database.CreateTestMySQLDB(t)
-	defer mysqlDB.Close()
-	check(t, &sqliteDownloadRepository{mysqlDB.DB, log.NewNopLogger()})
+	mysqlDB := database.TestMySQLConnection(t)
+	check(t, &sqliteDownloadRepository{mysqlDB, log.NewNopLogger()})
 }
 
 func TestDownload_route(t *testing.T) {
@@ -145,9 +144,8 @@ func TestDownload_route(t *testing.T) {
 	check(t, &sqliteDownloadRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
-	mysqlDB := database.CreateTestMySQLDB(t)
-	defer mysqlDB.Close()
-	check(t, &sqliteDownloadRepository{mysqlDB.DB, log.NewNopLogger()})
+	mysqlDB := database.TestMySQLConnection(t)
+	check(t, &sqliteDownloadRepository{mysqlDB, log.NewNopLogger()})
 }
 
 func TestDownload__lastRefresh(t *testing.T) {

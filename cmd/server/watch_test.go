@@ -49,9 +49,8 @@ func TestCompanyWatch(t *testing.T) {
 	check(t, &sqliteWatchRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
-	mysqlDB := database.CreateTestMySQLDB(t)
-	defer mysqlDB.Close()
-	check(t, &sqliteWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+	mysqlDB := database.TestMySQLConnection(t)
+	check(t, &sqliteWatchRepository{mysqlDB, log.NewNopLogger()})
 }
 
 func TestCompanyNameWatch(t *testing.T) {
@@ -84,9 +83,8 @@ func TestCompanyNameWatch(t *testing.T) {
 	check(t, &sqliteWatchRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
-	mysqlDB := database.CreateTestMySQLDB(t)
-	defer mysqlDB.Close()
-	check(t, &sqliteWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+	mysqlDB := database.TestMySQLConnection(t)
+	check(t, &sqliteWatchRepository{mysqlDB, log.NewNopLogger()})
 }
 
 func TestCustomerWatch(t *testing.T) {
@@ -119,9 +117,8 @@ func TestCustomerWatch(t *testing.T) {
 	check(t, &sqliteWatchRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
-	mysqlDB := database.CreateTestMySQLDB(t)
-	defer mysqlDB.Close()
-	check(t, &sqliteWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+	mysqlDB := database.TestMySQLConnection(t)
+	check(t, &sqliteWatchRepository{mysqlDB, log.NewNopLogger()})
 }
 
 func TestCustomerNameWatch(t *testing.T) {
@@ -154,9 +151,8 @@ func TestCustomerNameWatch(t *testing.T) {
 	check(t, &sqliteWatchRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
-	mysqlDB := database.CreateTestMySQLDB(t)
-	defer mysqlDB.Close()
-	check(t, &sqliteWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+	mysqlDB := database.TestMySQLConnection(t)
+	check(t, &sqliteWatchRepository{mysqlDB, log.NewNopLogger()})
 }
 
 func TestWatchCursor_ID(t *testing.T) {
@@ -206,9 +202,8 @@ func TestWatchCursor_ID(t *testing.T) {
 	check(t, &sqliteWatchRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
-	mysqlDB := database.CreateTestMySQLDB(t)
-	defer mysqlDB.Close()
-	check(t, &sqliteWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+	mysqlDB := database.TestMySQLConnection(t)
+	check(t, &sqliteWatchRepository{mysqlDB, log.NewNopLogger()})
 }
 
 func TestWatchCursor_Names(t *testing.T) {
@@ -264,7 +259,6 @@ func TestWatchCursor_Names(t *testing.T) {
 	check(t, &sqliteWatchRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
-	mysqlDB := database.CreateTestMySQLDB(t)
-	defer mysqlDB.Close()
-	check(t, &sqliteWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+	mysqlDB := database.TestMySQLConnection(t)
+	check(t, &sqliteWatchRepository{mysqlDB, log.NewNopLogger()})
 }
