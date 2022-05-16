@@ -1,6 +1,7 @@
 package csl
 
 import (
+	"compress/gzip"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -12,7 +13,7 @@ import (
 )
 
 func TestRead(t *testing.T) {
-	csl, err := Read(filepath.Join("..", "..", "test", "testdata", "csl.csv"))
+	csl, err := ReadFile(filepath.Join("..", "..", "test", "testdata", "csl.csv"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -27,6 +28,22 @@ func TestRead(t *testing.T) {
 	}
 }
 
+func TestRead__Large(t *testing.T) {
+	fd, err := os.Open(filepath.Join("testdata", "consolidated.csv.gz"))
+	require.NoError(t, err)
+
+	reader, err := gzip.NewReader(fd)
+	require.NoError(t, err)
+
+	report, err := Parse(reader)
+	require.NoError(t, err)
+	require.NotNil(t, report)
+
+	// Ensure we read each row as expected
+	require.Len(t, report.SSIs, 290)
+	require.Len(t, report.ELs, 2001)
+}
+
 func TestRead_missingRow(t *testing.T) {
 	fd, err := ioutil.TempFile("", "csl-missing.csv")
 	require.NoError(t, err)
@@ -35,7 +52,7 @@ func TestRead_missingRow(t *testing.T) {
 	_, err = fd.Write([]byte(`  \n invalid  \n  \n`))
 	require.NoError(t, err)
 
-	resp, err := Read(fd.Name())
+	resp, err := ReadFile(fd.Name())
 	require.NoError(t, err)
 
 	require.Len(t, resp.SSIs, 0)
@@ -43,7 +60,7 @@ func TestRead_missingRow(t *testing.T) {
 }
 
 func TestRead_invalidRow(t *testing.T) {
-	csl, err := Read(filepath.Join("..", "..", "test", "testdata", "invalidFiles", "csl.csv"))
+	csl, err := ReadFile(filepath.Join("..", "..", "test", "testdata", "invalidFiles", "csl.csv"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -119,7 +136,7 @@ func Test__Issue326EL(t *testing.T) {
 	}
 
 	// read the line back
-	csl, err := Read(fd.Name())
+	csl, err := ReadFile(fd.Name())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -176,7 +193,7 @@ func TestCSL__UniqueIDs(t *testing.T) {
 	// CSL datafiles have added a unique identifier as the first column.
 	// We need verify the old and new file formats can be parsed.
 
-	records, err := Read(filepath.Join("..", "..", "test", "testdata", "csl-unique-ids.csv"))
+	records, err := ReadFile(filepath.Join("..", "..", "test", "testdata", "csl-unique-ids.csv"))
 	if err != nil {
 		t.Fatal(err)
 	}
