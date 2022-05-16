@@ -12,10 +12,9 @@ import (
 )
 
 func TestMySQL__basic(t *testing.T) {
-	db := CreateTestMySQLDB(t)
-	defer db.Close()
+	db := TestMySQLConnection(t)
 
-	if err := db.DB.Ping(); err != nil {
+	if err := db.Ping(); err != nil {
 		t.Fatal(err)
 	}
 

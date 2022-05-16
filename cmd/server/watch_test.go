@@ -10,6 +10,8 @@ import (
 	"github.com/moov-io/base"
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/internal/database"
+
+	"github.com/stretchr/testify/require"
 )
 
 func createTestWatchRepository(t *testing.T) *sqliteWatchRepository {
@@ -24,23 +26,17 @@ func TestCompanyWatch(t *testing.T) {
 
 	check := func(t *testing.T, repo *sqliteWatchRepository) {
 		companyID := base.ID()
-		if err := repo.removeCompanyWatch(companyID, base.ID()); err != nil {
-			t.Errorf("expected no error: %v", err)
-		}
+		err := repo.removeCompanyWatch(companyID, base.ID())
+		require.NoError(t, err)
 
 		// add watch, then remove
 		watchID, err := repo.addCompanyWatch(companyID, watchRequest{Webhook: "https://moov.io"})
-		if err != nil {
-			t.Errorf("companyID=%q got error: %v", companyID, err)
-		}
-		if watchID == "" {
-			t.Error("empty watchID")
-		}
+		require.NoError(t, err)
+		require.NotEmpty(t, watchID)
 
 		// remove
-		if err := repo.removeCompanyWatch(companyID, watchID); err != nil {
-			t.Errorf("expected no error: %v", err)
-		}
+		err = repo.removeCompanyWatch(companyID, watchID)
+		require.NoError(t, err)
 	}
 
 	// SQLite tests
@@ -49,33 +45,26 @@ func TestCompanyWatch(t *testing.T) {
 	check(t, &sqliteWatchRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
-	mysqlDB := database.CreateTestMySQLDB(t)
-	defer mysqlDB.Close()
-	check(t, &sqliteWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+	mysqlDB := database.TestMySQLConnection(t)
+	check(t, &sqliteWatchRepository{mysqlDB, log.NewNopLogger()})
 }
 
 func TestCompanyNameWatch(t *testing.T) {
 	t.Parallel()
 
 	check := func(t *testing.T, repo *sqliteWatchRepository) {
-		if err := repo.removeCompanyNameWatch(base.ID()); err != nil {
-			t.Errorf("expected no error: %v", err)
-		}
+		err := repo.removeCompanyNameWatch(base.ID())
+		require.NoError(t, err)
 
 		// Add
 		name := base.ID()
 		watchID, err := repo.addCompanyNameWatch(name, "https://moov.io", "authToken")
-		if err != nil {
-			t.Errorf("name=%q got error: %v", name, err)
-		}
-		if watchID == "" {
-			t.Error("empty watchID")
-		}
+		require.NoError(t, err)
+		require.NotEmpty(t, watchID)
 
 		// Remove
-		if err := repo.removeCompanyNameWatch(watchID); err != nil {
-			t.Errorf("expected no error: %v", err)
-		}
+		err = repo.removeCompanyNameWatch(watchID)
+		require.NoError(t, err)
 	}
 
 	// SQLite tests
@@ -84,9 +73,8 @@ func TestCompanyNameWatch(t *testing.T) {
 	check(t, &sqliteWatchRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
-	mysqlDB := database.CreateTestMySQLDB(t)
-	defer mysqlDB.Close()
-	check(t, &sqliteWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+	mysqlDB := database.TestMySQLConnection(t)
+	check(t, &sqliteWatchRepository{mysqlDB, log.NewNopLogger()})
 }
 
 func TestCustomerWatch(t *testing.T) {
@@ -94,23 +82,17 @@ func TestCustomerWatch(t *testing.T) {
 
 	check := func(t *testing.T, repo *sqliteWatchRepository) {
 		customerID := base.ID()
-		if err := repo.removeCustomerWatch(customerID, base.ID()); err != nil {
-			t.Errorf("expected no error: %v", err)
-		}
+		err := repo.removeCustomerWatch(customerID, base.ID())
+		require.NoError(t, err)
 
 		// add watch, then remove
 		watchID, err := repo.addCustomerWatch(customerID, watchRequest{Webhook: "https://moov.io"})
-		if err != nil {
-			t.Errorf("customerID=%q got error: %v", customerID, err)
-		}
-		if watchID == "" {
-			t.Error("empty watchID")
-		}
+		require.NoError(t, err)
+		require.NotEmpty(t, watchID)
 
 		// remove
-		if err := repo.removeCustomerWatch(customerID, watchID); err != nil {
-			t.Errorf("expected no error: %v", err)
-		}
+		err = repo.removeCustomerWatch(customerID, watchID)
+		require.NoError(t, err)
 	}
 
 	// SQLite tests
@@ -119,33 +101,26 @@ func TestCustomerWatch(t *testing.T) {
 	check(t, &sqliteWatchRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
-	mysqlDB := database.CreateTestMySQLDB(t)
-	defer mysqlDB.Close()
-	check(t, &sqliteWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+	mysqlDB := database.TestMySQLConnection(t)
+	check(t, &sqliteWatchRepository{mysqlDB, log.NewNopLogger()})
 }
 
 func TestCustomerNameWatch(t *testing.T) {
 	t.Parallel()
 
 	check := func(t *testing.T, repo *sqliteWatchRepository) {
-		if err := repo.removeCustomerNameWatch(base.ID()); err != nil {
-			t.Errorf("expected no error: %v", err)
-		}
+		err := repo.removeCustomerNameWatch(base.ID())
+		require.NoError(t, err)
 
 		// Add
 		name := base.ID()
 		watchID, err := repo.addCustomerNameWatch(name, "https://moov.io", "authToken")
-		if err != nil {
-			t.Errorf("name=%q got error: %v", name, err)
-		}
-		if watchID == "" {
-			t.Error("empty watchID")
-		}
+		require.NoError(t, err)
+		require.NotEmpty(t, watchID)
 
 		// Remove
-		if err := repo.removeCustomerNameWatch(watchID); err != nil {
-			t.Errorf("expected no error: %v", err)
-		}
+		err = repo.removeCustomerNameWatch(watchID)
+		require.NoError(t, err)
 	}
 
 	// SQLite tests
@@ -154,9 +129,8 @@ func TestCustomerNameWatch(t *testing.T) {
 	check(t, &sqliteWatchRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
-	mysqlDB := database.CreateTestMySQLDB(t)
-	defer mysqlDB.Close()
-	check(t, &sqliteWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+	mysqlDB := database.TestMySQLConnection(t)
+	check(t, &sqliteWatchRepository{mysqlDB, log.NewNopLogger()})
 }
 
 func TestWatchCursor_ID(t *testing.T) {
@@ -195,9 +169,9 @@ func TestWatchCursor_ID(t *testing.T) {
 		if len(secondBatch) != 1 || err != nil {
 			t.Fatalf("len(secondBatch)=%d expected 1, err=%v", len(secondBatch), err)
 		}
-		if secondBatch[0].id != watchID2 || secondBatch[0].webhook != "https://moov.io/2" || secondBatch[0].customerID == "" {
-			t.Errorf("unknown watch: %v", secondBatch[0])
-		}
+		require.Equal(t, watchID2, secondBatch[0].id)
+		require.Equal(t, "https://moov.io/2", secondBatch[0].webhook)
+		require.NotEmpty(t, secondBatch[0].customerID)
 	}
 
 	// SQLite tests
@@ -206,9 +180,8 @@ func TestWatchCursor_ID(t *testing.T) {
 	check(t, &sqliteWatchRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
-	mysqlDB := database.CreateTestMySQLDB(t)
-	defer mysqlDB.Close()
-	check(t, &sqliteWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+	mysqlDB := database.TestMySQLConnection(t)
+	check(t, &sqliteWatchRepository{mysqlDB, log.NewNopLogger()})
 }
 
 func TestWatchCursor_Names(t *testing.T) {
@@ -253,9 +226,9 @@ func TestWatchCursor_Names(t *testing.T) {
 		if len(secondBatch) != 1 || err != nil {
 			t.Fatalf("len(secondBatch)=%d expected 1, err=%v", len(secondBatch), err)
 		}
-		if secondBatch[0].id != watchID2 || secondBatch[0].webhook != "https://moov.io/2" || secondBatch[0].customerName != "jane doe" {
-			t.Errorf("unknown watch: %v", secondBatch[0])
-		}
+		require.Equal(t, watchID2, secondBatch[0].id)
+		require.Equal(t, "https://moov.io/2", secondBatch[0].webhook)
+		require.Equal(t, "jane doe", secondBatch[0].customerName)
 	}
 
 	// SQLite tests
@@ -264,7 +237,6 @@ func TestWatchCursor_Names(t *testing.T) {
 	check(t, &sqliteWatchRepository{sqliteDB.DB, log.NewNopLogger()})
 
 	// MySQL tests
-	mysqlDB := database.CreateTestMySQLDB(t)
-	defer mysqlDB.Close()
-	check(t, &sqliteWatchRepository{mysqlDB.DB, log.NewNopLogger()})
+	mysqlDB := database.TestMySQLConnection(t)
+	check(t, &sqliteWatchRepository{mysqlDB, log.NewNopLogger()})
 }

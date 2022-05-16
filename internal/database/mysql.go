@@ -12,13 +12,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/moov-io/base/docker"
+	"github.com/moov-io/base"
 	"github.com/moov-io/base/log"
 
 	kitprom "github.com/go-kit/kit/metrics/prometheus"
 	gomysql "github.com/go-sql-driver/mysql"
 	"github.com/lopezator/migrator"
-	"github.com/ory/dockertest/v3"
 	stdprom "github.com/prometheus/client_golang/prometheus"
 )
 
@@ -147,69 +146,86 @@ func mysqlConnection(logger log.Logger, user, pass string, address string, datab
 	}
 }
 
-// TestMySQLDB is a wrapper around sql.DB for MySQL connections designed for tests to provide
-// a clean database for each testcase.  Callers should cleanup with Close() when finished.
-type TestMySQLDB struct {
-	DB *sql.DB
-
-	container *dockertest.Resource
+type MySQLConfig struct {
+	Address  string
+	Username string
+	Password string
+	Database string
 }
 
-func (r *TestMySQLDB) Close() error {
-	r.container.Close()
-	return r.DB.Close()
+func NewMySQLConnection(logger log.Logger, conf MySQLConfig) (*sql.DB, error) {
+	my := mysqlConnection(logger, conf.Username, conf.Password, conf.Address, conf.Database)
+
+	return my.Connect()
 }
 
-// CreateTestMySQLDB returns a TestMySQLDB which can be used in tests
-// as a clean mysql database. All migrations are ran on the db before.
-//
-// Callers should call close on the returned *TestMySQLDB.
-func CreateTestMySQLDB(t *testing.T) *TestMySQLDB {
+func TestMySQLConnection(t *testing.T) *sql.DB {
+	t.Helper()
+
 	if testing.Short() {
-		t.Skip("-short flag enabled")
-	}
-	if !docker.Enabled() {
-		t.Skip("Docker not enabled")
+		t.Skip("-short flag was specified")
 	}
 
-	pool, err := dockertest.NewPool("")
+	conf := CreateTestDatabase(t, TestDatabaseConfig())
+
+	db, err := NewMySQLConnection(log.NewNopLogger(), conf)
 	if err != nil {
 		t.Fatal(err)
 	}
-	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
-		Repository: "mysql",
-		Tag:        "8",
-		Env: []string{
-			"MYSQL_USER=moov",
-			"MYSQL_PASSWORD=secret",
-			"MYSQL_ROOT_PASSWORD=secret",
-			"MYSQL_DATABASE=watchman",
-		},
+
+	t.Cleanup(func() {
+		db.Close()
 	})
-	if err != nil {
-		t.Fatal(err)
+
+	return db
+}
+
+func TestDatabaseConfig() MySQLConfig {
+	return MySQLConfig{
+		Address:  "tcp(localhost:3306)",
+		Username: "root",
+		Password: "root",
+		Database: "watchman",
 	}
-	err = pool.Retry(func() error {
-		db, err := sql.Open("mysql", fmt.Sprintf("moov:secret@tcp(localhost:%s)/watchman", resource.GetPort("3306/tcp")))
+}
+
+func CreateTestDatabase(t *testing.T, config MySQLConfig) MySQLConfig {
+	open := func() (*sql.DB, error) {
+		db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@%s/", config.Username, config.Password, config.Address))
 		if err != nil {
-			return err
+			return nil, err
 		}
-		defer db.Close()
-		return db.Ping()
+
+		if err := db.Ping(); err != nil {
+			return nil, err
+		}
+
+		return db, nil
+	}
+
+	rootDb, err := open()
+	for i := 0; err != nil && i < 22; i++ {
+		time.Sleep(time.Second * 1)
+		rootDb, err = open()
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	dbName := "test" + base.ID()
+	_, err = rootDb.Exec(fmt.Sprintf("CREATE DATABASE %s", dbName))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Cleanup(func() {
+		rootDb.Exec(fmt.Sprintf("DROP DATABASE %s", dbName))
+		rootDb.Close()
 	})
-	if err != nil {
-		resource.Close()
-		t.Fatal(err)
-	}
 
-	logger := log.NewNopLogger()
-	address := fmt.Sprintf("tcp(localhost:%s)", resource.GetPort("3306/tcp"))
+	config.Database = dbName
 
-	db, err := mysqlConnection(logger, "moov", "secret", address, "watchman").Connect()
-	if err != nil {
-		t.Fatal(err)
-	}
-	return &TestMySQLDB{db, resource}
+	return config
 }
 
 // MySQLUniqueViolation returns true when the provided error matches the MySQL code

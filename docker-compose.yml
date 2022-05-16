@@ -1,5 +1,24 @@
 version: '3'
 services:
+  mysql:
+    image: mysql:8-oracle
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_DATABASE=watchman
+      - MYSQL_USER=watchman
+      - MYSQL_PASSWORD=watchman
+      - MYSQL_ROOT_PASSWORD=root
+    networks:
+      - intranet
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    tmpfs: # Run this mysql in memory as its used for testing
+      - /var/lib/mysql
+
   watchman:
     image: moov/watchman:latest
     environment:
@@ -9,3 +28,5 @@ services:
     ports:
       - "8084:8084"
       - "9094:9094"
+networks:
+  intranet: {}

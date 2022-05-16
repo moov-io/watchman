@@ -31,7 +31,7 @@ ifeq ($(OS),Windows_NT)
 else
 	@wget -O lint-project.sh https://raw.githubusercontent.com/moov-io/infra/master/go/lint-project.sh
 	@chmod +x ./lint-project.sh
-	COVER_THRESHOLD=75.0 SET_GOLANGCI_LINTERS=govet,gosec ./lint-project.sh
+	COVER_THRESHOLD=70.0 SET_GOLANGCI_LINTERS=govet,gosec ./lint-project.sh
 endif
 
 .PHONY: admin

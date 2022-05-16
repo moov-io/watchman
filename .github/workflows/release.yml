@@ -21,8 +21,19 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
 
-    - name: Check
+    - name: Setup
+      if: runner.os == 'Linux'
+      run: docker-compose up -d mysql
+
+    - name: Check (Linux)
+      if: runner.os == 'Linux'
       run: make check
+
+    - name: Check (Non-Linux)
+      if: runner.os != 'Linux'
+      run: make check
+      env:
+        GOTEST_FLAGS: "-short"
 
   create_release:
     name: Create Release
