@@ -37,12 +37,18 @@ jobs:
       run: make build
 
     - name: Setup
+      if: runner.os == 'Linux'
       run: docker-compose up -d mysql
 
-    - name: Check
+    - name: Check (Linux)
+      if: runner.os == 'Linux'
+      run: make check
+
+    - name: Check (Non-Linux)
+      if: runner.os != 'Linux'
       run: make check
       env:
-        GOLANGCI_LINTERS: gosec
+        GOTEST_FLAGS: "-short"
 
     - name: Upload Code Coverage
       if: runner.os == 'Linux'

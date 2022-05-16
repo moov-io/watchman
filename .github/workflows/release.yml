@@ -22,10 +22,18 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Setup
+      if: runner.os == 'Linux'
       run: docker-compose up -d mysql
 
-    - name: Check
+    - name: Check (Linux)
+      if: runner.os == 'Linux'
       run: make check
+
+    - name: Check (Non-Linux)
+      if: runner.os != 'Linux'
+      run: make check
+      env:
+        GOTEST_FLAGS: "-short"
 
   create_release:
     name: Create Release
