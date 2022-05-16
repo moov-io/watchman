@@ -9,12 +9,14 @@ import (
 	"math"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/base/log"
+	"github.com/moov-io/watchman/pkg/csl"
 
 	"github.com/go-kit/kit/metrics/prometheus"
 	"github.com/gorilla/mux"
@@ -31,6 +33,28 @@ var (
 
 func addSearchRoutes(logger log.Logger, r *mux.Router, searcher *searcher) {
 	r.Methods("GET").Path("/search").HandlerFunc(search(logger, searcher))
+}
+
+func extractSearchLimit(r *http.Request) int {
+	limit := softResultsLimit
+	if v := r.URL.Query().Get("limit"); v != "" {
+		n, _ := strconv.Atoi(v)
+		if n > 0 {
+			limit = n
+		}
+	}
+	if limit > hardResultsLimit {
+		limit = hardResultsLimit
+	}
+	return limit
+}
+
+func extractSearchMinMatch(r *http.Request) float64 {
+	if v := r.URL.Query().Get("minMatch"); v != "" {
+		n, _ := strconv.ParseFloat(v, 64)
+		return n
+	}
+	return 0.00
 }
 
 type addressSearchRequest struct {
@@ -127,11 +151,12 @@ type searchResponse struct {
 	AltNames  []Alt     `json:"altNames"`
 	Addresses []Address `json:"addresses"`
 
-	// Consolidated Screening List
-	SectoralSanctions []SSI `json:"sectoralSanctions"`
 	// BIS
-	DeniedPersons []DP        `json:"deniedPersons"`
-	BISEntities   []BISEntity `json:"bisEntities"`
+	DeniedPersons []DP `json:"deniedPersons"`
+
+	// Consolidated Screening List
+	SectoralSanctions []*Result[csl.SSI] `json:"sectoralSanctions"`
+	BISEntities       []*Result[csl.EL]  `json:"bisEntities"`
 
 	// Metadata
 	RefreshedAt time.Time `json:"refreshedAt"`

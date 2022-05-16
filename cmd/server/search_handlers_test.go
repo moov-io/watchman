@@ -263,6 +263,7 @@ func TestSearch__NameAndAltName(t *testing.T) {
 	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
 		t.Fatal(err)
 	}
+
 	// OFAC
 	if wrapper.SDNs[0].EntityID != "2681" {
 		t.Errorf("%#v", wrapper.SDNs[0])
