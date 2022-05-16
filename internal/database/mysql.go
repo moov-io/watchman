@@ -162,6 +162,10 @@ func NewMySQLConnection(logger log.Logger, conf MySQLConfig) (*sql.DB, error) {
 func TestMySQLConnection(t *testing.T) *sql.DB {
 	t.Helper()
 
+	if testing.Short() {
+		t.Skip("-short flag was specified")
+	}
+
 	conf := CreateTestDatabase(t, TestDatabaseConfig())
 
 	db, err := NewMySQLConnection(log.NewNopLogger(), conf)
