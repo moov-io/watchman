@@ -11,17 +11,12 @@ import (
 	"sync"
 )
 
-type Result[T json.Marshaler] struct {
+type Result[T any] struct {
 	Data T
 
 	match           float64
 	precomputedName string
 	precomputedAlts []string
-}
-
-type aux[T any] struct {
-	T     interface{ MarshalJSON() ([]byte, error) }
-	Match float64 `json:"match"`
 }
 
 func (e Result[T]) MarshalJSON() ([]byte, error) {
@@ -49,7 +44,7 @@ func (e Result[T]) MarshalJSON() ([]byte, error) {
 	return json.Marshal(result)
 }
 
-func topResults[T json.Marshaler](limit int, minMatch float64, name string, data []*Result[T]) []*Result[T] {
+func topResults[T any](limit int, minMatch float64, name string, data []*Result[T]) []*Result[T] {
 	if len(data) == 0 {
 		return nil
 	}
