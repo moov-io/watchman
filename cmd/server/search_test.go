@@ -125,7 +125,7 @@ func init() {
 			FRCitation:     "67 F.R. 7354 2/19/02 66 F.R. 48998 9/25/01 62 F.R. 26471 5/14/97 62 F.R. 34688 6/27/97 62 F.R. 60063 11/6/97 63 F.R. 25817 5/11/98 63 F.R. 58707 11/2/98 64 F.R. 23049 4/29/99",
 		},
 	}, noLogPipeliner)
-	ssiSearcher.SSIs = precomputeSSIs([]*csl.SSI{
+	ssiSearcher.SSIs = precomputeCSLEntities[csl.SSI](ssiName, []*csl.SSI{
 		{
 			EntityID:       "18782",
 			Type:           "Entity",
@@ -151,7 +151,7 @@ func init() {
 			SourceInfoURL:  "http://bit.ly/1MLgou0",
 		},
 	}, noLogPipeliner)
-	bisEntitySearcher.BISEntities = precomputeBISEntities([]*csl.EL{
+	bisEntitySearcher.BISEntities = precomputeCSLEntities[csl.EL](bisEntityName, []*csl.EL{
 		{
 			Name:               "Mohammad Jan Khan Mangal",
 			AlternateNames:     []string{"Air I"},

@@ -8,32 +8,37 @@ import (
 	"github.com/moov-io/watchman/pkg/csl"
 )
 
-func precomputeSSIs(ssis []*csl.SSI, pipe *pipeliner) []*Result[csl.SSI] {
-	out := make([]*Result[csl.SSI], len(ssis))
-	for i, ssi := range ssis {
-		nn := ssiName(ssi)
-		if err := pipe.Do(nn); err != nil {
-			pipe.logger.LogErrorf("problem pipelining SSI: %v", err)
+type cslEntity struct {
+	AlternateNames []string `json:"alternateNames"`
+}
+
+func precomputeCSLEntities[T cslEntity](load func(*T) *Name, items []*T, pipe *pipeliner) []*Result[T] {
+	out := make([]*Result[T], len(items))
+
+	for i, item := range items {
+		name := load(item)
+		if err := pipe.Do(name); err != nil {
+			pipe.logger.LogErrorf("problem pipelining %T: %v", item, err)
 			continue
 		}
 
 		var altNames []string
-		for i := range ssi.AlternateNames {
-			altNN := &Name{Processed: ssi.AlternateNames[i]}
-			if err := pipe.Do(altNN); err != nil {
-				pipe.logger.LogErrorf("problem pipelining alt: %v", err)
-				continue
+		for i := range name.altNames {
+			altName := &Name{Processed: name.altNames[i]}
+			if err := pipe.Do(altName); err != nil {
+				pipe.logger.LogErrorf("problem pipelining %T altName: %v", item, err)
 			}
-			altNames = append(altNames, altNN.Processed)
+			altNames = append(altNames, altName.Processed)
 		}
-		ssi.AlternateNames = altNames
+		item.AlternateNames = altNames
 
-		out[i] = &Result[csl.SSI]{
-			Data:            *ssi,
-			precomputedName: nn.Processed,
+		out[i] = &Result[T]{
+			Data:            *item,
+			precomputedName: name.Processed,
 			precomputedAlts: altNames,
 		}
 	}
+
 	return out
 }
 
@@ -46,35 +51,6 @@ func (s *searcher) TopSSIs(limit int, minMatch float64, name string) []*Result[c
 	defer s.Gate.Done()
 
 	return topResults[csl.SSI](limit, minMatch, name, s.SSIs)
-}
-
-func precomputeBISEntities(els []*csl.EL, pipe *pipeliner) []*Result[csl.EL] {
-	out := make([]*Result[csl.EL], len(els))
-	for i, el := range els {
-		nn := bisEntityName(el)
-		if err := pipe.Do(nn); err != nil {
-			pipe.logger.LogErrorf("problem pipelining EL: %v", err)
-			continue
-		}
-
-		var altNames []string
-		for i := range el.AlternateNames {
-			altNN := &Name{Processed: el.AlternateNames[i]}
-			if err := pipe.Do(altNN); err != nil {
-				pipe.logger.LogErrorf("problem pipelining alt: %v", err)
-				continue
-			}
-			altNames = append(altNames, altNN.Processed)
-		}
-		el.AlternateNames = altNames
-
-		out[i] = &Result[csl.EL]{
-			Data:            *el,
-			precomputedName: nn.Processed,
-			precomputedAlts: altNames,
-		}
-	}
-	return out
 }
 
 // TopBISEntities searches BIS Entity List records by name and alias

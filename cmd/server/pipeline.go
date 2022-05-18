@@ -30,6 +30,8 @@ type Name struct {
 	dp    *dpl.DPL
 	el    *csl.EL
 	addrs []*ofac.Address
+
+	altNames []string
 }
 
 func sdnName(sdn *ofac.SDN, addrs []*ofac.Address) *Name {
@@ -54,6 +56,7 @@ func ssiName(ssi *csl.SSI) *Name {
 		Original:  ssi.Name,
 		Processed: ssi.Name,
 		ssi:       ssi,
+		altNames:  ssi.AlternateNames,
 	}
 }
 
