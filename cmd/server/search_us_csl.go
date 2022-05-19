@@ -5,14 +5,12 @@
 package main
 
 import (
+	"reflect"
+
 	"github.com/moov-io/watchman/pkg/csl"
 )
 
-type cslEntity struct {
-	AlternateNames []string `json:"alternateNames"`
-}
-
-func precomputeCSLEntities[T cslEntity](load func(*T) *Name, items []*T, pipe *pipeliner) []*Result[T] {
+func precomputeCSLEntities[T any](load func(*T) *Name, items []*T, pipe *pipeliner) []*Result[T] {
 	out := make([]*Result[T], len(items))
 
 	for i, item := range items {
@@ -23,14 +21,24 @@ func precomputeCSLEntities[T cslEntity](load func(*T) *Name, items []*T, pipe *p
 		}
 
 		var altNames []string
-		for i := range name.altNames {
-			altName := &Name{Processed: name.altNames[i]}
-			if err := pipe.Do(altName); err != nil {
-				pipe.logger.LogErrorf("problem pipelining %T altName: %v", item, err)
+
+		elm := reflect.ValueOf(item).Elem()
+		for i := 0; i < elm.NumField(); i++ {
+			name := elm.Type().Field(i).Name
+			_type := elm.Type().Field(i).Type.String()
+
+			if name == "AlternateNames" && _type == "[]string" {
+				alts, ok := elm.Field(i).Interface().([]string)
+				if !ok {
+					continue
+				}
+				for j := range alts {
+					alt := &Name{Processed: alts[j]}
+					pipe.Do(alt)
+					altNames = append(altNames, alt.Processed)
+				}
 			}
-			altNames = append(altNames, altName.Processed)
 		}
-		item.AlternateNames = altNames
 
 		out[i] = &Result[T]{
 			Data:            *item,
