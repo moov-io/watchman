@@ -7,6 +7,8 @@ package main
 import (
 	"math"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestSearcher_TopBISEntities(t *testing.T) {
@@ -17,6 +19,10 @@ func TestSearcher_TopBISEntities(t *testing.T) {
 	if els[0].Data.Name != "Mohammad Jan Khan Mangal" {
 		t.Errorf("%#v", els[0].Data)
 	}
+
+	// Verify AlternateNames are passed through
+	require.Len(t, els[0].Data.AlternateNames, 1)
+	require.Equal(t, "Air I", els[0].Data.AlternateNames[0])
 }
 
 func TestSearcher_TopBISEntities_AltName(t *testing.T) {
@@ -40,6 +46,10 @@ func TestSearcher_TopSSIs(t *testing.T) {
 	if ssis[0].Data.EntityID != "18782" {
 		t.Errorf("%#v", ssis[0].Data)
 	}
+
+	// Verify AlternateNames are passed through
+	require.Len(t, ssis[0].Data.AlternateNames, 6)
+	require.Equal(t, "RUSSIAN DEFENSE EXPORT ROSOBORONEXPORT", ssis[0].Data.AlternateNames[0])
 }
 
 func TestSearcher_TopSSIs_limit(t *testing.T) {
