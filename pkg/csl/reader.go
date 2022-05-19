@@ -46,14 +46,14 @@ func Parse(r io.Reader) (*CSL, error) {
 		// we need to check either column 0 or 1 contains the identifier.
 		for i := 0; i <= 1; i++ {
 			switch record[i] {
-			case "Sectoral Sanctions Identifications List (SSI) - Treasury Department":
-				report.SSIs = append(report.SSIs, unmarshalSSI(record, i))
-
 			case "Entity List (EL) - Bureau of Industry and Security":
 				report.ELs = append(report.ELs, unmarshalEL(record, i))
 
 			case "Military End User (MEU) List - Bureau of Industry and Security":
-				// TODO(adam):
+				report.MEUs = append(report.MEUs, unmarshalMEU(record, i))
+
+			case "Sectoral Sanctions Identifications List (SSI) - Treasury Department":
+				report.SSIs = append(report.SSIs, unmarshalSSI(record, i))
 
 			case "Unverified List (UVL) - Bureau of Industry and Security":
 				// TODO(adam):
@@ -84,21 +84,6 @@ func Parse(r io.Reader) (*CSL, error) {
 	return &report, nil
 }
 
-func unmarshalSSI(record []string, offset int) *SSI {
-	return &SSI{
-		EntityID:       record[EntityNumberIdx+offset],
-		Type:           record[TypeIdx+offset],
-		Programs:       expandProgramsList(record[ProgramsIdx+offset]),
-		Name:           record[NameIdx+offset],
-		Addresses:      expandField(record[AddressesIdx+offset]),
-		Remarks:        expandField(record[RemarksIdx+offset]),
-		AlternateNames: expandField(record[AltNamesIdx+offset]),
-		IDsOnRecord:    expandField(record[IDsIdx+offset]),
-		SourceListURL:  record[SourceListURLIdx+offset],
-		SourceInfoURL:  record[SourceInformationURLIdx+offset],
-	}
-}
-
 func unmarshalEL(row []string, offset int) *EL {
 	id := ""
 	if offset == 1 {
@@ -115,6 +100,32 @@ func unmarshalEL(row []string, offset int) *EL {
 		FRNotice:           row[FRNoticeIdx+offset],
 		SourceListURL:      row[SourceListURLIdx+offset],
 		SourceInfoURL:      row[SourceInformationURLIdx+offset],
+	}
+}
+
+func unmarshalMEU(record []string, offset int) *MEU {
+	return &MEU{
+		EntityID:  record[0],
+		Name:      record[NameIdx+offset],
+		Addresses: record[AddressesIdx+offset],
+		FRNotice:  record[FRNoticeIdx+offset],
+		StartDate: record[StartDateIdx+offset],
+		EndDate:   record[EndDateIdx+offset],
+	}
+}
+
+func unmarshalSSI(record []string, offset int) *SSI {
+	return &SSI{
+		EntityID:       record[EntityNumberIdx+offset],
+		Type:           record[TypeIdx+offset],
+		Programs:       expandProgramsList(record[ProgramsIdx+offset]),
+		Name:           record[NameIdx+offset],
+		Addresses:      expandField(record[AddressesIdx+offset]),
+		Remarks:        expandField(record[RemarksIdx+offset]),
+		AlternateNames: expandField(record[AltNamesIdx+offset]),
+		IDsOnRecord:    expandField(record[IDsIdx+offset]),
+		SourceListURL:  record[SourceListURLIdx+offset],
+		SourceInfoURL:  record[SourceInformationURLIdx+offset],
 	}
 }
 
