@@ -76,6 +76,15 @@ func bisEntityName(el *csl.EL) *Name {
 	}
 }
 
+func meuName(meu *csl.MEU) *Name { // TODO(adam): cleanup - all CSL entites have a Name (or similar field), so reflection?
+	return &Name{
+		Original:  meu.Name,
+		Processed: meu.Name,
+		// ssi:       ssi,
+		// altNames:  ssi.AlternateNames,
+	}
+}
+
 type step interface {
 	apply(*Name) error
 }
