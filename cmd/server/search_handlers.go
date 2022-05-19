@@ -268,17 +268,18 @@ var (
 		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			resp.Addresses = s.TopAddresses(limit, minMatch, name)
 		},
-		// OFAC Sectoral Sanctions Identifications
-		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
-			resp.SectoralSanctions = s.TopSSIs(limit, minMatch, name)
-		},
+
 		// BIS Denied Persons
 		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			resp.DeniedPersons = s.TopDPs(limit, minMatch, name)
 		},
-		// BIS Entity List
+
+		// Consolidated Screening List Results
 		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			resp.BISEntities = s.TopBISEntities(limit, minMatch, name)
+		},
+		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
+			resp.SectoralSanctions = s.TopSSIs(limit, minMatch, name)
 		},
 	}
 )
