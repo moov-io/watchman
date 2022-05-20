@@ -5,6 +5,7 @@
 package main
 
 import (
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -13,14 +14,19 @@ import (
 func TestHandleDownloadStats(t *testing.T) {
 	updates := make(chan *DownloadStats)
 
+	var wg sync.WaitGroup // make the race detector happy
+
 	var received *DownloadStats
 	go handleDownloadStats(updates, func(stats *DownloadStats) {
 		received = stats
+		wg.Done()
 	})
 
+	wg.Add(1)
 	updates <- &DownloadStats{
 		SDNs: 123,
 	}
+	wg.Wait()
 
 	require.NotNil(t, received)
 	require.Equal(t, 123, received.SDNs)
