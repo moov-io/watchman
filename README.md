@@ -186,6 +186,8 @@ PONG
 | `DATABASE_TYPE` | Which database option to use (Options: `sqlite`, `mysql`). | Default: `sqlite` |
 | `WEB_ROOT` | Directory to serve web UI from. | Default: `webui/` |
 | `WEBHOOK_MAX_WORKERS` | Maximum number of workers processing webhooks. | Default: 10 |
+| `DOWNLOAD_WEBHOOK_URL` | Optional webhook URL called when data downloads / refreshes occur. | Empty |
+| `DOWNLOAD_WEBHOOK_AUTH_TOKEN` | Optional `Authorization` header included on download webhooks. | Empty |
 
 #### List configurations
 
@@ -225,6 +227,10 @@ When Watchman sends a [webhook](https://en.wikipedia.org/wiki/Webhook) to your a
 An `Authorization` header will also be sent with the `authToken` provided when setting up the watch. Clients should verify this token to ensure authenticated communication.
 
 Webhook notifications are run after the OFAC data is successfully refreshed, which is determined by the `DATA_REFRESH_INTERVAL` environmental variable.
+
+##### Downloads
+
+Moov Watchman supports sending a webhook when the underlying data is refreshed. The body will be the count of entities indexed for each list. The body will be in JSON format and the same schema as the manual data refresh endpoint.
 
 ##### Watching a specific customer or company by ID
 
