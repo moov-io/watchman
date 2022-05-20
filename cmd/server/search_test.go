@@ -27,13 +27,16 @@ var (
 	testSearcherOnce  sync.Once
 
 	// Mock Searchers
-	addressSearcher   = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
-	altSearcher       = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
-	sdnSearcher       = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
-	idSearcher        = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
-	dplSearcher       = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
-	ssiSearcher       = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	addressSearcher = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	altSearcher     = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	sdnSearcher     = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	idSearcher      = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	dplSearcher     = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+
+	// CSL Searchers
 	bisEntitySearcher = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	meuSearcher       = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	ssiSearcher       = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
 )
 
 func init() {
@@ -149,6 +152,24 @@ func init() {
 			IDsOnRecord:    []string{"1117746521452, Registration ID", "56467052, Government Gazette Number", "7718852163, Tax ID No.", "Subject to Directive 3, Executive Order 13662 Directive Determination -", "www.roe.ru, Website"},
 			SourceListURL:  "http://bit.ly/1QWTIfE",
 			SourceInfoURL:  "http://bit.ly/1MLgou0",
+		},
+	}, noLogPipeliner)
+	meuSearcher.MilitaryEndUsers = precomputeCSLEntities[csl.MEU](meuName, []*csl.MEU{
+		{
+			EntityID:  "26744194bd9b5cbec49db6ee29a4b53c697c7420",
+			Name:      "AECC Aviation Power Co. Ltd.",
+			Addresses: "Xiujia Bay, Weiyong Dt, Xian, 710021, CN",
+			FRNotice:  "85 FR 83799",
+			StartDate: "2020-12-23",
+			EndDate:   "",
+		},
+		{
+			EntityID:  "d54346ef81802673c1b1daeb2ca8bd5d13755abd",
+			Name:      "AECC China Gas Turbine Establishment",
+			Addresses: "No. 1 Hangkong Road, Mianyang, Sichuan, CN",
+			FRNotice:  "85 FR 83799",
+			StartDate: "2020-12-23",
+			EndDate:   "",
 		},
 	}, noLogPipeliner)
 	bisEntitySearcher.BISEntities = precomputeCSLEntities[csl.EL](bisEntityName, []*csl.EL{
