@@ -10,11 +10,11 @@ import (
 	"github.com/moov-io/watchman/pkg/csl"
 )
 
-func precomputeCSLEntities[T any](load func(*T) *Name, items []*T, pipe *pipeliner) []*Result[T] {
+func precomputeCSLEntities[T any](items []*T, pipe *pipeliner) []*Result[T] {
 	out := make([]*Result[T], len(items))
 
 	for i, item := range items {
-		name := load(item)
+		name := cslName(item)
 		if err := pipe.Do(name); err != nil {
 			pipe.logger.LogErrorf("problem pipelining %T: %v", item, err)
 			continue

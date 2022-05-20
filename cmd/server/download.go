@@ -214,9 +214,9 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 
 		return nil, fmt.Errorf("CSL records: %v", err)
 	}
-	els := precomputeCSLEntities[csl.EL](bisEntityName, consolidatedLists.ELs, s.pipe)
-	meus := precomputeCSLEntities[csl.MEU](meuName, consolidatedLists.MEUs, s.pipe)
-	ssis := precomputeCSLEntities[csl.SSI](ssiName, consolidatedLists.SSIs, s.pipe)
+	els := precomputeCSLEntities[csl.EL](consolidatedLists.ELs, s.pipe)
+	meus := precomputeCSLEntities[csl.MEU](consolidatedLists.MEUs, s.pipe)
+	ssis := precomputeCSLEntities[csl.SSI](consolidatedLists.SSIs, s.pipe)
 
 	stats := &downloadStats{
 		// OFAC

@@ -51,15 +51,6 @@ func altName(alt *ofac.AlternateIdentity) *Name {
 	}
 }
 
-func ssiName(ssi *csl.SSI) *Name {
-	return &Name{
-		Original:  ssi.Name,
-		Processed: ssi.Name,
-		ssi:       ssi,
-		altNames:  ssi.AlternateNames,
-	}
-}
-
 func dpName(dp *dpl.DPL) *Name {
 	return &Name{
 		Original:  dp.Name,
@@ -68,21 +59,28 @@ func dpName(dp *dpl.DPL) *Name {
 	}
 }
 
-func bisEntityName(el *csl.EL) *Name {
-	return &Name{
-		Original:  el.Name,
-		Processed: el.Name,
-		el:        el,
+func cslName(item interface{}) *Name {
+	switch v := item.(type) {
+	case *csl.EL:
+		return &Name{
+			Original:  v.Name,
+			Processed: v.Name,
+			el:        v,
+		}
+	case *csl.MEU:
+		return &Name{
+			Original:  v.Name,
+			Processed: v.Name,
+		}
+	case *csl.SSI:
+		return &Name{
+			Original:  v.Name,
+			Processed: v.Name,
+			ssi:       v,
+			altNames:  v.AlternateNames,
+		}
 	}
-}
-
-func meuName(meu *csl.MEU) *Name { // TODO(adam): cleanup - all CSL entites have a Name (or similar field), so reflection?
-	return &Name{
-		Original:  meu.Name,
-		Processed: meu.Name,
-		// ssi:       ssi,
-		// altNames:  ssi.AlternateNames,
-	}
+	return &Name{}
 }
 
 type step interface {
