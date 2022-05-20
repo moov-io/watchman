@@ -183,7 +183,7 @@ func main() {
 	defer custRepo.close()
 
 	// Setup periodic download and re-search
-	updates := make(chan *downloadStats)
+	updates := make(chan *DownloadStats)
 	dataRefreshInterval = getDataRefreshInterval(logger, os.Getenv("DATA_REFRESH_INTERVAL"))
 	go searcher.periodicDataRefresh(dataRefreshInterval, downloadRepo, updates)
 	go searcher.spawnResearching(logger, companyRepo, custRepo, watchRepo, webhookRepo, updates)

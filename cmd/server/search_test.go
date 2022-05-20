@@ -23,7 +23,7 @@ import (
 var (
 	// Live Searcher
 	testLiveSearcher  = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
-	testSearcherStats *downloadStats
+	testSearcherStats *DownloadStats
 	testSearcherOnce  sync.Once
 
 	// Mock Searchers

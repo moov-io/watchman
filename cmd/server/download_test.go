@@ -64,9 +64,10 @@ func TestDownload_record(t *testing.T) {
 	t.Parallel()
 
 	check := func(t *testing.T, repo *sqliteDownloadRepository) {
-		stats := &downloadStats{
-			SDNs: 1, Alts: 12, Addresses: 42, SectoralSanctions: 39,
-			DeniedPersons: 13, BISEntities: 32,
+		stats := &DownloadStats{
+			SDNs: 1, Alts: 12, Addresses: 42,
+			DeniedPersons: 13,
+			BISEntities:   32, SectoralSanctions: 39,
 		}
 		if err := repo.recordStats(stats); err != nil {
 			t.Fatal(err)
@@ -118,7 +119,7 @@ func TestDownload_route(t *testing.T) {
 		req := httptest.NewRequest("GET", "/downloads", nil)
 		req.Header.Set("x-user-id", "test")
 
-		repo.recordStats(&downloadStats{SDNs: 1, Alts: 421, Addresses: 1511, DeniedPersons: 731, SectoralSanctions: 289, BISEntities: 189})
+		repo.recordStats(&DownloadStats{SDNs: 1, Alts: 421, Addresses: 1511, DeniedPersons: 731, SectoralSanctions: 289, BISEntities: 189})
 
 		router := mux.NewRouter()
 		addDownloadRoutes(log.NewNopLogger(), router, repo)
@@ -129,7 +130,7 @@ func TestDownload_route(t *testing.T) {
 			t.Errorf("bogus status code: %d", w.Code)
 		}
 
-		var downloads []Download
+		var downloads []DownloadStats
 		if err := json.NewDecoder(w.Body).Decode(&downloads); err != nil {
 			t.Error(err)
 		}

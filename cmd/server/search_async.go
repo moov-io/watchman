@@ -37,7 +37,7 @@ func readWebhookBatchSize(str string) int {
 
 // spawnResearching will block and select on updates for when to re-inspect all watches setup.
 // Since watches are used to post list data via webhooks they are used as catalysts in other systems.
-func (s *searcher) spawnResearching(logger log.Logger, companyRepo companyRepository, custRepo customerRepository, watchRepo watchRepository, webhookRepo webhookRepository, updates chan *downloadStats) {
+func (s *searcher) spawnResearching(logger log.Logger, companyRepo companyRepository, custRepo customerRepository, watchRepo watchRepository, webhookRepo webhookRepository, updates chan *DownloadStats) {
 	for range updates {
 		s.logger.Log("async: starting re-search of watches")
 		cursor := watchRepo.getWatchesCursor(logger, watchResearchBatchSize)

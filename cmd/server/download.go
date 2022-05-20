@@ -46,26 +46,9 @@ func init() {
 	prometheus.MustRegister(lastDataRefreshFailure)
 }
 
-// Download holds counts for each type of list data parsed from files and a
+// DownloadStats holds counts for each type of list data parsed from files and a
 // timestamp of when the download happened.
-type Download struct {
-	Timestamp time.Time `json:"timestamp"`
-
-	// US Office of Foreign Assets Control (OFAC)
-	SDNs      int `json:"SDNs"`
-	Alts      int `json:"altNames"`
-	Addresses int `json:"addresses"`
-
-	// US Bureau of Industry and Security (BIS)
-	DeniedPersons int `json:"deniedPersons"`
-
-	// Consolidated Screening List (CSL)
-	BISEntities       int `json:"bisEntities"`
-	MilitaryEndUsers  int `json:"militaryEndUsers"`
-	SectoralSanctions int `json:"sectoralSanctions"`
-}
-
-type downloadStats struct {
+type DownloadStats struct {
 	// US Office of Foreign Assets Control (OFAC)
 	SDNs      int `json:"SDNs"`
 	Alts      int `json:"altNames"`
@@ -84,7 +67,7 @@ type downloadStats struct {
 
 // periodicDataRefresh will forever block for interval's duration and then download and reparse the data.
 // Download stats are recorded as part of a successful re-download and parse.
-func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo downloadRepository, updates chan *downloadStats) {
+func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo downloadRepository, updates chan *DownloadStats) {
 	if interval == 0*time.Second {
 		s.logger.Logf("not scheduling periodic refreshing duration=%v", interval)
 		return
@@ -178,7 +161,7 @@ func cslRecords(logger log.Logger, initialDir string) (*csl.CSL, error) {
 
 // refreshData reaches out to the various websites to download the latest
 // files, runs each list's parser, and index data for searches.
-func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
+func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	if s.logger != nil {
 		s.logger.Log("Starting refresh of data")
 
@@ -218,7 +201,7 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 	meus := precomputeCSLEntities[csl.MEU](consolidatedLists.MEUs, s.pipe)
 	ssis := precomputeCSLEntities[csl.SSI](consolidatedLists.SSIs, s.pipe)
 
-	stats := &downloadStats{
+	stats := &DownloadStats{
 		// OFAC
 		SDNs:      len(sdns),
 		Alts:      len(alts),
@@ -314,8 +297,8 @@ func getLatestDownloads(logger log.Logger, repo downloadRepository) http.Handler
 }
 
 type downloadRepository interface {
-	latestDownloads(limit int) ([]Download, error)
-	recordStats(stats *downloadStats) error
+	latestDownloads(limit int) ([]DownloadStats, error)
+	recordStats(stats *DownloadStats) error
 }
 
 type sqliteDownloadRepository struct {
@@ -327,7 +310,7 @@ func (r *sqliteDownloadRepository) close() error {
 	return r.db.Close()
 }
 
-func (r *sqliteDownloadRepository) recordStats(stats *downloadStats) error {
+func (r *sqliteDownloadRepository) recordStats(stats *DownloadStats) error {
 	if stats == nil {
 		return errors.New("recordStats: nil downloadStats")
 	}
@@ -343,7 +326,7 @@ func (r *sqliteDownloadRepository) recordStats(stats *downloadStats) error {
 	return err
 }
 
-func (r *sqliteDownloadRepository) latestDownloads(limit int) ([]Download, error) {
+func (r *sqliteDownloadRepository) latestDownloads(limit int) ([]DownloadStats, error) {
 	query := `select downloaded_at, sdns, alt_names, addresses, sectoral_sanctions, denied_persons, bis_entities from download_stats order by downloaded_at desc limit ?;`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
@@ -357,10 +340,10 @@ func (r *sqliteDownloadRepository) latestDownloads(limit int) ([]Download, error
 	}
 	defer rows.Close()
 
-	var downloads []Download
+	var downloads []DownloadStats
 	for rows.Next() {
-		var dl Download
-		if err := rows.Scan(&dl.Timestamp, &dl.SDNs, &dl.Alts, &dl.Addresses, &dl.SectoralSanctions, &dl.DeniedPersons, &dl.BISEntities); err == nil {
+		var dl DownloadStats
+		if err := rows.Scan(&dl.RefreshedAt, &dl.SDNs, &dl.Alts, &dl.Addresses, &dl.SectoralSanctions, &dl.DeniedPersons, &dl.BISEntities); err == nil {
 			downloads = append(downloads, dl)
 		}
 	}
