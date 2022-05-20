@@ -10,15 +10,18 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
+	"strconv"
 	"time"
 
+	"github.com/moov-io/base/strx"
 	"go4.org/syncutil"
 )
 
 var (
 	// webhookGate is a goroutine-safe throttler designed to only allow N
 	// goroutines to run at any given time.
-	webhookGate = syncutil.NewGate(10)
+	webhookGate *syncutil.Gate
 
 	webhookHTTPClient = &http.Client{
 		Timeout: 10 * time.Second,
@@ -35,6 +38,14 @@ var (
 		},
 	}
 )
+
+func init() {
+	maxWorkers, err := strconv.ParseInt(strx.Or(os.Getenv("WEBHOOK_MAX_WORKERS"), "10"), 10, 32)
+	if err != nil {
+		panic(fmt.Sprintf("ERROR reading WEBHOOK_MAX_WORKERS: %v", err))
+	}
+	webhookGate = syncutil.NewGate(int(maxWorkers))
+}
 
 // callWebhook will take `body` as JSON and make a POST request to the provided webhook url.
 // Returned is the HTTP status code.
