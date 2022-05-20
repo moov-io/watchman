@@ -52,26 +52,32 @@ type Download struct {
 	Timestamp time.Time `json:"timestamp"`
 
 	// US Office of Foreign Assets Control (OFAC)
-	SDNs              int `json:"SDNs"`
-	Alts              int `json:"altNames"`
-	Addresses         int `json:"addresses"`
-	SectoralSanctions int `json:"sectoralSanctions"`
+	SDNs      int `json:"SDNs"`
+	Alts      int `json:"altNames"`
+	Addresses int `json:"addresses"`
 
 	// US Bureau of Industry and Security (BIS)
 	DeniedPersons int `json:"deniedPersons"`
-	BISEntities   int `json:"bisEntities"`
+
+	// Consolidated Screening List (CSL)
+	BISEntities       int `json:"bisEntities"`
+	MilitaryEndUsers  int `json:"militaryEndUsers"`
+	SectoralSanctions int `json:"sectoralSanctions"`
 }
 
 type downloadStats struct {
 	// US Office of Foreign Assets Control (OFAC)
-	SDNs              int `json:"SDNs"`
-	Alts              int `json:"altNames"`
-	Addresses         int `json:"addresses"`
-	SectoralSanctions int `json:"sectoralSanctions"`
+	SDNs      int `json:"SDNs"`
+	Alts      int `json:"altNames"`
+	Addresses int `json:"addresses"`
 
 	// US Bureau of Industry and Security (BIS)
 	DeniedPersons int `json:"deniedPersons"`
-	BISEntities   int `json:"bisEntities"`
+
+	// Consolidated Screening List (CSL)
+	BISEntities       int `json:"bisEntities"`
+	MilitaryEndUsers  int `json:"militaryEndUsers"`
+	SectoralSanctions int `json:"sectoralSanctions"`
 
 	RefreshedAt time.Time `json:"timestamp"`
 }
@@ -94,12 +100,18 @@ func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo down
 			downloadRepo.recordStats(stats)
 			if s.logger != nil {
 				s.logger.Info().With(log.Fields{
-					"SDNs":        log.Int(stats.SDNs),
-					"AltNames":    log.Int(stats.Alts),
-					"Addresses":   log.Int(stats.Addresses),
-					"SSI":         log.Int(stats.SectoralSanctions),
-					"DPL":         log.Int(stats.DeniedPersons),
-					"BISEntities": log.Int(stats.BISEntities),
+					// OFAC
+					"SDNs":      log.Int(stats.SDNs),
+					"AltNames":  log.Int(stats.Alts),
+					"Addresses": log.Int(stats.Addresses),
+
+					// BIS
+					"DPL": log.Int(stats.DeniedPersons),
+
+					// CSL
+					"BISEntities":      log.Int(stats.BISEntities),
+					"MilitaryEndUsers": log.Int(stats.MilitaryEndUsers),
+					"SSI":              log.Int(stats.SectoralSanctions),
 				}).Logf("data refreshed %v ago", time.Since(stats.RefreshedAt))
 			}
 			updates <- stats // send stats for re-search and watch notifications
@@ -202,18 +214,21 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 
 		return nil, fmt.Errorf("CSL records: %v", err)
 	}
-	ssis := precomputeCSLEntities[csl.SSI](ssiName, consolidatedLists.SSIs, s.pipe)
-	els := precomputeCSLEntities[csl.EL](bisEntityName, consolidatedLists.ELs, s.pipe)
+	els := precomputeCSLEntities[csl.EL](consolidatedLists.ELs, s.pipe)
+	meus := precomputeCSLEntities[csl.MEU](consolidatedLists.MEUs, s.pipe)
+	ssis := precomputeCSLEntities[csl.SSI](consolidatedLists.SSIs, s.pipe)
 
 	stats := &downloadStats{
 		// OFAC
-		SDNs:              len(sdns),
-		Alts:              len(alts),
-		Addresses:         len(adds),
-		SectoralSanctions: len(ssis),
+		SDNs:      len(sdns),
+		Alts:      len(alts),
+		Addresses: len(adds),
 		// BIS
-		BISEntities:   len(els),
 		DeniedPersons: len(dps),
+		// CSL
+		BISEntities:       len(els),
+		MilitaryEndUsers:  len(meus),
+		SectoralSanctions: len(ssis),
 	}
 	stats.RefreshedAt = lastRefresh(initialDir)
 
@@ -221,6 +236,7 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 	lastDataRefreshCount.WithLabelValues("SDNs").Set(float64(len(sdns)))
 	lastDataRefreshCount.WithLabelValues("SSIs").Set(float64(len(ssis)))
 	lastDataRefreshCount.WithLabelValues("BISEntities").Set(float64(len(els)))
+	lastDataRefreshCount.WithLabelValues("MilitaryEndUsers").Set(float64(len(meus)))
 	lastDataRefreshCount.WithLabelValues("DPs").Set(float64(len(dps)))
 
 	// Set new records after precomputation (to minimize lock contention)
@@ -229,10 +245,12 @@ func (s *searcher) refreshData(initialDir string) (*downloadStats, error) {
 	s.SDNs = sdns
 	s.Addresses = adds
 	s.Alts = alts
-	s.SSIs = ssis
 	// BIS
 	s.DPs = dps
+	// CSL
 	s.BISEntities = els
+	s.MilitaryEndUsers = meus
+	s.SSIs = ssis
 	// metadata
 	s.lastRefreshedAt = stats.RefreshedAt
 	s.Unlock()

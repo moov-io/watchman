@@ -10,11 +10,11 @@ import (
 	"github.com/moov-io/watchman/pkg/csl"
 )
 
-func precomputeCSLEntities[T any](load func(*T) *Name, items []*T, pipe *pipeliner) []*Result[T] {
+func precomputeCSLEntities[T any](items []*T, pipe *pipeliner) []*Result[T] {
 	out := make([]*Result[T], len(items))
 
 	for i, item := range items {
-		name := load(item)
+		name := cslName(item)
 		if err := pipe.Do(name); err != nil {
 			pipe.logger.LogErrorf("problem pipelining %T: %v", item, err)
 			continue
@@ -50,17 +50,6 @@ func precomputeCSLEntities[T any](load func(*T) *Name, items []*T, pipe *pipelin
 	return out
 }
 
-// TopSSIs searches Sectoral Sanctions records by Name and Alias
-func (s *searcher) TopSSIs(limit int, minMatch float64, name string) []*Result[csl.SSI] {
-	s.RLock()
-	defer s.RUnlock()
-
-	s.Gate.Start() // TODO(adam): This used to be on a pre-record gate, so this may have different perf metrics
-	defer s.Gate.Done()
-
-	return topResults[csl.SSI](limit, minMatch, name, s.SSIs)
-}
-
 // TopBISEntities searches BIS Entity List records by name and alias
 func (s *searcher) TopBISEntities(limit int, minMatch float64, name string) []*Result[csl.EL] {
 	s.RLock()
@@ -70,4 +59,26 @@ func (s *searcher) TopBISEntities(limit int, minMatch float64, name string) []*R
 	defer s.Gate.Done()
 
 	return topResults[csl.EL](limit, minMatch, name, s.BISEntities)
+}
+
+// TopMEUs searches Military End User records by name and alias
+func (s *searcher) TopMEUs(limit int, minMatch float64, name string) []*Result[csl.MEU] {
+	s.RLock()
+	defer s.RUnlock()
+
+	s.Gate.Start()
+	defer s.Gate.Done()
+
+	return topResults[csl.MEU](limit, minMatch, name, s.MilitaryEndUsers)
+}
+
+// TopSSIs searches Sectoral Sanctions records by Name and Alias
+func (s *searcher) TopSSIs(limit int, minMatch float64, name string) []*Result[csl.SSI] {
+	s.RLock()
+	defer s.RUnlock()
+
+	s.Gate.Start()
+	defer s.Gate.Done()
+
+	return topResults[csl.SSI](limit, minMatch, name, s.SSIs)
 }

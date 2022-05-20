@@ -44,8 +44,9 @@ type searcher struct {
 	DPs []*DP
 
 	// US Consolidated Screening List
-	BISEntities []*Result[csl.EL]
-	SSIs        []*Result[csl.SSI]
+	BISEntities      []*Result[csl.EL]
+	MilitaryEndUsers []*Result[csl.MEU]
+	SSIs             []*Result[csl.SSI]
 
 	// metadata
 	lastRefreshedAt time.Time

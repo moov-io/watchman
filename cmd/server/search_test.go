@@ -27,13 +27,16 @@ var (
 	testSearcherOnce  sync.Once
 
 	// Mock Searchers
-	addressSearcher   = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
-	altSearcher       = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
-	sdnSearcher       = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
-	idSearcher        = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
-	dplSearcher       = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
-	ssiSearcher       = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	addressSearcher = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	altSearcher     = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	sdnSearcher     = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	idSearcher      = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	dplSearcher     = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+
+	// CSL Searchers
 	bisEntitySearcher = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	meuSearcher       = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	ssiSearcher       = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
 )
 
 func init() {
@@ -125,7 +128,7 @@ func init() {
 			FRCitation:     "67 F.R. 7354 2/19/02 66 F.R. 48998 9/25/01 62 F.R. 26471 5/14/97 62 F.R. 34688 6/27/97 62 F.R. 60063 11/6/97 63 F.R. 25817 5/11/98 63 F.R. 58707 11/2/98 64 F.R. 23049 4/29/99",
 		},
 	}, noLogPipeliner)
-	ssiSearcher.SSIs = precomputeCSLEntities[csl.SSI](ssiName, []*csl.SSI{
+	ssiSearcher.SSIs = precomputeCSLEntities[csl.SSI]([]*csl.SSI{
 		{
 			EntityID:       "18782",
 			Type:           "Entity",
@@ -151,7 +154,25 @@ func init() {
 			SourceInfoURL:  "http://bit.ly/1MLgou0",
 		},
 	}, noLogPipeliner)
-	bisEntitySearcher.BISEntities = precomputeCSLEntities[csl.EL](bisEntityName, []*csl.EL{
+	meuSearcher.MilitaryEndUsers = precomputeCSLEntities[csl.MEU]([]*csl.MEU{
+		{
+			EntityID:  "26744194bd9b5cbec49db6ee29a4b53c697c7420",
+			Name:      "AECC Aviation Power Co. Ltd.",
+			Addresses: "Xiujia Bay, Weiyong Dt, Xian, 710021, CN",
+			FRNotice:  "85 FR 83799",
+			StartDate: "2020-12-23",
+			EndDate:   "",
+		},
+		{
+			EntityID:  "d54346ef81802673c1b1daeb2ca8bd5d13755abd",
+			Name:      "AECC China Gas Turbine Establishment",
+			Addresses: "No. 1 Hangkong Road, Mianyang, Sichuan, CN",
+			FRNotice:  "85 FR 83799",
+			StartDate: "2020-12-23",
+			EndDate:   "",
+		},
+	}, noLogPipeliner)
+	bisEntitySearcher.BISEntities = precomputeCSLEntities[csl.EL]([]*csl.EL{
 		{
 			Name:               "Mohammad Jan Khan Mangal",
 			AlternateNames:     []string{"Air I"},

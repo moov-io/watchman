@@ -5,6 +5,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"testing"
 
@@ -36,6 +37,14 @@ func TestSearcher_TopBISEntities_AltName(t *testing.T) {
 	if math.Abs(1.0-els[0].match) > 0.001 {
 		t.Errorf("Expected match=1.0 for alt names: %f - %#v", els[0].match, els[0].Data)
 	}
+}
+
+func TestSearcher_TopMEUs(t *testing.T) {
+	meus := meuSearcher.TopMEUs(1, 0.00, "China Gas")
+	require.Len(t, meus, 1)
+
+	require.Equal(t, "d54346ef81802673c1b1daeb2ca8bd5d13755abd", meus[0].Data.EntityID)
+	require.Equal(t, "0.70597", fmt.Sprintf("%.5f", meus[0].match))
 }
 
 func TestSearcher_TopSSIs(t *testing.T) {
