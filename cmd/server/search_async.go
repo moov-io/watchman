@@ -37,38 +37,37 @@ func readWebhookBatchSize(str string) int {
 
 // spawnResearching will block and select on updates for when to re-inspect all watches setup.
 // Since watches are used to post list data via webhooks they are used as catalysts in other systems.
-func (s *searcher) spawnResearching(logger log.Logger, companyRepo companyRepository, custRepo customerRepository, watchRepo watchRepository, webhookRepo webhookRepository, updates chan *DownloadStats) {
-	for range updates {
-		s.logger.Log("async: starting re-search of watches")
-		cursor := watchRepo.getWatchesCursor(logger, watchResearchBatchSize)
-		for {
-			watches, _ := cursor.Next()
-			if len(watches) == 0 {
-				break
+func (s *searcher) spawnResearching(logger log.Logger, companyRepo companyRepository, custRepo customerRepository, watchRepo watchRepository, webhookRepo webhookRepository) {
+	s.logger.Log("async: starting re-search of watches")
+	cursor := watchRepo.getWatchesCursor(logger, watchResearchBatchSize)
+	for {
+		watches, _ := cursor.Next()
+		if len(watches) == 0 {
+			break
+		}
+		for i := range watches {
+			body, err := s.renderBody(watches[i], companyRepo, custRepo)
+			if err != nil {
+				s.logger.Logf("async: watch %s: %v", watches[i].id, err)
+				continue
 			}
-			for i := range watches {
-				body, err := s.renderBody(watches[i], companyRepo, custRepo)
-				if err != nil {
-					s.logger.Logf("async: watch %s: %v", watches[i].id, err)
-					continue
-				}
-				if body == nil {
-					s.logger.Logf("async: no body rendered for watchID=%s - skipping", watches[i].id)
-					continue
-				}
+			if body == nil {
+				s.logger.Logf("async: no body rendered for watchID=%s - skipping", watches[i].id)
+				continue
+			}
 
-				// Send HTTP webhook
-				now := time.Now()
-				status, err := callWebhook(watches[i].id, body, watches[i].webhook, watches[i].authToken)
-				if err != nil {
-					s.logger.Logf("async: problem writing watch (%s) webhook status: %v", watches[i].id, err)
-				}
-				if err := webhookRepo.recordWebhook(watches[i].id, now, status); err != nil {
-					s.logger.Logf("async: problem writing watch (%s) webhook status: %v", watches[i].id, err)
-				}
+			// Send HTTP webhook
+			now := time.Now()
+			status, err := callWebhook(body, watches[i].webhook, watches[i].authToken)
+			if err != nil {
+				s.logger.Logf("async: problem writing watch (%s) webhook status: %v", watches[i].id, err)
+			}
+			if err := webhookRepo.recordWebhook(watches[i].id, now, status); err != nil {
+				s.logger.Logf("async: problem writing watch (%s) webhook status: %v", watches[i].id, err)
 			}
 		}
 	}
+	s.logger.Log("async: finished re-search of watches")
 }
 
 func (s *searcher) renderBody(w watch, companyRepo companyRepository, custRepo customerRepository) (*bytes.Buffer, error) {

@@ -18,7 +18,7 @@ const (
 )
 
 // manualRefreshHandler will register an endpoint on the admin server data refresh endpoint
-func manualRefreshHandler(logger log.Logger, searcher *searcher, downloadRepo downloadRepository) http.HandlerFunc {
+func manualRefreshHandler(logger log.Logger, searcher *searcher, updates chan *DownloadStats, downloadRepo downloadRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		logger.Log("admin: refreshing data")
 
@@ -31,6 +31,10 @@ func manualRefreshHandler(logger log.Logger, searcher *searcher, downloadRepo do
 				return
 			}
 
+			go func() {
+				updates <- stats
+			}()
+
 			logger.Info().With(log.Fields{
 				"SDNs":        log.Int(stats.SDNs),
 				"AltNames":    log.Int(stats.Alts),
@@ -38,7 +42,7 @@ func manualRefreshHandler(logger log.Logger, searcher *searcher, downloadRepo do
 				"SSI":         log.Int(stats.SectoralSanctions),
 				"DPL":         log.Int(stats.DeniedPersons),
 				"BISEntities": log.Int(stats.BISEntities),
-			}).Logf("admin: finished data refreshed %v ago", time.Since(stats.RefreshedAt))
+			}).Logf("admin: finished data refresh %v ago", time.Since(stats.RefreshedAt))
 
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(stats)

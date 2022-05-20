@@ -29,7 +29,9 @@ func TestDownload__manualRefreshPath(t *testing.T) {
 		req := httptest.NewRequest("GET", "/data/refresh", nil)
 		req.Header.Set("x-request-id", base.ID())
 
-		manualRefreshHandler(log.NewNopLogger(), searcher, repo)(w, req)
+		updates := make(chan *DownloadStats)
+
+		manualRefreshHandler(log.NewNopLogger(), searcher, updates, repo)(w, req)
 		w.Flush()
 
 		if w.Code != http.StatusOK {
