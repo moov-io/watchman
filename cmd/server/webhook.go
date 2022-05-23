@@ -49,7 +49,7 @@ func init() {
 
 // callWebhook will take `body` as JSON and make a POST request to the provided webhook url.
 // Returned is the HTTP status code.
-func callWebhook(watchID string, body *bytes.Buffer, webhook string, authToken string) (int, error) {
+func callWebhook(body *bytes.Buffer, webhook string, authToken string) (int, error) {
 	webhook, err := validateWebhook(webhook)
 	if err != nil {
 		return 0, err
@@ -58,7 +58,7 @@ func callWebhook(watchID string, body *bytes.Buffer, webhook string, authToken s
 	// Setup HTTP request
 	req, err := http.NewRequest("POST", webhook, body)
 	if err != nil {
-		return 0, fmt.Errorf("unknown error with watch %s: %v", watchID, err)
+		return 0, fmt.Errorf("unknown error webhook: %v", err)
 	}
 	if authToken != "" {
 		req.Header.Set("Authorization", authToken)
@@ -73,7 +73,7 @@ func callWebhook(watchID string, body *bytes.Buffer, webhook string, authToken s
 		if resp == nil {
 			return 0, fmt.Errorf("unable to call webhook: %v", err)
 		}
-		return resp.StatusCode, fmt.Errorf("HTTP problem with watch %s: %v", watchID, err)
+		return resp.StatusCode, fmt.Errorf("HTTP problem with webhook %v", err)
 	}
 	if resp.Body != nil {
 		resp.Body.Close()

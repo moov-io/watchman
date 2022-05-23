@@ -145,9 +145,6 @@ func main() {
 	}
 	searcher := newSearcher(logger, pipeline, *flagWorkers)
 
-	// Add manual data refresh endpoint
-	adminServer.AddHandler(manualRefreshPath, manualRefreshHandler(logger, searcher, downloadRepo))
-
 	// Add debug routes
 	adminServer.AddHandler(debugSDNPath, debugSDNHandler(logger, searcher))
 
@@ -186,7 +183,13 @@ func main() {
 	updates := make(chan *DownloadStats)
 	dataRefreshInterval = getDataRefreshInterval(logger, os.Getenv("DATA_REFRESH_INTERVAL"))
 	go searcher.periodicDataRefresh(dataRefreshInterval, downloadRepo, updates)
-	go searcher.spawnResearching(logger, companyRepo, custRepo, watchRepo, webhookRepo, updates)
+	go handleDownloadStats(updates, func(stats *DownloadStats) {
+		callDownloadWebook(logger, stats)
+		searcher.spawnResearching(logger, companyRepo, custRepo, watchRepo, webhookRepo)
+	})
+
+	// Add manual data refresh endpoint
+	adminServer.AddHandler(manualRefreshPath, manualRefreshHandler(logger, searcher, updates, downloadRepo))
 
 	// Add searcher for HTTP routes
 	addCompanyRoutes(logger, router, searcher, companyRepo, watchRepo)
@@ -257,4 +260,13 @@ func setupWebui(logger log.Logger, r *mux.Router, basePath string) {
 		os.Exit(1)
 	}
 	r.PathPrefix("/").Handler(http.StripPrefix(basePath, http.FileServer(http.Dir(dir))))
+}
+
+func handleDownloadStats(updates chan *DownloadStats, handle func(stats *DownloadStats)) {
+	for {
+		stats := <-updates
+		if stats != nil {
+			handle(stats)
+		}
+	}
 }
