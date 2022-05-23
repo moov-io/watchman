@@ -5,7 +5,9 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -18,7 +20,32 @@ import (
 	"github.com/moov-io/watchman/internal/database"
 
 	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/require"
 )
+
+func TestDownloadStats(t *testing.T) {
+	when := time.Date(2022, time.May, 21, 9, 4, 0, 0, time.UTC)
+	bs, err := json.Marshal(&DownloadStats{
+		SDNs: 1,
+		Errors: []error{
+			errors.New("bad thing"),
+		},
+		RefreshedAt: when,
+	})
+	require.NoError(t, err)
+
+	var wrapper struct {
+		SDNs      int
+		Errors    []string
+		Timestamp time.Time
+	}
+	err = json.NewDecoder(bytes.NewReader(bs)).Decode(&wrapper)
+	require.NoError(t, err)
+
+	require.Equal(t, 1, wrapper.SDNs)
+	require.Len(t, wrapper.Errors, 1)
+	require.Equal(t, when, wrapper.Timestamp)
+}
 
 func TestSearcher__refreshInterval(t *testing.T) {
 	if v := getDataRefreshInterval(log.NewNopLogger(), ""); v.String() != "12h0m0s" {

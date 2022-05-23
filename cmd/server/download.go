@@ -5,6 +5,7 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -62,7 +63,31 @@ type DownloadStats struct {
 	MilitaryEndUsers  int `json:"militaryEndUsers"`
 	SectoralSanctions int `json:"sectoralSanctions"`
 
+	Errors      []error   `json:"-"`
 	RefreshedAt time.Time `json:"timestamp"`
+}
+
+func (ss *DownloadStats) Error() string {
+	var buf bytes.Buffer
+	for i := range ss.Errors {
+		buf.WriteString(ss.Errors[i].Error() + "\n")
+	}
+	return buf.String()
+}
+
+func (ss *DownloadStats) MarshalJSON() ([]byte, error) {
+	type Aux struct {
+		DownloadStats
+		Errors []string `json:"errors"`
+	}
+	var errors []string
+	for i := range ss.Errors {
+		errors = append(errors, ss.Errors[i].Error())
+	}
+	return json.Marshal(Aux{
+		DownloadStats: *ss,
+		Errors:        errors,
+	})
 }
 
 // periodicDataRefresh will forever block for interval's duration and then download and reparse the data.
@@ -170,13 +195,16 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 		}
 	}
 
+	stats := &DownloadStats{
+		RefreshedAt: lastRefresh(initialDir),
+	}
+
 	lastDataRefreshFailure.WithLabelValues("SDNs").Set(float64(time.Now().Unix()))
 
 	results, err := ofacRecords(s.logger, initialDir)
 	if err != nil {
 		lastDataRefreshFailure.WithLabelValues("SDNs").Set(float64(time.Now().Unix()))
-
-		return nil, fmt.Errorf("OFAC records: %v", err)
+		stats.Errors = append(stats.Errors, fmt.Errorf("OFAC: %v", err))
 	}
 
 	sdns := precomputeSDNs(results.SDNs, results.Addresses, s.pipe)
@@ -186,34 +214,29 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	deniedPersons, err := dplRecords(s.logger, initialDir)
 	if err != nil {
 		lastDataRefreshFailure.WithLabelValues("DPs").Set(float64(time.Now().Unix()))
-
-		return nil, fmt.Errorf("DPL records: %v", err)
+		stats.Errors = append(stats.Errors, fmt.Errorf("DPL: %v", err))
 	}
 	dps := precomputeDPs(deniedPersons, s.pipe)
 
 	consolidatedLists, err := cslRecords(s.logger, initialDir)
 	if err != nil {
 		lastDataRefreshFailure.WithLabelValues("CSL").Set(float64(time.Now().Unix()))
-
-		return nil, fmt.Errorf("CSL records: %v", err)
+		stats.Errors = append(stats.Errors, fmt.Errorf("CSL: %v", err))
 	}
 	els := precomputeCSLEntities[csl.EL](consolidatedLists.ELs, s.pipe)
 	meus := precomputeCSLEntities[csl.MEU](consolidatedLists.MEUs, s.pipe)
 	ssis := precomputeCSLEntities[csl.SSI](consolidatedLists.SSIs, s.pipe)
 
-	stats := &DownloadStats{
-		// OFAC
-		SDNs:      len(sdns),
-		Alts:      len(alts),
-		Addresses: len(adds),
-		// BIS
-		DeniedPersons: len(dps),
-		// CSL
-		BISEntities:       len(els),
-		MilitaryEndUsers:  len(meus),
-		SectoralSanctions: len(ssis),
-	}
-	stats.RefreshedAt = lastRefresh(initialDir)
+	// OFAC
+	stats.SDNs = len(sdns)
+	stats.Alts = len(alts)
+	stats.Addresses = len(adds)
+	// BIS
+	stats.DeniedPersons = len(dps)
+	// CSL
+	stats.BISEntities = len(els)
+	stats.MilitaryEndUsers = len(meus)
+	stats.SectoralSanctions = len(ssis)
 
 	// record prometheus metrics
 	lastDataRefreshCount.WithLabelValues("SDNs").Set(float64(len(sdns)))
@@ -221,6 +244,10 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	lastDataRefreshCount.WithLabelValues("BISEntities").Set(float64(len(els)))
 	lastDataRefreshCount.WithLabelValues("MilitaryEndUsers").Set(float64(len(meus)))
 	lastDataRefreshCount.WithLabelValues("DPs").Set(float64(len(dps)))
+
+	if len(stats.Errors) > 0 {
+		return stats, stats
+	}
 
 	// Set new records after precomputation (to minimize lock contention)
 	s.Lock()
@@ -251,7 +278,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 // lastRefresh returns a time.Time for the oldest file in dir or the current time if empty.
 func lastRefresh(dir string) time.Time {
 	if dir == "" {
-		return time.Now()
+		return time.Now().In(time.UTC)
 	}
 
 	infos, err := ioutil.ReadDir(dir)
@@ -265,7 +292,7 @@ func lastRefresh(dir string) time.Time {
 			oldest = t
 		}
 	}
-	return oldest
+	return oldest.In(time.UTC)
 }
 
 func addDownloadRoutes(logger log.Logger, r *mux.Router, repo downloadRepository) {

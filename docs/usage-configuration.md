@@ -22,6 +22,9 @@ menubar: docs-menu
 | `HTTPS_KEY_FILE`  | Filepath of a private key matching the leaf certificate from `HTTPS_CERT_FILE`. | Empty |
 | `DATABASE_TYPE` | Which database option to use (Options: `sqlite`, `mysql`). | Default: `sqlite` |
 | `WEB_ROOT` | Directory to serve web UI from. | Default: `webui/` |
+| `WEBHOOK_MAX_WORKERS` | Maximum number of workers processing webhooks. | Default: 10 |
+| `DOWNLOAD_WEBHOOK_URL` | Optional webhook URL called when data downloads / refreshes occur. | Empty |
+| `DOWNLOAD_WEBHOOK_AUTH_TOKEN` | Optional `Authorization` header included on download webhooks. | Empty |
 
 ## List configurations
 
