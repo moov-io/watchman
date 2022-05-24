@@ -56,31 +56,31 @@ func Parse(r io.Reader) (*CSL, error) {
 				report.SSIs = append(report.SSIs, unmarshalSSI(record, i))
 
 			case "Unverified List (UVL) - Bureau of Industry and Security":
-				// TODO(adam):
+				// TODO(adam): https://github.com/moov-io/watchman/issues/403
 
 			case "Nonproliferation Sanctions (ISN) - State Department":
-				// TODO(adam):
+				// TODO(adam): https://github.com/moov-io/watchman/issues/413
 
 			case "AECA Debarred List": // TODO: Not found
-				// TODO(adam): there is 'ITAR Debarred (DTC) - State Department'
+				// TODO(adam): https://github.com/moov-io/watchman/issues/414
 
 			case "Foreign Sanctions Evaders (FSE) - Treasury Department":
-				// TODO(adam):
+				// TODO(adam): https://github.com/moov-io/watchman/issues/415
 
 			case "Palestinian Legislative Council List (PLC) - Treasury Department":
-				// TODO(adam):
+				// TODO(adam): https://github.com/moov-io/watchman/issues/416
 
 			case "Capta List (CAP) - Treasury Department":
-				// TODO(adam):
+				// TODO(adam): https://github.com/moov-io/watchman/issues/417
 
 			case "Non-SDN Menu-Based Sanctions List (NS-MBS List) - Treasury Department":
-				// TODO(adam):
+				// TODO(adam): https://github.com/moov-io/watchman/issues/418
 
 			case "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department":
-				// TODO(adam):
+				// TODO(adam): https://github.com/moov-io/watchman/issues/419
 
 			case "ITAR Debarred (DTC) - State Department":
-				// TODO(adam):
+				// TODO(adam): https://github.com/moov-io/watchman/issues/422
 
 			default:
 				// Other lists are:
