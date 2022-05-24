@@ -78,6 +78,14 @@ func Parse(r io.Reader) (*CSL, error) {
 
 			case "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department":
 				// TODO(adam):
+
+			case "ITAR Debarred (DTC) - State Department":
+				// TODO(adam):
+
+			default:
+				// Other lists are:
+				// "Specially Designated Nationals (SDN) - Treasury Department"
+				// "Denied Persons List (DPL) - Bureau of Industry and Security"
 			}
 		}
 	}

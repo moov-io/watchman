@@ -19,6 +19,7 @@ type CSL struct {
 }
 
 // This is the order of the columns in the CSL
+// Source: https://legacy.trade.gov/CSL_Download_Instructions.pdf
 const (
 	SourceIdx = iota
 	EntityNumberIdx
@@ -27,7 +28,7 @@ const (
 	NameIdx
 	TitleIdx
 	AddressesIdx
-	FRNoticeIdx
+	FRNoticeIdx // Federal Register Notice
 	StartDateIdx
 	EndDateIdx
 	StandardOrderIdx
