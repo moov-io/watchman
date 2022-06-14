@@ -14,7 +14,7 @@ A model is defined as "a quantitative method, system, or approach that applies s
 
 Watchman's default data sources are several government agency and public data sources. These are typically lists of entity data (names, addresses, government IDs, etc) published regularly. Watchman will periodically download these data files and re-index the data. This allows for a high degree of uptime and continual improvement.
 
-After the data files are refreshed users can configure webhook notifications to be notified and initiate custom processes. The interval that data files are refreshed is configurable and can be triggered at any time. Custom files can also be used with Watchman.
+After the data files are refreshed users can [configure webhook notifications](https://moov-io.github.io/watchman/webhook-notifications/) to be notified and initiate custom processes. The interval that data files are refreshed is configurable and can be triggered at any time. Custom files can also be used with Watchman.
 
 Watchman will index the data sources in a normalized form for improved search rankings. These [steps are documented](https://moov-io.github.io/watchman/pipeline/#pipeline-steps) for data cleanup and typical search patterns.
 
@@ -25,8 +25,6 @@ Watchman uses the Jaro–Winkler string comparison scoring for each query. Each 
 Periodic searches of names, addresses, IDs, etc can be performed by two different methods. Watchman supports "watches" which are performed after source data is refreshed and delivers results via webhooks. Otherwise the HTTP endpoints can be called to get the current scoring. Watchman is highly performant to support large amounts of queries.
 
 Search queries return better results when multiple criteria are included with the query. Simple name queries will return false positive matches, so including addresses, alternate names, and other fields are suggested.
-
-[Webhook Docs](https://moov-io.github.io/watchman/webhook-notifications/)
 
 ## Checks Not Performed
 
