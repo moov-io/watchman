@@ -29,6 +29,11 @@
     - name: High availability
       link: /ha/
 
+- label: Risk Management
+  items:
+    - name: Model Validation
+      link: /model-validation/
+
 - label: Production and monitoring
   items:
     - name: Production runbook
