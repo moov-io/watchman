@@ -26,7 +26,7 @@ Periodic searches of names, addresses, IDs, etc can be performed by two differen
 
 Search queries return better results when multiple criteria are included with the query. Simple name queries will return false positive matches, so including addresses, alternate names, and other fields are suggested.
 
-Webhooks: https://moov-io.github.io/watchman/webhook-notifications/
+[Webhook Docs](https://moov-io.github.io/watchman/webhook-notifications/)
 
 ## Checks Not Performed
 
