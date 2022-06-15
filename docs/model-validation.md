@@ -14,6 +14,32 @@ A model is defined as "a quantitative method, system, or approach that applies s
 
 Watchman's default data sources are several government agency and public data sources. These are typically lists of entity data (names, addresses, government IDs, etc) published regularly. Watchman will periodically download these data files and re-index the data. By default this refresh occurs on a 12-hour interval and can be configured or initiated manually. This allows for a high degree of uptime and continual improvement.
 
+### Sources List
+
+- US Treasury - Office of Foreign Assets Control (OFAC)
+  - [Specially Designated Nationals](https://home.treasury.gov/policy-issues/financial-sanctions/specially-designated-nationals-and-blocked-persons-list-sdn-human-readable-lists) (SDN)
+    - Includes SDN, SDN Alternative Names, SDN Addresses
+- [United States Consolidated Screening List](https://www.export.gov/article2?id=Consolidated-Screening-List)
+   - Department of Commerce – Bureau of Industry and Security
+      - [Denied Persons List](http://www.bis.doc.gov/dpl/default.shtm)
+      <!-- - [Unverified List](http://www.bis.doc.gov/enforcement/unverifiedlist/unverified_parties.html) -->
+      - [Entity List](http://www.bis.doc.gov/entities/default.htm)
+<!--
+   - Department of State – Bureau of International Security and Non-proliferation
+      - [Nonproliferation Sanctions](http://www.state.gov/t/isn/c15231.htm)
+   - Department of State – Directorate of Defense Trade Controls
+      - [AECA Debarred List](http://www.pmddtc.state.gov/compliance/debar_intro.html)
+-->
+   - Department of the Treasury – Office of Foreign Assets Control
+<!--
+      - [Specially Designated Nationals List](http://www.treasury.gov/resource-center/sanctions/SDN-List/Pages/default.aspx)
+      - [Foreign Sanctions Evaders List](http://www.treasury.gov/resource-center/sanctions/SDN-List/Pages/fse_list.aspx)
+-->
+      - [Sectoral Sanctions Identifications List](http://www.treasury.gov/resource-center/sanctions/SDN-List/Pages/ssi_list.aspx)
+<!--
+      - [Palestinian Legislative Council List](https://www.treasury.gov/resource-center/sanctions/Terrorism-Proliferation-Narcotics/Pages/pa.aspx)
+-->
+
 After the data files are refreshed users can [configure webhook notifications](https://moov-io.github.io/watchman/webhook-notifications/) to be notified and initiate custom processes. Custom data files can be used with Watchman.
 
 Watchman will index the data sources in a normalized form for improved search rankings. These [steps are documented](https://moov-io.github.io/watchman/pipeline/#pipeline-steps) for data cleanup and typical search patterns.
