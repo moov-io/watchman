@@ -17,7 +17,6 @@ import (
 	"time"
 
 	"github.com/moov-io/base/log"
-	"github.com/moov-io/base/strx"
 	"github.com/moov-io/watchman/pkg/csl"
 	"github.com/moov-io/watchman/pkg/dpl"
 	"github.com/moov-io/watchman/pkg/ofac"
@@ -596,12 +595,34 @@ func precomputeDPs(persons []*dpl.DPL, pipe *pipeliner) []*DP {
 }
 
 var (
-	exactMatchFavoritism = readExactMatchFavoritism(os.Getenv("EXACT_MATCH_FAVORITISM"))
+	// Jaro-Winkler parameters
+	boostThreshold = readFloat(os.Getenv("JARO_WINKLER_BOOST_THRESHOLD"), 0.7)
+	prefixSize     = readInt(os.Getenv("JARO_WINKLER_PREFIX_SIZE"), 4)
+
+	// Watchman parameters
+	exactMatchFavoritism = readFloat(os.Getenv("EXACT_MATCH_FAVORITISM"), 0.0)
 )
 
-func readExactMatchFavoritism(input string) float64 {
-	weight, _ := strconv.ParseFloat(strx.Or(input, "0.0"), 32)
-	return weight
+func readFloat(override string, value float64) float64 {
+	if override != "" {
+		n, err := strconv.ParseFloat(override, 32)
+		if err != nil {
+			panic(fmt.Errorf("unable to parse %q as float64", override))
+		}
+		return n
+	}
+	return value
+}
+
+func readInt(override string, value int) int {
+	if override != "" {
+		n, err := strconv.ParseInt(override, 10, 32)
+		if err != nil {
+			panic(fmt.Errorf("unable to parse %q as int", override))
+		}
+		return int(n)
+	}
+	return value
 }
 
 // jaroWinkler runs the similarly named algorithm over the two input strings and averages their match percentages
@@ -613,9 +634,10 @@ func jaroWinkler(s1, s2 string) float64 {
 		if len(parts) == 0 {
 			return 0.0
 		}
-		max := smetrics.JaroWinkler(word, parts[0], 0.7, 4)
+
+		max := smetrics.JaroWinkler(word, parts[0], boostThreshold, prefixSize)
 		for i := 1; i < len(parts); i++ {
-			if score := smetrics.JaroWinkler(word, parts[i], 0.7, 4); score > max {
+			if score := smetrics.JaroWinkler(word, parts[i], boostThreshold, prefixSize); score > max {
 				max = score
 			}
 		}

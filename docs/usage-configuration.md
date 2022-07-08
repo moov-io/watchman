@@ -13,6 +13,8 @@ menubar: docs-menu
 | `DATA_REFRESH_INTERVAL` | Interval for data redownload and reparse. `off` disables this refreshing. | 12h |
 | `INITIAL_DATA_DIRECTORY` | Directory filepath with initial files to use instead of downloading. Periodic downloads will replace the initial files. | Empty |
 | `EXACT_MATCH_FAVORITISM` | Extra weighting assigned to exact matches. | 0.0 |
+| `JARO_WINKLER_BOOST_THRESHOLD` | Jaro-Winkler boost threshold. | 0.7 |
+| `JARO_WINKLER_PREFIX_SIZE` | Jaro-Winkler prefix size. | 4 |
 | `WEBHOOK_BATCH_SIZE` | How many watches to read from database per batch of async searches. | 100 |
 | `LOG_FORMAT` | Format for logging lines to be written as. | Options: `json`, `plain` - Default: `plain` |
 | `BASE_PATH` | HTTP path to serve API and web UI from. | `/` |
