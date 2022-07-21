@@ -199,7 +199,7 @@ func searchByName(api *moov.APIClient, name string) (float64, error) {
 	opts := &moov.SearchOpts{
 		Limit:      optional.NewInt32(1),
 		Name:       optional.NewString(name),
-		SdnType:    optional.NewString(*flagSdnType),
+		SdnType:    optional.NewInterface(*flagSdnType),
 		XRequestID: optional.NewString(*flagRequestID),
 	}
 
