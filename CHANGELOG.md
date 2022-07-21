@@ -1,4 +1,4 @@
-## v0.22.0 (Unreleased)
+## v0.22.0 (Released 2022-07-21)
 
 Watchman v0.22.0 has started to use Go 1.18 and its support for generic programming has helped us greatly clean up our code. We've also refreshed our [documentation website](https://moov-io.github.io/watchman/).
 
