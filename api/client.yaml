@@ -680,8 +680,7 @@ paths:
         - name: sdnType
           in: query
           schema:
-            type: string
-            example: individual
+            $ref: '#/components/schemas/SdnType'
           description: Optional filter to only return SDNs whose type case-insensitively matches.
         - name: program
           in: query
@@ -748,8 +747,7 @@ paths:
           description: SDN property to lookup. Values are sdnType, ofacProgram
           required: true
           schema:
-            type: string
-            example: sdnType
+            $ref: '#/components/schemas/SdnType'
         - name: limit
           in: query
           schema:
@@ -940,6 +938,7 @@ components:
         - entity
         - vessel
         - aircraft
+      example: individual
     SsiType:
       description: 'Used for classifying SSIs'
       type: string

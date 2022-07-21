@@ -843,8 +843,7 @@ paths:
         name: sdnType
         required: false
         schema:
-          example: individual
-          type: string
+          $ref: '#/components/schemas/SdnType'
         style: form
       - description: Optional filter to only return SDNs whose program case-insensitively
           matches.
@@ -924,8 +923,7 @@ paths:
         name: key
         required: true
         schema:
-          example: sdnType
-          type: string
+          $ref: '#/components/schemas/SdnType'
         style: simple
       - description: Maximum number of UI keys returned
         explode: true
@@ -985,6 +983,7 @@ components:
           alternateName: NATIONAL BANK OF CUBA
         ID: 9574756b
         sdn:
+          sdnType: individual
           match: 0.91
           entityID: "1231"
           programs:
@@ -1070,6 +1069,7 @@ components:
           alternateName: NATIONAL BANK OF CUBA
         ID: 9574756b
         sdn:
+          sdnType: individual
           match: 0.91
           entityID: "1231"
           programs:
@@ -1127,6 +1127,7 @@ components:
     OfacSDN:
       description: Specially designated national from OFAC list
       example:
+        sdnType: individual
         match: 0.91
         entityID: "1231"
         programs:
@@ -1235,6 +1236,7 @@ components:
       - entity
       - vessel
       - aircraft
+      example: individual
       type: string
     SsiType:
       description: Used for classifying SSIs
@@ -1510,14 +1512,16 @@ components:
       description: Search results containing SDNs, alternate names, and/or addreses
       example:
         SDNs:
-        - match: 0.91
+        - sdnType: individual
+          match: 0.91
           entityID: "1231"
           programs:
           - CUBA
           sdnName: BANCO NACIONAL DE CUBA
           title: Title of an individual
           remarks: Additional info
-        - match: 0.91
+        - sdnType: individual
+          match: 0.91
           entityID: "1231"
           programs:
           - CUBA

@@ -493,7 +493,7 @@ Return an ordered distinct list of keys for an SDN property.
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**key** | **string**| SDN property to lookup. Values are sdnType, ofacProgram | 
+**key** | [**SdnType**](.md)| SDN property to lookup. Values are sdnType, ofacProgram | 
  **optional** | ***GetUIValuesOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
@@ -776,7 +776,7 @@ Name | Type | Description  | Notes
  **id** | **optional.String**| ID value often found in remarks property of an SDN. Takes the form of &#39;No. NNNNN&#39; as an alphanumeric value. | 
  **minMatch** | **optional.Float32**| Match percentage that search query must obtain for results to be returned. | 
  **limit** | **optional.Int32**| Maximum results returned by a search. Results are sorted by their match percentage in decending order. | 
- **sdnType** | **optional.String**| Optional filter to only return SDNs whose type case-insensitively matches. | 
+ **sdnType** | [**optional.Interface of SdnType**](.md)| Optional filter to only return SDNs whose type case-insensitively matches. | 
  **program** | **optional.String**| Optional filter to only return SDNs whose program case-insensitively matches. | 
 
 ### Return type

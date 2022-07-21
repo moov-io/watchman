@@ -1022,7 +1022,7 @@ Return an ordered distinct list of keys for an SDN property.
  * @param "Limit" (optional.Int32) -  Maximum number of UI keys returned
 @return []SdnType
 */
-func (a *WatchmanApiService) GetUIValues(ctx _context.Context, key string, localVarOptionals *GetUIValuesOpts) ([]SdnType, *_nethttp.Response, error) {
+func (a *WatchmanApiService) GetUIValues(ctx _context.Context, key SdnType, localVarOptionals *GetUIValuesOpts) ([]SdnType, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
@@ -1538,7 +1538,7 @@ type SearchOpts struct {
 	Id         optional.String
 	MinMatch   optional.Float32
 	Limit      optional.Int32
-	SdnType    optional.String
+	SdnType    optional.Interface
 	Program    optional.String
 }
 
@@ -1559,7 +1559,7 @@ Search Search SDNs
  * @param "Id" (optional.String) -  ID value often found in remarks property of an SDN. Takes the form of 'No. NNNNN' as an alphanumeric value.
  * @param "MinMatch" (optional.Float32) -  Match percentage that search query must obtain for results to be returned.
  * @param "Limit" (optional.Int32) -  Maximum results returned by a search. Results are sorted by their match percentage in decending order.
- * @param "SdnType" (optional.String) -  Optional filter to only return SDNs whose type case-insensitively matches.
+ * @param "SdnType" (optional.Interface of SdnType) -  Optional filter to only return SDNs whose type case-insensitively matches.
  * @param "Program" (optional.String) -  Optional filter to only return SDNs whose program case-insensitively matches.
 @return Search
 */
