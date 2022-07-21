@@ -74,10 +74,16 @@ jobs:
       if: runner.os == 'Linux'
       run: make docker-hub
 
-    - name: Tests
+    - name: Build batchsearch
       if: runner.os == 'Linux'
-      run: make build-batchsearch && make test-integration
+      run: make build-batchsearch
+
+    - name: Integration Test
+      if: runner.os == 'Linux'
+      run: make test-integration
 
     - name: Test Cleanup
       if: runner.os == 'Linux' && always()
-      run: make clean-integration
+      run: |
+        docker-compose logs
+        make clean-integration
