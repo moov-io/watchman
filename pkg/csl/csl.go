@@ -9,8 +9,7 @@ type CSL struct {
 	ELs  []*EL  // Entity List – Bureau of Industry and Security
 	MEUs []*MEU // Military End User List
 	SSIs []*SSI // Sectoral Sanctions Identifications List (SSI) - Treasury Department
-
-	// []*UL (Unverified List – Bureau of Industry and Security)
+	UVLs []*UVL // Unverified List – Bureau of Industry and Security
 	// []*PSE (Foreign Sanctions Evaders (FSE) - Treasury Department)
 	// []*ISN (Nonproliferation Sanctions (ISN) - State Department)
 	// []*PLC (Palestinian Legislative Council List (PLC) - Treasury Department)
@@ -106,4 +105,12 @@ type SSI struct {
 	SourceListURL string `json:"sourceListURL"`
 	// SourceInfoURL is a link to information about the list
 	SourceInfoURL string `json:"sourceInfoURL"`
+}
+
+type UVL struct {
+	EntityID      string   `json:"entityID"`
+	Name          string   `json:"name"`
+	Addresses     []string `json:"addresses"`
+	SourceListURL string   `json:"sourceListURL"`
+	SourceInfoURL string   `json:"sourceInfoURL"`
 }
