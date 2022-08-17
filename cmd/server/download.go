@@ -62,6 +62,7 @@ type DownloadStats struct {
 	BISEntities       int `json:"bisEntities"`
 	MilitaryEndUsers  int `json:"militaryEndUsers"`
 	SectoralSanctions int `json:"sectoralSanctions"`
+	Unverified        int `json:"Unverified"`
 
 	Errors      []error   `json:"-"`
 	RefreshedAt time.Time `json:"timestamp"`
@@ -226,6 +227,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	els := precomputeCSLEntities[csl.EL](consolidatedLists.ELs, s.pipe)
 	meus := precomputeCSLEntities[csl.MEU](consolidatedLists.MEUs, s.pipe)
 	ssis := precomputeCSLEntities[csl.SSI](consolidatedLists.SSIs, s.pipe)
+	uvls := precomputeCSLEntities[csl.UVL](consolidatedLists.UVLs, s.pipe)
 
 	// OFAC
 	stats.SDNs = len(sdns)
@@ -237,6 +239,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	stats.BISEntities = len(els)
 	stats.MilitaryEndUsers = len(meus)
 	stats.SectoralSanctions = len(ssis)
+	stats.Unverified = len(uvls)
 
 	// record prometheus metrics
 	lastDataRefreshCount.WithLabelValues("SDNs").Set(float64(len(sdns)))
@@ -244,6 +247,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	lastDataRefreshCount.WithLabelValues("BISEntities").Set(float64(len(els)))
 	lastDataRefreshCount.WithLabelValues("MilitaryEndUsers").Set(float64(len(meus)))
 	lastDataRefreshCount.WithLabelValues("DPs").Set(float64(len(dps)))
+	lastDataRefreshCount.WithLabelValues("UVLs").Set(float64(len(dps)))
 
 	if len(stats.Errors) > 0 {
 		return stats, stats
@@ -261,6 +265,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	s.BISEntities = els
 	s.MilitaryEndUsers = meus
 	s.SSIs = ssis
+	s.UVLs = uvls
 	// metadata
 	s.lastRefreshedAt = stats.RefreshedAt
 	s.Unlock()
