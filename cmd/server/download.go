@@ -247,7 +247,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	lastDataRefreshCount.WithLabelValues("BISEntities").Set(float64(len(els)))
 	lastDataRefreshCount.WithLabelValues("MilitaryEndUsers").Set(float64(len(meus)))
 	lastDataRefreshCount.WithLabelValues("DPs").Set(float64(len(dps)))
-	lastDataRefreshCount.WithLabelValues("UVLs").Set(float64(len(dps)))
+	lastDataRefreshCount.WithLabelValues("UVLs").Set(float64(len(uvls)))
 
 	if len(stats.Errors) > 0 {
 		return stats, stats
