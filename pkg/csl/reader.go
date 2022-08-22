@@ -139,7 +139,7 @@ func unmarshalSSI(record []string, offset int) *SSI {
 
 func unmarshalUVL(record []string, offset int) *UVL {
 	return &UVL{
-		EntityID:      record[EntityNumberIdx+offset],
+		EntityID:      record[0],
 		Name:          record[NameIdx+offset],
 		Addresses:     expandField(record[AddressesIdx+offset]),
 		SourceListURL: record[SourceListURLIdx+offset],
