@@ -28,8 +28,9 @@ type AdminApiService service
 /*
 DebugSDN Debug SDN
 Get an SDN and search index debug information
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param sdnId SDN ID
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param sdnId SDN ID
+
 @return DebugSdn
 */
 func (a *AdminApiService) DebugSDN(ctx _context.Context, sdnId string) (DebugSdn, *_nethttp.Response, error) {
@@ -115,7 +116,8 @@ func (a *AdminApiService) DebugSDN(ctx _context.Context, sdnId string) (DebugSdn
 /*
 GetVersion Get Version
 Show the current version of Watchman
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+
 @return string
 */
 func (a *AdminApiService) GetVersion(ctx _context.Context) (string, *_nethttp.Response, error) {
@@ -189,7 +191,8 @@ func (a *AdminApiService) GetVersion(ctx _context.Context) (string, *_nethttp.Re
 
 /*
 RefreshData Download and reindex all data sources
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+
 @return DataRefresh
 */
 func (a *AdminApiService) RefreshData(ctx _context.Context) (DataRefresh, *_nethttp.Response, error) {
