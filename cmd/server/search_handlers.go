@@ -158,7 +158,7 @@ type searchResponse struct {
 	BISEntities       []*Result[csl.EL]  `json:"bisEntities"`
 	MilitaryEndUsers  []*Result[csl.MEU] `json:"militaryEndUsers"`
 	SectoralSanctions []*Result[csl.SSI] `json:"sectoralSanctions"`
-	Unverified        []*Result[csl.UVL] `json:"unverified"`
+	Unverified        []*Result[csl.UVL] `json:"unverifiedCSL"`
 
 	// Metadata
 	RefreshedAt time.Time `json:"refreshedAt"`

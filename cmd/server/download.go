@@ -62,7 +62,7 @@ type DownloadStats struct {
 	BISEntities       int `json:"bisEntities"`
 	MilitaryEndUsers  int `json:"militaryEndUsers"`
 	SectoralSanctions int `json:"sectoralSanctions"`
-	Unverified        int `json:"Unverified"`
+	Unverified        int `json:"unverifiedCSL"`
 
 	Errors      []error   `json:"-"`
 	RefreshedAt time.Time `json:"timestamp"`
@@ -121,6 +121,7 @@ func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo down
 					"BISEntities":      log.Int(stats.BISEntities),
 					"MilitaryEndUsers": log.Int(stats.MilitaryEndUsers),
 					"SSI":              log.Int(stats.SectoralSanctions),
+					"UVL":              log.Int(stats.Unverified),
 				}).Logf("data refreshed %v ago", time.Since(stats.RefreshedAt))
 			}
 			updates <- stats // send stats for re-search and watch notifications
