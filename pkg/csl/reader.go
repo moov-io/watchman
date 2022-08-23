@@ -137,6 +137,20 @@ func unmarshalSSI(record []string, offset int) *SSI {
 	}
 }
 
+func unmarshalISN(record []string, offset int) *ISN {
+	return &ISN{
+		EntityID:              record[0],
+		Programs:              expandProgramsList(record[ProgramsIdx+offset]),
+		Name:                  record[NameIdx+offset],
+		FederalRegisterNotice: record[FRNoticeIdx+offset],
+		StartDate:             record[StartDateIdx+offset],
+		Remarks:               expandField(record[RemarksIdx+offset]),
+		SourceListURL:         record[SourceListURLIdx+offset],
+		AlternateNames:        expandField(record[AltNamesIdx+offset]),
+		SourceInfoURL:         record[SourceInformationURLIdx+offset],
+	}
+}
+
 // Some columns in a CSL row are actually lists delimited by ';'.
 // These helper methods split these fields out and clean up the results.
 

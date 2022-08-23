@@ -12,7 +12,7 @@ type CSL struct {
 
 	// []*UL (Unverified List – Bureau of Industry and Security)
 	// []*PSE (Foreign Sanctions Evaders (FSE) - Treasury Department)
-	// []*ISN (Nonproliferation Sanctions (ISN) - State Department)
+	ISNs []*ISN // Nonproliferation Sanctions (ISN) - State Department
 	// []*PLC (Palestinian Legislative Council List (PLC) - Treasury Department)
 	// []*CAPTA (CAPTA (formerly Foreign Financial Institutions Subject to Part 561 - Treasury Department))
 	// []*ADL (AECA Debarred List - State Department)
@@ -106,4 +106,16 @@ type SSI struct {
 	SourceListURL string `json:"sourceListURL"`
 	// SourceInfoURL is a link to information about the list
 	SourceInfoURL string `json:"sourceInfoURL"`
+}
+
+type ISN struct {
+	EntityID              string   `json:"entityID"`
+	Programs              []string `json:"programs"`
+	Name                  string   `json:"name"`
+	FederalRegisterNotice string   `json:"federalRegisterNotice"`
+	StartDate             string   `json:"startDate"`
+	Remarks               []string `json:"remarks"`
+	SourceListURL         string   `json:"sourceListURL"`
+	AlternateNames        []string `json:"alternateNames"`
+	SourceInfoURL         string   `json:"sourceInfoURL"`
 }
