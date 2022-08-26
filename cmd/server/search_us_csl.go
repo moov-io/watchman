@@ -82,3 +82,14 @@ func (s *searcher) TopSSIs(limit int, minMatch float64, name string) []*Result[c
 
 	return topResults[csl.SSI](limit, minMatch, name, s.SSIs)
 }
+
+// TopUVLs search Unverified Lists records by Name and Alias
+func (s *searcher) TopUVLs(limit int, minMatch float64, name string) []*Result[csl.UVL] {
+	s.RLock()
+	defer s.RUnlock()
+
+	s.Gate.Start()
+	defer s.Gate.Done()
+
+	return topResults[csl.UVL](limit, minMatch, name, s.UVLs)
+}
