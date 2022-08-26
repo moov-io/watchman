@@ -10,8 +10,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"time"
 
 	moovhttp "github.com/moov-io/base/http"
@@ -287,14 +287,18 @@ func lastRefresh(dir string) time.Time {
 		return time.Now().In(time.UTC)
 	}
 
-	infos, err := ioutil.ReadDir(dir)
-	if len(infos) == 0 || err != nil {
+	fds, err := os.ReadDir(dir)
+	if len(fds) == 0 || err != nil {
 		return time.Time{} // zero time because there's no initial data
 	}
 
-	oldest := infos[0].ModTime()
-	for i := range infos[1:] {
-		if t := infos[i].ModTime(); t.Before(oldest) {
+	oldest := time.Now().In(time.UTC)
+	for i := range fds {
+		info, err := fds[i].Info()
+		if err != nil {
+			continue
+		}
+		if t := info.ModTime(); t.Before(oldest) {
 			oldest = t
 		}
 	}

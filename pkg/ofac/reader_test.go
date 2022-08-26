@@ -5,7 +5,7 @@
 package ofac
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -93,7 +93,7 @@ func TestSplitPrograms(t *testing.T) {
 }
 
 func TestSDNComments(t *testing.T) {
-	fd, err := ioutil.TempFile("", "sdn-csv")
+	fd, err := os.CreateTemp("", "sdn-csv")
 	if err != nil {
 		t.Fatal(err)
 	}

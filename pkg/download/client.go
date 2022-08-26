@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -67,14 +66,14 @@ func (dl *Downloader) GetFiles(initialDir string, namesAndSources map[string]str
 	}
 	// Create a temporary directory for downloads if needed
 	if dir == "" {
-		temp, err := ioutil.TempDir("", "downloader")
+		temp, err := os.MkdirTemp("", "downloader")
 		if err != nil {
 			return nil, fmt.Errorf("downloader: unable to make temp dir: %v", err)
 		}
 		dir = temp
 	}
 
-	localFiles, err := ioutil.ReadDir(dir)
+	localFiles, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, fmt.Errorf("readdir %s: %v", dir, err)
 	}
@@ -105,7 +104,7 @@ func (dl *Downloader) GetFiles(initialDir string, namesAndSources map[string]str
 	wg.Wait()
 
 	// count files and error if the count isn't what we expected
-	fds, err := ioutil.ReadDir(dir)
+	fds, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, fmt.Errorf("problem reading data directory: %v", err)
 	}

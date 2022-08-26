@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -185,7 +184,7 @@ func TestDownload__lastRefresh(t *testing.T) {
 	}
 
 	// make a temp dir (initially with nothing in it)
-	dir, err := ioutil.TempDir("", "lastRefresh")
+	dir, err := os.MkdirTemp("", "lastRefresh")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -196,7 +195,7 @@ func TestDownload__lastRefresh(t *testing.T) {
 
 	// add a file and get it's mtime
 	path := filepath.Join(dir, "out.txt")
-	if err := ioutil.WriteFile(path, []byte("hello, world"), 0600); err != nil {
+	if err := os.WriteFile(path, []byte("hello, world"), 0600); err != nil {
 		t.Fatal(err)
 	}
 	if info, err := os.Stat(path); err != nil {

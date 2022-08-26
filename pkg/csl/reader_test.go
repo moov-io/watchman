@@ -2,7 +2,6 @@ package csl
 
 import (
 	"compress/gzip"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -47,7 +46,7 @@ func TestRead__Large(t *testing.T) {
 }
 
 func TestRead_missingRow(t *testing.T) {
-	fd, err := ioutil.TempFile("", "csl-missing.csv")
+	fd, err := os.CreateTemp("", "csl-missing.csv")
 	require.NoError(t, err)
 	t.Cleanup(func() { os.Remove(fd.Name()) })
 
@@ -179,7 +178,7 @@ func Test_unmarshalUVL(t *testing.T) {
 }
 
 func Test__Issue326EL(t *testing.T) {
-	fd, err := ioutil.TempFile("", "csl*.csv")
+	fd, err := os.CreateTemp("", "csl*.csv")
 	if err != nil {
 		t.Fatal(err)
 	}
