@@ -5,7 +5,6 @@
 package dpl
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -34,7 +33,7 @@ func TestDownloader(t *testing.T) {
 }
 
 func TestDownloader__initialDir(t *testing.T) {
-	dir, err := ioutil.TempDir("", "iniital-dir")
+	dir, err := os.MkdirTemp("", "iniital-dir")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,7 +41,7 @@ func TestDownloader__initialDir(t *testing.T) {
 
 	mk := func(t *testing.T, name string, body string) {
 		path := filepath.Join(dir, name)
-		if err := ioutil.WriteFile(path, []byte(body), 0600); err != nil {
+		if err := os.WriteFile(path, []byte(body), 0600); err != nil {
 			t.Fatalf("writing %s: %v", path, err)
 		}
 	}
@@ -60,7 +59,7 @@ func TestDownloader__initialDir(t *testing.T) {
 	}
 
 	if strings.EqualFold("dpl.txt", filepath.Base(file)) {
-		bs, err := ioutil.ReadFile(file)
+		bs, err := os.ReadFile(file)
 		if err != nil {
 			t.Fatal(err)
 		}

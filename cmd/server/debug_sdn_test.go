@@ -6,7 +6,7 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 
@@ -32,7 +32,7 @@ func TestDebug__SDN(t *testing.T) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		bs, _ := ioutil.ReadAll(resp.Body)
+		bs, _ := io.ReadAll(resp.Body)
 		t.Fatalf("bogus status code: %s: %s", resp.Status, string(bs))
 	}
 
