@@ -93,3 +93,14 @@ func (s *searcher) TopUVLs(limit int, minMatch float64, name string) []*Result[c
 
 	return topResults[csl.UVL](limit, minMatch, name, s.UVLs)
 }
+
+// TopISNs searches Nonproliferation Sanctions records by Name and Alias
+func (s *searcher) TopISNs(limit int, minMatch float64, name string) []*Result[csl.ISN] {
+	s.RLock()
+	defer s.RUnlock()
+
+	s.Gate.Start()
+	defer s.Gate.Done()
+
+	return topResults[csl.ISN](limit, minMatch, name, s.ISNs)
+}

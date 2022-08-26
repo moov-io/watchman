@@ -47,6 +47,7 @@ type searcher struct {
 	MilitaryEndUsers []*Result[csl.MEU]
 	SSIs             []*Result[csl.SSI]
 	UVLs             []*Result[csl.UVL]
+	ISNs             []*Result[csl.ISN]
 
 	// metadata
 	lastRefreshedAt time.Time

@@ -114,6 +114,7 @@ type UVL struct {
 	SourceListURL string   `json:"sourceListURL"`
 	SourceInfoURL string   `json:"sourceInfoURL"`
 }
+
 type ISN struct {
 	EntityID              string   `json:"entityID"`
 	Programs              []string `json:"programs"`

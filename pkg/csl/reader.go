@@ -59,7 +59,7 @@ func Parse(r io.Reader) (*CSL, error) {
 				report.UVLs = append(report.UVLs, unmarshalUVL(record, i))
 
 			case "Nonproliferation Sanctions (ISN) - State Department":
-				// TODO(adam): https://github.com/moov-io/watchman/issues/413
+				report.ISNs = append(report.ISNs, unmarshalISN(record, i))
 
 			case "AECA Debarred List": // TODO: Not found
 				// TODO(adam): https://github.com/moov-io/watchman/issues/414
