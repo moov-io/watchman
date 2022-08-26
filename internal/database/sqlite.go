@@ -111,12 +111,16 @@ func (s *sqlite) Connect() (*sql.DB, error) {
 	}
 
 	// Migrate our database
-	if m, err := migrator.New(sqliteMigrations); err != nil {
+	opts := []migrator.Option{sqliteMigrations}
+	if s != nil {
+		opts = append(opts, migrator.WithLogger(newMigrationLogger(s.logger)))
+	}
+	mig, err := migrator.New(opts...)
+	if err != nil {
 		return db, err
-	} else {
-		if err := m.Migrate(db); err != nil {
-			return db, err
-		}
+	}
+	if err := mig.Migrate(db); err != nil {
+		return db, err
 	}
 
 	// Spin up metrics only after everything works

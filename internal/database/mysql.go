@@ -110,12 +110,16 @@ func (my *mysql) Connect() (*sql.DB, error) {
 	}
 
 	// Migrate our database
-	if m, err := migrator.New(mysqlMigrations); err != nil {
+	opts := []migrator.Option{mysqlMigrations}
+	if my != nil {
+		opts = append(opts, migrator.WithLogger(newMigrationLogger(my.logger)))
+	}
+	mig, err := migrator.New(opts...)
+	if err != nil {
 		return nil, err
-	} else {
-		if err := m.Migrate(db); err != nil {
-			return nil, err
-		}
+	}
+	if err := mig.Migrate(db); err != nil {
+		return nil, err
 	}
 
 	// Setup metrics after the database is setup
