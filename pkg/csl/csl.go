@@ -121,8 +121,8 @@ type ISN struct {
 	Name                  string   `json:"name"`
 	FederalRegisterNotice string   `json:"federalRegisterNotice"`
 	StartDate             string   `json:"startDate"`
-	Remarks               []string `json:"remarks"`
+	Remarks               []string `json:"remarks,omitempty"`
 	SourceListURL         string   `json:"sourceListURL"`
-	AlternateNames        []string `json:"alternateNames"`
+	AlternateNames        []string `json:"alternateNames,omitempty"`
 	SourceInfoURL         string   `json:"sourceInfoURL"`
 }

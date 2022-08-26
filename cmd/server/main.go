@@ -165,6 +165,8 @@ func main() {
 			"SSI":         log.Int(stats.SectoralSanctions),
 			"DPL":         log.Int(stats.DeniedPersons),
 			"BISEntities": log.Int(stats.BISEntities),
+			"UVL":         log.Int(stats.Unverified),
+			"ISN":         log.Int(stats.NonproliferationSanctions),
 		}).Logf("data refreshed %v ago", time.Since(stats.RefreshedAt))
 	}
 

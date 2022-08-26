@@ -123,6 +123,7 @@ func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo down
 					"MilitaryEndUsers": log.Int(stats.MilitaryEndUsers),
 					"SSI":              log.Int(stats.SectoralSanctions),
 					"UVL":              log.Int(stats.Unverified),
+					"ISN":              log.Int(stats.NonproliferationSanctions),
 				}).Logf("data refreshed %v ago", time.Since(stats.RefreshedAt))
 			}
 			updates <- stats // send stats for re-search and watch notifications
@@ -271,6 +272,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	s.MilitaryEndUsers = meus
 	s.SSIs = ssis
 	s.UVLs = uvls
+	s.ISNs = isns
 	// metadata
 	s.lastRefreshedAt = stats.RefreshedAt
 	s.Unlock()
