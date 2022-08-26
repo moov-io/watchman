@@ -156,6 +156,27 @@ func Test_unmarshalSSI(t *testing.T) {
 	}
 }
 
+func Test_unmarshalUVL(t *testing.T) {
+	// Record from official CSV
+	record := []string{"f15fa805ff4ac5e09026f5e78011a1bb6b26dec2", "Unverified List (UVL) - Bureau of Industry and Security", "", "", "",
+		"Atlas Sanatgaran", "", "Komitas 26/114, Yerevan, Armenia, AM", "", "", "", "", "", "", "", "", "", "", "", "", "", "http://bit.ly/1iwwTSJ", "", "", "", "", "",
+		"http://bit.ly/1Qi4R7Z", "",
+	}
+	expectedUVL := &UVL{
+		EntityID:      "f15fa805ff4ac5e09026f5e78011a1bb6b26dec2",
+		Name:          "Atlas Sanatgaran",
+		Addresses:     []string{"Komitas 26/114, Yerevan, Armenia, AM"},
+		SourceListURL: "http://bit.ly/1iwwTSJ",
+		SourceInfoURL: "http://bit.ly/1Qi4R7Z",
+	}
+
+	actualUVL := unmarshalUVL(record, 1)
+
+	if !reflect.DeepEqual(expectedUVL, actualUVL) {
+		t.Errorf("Expected: %#v\nFound: %#v\n", expectedUVL, actualUVL)
+	}
+}
+
 func Test__Issue326EL(t *testing.T) {
 	fd, err := os.CreateTemp("", "csl*.csv")
 	if err != nil {
