@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/moov-io/base/log"
@@ -36,7 +35,7 @@ type Company struct {
 
 func addWebhookRoute(logger log.Logger, r *mux.Router) {
 	r.Methods("POST").Path("/ofac").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		bs, err := ioutil.ReadAll(io.LimitReader(r.Body, 5*1024*1024))
+		bs, err := io.ReadAll(io.LimitReader(r.Body, 5*1024*1024))
 		if err != nil {
 			logger.Logf("problem reading request: %v", err)
 

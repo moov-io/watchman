@@ -7,7 +7,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -59,7 +59,7 @@ func TestWebhook_retry(t *testing.T) {
 	}
 
 	// Ensure we landed on example.com
-	bs, _ := ioutil.ReadAll(resp.Body)
+	bs, _ := io.ReadAll(resp.Body)
 	resp.Body.Close()
 	if !bytes.Contains(bs, []byte("iana.org")) {
 		t.Errorf("resp.Body=%s", string(bs))
@@ -72,7 +72,7 @@ func TestWebhook_retry(t *testing.T) {
 	}
 	defer resp.Body.Close()
 
-	bs, _ = ioutil.ReadAll(resp.Body)
+	bs, _ = io.ReadAll(resp.Body)
 	if !bytes.Contains(bs, []byte("didn't redirect")) {
 		t.Errorf("resp.Body=%s", string(bs))
 	}

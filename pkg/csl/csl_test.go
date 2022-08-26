@@ -5,7 +5,7 @@
 package csl
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/moov-io/base/log"
@@ -21,7 +21,7 @@ func TestCSL(t *testing.T) {
 	}
 
 	logger := log.NewNopLogger()
-	dir, err := ioutil.TempDir("", "csl")
+	dir, err := os.MkdirTemp("", "csl")
 	require.NoError(t, err)
 
 	file, err := Download(logger, dir)
