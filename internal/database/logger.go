@@ -5,7 +5,8 @@
 package database
 
 import (
-	"testing"
+	"os"
+	"strings"
 
 	"github.com/moov-io/base/log"
 
@@ -13,18 +14,23 @@ import (
 )
 
 type migrationLogger struct {
-	logger log.Logger
+	logger    log.Logger
+	shouldLog bool
 }
 
 func newMigrationLogger(logger log.Logger) migrator.Logger {
+	level := strings.TrimSpace(os.Getenv("LOG_LEVEL"))
+	shouldLog := strings.EqualFold("trace", level)
+
 	return &migrationLogger{
-		logger: logger,
+		logger:    logger,
+		shouldLog: shouldLog,
 	}
 }
 
 func (ml *migrationLogger) Printf(pattern string, args ...interface{}) {
 	if ml != nil && ml.logger != nil {
-		if testing.Verbose() {
+		if ml.shouldLog {
 			ml.logger.Info().Logf(pattern, args...)
 		}
 	}
