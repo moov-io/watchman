@@ -123,7 +123,7 @@ func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo down
 					"MilitaryEndUsers": log.Int(stats.MilitaryEndUsers),
 					"SSI":              log.Int(stats.SectoralSanctions),
 					"UVL":              log.Int(stats.Unverified),
-					"ISN":              log.Int(stats.NonproliferationSanctions),
+					"ISN":              log.Int(stats.NonProliferationSanctions),
 				}).Logf("data refreshed %v ago", time.Since(stats.RefreshedAt))
 			}
 			updates <- stats // send stats for re-search and watch notifications
@@ -244,7 +244,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	stats.MilitaryEndUsers = len(meus)
 	stats.SectoralSanctions = len(ssis)
 	stats.Unverified = len(uvls)
-	stats.NonproliferationSanctions = len(isns)
+	stats.NonProliferationSanctions = len(isns)
 
 	// record prometheus metrics
 	lastDataRefreshCount.WithLabelValues("SDNs").Set(float64(len(sdns)))
