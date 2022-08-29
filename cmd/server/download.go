@@ -63,7 +63,7 @@ type DownloadStats struct {
 	MilitaryEndUsers          int `json:"militaryEndUsers"`
 	SectoralSanctions         int `json:"sectoralSanctions"`
 	Unverified                int `json:"unverifiedCSL"`
-	NonproliferationSanctions int `json:"nonproliferationSanctions"`
+	NonProliferationSanctions int `json:"nonProliferationSanctions"`
 
 	Errors      []error   `json:"-"`
 	RefreshedAt time.Time `json:"timestamp"`
