@@ -12,7 +12,7 @@ type CSL struct {
 	UVLs []*UVL // Unverified List – Bureau of Industry and Security
 	FSEs []*FSE // Foreign Sanctions Evaders (FSE) - Treasury Department
 	ISNs []*ISN // Nonproliferation Sanctions (ISN) - State Department
-	// []*PLC (Palestinian Legislative Council List (PLC) - Treasury Department)
+	PLCs []*PLC // Palestinian Legislative Council List (PLC) - Treasury Department
 	// []*CAPTA (CAPTA (formerly Foreign Financial Institutions Subject to Part 561 - Treasury Department))
 	// []*ADL (AECA Debarred List - State Department)
 }
@@ -139,4 +139,19 @@ type FSE struct {
 	DatesOfBirth  string   `json:"datesOfBirth"`
 	SourceInfoURL string   `json:"sourceInfoURL"`
 	IDs           []string `json:"IDs"`
+}
+
+type PLC struct {
+	EntityID       string   `json:"entityID"`
+	EntityNumber   string   `json:"entityNumber"`
+	Type           string   `json:"type"`
+	Programs       []string `json:"programs"`
+	Name           string   `json:"name"`
+	Addresses      []string `json:"addresses,omitempty"`
+	Remarks        string   `json:"remarks"`
+	SourceListURL  string   `json:"sourceListURL"`
+	AlternateNames []string `json:"alternateNames,omitempty"`
+	DatesOfBirth   string   `json:"datesOfBirth,omitempty"`
+	PlacesOfBirth  string   `json:"placesOfBirth,omitempty"`
+	SourceInfoURL  string   `json:"sourceInfoURL"`
 }
