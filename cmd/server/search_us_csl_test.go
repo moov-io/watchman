@@ -83,3 +83,12 @@ func TestSearcher_TopSSIs_reportAltNameWeight(t *testing.T) {
 		t.Errorf("Expected match=1.0 for alt names: %f - %#v", ssis[0].match, ssis[0].Data)
 	}
 }
+
+func TestSearcher_TopISNs(t *testing.T) {
+	isns := isnSearcher.TopISNs(1, 0.00, "Abdul Qadeer K")
+	require.Len(t, isns, 1)
+
+	isn := isns[0]
+	require.Equal(t, "2d2db09c686e4829d0ef1b0b04145eec3d42cd88", isn.Data.EntityID)
+	require.Equal(t, "0.92", fmt.Sprintf("%.2f", isn.match))
+}

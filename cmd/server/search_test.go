@@ -37,6 +37,7 @@ var (
 	bisEntitySearcher = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
 	meuSearcher       = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
 	ssiSearcher       = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	isnSearcher       = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
 )
 
 func init() {
@@ -194,6 +195,19 @@ func init() {
 			FRNotice:           "81 FR 57451",
 			SourceListURL:      "http://bit.ly/1L47xrV",
 			SourceInfoURL:      "http://bit.ly/1L47xrV",
+		},
+	}, noLogPipeliner)
+	isnSearcher.ISNs = precomputeCSLEntities[csl.ISN]([]*csl.ISN{
+		{
+			EntityID:              "2d2db09c686e4829d0ef1b0b04145eec3d42cd88",
+			Programs:              []string{"E.O. 13382", "Export-Import Bank Act", "Nuclear Proliferation Prevention Act"},
+			Name:                  "Abdul Qadeer Khan",
+			FederalRegisterNotice: "Vol. 74, No. 11, 01/16/09",
+			StartDate:             "2009-01-09",
+			Remarks:               []string{"Associated with the A.Q. Khan Network"},
+			SourceListURL:         "http://bit.ly/1NuVFxV",
+			AlternateNames:        []string{"ZAMAN", "Haydar"},
+			SourceInfoURL:         "http://bit.ly/1NuVFxV",
 		},
 	}, noLogPipeliner)
 }
