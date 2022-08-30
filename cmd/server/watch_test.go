@@ -185,8 +185,6 @@ func TestWatchCursor_ID(t *testing.T) {
 }
 
 func TestWatchCursor_Names(t *testing.T) {
-	t.Parallel()
-
 	check := func(t *testing.T, repo *sqliteWatchRepository) {
 		cur := repo.getWatchesCursor(log.NewNopLogger(), 4)
 
