@@ -10,7 +10,7 @@ type CSL struct {
 	MEUs []*MEU // Military End User List
 	SSIs []*SSI // Sectoral Sanctions Identifications List (SSI) - Treasury Department
 	UVLs []*UVL // Unverified List – Bureau of Industry and Security
-	// []*PSE (Foreign Sanctions Evaders (FSE) - Treasury Department)
+	FSEs []*FSE // Foreign Sanctions Evaders (FSE) - Treasury Department
 	ISNs []*ISN // Nonproliferation Sanctions (ISN) - State Department
 	// []*PLC (Palestinian Legislative Council List (PLC) - Treasury Department)
 	// []*CAPTA (CAPTA (formerly Foreign Financial Institutions Subject to Part 561 - Treasury Department))
@@ -125,4 +125,18 @@ type ISN struct {
 	SourceListURL         string   `json:"sourceListURL"`
 	AlternateNames        []string `json:"alternateNames,omitempty"`
 	SourceInfoURL         string   `json:"sourceInfoURL"`
+}
+
+type FSE struct {
+	EntityID      string   `json:"entityID"`
+	EntityNumber  string   `json:"entityNumber"`
+	Type          string   `json:"type"`
+	Programs      []string `json:"programs"`
+	Name          string   `json:"name"`
+	Addresses     []string `json:"addresses,omitempty"`
+	SourceListURL string   `json:"sourceListURL"`
+	Citizenships  string   `json:"citizenships,omitempty"`
+	DatesOfBirth  string   `json:"datesOfBirth"`
+	SourceInfoURL string   `json:"sourceInfoURL"`
+	IDs           []string `json:"IDs"`
 }
