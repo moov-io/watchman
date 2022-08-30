@@ -59,7 +59,7 @@ func Parse(r io.Reader) (*CSL, error) {
 				report.UVLs = append(report.UVLs, unmarshalUVL(record, i))
 
 			case "Nonproliferation Sanctions (ISN) - State Department":
-				// TODO(adam): https://github.com/moov-io/watchman/issues/413
+				report.ISNs = append(report.ISNs, unmarshalISN(record, i))
 
 			case "AECA Debarred List": // TODO: Not found
 				// TODO(adam): https://github.com/moov-io/watchman/issues/414
@@ -144,6 +144,20 @@ func unmarshalUVL(record []string, offset int) *UVL {
 		Addresses:     expandField(record[AddressesIdx+offset]),
 		SourceListURL: record[SourceListURLIdx+offset],
 		SourceInfoURL: record[SourceInformationURLIdx+offset],
+	}
+}
+
+func unmarshalISN(record []string, offset int) *ISN {
+	return &ISN{
+		EntityID:              record[0],
+		Programs:              expandProgramsList(record[ProgramsIdx+offset]),
+		Name:                  record[NameIdx+offset],
+		FederalRegisterNotice: record[FRNoticeIdx+offset],
+		StartDate:             record[StartDateIdx+offset],
+		Remarks:               expandField(record[RemarksIdx+offset]),
+		SourceListURL:         record[SourceListURLIdx+offset],
+		AlternateNames:        expandField(record[AltNamesIdx+offset]),
+		SourceInfoURL:         record[SourceInformationURLIdx+offset],
 	}
 }
 

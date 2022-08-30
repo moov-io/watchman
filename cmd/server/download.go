@@ -59,10 +59,11 @@ type DownloadStats struct {
 	DeniedPersons int `json:"deniedPersons"`
 
 	// Consolidated Screening List (CSL)
-	BISEntities       int `json:"bisEntities"`
-	MilitaryEndUsers  int `json:"militaryEndUsers"`
-	SectoralSanctions int `json:"sectoralSanctions"`
-	Unverified        int `json:"unverifiedCSL"`
+	BISEntities               int `json:"bisEntities"`
+	MilitaryEndUsers          int `json:"militaryEndUsers"`
+	SectoralSanctions         int `json:"sectoralSanctions"`
+	Unverified                int `json:"unverifiedCSL"`
+	NonProliferationSanctions int `json:"nonProliferationSanctions"`
 
 	Errors      []error   `json:"-"`
 	RefreshedAt time.Time `json:"timestamp"`
@@ -122,6 +123,7 @@ func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo down
 					"MilitaryEndUsers": log.Int(stats.MilitaryEndUsers),
 					"SSI":              log.Int(stats.SectoralSanctions),
 					"UVL":              log.Int(stats.Unverified),
+					"ISN":              log.Int(stats.NonProliferationSanctions),
 				}).Logf("data refreshed %v ago", time.Since(stats.RefreshedAt))
 			}
 			updates <- stats // send stats for re-search and watch notifications
@@ -229,6 +231,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	meus := precomputeCSLEntities[csl.MEU](consolidatedLists.MEUs, s.pipe)
 	ssis := precomputeCSLEntities[csl.SSI](consolidatedLists.SSIs, s.pipe)
 	uvls := precomputeCSLEntities[csl.UVL](consolidatedLists.UVLs, s.pipe)
+	isns := precomputeCSLEntities[csl.ISN](consolidatedLists.ISNs, s.pipe)
 
 	// OFAC
 	stats.SDNs = len(sdns)
@@ -241,6 +244,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	stats.MilitaryEndUsers = len(meus)
 	stats.SectoralSanctions = len(ssis)
 	stats.Unverified = len(uvls)
+	stats.NonProliferationSanctions = len(isns)
 
 	// record prometheus metrics
 	lastDataRefreshCount.WithLabelValues("SDNs").Set(float64(len(sdns)))
@@ -249,6 +253,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	lastDataRefreshCount.WithLabelValues("MilitaryEndUsers").Set(float64(len(meus)))
 	lastDataRefreshCount.WithLabelValues("DPs").Set(float64(len(dps)))
 	lastDataRefreshCount.WithLabelValues("UVLs").Set(float64(len(uvls)))
+	lastDataRefreshCount.WithLabelValues("ISNs").Set(float64(len(isns)))
 
 	if len(stats.Errors) > 0 {
 		return stats, stats
@@ -267,6 +272,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	s.MilitaryEndUsers = meus
 	s.SSIs = ssis
 	s.UVLs = uvls
+	s.ISNs = isns
 	// metadata
 	s.lastRefreshedAt = stats.RefreshedAt
 	s.Unlock()

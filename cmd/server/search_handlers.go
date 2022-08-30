@@ -155,10 +155,11 @@ type searchResponse struct {
 	DeniedPersons []DP `json:"deniedPersons"`
 
 	// Consolidated Screening List
-	BISEntities       []*Result[csl.EL]  `json:"bisEntities"`
-	MilitaryEndUsers  []*Result[csl.MEU] `json:"militaryEndUsers"`
-	SectoralSanctions []*Result[csl.SSI] `json:"sectoralSanctions"`
-	Unverified        []*Result[csl.UVL] `json:"unverifiedCSL"`
+	BISEntities               []*Result[csl.EL]  `json:"bisEntities"`
+	MilitaryEndUsers          []*Result[csl.MEU] `json:"militaryEndUsers"`
+	SectoralSanctions         []*Result[csl.SSI] `json:"sectoralSanctions"`
+	Unverified                []*Result[csl.UVL] `json:"unverifiedCSL"`
+	NonproliferationSanctions []*Result[csl.ISN] `json:"nonproliferationSanctions"`
 
 	// Metadata
 	RefreshedAt time.Time `json:"refreshedAt"`
@@ -288,6 +289,9 @@ var (
 		},
 		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			resp.Unverified = s.TopUVLs(limit, minMatch, name)
+		},
+		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
+			resp.NonproliferationSanctions = s.TopISNs(limit, minMatch, name)
 		},
 	}
 )

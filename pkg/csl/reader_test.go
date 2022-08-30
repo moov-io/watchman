@@ -177,6 +177,31 @@ func Test_unmarshalUVL(t *testing.T) {
 	}
 }
 
+func Test_unmarshalISN(t *testing.T) {
+	// Record from official CSV
+	record := []string{"2d2db09c686e4829d0ef1b0b04145eec3d42cd88", "Nonproliferation Sanctions (ISN) - State Department", "", "",
+		"E.O. 13382; Export-Import Bank Act; Nuclear Proliferation Prevention Act", "Abdul Qadeer Khan", "", "", "Vol. 74, No. 11, 01/16/09", "2009-01-09",
+		"", "", "", "", "", "", "", "", "", "", "Associated with the A.Q. Khan Network", "http://bit.ly/1NuVFxV", "ZAMAN; Haydar", "", "", "", "", "http://bit.ly/1NuVFxV", "",
+	}
+	expectedISN := &ISN{
+		EntityID:              "2d2db09c686e4829d0ef1b0b04145eec3d42cd88",
+		Programs:              []string{"E.O. 13382", "Export-Import Bank Act", "Nuclear Proliferation Prevention Act"},
+		Name:                  "Abdul Qadeer Khan",
+		FederalRegisterNotice: "Vol. 74, No. 11, 01/16/09",
+		StartDate:             "2009-01-09",
+		Remarks:               []string{"Associated with the A.Q. Khan Network"},
+		SourceListURL:         "http://bit.ly/1NuVFxV",
+		AlternateNames:        []string{"ZAMAN", "Haydar"},
+		SourceInfoURL:         "http://bit.ly/1NuVFxV",
+	}
+
+	actualISN := unmarshalISN(record, 1)
+
+	if !reflect.DeepEqual(expectedISN, actualISN) {
+		t.Errorf("Expected: %#v\nFound: %#v\n", expectedISN, actualISN)
+	}
+}
+
 func Test__Issue326EL(t *testing.T) {
 	fd, err := os.CreateTemp("", "csl*.csv")
 	if err != nil {

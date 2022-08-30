@@ -28,6 +28,7 @@ type Name struct {
 	sdn   *ofac.SDN
 	ssi   *csl.SSI
 	uvl   *csl.UVL
+	isn   *csl.ISN
 	dp    *dpl.DPL
 	el    *csl.EL
 	addrs []*ofac.Address
@@ -85,6 +86,13 @@ func cslName(item interface{}) *Name {
 			Original:  v.Name,
 			Processed: v.Name,
 			uvl:       v,
+		}
+	case *csl.ISN:
+		return &Name{
+			Original:  v.Name,
+			Processed: v.Name,
+			isn:       v,
+			altNames:  v.AlternateNames,
 		}
 	}
 	return &Name{}
