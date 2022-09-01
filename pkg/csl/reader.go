@@ -66,21 +66,27 @@ func Parse(r io.Reader) (*CSL, error) {
 
 			case "Foreign Sanctions Evaders (FSE) - Treasury Department":
 				// TODO(adam): https://github.com/moov-io/watchman/issues/415
+				report.FSEs = append(report.FSEs, unmarshalFSE(record, i))
 
 			case "Palestinian Legislative Council List (PLC) - Treasury Department":
 				// TODO(adam): https://github.com/moov-io/watchman/issues/416
+				report.PLCs = append(report.PLCs, unmarshalPLC(record, i))
 
 			case "Capta List (CAP) - Treasury Department":
 				// TODO(adam): https://github.com/moov-io/watchman/issues/417
+				report.CAPs = append(report.CAPs, unmarshalCAP(record, i))
 
 			case "Non-SDN Menu-Based Sanctions List (NS-MBS List) - Treasury Department":
 				// TODO(adam): https://github.com/moov-io/watchman/issues/418
+				report.NS_MBSs = append(report.NS_MBSs, unmarshalNS_MBS(record, i))
 
 			case "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department":
 				// TODO(adam): https://github.com/moov-io/watchman/issues/419
+				report.CMICs = append(report.CMICs, unmarshalCMIC(record, i))
 
 			case "ITAR Debarred (DTC) - State Department":
 				// TODO(adam): https://github.com/moov-io/watchman/issues/422
+				report.DTCs = append(report.DTCs, unmarshalDTC(record, i))
 
 			default:
 				// Other lists are:
@@ -155,6 +161,97 @@ func unmarshalISN(record []string, offset int) *ISN {
 		FederalRegisterNotice: record[FRNoticeIdx+offset],
 		StartDate:             record[StartDateIdx+offset],
 		Remarks:               expandField(record[RemarksIdx+offset]),
+		SourceListURL:         record[SourceListURLIdx+offset],
+		AlternateNames:        expandField(record[AltNamesIdx+offset]),
+		SourceInfoURL:         record[SourceInformationURLIdx+offset],
+	}
+}
+
+func unmarshalFSE(record []string, offset int) *FSE {
+	return &FSE{
+		EntityID:      record[0],
+		EntityNumber:  record[EntityNumberIdx+offset],
+		Type:          record[TypeIdx+offset],
+		Programs:      expandProgramsList(record[ProgramsIdx+offset]),
+		Name:          record[NameIdx+offset],
+		Addresses:     expandField(record[AddressesIdx+offset]),
+		SourceListURL: record[SourceListURLIdx+offset],
+		Citizenships:  record[CitizenshipsIdx+offset],
+		DatesOfBirth:  record[DatesOfBirthIdx+offset],
+		SourceInfoURL: record[SourceInformationURLIdx+offset],
+		IDs:           expandField(record[IDsIdx+offset]),
+	}
+}
+
+func unmarshalPLC(record []string, offset int) *PLC {
+	return &PLC{
+		EntityID:       record[0],
+		EntityNumber:   record[EntityNumberIdx+offset],
+		Type:           record[TypeIdx+offset],
+		Programs:       expandProgramsList(record[ProgramsIdx+offset]),
+		Name:           record[NameIdx+offset],
+		Addresses:      expandField(record[AddressesIdx+offset]),
+		Remarks:        record[RemarksIdx+offset],
+		SourceListURL:  record[SourceListURLIdx+offset],
+		AlternateNames: expandField(record[AltNamesIdx+offset]),
+		DatesOfBirth:   record[DatesOfBirthIdx+offset],
+		PlacesOfBirth:  record[PlacesOfBirthIdx+offset],
+		SourceInfoURL:  record[SourceInformationURLIdx+offset],
+	}
+}
+
+func unmarshalCAP(record []string, offset int) *CAP {
+	return &CAP{
+		EntityID:       record[0],
+		EntityNumber:   record[EntityNumberIdx+offset],
+		Type:           record[TypeIdx+offset],
+		Programs:       expandProgramsList(record[ProgramsIdx+offset]),
+		Name:           record[NameIdx+offset],
+		Addresses:      expandField(record[AddressesIdx+offset]),
+		Remarks:        expandField(record[RemarksIdx+offset]),
+		SourceListURL:  record[SourceListURLIdx+offset],
+		AlternateNames: expandField(record[AltNamesIdx+offset]),
+		SourceInfoURL:  record[SourceInformationURLIdx+offset],
+		IDs:            expandField(record[IDsIdx+offset]),
+	}
+}
+
+func unmarshalNS_MBS(record []string, offset int) *NS_MBS {
+	return &NS_MBS{
+		EntityID:       record[0],
+		EntityNumber:   record[EntityNumberIdx+offset],
+		Type:           record[TypeIdx+offset],
+		Programs:       expandProgramsList(record[ProgramsIdx+offset]),
+		Name:           record[NameIdx+offset],
+		Addresses:      expandField(record[AddressesIdx+offset]),
+		Remarks:        expandField(record[RemarksIdx+offset]),
+		AlternateNames: expandField(record[AltNamesIdx+offset]),
+		SourceInfoURL:  record[SourceInformationURLIdx],
+		IDs:            expandField(record[IDsIdx+offset]),
+	}
+}
+
+func unmarshalCMIC(record []string, offset int) *CMIC {
+	return &CMIC{
+		EntityID:       record[0],
+		EntityNumber:   record[EntityNumberIdx+offset],
+		Type:           record[TypeIdx+offset],
+		Programs:       expandProgramsList(record[ProgramsIdx+offset]),
+		Name:           record[NameIdx+offset],
+		Addresses:      expandField(record[AddressesIdx+offset]),
+		Remarks:        expandField(record[RemarksIdx+offset]),
+		SourceListURL:  record[SourceListURLIdx+offset],
+		AlternateNames: expandField(record[AltNamesIdx+offset]),
+		SourceInfoURL:  record[SourceInformationURLIdx+offset],
+		IDs:            expandField(record[IDsIdx+offset]),
+	}
+}
+
+func unmarshalDTC(record []string, offset int) *DTC {
+	return &DTC{
+		EntityID:              record[0],
+		Name:                  record[NameIdx+offset],
+		FederalRegisterNotice: record[FRNoticeIdx+offset],
 		SourceListURL:         record[SourceListURLIdx+offset],
 		AlternateNames:        expandField(record[AltNamesIdx+offset]),
 		SourceInfoURL:         record[SourceInformationURLIdx+offset],
