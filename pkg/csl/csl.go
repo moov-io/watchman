@@ -14,6 +14,7 @@ type CSL struct {
 	ISNs []*ISN // Nonproliferation Sanctions (ISN) - State Department
 	PLCs []*PLC // Palestinian Legislative Council List (PLC) - Treasury Department
 	CAPs []*CAP // CAPTA (formerly Foreign Financial Institutions Subject to Part 561 - Treasury Department)
+	DPLs []*DPL // Denied Persons List (DPL) - Bureau of Industry and Security
 	// []*ADL (AECA Debarred List - State Department)
 }
 
@@ -168,4 +169,17 @@ type CAP struct {
 	AlternateNames []string `json:"alternamteNames,omitempty"`
 	SourceInfoURL  string   `json:"sourceInfoURL"`
 	IDs            []string `json:"IDs"`
+}
+
+type DPL struct {
+	EntityID              string   `json:"entityID"`
+	Name                  string   `json:"name"`
+	Addresses             []string `json:"addresses"`
+	FederalRegisterNotice string   `json:"federalRegisterNotice,omitempty"`
+	StartDate             string   `json:"startDate"`
+	EndDate               string   `json:"endDate,omitempty"`
+	StandardOrder         string   `json:"standardOrder"`
+	Remarks               []string `json:"remarks,omitempty"`
+	SourceListURL         string   `json:"sourceListURL"`
+	SourceInfoURL         string   `json:"sourceInfoURL"`
 }
