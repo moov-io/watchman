@@ -15,7 +15,7 @@ type CSL struct {
 	PLCs []*PLC // Palestinian Legislative Council List (PLC) - Treasury Department
 	CAPs []*CAP // CAPTA (formerly Foreign Financial Institutions Subject to Part 561 - Treasury Department)
 	DPLs []*DPL // Denied Persons List (DPL) - Bureau of Industry and Security
-	// []*ADL (AECA Debarred List - State Department)
+	DTCs []*DTC // ITAR Debarred (DTC) - State Department
 }
 
 // This is the order of the columns in the CSL
@@ -181,5 +181,14 @@ type DPL struct {
 	StandardOrder         string   `json:"standardOrder"`
 	Remarks               []string `json:"remarks,omitempty"`
 	SourceListURL         string   `json:"sourceListURL"`
+	SourceInfoURL         string   `json:"sourceInfoURL"`
+}
+
+type DTC struct {
+	EntityID              string   `json:"entityID"`
+	Name                  string   `json:"name"`
+	FederalRegisterNotice string   `json:"federalRegisterNotice"`
+	SourceListURL         string   `json:"sourceListURL"`
+	AlternateNames        []string `json:"alternateNames,omitempty"`
 	SourceInfoURL         string   `json:"sourceInfoURL"`
 }
