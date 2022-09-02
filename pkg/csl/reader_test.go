@@ -297,6 +297,29 @@ func Test_unmarshalCAP(t *testing.T) {
 	}
 }
 
+func Test_unmarshalDTC(t *testing.T) {
+	// Record derived from official CSV
+	record := []string{"d44d88d0265d93927b9ff1c13bbbb7c7db64142c", "ITAR Debarred (DTC) - State Department", "", "", "",
+		"Yasmin Ahmed", "", "", "69 FR 17468", "", "", "", "", "", "", "", "", "", "", "", "",
+		"http://bit.ly/307FuRQ", "Yasmin Tariq; Fatimah Mohammad", "", "", "", "", "http://bit.ly/307FuRQ",
+	}
+
+	expectedDTC := &DTC{
+		EntityID:              "d44d88d0265d93927b9ff1c13bbbb7c7db64142c",
+		Name:                  "Yasmin Ahmed",
+		FederalRegisterNotice: "69 FR 17468",
+		SourceListURL:         "http://bit.ly/307FuRQ",
+		AlternateNames:        []string{"Yasmin Tariq", "Fatimah Mohammad"},
+		SourceInfoURL:         "http://bit.ly/307FuRQ",
+	}
+
+	actualDTC := unmarshalDTC(record, 1)
+
+	if !reflect.DeepEqual(expectedDTC, actualDTC) {
+		t.Errorf("Expected: %#v\nFound: %#v\n", expectedDTC, actualDTC)
+	}
+}
+
 func Test__Issue326EL(t *testing.T) {
 	fd, err := os.CreateTemp("", "csl*.csv")
 	if err != nil {
