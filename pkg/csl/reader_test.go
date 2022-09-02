@@ -258,6 +258,45 @@ func Test_unmarshalPLC(t *testing.T) {
 	}
 }
 
+func Test_unmarshalCAP(t *testing.T) {
+	// Record derived from official CSV
+	record := []string{"20002", "Capta List (CAP) - Treasury Department", "20002", "Entity", "UKRAINE-EO13662; RUSSIA-EO14024", "BM BANK PUBLIC JOINT STOCK COMPANY",
+		"", "Bld 3 8/15, Rozhdestvenka St., Moscow, 107996, RU", "", "", "", "", "", "", "", "", "", "", "", "",
+		"All offices worldwide; for more information on directives, please visit the following link: https://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives; (Linked To: VTB BANK PUBLIC JOINT STOCK COMPANY)",
+		"", "BM BANK JSC; BM BANK AO; AKTSIONERNOE OBSHCHESTVO BM BANK; PAO BM BANK; BANK MOSKVY PAO; BANK OF MOSCOW; AKTSIONERNY KOMMERCHESKI BANK BANK MOSKVY OTKRYTOE AKTSIONERNOE OBSCHCHESTVO; JOINT STOCK COMMERCIAL BANK - BANK OF MOSCOW OPEN JOINT STOCK COMPANY",
+		"", "", "", "", "http://bit.ly/2PqohAD", "RU, 1027700159497, Registration Number; RU, 29292940, Government Gazette Number; MOSWRUMM, SWIFT/BIC; www.bm.ru, Website; Subject to Directive 1, Executive Order 13662 Directive Determination -; 044525219, BIK (RU); Financial Institution, Target Type",
+	}
+
+	expectedCAP := &CAP{
+		EntityID:      "20002",
+		EntityNumber:  "20002",
+		Type:          "Entity",
+		Programs:      []string{"UKRAINE-EO13662", "RUSSIA-EO14024"},
+		Name:          "BM BANK PUBLIC JOINT STOCK COMPANY",
+		Addresses:     []string{"Bld 3 8/15, Rozhdestvenka St., Moscow, 107996, RU"},
+		Remarks:       []string{"All offices worldwide", "for more information on directives, please visit the following link: https://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives", "(Linked To: VTB BANK PUBLIC JOINT STOCK COMPANY)"},
+		SourceListURL: "",
+		AlternateNames: []string{"BM BANK JSC", "BM BANK AO", "AKTSIONERNOE OBSHCHESTVO BM BANK",
+			"PAO BM BANK", "BANK MOSKVY PAO", "BANK OF MOSCOW",
+			"AKTSIONERNY KOMMERCHESKI BANK BANK MOSKVY OTKRYTOE AKTSIONERNOE OBSCHCHESTVO",
+			"JOINT STOCK COMMERCIAL BANK - BANK OF MOSCOW OPEN JOINT STOCK COMPANY"},
+		SourceInfoURL: "http://bit.ly/2PqohAD",
+		IDs: []string{"RU, 1027700159497, Registration Number",
+			"RU, 29292940, Government Gazette Number",
+			"MOSWRUMM, SWIFT/BIC",
+			"www.bm.ru, Website",
+			"Subject to Directive 1, Executive Order 13662 Directive Determination -",
+			"044525219, BIK (RU)",
+			"Financial Institution, Target Type"},
+	}
+
+	actualCAP := unmarshalCAP(record, 1)
+
+	if !reflect.DeepEqual(expectedCAP, actualCAP) {
+		t.Errorf("Expected: %#v\nFound: %#v\n", expectedCAP, actualCAP)
+	}
+}
+
 func Test__Issue326EL(t *testing.T) {
 	fd, err := os.CreateTemp("", "csl*.csv")
 	if err != nil {
