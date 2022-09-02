@@ -202,6 +202,33 @@ func Test_unmarshalISN(t *testing.T) {
 	}
 }
 
+func Test_unmarshalFSE(t *testing.T) {
+	// Record from official CSV
+	record := []string{"17526", "Foreign Sanctions Evaders (FSE) - Treasury Department", "17526", "Individual", "SYRIA; FSE-SY",
+		"BEKTAS, Halis", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "https://bit.ly/1QWTIfE", "", "CH", "1966-02-13", "", "",
+		"http://bit.ly/1N1docf", "CH, X0906223, Passport",
+	}
+	expectedFSE := &FSE{
+		EntityID:      "17526",
+		EntityNumber:  "17526",
+		Type:          "Individual",
+		Programs:      []string{"SYRIA", "FSE-SY"},
+		Name:          "BEKTAS, Halis",
+		Addresses:     nil,
+		SourceListURL: "https://bit.ly/1QWTIfE",
+		Citizenships:  "CH",
+		DatesOfBirth:  "1966-02-13",
+		SourceInfoURL: "http://bit.ly/1N1docf",
+		IDs:           []string{"CH, X0906223, Passport"},
+	}
+
+	actualFSE := unmarshalFSE(record, 1)
+
+	if !reflect.DeepEqual(expectedFSE, actualFSE) {
+		t.Errorf("Expected: %#v\nFound: %#v\n", expectedFSE, actualFSE)
+	}
+}
+
 func Test__Issue326EL(t *testing.T) {
 	fd, err := os.CreateTemp("", "csl*.csv")
 	if err != nil {
