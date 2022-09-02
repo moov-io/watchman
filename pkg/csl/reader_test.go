@@ -229,6 +229,35 @@ func Test_unmarshalFSE(t *testing.T) {
 	}
 }
 
+func Test_unmarshalPLC(t *testing.T) {
+	// Record derived from official CSV
+	record := []string{"9702", "Palestinian Legislative Council List (PLC) - Treasury Department", "9702", "Individual", "NS-PLC;Office of Misinformation", "SALAMEH, Salem",
+		"", "123 Dunbar Street, Testerville, TX, Palestine", "", "", "", "", "", "", "", "", "", "", "", "", "HAMAS - Der al-Balah", "https://bit.ly/1QWTIfE", "SALAMEH, Salem Ahmad Abdel Hadi", "", "1951",
+		"", "", "http://bit.ly/2tjOLpx", "",
+	}
+
+	expectedPLC := &PLC{
+		EntityID:       "9702",
+		EntityNumber:   "9702",
+		Type:           "Individual",
+		Programs:       []string{"NS-PLC", "Office of Misinformation"},
+		Name:           "SALAMEH, Salem",
+		Addresses:      []string{"123 Dunbar Street, Testerville, TX, Palestine"},
+		Remarks:        "HAMAS - Der al-Balah",
+		SourceListURL:  "https://bit.ly/1QWTIfE",
+		AlternateNames: []string{"SALAMEH, Salem Ahmad Abdel Hadi"},
+		DatesOfBirth:   "1951",
+		PlacesOfBirth:  "",
+		SourceInfoURL:  "http://bit.ly/2tjOLpx",
+	}
+
+	actualPLC := unmarshalPLC(record, 1)
+
+	if !reflect.DeepEqual(expectedPLC, actualPLC) {
+		t.Errorf("Expected: %#v\nFound: %#v\n", expectedPLC, actualPLC)
+	}
+}
+
 func Test__Issue326EL(t *testing.T) {
 	fd, err := os.CreateTemp("", "csl*.csv")
 	if err != nil {
