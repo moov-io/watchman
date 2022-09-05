@@ -12,7 +12,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/lopezator/migrator v0.3.1
 	github.com/mattn/go-sqlite3 v1.14.15
-	github.com/moov-io/base v0.34.0
+	github.com/moov-io/base v0.34.1
 	github.com/pariz/gountries v0.1.6
 	github.com/prometheus/client_golang v1.13.0
 	github.com/stretchr/testify v1.8.0
@@ -34,7 +34,7 @@ require (
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
-	github.com/rickar/cal/v2 v2.1.5 // indirect
+	github.com/rickar/cal/v2 v2.1.6 // indirect
 	golang.org/x/net v0.0.0-20220826154423-83b083e8dc8b // indirect
 	golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
