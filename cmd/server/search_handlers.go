@@ -155,11 +155,17 @@ type searchResponse struct {
 	DeniedPersons []DP `json:"deniedPersons"`
 
 	// Consolidated Screening List
-	BISEntities               []*Result[csl.EL]  `json:"bisEntities"`
-	MilitaryEndUsers          []*Result[csl.MEU] `json:"militaryEndUsers"`
-	SectoralSanctions         []*Result[csl.SSI] `json:"sectoralSanctions"`
-	Unverified                []*Result[csl.UVL] `json:"unverifiedCSL"`
-	NonproliferationSanctions []*Result[csl.ISN] `json:"nonproliferationSanctions"`
+	BISEntities                            []*Result[csl.EL]     `json:"bisEntities"`
+	MilitaryEndUsers                       []*Result[csl.MEU]    `json:"militaryEndUsers"`
+	SectoralSanctions                      []*Result[csl.SSI]    `json:"sectoralSanctions"`
+	Unverified                             []*Result[csl.UVL]    `json:"unverifiedCSL"`
+	NonproliferationSanctions              []*Result[csl.ISN]    `json:"nonproliferationSanctions"`
+	ForeignSanctionsEvaders                []*Result[csl.FSE]    `json:"foreignSanctionsEvaders"`
+	PalestinianLegislativeCouncil          []*Result[csl.PLC]    `json:"palestinianLegislativeCouncil"`
+	CaptaList                              []*Result[csl.CAP]    `json:"captaList"`
+	ITARDebarred                           []*Result[csl.DTC]    `json:"itarDebarred"`
+	NonSDNChineseMilitaryIndustrialComplex []*Result[csl.CMIC]   `json:"nonSDNChineseMilitaryIndustrialComplex"`
+	NonSDNMenuBasedSanctionsList           []*Result[csl.NS_MBS] `json:"nonSDNMenuBasedSanctionsList"`
 
 	// Metadata
 	RefreshedAt time.Time `json:"refreshedAt"`
