@@ -106,7 +106,7 @@ func (s *searcher) TopISNs(limit int, minMatch float64, name string) []*Result[c
 }
 
 // TopFSEs searches Foreign Sanctions Evaders records by Name and Alias
-func (s *searcher) TobFSEs(limit int, minMatch float64, name string) []*Result[csl.FSE] {
+func (s *searcher) TopFSEs(limit int, minMatch float64, name string) []*Result[csl.FSE] {
 	s.RLock()
 	defer s.RUnlock()
 

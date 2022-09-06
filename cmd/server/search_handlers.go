@@ -299,6 +299,24 @@ var (
 		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			resp.NonproliferationSanctions = s.TopISNs(limit, minMatch, name)
 		},
+		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
+			resp.ForeignSanctionsEvaders = s.TopFSEs(limit, minMatch, name)
+		},
+		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
+			resp.PalestinianLegislativeCouncil = s.TopPLCs(limit, minMatch, name)
+		},
+		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
+			resp.CaptaList = s.TopCAPs(limit, minMatch, name)
+		},
+		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
+			resp.ITARDebarred = s.TopDTCs(limit, minMatch, name)
+		},
+		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
+			resp.NonSDNChineseMilitaryIndustrialComplex = s.TopCMICs(limit, minMatch, name)
+		},
+		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
+			resp.NonSDNMenuBasedSanctionsList = s.TopNS_MBS(limit, minMatch, name)
+		},
 	}
 )
 
