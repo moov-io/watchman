@@ -320,6 +320,38 @@ func Test_unmarshalDTC(t *testing.T) {
 	}
 }
 
+func Test_unmarshalCMIC(t *testing.T) {
+	// Record derived from official CSV
+	record := []string{"32091", "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department", "32091", "Entity",
+		"CMIC-EO13959", "PROVEN HONOUR CAPITAL LIMITED", "", "C/O Vistra Corporate Services Centre, Wickhams Cay II, Road Town, VG1110, VG",
+		"", "", "", "", "", "", "", "", "", "", "", "", "(Linked To: HUAWEI INVESTMENT & HOLDING CO., LTD.)", "https://bit.ly/1QWTIfE",
+		"PROVEN HONOUR CAPITAL LTD; PROVEN HONOUR", "", "", "", "", "https://bit.ly/3zsMQ4n",
+		"Proven Honour Capital Ltd, Issuer Name; Proven Honour Capital Limited, Issuer Name; XS1233275194, ISIN; HK0000216777, ISIN; Private Company, Target Type; XS1401816761, ISIN; HK0000111952, ISIN; 03 Jun 2021, Listing Date (CMIC); 02 Aug 2021, Effective Date (CMIC); 03 Jun 2022, Purchase/Sales For Divestment Date (CMIC)",
+	}
+
+	expectedCMIC := &CMIC{
+		EntityID:       "32091",
+		EntityNumber:   "32091",
+		Type:           "Entity",
+		Programs:       []string{"CMIC-EO13959"},
+		Name:           "PROVEN HONOUR CAPITAL LIMITED",
+		Addresses:      []string{"C/O Vistra Corporate Services Centre, Wickhams Cay II, Road Town, VG1110, VG"},
+		Remarks:        []string{"(Linked To: HUAWEI INVESTMENT & HOLDING CO., LTD.)"},
+		SourceListURL:  "https://bit.ly/1QWTIfE",
+		AlternateNames: []string{"PROVEN HONOUR CAPITAL LTD", "PROVEN HONOUR"},
+		SourceInfoURL:  "https://bit.ly/3zsMQ4n",
+		IDs: []string{"Proven Honour Capital Ltd, Issuer Name", "Proven Honour Capital Limited, Issuer Name", "XS1233275194, ISIN",
+			"HK0000216777, ISIN", "Private Company, Target Type", "XS1401816761, ISIN", "HK0000111952, ISIN", "03 Jun 2021, Listing Date (CMIC)",
+			"02 Aug 2021, Effective Date (CMIC)", "03 Jun 2022, Purchase/Sales For Divestment Date (CMIC)"},
+	}
+
+	actualCMIC := unmarshalCMIC(record, 1)
+
+	if !reflect.DeepEqual(expectedCMIC, actualCMIC) {
+		t.Errorf("Expected: %#v\nFound: %#v\n", expectedCMIC, actualCMIC)
+	}
+}
+
 func Test__Issue326EL(t *testing.T) {
 	fd, err := os.CreateTemp("", "csl*.csv")
 	if err != nil {
