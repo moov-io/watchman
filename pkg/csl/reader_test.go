@@ -352,6 +352,39 @@ func Test_unmarshalCMIC(t *testing.T) {
 	}
 }
 
+func Test_unmarshalNS_MBS(t *testing.T) {
+	// Record derived from official CSV
+	record := []string{"17016", "Non-SDN Menu-Based Sanctions List (NS-MBS List) - Treasury Department", "17016", "Entity", "UKRAINE-EO13662; MBS",
+		"GAZPROMBANK JOINT STOCK COMPANY", "", "16 Nametkina Street, Bldg. 1, Moscow, 117420, RU", "", "", "", "", "", "", "", "", "", "", "", "",
+		"For more information on directives, please visit the following link: http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives.",
+		"", "GAZPROMBANK OPEN JOINT STOCK COMPANY; BANK GPB JSC; GAZPROMBANK AO; JOINT STOCK BANK OF THE GAS INDUSTRY GAZPROMBANK", "", "", "", "", "https://bit.ly/2MbsybU",
+		"RU, 1027700167110, Registration Number; RU, 09807684, Government Gazette Number; RU, 7744001497, Tax ID No.; www.gazprombank.ru, Website; GAZPRUMM, SWIFT/BIC; Subject to Directive 1, Executive Order 13662 Directive Determination -; Subject to Directive 3 - All transactions in, provision of financing for, and other dealings in new debt of longer than 14 days maturity or new equity where such new debt or new equity is issued on or after the 'Effective Date (EO 14024 Directive)' associated with this name are prohibited., Executive Order 14024 Directive Information; 31 Jul 1990, Organization Established Date; 24 Feb 2022, Listing Date (EO 14024 Directive 3):; 26 Mar 2022, Effective Date (EO 14024 Directive 3):; For more information on directives, please visit the following link: https://home.treasury.gov/policy-issues/financial-sanctions/sanctions-programs-and-country-information/russian-harmful-foreign-activities-sanctions#directives, Executive Order 14024 Directive Information -",
+	}
+
+	expectedNS_MBS := &NS_MBS{
+		EntityID:       "17016",
+		EntityNumber:   "17016",
+		Type:           "Entity",
+		Programs:       []string{"UKRAINE-EO13662", "MBS"},
+		Name:           "GAZPROMBANK JOINT STOCK COMPANY",
+		Addresses:      []string{"16 Nametkina Street, Bldg. 1, Moscow, 117420, RU"},
+		Remarks:        []string{"For more information on directives, please visit the following link: http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives."},
+		AlternateNames: []string{"GAZPROMBANK OPEN JOINT STOCK COMPANY", "BANK GPB JSC", "GAZPROMBANK AO", "JOINT STOCK BANK OF THE GAS INDUSTRY GAZPROMBANK"},
+		SourceInfoURL:  "https://bit.ly/2MbsybU",
+		IDs: []string{"RU, 1027700167110, Registration Number", "RU, 09807684, Government Gazette Number", "RU, 7744001497, Tax ID No.",
+			"www.gazprombank.ru, Website", "GAZPRUMM, SWIFT/BIC", "Subject to Directive 1, Executive Order 13662 Directive Determination -",
+			"Subject to Directive 3 - All transactions in, provision of financing for, and other dealings in new debt of longer than 14 days maturity or new equity where such new debt or new equity is issued on or after the 'Effective Date (EO 14024 Directive)' associated with this name are prohibited., Executive Order 14024 Directive Information",
+			"31 Jul 1990, Organization Established Date", "24 Feb 2022, Listing Date (EO 14024 Directive 3):", "26 Mar 2022, Effective Date (EO 14024 Directive 3):",
+			"For more information on directives, please visit the following link: https://home.treasury.gov/policy-issues/financial-sanctions/sanctions-programs-and-country-information/russian-harmful-foreign-activities-sanctions#directives, Executive Order 14024 Directive Information -"},
+	}
+
+	actualNB_MBS := unmarshalNS_MBS(record, 1)
+
+	if !reflect.DeepEqual(expectedNS_MBS, actualNB_MBS) {
+		t.Errorf("Expected: %#v\nFound: %#v\n", expectedNS_MBS, actualNB_MBS)
+	}
+}
+
 func Test__Issue326EL(t *testing.T) {
 	fd, err := os.CreateTemp("", "csl*.csv")
 	if err != nil {

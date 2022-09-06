@@ -226,7 +226,7 @@ func unmarshalNS_MBS(record []string, offset int) *NS_MBS {
 		Addresses:      expandField(record[AddressesIdx+offset]),
 		Remarks:        expandField(record[RemarksIdx+offset]),
 		AlternateNames: expandField(record[AltNamesIdx+offset]),
-		SourceInfoURL:  record[SourceInformationURLIdx],
+		SourceInfoURL:  record[SourceInformationURLIdx+offset],
 		IDs:            expandField(record[IDsIdx+offset]),
 	}
 }
