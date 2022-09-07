@@ -104,3 +104,69 @@ func (s *searcher) TopISNs(limit int, minMatch float64, name string) []*Result[c
 
 	return topResults[csl.ISN](limit, minMatch, name, s.ISNs)
 }
+
+// TopFSEs searches Foreign Sanctions Evaders records by Name and Alias
+func (s *searcher) TopFSEs(limit int, minMatch float64, name string) []*Result[csl.FSE] {
+	s.RLock()
+	defer s.RUnlock()
+
+	s.Gate.Start()
+	defer s.Gate.Done()
+
+	return topResults[csl.FSE](limit, minMatch, name, s.FSEs)
+}
+
+// TopPLCs searches Palestinian Legislative Council records by Name and Alias
+func (s *searcher) TopPLCs(limit int, minMatch float64, name string) []*Result[csl.PLC] {
+	s.RLock()
+	defer s.RUnlock()
+
+	s.Gate.Start()
+	defer s.Gate.Done()
+
+	return topResults[csl.PLC](limit, minMatch, name, s.PLCs)
+}
+
+// TopCAPs searches the CAPTA list by Name and Alias
+func (s *searcher) TopCAPs(limit int, minMatch float64, name string) []*Result[csl.CAP] {
+	s.RLock()
+	defer s.RUnlock()
+
+	s.Gate.Start()
+	defer s.Gate.Done()
+
+	return topResults[csl.CAP](limit, minMatch, name, s.CAPs)
+}
+
+// TopDTCs searches the ITAR Debarred list by Name and Alias
+func (s *searcher) TopDTCs(limit int, minMatch float64, name string) []*Result[csl.DTC] {
+	s.RLock()
+	defer s.RUnlock()
+
+	s.Gate.Start()
+	defer s.Gate.Done()
+
+	return topResults[csl.DTC](limit, minMatch, name, s.DTCs)
+}
+
+// TopCMICs searches the Non-SDN Chinese Military Industrial Complex list by Name and Alias
+func (s *searcher) TopCMICs(limit int, minMatch float64, name string) []*Result[csl.CMIC] {
+	s.RLock()
+	defer s.RUnlock()
+
+	s.Gate.Start()
+	defer s.Gate.Done()
+
+	return topResults[csl.CMIC](limit, minMatch, name, s.CMICs)
+}
+
+// TopNS_MBS searches the Non-SDN Menu Based Sanctions list by Name and Alias
+func (s *searcher) TopNS_MBS(limit int, minMatch float64, name string) []*Result[csl.NS_MBS] {
+	s.RLock()
+	defer s.RUnlock()
+
+	s.Gate.Start()
+	defer s.Gate.Done()
+
+	return topResults[csl.NS_MBS](limit, minMatch, name, s.NS_MBSs)
+}

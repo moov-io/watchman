@@ -24,11 +24,18 @@ type Name struct {
 	Processed string
 
 	// optional metadata of where a name came from
-	alt   *ofac.AlternateIdentity
-	sdn   *ofac.SDN
-	ssi   *csl.SSI
-	uvl   *csl.UVL
-	isn   *csl.ISN
+	alt    *ofac.AlternateIdentity
+	sdn    *ofac.SDN
+	ssi    *csl.SSI
+	uvl    *csl.UVL
+	isn    *csl.ISN
+	fse    *csl.FSE
+	plc    *csl.PLC
+	cap    *csl.CAP
+	dtc    *csl.DTC
+	cmic   *csl.CMIC
+	ns_mbs *csl.NS_MBS
+
 	dp    *dpl.DPL
 	el    *csl.EL
 	addrs []*ofac.Address
@@ -92,6 +99,47 @@ func cslName(item interface{}) *Name {
 			Original:  v.Name,
 			Processed: v.Name,
 			isn:       v,
+			altNames:  v.AlternateNames,
+		}
+	case *csl.FSE:
+		return &Name{
+			Original:  v.Name,
+			Processed: v.Name,
+			fse:       v,
+		}
+	case *csl.PLC:
+		return &Name{
+			Original:  v.Name,
+			Processed: v.Name,
+			plc:       v,
+			altNames:  v.AlternateNames,
+		}
+	case *csl.CAP:
+		return &Name{
+			Original:  v.Name,
+			Processed: v.Name,
+			cap:       v,
+			altNames:  v.AlternateNames,
+		}
+	case *csl.DTC:
+		return &Name{
+			Original:  v.Name,
+			Processed: v.Name,
+			dtc:       v,
+			altNames:  v.AlternateNames,
+		}
+	case *csl.CMIC:
+		return &Name{
+			Original:  v.Name,
+			Processed: v.Name,
+			cmic:      v,
+			altNames:  v.AlternateNames,
+		}
+	case *csl.NS_MBS:
+		return &Name{
+			Original:  v.Name,
+			Processed: v.Name,
+			ns_mbs:    v,
 			altNames:  v.AlternateNames,
 		}
 	}

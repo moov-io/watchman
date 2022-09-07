@@ -202,6 +202,189 @@ func Test_unmarshalISN(t *testing.T) {
 	}
 }
 
+func Test_unmarshalFSE(t *testing.T) {
+	// Record from official CSV
+	record := []string{"17526", "Foreign Sanctions Evaders (FSE) - Treasury Department", "17526", "Individual", "SYRIA; FSE-SY",
+		"BEKTAS, Halis", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "https://bit.ly/1QWTIfE", "", "CH", "1966-02-13", "", "",
+		"http://bit.ly/1N1docf", "CH, X0906223, Passport",
+	}
+	expectedFSE := &FSE{
+		EntityID:      "17526",
+		EntityNumber:  "17526",
+		Type:          "Individual",
+		Programs:      []string{"SYRIA", "FSE-SY"},
+		Name:          "BEKTAS, Halis",
+		Addresses:     nil,
+		SourceListURL: "https://bit.ly/1QWTIfE",
+		Citizenships:  "CH",
+		DatesOfBirth:  "1966-02-13",
+		SourceInfoURL: "http://bit.ly/1N1docf",
+		IDs:           []string{"CH, X0906223, Passport"},
+	}
+
+	actualFSE := unmarshalFSE(record, 1)
+
+	if !reflect.DeepEqual(expectedFSE, actualFSE) {
+		t.Errorf("Expected: %#v\nFound: %#v\n", expectedFSE, actualFSE)
+	}
+}
+
+func Test_unmarshalPLC(t *testing.T) {
+	// Record derived from official CSV
+	record := []string{"9702", "Palestinian Legislative Council List (PLC) - Treasury Department", "9702", "Individual", "NS-PLC;Office of Misinformation", "SALAMEH, Salem",
+		"", "123 Dunbar Street, Testerville, TX, Palestine", "", "", "", "", "", "", "", "", "", "", "", "", "HAMAS - Der al-Balah", "https://bit.ly/1QWTIfE", "SALAMEH, Salem Ahmad Abdel Hadi", "", "1951",
+		"", "", "http://bit.ly/2tjOLpx", "",
+	}
+
+	expectedPLC := &PLC{
+		EntityID:       "9702",
+		EntityNumber:   "9702",
+		Type:           "Individual",
+		Programs:       []string{"NS-PLC", "Office of Misinformation"},
+		Name:           "SALAMEH, Salem",
+		Addresses:      []string{"123 Dunbar Street, Testerville, TX, Palestine"},
+		Remarks:        "HAMAS - Der al-Balah",
+		SourceListURL:  "https://bit.ly/1QWTIfE",
+		AlternateNames: []string{"SALAMEH, Salem Ahmad Abdel Hadi"},
+		DatesOfBirth:   "1951",
+		PlacesOfBirth:  "",
+		SourceInfoURL:  "http://bit.ly/2tjOLpx",
+	}
+
+	actualPLC := unmarshalPLC(record, 1)
+
+	if !reflect.DeepEqual(expectedPLC, actualPLC) {
+		t.Errorf("Expected: %#v\nFound: %#v\n", expectedPLC, actualPLC)
+	}
+}
+
+func Test_unmarshalCAP(t *testing.T) {
+	// Record derived from official CSV
+	record := []string{"20002", "Capta List (CAP) - Treasury Department", "20002", "Entity", "UKRAINE-EO13662; RUSSIA-EO14024", "BM BANK PUBLIC JOINT STOCK COMPANY",
+		"", "Bld 3 8/15, Rozhdestvenka St., Moscow, 107996, RU", "", "", "", "", "", "", "", "", "", "", "", "",
+		"All offices worldwide; for more information on directives, please visit the following link: https://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives; (Linked To: VTB BANK PUBLIC JOINT STOCK COMPANY)",
+		"", "BM BANK JSC; BM BANK AO; AKTSIONERNOE OBSHCHESTVO BM BANK; PAO BM BANK; BANK MOSKVY PAO; BANK OF MOSCOW; AKTSIONERNY KOMMERCHESKI BANK BANK MOSKVY OTKRYTOE AKTSIONERNOE OBSCHCHESTVO; JOINT STOCK COMMERCIAL BANK - BANK OF MOSCOW OPEN JOINT STOCK COMPANY",
+		"", "", "", "", "http://bit.ly/2PqohAD", "RU, 1027700159497, Registration Number; RU, 29292940, Government Gazette Number; MOSWRUMM, SWIFT/BIC; www.bm.ru, Website; Subject to Directive 1, Executive Order 13662 Directive Determination -; 044525219, BIK (RU); Financial Institution, Target Type",
+	}
+
+	expectedCAP := &CAP{
+		EntityID:      "20002",
+		EntityNumber:  "20002",
+		Type:          "Entity",
+		Programs:      []string{"UKRAINE-EO13662", "RUSSIA-EO14024"},
+		Name:          "BM BANK PUBLIC JOINT STOCK COMPANY",
+		Addresses:     []string{"Bld 3 8/15, Rozhdestvenka St., Moscow, 107996, RU"},
+		Remarks:       []string{"All offices worldwide", "for more information on directives, please visit the following link: https://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives", "(Linked To: VTB BANK PUBLIC JOINT STOCK COMPANY)"},
+		SourceListURL: "",
+		AlternateNames: []string{"BM BANK JSC", "BM BANK AO", "AKTSIONERNOE OBSHCHESTVO BM BANK",
+			"PAO BM BANK", "BANK MOSKVY PAO", "BANK OF MOSCOW",
+			"AKTSIONERNY KOMMERCHESKI BANK BANK MOSKVY OTKRYTOE AKTSIONERNOE OBSCHCHESTVO",
+			"JOINT STOCK COMMERCIAL BANK - BANK OF MOSCOW OPEN JOINT STOCK COMPANY"},
+		SourceInfoURL: "http://bit.ly/2PqohAD",
+		IDs: []string{"RU, 1027700159497, Registration Number",
+			"RU, 29292940, Government Gazette Number",
+			"MOSWRUMM, SWIFT/BIC",
+			"www.bm.ru, Website",
+			"Subject to Directive 1, Executive Order 13662 Directive Determination -",
+			"044525219, BIK (RU)",
+			"Financial Institution, Target Type"},
+	}
+
+	actualCAP := unmarshalCAP(record, 1)
+
+	if !reflect.DeepEqual(expectedCAP, actualCAP) {
+		t.Errorf("Expected: %#v\nFound: %#v\n", expectedCAP, actualCAP)
+	}
+}
+
+func Test_unmarshalDTC(t *testing.T) {
+	// Record derived from official CSV
+	record := []string{"d44d88d0265d93927b9ff1c13bbbb7c7db64142c", "ITAR Debarred (DTC) - State Department", "", "", "",
+		"Yasmin Ahmed", "", "", "69 FR 17468", "", "", "", "", "", "", "", "", "", "", "", "",
+		"http://bit.ly/307FuRQ", "Yasmin Tariq; Fatimah Mohammad", "", "", "", "", "http://bit.ly/307FuRQ",
+	}
+
+	expectedDTC := &DTC{
+		EntityID:              "d44d88d0265d93927b9ff1c13bbbb7c7db64142c",
+		Name:                  "Yasmin Ahmed",
+		FederalRegisterNotice: "69 FR 17468",
+		SourceListURL:         "http://bit.ly/307FuRQ",
+		AlternateNames:        []string{"Yasmin Tariq", "Fatimah Mohammad"},
+		SourceInfoURL:         "http://bit.ly/307FuRQ",
+	}
+
+	actualDTC := unmarshalDTC(record, 1)
+
+	if !reflect.DeepEqual(expectedDTC, actualDTC) {
+		t.Errorf("Expected: %#v\nFound: %#v\n", expectedDTC, actualDTC)
+	}
+}
+
+func Test_unmarshalCMIC(t *testing.T) {
+	// Record derived from official CSV
+	record := []string{"32091", "Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department", "32091", "Entity",
+		"CMIC-EO13959", "PROVEN HONOUR CAPITAL LIMITED", "", "C/O Vistra Corporate Services Centre, Wickhams Cay II, Road Town, VG1110, VG",
+		"", "", "", "", "", "", "", "", "", "", "", "", "(Linked To: HUAWEI INVESTMENT & HOLDING CO., LTD.)", "https://bit.ly/1QWTIfE",
+		"PROVEN HONOUR CAPITAL LTD; PROVEN HONOUR", "", "", "", "", "https://bit.ly/3zsMQ4n",
+		"Proven Honour Capital Ltd, Issuer Name; Proven Honour Capital Limited, Issuer Name; XS1233275194, ISIN; HK0000216777, ISIN; Private Company, Target Type; XS1401816761, ISIN; HK0000111952, ISIN; 03 Jun 2021, Listing Date (CMIC); 02 Aug 2021, Effective Date (CMIC); 03 Jun 2022, Purchase/Sales For Divestment Date (CMIC)",
+	}
+
+	expectedCMIC := &CMIC{
+		EntityID:       "32091",
+		EntityNumber:   "32091",
+		Type:           "Entity",
+		Programs:       []string{"CMIC-EO13959"},
+		Name:           "PROVEN HONOUR CAPITAL LIMITED",
+		Addresses:      []string{"C/O Vistra Corporate Services Centre, Wickhams Cay II, Road Town, VG1110, VG"},
+		Remarks:        []string{"(Linked To: HUAWEI INVESTMENT & HOLDING CO., LTD.)"},
+		SourceListURL:  "https://bit.ly/1QWTIfE",
+		AlternateNames: []string{"PROVEN HONOUR CAPITAL LTD", "PROVEN HONOUR"},
+		SourceInfoURL:  "https://bit.ly/3zsMQ4n",
+		IDs: []string{"Proven Honour Capital Ltd, Issuer Name", "Proven Honour Capital Limited, Issuer Name", "XS1233275194, ISIN",
+			"HK0000216777, ISIN", "Private Company, Target Type", "XS1401816761, ISIN", "HK0000111952, ISIN", "03 Jun 2021, Listing Date (CMIC)",
+			"02 Aug 2021, Effective Date (CMIC)", "03 Jun 2022, Purchase/Sales For Divestment Date (CMIC)"},
+	}
+
+	actualCMIC := unmarshalCMIC(record, 1)
+
+	if !reflect.DeepEqual(expectedCMIC, actualCMIC) {
+		t.Errorf("Expected: %#v\nFound: %#v\n", expectedCMIC, actualCMIC)
+	}
+}
+
+func Test_unmarshalNS_MBS(t *testing.T) {
+	// Record derived from official CSV
+	record := []string{"17016", "Non-SDN Menu-Based Sanctions List (NS-MBS List) - Treasury Department", "17016", "Entity", "UKRAINE-EO13662; MBS",
+		"GAZPROMBANK JOINT STOCK COMPANY", "", "16 Nametkina Street, Bldg. 1, Moscow, 117420, RU", "", "", "", "", "", "", "", "", "", "", "", "",
+		"For more information on directives, please visit the following link: http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives.",
+		"", "GAZPROMBANK OPEN JOINT STOCK COMPANY; BANK GPB JSC; GAZPROMBANK AO; JOINT STOCK BANK OF THE GAS INDUSTRY GAZPROMBANK", "", "", "", "", "https://bit.ly/2MbsybU",
+		"RU, 1027700167110, Registration Number; RU, 09807684, Government Gazette Number; RU, 7744001497, Tax ID No.; www.gazprombank.ru, Website; GAZPRUMM, SWIFT/BIC; Subject to Directive 1, Executive Order 13662 Directive Determination -; Subject to Directive 3 - All transactions in, provision of financing for, and other dealings in new debt of longer than 14 days maturity or new equity where such new debt or new equity is issued on or after the 'Effective Date (EO 14024 Directive)' associated with this name are prohibited., Executive Order 14024 Directive Information; 31 Jul 1990, Organization Established Date; 24 Feb 2022, Listing Date (EO 14024 Directive 3):; 26 Mar 2022, Effective Date (EO 14024 Directive 3):; For more information on directives, please visit the following link: https://home.treasury.gov/policy-issues/financial-sanctions/sanctions-programs-and-country-information/russian-harmful-foreign-activities-sanctions#directives, Executive Order 14024 Directive Information -",
+	}
+
+	expectedNS_MBS := &NS_MBS{
+		EntityID:       "17016",
+		EntityNumber:   "17016",
+		Type:           "Entity",
+		Programs:       []string{"UKRAINE-EO13662", "MBS"},
+		Name:           "GAZPROMBANK JOINT STOCK COMPANY",
+		Addresses:      []string{"16 Nametkina Street, Bldg. 1, Moscow, 117420, RU"},
+		Remarks:        []string{"For more information on directives, please visit the following link: http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives."},
+		AlternateNames: []string{"GAZPROMBANK OPEN JOINT STOCK COMPANY", "BANK GPB JSC", "GAZPROMBANK AO", "JOINT STOCK BANK OF THE GAS INDUSTRY GAZPROMBANK"},
+		SourceInfoURL:  "https://bit.ly/2MbsybU",
+		IDs: []string{"RU, 1027700167110, Registration Number", "RU, 09807684, Government Gazette Number", "RU, 7744001497, Tax ID No.",
+			"www.gazprombank.ru, Website", "GAZPRUMM, SWIFT/BIC", "Subject to Directive 1, Executive Order 13662 Directive Determination -",
+			"Subject to Directive 3 - All transactions in, provision of financing for, and other dealings in new debt of longer than 14 days maturity or new equity where such new debt or new equity is issued on or after the 'Effective Date (EO 14024 Directive)' associated with this name are prohibited., Executive Order 14024 Directive Information",
+			"31 Jul 1990, Organization Established Date", "24 Feb 2022, Listing Date (EO 14024 Directive 3):", "26 Mar 2022, Effective Date (EO 14024 Directive 3):",
+			"For more information on directives, please visit the following link: https://home.treasury.gov/policy-issues/financial-sanctions/sanctions-programs-and-country-information/russian-harmful-foreign-activities-sanctions#directives, Executive Order 14024 Directive Information -"},
+	}
+
+	actualNB_MBS := unmarshalNS_MBS(record, 1)
+
+	if !reflect.DeepEqual(expectedNS_MBS, actualNB_MBS) {
+		t.Errorf("Expected: %#v\nFound: %#v\n", expectedNS_MBS, actualNB_MBS)
+	}
+}
+
 func Test__Issue326EL(t *testing.T) {
 	fd, err := os.CreateTemp("", "csl*.csv")
 	if err != nil {

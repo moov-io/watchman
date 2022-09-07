@@ -48,6 +48,12 @@ type searcher struct {
 	SSIs             []*Result[csl.SSI]
 	UVLs             []*Result[csl.UVL]
 	ISNs             []*Result[csl.ISN]
+	FSEs             []*Result[csl.FSE]
+	PLCs             []*Result[csl.PLC]
+	CAPs             []*Result[csl.CAP]
+	DTCs             []*Result[csl.DTC]
+	CMICs            []*Result[csl.CMIC]
+	NS_MBSs          []*Result[csl.NS_MBS]
 
 	// metadata
 	lastRefreshedAt time.Time

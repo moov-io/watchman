@@ -59,11 +59,17 @@ type DownloadStats struct {
 	DeniedPersons int `json:"deniedPersons"`
 
 	// Consolidated Screening List (CSL)
-	BISEntities               int `json:"bisEntities"`
-	MilitaryEndUsers          int `json:"militaryEndUsers"`
-	SectoralSanctions         int `json:"sectoralSanctions"`
-	Unverified                int `json:"unverifiedCSL"`
-	NonProliferationSanctions int `json:"nonProliferationSanctions"`
+	BISEntities                      int `json:"bisEntities"`
+	MilitaryEndUsers                 int `json:"militaryEndUsers"`
+	SectoralSanctions                int `json:"sectoralSanctions"`
+	Unverified                       int `json:"unverifiedCSL"`
+	NonProliferationSanctions        int `json:"nonProliferationSanctions"`
+	ForeignSanctionsEvaders          int `json:"foreignSanctionsEvaders"`
+	PalestinianLegislativeCouncil    int `json:"palestinianLegislativeCouncil"`
+	CAPTA                            int `json:"CAPTA"`
+	ITARDebarred                     int `json:"ITARDebarred"`
+	ChineseMilitaryIndustrialComplex int `json:"chineseMilitaryIndustrialComplex"`
+	NonSDNMenuBasedSanctions         int `json:"nonSDNMenuBasedSanctions"`
 
 	Errors      []error   `json:"-"`
 	RefreshedAt time.Time `json:"timestamp"`
@@ -124,6 +130,12 @@ func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo down
 					"SSI":              log.Int(stats.SectoralSanctions),
 					"UVL":              log.Int(stats.Unverified),
 					"ISN":              log.Int(stats.NonProliferationSanctions),
+					"FSE":              log.Int(stats.ForeignSanctionsEvaders),
+					"PLC":              log.Int(stats.PalestinianLegislativeCouncil),
+					"CAP":              log.Int(stats.CAPTA),
+					"DTC":              log.Int(stats.ITARDebarred),
+					"CMIC":             log.Int(stats.ChineseMilitaryIndustrialComplex),
+					"NS_MBS":           log.Int(stats.NonSDNMenuBasedSanctions),
 				}).Logf("data refreshed %v ago", time.Since(stats.RefreshedAt))
 			}
 			updates <- stats // send stats for re-search and watch notifications
@@ -232,6 +244,12 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	ssis := precomputeCSLEntities[csl.SSI](consolidatedLists.SSIs, s.pipe)
 	uvls := precomputeCSLEntities[csl.UVL](consolidatedLists.UVLs, s.pipe)
 	isns := precomputeCSLEntities[csl.ISN](consolidatedLists.ISNs, s.pipe)
+	fses := precomputeCSLEntities[csl.FSE](consolidatedLists.FSEs, s.pipe)
+	plcs := precomputeCSLEntities[csl.PLC](consolidatedLists.PLCs, s.pipe)
+	caps := precomputeCSLEntities[csl.CAP](consolidatedLists.CAPs, s.pipe)
+	dtcs := precomputeCSLEntities[csl.DTC](consolidatedLists.DTCs, s.pipe)
+	cmics := precomputeCSLEntities[csl.CMIC](consolidatedLists.CMICs, s.pipe)
+	ns_mbss := precomputeCSLEntities[csl.NS_MBS](consolidatedLists.NS_MBSs, s.pipe)
 
 	// OFAC
 	stats.SDNs = len(sdns)
@@ -245,6 +263,12 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	stats.SectoralSanctions = len(ssis)
 	stats.Unverified = len(uvls)
 	stats.NonProliferationSanctions = len(isns)
+	stats.ForeignSanctionsEvaders = len(fses)
+	stats.PalestinianLegislativeCouncil = len(plcs)
+	stats.CAPTA = len(caps)
+	stats.ITARDebarred = len(dtcs)
+	stats.ChineseMilitaryIndustrialComplex = len(cmics)
+	stats.NonSDNMenuBasedSanctions = len(ns_mbss)
 
 	// record prometheus metrics
 	lastDataRefreshCount.WithLabelValues("SDNs").Set(float64(len(sdns)))
@@ -254,6 +278,12 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	lastDataRefreshCount.WithLabelValues("DPs").Set(float64(len(dps)))
 	lastDataRefreshCount.WithLabelValues("UVLs").Set(float64(len(uvls)))
 	lastDataRefreshCount.WithLabelValues("ISNs").Set(float64(len(isns)))
+	lastDataRefreshCount.WithLabelValues("FSEs").Set(float64(len(fses)))
+	lastDataRefreshCount.WithLabelValues("PLCs").Set(float64(len(plcs)))
+	lastDataRefreshCount.WithLabelValues("CAPs").Set(float64(len(caps)))
+	lastDataRefreshCount.WithLabelValues("DTCs").Set(float64(len(dtcs)))
+	lastDataRefreshCount.WithLabelValues("CMICs").Set(float64(len(cmics)))
+	lastDataRefreshCount.WithLabelValues("NS_MBSs").Set(float64(len(ns_mbss)))
 
 	if len(stats.Errors) > 0 {
 		return stats, stats
@@ -273,6 +303,12 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	s.SSIs = ssis
 	s.UVLs = uvls
 	s.ISNs = isns
+	s.FSEs = fses
+	s.PLCs = plcs
+	s.CAPs = caps
+	s.DTCs = dtcs
+	s.CMICs = cmics
+	s.NS_MBSs = ns_mbss
 	// metadata
 	s.lastRefreshedAt = stats.RefreshedAt
 	s.Unlock()
