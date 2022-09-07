@@ -14,7 +14,7 @@ FROM quay.io/fedora/fedora:37-x86_64
 RUN yum install -y glibc
 
 ARG VERSION=unknown
-LABEL maintainer="Moov <support@moov.io>"
+LABEL maintainer="Moov <oss@moov.io>"
 LABEL name="watchman"
 LABEL version=$VERSION
 

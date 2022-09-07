@@ -8,7 +8,7 @@
 # For technical reasons, this file is *NOT* reloaded automatically when you use
 # 'bundle exec jekyll serve'. If you change this file, please restart the server process.
 #
-# If you need help with YAML syntax, here are some quick references for you: 
+# If you need help with YAML syntax, here are some quick references for you:
 # https://learn-the-web.algonquindesign.ca/topics/markdown-yaml-cheat-sheet/#yaml
 # https://learnxinyminutes.com/docs/yaml/
 #
@@ -19,7 +19,7 @@
 # in the templates via {{ site.myvariable }}.
 
 title: Moov Watchman
-email: security@moov.io
+email: oss@moov.io
 description: >- # this means to ignore newlines until "baseurl:"
  Moov Watchman is an HTTP API and Go library that offers download, parse, and search functions over numerous trade sanction lists from the United States, agencies, and nonprofits for complying with regional laws.
 url: "https://moov-io.github.io" # the base hostname & protocol for your site, e.g. http://example.com
