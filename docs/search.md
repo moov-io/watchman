@@ -270,3 +270,36 @@ curl 'http://localhost:8084/search?name=EP&sdnType=aircraft&limit=1&program=sdgt
   "deniedPersons": null
 }
 ```
+
+## US Consolidated Screening List (CSL)
+
+Moov Watchman offers searching the entire US CSL list. The supported query parameters are:
+
+- `name`: Legal name of entity on list
+- `limit`: Maximum number of results to return
+
+Refer to the [API docs for searching US CSL](https://moov-io.github.io/watchman/api/#get-/search/us-csl) for more details.
+
+```
+curl "http://localhost:8084/search/us-csl?name=Al&limit=10
+```
+```
+{
+  "SDNs": null,
+  "altNames": null,
+  "addresses": null,
+  "deniedPersons": null,
+  "bisEntities": [ ... ],
+  "militaryEndUsers": [ ... ],
+  "sectoralSanctions": [ ... ],
+  "unverifiedCSL": [ ... ],
+  "nonproliferationSanctions": [ ... ],
+  "foreignSanctionsEvaders": [ ... ],
+  "palestinianLegislativeCouncil": [ ... ],
+  "captaList": [ ... ],
+  "itarDebarred": [ ... ],
+  "nonSDNChineseMilitaryIndustrialComplex": [ ... ],
+  "nonSDNMenuBasedSanctionsList": [ ... ],
+  "refreshedAt": "2022-09-07T20:35:35.773313Z"
+}
+```

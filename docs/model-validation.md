@@ -25,6 +25,16 @@ Watchman's default data sources are several government agency and public data so
       - [Entity List](http://www.bis.doc.gov/entities/default.htm)
    - Department of the Treasury – Office of Foreign Assets Control
       - [Sectoral Sanctions Identifications List](http://www.treasury.gov/resource-center/sanctions/SDN-List/Pages/ssi_list.aspx)
+- US Consolidated Screening List
+  - Military End User (MEU) List
+  - Unverified List (UVL)
+  - Nonproliferation Sanctions (ISN)
+  - Foreign Sanctions Evaders (FSE)
+  - Palestinian Legislative Council List (PLC)
+  - Capta List (CAP)
+  - Non-SDN Menu-Based Sanctions List (NS-MBS List)
+  - Non-SDN Chinese Military-Industrial Complex Companies List (CMIC)
+  - ITAR Debarred (DTC)
 
 After the data files are refreshed users can [configure webhook notifications](https://moov-io.github.io/watchman/webhook-notifications/) to be notified and initiate custom processes. Custom data files can be used with Watchman.
 

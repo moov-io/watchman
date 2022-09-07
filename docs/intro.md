@@ -10,12 +10,12 @@ menubar: docs-menu
 
 The Watchman project implements an HTTP server and [Go library](https://pkg.go.dev/github.com/moov-io/watchman) for searching, parsing, and downloading lists. We also have an [example](https://pkg.go.dev/github.com/moov-io/watchman/examples) of the webhook service. Below, you can find a detailed list of features offered by Watchman:
 
-- Download OFAC, BIS Denied Persons List (DPL), and various other data sources on startup
-  - Admin endpoint to [manually refresh OFAC and DPL data](https://moov-io.github.io/watchman/runbook/#force-data-refresh)
+- Download OFAC, BIS Denied Persons List, Consolidated Screening List, and various other data sources on startup
+  - Admin endpoint to [manually refresh OFAC, CSL, and other data sources](https://moov-io.github.io/watchman/runbook/#force-data-refresh)
 - Index data for searches
 - Async searches and notifications (webhooks)
-- Manual overrides to mark a `Company` or `Customer` as `unsafe` (blocked) or `exception` (never blocked).
-- Library for OFAC and BIS DPL data to download and parse their custom files
+- Manual overrides to mark an OFAC `Company` or `Customer` as `unsafe` (blocked) or `exception` (never blocked).
+- Libraries for OFAC, CSL, and BIS DPL data to download and parse their custom files
 
 Searching across all sanction lists Watchman uses the [Jaro–Winkler](https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance) algorithm to score the probability of each search query matching a list entry. This follows after what the [US Treasury OFAC Search](https://home.treasury.gov/policy-issues/financial-sanctions/faqs/topic/1636) uses and what is [recommended in academic literature](https://www.wseas.org/multimedia/journals/computers/2015/a965705-699.pdf).
 
