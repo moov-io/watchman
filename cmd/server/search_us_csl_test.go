@@ -5,13 +5,43 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
+	"net/http"
+	"net/http/httptest"
 	"strconv"
 	"testing"
 
+	"github.com/moov-io/base/log"
+	"github.com/moov-io/watchman/pkg/csl"
+
+	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/require"
 )
+
+func TestSearch__US_CSL(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/search/us-csl?name=Khan&limit=1", nil)
+
+	router := mux.NewRouter()
+	addSearchRoutes(log.NewNopLogger(), router, isnSearcher)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	require.Equal(t, http.StatusOK, w.Code)
+	require.Contains(t, w.Body.String(), `"match":0.6333`)
+
+	var wrapper struct {
+		NonProliferationSanctions []csl.ISN `json:"nonProliferationSanctions"`
+	}
+	err := json.NewDecoder(w.Body).Decode(&wrapper)
+	require.NoError(t, err)
+
+	require.Len(t, wrapper.NonProliferationSanctions, 1)
+	prolif := wrapper.NonProliferationSanctions[0]
+	require.Equal(t, "2d2db09c686e4829d0ef1b0b04145eec3d42cd88", prolif.EntityID)
+}
 
 func TestSearcher_TopBISEntities(t *testing.T) {
 	els := bisEntitySearcher.TopBISEntities(1, 0.00, "Khan")

@@ -702,6 +702,45 @@ paths:
               schema:
                 $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
 
+  /search/us-csl:
+    get:
+      tags: [Watchman]
+      summary: Search US CSL
+      description: Search the US Consolidated Screening List
+      operationId: searchUSCSL
+      parameters:
+        - name: X-Request-ID
+          in: header
+          description: Optional Request ID allows application developer to trace requests through the system's logs
+          schema:
+            type: string
+            example: 94c825ee
+        - name: name
+          in: query
+          schema:
+            type: string
+            example: Jane Smith
+          description: Name which could correspond to an entry on the CSL
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            example: 25
+          description: Maximum number of downloads to return sorted by their timestamp in decending order.
+      responses:
+        '200':
+          description: SDNs returned from a search
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Search'
+        '400':
+          description: Error occurred, see response body.
+          content:
+            application/json:
+              schema:
+                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
+
   # Downloads endpoint
   /downloads:
     get:
@@ -1102,6 +1141,360 @@ components:
           type: number
           description: Match percentage of search query
           example: 0.91
+    MilitaryEndUser:
+      properties:
+        entityID:
+          type: string
+          example: '26744194bd9b5cbec49db6ee29a4b53c697c7420'
+        name:
+          type: string
+          example: 'AECC Aviation Power Co. Ltd.'
+        addresses:
+          type: string
+          example: 'Xiujia Bay, Weiyong Dt, Xian, 710021, CN'
+        FRNotice:
+          type: string
+          example: '85 FR 83799'
+        startDate:
+          type: string
+          example: '2020-12-23'
+        endDate:
+          type: string
+          example: ''
+    Unverified:
+      properties:
+        entityID:
+          type: string
+          example: 'f15fa805ff4ac5e09026f5e78011a1bb6b26dec2'
+        name:
+          type: string
+          example: 'Atlas Sanatgaran'
+        addresses:
+          type: array
+          items:
+            type: string
+          example:
+            - 'Komitas 26/114, Yerevan, Armenia, AM'
+        sourceListURL:
+          type: string
+          example: 'http://bit.ly/1iwwTSJ'
+        sourceInfoURL:
+          type: string
+          example: 'http://bit.ly/1Qi4R7Z'
+    NonProliferationSanction:
+      properties:
+        entityID:
+          type: string
+          example: '2d2db09c686e4829d0ef1b0b04145eec3d42cd88'
+        programs:
+          type: array
+          items:
+            type: string
+          example:
+            - "E.O. 13382"
+            - "Export-Import Bank Act"
+            - "Nuclear Proliferation Prevention Act"
+        name:
+          type: string
+          example: 'Abdul Qadeer Khan'
+        federalRegisterNotice:
+          type: string
+          example: 'Vol. 74, No. 11, 01/16/09'
+        startDate:
+          type: string
+          example: '2009-01-09'
+        remarks:
+          type: array
+          items:
+            type: string
+          example: 'Associated with the A.Q. Khan Network'
+        sourceListURL:
+          type: string
+          example: 'http://bit.ly/1NuVFxV'
+        alternateNames:
+          type: array
+          items:
+            type: string
+          example:
+            - "ZAMAN"
+            - "Haydar"
+        sourceInfoURL:
+          type: string
+          example: 'http://bit.ly/1NuVFxV'
+    ForeignSanctionsEvader:
+      properties:
+        entityID:
+          type: string
+          example: '17526'
+        entityNumber:
+          type: string
+          example: '17526'
+        type:
+          type: string
+          example: 'Individual'
+        programs:
+          type: array
+          items:
+            type: string
+          example:
+            - "SYRIA"
+            - "FSE-SY"
+        name:
+          type: string
+          example: 'BEKTAS, Halis'
+        addresses:
+          type: array
+          items:
+            type: string
+          example: []
+        sourceListURL:
+          type: string
+          example: 'https://bit.ly/1QWTIfE'
+        citizenships:
+          type: string
+          example: 'CH'
+        datesOfBirth:
+          type: string
+          example: '1966-02-13'
+        sourceInfoURL:
+          type: string
+          example: 'http://bit.ly/1N1docf'
+        IDs:
+          type: array
+          items:
+            type: string
+          example:
+            - "CH, X0906223, Passport"
+    PalestinianLegislativeCouncil:
+      properties:
+        entityID:
+          type: string
+          example: '9702'
+        entityNumber:
+          type: string
+          example: '9702'
+        type:
+          type: string
+          example: 'Individual'
+        programs:
+          type: array
+          items:
+            type: string
+          example:
+            - "NS-PLC"
+            - "Office of Misinformation"
+        name:
+          type: string
+          example: 'SALAMEH, Salem'
+        addresses:
+          type: array
+          items:
+            type: string
+          example:
+            - "123 Dunbar Street, Testerville, TX, Palestine"
+        remarks:
+          type: string
+          example: 'HAMAS - Der al-Balah'
+        sourceListURL:
+          type: string
+          example: https://bit.ly/1QWTIfE
+        alternateNames:
+          type: array
+          items:
+            type: string
+          example:
+            - "SALAMEH, Salem Ahmad Abdel Hadi"
+        datesOfBirth:
+          type: string
+          example: '1951'
+        placesOfBirth:
+          type: string
+          example: ''
+        sourceInfoURL:
+          type: string
+          example: 'http://bit.ly/2tjOLpx'
+    CAPTAList:
+      properties:
+        entityID:
+          type: string
+          example: "20002"
+        entityNumber:
+          type: string
+          example: "20002"
+        type:
+          type: string
+          example: "Entity"
+        programs:
+          type: array
+          items:
+            type: string
+          example:
+            - "UKRAINE-EO13662"
+            - "RUSSIA-EO14024"
+        name:
+          type: string
+          example: "BM BANK PUBLIC JOINT STOCK COMPANY"
+        addresses:
+          type: array
+          items:
+            type: string
+          example: "Bld 3 8/15, Rozhdestvenka St., Moscow, 107996, RU"
+        remarks:
+          type: array
+          items:
+            type: string
+          example:
+            - "All offices worldwide"
+        sourceListURL:
+          type: string
+          example: ""
+        alternateNames:
+          type: array
+          items:
+            type: string
+          example:
+            - "BM BANK JSC"
+            - "BM BANK AO"
+            - "AKTSIONERNOE OBSHCHESTVO BM BANK"
+        sourceInfoURL:
+          type: string
+          example: "http://bit.ly/2PqohAD"
+        IDs:
+          type: array
+          items:
+            type: string
+          example:
+            - "RU, 1027700159497, Registration Number"
+            - "RU, 29292940, Government Gazette Number"
+            - "MOSWRUMM, SWIFT/BIC"
+    ITARDebarred:
+      properties:
+        entityID:
+          type: string
+          example: "d44d88d0265d93927b9ff1c13bbbb7c7db64142c"
+        name:
+          type: string
+          example: "Yasmin Ahmed"
+        federalRegisterNotice:
+          type: string
+          example: "69 FR 17468"
+        sourceListURL:
+          type: string
+          example: "http://bit.ly/307FuRQ"
+        alternateNames:
+          type: array
+          items:
+            type: string
+          example:
+            - "Yasmin Tariq"
+            - "Fatimah Mohammad"
+        sourceInfoURL:
+          type: string
+          example: "http://bit.ly/307FuRQ"
+    NonSDNChineseMilitaryIndustrialComplex:
+      properties:
+        entityID:
+          type: string
+          example: "32091"
+        entityNumber:
+          type: string
+          example: "32091"
+        type:
+          type: string
+          example: "Entity"
+        programs:
+          type: array
+          items:
+            type: string
+          example:
+            - "CMIC-EO13959"
+        name:
+          type: string
+          example: "PROVEN HONOUR CAPITAL LIMITED"
+        addresses:
+          type: array
+          items:
+            type: string
+          example:
+            - "C/O Vistra Corporate Services Centre, Wickhams Cay II, Road Town, VG1110, VG"
+        remarks:
+          type: array
+          items:
+            type: string
+          example:
+            - "(Linked To: HUAWEI INVESTMENT & HOLDING CO., LTD.)"
+        sourceListURL:
+          type: string
+          example: "https://bit.ly/1QWTIfE"
+        alternateNames:
+          type: array
+          items:
+            type: string
+          example:
+            - "PROVEN HONOUR CAPITAL LTD"
+            - "PROVEN HONOUR"
+        sourceInfoURL:
+          type: string
+          example: "https://bit.ly/3zsMQ4n"
+        IDs:
+          type: array
+          items:
+            type: string
+          example:
+            - "Proven Honour Capital Ltd, Issuer Name"
+            - "XS1233275194, ISIN"
+    NonSDNMenuBasedSanctionsList:
+      properties:
+        EntityID:
+          type: string
+          example: "17016"
+        EntityNumber:
+          type: string
+          example: "17016"
+        Type:
+          type: string
+          example: "Entity"
+        Programs:
+          type: array
+          items:
+            type: string
+          example:
+            - "UKRAINE-EO13662"
+            - "MBS"
+        Name:
+          type: string
+          example: "GAZPROMBANK JOINT STOCK COMPANY"
+        Addresses:
+          type: array
+          items:
+            type: string
+          example:
+            - "16 Nametkina Street, Bldg. 1, Moscow, 117420, RU"
+        Remarks:
+          type: array
+          items:
+            type: string
+          example:
+            - "For more information on directives, please visit the following link: http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives."
+        AlternateNames:
+          type: array
+          items:
+            type: string
+          example:
+            - "GAZPROMBANK OPEN JOINT STOCK COMPANY"
+            - "BANK GPB JSC"
+            - "GAZPROMBANK AO"
+        SourceInfoURL:
+          type: string
+          example: "https://bit.ly/2MbsybU"
+        IDs:
+          type: array
+          items:
+            type: string
+          example:
+            - "RU, 1027700167110, Registration Number"
+            - "RU, 09807684, Government Gazette Number"
+            - "RU, 7744001497, Tax ID No."
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       properties:
@@ -1148,10 +1541,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OfacEntityAddress'
-        sectoralSanctions:
-          type: array
-          items:
-            $ref: '#/components/schemas/SSI'
         # BIS
         deniedPersons:
           type: array
@@ -1161,6 +1550,47 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BISEntities'
+        # US Consolidated Screening List
+        militaryEndUsers:
+          type: array
+          items:
+            $ref: '#/components/schemas/MilitaryEndUser'
+        sectoralSanctions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SSI'
+        unverifiedCSL:
+          type: array
+          items:
+            $ref: '#/components/schemas/Unverified'
+        nonproliferationSanctions:
+          type: array
+          items:
+            $ref: '#/components/schemas/NonProliferationSanction'
+        foreignSanctionsEvaders:
+          type: array
+          items:
+            $ref: '#/components/schemas/ForeignSanctionsEvader'
+        palestinianLegislativeCouncil:
+          type: array
+          items:
+            $ref: '#/components/schemas/PalestinianLegislativeCouncil'
+        captaList:
+          type: array
+          items:
+            $ref: '#/components/schemas/CAPTAList'
+        itarDebarred:
+          type: array
+          items:
+            $ref: '#/components/schemas/ITARDebarred'
+        nonSDNChineseMilitaryIndustrialComplex:
+          type: array
+          items:
+            $ref: '#/components/schemas/NonSDNChineseMilitaryIndustrialComplex'
+        nonSDNMenuBasedSanctionsList:
+          type: array
+          items:
+            $ref: '#/components/schemas/NonSDNMenuBasedSanctionsList'
         # Metadata
         refreshedAt:
           type: string

@@ -18,6 +18,7 @@ import (
 	"github.com/moov-io/watchman/pkg/csl"
 	"github.com/moov-io/watchman/pkg/dpl"
 	"github.com/moov-io/watchman/pkg/ofac"
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -345,6 +346,7 @@ func createTestSearcher(t *testing.T) *searcher {
 }
 
 func createBenchmarkSearcher(b *testing.B) *searcher {
+	b.Helper()
 	testSearcherOnce.Do(func() {
 		stats, err := testLiveSearcher.refreshData(filepath.Join("..", "..", "test", "testdata", "bench"))
 		if err != nil {
@@ -352,7 +354,33 @@ func createBenchmarkSearcher(b *testing.B) *searcher {
 		}
 		testSearcherStats = stats
 	})
+	verifyDownloadStats(b)
 	return testLiveSearcher
+}
+
+func verifyDownloadStats(b *testing.B) {
+	b.Helper()
+
+	// OFAC
+	require.Greater(b, testSearcherStats.SDNs, 1)
+	require.Greater(b, testSearcherStats.Alts, 1)
+	require.Greater(b, testSearcherStats.Addresses, 1)
+
+	// BIS
+	require.Greater(b, testSearcherStats.DeniedPersons, 1)
+
+	// CSL
+	require.Greater(b, testSearcherStats.BISEntities, 1)
+	require.Greater(b, testSearcherStats.MilitaryEndUsers, 1)
+	require.Greater(b, testSearcherStats.SectoralSanctions, 1)
+	require.Greater(b, testSearcherStats.Unverified, 1)
+	require.Greater(b, testSearcherStats.NonProliferationSanctions, 1)
+	require.Greater(b, testSearcherStats.ForeignSanctionsEvaders, 1)
+	require.Greater(b, testSearcherStats.PalestinianLegislativeCouncil, 1)
+	require.Greater(b, testSearcherStats.CAPTA, 1)
+	require.Greater(b, testSearcherStats.ITARDebarred, 1)
+	require.Greater(b, testSearcherStats.ChineseMilitaryIndustrialComplex, 1)
+	require.Greater(b, testSearcherStats.NonSDNMenuBasedSanctions, 1)
 }
 
 func TestJaroWinkler(t *testing.T) {

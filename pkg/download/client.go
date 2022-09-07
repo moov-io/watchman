@@ -78,6 +78,9 @@ func (dl *Downloader) GetFiles(initialDir string, namesAndSources map[string]str
 		return nil, fmt.Errorf("readdir %s: %v", dir, err)
 	}
 
+	var mu sync.Mutex
+	var out []string
+
 	var wg sync.WaitGroup
 	wg.Add(len(namesAndSources))
 	for name, source := range namesAndSources {
@@ -86,6 +89,7 @@ func (dl *Downloader) GetFiles(initialDir string, namesAndSources map[string]str
 		for i := range localFiles {
 			if strings.EqualFold(filepath.Base(localFiles[i].Name()), name) {
 				found = true
+				out = append(out, filepath.Join(dir, localFiles[i].Name()))
 				break
 			}
 		}
@@ -94,24 +98,19 @@ func (dl *Downloader) GetFiles(initialDir string, namesAndSources map[string]str
 			wg.Done()
 			continue
 		}
+
 		// Download missing files
 		go func(wg *sync.WaitGroup, filename, downloadURL string) {
 			defer wg.Done()
 			dl.retryDownload(dir, filename, downloadURL)
+
+			mu.Lock()
+			out = append(out, filepath.Join(dir, filename))
+			mu.Unlock()
 		}(&wg, name, source)
 	}
-
 	wg.Wait()
 
-	// count files and error if the count isn't what we expected
-	fds, err := os.ReadDir(dir)
-	if err != nil {
-		return nil, fmt.Errorf("problem reading data directory: %v", err)
-	}
-	var out []string
-	for i := range fds {
-		out = append(out, filepath.Join(dir, filepath.Base(fds[i].Name())))
-	}
 	return out, nil
 }
 
