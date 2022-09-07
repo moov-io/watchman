@@ -78,7 +78,9 @@ func (dl *Downloader) GetFiles(initialDir string, namesAndSources map[string]str
 		return nil, fmt.Errorf("readdir %s: %v", dir, err)
 	}
 
+	var mu sync.Mutex
 	var out []string
+
 	var wg sync.WaitGroup
 	wg.Add(len(namesAndSources))
 	for name, source := range namesAndSources {
@@ -101,7 +103,10 @@ func (dl *Downloader) GetFiles(initialDir string, namesAndSources map[string]str
 		go func(wg *sync.WaitGroup, filename, downloadURL string) {
 			defer wg.Done()
 			dl.retryDownload(dir, filename, downloadURL)
+
+			mu.Lock()
 			out = append(out, filepath.Join(dir, filename))
+			mu.Unlock()
 		}(&wg, name, source)
 	}
 	wg.Wait()
