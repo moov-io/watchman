@@ -260,7 +260,7 @@ func searchViaQ(logger log.Logger, searcher *searcher, name string) http.Handler
 type searchGather func(searcher *searcher, filters filterRequest, limit int, minMatch float64, name string, resp *searchResponse)
 
 var (
-	gatherings = []searchGather{
+	gatherings = append([]searchGather{
 		// OFAC SDN Search
 		func(s *searcher, filters filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			sdns := s.FindSDNsByRemarksID(limit, name)
@@ -282,8 +282,10 @@ var (
 		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			resp.DeniedPersons = s.TopDPs(limit, minMatch, name)
 		},
+	}, cslGatherings...)
 
-		// Consolidated Screening List Results
+	// Consolidated Screening List Results
+	cslGatherings = []searchGather{
 		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			resp.BISEntities = s.TopBISEntities(limit, minMatch, name)
 		},
@@ -321,14 +323,18 @@ var (
 )
 
 func buildFullSearchResponse(searcher *searcher, filters filterRequest, limit int, minMatch float64, name string) *searchResponse {
+	return buildFullSearchResponseWith(searcher, gatherings, filters, limit, minMatch, name)
+}
+
+func buildFullSearchResponseWith(searcher *searcher, searchGatherings []searchGather, filters filterRequest, limit int, minMatch float64, name string) *searchResponse {
 	resp := searchResponse{
 		RefreshedAt: searcher.lastRefreshedAt,
 	}
 	var wg sync.WaitGroup
-	wg.Add(len(gatherings))
-	for i := range gatherings {
+	wg.Add(len(searchGatherings))
+	for i := range searchGatherings {
 		go func(i int) {
-			gatherings[i](searcher, filters, limit, minMatch, name, &resp)
+			searchGatherings[i](searcher, filters, limit, minMatch, name, &resp)
 			wg.Done()
 		}(i)
 	}
