@@ -23,5 +23,15 @@ Lists included in search are:
 - US Department of Commerce - Bureau of Industry and Security (BIS)
   - [Denied Persons List](https://bis.data.commerce.gov/dataset/Denied-Persons-List-with-Denied-US-Export-Privileg/xwtd-wd7a/data) (DPL)
   - [Entity List](https://www.bis.doc.gov/index.php/policy-guidance/lists-of-parties-of-concern/entity-list) (EL)
+- US Consolidated Screening List
+  - Military End User (MEU) List
+  - Unverified List (UVL)
+  - Nonproliferation Sanctions (ISN)
+  - Foreign Sanctions Evaders (FSE)
+  - Palestinian Legislative Council List (PLC)
+  - Capta List (CAP)
+  - Non-SDN Menu-Based Sanctions List (NS-MBS List)
+  - Non-SDN Chinese Military-Industrial Complex Companies List (CMIC)
+  - ITAR Debarred (DTC)
 
 All United States and European Union companies are required to comply with various regulations and sanction lists (such as the US Patriot Act requiring compliance with the BIS Denied Persons List).
