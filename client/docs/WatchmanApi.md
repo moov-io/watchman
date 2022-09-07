@@ -21,6 +21,7 @@ Method | HTTP request | Description
 [**RemoveOfacCustomerNameWatch**](WatchmanApi.md#RemoveOfacCustomerNameWatch) | **Delete** /ofac/customers/watch/{watchID} | Remove customer watch
 [**RemoveOfacCustomerWatch**](WatchmanApi.md#RemoveOfacCustomerWatch) | **Delete** /ofac/customers/{customerID}/watch/{watchID} | Remove customer watch
 [**Search**](WatchmanApi.md#Search) | **Get** /search | Search SDNs
+[**SearchUSCSL**](WatchmanApi.md#SearchUSCSL) | **Get** /search/us-csl | Search US CSL
 [**UpdateOfacCompanyStatus**](WatchmanApi.md#UpdateOfacCompanyStatus) | **Put** /ofac/companies/{companyID} | Update company
 [**UpdateOfacCustomerStatus**](WatchmanApi.md#UpdateOfacCustomerStatus) | **Put** /ofac/customers/{customerID} | Update customer
 
@@ -778,6 +779,51 @@ Name | Type | Description  | Notes
  **limit** | **optional.Int32**| Maximum results returned by a search. Results are sorted by their match percentage in decending order. | 
  **sdnType** | [**optional.Interface of SdnType**](.md)| Optional filter to only return SDNs whose type case-insensitively matches. | 
  **program** | **optional.String**| Optional filter to only return SDNs whose program case-insensitively matches. | 
+
+### Return type
+
+[**Search**](Search.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## SearchUSCSL
+
+> Search SearchUSCSL(ctx, optional)
+
+Search US CSL
+
+Search the US Consolidated Screening List
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+ **optional** | ***SearchUSCSLOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+
+Optional parameters are passed through a pointer to a SearchUSCSLOpts struct
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **xRequestID** | **optional.String**| Optional Request ID allows application developer to trace requests through the system&#39;s logs | 
+ **name** | **optional.String**| Name which could correspond to an entry on the CSL | 
+ **limit** | **optional.Int32**| Maximum number of downloads to return sorted by their timestamp in decending order. | 
 
 ### Return type
 

@@ -50,6 +50,7 @@ Class | Method | HTTP request | Description
 *WatchmanApi* | [**RemoveOfacCustomerNameWatch**](docs/WatchmanApi.md#removeofaccustomernamewatch) | **Delete** /ofac/customers/watch/{watchID} | Remove customer watch
 *WatchmanApi* | [**RemoveOfacCustomerWatch**](docs/WatchmanApi.md#removeofaccustomerwatch) | **Delete** /ofac/customers/{customerID}/watch/{watchID} | Remove customer watch
 *WatchmanApi* | [**Search**](docs/WatchmanApi.md#search) | **Get** /search | Search SDNs
+*WatchmanApi* | [**SearchUSCSL**](docs/WatchmanApi.md#searchuscsl) | **Get** /search/us-csl | Search US CSL
 *WatchmanApi* | [**UpdateOfacCompanyStatus**](docs/WatchmanApi.md#updateofaccompanystatus) | **Put** /ofac/companies/{companyID} | Update company
 *WatchmanApi* | [**UpdateOfacCustomerStatus**](docs/WatchmanApi.md#updateofaccustomerstatus) | **Put** /ofac/customers/{customerID} | Update customer
 
@@ -57,9 +58,16 @@ Class | Method | HTTP request | Description
 ## Documentation For Models
 
  - [BisEntities](docs/BisEntities.md)
+ - [CaptaList](docs/CaptaList.md)
  - [Download](docs/Download.md)
  - [Dpl](docs/Dpl.md)
  - [Error](docs/Error.md)
+ - [ForeignSanctionsEvader](docs/ForeignSanctionsEvader.md)
+ - [ItarDebarred](docs/ItarDebarred.md)
+ - [MilitaryEndUser](docs/MilitaryEndUser.md)
+ - [NonProliferationSanction](docs/NonProliferationSanction.md)
+ - [NonSdnChineseMilitaryIndustrialComplex](docs/NonSdnChineseMilitaryIndustrialComplex.md)
+ - [NonSdnMenuBasedSanctionsList](docs/NonSdnMenuBasedSanctionsList.md)
  - [OfacAlt](docs/OfacAlt.md)
  - [OfacCompany](docs/OfacCompany.md)
  - [OfacCompanyStatus](docs/OfacCompanyStatus.md)
@@ -69,10 +77,12 @@ Class | Method | HTTP request | Description
  - [OfacSdn](docs/OfacSdn.md)
  - [OfacWatch](docs/OfacWatch.md)
  - [OfacWatchRequest](docs/OfacWatchRequest.md)
+ - [PalestinianLegislativeCouncil](docs/PalestinianLegislativeCouncil.md)
  - [SdnType](docs/SdnType.md)
  - [Search](docs/Search.md)
  - [Ssi](docs/Ssi.md)
  - [SsiType](docs/SsiType.md)
+ - [Unverified](docs/Unverified.md)
  - [UpdateOfacCompanyStatus](docs/UpdateOfacCompanyStatus.md)
  - [UpdateOfacCustomerStatus](docs/UpdateOfacCustomerStatus.md)
 

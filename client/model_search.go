@@ -15,11 +15,20 @@ import (
 
 // Search Search results containing SDNs, alternate names, and/or addreses
 type Search struct {
-	SDNs              []OfacSdn           `json:"SDNs,omitempty"`
-	AltNames          []OfacAlt           `json:"altNames,omitempty"`
-	Addresses         []OfacEntityAddress `json:"addresses,omitempty"`
-	SectoralSanctions []Ssi               `json:"sectoralSanctions,omitempty"`
-	DeniedPersons     []Dpl               `json:"deniedPersons,omitempty"`
-	BisEntities       []BisEntities       `json:"bisEntities,omitempty"`
-	RefreshedAt       time.Time           `json:"refreshedAt,omitempty"`
+	SDNs                                   []OfacSdn                                `json:"SDNs,omitempty"`
+	AltNames                               []OfacAlt                                `json:"altNames,omitempty"`
+	Addresses                              []OfacEntityAddress                      `json:"addresses,omitempty"`
+	DeniedPersons                          []Dpl                                    `json:"deniedPersons,omitempty"`
+	BisEntities                            []BisEntities                            `json:"bisEntities,omitempty"`
+	MilitaryEndUsers                       []MilitaryEndUser                        `json:"militaryEndUsers,omitempty"`
+	SectoralSanctions                      []Ssi                                    `json:"sectoralSanctions,omitempty"`
+	UnverifiedCSL                          []Unverified                             `json:"unverifiedCSL,omitempty"`
+	NonproliferationSanctions              []NonProliferationSanction               `json:"nonproliferationSanctions,omitempty"`
+	ForeignSanctionsEvaders                []ForeignSanctionsEvader                 `json:"foreignSanctionsEvaders,omitempty"`
+	PalestinianLegislativeCouncil          []PalestinianLegislativeCouncil          `json:"palestinianLegislativeCouncil,omitempty"`
+	CaptaList                              []CaptaList                              `json:"captaList,omitempty"`
+	ItarDebarred                           []ItarDebarred                           `json:"itarDebarred,omitempty"`
+	NonSDNChineseMilitaryIndustrialComplex []NonSdnChineseMilitaryIndustrialComplex `json:"nonSDNChineseMilitaryIndustrialComplex,omitempty"`
+	NonSDNMenuBasedSanctionsList           []NonSdnMenuBasedSanctionsList           `json:"nonSDNMenuBasedSanctionsList,omitempty"`
+	RefreshedAt                            time.Time                                `json:"refreshedAt,omitempty"`
 }

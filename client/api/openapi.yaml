@@ -871,6 +871,56 @@ paths:
       summary: Search SDNs
       tags:
       - Watchman
+  /search/us-csl:
+    get:
+      description: Search the US Consolidated Screening List
+      operationId: searchUSCSL
+      parameters:
+      - description: Optional Request ID allows application developer to trace requests
+          through the system's logs
+        explode: false
+        in: header
+        name: X-Request-ID
+        required: false
+        schema:
+          example: 94c825ee
+          type: string
+        style: simple
+      - description: Name which could correspond to an entry on the CSL
+        explode: true
+        in: query
+        name: name
+        required: false
+        schema:
+          example: Jane Smith
+          type: string
+        style: form
+      - description: Maximum number of downloads to return sorted by their timestamp
+          in decending order.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          example: 25
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Search'
+          description: SDNs returned from a search
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error occurred, see response body.
+      summary: Search US CSL
+      tags:
+      - Watchman
   /downloads:
     get:
       description: Return list of recent downloads of list data.
@@ -1472,6 +1522,491 @@ components:
           description: Match percentage of search query
           example: 0.91
           type: number
+    MilitaryEndUser:
+      example:
+        addresses: Xiujia Bay, Weiyong Dt, Xian, 710021, CN
+        endDate: endDate
+        name: AECC Aviation Power Co. Ltd.
+        FRNotice: 85 FR 83799
+        entityID: 26744194bd9b5cbec49db6ee29a4b53c697c7420
+        startDate: 2020-12-23
+      properties:
+        entityID:
+          example: 26744194bd9b5cbec49db6ee29a4b53c697c7420
+          type: string
+        name:
+          example: AECC Aviation Power Co. Ltd.
+          type: string
+        addresses:
+          example: Xiujia Bay, Weiyong Dt, Xian, 710021, CN
+          type: string
+        FRNotice:
+          example: 85 FR 83799
+          type: string
+        startDate:
+          example: 2020-12-23
+          type: string
+        endDate:
+          type: string
+    Unverified:
+      example:
+        sourceInfoURL: http://bit.ly/1Qi4R7Z
+        addresses:
+        - Komitas 26/114, Yerevan, Armenia, AM
+        name: Atlas Sanatgaran
+        entityID: f15fa805ff4ac5e09026f5e78011a1bb6b26dec2
+        sourceListURL: http://bit.ly/1iwwTSJ
+      properties:
+        entityID:
+          example: f15fa805ff4ac5e09026f5e78011a1bb6b26dec2
+          type: string
+        name:
+          example: Atlas Sanatgaran
+          type: string
+        addresses:
+          example:
+          - Komitas 26/114, Yerevan, Armenia, AM
+          items:
+            type: string
+          type: array
+        sourceListURL:
+          example: http://bit.ly/1iwwTSJ
+          type: string
+        sourceInfoURL:
+          example: http://bit.ly/1Qi4R7Z
+          type: string
+    NonProliferationSanction:
+      example:
+        sourceInfoURL: http://bit.ly/1NuVFxV
+        alternateNames:
+        - ZAMAN
+        - Haydar
+        federalRegisterNotice: Vol. 74, No. 11, 01/16/09
+        name: Abdul Qadeer Khan
+        entityID: 2d2db09c686e4829d0ef1b0b04145eec3d42cd88
+        programs:
+        - E.O. 13382
+        - Export-Import Bank Act
+        - Nuclear Proliferation Prevention Act
+        sourceListURL: http://bit.ly/1NuVFxV
+        startDate: 2009-01-09
+        remarks: Associated with the A.Q. Khan Network
+      properties:
+        entityID:
+          example: 2d2db09c686e4829d0ef1b0b04145eec3d42cd88
+          type: string
+        programs:
+          example:
+          - E.O. 13382
+          - Export-Import Bank Act
+          - Nuclear Proliferation Prevention Act
+          items:
+            type: string
+          type: array
+        name:
+          example: Abdul Qadeer Khan
+          type: string
+        federalRegisterNotice:
+          example: Vol. 74, No. 11, 01/16/09
+          type: string
+        startDate:
+          example: 2009-01-09
+          type: string
+        remarks:
+          example: Associated with the A.Q. Khan Network
+          items:
+            type: string
+          type: array
+        sourceListURL:
+          example: http://bit.ly/1NuVFxV
+          type: string
+        alternateNames:
+          example:
+          - ZAMAN
+          - Haydar
+          items:
+            type: string
+          type: array
+        sourceInfoURL:
+          example: http://bit.ly/1NuVFxV
+          type: string
+    ForeignSanctionsEvader:
+      example:
+        sourceInfoURL: http://bit.ly/1N1docf
+        addresses: []
+        entityNumber: "17526"
+        citizenships: CH
+        name: BEKTAS, Halis
+        IDs:
+        - CH, X0906223, Passport
+        entityID: "17526"
+        programs:
+        - SYRIA
+        - FSE-SY
+        datesOfBirth: 1966-02-13
+        type: Individual
+        sourceListURL: https://bit.ly/1QWTIfE
+      properties:
+        entityID:
+          example: "17526"
+          type: string
+        entityNumber:
+          example: "17526"
+          type: string
+        type:
+          example: Individual
+          type: string
+        programs:
+          example:
+          - SYRIA
+          - FSE-SY
+          items:
+            type: string
+          type: array
+        name:
+          example: BEKTAS, Halis
+          type: string
+        addresses:
+          example: []
+          items:
+            type: string
+          type: array
+        sourceListURL:
+          example: https://bit.ly/1QWTIfE
+          type: string
+        citizenships:
+          example: CH
+          type: string
+        datesOfBirth:
+          example: 1966-02-13
+          type: string
+        sourceInfoURL:
+          example: http://bit.ly/1N1docf
+          type: string
+        IDs:
+          example:
+          - CH, X0906223, Passport
+          items:
+            type: string
+          type: array
+    PalestinianLegislativeCouncil:
+      example:
+        sourceInfoURL: http://bit.ly/2tjOLpx
+        addresses:
+        - 123 Dunbar Street, Testerville, TX, Palestine
+        alternateNames:
+        - SALAMEH, Salem Ahmad Abdel Hadi
+        placesOfBirth: placesOfBirth
+        entityNumber: "9702"
+        name: SALAMEH, Salem
+        entityID: "9702"
+        programs:
+        - NS-PLC
+        - Office of Misinformation
+        datesOfBirth: "1951"
+        type: Individual
+        sourceListURL: https://bit.ly/1QWTIfE
+        remarks: HAMAS - Der al-Balah
+      properties:
+        entityID:
+          example: "9702"
+          type: string
+        entityNumber:
+          example: "9702"
+          type: string
+        type:
+          example: Individual
+          type: string
+        programs:
+          example:
+          - NS-PLC
+          - Office of Misinformation
+          items:
+            type: string
+          type: array
+        name:
+          example: SALAMEH, Salem
+          type: string
+        addresses:
+          example:
+          - 123 Dunbar Street, Testerville, TX, Palestine
+          items:
+            type: string
+          type: array
+        remarks:
+          example: HAMAS - Der al-Balah
+          type: string
+        sourceListURL:
+          example: https://bit.ly/1QWTIfE
+          type: string
+        alternateNames:
+          example:
+          - SALAMEH, Salem Ahmad Abdel Hadi
+          items:
+            type: string
+          type: array
+        datesOfBirth:
+          example: "1951"
+          type: string
+        placesOfBirth:
+          type: string
+        sourceInfoURL:
+          example: http://bit.ly/2tjOLpx
+          type: string
+    CAPTAList:
+      example:
+        sourceInfoURL: http://bit.ly/2PqohAD
+        addresses: Bld 3 8/15, Rozhdestvenka St., Moscow, 107996, RU
+        alternateNames:
+        - BM BANK JSC
+        - BM BANK AO
+        - AKTSIONERNOE OBSHCHESTVO BM BANK
+        entityNumber: "20002"
+        name: BM BANK PUBLIC JOINT STOCK COMPANY
+        IDs:
+        - RU, 1027700159497, Registration Number
+        - RU, 29292940, Government Gazette Number
+        - MOSWRUMM, SWIFT/BIC
+        entityID: "20002"
+        programs:
+        - UKRAINE-EO13662
+        - RUSSIA-EO14024
+        type: Entity
+        sourceListURL: sourceListURL
+        remarks:
+        - All offices worldwide
+      properties:
+        entityID:
+          example: "20002"
+          type: string
+        entityNumber:
+          example: "20002"
+          type: string
+        type:
+          example: Entity
+          type: string
+        programs:
+          example:
+          - UKRAINE-EO13662
+          - RUSSIA-EO14024
+          items:
+            type: string
+          type: array
+        name:
+          example: BM BANK PUBLIC JOINT STOCK COMPANY
+          type: string
+        addresses:
+          example: Bld 3 8/15, Rozhdestvenka St., Moscow, 107996, RU
+          items:
+            type: string
+          type: array
+        remarks:
+          example:
+          - All offices worldwide
+          items:
+            type: string
+          type: array
+        sourceListURL:
+          type: string
+        alternateNames:
+          example:
+          - BM BANK JSC
+          - BM BANK AO
+          - AKTSIONERNOE OBSHCHESTVO BM BANK
+          items:
+            type: string
+          type: array
+        sourceInfoURL:
+          example: http://bit.ly/2PqohAD
+          type: string
+        IDs:
+          example:
+          - RU, 1027700159497, Registration Number
+          - RU, 29292940, Government Gazette Number
+          - MOSWRUMM, SWIFT/BIC
+          items:
+            type: string
+          type: array
+    ITARDebarred:
+      example:
+        sourceInfoURL: http://bit.ly/307FuRQ
+        alternateNames:
+        - Yasmin Tariq
+        - Fatimah Mohammad
+        federalRegisterNotice: 69 FR 17468
+        name: Yasmin Ahmed
+        entityID: d44d88d0265d93927b9ff1c13bbbb7c7db64142c
+        sourceListURL: http://bit.ly/307FuRQ
+      properties:
+        entityID:
+          example: d44d88d0265d93927b9ff1c13bbbb7c7db64142c
+          type: string
+        name:
+          example: Yasmin Ahmed
+          type: string
+        federalRegisterNotice:
+          example: 69 FR 17468
+          type: string
+        sourceListURL:
+          example: http://bit.ly/307FuRQ
+          type: string
+        alternateNames:
+          example:
+          - Yasmin Tariq
+          - Fatimah Mohammad
+          items:
+            type: string
+          type: array
+        sourceInfoURL:
+          example: http://bit.ly/307FuRQ
+          type: string
+    NonSDNChineseMilitaryIndustrialComplex:
+      example:
+        sourceInfoURL: https://bit.ly/3zsMQ4n
+        addresses:
+        - C/O Vistra Corporate Services Centre, Wickhams Cay II, Road Town, VG1110,
+          VG
+        alternateNames:
+        - PROVEN HONOUR CAPITAL LTD
+        - PROVEN HONOUR
+        entityNumber: "32091"
+        name: PROVEN HONOUR CAPITAL LIMITED
+        IDs:
+        - Proven Honour Capital Ltd, Issuer Name
+        - XS1233275194, ISIN
+        entityID: "32091"
+        programs:
+        - CMIC-EO13959
+        type: Entity
+        sourceListURL: https://bit.ly/1QWTIfE
+        remarks:
+        - '(Linked To: HUAWEI INVESTMENT & HOLDING CO., LTD.)'
+      properties:
+        entityID:
+          example: "32091"
+          type: string
+        entityNumber:
+          example: "32091"
+          type: string
+        type:
+          example: Entity
+          type: string
+        programs:
+          example:
+          - CMIC-EO13959
+          items:
+            type: string
+          type: array
+        name:
+          example: PROVEN HONOUR CAPITAL LIMITED
+          type: string
+        addresses:
+          example:
+          - C/O Vistra Corporate Services Centre, Wickhams Cay II, Road Town, VG1110,
+            VG
+          items:
+            type: string
+          type: array
+        remarks:
+          example:
+          - '(Linked To: HUAWEI INVESTMENT & HOLDING CO., LTD.)'
+          items:
+            type: string
+          type: array
+        sourceListURL:
+          example: https://bit.ly/1QWTIfE
+          type: string
+        alternateNames:
+          example:
+          - PROVEN HONOUR CAPITAL LTD
+          - PROVEN HONOUR
+          items:
+            type: string
+          type: array
+        sourceInfoURL:
+          example: https://bit.ly/3zsMQ4n
+          type: string
+        IDs:
+          example:
+          - Proven Honour Capital Ltd, Issuer Name
+          - XS1233275194, ISIN
+          items:
+            type: string
+          type: array
+    NonSDNMenuBasedSanctionsList:
+      example:
+        EntityID: "17016"
+        Programs:
+        - UKRAINE-EO13662
+        - MBS
+        Addresses:
+        - 16 Nametkina Street, Bldg. 1, Moscow, 117420, RU
+        SourceInfoURL: https://bit.ly/2MbsybU
+        Type: Entity
+        Remarks:
+        - 'For more information on directives, please visit the following link: http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives.'
+        IDs:
+        - RU, 1027700167110, Registration Number
+        - RU, 09807684, Government Gazette Number
+        - RU, 7744001497, Tax ID No.
+        EntityNumber: "17016"
+        AlternateNames:
+        - GAZPROMBANK OPEN JOINT STOCK COMPANY
+        - BANK GPB JSC
+        - GAZPROMBANK AO
+        Name: GAZPROMBANK JOINT STOCK COMPANY
+      properties:
+        EntityID:
+          example: "17016"
+          type: string
+        EntityNumber:
+          example: "17016"
+          type: string
+        Type:
+          example: Entity
+          type: string
+        Programs:
+          example:
+          - UKRAINE-EO13662
+          - MBS
+          items:
+            type: string
+          type: array
+        Name:
+          example: GAZPROMBANK JOINT STOCK COMPANY
+          type: string
+        Addresses:
+          example:
+          - 16 Nametkina Street, Bldg. 1, Moscow, 117420, RU
+          items:
+            type: string
+          type: array
+        Remarks:
+          example:
+          - 'For more information on directives, please visit the following link:
+            http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives.'
+          items:
+            type: string
+          type: array
+        AlternateNames:
+          example:
+          - GAZPROMBANK OPEN JOINT STOCK COMPANY
+          - BANK GPB JSC
+          - GAZPROMBANK AO
+          items:
+            type: string
+          type: array
+        SourceInfoURL:
+          example: https://bit.ly/2MbsybU
+          type: string
+        IDs:
+          example:
+          - RU, 1027700167110, Registration Number
+          - RU, 09807684, Government Gazette Number
+          - RU, 7744001497, Tax ID No.
+          items:
+            type: string
+          type: array
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       example:
@@ -1511,23 +2046,45 @@ components:
     Search:
       description: Search results containing SDNs, alternate names, and/or addreses
       example:
-        SDNs:
-        - sdnType: individual
-          match: 0.91
-          entityID: "1231"
+        nonSDNChineseMilitaryIndustrialComplex:
+        - sourceInfoURL: https://bit.ly/3zsMQ4n
+          addresses:
+          - C/O Vistra Corporate Services Centre, Wickhams Cay II, Road Town, VG1110,
+            VG
+          alternateNames:
+          - PROVEN HONOUR CAPITAL LTD
+          - PROVEN HONOUR
+          entityNumber: "32091"
+          name: PROVEN HONOUR CAPITAL LIMITED
+          IDs:
+          - Proven Honour Capital Ltd, Issuer Name
+          - XS1233275194, ISIN
+          entityID: "32091"
           programs:
-          - CUBA
-          sdnName: BANCO NACIONAL DE CUBA
-          title: Title of an individual
-          remarks: Additional info
-        - sdnType: individual
-          match: 0.91
-          entityID: "1231"
+          - CMIC-EO13959
+          type: Entity
+          sourceListURL: https://bit.ly/1QWTIfE
+          remarks:
+          - '(Linked To: HUAWEI INVESTMENT & HOLDING CO., LTD.)'
+        - sourceInfoURL: https://bit.ly/3zsMQ4n
+          addresses:
+          - C/O Vistra Corporate Services Centre, Wickhams Cay II, Road Town, VG1110,
+            VG
+          alternateNames:
+          - PROVEN HONOUR CAPITAL LTD
+          - PROVEN HONOUR
+          entityNumber: "32091"
+          name: PROVEN HONOUR CAPITAL LIMITED
+          IDs:
+          - Proven Honour Capital Ltd, Issuer Name
+          - XS1233275194, ISIN
+          entityID: "32091"
           programs:
-          - CUBA
-          sdnName: BANCO NACIONAL DE CUBA
-          title: Title of an individual
-          remarks: Additional info
+          - CMIC-EO13959
+          type: Entity
+          sourceListURL: https://bit.ly/1QWTIfE
+          remarks:
+          - '(Linked To: HUAWEI INVESTMENT & HOLDING CO., LTD.)'
         altNames:
         - alternateID: "220"
           alternateRemarks: Extra information
@@ -1583,6 +2140,127 @@ components:
           state: TX
           effectiveDate: 06/15/2016
           expirationDate: 06/15/2025
+        palestinianLegislativeCouncil:
+        - sourceInfoURL: http://bit.ly/2tjOLpx
+          addresses:
+          - 123 Dunbar Street, Testerville, TX, Palestine
+          alternateNames:
+          - SALAMEH, Salem Ahmad Abdel Hadi
+          placesOfBirth: placesOfBirth
+          entityNumber: "9702"
+          name: SALAMEH, Salem
+          entityID: "9702"
+          programs:
+          - NS-PLC
+          - Office of Misinformation
+          datesOfBirth: "1951"
+          type: Individual
+          sourceListURL: https://bit.ly/1QWTIfE
+          remarks: HAMAS - Der al-Balah
+        - sourceInfoURL: http://bit.ly/2tjOLpx
+          addresses:
+          - 123 Dunbar Street, Testerville, TX, Palestine
+          alternateNames:
+          - SALAMEH, Salem Ahmad Abdel Hadi
+          placesOfBirth: placesOfBirth
+          entityNumber: "9702"
+          name: SALAMEH, Salem
+          entityID: "9702"
+          programs:
+          - NS-PLC
+          - Office of Misinformation
+          datesOfBirth: "1951"
+          type: Individual
+          sourceListURL: https://bit.ly/1QWTIfE
+          remarks: HAMAS - Der al-Balah
+        itarDebarred:
+        - sourceInfoURL: http://bit.ly/307FuRQ
+          alternateNames:
+          - Yasmin Tariq
+          - Fatimah Mohammad
+          federalRegisterNotice: 69 FR 17468
+          name: Yasmin Ahmed
+          entityID: d44d88d0265d93927b9ff1c13bbbb7c7db64142c
+          sourceListURL: http://bit.ly/307FuRQ
+        - sourceInfoURL: http://bit.ly/307FuRQ
+          alternateNames:
+          - Yasmin Tariq
+          - Fatimah Mohammad
+          federalRegisterNotice: 69 FR 17468
+          name: Yasmin Ahmed
+          entityID: d44d88d0265d93927b9ff1c13bbbb7c7db64142c
+          sourceListURL: http://bit.ly/307FuRQ
+        unverifiedCSL:
+        - sourceInfoURL: http://bit.ly/1Qi4R7Z
+          addresses:
+          - Komitas 26/114, Yerevan, Armenia, AM
+          name: Atlas Sanatgaran
+          entityID: f15fa805ff4ac5e09026f5e78011a1bb6b26dec2
+          sourceListURL: http://bit.ly/1iwwTSJ
+        - sourceInfoURL: http://bit.ly/1Qi4R7Z
+          addresses:
+          - Komitas 26/114, Yerevan, Armenia, AM
+          name: Atlas Sanatgaran
+          entityID: f15fa805ff4ac5e09026f5e78011a1bb6b26dec2
+          sourceListURL: http://bit.ly/1iwwTSJ
+        captaList:
+        - sourceInfoURL: http://bit.ly/2PqohAD
+          addresses: Bld 3 8/15, Rozhdestvenka St., Moscow, 107996, RU
+          alternateNames:
+          - BM BANK JSC
+          - BM BANK AO
+          - AKTSIONERNOE OBSHCHESTVO BM BANK
+          entityNumber: "20002"
+          name: BM BANK PUBLIC JOINT STOCK COMPANY
+          IDs:
+          - RU, 1027700159497, Registration Number
+          - RU, 29292940, Government Gazette Number
+          - MOSWRUMM, SWIFT/BIC
+          entityID: "20002"
+          programs:
+          - UKRAINE-EO13662
+          - RUSSIA-EO14024
+          type: Entity
+          sourceListURL: sourceListURL
+          remarks:
+          - All offices worldwide
+        - sourceInfoURL: http://bit.ly/2PqohAD
+          addresses: Bld 3 8/15, Rozhdestvenka St., Moscow, 107996, RU
+          alternateNames:
+          - BM BANK JSC
+          - BM BANK AO
+          - AKTSIONERNOE OBSHCHESTVO BM BANK
+          entityNumber: "20002"
+          name: BM BANK PUBLIC JOINT STOCK COMPANY
+          IDs:
+          - RU, 1027700159497, Registration Number
+          - RU, 29292940, Government Gazette Number
+          - MOSWRUMM, SWIFT/BIC
+          entityID: "20002"
+          programs:
+          - UKRAINE-EO13662
+          - RUSSIA-EO14024
+          type: Entity
+          sourceListURL: sourceListURL
+          remarks:
+          - All offices worldwide
+        SDNs:
+        - sdnType: individual
+          match: 0.91
+          entityID: "1231"
+          programs:
+          - CUBA
+          sdnName: BANCO NACIONAL DE CUBA
+          title: Title of an individual
+          remarks: Additional info
+        - sdnType: individual
+          match: 0.91
+          entityID: "1231"
+          programs:
+          - CUBA
+          sdnName: BANCO NACIONAL DE CUBA
+          title: Title of an individual
+          remarks: Additional info
         bisEntities:
         - licenseRequirement: For all items subject to the EAR. (See ¬ß744.11 of the
             EAR).
@@ -1614,6 +2292,91 @@ components:
           sourceListURL: http://bit.ly/1MLgou0
           startDate: 6/21/16
           frNotice: 81 FR 61595
+        militaryEndUsers:
+        - addresses: Xiujia Bay, Weiyong Dt, Xian, 710021, CN
+          endDate: endDate
+          name: AECC Aviation Power Co. Ltd.
+          FRNotice: 85 FR 83799
+          entityID: 26744194bd9b5cbec49db6ee29a4b53c697c7420
+          startDate: 2020-12-23
+        - addresses: Xiujia Bay, Weiyong Dt, Xian, 710021, CN
+          endDate: endDate
+          name: AECC Aviation Power Co. Ltd.
+          FRNotice: 85 FR 83799
+          entityID: 26744194bd9b5cbec49db6ee29a4b53c697c7420
+          startDate: 2020-12-23
+        foreignSanctionsEvaders:
+        - sourceInfoURL: http://bit.ly/1N1docf
+          addresses: []
+          entityNumber: "17526"
+          citizenships: CH
+          name: BEKTAS, Halis
+          IDs:
+          - CH, X0906223, Passport
+          entityID: "17526"
+          programs:
+          - SYRIA
+          - FSE-SY
+          datesOfBirth: 1966-02-13
+          type: Individual
+          sourceListURL: https://bit.ly/1QWTIfE
+        - sourceInfoURL: http://bit.ly/1N1docf
+          addresses: []
+          entityNumber: "17526"
+          citizenships: CH
+          name: BEKTAS, Halis
+          IDs:
+          - CH, X0906223, Passport
+          entityID: "17526"
+          programs:
+          - SYRIA
+          - FSE-SY
+          datesOfBirth: 1966-02-13
+          type: Individual
+          sourceListURL: https://bit.ly/1QWTIfE
+        nonSDNMenuBasedSanctionsList:
+        - EntityID: "17016"
+          Programs:
+          - UKRAINE-EO13662
+          - MBS
+          Addresses:
+          - 16 Nametkina Street, Bldg. 1, Moscow, 117420, RU
+          SourceInfoURL: https://bit.ly/2MbsybU
+          Type: Entity
+          Remarks:
+          - 'For more information on directives, please visit the following link:
+            http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives.'
+          IDs:
+          - RU, 1027700167110, Registration Number
+          - RU, 09807684, Government Gazette Number
+          - RU, 7744001497, Tax ID No.
+          EntityNumber: "17016"
+          AlternateNames:
+          - GAZPROMBANK OPEN JOINT STOCK COMPANY
+          - BANK GPB JSC
+          - GAZPROMBANK AO
+          Name: GAZPROMBANK JOINT STOCK COMPANY
+        - EntityID: "17016"
+          Programs:
+          - UKRAINE-EO13662
+          - MBS
+          Addresses:
+          - 16 Nametkina Street, Bldg. 1, Moscow, 117420, RU
+          SourceInfoURL: https://bit.ly/2MbsybU
+          Type: Entity
+          Remarks:
+          - 'For more information on directives, please visit the following link:
+            http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives.'
+          IDs:
+          - RU, 1027700167110, Registration Number
+          - RU, 09807684, Government Gazette Number
+          - RU, 7744001497, Tax ID No.
+          EntityNumber: "17016"
+          AlternateNames:
+          - GAZPROMBANK OPEN JOINT STOCK COMPANY
+          - BANK GPB JSC
+          - GAZPROMBANK AO
+          Name: GAZPROMBANK JOINT STOCK COMPANY
         refreshedAt: 2000-01-23T04:56:07.000+00:00
         sectoralSanctions:
         - sourceInfoURL: http://bit.ly/1MLgou0
@@ -1660,6 +2423,35 @@ components:
           - 'For more information on directives, please visit the following link:
             http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives.'
           - '(Linked To: OPEN JOINT-STOCK COMPANY ROSNEFT OIL COMPANY)'
+        nonproliferationSanctions:
+        - sourceInfoURL: http://bit.ly/1NuVFxV
+          alternateNames:
+          - ZAMAN
+          - Haydar
+          federalRegisterNotice: Vol. 74, No. 11, 01/16/09
+          name: Abdul Qadeer Khan
+          entityID: 2d2db09c686e4829d0ef1b0b04145eec3d42cd88
+          programs:
+          - E.O. 13382
+          - Export-Import Bank Act
+          - Nuclear Proliferation Prevention Act
+          sourceListURL: http://bit.ly/1NuVFxV
+          startDate: 2009-01-09
+          remarks: Associated with the A.Q. Khan Network
+        - sourceInfoURL: http://bit.ly/1NuVFxV
+          alternateNames:
+          - ZAMAN
+          - Haydar
+          federalRegisterNotice: Vol. 74, No. 11, 01/16/09
+          name: Abdul Qadeer Khan
+          entityID: 2d2db09c686e4829d0ef1b0b04145eec3d42cd88
+          programs:
+          - E.O. 13382
+          - Export-Import Bank Act
+          - Nuclear Proliferation Prevention Act
+          sourceListURL: http://bit.ly/1NuVFxV
+          startDate: 2009-01-09
+          remarks: Associated with the A.Q. Khan Network
       properties:
         SDNs:
           items:
@@ -1673,10 +2465,6 @@ components:
           items:
             $ref: '#/components/schemas/OfacEntityAddress'
           type: array
-        sectoralSanctions:
-          items:
-            $ref: '#/components/schemas/SSI'
-          type: array
         deniedPersons:
           items:
             $ref: '#/components/schemas/DPL'
@@ -1684,6 +2472,46 @@ components:
         bisEntities:
           items:
             $ref: '#/components/schemas/BISEntities'
+          type: array
+        militaryEndUsers:
+          items:
+            $ref: '#/components/schemas/MilitaryEndUser'
+          type: array
+        sectoralSanctions:
+          items:
+            $ref: '#/components/schemas/SSI'
+          type: array
+        unverifiedCSL:
+          items:
+            $ref: '#/components/schemas/Unverified'
+          type: array
+        nonproliferationSanctions:
+          items:
+            $ref: '#/components/schemas/NonProliferationSanction'
+          type: array
+        foreignSanctionsEvaders:
+          items:
+            $ref: '#/components/schemas/ForeignSanctionsEvader'
+          type: array
+        palestinianLegislativeCouncil:
+          items:
+            $ref: '#/components/schemas/PalestinianLegislativeCouncil'
+          type: array
+        captaList:
+          items:
+            $ref: '#/components/schemas/CAPTAList'
+          type: array
+        itarDebarred:
+          items:
+            $ref: '#/components/schemas/ITARDebarred'
+          type: array
+        nonSDNChineseMilitaryIndustrialComplex:
+          items:
+            $ref: '#/components/schemas/NonSDNChineseMilitaryIndustrialComplex'
+          type: array
+        nonSDNMenuBasedSanctionsList:
+          items:
+            $ref: '#/components/schemas/NonSDNMenuBasedSanctionsList'
           type: array
         refreshedAt:
           format: date-time
