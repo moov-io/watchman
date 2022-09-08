@@ -10,6 +10,7 @@ import (
 	"math"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/moov-io/base/log"
@@ -121,4 +122,67 @@ func TestSearcher_TopISNs(t *testing.T) {
 	isn := isns[0]
 	require.Equal(t, "2d2db09c686e4829d0ef1b0b04145eec3d42cd88", isn.Data.EntityID)
 	require.Equal(t, "0.92", fmt.Sprintf("%.2f", isn.match))
+}
+
+func TestSearcher_TopUVLs(t *testing.T) {
+	uvls := uvlSearcher.TopUVLs(1, 0.00, "Atlas Sanatgaran")
+	require.Len(t, uvls, 1)
+
+	uvl := uvls[0]
+	require.Equal(t, "f15fa805ff4ac5e09026f5e78011a1bb6b26dec2", uvl.Data.EntityID)
+	require.Equal(t, "1", strconv.Itoa(int(uvl.match)))
+}
+
+func TestSearcher_TopFSEs(t *testing.T) {
+	fses := fseSearcher.TopFSEs(1, 0.00, "BEKTAS, Halis")
+	require.Len(t, fses, 1)
+
+	fse := fses[0]
+	require.Equal(t, "17526", fse.Data.EntityID)
+	require.Equal(t, "1", strconv.Itoa(int(fse.match)))
+}
+
+func TestSearcher_TopPLCs(t *testing.T) {
+	plcs := plcSearcher.TopPLCs(1, 0.00, "SALAMEH, Salem")
+	require.Len(t, plcs, 1)
+
+	plc := plcs[0]
+	require.Equal(t, "9702", plc.Data.EntityID)
+	require.Equal(t, "1", strconv.Itoa(int(plc.match)))
+}
+
+func TestSearcher_TopCAPs(t *testing.T) {
+	caps := capSearcher.TopCAPs(1, 0.00, "BM BANK PUBLIC JOINT STOCK COMPANY")
+	require.Len(t, caps, 1)
+
+	cap := caps[0]
+	require.Equal(t, "20002", cap.Data.EntityID)
+	require.Equal(t, "1", strconv.Itoa(int(cap.match)))
+}
+
+func TestSearcher_TopDTCs(t *testing.T) {
+	dtcs := dtcSearcher.TopDTCs(1, 0.00, "Yasmin Ahmed")
+	require.Len(t, dtcs, 1)
+
+	dtc := dtcs[0]
+	require.Equal(t, "d44d88d0265d93927b9ff1c13bbbb7c7db64142c", dtc.Data.EntityID)
+	require.Equal(t, "1", strconv.Itoa(int(dtc.match)))
+}
+
+func TestSearcher_TopCMICs(t *testing.T) {
+	cmics := cmicSearcher.TopCMICs(1, 0.00, "PROVEN HONOUR CAPITAL LIMITED")
+	require.Len(t, cmics, 1)
+
+	cmic := cmics[0]
+	require.Equal(t, "32091", cmic.Data.EntityID)
+	require.Equal(t, "1", strconv.Itoa(int(cmic.match)))
+}
+
+func TestSearcher_TopNSMBSs(t *testing.T) {
+	ns_mbss := ns_mbsSearcher.TopNS_MBS(1, 0.00, "GAZPROMBANK JOINT STOCK COMPANY")
+	require.Len(t, ns_mbss, 1)
+
+	ns_mbs := ns_mbss[0]
+	require.Equal(t, "17016", ns_mbs.Data.EntityID)
+	require.Equal(t, "1", strconv.Itoa(int(ns_mbs.match)))
 }
