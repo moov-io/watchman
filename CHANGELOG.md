@@ -1,3 +1,32 @@
+## v0.23.0 (Released 2022-09-08)
+
+Watchman v0.23.0 adds the US Consolidated Screening List results to search queries. A new `/search/us-csl` endpoint has also been added to only search the CSL. See the [API docs for full details](https://moov-io.github.io/watchman/api/#get-/search/us-csl).
+
+Lists added in this release:
+- Capta List (CAP)
+- Foreign Sanctions Evaders (FSE)
+- ITAR Debarred (DTC)
+- Military End User (MEU) List
+- Non-SDN Chinese Military-Industrial Complex Companies List (CMIC)
+- Non-SDN Menu-Based Sanctions List (NS-MBS List)
+- Nonproliferation Sanctions (ISN)
+- Palestinian Legislative Council List (PLC)
+- Unverified List (UVL)
+
+IMPROVEMENTS
+
+- download: only return files which are found or downloaded, not entire directory
+- feat: add GET /search/us-csl endpoint
+- fix: refer to `LOG_LEVEL` env var for when to log about migrations
+
+BUILD
+
+- build: upgrade to Go 1.19
+- build: replace deprecated ioutil functions
+- build(deps): bump terser from 5.13.1 to 5.14.2 in /webui
+- chore(deps): update dependency tzinfo to v1.2.10 [security]
+- fix(deps): update module github.com/moov-io/base to v0.34.1
+
 ## v0.22.0 (Released 2022-07-21)
 
 Watchman v0.22.0 has started to use Go 1.18 and its support for generic programming has helped us greatly clean up our code. We've also refreshed our [documentation website](https://moov-io.github.io/watchman/).
