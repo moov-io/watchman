@@ -51,6 +51,14 @@ Periodic searches of names, addresses, IDs, etc can be performed by two differen
 
 Search queries return better results when multiple criteria are included with the query. Simple name queries will return false positive matches, so including addresses, alternate names, and other fields are suggested.
 
+### Filtering
+
+OFAC searches can add filters to include results of a certain type. These types can be individuals, businesses, aircraft, and vessels. SDN results can also be filtered by their OFAC program. Address searches can filter by Country
+
+### Deep Inspection
+
+OFAC searches can include exact matches on ID values (e.g. Government ID). These are in the "Remarks" section of each entity.
+
 ## Checks Not Performed
 
 BSA/AML programs have requirements that are outside of Watchman, such as ownership calculations (thresholds, shell corporations, indirect majority shares), family relationships, and other risk analysis.
