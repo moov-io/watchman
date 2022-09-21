@@ -595,7 +595,7 @@ paths:
   /search:
     get:
       tags: [Watchman]
-      summary: Search SDNs
+      summary: Search
       operationId: search
       parameters:
         - name: X-Request-ID
