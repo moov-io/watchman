@@ -1,3 +1,15 @@
+## v0.23.1 (Released 2022-10-17)
+
+IMPROVEMENTS
+
+- api,client: add 'match' to CSL results
+- webui: update country list
+
+BUILD
+
+- build: require go1.19.1 in CI/CD
+- build: upgrade golang.org/x/text to v0.3.8
+
 ## v0.23.0 (Released 2022-09-08)
 
 Watchman v0.23.0 adds the US Consolidated Screening List results to search queries. A new `/search/us-csl` endpoint has also been added to only search the CSL. See the [API docs for full details](https://moov-io.github.io/watchman/api/#get-/search/us-csl).
