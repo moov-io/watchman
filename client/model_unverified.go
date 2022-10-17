@@ -16,4 +16,6 @@ type Unverified struct {
 	Addresses     []string `json:"addresses,omitempty"`
 	SourceListURL string   `json:"sourceListURL,omitempty"`
 	SourceInfoURL string   `json:"sourceInfoURL,omitempty"`
+	// Match percentage of search query
+	Match float32 `json:"match,omitempty"`
 }

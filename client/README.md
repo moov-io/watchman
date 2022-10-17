@@ -49,7 +49,7 @@ Class | Method | HTTP request | Description
 *WatchmanApi* | [**RemoveOfacCompanyWatch**](docs/WatchmanApi.md#removeofaccompanywatch) | **Delete** /ofac/companies/{companyID}/watch/{watchID} | Remove company watch
 *WatchmanApi* | [**RemoveOfacCustomerNameWatch**](docs/WatchmanApi.md#removeofaccustomernamewatch) | **Delete** /ofac/customers/watch/{watchID} | Remove customer watch
 *WatchmanApi* | [**RemoveOfacCustomerWatch**](docs/WatchmanApi.md#removeofaccustomerwatch) | **Delete** /ofac/customers/{customerID}/watch/{watchID} | Remove customer watch
-*WatchmanApi* | [**Search**](docs/WatchmanApi.md#search) | **Get** /search | Search SDNs
+*WatchmanApi* | [**Search**](docs/WatchmanApi.md#search) | **Get** /search | Search
 *WatchmanApi* | [**SearchUSCSL**](docs/WatchmanApi.md#searchuscsl) | **Get** /search/us-csl | Search US CSL
 *WatchmanApi* | [**UpdateOfacCompanyStatus**](docs/WatchmanApi.md#updateofaccompanystatus) | **Put** /ofac/companies/{companyID} | Update company
 *WatchmanApi* | [**UpdateOfacCustomerStatus**](docs/WatchmanApi.md#updateofaccustomerstatus) | **Put** /ofac/customers/{customerID} | Update customer

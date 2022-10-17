@@ -17,4 +17,6 @@ type MilitaryEndUser struct {
 	FRNotice  string `json:"FRNotice,omitempty"`
 	StartDate string `json:"startDate,omitempty"`
 	EndDate   string `json:"endDate,omitempty"`
+	// Match percentage of search query
+	Match float32 `json:"match,omitempty"`
 }
