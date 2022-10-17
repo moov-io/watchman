@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -102,7 +103,18 @@ func (dl *Downloader) GetFiles(initialDir string, namesAndSources map[string]str
 		// Download missing files
 		go func(wg *sync.WaitGroup, filename, downloadURL string) {
 			defer wg.Done()
-			dl.retryDownload(dir, filename, downloadURL)
+
+			logger := dl.createLogger(filename, downloadURL)
+
+			startTime := time.Now().In(time.UTC)
+			err := dl.retryDownload(dir, filename, downloadURL)
+			dur := time.Now().In(time.UTC).Sub(startTime)
+
+			if err != nil {
+				logger.Error().LogErrorf("FAILURE after %v to download: %v", dur, err)
+			} else {
+				logger.Error().LogErrorf("successful download after %v", dur)
+			}
 
 			mu.Lock()
 			out = append(out, filepath.Join(dir, filename))
@@ -114,13 +126,24 @@ func (dl *Downloader) GetFiles(initialDir string, namesAndSources map[string]str
 	return out, nil
 }
 
-func (dl *Downloader) retryDownload(dir, filename, downloadURL string) {
+func (dl *Downloader) createLogger(filename, downloadURL string) log.Logger {
+	var host string
+	u, _ := url.Parse(downloadURL)
+	if u != nil {
+		host = u.Host
+	}
+	return dl.Logger.With(log.Fields{
+		"host":     log.String(host),
+		"filename": log.String(filename),
+	})
+}
+
+func (dl *Downloader) retryDownload(dir, filename, downloadURL string) error {
 	// Allow a couple retries for various sources (some are flakey)
 	for i := 0; i < 3; i++ {
 		req, err := http.NewRequest("GET", downloadURL, nil)
 		if err != nil {
-			dl.Logger.Error().LogErrorf("error building HTTP request: %v", err)
-			return
+			return dl.Logger.Error().LogErrorf("error building HTTP request: %v", err).Err()
 		}
 		req.Header.Set("User-Agent", fmt.Sprintf("moov-io/watchman:%v", watchman.Version))
 
@@ -134,7 +157,7 @@ func (dl *Downloader) retryDownload(dir, filename, downloadURL string) {
 		fd, err := os.Create(filepath.Join(dir, filename))
 		if err != nil {
 			resp.Body.Close()
-			return
+			return fmt.Errorf("attempt %d failed to create file: %v", i, err)
 		}
 
 		io.Copy(fd, resp.Body) // copy file contents
@@ -142,6 +165,7 @@ func (dl *Downloader) retryDownload(dir, filename, downloadURL string) {
 		// close the open files
 		fd.Close()
 		resp.Body.Close()
-		return // quit after successful download
+		return nil // quit after successful download
 	}
+	return nil
 }
