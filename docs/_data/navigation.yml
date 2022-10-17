@@ -5,16 +5,28 @@
 - name: Demo
   link: https://oss.moov.io/watchman/
 - name: Community
-  link: https://slack.moov.io/
+  dropdown:
+    - name: Awesome Fintech
+      link: https://github.com/moov-io/awesome-fintech
+    - name: Slack
+      link: https://slack.moov.io/
+    - name: Terms Dictionary
+      link: https://github.com/moov-io/terms-dictionary
 - name: Other Projects
   dropdown:
     - name: Moov ACH
       link: https://moov-io.github.io/ach/
+    - name: Moov ACHGateway
+      link: https://moov-io.github.io/achgateway/
+    - name: Moov ACH Test Harness
+      link: https://github.com/moov-io/ach-test-harness
+    - name: Moov Fed
+      link: https://moov-io.github.io/fed/
+    - name: Moov FinCEN
+      link: https://moov-io.github.io/fincen/
     - name: Moov Image Cash Letter
       link: https://moov-io.github.io/imagecashletter/
     - name: Moov Metro 2
       link: https://moov-io.github.io/metro2/
-    - name: Moov Fed
-      link: https://moov-io.github.io/fed/
     - name: Moov Wire
       link: https://moov-io.github.io/wire/
