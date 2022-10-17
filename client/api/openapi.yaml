@@ -868,7 +868,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Error occurred, see response body.
-      summary: Search SDNs
+      summary: Search
       tags:
       - Watchman
   /search/us-csl:
@@ -1527,6 +1527,7 @@ components:
         addresses: Xiujia Bay, Weiyong Dt, Xian, 710021, CN
         endDate: endDate
         name: AECC Aviation Power Co. Ltd.
+        match: 0.92
         FRNotice: 85 FR 83799
         entityID: 26744194bd9b5cbec49db6ee29a4b53c697c7420
         startDate: 2020-12-23
@@ -1548,12 +1549,17 @@ components:
           type: string
         endDate:
           type: string
+        match:
+          description: Match percentage of search query
+          example: 0.92
+          type: number
     Unverified:
       example:
         sourceInfoURL: http://bit.ly/1Qi4R7Z
         addresses:
         - Komitas 26/114, Yerevan, Armenia, AM
         name: Atlas Sanatgaran
+        match: 0.92
         entityID: f15fa805ff4ac5e09026f5e78011a1bb6b26dec2
         sourceListURL: http://bit.ly/1iwwTSJ
       properties:
@@ -1575,6 +1581,10 @@ components:
         sourceInfoURL:
           example: http://bit.ly/1Qi4R7Z
           type: string
+        match:
+          description: Match percentage of search query
+          example: 0.92
+          type: number
     NonProliferationSanction:
       example:
         sourceInfoURL: http://bit.ly/1NuVFxV
@@ -1583,6 +1593,7 @@ components:
         - Haydar
         federalRegisterNotice: Vol. 74, No. 11, 01/16/09
         name: Abdul Qadeer Khan
+        match: 0.92
         entityID: 2d2db09c686e4829d0ef1b0b04145eec3d42cd88
         programs:
         - E.O. 13382
@@ -1630,6 +1641,10 @@ components:
         sourceInfoURL:
           example: http://bit.ly/1NuVFxV
           type: string
+        match:
+          description: Match percentage of search query
+          example: 0.92
+          type: number
     ForeignSanctionsEvader:
       example:
         sourceInfoURL: http://bit.ly/1N1docf
@@ -1637,6 +1652,7 @@ components:
         entityNumber: "17526"
         citizenships: CH
         name: BEKTAS, Halis
+        match: 0.92
         IDs:
         - CH, X0906223, Passport
         entityID: "17526"
@@ -1689,23 +1705,28 @@ components:
           items:
             type: string
           type: array
+        match:
+          description: Match percentage of search query
+          example: 0.92
+          type: number
     PalestinianLegislativeCouncil:
       example:
-        sourceInfoURL: http://bit.ly/2tjOLpx
         addresses:
         - 123 Dunbar Street, Testerville, TX, Palestine
-        alternateNames:
-        - SALAMEH, Salem Ahmad Abdel Hadi
-        placesOfBirth: placesOfBirth
         entityNumber: "9702"
-        name: SALAMEH, Salem
+        match: 0.92
         entityID: "9702"
-        programs:
-        - NS-PLC
-        - Office of Misinformation
         datesOfBirth: "1951"
         type: Individual
         sourceListURL: https://bit.ly/1QWTIfE
+        sourceInfoURL: http://bit.ly/2tjOLpx
+        alternateNames:
+        - SALAMEH, Salem Ahmad Abdel Hadi
+        placesOfBirth: placesOfBirth
+        name: SALAMEH, Salem
+        programs:
+        - NS-PLC
+        - Office of Misinformation
         remarks: HAMAS - Der al-Balah
       properties:
         entityID:
@@ -1753,6 +1774,10 @@ components:
         sourceInfoURL:
           example: http://bit.ly/2tjOLpx
           type: string
+        match:
+          description: Match percentage of search query
+          example: 0.92
+          type: number
     CAPTAList:
       example:
         sourceInfoURL: http://bit.ly/2PqohAD
@@ -1763,6 +1788,7 @@ components:
         - AKTSIONERNOE OBSHCHESTVO BM BANK
         entityNumber: "20002"
         name: BM BANK PUBLIC JOINT STOCK COMPANY
+        match: 0.92
         IDs:
         - RU, 1027700159497, Registration Number
         - RU, 29292940, Government Gazette Number
@@ -1827,6 +1853,10 @@ components:
           items:
             type: string
           type: array
+        match:
+          description: Match percentage of search query
+          example: 0.92
+          type: number
     ITARDebarred:
       example:
         sourceInfoURL: http://bit.ly/307FuRQ
@@ -1835,6 +1865,7 @@ components:
         - Fatimah Mohammad
         federalRegisterNotice: 69 FR 17468
         name: Yasmin Ahmed
+        match: 0.92
         entityID: d44d88d0265d93927b9ff1c13bbbb7c7db64142c
         sourceListURL: http://bit.ly/307FuRQ
       properties:
@@ -1860,6 +1891,10 @@ components:
         sourceInfoURL:
           example: http://bit.ly/307FuRQ
           type: string
+        match:
+          description: Match percentage of search query
+          example: 0.92
+          type: number
     NonSDNChineseMilitaryIndustrialComplex:
       example:
         sourceInfoURL: https://bit.ly/3zsMQ4n
@@ -1871,6 +1906,7 @@ components:
         - PROVEN HONOUR
         entityNumber: "32091"
         name: PROVEN HONOUR CAPITAL LIMITED
+        match: 0.92
         IDs:
         - Proven Honour Capital Ltd, Issuer Name
         - XS1233275194, ISIN
@@ -1933,6 +1969,10 @@ components:
           items:
             type: string
           type: array
+        match:
+          description: Match percentage of search query
+          example: 0.92
+          type: number
     NonSDNMenuBasedSanctionsList:
       example:
         EntityID: "17016"
@@ -1945,6 +1985,7 @@ components:
         Type: Entity
         Remarks:
         - 'For more information on directives, please visit the following link: http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives.'
+        match: 0.92
         IDs:
         - RU, 1027700167110, Registration Number
         - RU, 09807684, Government Gazette Number
@@ -2007,6 +2048,10 @@ components:
           items:
             type: string
           type: array
+        match:
+          description: Match percentage of search query
+          example: 0.92
+          type: number
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       example:
@@ -2056,6 +2101,7 @@ components:
           - PROVEN HONOUR
           entityNumber: "32091"
           name: PROVEN HONOUR CAPITAL LIMITED
+          match: 0.92
           IDs:
           - Proven Honour Capital Ltd, Issuer Name
           - XS1233275194, ISIN
@@ -2075,6 +2121,7 @@ components:
           - PROVEN HONOUR
           entityNumber: "32091"
           name: PROVEN HONOUR CAPITAL LIMITED
+          match: 0.92
           IDs:
           - Proven Honour Capital Ltd, Issuer Name
           - XS1233275194, ISIN
@@ -2141,37 +2188,39 @@ components:
           effectiveDate: 06/15/2016
           expirationDate: 06/15/2025
         palestinianLegislativeCouncil:
-        - sourceInfoURL: http://bit.ly/2tjOLpx
-          addresses:
+        - addresses:
           - 123 Dunbar Street, Testerville, TX, Palestine
-          alternateNames:
-          - SALAMEH, Salem Ahmad Abdel Hadi
-          placesOfBirth: placesOfBirth
           entityNumber: "9702"
-          name: SALAMEH, Salem
+          match: 0.92
           entityID: "9702"
-          programs:
-          - NS-PLC
-          - Office of Misinformation
           datesOfBirth: "1951"
           type: Individual
           sourceListURL: https://bit.ly/1QWTIfE
+          sourceInfoURL: http://bit.ly/2tjOLpx
+          alternateNames:
+          - SALAMEH, Salem Ahmad Abdel Hadi
+          placesOfBirth: placesOfBirth
+          name: SALAMEH, Salem
+          programs:
+          - NS-PLC
+          - Office of Misinformation
           remarks: HAMAS - Der al-Balah
-        - sourceInfoURL: http://bit.ly/2tjOLpx
-          addresses:
+        - addresses:
           - 123 Dunbar Street, Testerville, TX, Palestine
-          alternateNames:
-          - SALAMEH, Salem Ahmad Abdel Hadi
-          placesOfBirth: placesOfBirth
           entityNumber: "9702"
-          name: SALAMEH, Salem
+          match: 0.92
           entityID: "9702"
-          programs:
-          - NS-PLC
-          - Office of Misinformation
           datesOfBirth: "1951"
           type: Individual
           sourceListURL: https://bit.ly/1QWTIfE
+          sourceInfoURL: http://bit.ly/2tjOLpx
+          alternateNames:
+          - SALAMEH, Salem Ahmad Abdel Hadi
+          placesOfBirth: placesOfBirth
+          name: SALAMEH, Salem
+          programs:
+          - NS-PLC
+          - Office of Misinformation
           remarks: HAMAS - Der al-Balah
         itarDebarred:
         - sourceInfoURL: http://bit.ly/307FuRQ
@@ -2180,6 +2229,7 @@ components:
           - Fatimah Mohammad
           federalRegisterNotice: 69 FR 17468
           name: Yasmin Ahmed
+          match: 0.92
           entityID: d44d88d0265d93927b9ff1c13bbbb7c7db64142c
           sourceListURL: http://bit.ly/307FuRQ
         - sourceInfoURL: http://bit.ly/307FuRQ
@@ -2188,6 +2238,7 @@ components:
           - Fatimah Mohammad
           federalRegisterNotice: 69 FR 17468
           name: Yasmin Ahmed
+          match: 0.92
           entityID: d44d88d0265d93927b9ff1c13bbbb7c7db64142c
           sourceListURL: http://bit.ly/307FuRQ
         unverifiedCSL:
@@ -2195,12 +2246,14 @@ components:
           addresses:
           - Komitas 26/114, Yerevan, Armenia, AM
           name: Atlas Sanatgaran
+          match: 0.92
           entityID: f15fa805ff4ac5e09026f5e78011a1bb6b26dec2
           sourceListURL: http://bit.ly/1iwwTSJ
         - sourceInfoURL: http://bit.ly/1Qi4R7Z
           addresses:
           - Komitas 26/114, Yerevan, Armenia, AM
           name: Atlas Sanatgaran
+          match: 0.92
           entityID: f15fa805ff4ac5e09026f5e78011a1bb6b26dec2
           sourceListURL: http://bit.ly/1iwwTSJ
         captaList:
@@ -2212,6 +2265,7 @@ components:
           - AKTSIONERNOE OBSHCHESTVO BM BANK
           entityNumber: "20002"
           name: BM BANK PUBLIC JOINT STOCK COMPANY
+          match: 0.92
           IDs:
           - RU, 1027700159497, Registration Number
           - RU, 29292940, Government Gazette Number
@@ -2232,6 +2286,7 @@ components:
           - AKTSIONERNOE OBSHCHESTVO BM BANK
           entityNumber: "20002"
           name: BM BANK PUBLIC JOINT STOCK COMPANY
+          match: 0.92
           IDs:
           - RU, 1027700159497, Registration Number
           - RU, 29292940, Government Gazette Number
@@ -2296,12 +2351,14 @@ components:
         - addresses: Xiujia Bay, Weiyong Dt, Xian, 710021, CN
           endDate: endDate
           name: AECC Aviation Power Co. Ltd.
+          match: 0.92
           FRNotice: 85 FR 83799
           entityID: 26744194bd9b5cbec49db6ee29a4b53c697c7420
           startDate: 2020-12-23
         - addresses: Xiujia Bay, Weiyong Dt, Xian, 710021, CN
           endDate: endDate
           name: AECC Aviation Power Co. Ltd.
+          match: 0.92
           FRNotice: 85 FR 83799
           entityID: 26744194bd9b5cbec49db6ee29a4b53c697c7420
           startDate: 2020-12-23
@@ -2311,6 +2368,7 @@ components:
           entityNumber: "17526"
           citizenships: CH
           name: BEKTAS, Halis
+          match: 0.92
           IDs:
           - CH, X0906223, Passport
           entityID: "17526"
@@ -2325,6 +2383,7 @@ components:
           entityNumber: "17526"
           citizenships: CH
           name: BEKTAS, Halis
+          match: 0.92
           IDs:
           - CH, X0906223, Passport
           entityID: "17526"
@@ -2346,6 +2405,7 @@ components:
           Remarks:
           - 'For more information on directives, please visit the following link:
             http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives.'
+          match: 0.92
           IDs:
           - RU, 1027700167110, Registration Number
           - RU, 09807684, Government Gazette Number
@@ -2367,6 +2427,7 @@ components:
           Remarks:
           - 'For more information on directives, please visit the following link:
             http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives.'
+          match: 0.92
           IDs:
           - RU, 1027700167110, Registration Number
           - RU, 09807684, Government Gazette Number
@@ -2430,6 +2491,7 @@ components:
           - Haydar
           federalRegisterNotice: Vol. 74, No. 11, 01/16/09
           name: Abdul Qadeer Khan
+          match: 0.92
           entityID: 2d2db09c686e4829d0ef1b0b04145eec3d42cd88
           programs:
           - E.O. 13382
@@ -2444,6 +2506,7 @@ components:
           - Haydar
           federalRegisterNotice: Vol. 74, No. 11, 01/16/09
           name: Abdul Qadeer Khan
+          match: 0.92
           entityID: 2d2db09c686e4829d0ef1b0b04145eec3d42cd88
           programs:
           - E.O. 13382

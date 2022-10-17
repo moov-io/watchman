@@ -21,4 +21,6 @@ type NonSdnMenuBasedSanctionsList struct {
 	AlternateNames []string `json:"AlternateNames,omitempty"`
 	SourceInfoURL  string   `json:"SourceInfoURL,omitempty"`
 	IDs            []string `json:"IDs,omitempty"`
+	// Match percentage of search query
+	Match float32 `json:"match,omitempty"`
 }

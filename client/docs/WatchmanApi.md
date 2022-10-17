@@ -20,7 +20,7 @@ Method | HTTP request | Description
 [**RemoveOfacCompanyWatch**](WatchmanApi.md#RemoveOfacCompanyWatch) | **Delete** /ofac/companies/{companyID}/watch/{watchID} | Remove company watch
 [**RemoveOfacCustomerNameWatch**](WatchmanApi.md#RemoveOfacCustomerNameWatch) | **Delete** /ofac/customers/watch/{watchID} | Remove customer watch
 [**RemoveOfacCustomerWatch**](WatchmanApi.md#RemoveOfacCustomerWatch) | **Delete** /ofac/customers/{customerID}/watch/{watchID} | Remove customer watch
-[**Search**](WatchmanApi.md#Search) | **Get** /search | Search SDNs
+[**Search**](WatchmanApi.md#Search) | **Get** /search | Search
 [**SearchUSCSL**](WatchmanApi.md#SearchUSCSL) | **Get** /search/us-csl | Search US CSL
 [**UpdateOfacCompanyStatus**](WatchmanApi.md#UpdateOfacCompanyStatus) | **Put** /ofac/companies/{companyID} | Update company
 [**UpdateOfacCustomerStatus**](WatchmanApi.md#UpdateOfacCustomerStatus) | **Put** /ofac/customers/{customerID} | Update customer
@@ -747,7 +747,7 @@ No authorization required
 
 > Search Search(ctx, optional)
 
-Search SDNs
+Search
 
 ### Required Parameters
 

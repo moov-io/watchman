@@ -17,4 +17,6 @@ type ItarDebarred struct {
 	SourceListURL         string   `json:"sourceListURL,omitempty"`
 	AlternateNames        []string `json:"alternateNames,omitempty"`
 	SourceInfoURL         string   `json:"sourceInfoURL,omitempty"`
+	// Match percentage of search query
+	Match float32 `json:"match,omitempty"`
 }

@@ -1554,7 +1554,7 @@ type SearchOpts struct {
 }
 
 /*
-Search Search SDNs
+Search Search
   - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
   - @param optional nil or *SearchOpts - Optional Parameters:
   - @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs

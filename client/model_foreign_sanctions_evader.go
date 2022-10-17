@@ -22,4 +22,6 @@ type ForeignSanctionsEvader struct {
 	DatesOfBirth  string   `json:"datesOfBirth,omitempty"`
 	SourceInfoURL string   `json:"sourceInfoURL,omitempty"`
 	IDs           []string `json:"IDs,omitempty"`
+	// Match percentage of search query
+	Match float32 `json:"match,omitempty"`
 }

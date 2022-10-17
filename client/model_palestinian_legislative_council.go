@@ -23,4 +23,6 @@ type PalestinianLegislativeCouncil struct {
 	DatesOfBirth   string   `json:"datesOfBirth,omitempty"`
 	PlacesOfBirth  string   `json:"placesOfBirth,omitempty"`
 	SourceInfoURL  string   `json:"sourceInfoURL,omitempty"`
+	// Match percentage of search query
+	Match float32 `json:"match,omitempty"`
 }

@@ -1161,6 +1161,10 @@ components:
         endDate:
           type: string
           example: ''
+        match:
+          type: number
+          description: Match percentage of search query
+          example: 0.92
     Unverified:
       properties:
         entityID:
@@ -1181,6 +1185,10 @@ components:
         sourceInfoURL:
           type: string
           example: 'http://bit.ly/1Qi4R7Z'
+        match:
+          type: number
+          description: Match percentage of search query
+          example: 0.92
     NonProliferationSanction:
       properties:
         entityID:
@@ -1221,6 +1229,10 @@ components:
         sourceInfoURL:
           type: string
           example: 'http://bit.ly/1NuVFxV'
+        match:
+          type: number
+          description: Match percentage of search query
+          example: 0.92
     ForeignSanctionsEvader:
       properties:
         entityID:
@@ -1265,6 +1277,10 @@ components:
             type: string
           example:
             - "CH, X0906223, Passport"
+        match:
+          type: number
+          description: Match percentage of search query
+          example: 0.92
     PalestinianLegislativeCouncil:
       properties:
         entityID:
@@ -1313,6 +1329,10 @@ components:
         sourceInfoURL:
           type: string
           example: 'http://bit.ly/2tjOLpx'
+        match:
+          type: number
+          description: Match percentage of search query
+          example: 0.92
     CAPTAList:
       properties:
         entityID:
@@ -1367,6 +1387,10 @@ components:
             - "RU, 1027700159497, Registration Number"
             - "RU, 29292940, Government Gazette Number"
             - "MOSWRUMM, SWIFT/BIC"
+        match:
+          type: number
+          description: Match percentage of search query
+          example: 0.92
     ITARDebarred:
       properties:
         entityID:
@@ -1391,6 +1415,10 @@ components:
         sourceInfoURL:
           type: string
           example: "http://bit.ly/307FuRQ"
+        match:
+          type: number
+          description: Match percentage of search query
+          example: 0.92
     NonSDNChineseMilitaryIndustrialComplex:
       properties:
         entityID:
@@ -1443,6 +1471,10 @@ components:
           example:
             - "Proven Honour Capital Ltd, Issuer Name"
             - "XS1233275194, ISIN"
+        match:
+          type: number
+          description: Match percentage of search query
+          example: 0.92
     NonSDNMenuBasedSanctionsList:
       properties:
         EntityID:
@@ -1495,6 +1527,10 @@ components:
             - "RU, 1027700167110, Registration Number"
             - "RU, 09807684, Government Gazette Number"
             - "RU, 7744001497, Tax ID No."
+        match:
+          type: number
+          description: Match percentage of search query
+          example: 0.92
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       properties:
