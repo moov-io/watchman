@@ -90,7 +90,9 @@ func (dl *Downloader) GetFiles(initialDir string, namesAndSources map[string]str
 		for i := range localFiles {
 			if strings.EqualFold(filepath.Base(localFiles[i].Name()), name) {
 				found = true
+				mu.Lock()
 				out = append(out, filepath.Join(dir, localFiles[i].Name()))
+				mu.Unlock()
 				break
 			}
 		}
