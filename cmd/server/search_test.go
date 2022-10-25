@@ -458,6 +458,20 @@ func TestJaroWinkler(t *testing.T) {
 	}
 }
 
+func TestJaroWinklerWithFavoritism(t *testing.T) {
+	favoritism := 1.0
+	delta := 0.01
+
+	score := jaroWinklerWithFavoritism("Vladimir Putin", "PUTIN, Vladimir Vladimirovich", favoritism)
+	require.InDelta(t, score, 1.00, delta)
+
+	score = jaroWinklerWithFavoritism("nicolas, maduro moros", "nicolás maduro", 0.25)
+	require.InDelta(t, score, 0.96, delta)
+
+	score = jaroWinklerWithFavoritism("Vladimir Putin", "A.I.C. SOGO KENKYUSHO", favoritism)
+	require.InDelta(t, score, 0.00, delta)
+}
+
 func TestJaroWinklerErr(t *testing.T) {
 	v := jaroWinkler("", "hello")
 	eql(t, "NaN #1", v, 0.0)

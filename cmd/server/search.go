@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"sort"
 	"strconv"
@@ -638,6 +639,10 @@ func readInt(override string, value int) int {
 //
 // For more details see https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance
 func jaroWinkler(s1, s2 string) float64 {
+	return jaroWinklerWithFavoritism(s1, s2, exactMatchFavoritism)
+}
+
+func jaroWinklerWithFavoritism(s1, s2 string, favoritism float64) float64 {
 	maxMatch := func(word string, parts []string) float64 {
 		if len(parts) == 0 {
 			return 0.0
@@ -661,7 +666,7 @@ func jaroWinkler(s1, s2 string) float64 {
 	for i := range s1Parts {
 		max := maxMatch(s1Parts[i], s2Parts)
 		if max >= 1.0 {
-			max += exactMatchFavoritism
+			max += favoritism
 		}
 		scores = append(scores, max)
 	}
@@ -677,7 +682,7 @@ func jaroWinkler(s1, s2 string) float64 {
 		sum += scores[i]
 	}
 
-	return sum / float64(len(scores))
+	return math.Min(sum/float64(len(scores)), 1.00)
 }
 
 // extractIDFromRemark attempts to parse out a National ID or similar governmental ID value
