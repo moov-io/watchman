@@ -353,15 +353,33 @@ func searchViaAddressAndName(logger log.Logger, searcher *searcher, name string,
 
 		limit, minMatch := extractSearchLimit(r), extractSearchMinMatch(r)
 
-		resp := &searchResponse{
-			RefreshedAt: searcher.lastRefreshedAt,
-		}
-
-		resp.SDNs = searcher.TopSDNs(limit, minMatch, name, keepSDN(buildFilterRequest(r.URL)))
+		sdns := searcher.TopSDNs(limit, minMatch, name, keepSDN(buildFilterRequest(r.URL)))
 
 		compares := buildAddressCompares(req)
 		filtered := searcher.FilterCountries(req.Country)
-		resp.Addresses = TopAddressesFn(limit, minMatch, filtered, multiAddressCompare(compares...))
+		addresses := TopAddressesFn(limit, minMatch, filtered, multiAddressCompare(compares...))
+
+		resp := &searchResponse{
+			SDNs:      sdns,
+			AltNames:  searcher.TopAltNames(limit, minMatch, name),
+			Addresses: addresses,
+
+			DeniedPersons:                          searcher.TopDPs(limit, minMatch, name),
+			BISEntities:                            searcher.TopBISEntities(limit, minMatch, name),
+			MilitaryEndUsers:                       searcher.TopMEUs(limit, minMatch, name),
+			SectoralSanctions:                      searcher.TopSSIs(limit, minMatch, name),
+			Unverified:                             searcher.TopUVLs(limit, minMatch, name),
+			NonproliferationSanctions:              searcher.TopISNs(limit, minMatch, name),
+			ForeignSanctionsEvaders:                searcher.TopFSEs(limit, minMatch, name),
+			PalestinianLegislativeCouncil:          searcher.TopPLCs(limit, minMatch, name),
+			CaptaList:                              searcher.TopCAPs(limit, minMatch, name),
+			ITARDebarred:                           searcher.TopDTCs(limit, minMatch, name),
+			NonSDNChineseMilitaryIndustrialComplex: searcher.TopCMICs(limit, minMatch, name),
+			NonSDNMenuBasedSanctionsList:           searcher.TopNS_MBS(limit, minMatch, name),
+
+			// Metadata
+			RefreshedAt: searcher.lastRefreshedAt,
+		}
 
 		// record Prometheus metrics
 		if len(resp.SDNs) > 0 && len(resp.Addresses) > 0 {
@@ -404,10 +422,10 @@ func searchByRemarksID(logger log.Logger, searcher *searcher, id string) http.Ha
 	}
 }
 
-func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.HandlerFunc {
+func searchByName(logger log.Logger, searcher *searcher, name string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		nameSlug = strings.TrimSpace(nameSlug)
-		if nameSlug == "" {
+		name = strings.TrimSpace(name)
+		if name == "" {
 			moovhttp.Problem(w, errNoSearchParams)
 			return
 		}
@@ -416,7 +434,7 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 		minMatch := extractSearchMinMatch(r)
 
 		// Grab the SDN's and then filter any out based on query params
-		sdns := searcher.TopSDNs(limit, minMatch, nameSlug, keepSDN(buildFilterRequest(r.URL)))
+		sdns := searcher.TopSDNs(limit, minMatch, name, keepSDN(buildFilterRequest(r.URL)))
 
 		// record Prometheus metrics
 		if len(sdns) > 0 {
@@ -428,13 +446,22 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(&searchResponse{
-			// OFAC
-			SDNs:              sdns,
-			AltNames:          searcher.TopAltNames(limit, minMatch, nameSlug),
-			SectoralSanctions: searcher.TopSSIs(limit, minMatch, nameSlug),
-			// BIS
-			DeniedPersons: searcher.TopDPs(limit, minMatch, nameSlug),
-			BISEntities:   searcher.TopBISEntities(limit, minMatch, nameSlug),
+			SDNs:     sdns,
+			AltNames: searcher.TopAltNames(limit, minMatch, name),
+
+			DeniedPersons:                          searcher.TopDPs(limit, minMatch, name),
+			BISEntities:                            searcher.TopBISEntities(limit, minMatch, name),
+			MilitaryEndUsers:                       searcher.TopMEUs(limit, minMatch, name),
+			SectoralSanctions:                      searcher.TopSSIs(limit, minMatch, name),
+			Unverified:                             searcher.TopUVLs(limit, minMatch, name),
+			NonproliferationSanctions:              searcher.TopISNs(limit, minMatch, name),
+			ForeignSanctionsEvaders:                searcher.TopFSEs(limit, minMatch, name),
+			PalestinianLegislativeCouncil:          searcher.TopPLCs(limit, minMatch, name),
+			CaptaList:                              searcher.TopCAPs(limit, minMatch, name),
+			ITARDebarred:                           searcher.TopDTCs(limit, minMatch, name),
+			NonSDNChineseMilitaryIndustrialComplex: searcher.TopCMICs(limit, minMatch, name),
+			NonSDNMenuBasedSanctionsList:           searcher.TopNS_MBS(limit, minMatch, name),
+
 			// Metadata
 			RefreshedAt: searcher.lastRefreshedAt,
 		})
