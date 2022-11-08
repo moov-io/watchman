@@ -1,4 +1,4 @@
-package eucls
+package csl
 
 // CLS - Consolidated List Sanctions from European Union
 // TODO: does this need to be in csl (ask Adam from moov)
@@ -12,24 +12,25 @@ package eucls
 // query: ?token=dG9rZW4tMjAxNw
 
 // struct to hold the rows from the csv data
-type EUCLS map[string]EUCLSRow
+type EUCSL map[int][]*EUCSLRow
 
-type EUCLSRow struct {
+type EUCSLRow struct {
 	FileGenerationDate string
 	Entity             *Entity
+	NameAlias          *NameAlias
 	Address            *Address
 	BirthDate          *BirthDate
 	Identification     *Identification
 }
 
 type Entity struct {
-	LogicalID          int64
-	ReferenceNumber    string
+	LogicalID          int
+	ReferenceNumber    string // EntityNumber
 	UnitiedNationsID   string
 	DesignationDate    string
 	DesignationDetails string
-	Remark             string
-	SubjectType        *SubjectType
+	Remark             string       // Remark - other remarks exist but this one is most pertinent
+	SubjectType        *SubjectType // Type
 	Regulation         *Regulation
 }
 type SubjectType struct {
@@ -38,46 +39,46 @@ type SubjectType struct {
 }
 type Regulation struct {
 	Type               string
-	Organization       string
+	OrganizationType   string
 	PublicationDate    string
 	EntryInfoForceDate string
 	NumberTitle        string
 	Programme          string
-	PublicationURL     string
+	PublicationURL     string // SourceListURL
 }
 
-type NameAlias struct {
+type NameAlias struct { // AltNames
 	LastName           string
 	FirstName          string
 	MiddleName         string
-	WholeName          string
+	WholeName          string // Name
 	NameLanguage       string
 	Gender             string
-	Title              string
+	Title              string // Title
 	Function           string
 	LogicalID          int64
 	RegulationLanguage string
 	Remark             string
 	Regulation         *Regulation
 }
-type Address struct {
-	City               string
-	Street             string
-	PoBox              string
-	ZipCode            string
+type Address struct { // addresses
+	City               string // keep
+	Street             string // keep
+	PoBox              string // keep
+	ZipCode            string // keep
 	Region             string
 	Place              string
 	AsAtListingTime    string
 	ContactInfo        string
 	CountryIso2code    string
-	CountryDescription string
+	CountryDescription string // keep
 	LogicalID          int64
 	RegulationLanguage string
 	Remark             string
 	Regulation         *Regulation
 }
 type BirthDate struct {
-	BirthDate          string
+	BirthDate          string // keep
 	Day                int64
 	Month              int64
 	Year               int64
@@ -88,9 +89,9 @@ type BirthDate struct {
 	ZipCode            string
 	Region             string
 	Place              string
-	City               string
+	City               string // keep?
 	CountryIso2code    string
-	CountryDescription string
+	CountryDescription string // Nationality?
 	LogicalID          int64
 	Regulation         *Regulation
 }
@@ -106,8 +107,8 @@ type Identification struct {
 	Diplomatic         string // TODO: not sure about this field
 	IssuedBy           string
 	IssuedDate         string
-	ValidFrom          string
-	ValidTo            string
+	ValidFrom          string // StartDate
+	ValidTo            string // EndDate
 	NameOnDocument     string
 	TypeCode           string
 	TypeDescription    string
@@ -119,14 +120,40 @@ type Identification struct {
 }
 
 // header indicies
-const ()
+const (
+	FileGenerationDateIdx             = 0
+	EntityLogicalIdx                  = 1
+	ReferenceNumberIdx                = 2
+	EntityRemarkIdx                   = 6
+	EntitySubjectTypeIdx              = 8
+	EntityRegulationPublicationURLIdx = 15
 
-// TODO: need function to merge the like rows based on the Entity_LogicalId
-func mergeRowsByLogicalID(rows []EUCLSRow) EUCLS {
-	cls := make(EUCLS)
-	// using a map for constant lookups (if possible)
-	// append to the map every time a new lookup for entity logical id is found
-	// otherwise
+	NameAliasWholeNameIdx = 19
+	NameAliasTitleIdx     = 22
 
-	return cls
+	AddressCityIdx               = 34
+	AddressStreetIdx             = 35
+	AddressPoBoxIdx              = 36
+	AddressZipCodeIdx            = 37
+	AddressCountryDescriptionIdx = 43
+
+	BirthDateIdx        = 54
+	BirthDateCityIdx    = 65
+	BirthDateCountryIdx = 67
+
+	IdentificationValidFromIdx = 86
+	IdentificationValidToIdx   = 87
+)
+
+func NewEUCSLRow() *EUCSLRow {
+	row := new(EUCSLRow)
+	row.Entity = new(Entity)
+	row.Entity.SubjectType = new(SubjectType)
+	row.Entity.Regulation = new(Regulation)
+	row.NameAlias = new(NameAlias)
+	row.Address = new(Address)
+	row.BirthDate = new(BirthDate)
+	row.Identification = new(Identification)
+
+	return row
 }
