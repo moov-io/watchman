@@ -13,8 +13,10 @@ import (
 	"github.com/moov-io/watchman/pkg/download"
 )
 
+// where can I get a new token from?
 const uri = "https://webgate.ec.europa.eu/fsd/fsf/public/files/csvFullSanctionsList_1_1/content?token=dG9rZW4tMjAxNw"
 
+// TODO: env???
 var (
 	euCSLDownloadTemplate = func() string {
 		if w := os.Getenv("EU_CSL_DOWNLOAD_TEMPLATE"); w != "" {

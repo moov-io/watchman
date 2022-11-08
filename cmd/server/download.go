@@ -250,7 +250,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	dps := precomputeDPs(deniedPersons, s.pipe)
 
 	// TODO: we need to grab the EU data here as well and save it to the struct
-	euCSL, err := euCSLRecords(s.logger, initialDir)
+	_, err = euCSLRecords(s.logger, initialDir)
 	if err != nil {
 		lastDataRefreshFailure.WithLabelValues("EUCSL").Set(float64(time.Now().Unix()))
 		stats.Errors = append(stats.Errors, fmt.Errorf("EUCSL: %v", err))
@@ -292,7 +292,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	stats.ChineseMilitaryIndustrialComplex = len(cmics)
 	stats.NonSDNMenuBasedSanctions = len(ns_mbss)
 
-	stats.EUCSL = len(euCSL)
+	// stats.EUCSL = len(euCSL)
 
 	// record prometheus metrics
 	lastDataRefreshCount.WithLabelValues("SDNs").Set(float64(len(sdns)))
@@ -309,7 +309,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	lastDataRefreshCount.WithLabelValues("CMICs").Set(float64(len(cmics)))
 	lastDataRefreshCount.WithLabelValues("NS_MBSs").Set(float64(len(ns_mbss)))
 
-	lastDataRefreshCount.WithLabelValues("EUCSL").Set(float64(len(euCSL)))
+	// lastDataRefreshCount.WithLabelValues("EUCSL").Set(float64(len(euCSL)))
 
 	if len(stats.Errors) > 0 {
 		return stats, stats
@@ -336,7 +336,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	s.CMICs = cmics
 	s.NS_MBSs = ns_mbss
 	//EUCSL
-	s.EUCSL = euCSL
+	// s.EUCSL = euCSL
 	// metadata
 	s.lastRefreshedAt = stats.RefreshedAt
 	s.Unlock()
