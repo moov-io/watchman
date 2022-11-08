@@ -50,6 +50,7 @@ func init() {
 // DownloadStats holds counts for each type of list data parsed from files and a
 // timestamp of when the download happened.
 type DownloadStats struct {
+	// TODO: include EU - Consolidated List of Sanctions (CLS)
 	// US Office of Foreign Assets Control (OFAC)
 	SDNs      int `json:"SDNs"`
 	Alts      int `json:"altNames"`
@@ -234,6 +235,8 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	}
 	dps := precomputeDPs(deniedPersons, s.pipe)
 
+	// TODO: we need to grab the EU data here as well and save it to the struct
+	// csl records from US downloaded here
 	consolidatedLists, err := cslRecords(s.logger, initialDir)
 	if err != nil {
 		lastDataRefreshFailure.WithLabelValues("CSL").Set(float64(time.Now().Unix()))

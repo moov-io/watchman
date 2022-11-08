@@ -31,9 +31,11 @@ var (
 	}, []string{"type"})
 )
 
+// TODO: modify existing search endpoint with additional eu info and add an eu only endpoint
 func addSearchRoutes(logger log.Logger, r *mux.Router, searcher *searcher) {
 	r.Methods("GET").Path("/search").HandlerFunc(search(logger, searcher))
 	r.Methods("GET").Path("/search/us-csl").HandlerFunc(searchUSCSL(logger, searcher))
+	r.Methods("GET").Path("/search/eu-csl").HandlerFunc(searchEUCSL(logger, searcher))
 }
 
 func extractSearchLimit(r *http.Request) int {
@@ -260,6 +262,8 @@ func searchViaQ(logger log.Logger, searcher *searcher, name string) http.Handler
 // searchGather performs an inmem search with *searcher and mutates *searchResponse by setting a specific field
 type searchGather func(searcher *searcher, filters filterRequest, limit int, minMatch float64, name string, resp *searchResponse)
 
+// TODO: this could be refactored into function block that returns these
+// generateAllGatherings()
 var (
 	gatherings = append([]searchGather{
 		// OFAC SDN Search
@@ -285,6 +289,7 @@ var (
 		},
 	}, cslGatherings...)
 
+	// TODO: add a block for eu - cls
 	// Consolidated Screening List Results
 	cslGatherings = []searchGather{
 		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
@@ -321,6 +326,8 @@ var (
 			resp.NonSDNMenuBasedSanctionsList = s.TopNS_MBS(limit, minMatch, name)
 		},
 	}
+
+	euClsGatherings = []searchGather{}
 )
 
 func buildFullSearchResponse(searcher *searcher, filters filterRequest, limit int, minMatch float64, name string) *searchResponse {
