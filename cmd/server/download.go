@@ -201,6 +201,20 @@ func cslRecords(logger log.Logger, initialDir string) (*csl.CSL, error) {
 	return cslRecords, err
 }
 
+func euCSLRecords(logger log.Logger, initialDir string) (csl.EUCSL, error) {
+	file, err := csl.DownloadEU(logger, initialDir)
+	if err != nil {
+		logger.Warn().LogErrorf("skipping CSL download: %v", err)
+		// no error to return because we skip the download
+		return nil, nil
+	}
+	cslRecords, err := csl.ReadEUFile(file)
+	if err != nil {
+		return nil, err
+	}
+	return cslRecords, err
+}
+
 // refreshData reaches out to the various websites to download the latest
 // files, runs each list's parser, and index data for searches.
 func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
@@ -236,6 +250,11 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	dps := precomputeDPs(deniedPersons, s.pipe)
 
 	// TODO: we need to grab the EU data here as well and save it to the struct
+	euCSL, err := euCSLRecords(s.logger, initialDir)
+	if err != nil {
+		lastDataRefreshFailure.WithLabelValues("EUCSL").Set(float64(time.Now().Unix()))
+		stats.Errors = append(stats.Errors, fmt.Errorf("EUCSL: %v", err))
+	}
 	// csl records from US downloaded here
 	consolidatedLists, err := cslRecords(s.logger, initialDir)
 	if err != nil {
@@ -273,6 +292,8 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	stats.ChineseMilitaryIndustrialComplex = len(cmics)
 	stats.NonSDNMenuBasedSanctions = len(ns_mbss)
 
+	stats.EUCSL = len(euCSL)
+
 	// record prometheus metrics
 	lastDataRefreshCount.WithLabelValues("SDNs").Set(float64(len(sdns)))
 	lastDataRefreshCount.WithLabelValues("SSIs").Set(float64(len(ssis)))
@@ -287,6 +308,8 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	lastDataRefreshCount.WithLabelValues("DTCs").Set(float64(len(dtcs)))
 	lastDataRefreshCount.WithLabelValues("CMICs").Set(float64(len(cmics)))
 	lastDataRefreshCount.WithLabelValues("NS_MBSs").Set(float64(len(ns_mbss)))
+
+	lastDataRefreshCount.WithLabelValues("EUCSL").Set(float64(len(euCSL)))
 
 	if len(stats.Errors) > 0 {
 		return stats, stats
@@ -312,6 +335,8 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	s.DTCs = dtcs
 	s.CMICs = cmics
 	s.NS_MBSs = ns_mbss
+	//EUCSL
+	s.EUCSL = euCSL
 	// metadata
 	s.lastRefreshedAt = stats.RefreshedAt
 	s.Unlock()
