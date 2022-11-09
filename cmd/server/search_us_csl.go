@@ -198,3 +198,14 @@ func (s *searcher) TopNS_MBS(limit int, minMatch float64, name string) []*Result
 
 	return topResults[csl.NS_MBS](limit, minMatch, name, s.NS_MBSs)
 }
+
+// TopEUCSL searches the Non-SDN Menu Based Sanctions list by Name and Alias
+func (s *searcher) TopEUCSL(limit int, minMatch float64, name string) []*Result[csl.EUCSLRow] {
+	s.RLock()
+	defer s.RUnlock()
+
+	s.Gate.Start()
+	defer s.Gate.Done()
+
+	return topResults[csl.EUCSLRow](limit, minMatch, name, s.EUCSL)
+}

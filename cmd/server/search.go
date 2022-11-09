@@ -59,6 +59,7 @@ type searcher struct {
 	NS_MBSs          []*Result[csl.NS_MBS]
 
 	// EU Consolidated List of Sactions
+	EUCSL []*Result[csl.EUCSLRow]
 
 	// metadata
 	lastRefreshedAt time.Time

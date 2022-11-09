@@ -12,15 +12,17 @@ package csl
 // query: ?token=dG9rZW4tMjAxNw
 
 // struct to hold the rows from the csv data
-type EUCSL map[int][]*EUCSLRow
+type EUCSL map[int]*EUCSLRow
+
+// type EUCSLSheet []*EUCSLRow
 
 type EUCSLRow struct {
 	FileGenerationDate string
 	Entity             *Entity
-	NameAlias          *NameAlias
-	Address            *Address
-	BirthDate          *BirthDate
-	Identification     *Identification
+	NameAliases        []*NameAlias
+	Addresses          []*Address
+	BirthDates         []*BirthDate
+	Identifications    []*Identification
 }
 
 type Entity struct {
@@ -150,10 +152,10 @@ func NewEUCSLRow() *EUCSLRow {
 	row.Entity = new(Entity)
 	row.Entity.SubjectType = new(SubjectType)
 	row.Entity.Regulation = new(Regulation)
-	row.NameAlias = new(NameAlias)
-	row.Address = new(Address)
-	row.BirthDate = new(BirthDate)
-	row.Identification = new(Identification)
+	row.NameAliases = make([]*NameAlias, 0)
+	row.Addresses = make([]*Address, 0)
+	row.BirthDates = make([]*BirthDate, 0)
+	row.Identifications = make([]*Identification, 0)
 
 	return row
 }

@@ -170,6 +170,9 @@ type searchResponse struct {
 	NonSDNChineseMilitaryIndustrialComplex []*Result[csl.CMIC]   `json:"nonSDNChineseMilitaryIndustrialComplex"`
 	NonSDNMenuBasedSanctionsList           []*Result[csl.NS_MBS] `json:"nonSDNMenuBasedSanctionsList"`
 
+	// EU - Consolidated Sanctions List
+	EUCSL []*Result[csl.EUCSLRow] `json:"euConsolidatedSanctionsList"`
+
 	// Metadata
 	RefreshedAt time.Time `json:"refreshedAt"`
 }
@@ -262,10 +265,8 @@ func searchViaQ(logger log.Logger, searcher *searcher, name string) http.Handler
 // searchGather performs an inmem search with *searcher and mutates *searchResponse by setting a specific field
 type searchGather func(searcher *searcher, filters filterRequest, limit int, minMatch float64, name string, resp *searchResponse)
 
-// TODO: this could be refactored into function block that returns these
-// generateAllGatherings()
 var (
-	gatherings = append([]searchGather{
+	gatherings = []searchGather{
 		// OFAC SDN Search
 		func(s *searcher, filters filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			sdns := s.FindSDNsByRemarksID(limit, name)
@@ -287,9 +288,8 @@ var (
 		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			resp.DeniedPersons = s.TopDPs(limit, minMatch, name)
 		},
-	}, cslGatherings...)
+	}
 
-	// TODO: add a block for eu - cls
 	// Consolidated Screening List Results
 	cslGatherings = []searchGather{
 		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
@@ -327,11 +327,22 @@ var (
 		},
 	}
 
-	euClsGatherings = []searchGather{}
+	// eu - consolidated sanctions list
+	euGatherings = []searchGather{
+		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
+			resp.EUCSL = s.TopEUCSL(limit, minMatch, name)
+		},
+	}
 )
 
+func generateAllGatherings() []searchGather {
+	gatherings = append(gatherings, cslGatherings...)
+	gatherings = append(gatherings, euGatherings...)
+	return gatherings
+}
+
 func buildFullSearchResponse(searcher *searcher, filters filterRequest, limit int, minMatch float64, name string) *searchResponse {
-	return buildFullSearchResponseWith(searcher, gatherings, filters, limit, minMatch, name)
+	return buildFullSearchResponseWith(searcher, generateAllGatherings(), filters, limit, minMatch, name)
 }
 
 func buildFullSearchResponseWith(searcher *searcher, searchGatherings []searchGather, filters filterRequest, limit int, minMatch float64, name string) *searchResponse {

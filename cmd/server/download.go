@@ -50,7 +50,6 @@ func init() {
 // DownloadStats holds counts for each type of list data parsed from files and a
 // timestamp of when the download happened.
 type DownloadStats struct {
-	// TODO: include EU - Consolidated List of Sanctions (CLS)
 	// US Office of Foreign Assets Control (OFAC)
 	SDNs      int `json:"SDNs"`
 	Alts      int `json:"altNames"`
@@ -71,6 +70,9 @@ type DownloadStats struct {
 	ITARDebarred                     int `json:"ITARDebarred"`
 	ChineseMilitaryIndustrialComplex int `json:"chineseMilitaryIndustrialComplex"`
 	NonSDNMenuBasedSanctions         int `json:"nonSDNMenuBasedSanctions"`
+
+	// EU Consolidated Sanctions List
+	EUCSL int `json:"EuropeanSanctionsList"`
 
 	Errors      []error   `json:"-"`
 	RefreshedAt time.Time `json:"timestamp"`
@@ -201,7 +203,7 @@ func cslRecords(logger log.Logger, initialDir string) (*csl.CSL, error) {
 	return cslRecords, err
 }
 
-func euCSLRecords(logger log.Logger, initialDir string) (csl.EUCSL, error) {
+func euCSLRecords(logger log.Logger, initialDir string) ([]*csl.EUCSLRow, error) {
 	file, err := csl.DownloadEU(logger, initialDir)
 	if err != nil {
 		logger.Warn().LogErrorf("skipping CSL download: %v", err)
@@ -249,12 +251,13 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	}
 	dps := precomputeDPs(deniedPersons, s.pipe)
 
-	// TODO: we need to grab the EU data here as well and save it to the struct
-	_, err = euCSLRecords(s.logger, initialDir)
+	euConsolidatedList, err := euCSLRecords(s.logger, initialDir)
 	if err != nil {
 		lastDataRefreshFailure.WithLabelValues("EUCSL").Set(float64(time.Now().Unix()))
 		stats.Errors = append(stats.Errors, fmt.Errorf("EUCSL: %v", err))
 	}
+	euCSLs := precomputeCSLEntities[csl.EUCSLRow](euConsolidatedList, s.pipe)
+
 	// csl records from US downloaded here
 	consolidatedLists, err := cslRecords(s.logger, initialDir)
 	if err != nil {
@@ -292,7 +295,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	stats.ChineseMilitaryIndustrialComplex = len(cmics)
 	stats.NonSDNMenuBasedSanctions = len(ns_mbss)
 
-	// stats.EUCSL = len(euCSL)
+	stats.EUCSL = len(euCSLs)
 
 	// record prometheus metrics
 	lastDataRefreshCount.WithLabelValues("SDNs").Set(float64(len(sdns)))
@@ -309,7 +312,8 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	lastDataRefreshCount.WithLabelValues("CMICs").Set(float64(len(cmics)))
 	lastDataRefreshCount.WithLabelValues("NS_MBSs").Set(float64(len(ns_mbss)))
 
-	// lastDataRefreshCount.WithLabelValues("EUCSL").Set(float64(len(euCSL)))
+	// EU CSL
+	lastDataRefreshCount.WithLabelValues("EUCSL").Set(float64(len(euCSLs)))
 
 	if len(stats.Errors) > 0 {
 		return stats, stats
@@ -336,7 +340,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	s.CMICs = cmics
 	s.NS_MBSs = ns_mbss
 	//EUCSL
-	// s.EUCSL = euCSL
+	s.EUCSL = euCSLs
 	// metadata
 	s.lastRefreshedAt = stats.RefreshedAt
 	s.Unlock()

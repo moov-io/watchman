@@ -18,7 +18,6 @@ func TestReadEU(t *testing.T) {
 
 	testLogicalID := 13
 
-	// TODO: add tests for failure cases
 	if euCSL[testLogicalID] == nil {
 		t.Fatalf("expected a record at %d and got nil", testLogicalID)
 	}
@@ -35,51 +34,41 @@ func TestReadEU(t *testing.T) {
 	expectedNameAliasTitle := ""
 
 	// Address
-	expectedAddressCity := ""
-	expectedAddressStreet := ""
-	expectedAddressPoBox := ""
-	expectedAddressZipCode := ""
-	expectedAddressCountryDescription := ""
+	// No address found for this record
 
 	expectedBirthDate := "1937-04-28"
 	expectedBirthCity := "al-Awja, near Tikrit"
 	expectedBirthCountryDescription := "IRAQ"
 
 	assert.Greater(t, len(euCSL), 0)
-	assert.Greater(t, len(euCSL[testLogicalID]), 0)
-	assert.NotNil(t, euCSL[testLogicalID][0].Entity)
-	assert.NotNil(t, euCSL[testLogicalID][0].NameAlias)
-	assert.NotNil(t, euCSL[testLogicalID][0].Address)
-	assert.NotNil(t, euCSL[testLogicalID][0].BirthDate)
-	assert.NotNil(t, euCSL[testLogicalID][0].Identification)
+	assert.NotNil(t, euCSL[testLogicalID].Entity)
+	assert.NotNil(t, euCSL[testLogicalID].NameAliases)
+	assert.NotNil(t, euCSL[testLogicalID].Addresses)
+	assert.NotNil(t, euCSL[testLogicalID].BirthDates)
+	assert.NotNil(t, euCSL[testLogicalID].Identifications)
 
-	assert.Equal(t, euCSL[testLogicalID][0].FileGenerationDate, expectedFileGenerationDate)
+	assert.Equal(t, euCSL[testLogicalID].FileGenerationDate, expectedFileGenerationDate)
 
 	// Entity
-	assert.Equal(t, euCSL[testLogicalID][0].Entity.ReferenceNumber, expectedReferenceNumber)
-	assert.Equal(t, euCSL[testLogicalID][0].Entity.Remark, expectedEntityRemark)
-	assert.Equal(t, euCSL[testLogicalID][0].Entity.SubjectType.ClassificationCode, expectedClassificationCode)
-	assert.Equal(t, euCSL[testLogicalID][0].Entity.Regulation.PublicationURL, expectedPublicationURL)
+	assert.Equal(t, euCSL[testLogicalID].Entity.ReferenceNumber, expectedReferenceNumber)
+	assert.Equal(t, euCSL[testLogicalID].Entity.Remark, expectedEntityRemark)
+	assert.Equal(t, euCSL[testLogicalID].Entity.SubjectType.ClassificationCode, expectedClassificationCode)
+	assert.Equal(t, euCSL[testLogicalID].Entity.Regulation.PublicationURL, expectedPublicationURL)
 
 	// Name Alias
-	assert.Equal(t, euCSL[testLogicalID][0].NameAlias.WholeName, expectedNameAliasWholeName1)
-	assert.Equal(t, euCSL[testLogicalID][1].NameAlias.WholeName, expectedNameAliasWholeName2)
-	assert.Equal(t, euCSL[testLogicalID][2].NameAlias.WholeName, expectedNameAliasWholeName3)
-	assert.Equal(t, euCSL[testLogicalID][0].NameAlias.Title, expectedNameAliasTitle)
+	assert.Equal(t, euCSL[testLogicalID].NameAliases[0].WholeName, expectedNameAliasWholeName1)
+	assert.Equal(t, euCSL[testLogicalID].NameAliases[1].WholeName, expectedNameAliasWholeName2)
+	assert.Equal(t, euCSL[testLogicalID].NameAliases[2].WholeName, expectedNameAliasWholeName3)
+	assert.Equal(t, euCSL[testLogicalID].NameAliases[0].Title, expectedNameAliasTitle)
 
 	// Address
-	assert.Equal(t, euCSL[testLogicalID][0].Address.City, expectedAddressCity)
-	assert.Equal(t, euCSL[testLogicalID][0].Address.Street, expectedAddressStreet)
-	assert.Equal(t, euCSL[testLogicalID][0].Address.PoBox, expectedAddressPoBox)
-	assert.Equal(t, euCSL[testLogicalID][0].Address.ZipCode, expectedAddressZipCode)
-	assert.Equal(t, euCSL[testLogicalID][0].Address.CountryDescription, expectedAddressCountryDescription)
+	assert.Len(t, euCSL[testLogicalID].Addresses, 0)
 
 	// BirthDate
-	assert.Equal(t, euCSL[testLogicalID][3].BirthDate.BirthDate, expectedBirthDate)
-	assert.Equal(t, euCSL[testLogicalID][3].BirthDate.City, expectedBirthCity)
-	assert.Equal(t, euCSL[testLogicalID][3].BirthDate.CountryDescription, expectedBirthCountryDescription)
+	assert.Equal(t, euCSL[testLogicalID].BirthDates[0].BirthDate, expectedBirthDate)
+	assert.Equal(t, euCSL[testLogicalID].BirthDates[0].City, expectedBirthCity)
+	assert.Equal(t, euCSL[testLogicalID].BirthDates[0].CountryDescription, expectedBirthCountryDescription)
 
 	// Identification
-	assert.Equal(t, euCSL[testLogicalID][0].Identification.ValidFrom, "")
-	assert.Equal(t, euCSL[testLogicalID][0].Identification.ValidTo, "")
+	assert.Len(t, euCSL[testLogicalID].Identifications, 0)
 }
