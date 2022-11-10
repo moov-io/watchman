@@ -143,16 +143,23 @@ func (dl *Downloader) createLogger(filename, downloadURL string) log.Logger {
 func (dl *Downloader) retryDownload(dir, filename, downloadURL string) error {
 	// Allow a couple retries for various sources (some are flakey)
 	for i := 0; i < 3; i++ {
-		req, err := http.NewRequest("GET", downloadURL, nil)
+		req, err := http.NewRequest(http.MethodGet, downloadURL, nil)
 		if err != nil {
 			return dl.Logger.Error().LogErrorf("error building HTTP request: %v", err).Err()
 		}
 		req.Header.Set("User-Agent", fmt.Sprintf("moov-io/watchman:%v", watchman.Version))
+		// in order to get passed europes 406 (Not Accepted)
+		req.Header.Set("accept-language", "en-US,en;q=0.9")
 
 		resp, err := dl.HTTP.Do(req)
 		if err != nil {
+			fmt.Println("err while doing client request: ", err)
 			time.Sleep(100 * time.Millisecond)
 			continue // retry
+		}
+
+		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+			fmt.Println("we experienced a problem in the dl: ", resp.StatusCode)
 		}
 
 		// Copy resp.Body into a file in our temp dir

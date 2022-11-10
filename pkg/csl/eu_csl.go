@@ -17,108 +17,108 @@ type EUCSL map[int]*EUCSLRow
 // type EUCSLSheet []*EUCSLRow
 
 type EUCSLRow struct {
-	FileGenerationDate string
-	Entity             *Entity
-	NameAliases        []*NameAlias
-	Addresses          []*Address
-	BirthDates         []*BirthDate
-	Identifications    []*Identification
+	FileGenerationDate string            `json:"fileGenerationDate"`
+	Entity             *Entity           `json:"entity"`
+	NameAliases        []*NameAlias      `json:"nameAliases"`
+	Addresses          []*Address        `json:"addresses"`
+	BirthDates         []*BirthDate      `json:"birthDates"`
+	Identifications    []*Identification `json:"identifications"`
 }
 
 type Entity struct {
-	LogicalID          int
-	ReferenceNumber    string // EntityNumber
-	UnitiedNationsID   string
-	DesignationDate    string
-	DesignationDetails string
-	Remark             string       // Remark - other remarks exist but this one is most pertinent
-	SubjectType        *SubjectType // Type
-	Regulation         *Regulation
+	LogicalID       int    `json:"logicalId"`
+	ReferenceNumber string `json:"referenceNumber"`
+	// UnitiedNationsID   string
+	// DesignationDate    string
+	// DesignationDetails string
+	Remark      string       `json:"remark"`
+	SubjectType *SubjectType `json:"subjectType"`
+	Regulation  *Regulation
 }
 type SubjectType struct {
-	SingleLetter       string
-	ClassificationCode string
+	// SingleLetter       string
+	ClassificationCode string `json:"classificationCode"`
 }
 type Regulation struct {
-	Type               string
-	OrganizationType   string
-	PublicationDate    string
-	EntryInfoForceDate string
-	NumberTitle        string
-	Programme          string
-	PublicationURL     string // SourceListURL
+	// Type               string
+	// OrganizationType   string
+	// PublicationDate    string
+	// EntryInfoForceDate string
+	// NumberTitle        string
+	// Programme          string
+	PublicationURL string `json:"publicationURL"`
 }
 
 type NameAlias struct { // AltNames
-	LastName           string
-	FirstName          string
-	MiddleName         string
-	WholeName          string // Name
-	NameLanguage       string
-	Gender             string
-	Title              string // Title
-	Function           string
-	LogicalID          int64
-	RegulationLanguage string
-	Remark             string
-	Regulation         *Regulation
+	// LastName           string
+	// FirstName          string
+	// MiddleName         string
+	WholeName string `json:"wholeName"`
+	// NameLanguage       string
+	// Gender             string
+	Title string `json:"title"`
+	// Function           string
+	// LogicalID          int64
+	// RegulationLanguage string
+	// Remark             string
+	// Regulation         *Regulation
 }
 type Address struct { // addresses
-	City               string // keep
-	Street             string // keep
-	PoBox              string // keep
-	ZipCode            string // keep
-	Region             string
-	Place              string
-	AsAtListingTime    string
-	ContactInfo        string
-	CountryIso2code    string
+	City    string `json:"city"`
+	Street  string `json:"street"`
+	PoBox   string `json:"poBox"`
+	ZipCode string `json:"zipCode"`
+	// Region             string
+	// Place              string
+	// AsAtListingTime    string
+	// ContactInfo        string
+	// CountryIso2code    string
 	CountryDescription string // keep
-	LogicalID          int64
-	RegulationLanguage string
-	Remark             string
-	Regulation         *Regulation
+	// LogicalID          int64
+	// RegulationLanguage string
+	// Remark             string
+	// Regulation         *Regulation
 }
 type BirthDate struct {
-	BirthDate          string // keep
-	Day                int64
-	Month              int64
-	Year               int64
-	YearRangeFrom      string
-	YearRangeTo        string
-	Circa              string
-	CaldendarType      string // TODO: this could be an enum
-	ZipCode            string
-	Region             string
-	Place              string
-	City               string // keep?
-	CountryIso2code    string
-	CountryDescription string // Nationality?
-	LogicalID          int64
-	Regulation         *Regulation
+	BirthDate string // keep
+	// Day                int64
+	// Month              int64
+	// Year               int64
+	// YearRangeFrom      string
+	// YearRangeTo        string
+	// Circa              string
+	// CaldendarType      string // TODO: this could be an enum
+	// ZipCode            string
+	// Region             string
+	// Place              string
+	City string `json:"city"`
+	// CountryIso2code    string
+	CountryDescription string `json:"countryDescription"`
+	// LogicalID          int64
+	// Regulation         *Regulation
 }
 
 type Identification struct {
-	Regulation         *Regulation
-	Number             int64
-	KnownExpired       bool
-	KnownFalse         bool
-	ReportedLost       bool
-	RevokedByIssuer    bool
-	LogicalID          int64
-	Diplomatic         string // TODO: not sure about this field
-	IssuedBy           string
-	IssuedDate         string
-	ValidFrom          string // StartDate
-	ValidTo            string // EndDate
-	NameOnDocument     string
-	TypeCode           string
-	TypeDescription    string
-	Region             string
-	CountryIso2code    string
-	CountryDescription string
-	RegulationLanguage string
-	Remark             string
+	// Regulation         *Regulation
+	// Number             int64
+	// KnownExpired       bool
+	// KnownFalse         bool
+	// ReportedLost       bool
+	// RevokedByIssuer    bool
+	// LogicalID          int64
+	// Diplomatic         string // TODO: not sure about this field
+	// IssuedBy           string
+	// IssuedDate         string
+	ValidFrom string `json:"validFrom"`
+	ValidTo   string `json:"validTo"`
+	// NameOnDocument     string
+	// TypeCode           string
+	// TypeDescription    string
+	// Region             string
+	// CountryIso2code    string
+	// CountryDescription string
+	// RegulationLanguage string
+	// Remark             string
 }
 
 // header indicies

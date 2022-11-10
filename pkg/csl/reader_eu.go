@@ -9,27 +9,36 @@ import (
 	"strconv"
 )
 
-func ReadEUFile(path string) ([]*EUCSLRow, error) {
+func ReadEUFile(path string) ([]*EUCSLRow, EUCSL, error) {
 	fd, err := os.Open(path)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer fd.Close()
 
-	return ParseEU(fd)
+	rows, rowsMap, err := ParseEU(fd)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return rows, rowsMap, nil
 }
 
-func ParseEU(r io.Reader) ([]*EUCSLRow, error) {
+func ParseEU(r io.Reader) ([]*EUCSLRow, EUCSL, error) {
 	reader := csv.NewReader(r)
+	// sets comma delim to ; and ignores " in non quoted field and size of columns
+	// https://stackoverflow.com/questions/31326659/golang-csv-error-bare-in-non-quoted-field
+	// https://stackoverflow.com/questions/61336787/how-do-i-fix-the-wrong-number-of-fields-with-the-missing-commas-in-csv-file-in
 	reader.Comma = ';'
+	reader.LazyQuotes = true
+	// reader.FieldsPerRecord = -1
 
 	report := make(EUCSL)
 	_, err := reader.Read()
 	if err != nil {
-		fmt.Println("we made an oopsie: ", err)
+		fmt.Println("failed to read csv: ", err)
 	}
-	// TODO: change this back to while
-	for i := 0; i <= 4; i++ {
+	for {
 		record, err := reader.Read()
 		if err != nil {
 			// reached the last line
@@ -42,10 +51,11 @@ func ParseEU(r io.Reader) ([]*EUCSLRow, error) {
 				errors.Is(err, csv.ErrQuote) {
 				continue
 			}
-			return nil, err
+			return nil, nil, err
 		}
 
 		if len(record) <= 1 {
+			fmt.Println("record is <= 1", record)
 			continue // skip empty records
 		}
 
@@ -54,13 +64,11 @@ func ParseEU(r io.Reader) ([]*EUCSLRow, error) {
 		logicalID, _ := strconv.Atoi(record[EntityLogicalIdx])
 		// check if entry does not exist
 		if val, ok := report[logicalID]; !ok {
-			fmt.Println("unmarshalling first row")
 			row := unmarshalFirstEUCSLRow(record)
 
 			report[logicalID] = row
 		} else {
 			// we found an entry in the map and need to append
-			fmt.Println("unmarshalling next row")
 			unmarshalNextEUCSLRow(record, val)
 		}
 
@@ -69,7 +77,7 @@ func ParseEU(r io.Reader) ([]*EUCSLRow, error) {
 	for _, row := range report {
 		totalReport = append(totalReport, row)
 	}
-	return totalReport, nil
+	return totalReport, report, nil
 }
 
 func unmarshalFirstEUCSLRow(csvRecord []string) *EUCSLRow {
@@ -93,7 +101,9 @@ func unmarshalFirstEUCSLRow(csvRecord []string) *EUCSLRow {
 		}
 		newNameAlias.Title = csvRecord[NameAliasTitleIdx]
 	}
-	row.NameAliases = append(row.NameAliases, newNameAlias)
+	if newNameAlias != nil {
+		row.NameAliases = append(row.NameAliases, newNameAlias)
+	}
 
 	var newAddress *Address
 	if csvRecord[AddressCityIdx] != "" {
@@ -168,7 +178,6 @@ func unmarshalFirstEUCSLRow(csvRecord []string) *EUCSLRow {
 }
 
 func unmarshalNextEUCSLRow(csvRecord []string, row *EUCSLRow) {
-
 	// NameAlias
 	var newNameAlias *NameAlias
 	if csvRecord[NameAliasWholeNameIdx] != "" {

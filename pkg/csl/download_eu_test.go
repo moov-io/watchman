@@ -71,10 +71,3 @@ func TestEUDownload_initialDir(t *testing.T) {
 		t.Fatalf("unknown file: %v", file)
 	}
 }
-
-func Test_buildEUDownloadURL_parseError(t *testing.T) {
-	url, err := buildEUDownloadURL("\\\\://api.trade.gov/blah/blah/%s")
-	if err == nil {
-		t.Errorf("expected error, found %s", url)
-	}
-}

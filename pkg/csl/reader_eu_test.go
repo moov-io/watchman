@@ -8,17 +8,21 @@ import (
 )
 
 func TestReadEU(t *testing.T) {
-	euCSL, err := ReadEUFile(filepath.Join("..", "..", "test", "testdata", "eu_csl.csv"))
+	euCSL, euCSLMap, err := ReadEUFile(filepath.Join("..", "..", "test", "testdata", "eu_csl.csv"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if euCSL == nil {
+	if euCSL == nil || euCSLMap == nil {
 		t.Fatal("failed to parse eu_csl.csv")
+	}
+
+	if len(euCSL) == 0 {
+		t.Fatal("failed to convert map to sheet")
 	}
 
 	testLogicalID := 13
 
-	if euCSL[testLogicalID] == nil {
+	if euCSLMap[testLogicalID] == nil {
 		t.Fatalf("expected a record at %d and got nil", testLogicalID)
 	}
 	expectedFileGenerationDate := "28/10/2022"
@@ -41,34 +45,34 @@ func TestReadEU(t *testing.T) {
 	expectedBirthCountryDescription := "IRAQ"
 
 	assert.Greater(t, len(euCSL), 0)
-	assert.NotNil(t, euCSL[testLogicalID].Entity)
-	assert.NotNil(t, euCSL[testLogicalID].NameAliases)
-	assert.NotNil(t, euCSL[testLogicalID].Addresses)
-	assert.NotNil(t, euCSL[testLogicalID].BirthDates)
-	assert.NotNil(t, euCSL[testLogicalID].Identifications)
+	assert.NotNil(t, euCSLMap[testLogicalID].Entity)
+	assert.NotNil(t, euCSLMap[testLogicalID].NameAliases)
+	assert.NotNil(t, euCSLMap[testLogicalID].Addresses)
+	assert.NotNil(t, euCSLMap[testLogicalID].BirthDates)
+	assert.NotNil(t, euCSLMap[testLogicalID].Identifications)
 
-	assert.Equal(t, euCSL[testLogicalID].FileGenerationDate, expectedFileGenerationDate)
+	assert.Equal(t, euCSLMap[testLogicalID].FileGenerationDate, expectedFileGenerationDate)
 
 	// Entity
-	assert.Equal(t, euCSL[testLogicalID].Entity.ReferenceNumber, expectedReferenceNumber)
-	assert.Equal(t, euCSL[testLogicalID].Entity.Remark, expectedEntityRemark)
-	assert.Equal(t, euCSL[testLogicalID].Entity.SubjectType.ClassificationCode, expectedClassificationCode)
-	assert.Equal(t, euCSL[testLogicalID].Entity.Regulation.PublicationURL, expectedPublicationURL)
+	assert.Equal(t, expectedReferenceNumber, euCSLMap[testLogicalID].Entity.ReferenceNumber)
+	assert.Equal(t, expectedEntityRemark, euCSLMap[testLogicalID].Entity.Remark)
+	assert.Equal(t, expectedClassificationCode, euCSLMap[testLogicalID].Entity.SubjectType.ClassificationCode)
+	assert.Equal(t, expectedPublicationURL, euCSLMap[testLogicalID].Entity.Regulation.PublicationURL)
 
 	// Name Alias
-	assert.Equal(t, euCSL[testLogicalID].NameAliases[0].WholeName, expectedNameAliasWholeName1)
-	assert.Equal(t, euCSL[testLogicalID].NameAliases[1].WholeName, expectedNameAliasWholeName2)
-	assert.Equal(t, euCSL[testLogicalID].NameAliases[2].WholeName, expectedNameAliasWholeName3)
-	assert.Equal(t, euCSL[testLogicalID].NameAliases[0].Title, expectedNameAliasTitle)
+	assert.Equal(t, expectedNameAliasWholeName1, euCSLMap[testLogicalID].NameAliases[0].WholeName)
+	assert.Equal(t, expectedNameAliasWholeName2, euCSLMap[testLogicalID].NameAliases[1].WholeName)
+	assert.Equal(t, expectedNameAliasWholeName3, euCSLMap[testLogicalID].NameAliases[2].WholeName)
+	assert.Equal(t, expectedNameAliasTitle, euCSLMap[testLogicalID].NameAliases[0].Title)
 
 	// Address
-	assert.Len(t, euCSL[testLogicalID].Addresses, 0)
+	assert.Len(t, euCSLMap[testLogicalID].Addresses, 0)
 
 	// BirthDate
-	assert.Equal(t, euCSL[testLogicalID].BirthDates[0].BirthDate, expectedBirthDate)
-	assert.Equal(t, euCSL[testLogicalID].BirthDates[0].City, expectedBirthCity)
-	assert.Equal(t, euCSL[testLogicalID].BirthDates[0].CountryDescription, expectedBirthCountryDescription)
+	assert.Equal(t, expectedBirthDate, euCSLMap[testLogicalID].BirthDates[0].BirthDate)
+	assert.Equal(t, expectedBirthCity, euCSLMap[testLogicalID].BirthDates[0].City)
+	assert.Equal(t, expectedBirthCountryDescription, euCSLMap[testLogicalID].BirthDates[0].CountryDescription)
 
 	// Identification
-	assert.Len(t, euCSL[testLogicalID].Identifications, 0)
+	assert.Len(t, euCSLMap[testLogicalID].Identifications, 0)
 }

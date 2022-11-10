@@ -139,6 +139,7 @@ func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo down
 					"DTC":              log.Int(stats.ITARDebarred),
 					"CMIC":             log.Int(stats.ChineseMilitaryIndustrialComplex),
 					"NS_MBS":           log.Int(stats.NonSDNMenuBasedSanctions),
+					"EU_CSL":           log.Int(stats.EUCSL),
 				}).Logf("data refreshed %v ago", time.Since(stats.RefreshedAt))
 			}
 			updates <- stats // send stats for re-search and watch notifications
@@ -210,7 +211,7 @@ func euCSLRecords(logger log.Logger, initialDir string) ([]*csl.EUCSLRow, error)
 		// no error to return because we skip the download
 		return nil, nil
 	}
-	cslRecords, err := csl.ReadEUFile(file)
+	cslRecords, _, err := csl.ReadEUFile(file)
 	if err != nil {
 		return nil, err
 	}
@@ -256,6 +257,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 		lastDataRefreshFailure.WithLabelValues("EUCSL").Set(float64(time.Now().Unix()))
 		stats.Errors = append(stats.Errors, fmt.Errorf("EUCSL: %v", err))
 	}
+
 	euCSLs := precomputeCSLEntities[csl.EUCSLRow](euConsolidatedList, s.pipe)
 
 	// csl records from US downloaded here
@@ -294,7 +296,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	stats.ITARDebarred = len(dtcs)
 	stats.ChineseMilitaryIndustrialComplex = len(cmics)
 	stats.NonSDNMenuBasedSanctions = len(ns_mbss)
-
+	// EU - CSL
 	stats.EUCSL = len(euCSLs)
 
 	// record prometheus metrics
@@ -311,7 +313,6 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	lastDataRefreshCount.WithLabelValues("DTCs").Set(float64(len(dtcs)))
 	lastDataRefreshCount.WithLabelValues("CMICs").Set(float64(len(cmics)))
 	lastDataRefreshCount.WithLabelValues("NS_MBSs").Set(float64(len(ns_mbss)))
-
 	// EU CSL
 	lastDataRefreshCount.WithLabelValues("EUCSL").Set(float64(len(euCSLs)))
 
