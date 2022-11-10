@@ -921,6 +921,56 @@ paths:
       summary: Search US CSL
       tags:
       - Watchman
+  /search/eu-csl:
+    get:
+      description: Search the EU Consolidated Screening List
+      operationId: searchEUCSL
+      parameters:
+      - description: Optional Request ID allows application developer to trace requests
+          through the system's logs
+        explode: false
+        in: header
+        name: X-Request-ID
+        required: false
+        schema:
+          example: 94c825ee
+          type: string
+        style: simple
+      - description: Name which could correspond to an entry on the EU CSL
+        explode: true
+        in: query
+        name: name
+        required: false
+        schema:
+          example: Jane Smith
+          type: string
+        style: form
+      - description: Maximum number of downloads to return sorted by their timestamp
+          in decending order.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          example: 25
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Search'
+          description: SDNs returned from a search
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error occurred, see response body.
+      summary: Search US CSL
+      tags:
+      - Watchman
   /downloads:
     get:
       description: Return list of recent downloads of list data.
@@ -2052,6 +2102,9 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
+    euConsolidatedSanctionsList:
+      properties:
+        ...
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       example:
@@ -2575,6 +2628,10 @@ components:
         nonSDNMenuBasedSanctionsList:
           items:
             $ref: '#/components/schemas/NonSDNMenuBasedSanctionsList'
+          type: array
+        euConsolidatedSanctionsList:
+          items:
+            $ref: '#/components/schemas/euConsolidatedSanctionsList'
           type: array
         refreshedAt:
           format: date-time

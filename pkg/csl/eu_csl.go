@@ -33,7 +33,7 @@ type Entity struct {
 	// DesignationDetails string
 	Remark      string       `json:"remark"`
 	SubjectType *SubjectType `json:"subjectType"`
-	Regulation  *Regulation
+	Regulation  *Regulation  `json:"regulation"`
 }
 type SubjectType struct {
 	// SingleLetter       string
@@ -73,7 +73,7 @@ type Address struct { // addresses
 	// AsAtListingTime    string
 	// ContactInfo        string
 	// CountryIso2code    string
-	CountryDescription string // keep
+	CountryDescription string `json:"countryDescription"`
 	// LogicalID          int64
 	// RegulationLanguage string
 	// Remark             string
