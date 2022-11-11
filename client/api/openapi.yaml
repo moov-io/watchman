@@ -2104,7 +2104,10 @@ components:
           type: number
     euConsolidatedSanctionsList:
       properties:
-        ...
+        fileGenerationDate:
+          type: string
+          example: "28/10/2022"
+        
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       example:

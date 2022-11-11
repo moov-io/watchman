@@ -171,7 +171,7 @@ type searchResponse struct {
 	NonSDNMenuBasedSanctionsList           []*Result[csl.NS_MBS] `json:"nonSDNMenuBasedSanctionsList"`
 
 	// EU - Consolidated Sanctions List
-	EUCSL []*Result[csl.EUCSLRow] `json:"euConsolidatedSanctionsList"`
+	EUCSL []*Result[csl.EUCSLRecord] `json:"euConsolidatedSanctionsList"`
 
 	// Metadata
 	RefreshedAt time.Time `json:"refreshedAt"`
@@ -453,6 +453,8 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 			// BIS
 			DeniedPersons: searcher.TopDPs(limit, minMatch, nameSlug),
 			BISEntities:   searcher.TopBISEntities(limit, minMatch, nameSlug),
+			// EUCSL
+			EUCSL: searcher.TopEUCSL(limit, minMatch, nameSlug),
 			// Metadata
 			RefreshedAt: searcher.lastRefreshedAt,
 		})

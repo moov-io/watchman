@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-func ReadEUFile(path string) ([]*EUCSLRow, EUCSL, error) {
+func ReadEUFile(path string) ([]*EUCSLRecord, EUCSL, error) {
 	fd, err := os.Open(path)
 	if err != nil {
 		return nil, nil, err
@@ -24,14 +24,13 @@ func ReadEUFile(path string) ([]*EUCSLRow, EUCSL, error) {
 	return rows, rowsMap, nil
 }
 
-func ParseEU(r io.Reader) ([]*EUCSLRow, EUCSL, error) {
+func ParseEU(r io.Reader) ([]*EUCSLRecord, EUCSL, error) {
 	reader := csv.NewReader(r)
 	// sets comma delim to ; and ignores " in non quoted field and size of columns
 	// https://stackoverflow.com/questions/31326659/golang-csv-error-bare-in-non-quoted-field
 	// https://stackoverflow.com/questions/61336787/how-do-i-fix-the-wrong-number-of-fields-with-the-missing-commas-in-csv-file-in
 	reader.Comma = ';'
 	reader.LazyQuotes = true
-	// reader.FieldsPerRecord = -1
 
 	report := make(EUCSL)
 	_, err := reader.Read()
@@ -64,20 +63,84 @@ func ParseEU(r io.Reader) ([]*EUCSLRow, EUCSL, error) {
 		logicalID, _ := strconv.Atoi(record[EntityLogicalIdx])
 		// check if entry does not exist
 		if val, ok := report[logicalID]; !ok {
-			row := unmarshalFirstEUCSLRow(record)
+			// creates the inital record
+			row := new(EUCSLRecord)
+			unmarshalRecord(record, row)
 
 			report[logicalID] = row
 		} else {
 			// we found an entry in the map and need to append
-			unmarshalNextEUCSLRow(record, val)
+			unmarshalRecord(record, val)
 		}
 
 	}
-	var totalReport []*EUCSLRow
+	var totalReport []*EUCSLRecord
 	for _, row := range report {
 		totalReport = append(totalReport, row)
 	}
 	return totalReport, report, nil
+}
+
+func unmarshalRecord(csvRecord []string, euCSLRecord *EUCSLRecord) {
+	euCSLRecord.EntityLogicalID, _ = strconv.Atoi(csvRecord[EntityLogicalIdx])
+
+	// entity
+	if csvRecord[FileGenerationDateIdx] != "" {
+		euCSLRecord.FileGenerationDate = csvRecord[FileGenerationDateIdx]
+	}
+	if csvRecord[ReferenceNumberIdx] != "" {
+		euCSLRecord.EntityReferenceNumber = csvRecord[ReferenceNumberIdx]
+	}
+	if csvRecord[EntityRemarkIdx] != "" {
+		euCSLRecord.EntityRemark = csvRecord[EntityRemarkIdx]
+	}
+	if csvRecord[EntitySubjectTypeIdx] != "" {
+		euCSLRecord.EntitySubjectType = csvRecord[EntitySubjectTypeIdx]
+	}
+	if csvRecord[EntityRegulationPublicationURLIdx] != "" {
+		euCSLRecord.EntityPublicationURL = csvRecord[EntityRegulationPublicationURLIdx]
+	}
+
+	// name alias
+	if csvRecord[NameAliasWholeNameIdx] != "" {
+		euCSLRecord.NameAliasWholeNames = append(euCSLRecord.NameAliasWholeNames, csvRecord[NameAliasWholeNameIdx])
+	}
+	if csvRecord[NameAliasTitleIdx] != "" {
+		euCSLRecord.NameAliasTitles = append(euCSLRecord.NameAliasTitles, csvRecord[NameAliasTitleIdx])
+	}
+	// address
+	if csvRecord[AddressCityIdx] != "" {
+		euCSLRecord.AddressCities = append(euCSLRecord.AddressCities, csvRecord[AddressCityIdx])
+	}
+	if csvRecord[AddressStreetIdx] != "" {
+		euCSLRecord.AddressStreets = append(euCSLRecord.AddressStreets, csvRecord[AddressStreetIdx])
+	}
+	if csvRecord[AddressPoBoxIdx] != "" {
+		euCSLRecord.AddressPoBoxes = append(euCSLRecord.AddressPoBoxes, csvRecord[AddressPoBoxIdx])
+	}
+	if csvRecord[AddressZipCodeIdx] != "" {
+		euCSLRecord.AddressZipCodes = append(euCSLRecord.AddressZipCodes, csvRecord[AddressZipCodeIdx])
+	}
+	if csvRecord[AddressCountryDescriptionIdx] != "" {
+		euCSLRecord.AddressCountryDescriptions = append(euCSLRecord.AddressCountryDescriptions, csvRecord[AddressCountryDescriptionIdx])
+	}
+
+	// birthdate
+	if csvRecord[BirthDateIdx] != "" {
+		euCSLRecord.BirthDates = append(euCSLRecord.BirthDates, csvRecord[BirthDateIdx])
+	}
+	if csvRecord[BirthDateCityIdx] != "" {
+		euCSLRecord.BirthCities = append(euCSLRecord.BirthCities, csvRecord[BirthDateCityIdx])
+	}
+	if csvRecord[BirthDateCountryIdx] != "" {
+		euCSLRecord.BirthCountries = append(euCSLRecord.BirthCountries, csvRecord[BirthDateCountryIdx])
+	}
+
+	// identifications
+	if csvRecord[IdentificationValidFromIdx] != "" {
+		euCSLRecord.ValidFromTo = make(map[string]string)
+		euCSLRecord.ValidFromTo[csvRecord[IdentificationValidFromIdx]] = csvRecord[IdentificationValidToIdx]
+	}
 }
 
 func unmarshalFirstEUCSLRow(csvRecord []string) *EUCSLRow {

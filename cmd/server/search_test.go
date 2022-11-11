@@ -330,48 +330,24 @@ func init() {
 		},
 	}, noLogPipeliner)
 
-	eu_cslSearcher.EUCSL = precomputeCSLEntities[csl.EUCSLRow]([]*csl.EUCSLRow{
-		{
-			FileGenerationDate: "28/10/2022",
-			Entity: &csl.Entity{
-				LogicalID:       13,
-				ReferenceNumber: "EU.27.28",
-				Remark:          "(UNSC RESOLUTION 1483)",
-				SubjectType: &csl.SubjectType{
-					ClassificationCode: "person",
-				},
-				Regulation: &csl.Regulation{
-					PublicationURL: "http://eur-lex.europa.eu/LexUriServ/LexUriServ.do?uri=OJ:L:2003:169:0006:0023:EN:PDF",
-				},
-			},
-			NameAliases: []*csl.NameAlias{{
-				WholeName: "Saddam Hussein Al-Tikriti",
-				Title:     "",
-			}, {
-				WholeName: "Abu Ali",
-				Title:     "",
-			}, {
-				WholeName: "Abou Ali",
-				Title:     "",
-			}},
-			Addresses: []*csl.Address{{
-				City:               "test city",
-				Street:             "test street",
-				PoBox:              "test po box",
-				ZipCode:            "test zip",
-				CountryDescription: "test country",
-			}},
-			BirthDates: []*csl.BirthDate{{
-				BirthDate:          "1937-04-28",
-				City:               "al-Awja, near Tikrit",
-				CountryDescription: "IRAQ",
-			}},
-			Identifications: []*csl.Identification{{
-				ValidFrom: "2002",
-				ValidTo:   "2032",
-			}},
-		},
-	}, noLogPipeliner)
+	eu_cslSearcher.EUCSL = precomputeCSLEntities[csl.EUCSLRecord]([]*csl.EUCSLRecord{{
+		FileGenerationDate:         "28/10/2022",
+		EntityLogicalID:            13,
+		EntityRemark:               "(UNSC RESOLUTION 1483)",
+		EntitySubjectType:          "person",
+		EntityPublicationURL:       "http://eur-lex.europa.eu/LexUriServ/LexUriServ.do?uri=OJ:L:2003:169:0006:0023:EN:PDF",
+		EntityReferenceNumber:      "",
+		NameAliasWholeNames:        []string{"Saddam Hussein Al-Tikriti", "Abu Ali", "Abou Ali"},
+		AddressCities:              []string{"test city"},
+		AddressStreets:             []string{"test street"},
+		AddressPoBoxes:             []string{"test po box"},
+		AddressZipCodes:            []string{"test zip"},
+		AddressCountryDescriptions: []string{"test country"},
+		BirthDates:                 []string{"1937-04-28"},
+		BirthCities:                []string{"al-Awja, near Tikrit"},
+		BirthCountries:             []string{"IRAQ"},
+		ValidFromTo:                map[string]string{"2022": "2030"},
+	}}, noLogPipeliner)
 }
 
 func createTestSearcher(t *testing.T) *searcher {

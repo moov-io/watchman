@@ -35,7 +35,7 @@ func TestReadEU(t *testing.T) {
 	expectedNameAliasWholeName1 := "Saddam Hussein Al-Tikriti"
 	expectedNameAliasWholeName2 := "Abu Ali"
 	expectedNameAliasWholeName3 := "Abou Ali"
-	expectedNameAliasTitle := ""
+	expectedWholeNames := []string{expectedNameAliasWholeName1, expectedNameAliasWholeName2, expectedNameAliasWholeName3}
 
 	// Address
 	// No address found for this record
@@ -44,35 +44,22 @@ func TestReadEU(t *testing.T) {
 	expectedBirthCity := "al-Awja, near Tikrit"
 	expectedBirthCountryDescription := "IRAQ"
 
-	assert.Greater(t, len(euCSL), 0)
-	assert.NotNil(t, euCSLMap[testLogicalID].Entity)
-	assert.NotNil(t, euCSLMap[testLogicalID].NameAliases)
-	assert.NotNil(t, euCSLMap[testLogicalID].Addresses)
-	assert.NotNil(t, euCSLMap[testLogicalID].BirthDates)
-	assert.NotNil(t, euCSLMap[testLogicalID].Identifications)
-
 	assert.Equal(t, euCSLMap[testLogicalID].FileGenerationDate, expectedFileGenerationDate)
 
 	// Entity
-	assert.Equal(t, expectedReferenceNumber, euCSLMap[testLogicalID].Entity.ReferenceNumber)
-	assert.Equal(t, expectedEntityRemark, euCSLMap[testLogicalID].Entity.Remark)
-	assert.Equal(t, expectedClassificationCode, euCSLMap[testLogicalID].Entity.SubjectType.ClassificationCode)
-	assert.Equal(t, expectedPublicationURL, euCSLMap[testLogicalID].Entity.Regulation.PublicationURL)
+	assert.Equal(t, expectedReferenceNumber, euCSLMap[testLogicalID].EntityReferenceNumber)
+	assert.Equal(t, expectedEntityRemark, euCSLMap[testLogicalID].EntityRemark)
+	assert.Equal(t, expectedClassificationCode, euCSLMap[testLogicalID].EntitySubjectType)
+	assert.Equal(t, expectedPublicationURL, euCSLMap[testLogicalID].EntityPublicationURL)
 
 	// Name Alias
-	assert.Equal(t, expectedNameAliasWholeName1, euCSLMap[testLogicalID].NameAliases[0].WholeName)
-	assert.Equal(t, expectedNameAliasWholeName2, euCSLMap[testLogicalID].NameAliases[1].WholeName)
-	assert.Equal(t, expectedNameAliasWholeName3, euCSLMap[testLogicalID].NameAliases[2].WholeName)
-	assert.Equal(t, expectedNameAliasTitle, euCSLMap[testLogicalID].NameAliases[0].Title)
-
-	// Address
-	assert.Len(t, euCSLMap[testLogicalID].Addresses, 0)
+	assert.Equal(t, len(expectedWholeNames), len(euCSLMap[testLogicalID].NameAliasWholeNames))
+	assert.Equal(t, expectedNameAliasWholeName1, euCSLMap[testLogicalID].NameAliasWholeNames[0])
+	assert.Equal(t, expectedNameAliasWholeName2, euCSLMap[testLogicalID].NameAliasWholeNames[1])
+	assert.Equal(t, expectedNameAliasWholeName3, euCSLMap[testLogicalID].NameAliasWholeNames[2])
 
 	// BirthDate
-	assert.Equal(t, expectedBirthDate, euCSLMap[testLogicalID].BirthDates[0].BirthDate)
-	assert.Equal(t, expectedBirthCity, euCSLMap[testLogicalID].BirthDates[0].City)
-	assert.Equal(t, expectedBirthCountryDescription, euCSLMap[testLogicalID].BirthDates[0].CountryDescription)
-
-	// Identification
-	assert.Len(t, euCSLMap[testLogicalID].Identifications, 0)
+	assert.Equal(t, expectedBirthDate, euCSLMap[testLogicalID].BirthDates[0])
+	assert.Equal(t, expectedBirthCity, euCSLMap[testLogicalID].BirthCities[0])
+	assert.Equal(t, expectedBirthCountryDescription, euCSLMap[testLogicalID].BirthCountries[0])
 }
