@@ -15,23 +15,23 @@ package csl
 type EUCSL map[int]*EUCSLRecord
 
 type EUCSLRecord struct {
-	FileGenerationDate         string   `json:"fileGenerationDate"`
-	EntityLogicalID            int      `json:"entityLogicalId"`
-	EntityRemark               string   `json:"entityRemark"`
-	EntitySubjectType          string   `json:"entitySubjectType"`
-	EntityPublicationURL       string   `json:"entityPublicationURL"`
-	EntityReferenceNumber      string   `json:"entityReferenceNumber"`
-	NameAliasWholeNames        []string `json:"nameAliasWholeNames"`
-	NameAliasTitles            []string `json:"nameAliasTitles"`
-	AddressCities              []string `json:"addressCities"`
-	AddressStreets             []string `json:"addressStreets"`
-	AddressPoBoxes             []string `json:"addressPoBoxs"`
-	AddressZipCodes            []string `json:"addressZipCodes"`
-	AddressCountryDescriptions []string `json:"addressCountryDescriptions"`
-	BirthDates                 []string `json:"birthDates"`
-	BirthCities                []string `json:"birthCities"`
-	BirthCountries             []string `json:"birthCountries"`
-	ValidFromTo                map[string]string
+	FileGenerationDate         string            `json:"fileGenerationDate"`
+	EntityLogicalID            int               `json:"entityLogicalId"`
+	EntityRemark               string            `json:"entityRemark"`
+	EntitySubjectType          string            `json:"entitySubjectType"`
+	EntityPublicationURL       string            `json:"entityPublicationURL"`
+	EntityReferenceNumber      string            `json:"entityReferenceNumber"`
+	NameAliasWholeNames        []string          `json:"nameAliasWholeNames"`
+	NameAliasTitles            []string          `json:"nameAliasTitles"`
+	AddressCities              []string          `json:"addressCities"`
+	AddressStreets             []string          `json:"addressStreets"`
+	AddressPoBoxes             []string          `json:"addressPoBoxs"`
+	AddressZipCodes            []string          `json:"addressZipCodes"`
+	AddressCountryDescriptions []string          `json:"addressCountryDescriptions"`
+	BirthDates                 []string          `json:"birthDates"`
+	BirthCities                []string          `json:"birthCities"`
+	BirthCountries             []string          `json:"birthCountries"`
+	ValidFromTo                map[string]string `json:"validFromTo"`
 	// IdentificationValidFroms   []string `json:"identificationValidFroms"`
 	// IdentificationValidTos     []string `json:"identificationValidTos"`
 }
