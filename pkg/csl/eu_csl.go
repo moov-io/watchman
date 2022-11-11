@@ -1,17 +1,8 @@
 package csl
 
 // CLS - Consolidated List Sanctions from European Union
-// TODO: does this need to be in csl (ask Adam from moov)
 
-// TODO: get this from env
-// download uri
-// https://webgate.ec.europa.eu/fsd/fsf/public/files/csvFullSanctionsList_1_1/content?token=dG9rZW4tMjAxNw
-// protocol: https://
-// hostname: webgate.ec.europa.eu
-// path: /fsd/fsf/public/files/csvFullSanctionsList_1_1/content
-// query: ?token=dG9rZW4tMjAxNw
-
-// struct to hold the rows from the csv data
+// struct to hold the rows from the csv data before merge
 type EUCSL map[int]*EUCSLRecord
 
 type EUCSLRecord struct {

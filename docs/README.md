@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Moov Watchman is an HTTP API and Go library that offers download, parse, and search functions over numerous trade sanction lists from the United States, agencies, and nonprofits for complying with regional laws. Also included is a web UI and async webhook notification service to initiate processes on remote systems.
+Moov Watchman is an HTTP API and Go library that offers download, parse, and search functions over numerous trade sanction lists from the United States and European Union, agencies, and nonprofits for complying with regional laws. Also included is a web UI and async webhook notification service to initiate processes on remote systems.
 
 ## Getting help
 

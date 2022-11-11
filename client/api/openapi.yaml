@@ -2102,7 +2102,7 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
-    euConsolidatedSanctionsList:
+    EUConsolidatedSanctionsList:
       properties:
         fileGenerationDate:
           type: string
@@ -2160,11 +2160,6 @@ components:
             type: string
         validFromTo:
           type: object
-            additionalProperties:
-              code:
-                type: string
-              text: 
-                type: string
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       example:
