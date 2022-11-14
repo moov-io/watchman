@@ -921,56 +921,6 @@ paths:
       summary: Search US CSL
       tags:
       - Watchman
-  /search/eu-csl:
-    get:
-      description: Search the EU Consolidated Screening List
-      operationId: searchEUCSL
-      parameters:
-      - description: Optional Request ID allows application developer to trace requests
-          through the system's logs
-        explode: false
-        in: header
-        name: X-Request-ID
-        required: false
-        schema:
-          example: 94c825ee
-          type: string
-        style: simple
-      - description: Name which could correspond to an entry on the EU CSL
-        explode: true
-        in: query
-        name: name
-        required: false
-        schema:
-          example: Jane Smith
-          type: string
-        style: form
-      - description: Maximum number of downloads to return sorted by their timestamp
-          in decending order.
-        explode: true
-        in: query
-        name: limit
-        required: false
-        schema:
-          example: 25
-          type: integer
-        style: form
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Search'
-          description: SDNs returned from a search
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Error occurred, see response body.
-      summary: Search US CSL
-      tags:
-      - Watchman
   /downloads:
     get:
       description: Return list of recent downloads of list data.
@@ -2103,13 +2053,51 @@ components:
           example: 0.92
           type: number
     EUConsolidatedSanctionsList:
+      example:
+        birthCities:
+        - birthCities
+        - birthCities
+        entitySubjectType: entitySubjectType
+        nameAliasTitles:
+        - nameAliasTitles
+        - nameAliasTitles
+        addressPoBoxes:
+        - addressPoBoxes
+        - addressPoBoxes
+        addressCities:
+        - addressCities
+        - addressCities
+        birthDates:
+        - birthDates
+        - birthDates
+        entityPublicationURL: entityPublicationURL
+        entityLogicalId: 13
+        nameAliasWholeNames:
+        - nameAliasWholeNames
+        - nameAliasWholeNames
+        validFromTo: '{}'
+        addressZipCodes:
+        - addressZipCodes
+        - addressZipCodes
+        addressCountryDescriptions:
+        - addressCountryDescriptions
+        - addressCountryDescriptions
+        entityReferenceNumber: entityReferenceNumber
+        addressStreets:
+        - addressStreets
+        - addressStreets
+        birthCountries:
+        - birthCountries
+        - birthCountries
+        fileGenerationDate: 28/10/2022
+        entityRemark: entityRemark
       properties:
         fileGenerationDate:
+          example: 28/10/2022
           type: string
-          example: "28/10/2022"
         entityLogicalId:
-          type: integer
           example: 13
+          type: integer
         entityRemark:
           type: string
         entitySubjectType:
@@ -2119,45 +2107,45 @@ components:
         entityReferenceNumber:
           type: string
         nameAliasWholeNames:
-          type: array
           items:
             type: string
+          type: array
         nameAliasTitles:
-          type: array
           items:
             type: string
+          type: array
         addressCities:
-          type: array
           items:
             type: string
+          type: array
         addressStreets:
-          type: array
           items:
             type: string
+          type: array
         addressPoBoxes:
-          type: array
           items:
             type: string
+          type: array
         addressZipCodes:
-          type: array
           items:
             type: string
+          type: array
         addressCountryDescriptions:
-          type: array
           items:
             type: string
+          type: array
         birthDates:
-          type: array
           items:
             type: string
+          type: array
         birthCities:
-          type: array
           items:
             type: string
+          type: array
         birthCountries:
-          type: array
           items:
             type: string
+          type: array
         validFromTo:
           type: object
     UpdateOfacCompanyStatus:
@@ -2455,6 +2443,81 @@ components:
           sourceListURL: http://bit.ly/1MLgou0
           startDate: 6/21/16
           frNotice: 81 FR 61595
+        euConsolidatedSanctionsList:
+        - birthCities:
+          - birthCities
+          - birthCities
+          entitySubjectType: entitySubjectType
+          nameAliasTitles:
+          - nameAliasTitles
+          - nameAliasTitles
+          addressPoBoxes:
+          - addressPoBoxes
+          - addressPoBoxes
+          addressCities:
+          - addressCities
+          - addressCities
+          birthDates:
+          - birthDates
+          - birthDates
+          entityPublicationURL: entityPublicationURL
+          entityLogicalId: 13
+          nameAliasWholeNames:
+          - nameAliasWholeNames
+          - nameAliasWholeNames
+          validFromTo: '{}'
+          addressZipCodes:
+          - addressZipCodes
+          - addressZipCodes
+          addressCountryDescriptions:
+          - addressCountryDescriptions
+          - addressCountryDescriptions
+          entityReferenceNumber: entityReferenceNumber
+          addressStreets:
+          - addressStreets
+          - addressStreets
+          birthCountries:
+          - birthCountries
+          - birthCountries
+          fileGenerationDate: 28/10/2022
+          entityRemark: entityRemark
+        - birthCities:
+          - birthCities
+          - birthCities
+          entitySubjectType: entitySubjectType
+          nameAliasTitles:
+          - nameAliasTitles
+          - nameAliasTitles
+          addressPoBoxes:
+          - addressPoBoxes
+          - addressPoBoxes
+          addressCities:
+          - addressCities
+          - addressCities
+          birthDates:
+          - birthDates
+          - birthDates
+          entityPublicationURL: entityPublicationURL
+          entityLogicalId: 13
+          nameAliasWholeNames:
+          - nameAliasWholeNames
+          - nameAliasWholeNames
+          validFromTo: '{}'
+          addressZipCodes:
+          - addressZipCodes
+          - addressZipCodes
+          addressCountryDescriptions:
+          - addressCountryDescriptions
+          - addressCountryDescriptions
+          entityReferenceNumber: entityReferenceNumber
+          addressStreets:
+          - addressStreets
+          - addressStreets
+          birthCountries:
+          - birthCountries
+          - birthCountries
+          fileGenerationDate: 28/10/2022
+          entityRemark: entityRemark
         militaryEndUsers:
         - addresses: Xiujia Bay, Weiyong Dt, Xian, 710021, CN
           endDate: endDate
