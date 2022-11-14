@@ -1687,7 +1687,7 @@ components:
             $ref: '#/components/schemas/NonSDNMenuBasedSanctionsList'
         euConsolidatedSanctionsList:
           items:
-            $ref: '#/components/schemas/euConsolidatedSanctionsList'
+            $ref: '#/components/schemas/EUConsolidatedSanctionsList'
           type: array
         # Metadata
         refreshedAt:

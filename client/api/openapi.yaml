@@ -2686,7 +2686,7 @@ components:
           type: array
         euConsolidatedSanctionsList:
           items:
-            $ref: '#/components/schemas/euConsolidatedSanctionsList'
+            $ref: '#/components/schemas/EUConsolidatedSanctionsList'
           type: array
         refreshedAt:
           format: date-time
