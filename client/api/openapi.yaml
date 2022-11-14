@@ -2148,6 +2148,10 @@ components:
           type: array
         validFromTo:
           type: object
+        match:
+          description: Match percentage of search query
+          example: 0.92
+          type: number
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       example:
