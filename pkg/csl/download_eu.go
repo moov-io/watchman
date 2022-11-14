@@ -11,7 +11,6 @@ import (
 	"github.com/moov-io/watchman/pkg/download"
 )
 
-// TODO: where can I get a new token from?
 const uri = "https://webgate.ec.europa.eu/fsd/fsf/public/files/csvFullSanctionsList_1_1/content?token=dG9rZW4tMjAxNw"
 
 func DownloadEU(logger log.Logger, initialDir string) (string, error) {

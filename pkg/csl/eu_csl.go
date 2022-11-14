@@ -126,7 +126,7 @@ type BirthDate struct {
 	// YearRangeFrom      string
 	// YearRangeTo        string
 	// Circa              string
-	// CaldendarType      string // TODO: this could be an enum
+	// CaldendarType      string
 	// ZipCode            string
 	// Region             string
 	// Place              string
