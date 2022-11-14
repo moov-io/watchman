@@ -2108,8 +2108,8 @@ components:
           type: string
           example: "28/10/2022"
         entityLogicalId:
-          type: int
-          example: "13"
+          type: integer
+          example: 13
         entityRemark:
           type: string
         entitySubjectType:
