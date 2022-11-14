@@ -21,6 +21,7 @@ Name | Type | Description | Notes
 **BirthCities** | **[]string** |  | [optional] 
 **BirthCountries** | **[]string** |  | [optional] 
 **ValidFromTo** | [**map[string]interface{}**](.md) |  | [optional] 
+**Match** | **float32** | Match percentage of search query | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

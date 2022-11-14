@@ -28,4 +28,6 @@ type EuConsolidatedSanctionsList struct {
 	BirthCities                []string               `json:"birthCities,omitempty"`
 	BirthCountries             []string               `json:"birthCountries,omitempty"`
 	ValidFromTo                map[string]interface{} `json:"validFromTo,omitempty"`
+	// Match percentage of search query
+	Match float32 `json:"match,omitempty"`
 }

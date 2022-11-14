@@ -2067,6 +2067,7 @@ components:
         addressCities:
         - addressCities
         - addressCities
+        match: 0.92
         birthDates:
         - birthDates
         - birthDates
@@ -2148,6 +2149,10 @@ components:
           type: array
         validFromTo:
           type: object
+        match:
+          description: Match percentage of search query
+          example: 0.92
+          type: number
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       example:
@@ -2457,6 +2462,7 @@ components:
           addressCities:
           - addressCities
           - addressCities
+          match: 0.92
           birthDates:
           - birthDates
           - birthDates
@@ -2494,6 +2500,7 @@ components:
           addressCities:
           - addressCities
           - addressCities
+          match: 0.92
           birthDates:
           - birthDates
           - birthDates
