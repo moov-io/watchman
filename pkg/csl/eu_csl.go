@@ -23,8 +23,6 @@ type EUCSLRecord struct {
 	BirthCities                []string          `json:"birthCities"`
 	BirthCountries             []string          `json:"birthCountries"`
 	ValidFromTo                map[string]string `json:"validFromTo"`
-	// IdentificationValidFroms   []string `json:"identificationValidFroms"`
-	// IdentificationValidTos     []string `json:"identificationValidTos"`
 }
 
 // header indicies
@@ -55,7 +53,7 @@ const (
 
 // below is the original struct used to parse the document
 // fields commented out are not parsed
-// this was refactored to be a flatter structure
+// this was refactored to be a flatter structure but is left in for visibility
 type EUCSLRow struct {
 	FileGenerationDate string            `json:"fileGenerationDate"`
 	Entity             *Entity           `json:"entity"`
