@@ -53,7 +53,8 @@ const (
 
 // below is the original struct used to parse the document
 // fields commented out are not parsed
-// this was refactored to be a flatter structure but is left in for visibility
+// this was refactored to be a flatter structure but is left in for documentation
+// use the EUCSLRecord struct above
 type EUCSLRow struct {
 	FileGenerationDate string            `json:"fileGenerationDate"`
 	Entity             *Entity           `json:"entity"`
@@ -157,17 +158,4 @@ type Identification struct {
 	// CountryDescription string
 	// RegulationLanguage string
 	// Remark             string
-}
-
-func NewEUCSLRow() *EUCSLRow {
-	row := new(EUCSLRow)
-	row.Entity = new(Entity)
-	row.Entity.SubjectType = new(SubjectType)
-	row.Entity.Regulation = new(Regulation)
-	row.NameAliases = make([]*NameAlias, 0)
-	row.Addresses = make([]*Address, 0)
-	row.BirthDates = make([]*BirthDate, 0)
-	row.Identifications = make([]*Identification, 0)
-
-	return row
 }
