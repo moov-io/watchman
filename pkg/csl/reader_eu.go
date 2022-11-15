@@ -63,7 +63,7 @@ func ParseEU(r io.Reader) ([]*EUCSLRecord, EUCSL, error) {
 		logicalID, _ := strconv.Atoi(record[EntityLogicalIdx])
 		// check if entry does not exist
 		if val, ok := report[logicalID]; !ok {
-			// creates the inital record
+			// creates the initial record
 			row := new(EUCSLRecord)
 			unmarshalRecord(record, row)
 

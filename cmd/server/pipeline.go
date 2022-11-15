@@ -147,9 +147,7 @@ func cslName(item interface{}) *Name {
 	case *csl.EUCSLRecord:
 		if len(v.NameAliasWholeNames) >= 1 {
 			var alts []string
-			for _, nameAlias := range v.NameAliasWholeNames {
-				alts = append(alts, nameAlias)
-			}
+			alts = append(alts, v.NameAliasWholeNames...)
 			return &Name{
 				Original:  v.NameAliasWholeNames[0],
 				Processed: v.NameAliasWholeNames[0],
