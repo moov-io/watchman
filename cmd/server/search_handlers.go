@@ -265,8 +265,8 @@ func searchViaQ(logger log.Logger, searcher *searcher, name string) http.Handler
 // searchGather performs an inmem search with *searcher and mutates *searchResponse by setting a specific field
 type searchGather func(searcher *searcher, filters filterRequest, limit int, minMatch float64, name string, resp *searchResponse)
 
-var (
-	gatherings = []searchGather{
+func generateAllGatherings() []searchGather {
+	gatherings := []searchGather{
 		// OFAC SDN Search
 		func(s *searcher, filters filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			sdns := s.FindSDNsByRemarksID(limit, name)
@@ -291,7 +291,7 @@ var (
 	}
 
 	// Consolidated Screening List Results
-	cslGatherings = []searchGather{
+	cslGatherings := []searchGather{
 		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			resp.BISEntities = s.TopBISEntities(limit, minMatch, name)
 		},
@@ -328,16 +328,15 @@ var (
 	}
 
 	// eu - consolidated sanctions list
-	euGatherings = []searchGather{
+	euGatherings := []searchGather{
 		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			resp.EUCSL = s.TopEUCSL(limit, minMatch, name)
 		},
 	}
-)
 
-func generateAllGatherings() []searchGather {
 	gatherings = append(gatherings, cslGatherings...)
 	gatherings = append(gatherings, euGatherings...)
+
 	return gatherings
 }
 
