@@ -265,8 +265,8 @@ func searchViaQ(logger log.Logger, searcher *searcher, name string) http.Handler
 // searchGather performs an inmem search with *searcher and mutates *searchResponse by setting a specific field
 type searchGather func(searcher *searcher, filters filterRequest, limit int, minMatch float64, name string, resp *searchResponse)
 
-func generateAllGatherings() []searchGather {
-	gatherings := []searchGather{
+var (
+	baseGatherings = append([]searchGather{
 		// OFAC SDN Search
 		func(s *searcher, filters filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			sdns := s.FindSDNsByRemarksID(limit, name)
@@ -288,10 +288,10 @@ func generateAllGatherings() []searchGather {
 		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			resp.DeniedPersons = s.TopDPs(limit, minMatch, name)
 		},
-	}
+	}, cslGatherings...)
 
 	// Consolidated Screening List Results
-	cslGatherings := []searchGather{
+	cslGatherings = []searchGather{
 		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			resp.BISEntities = s.TopBISEntities(limit, minMatch, name)
 		},
@@ -328,20 +328,17 @@ func generateAllGatherings() []searchGather {
 	}
 
 	// eu - consolidated sanctions list
-	euGatherings := []searchGather{
+	euGatherings = []searchGather{
 		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			resp.EUCSL = s.TopEUCSL(limit, minMatch, name)
 		},
 	}
 
-	gatherings = append(gatherings, cslGatherings...)
-	gatherings = append(gatherings, euGatherings...)
-
-	return gatherings
-}
+	gatherings = append(baseGatherings, euGatherings...)
+)
 
 func buildFullSearchResponse(searcher *searcher, filters filterRequest, limit int, minMatch float64, name string) *searchResponse {
-	return buildFullSearchResponseWith(searcher, generateAllGatherings(), filters, limit, minMatch, name)
+	return buildFullSearchResponseWith(searcher, gatherings, filters, limit, minMatch, name)
 }
 
 func buildFullSearchResponseWith(searcher *searcher, searchGatherings []searchGather, filters filterRequest, limit int, minMatch float64, name string) *searchResponse {
