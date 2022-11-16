@@ -1,3 +1,20 @@
+## v0.24.0 (Unreleased)
+
+ADDITIONS
+
+- search: Add the EU Consolidated Screening List
+
+IMPROVEMENTS
+
+- feat: log status after download
+- fix: guard around race condition in pkg/download
+- fix: cap match percentage
+
+BUILD
+
+- build(deps): bump nokogiri from 1.13.6 to 1.13.9 in /docs
+- build(deps): bump loader-utils from 2.0.0 to 2.0.4 in /webui
+
 ## v0.23.1 (Released 2022-10-17)
 
 IMPROVEMENTS
