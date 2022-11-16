@@ -30,5 +30,6 @@ type Search struct {
 	ItarDebarred                           []ItarDebarred                           `json:"itarDebarred,omitempty"`
 	NonSDNChineseMilitaryIndustrialComplex []NonSdnChineseMilitaryIndustrialComplex `json:"nonSDNChineseMilitaryIndustrialComplex,omitempty"`
 	NonSDNMenuBasedSanctionsList           []NonSdnMenuBasedSanctionsList           `json:"nonSDNMenuBasedSanctionsList,omitempty"`
+	EuConsolidatedSanctionsList            []EuConsolidatedSanctionsList            `json:"euConsolidatedSanctionsList,omitempty"`
 	RefreshedAt                            time.Time                                `json:"refreshedAt,omitempty"`
 }

@@ -71,6 +71,9 @@ type DownloadStats struct {
 	ChineseMilitaryIndustrialComplex int `json:"chineseMilitaryIndustrialComplex"`
 	NonSDNMenuBasedSanctions         int `json:"nonSDNMenuBasedSanctions"`
 
+	// EU Consolidated Sanctions List
+	EUCSL int `json:"EuropeanSanctionsList"`
+
 	Errors      []error   `json:"-"`
 	RefreshedAt time.Time `json:"timestamp"`
 }
@@ -136,6 +139,7 @@ func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo down
 					"DTC":              log.Int(stats.ITARDebarred),
 					"CMIC":             log.Int(stats.ChineseMilitaryIndustrialComplex),
 					"NS_MBS":           log.Int(stats.NonSDNMenuBasedSanctions),
+					"EU_CSL":           log.Int(stats.EUCSL),
 				}).Logf("data refreshed %v ago", time.Since(stats.RefreshedAt))
 			}
 			updates <- stats // send stats for re-search and watch notifications
@@ -200,6 +204,20 @@ func cslRecords(logger log.Logger, initialDir string) (*csl.CSL, error) {
 	return cslRecords, err
 }
 
+func euCSLRecords(logger log.Logger, initialDir string) ([]*csl.EUCSLRecord, error) {
+	file, err := csl.DownloadEU(logger, initialDir)
+	if err != nil {
+		logger.Warn().LogErrorf("skipping CSL download: %v", err)
+		// no error to return because we skip the download
+		return nil, nil
+	}
+	cslRecords, _, err := csl.ReadEUFile(file)
+	if err != nil {
+		return nil, err
+	}
+	return cslRecords, err
+}
+
 // refreshData reaches out to the various websites to download the latest
 // files, runs each list's parser, and index data for searches.
 func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
@@ -234,6 +252,15 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	}
 	dps := precomputeDPs(deniedPersons, s.pipe)
 
+	euConsolidatedList, err := euCSLRecords(s.logger, initialDir)
+	if err != nil {
+		lastDataRefreshFailure.WithLabelValues("EUCSL").Set(float64(time.Now().Unix()))
+		stats.Errors = append(stats.Errors, fmt.Errorf("EUCSL: %v", err))
+	}
+
+	euCSLs := precomputeCSLEntities[csl.EUCSLRecord](euConsolidatedList, s.pipe)
+
+	// csl records from US downloaded here
 	consolidatedLists, err := cslRecords(s.logger, initialDir)
 	if err != nil {
 		lastDataRefreshFailure.WithLabelValues("CSL").Set(float64(time.Now().Unix()))
@@ -269,6 +296,8 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	stats.ITARDebarred = len(dtcs)
 	stats.ChineseMilitaryIndustrialComplex = len(cmics)
 	stats.NonSDNMenuBasedSanctions = len(ns_mbss)
+	// EU - CSL
+	stats.EUCSL = len(euCSLs)
 
 	// record prometheus metrics
 	lastDataRefreshCount.WithLabelValues("SDNs").Set(float64(len(sdns)))
@@ -284,6 +313,8 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	lastDataRefreshCount.WithLabelValues("DTCs").Set(float64(len(dtcs)))
 	lastDataRefreshCount.WithLabelValues("CMICs").Set(float64(len(cmics)))
 	lastDataRefreshCount.WithLabelValues("NS_MBSs").Set(float64(len(ns_mbss)))
+	// EU CSL
+	lastDataRefreshCount.WithLabelValues("EUCSL").Set(float64(len(euCSLs)))
 
 	if len(stats.Errors) > 0 {
 		return stats, stats
@@ -309,6 +340,8 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	s.DTCs = dtcs
 	s.CMICs = cmics
 	s.NS_MBSs = ns_mbss
+	//EUCSL
+	s.EUCSL = euCSLs
 	// metadata
 	s.lastRefreshedAt = stats.RefreshedAt
 	s.Unlock()

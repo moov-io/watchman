@@ -36,6 +36,8 @@ type Name struct {
 	cmic   *csl.CMIC
 	ns_mbs *csl.NS_MBS
 
+	eu_csl *csl.EUCSLRecord
+
 	dp    *dpl.DPL
 	el    *csl.EL
 	addrs []*ofac.Address
@@ -142,6 +144,19 @@ func cslName(item interface{}) *Name {
 			ns_mbs:    v,
 			altNames:  v.AlternateNames,
 		}
+	case *csl.EUCSLRecord:
+		if len(v.NameAliasWholeNames) >= 1 {
+			var alts []string
+			alts = append(alts, v.NameAliasWholeNames...)
+			return &Name{
+				Original:  v.NameAliasWholeNames[0],
+				Processed: v.NameAliasWholeNames[0],
+				eu_csl:    v,
+				altNames:  alts,
+			}
+		}
+
+		return &Name{}
 	}
 	return &Name{}
 }

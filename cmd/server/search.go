@@ -43,6 +43,8 @@ type searcher struct {
 	// BIS
 	DPs []*DP
 
+	// TODO: this could be refactored into sub structs that have us/eu (and eventually others)
+
 	// US Consolidated Screening List
 	BISEntities      []*Result[csl.EL]
 	MilitaryEndUsers []*Result[csl.MEU]
@@ -55,6 +57,9 @@ type searcher struct {
 	DTCs             []*Result[csl.DTC]
 	CMICs            []*Result[csl.CMIC]
 	NS_MBSs          []*Result[csl.NS_MBS]
+
+	// EU Consolidated List of Sactions
+	EUCSL []*Result[csl.EUCSLRecord]
 
 	// metadata
 	lastRefreshedAt time.Time

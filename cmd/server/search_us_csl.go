@@ -14,6 +14,7 @@ import (
 	"github.com/moov-io/watchman/pkg/csl"
 )
 
+// TODO: make a search EUCLS function as well; put it in a new file
 func searchUSCSL(logger log.Logger, searcher *searcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w = wrapResponseWriter(logger, w, r)
@@ -55,6 +56,16 @@ func precomputeCSLEntities[T any](items []*T, pipe *pipeliner) []*Result[T] {
 			_type := elm.Type().Field(i).Type.String()
 
 			if name == "AlternateNames" && _type == "[]string" {
+				alts, ok := elm.Field(i).Interface().([]string)
+				if !ok {
+					continue
+				}
+				for j := range alts {
+					alt := &Name{Processed: alts[j]}
+					pipe.Do(alt)
+					altNames = append(altNames, alt.Processed)
+				}
+			} else if name == "NameAliasWholesNames" && _type == "[]string" {
 				alts, ok := elm.Field(i).Interface().([]string)
 				if !ok {
 					continue

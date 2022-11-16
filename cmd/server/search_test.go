@@ -46,6 +46,8 @@ var (
 	dtcSearcher       = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
 	cmicSearcher      = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
 	ns_mbsSearcher    = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+
+	eu_cslSearcher = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
 )
 
 func init() {
@@ -327,6 +329,25 @@ func init() {
 				"For more information on directives, please visit the following link: https://home.treasury.gov/policy-issues/financial-sanctions/sanctions-programs-and-country-information/russian-harmful-foreign-activities-sanctions#directives, Executive Order 14024 Directive Information -"},
 		},
 	}, noLogPipeliner)
+
+	eu_cslSearcher.EUCSL = precomputeCSLEntities[csl.EUCSLRecord]([]*csl.EUCSLRecord{{
+		FileGenerationDate:         "28/10/2022",
+		EntityLogicalID:            13,
+		EntityRemark:               "(UNSC RESOLUTION 1483)",
+		EntitySubjectType:          "person",
+		EntityPublicationURL:       "http://eur-lex.europa.eu/LexUriServ/LexUriServ.do?uri=OJ:L:2003:169:0006:0023:EN:PDF",
+		EntityReferenceNumber:      "",
+		NameAliasWholeNames:        []string{"Saddam Hussein Al-Tikriti", "Abu Ali", "Abou Ali"},
+		AddressCities:              []string{"test city"},
+		AddressStreets:             []string{"test street"},
+		AddressPoBoxes:             []string{"test po box"},
+		AddressZipCodes:            []string{"test zip"},
+		AddressCountryDescriptions: []string{"test country"},
+		BirthDates:                 []string{"1937-04-28"},
+		BirthCities:                []string{"al-Awja, near Tikrit"},
+		BirthCountries:             []string{"IRAQ"},
+		ValidFromTo:                map[string]string{"2022": "2030"},
+	}}, noLogPipeliner)
 }
 
 func createTestSearcher(t *testing.T) *searcher {
@@ -381,6 +402,9 @@ func verifyDownloadStats(b *testing.B) {
 	require.Greater(b, testSearcherStats.ITARDebarred, 1)
 	require.Greater(b, testSearcherStats.ChineseMilitaryIndustrialComplex, 1)
 	require.Greater(b, testSearcherStats.NonSDNMenuBasedSanctions, 1)
+
+	// EU - CSL
+	require.Greater(b, testSearcherStats.EUCSL, 1)
 }
 
 func TestJaroWinkler(t *testing.T) {

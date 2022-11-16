@@ -1531,6 +1531,68 @@ components:
           type: number
           description: Match percentage of search query
           example: 0.92
+    EUConsolidatedSanctionsList:
+      properties:
+        fileGenerationDate:
+          type: string
+          example: "28/10/2022"
+        entityLogicalId:
+          type: integer
+          example: 13
+        entityRemark:
+          type: string
+        entitySubjectType:
+          type: string
+        entityPublicationURL:
+          type: string
+        entityReferenceNumber:
+          type: string
+        nameAliasWholeNames:
+          type: array
+          items:
+            type: string
+        nameAliasTitles:
+          type: array
+          items:
+            type: string
+        addressCities:
+          type: array
+          items:
+            type: string
+        addressStreets:
+          type: array
+          items:
+            type: string
+        addressPoBoxes:
+          type: array
+          items:
+            type: string
+        addressZipCodes:
+          type: array
+          items:
+            type: string
+        addressCountryDescriptions:
+          type: array
+          items:
+            type: string
+        birthDates:
+          type: array
+          items:
+            type: string
+        birthCities:
+          type: array
+          items:
+            type: string
+        birthCountries:
+          type: array
+          items:
+            type: string
+        validFromTo:
+          type: object
+        match:
+          description: Match percentage of search query
+          example: 0.92
+          type: number
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       properties:
@@ -1627,6 +1689,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/NonSDNMenuBasedSanctionsList'
+        euConsolidatedSanctionsList:
+          items:
+            $ref: '#/components/schemas/EUConsolidatedSanctionsList'
+          type: array
         # Metadata
         refreshedAt:
           type: string

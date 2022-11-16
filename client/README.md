@@ -62,6 +62,7 @@ Class | Method | HTTP request | Description
  - [Download](docs/Download.md)
  - [Dpl](docs/Dpl.md)
  - [Error](docs/Error.md)
+ - [EuConsolidatedSanctionsList](docs/EuConsolidatedSanctionsList.md)
  - [ForeignSanctionsEvader](docs/ForeignSanctionsEvader.md)
  - [ItarDebarred](docs/ItarDebarred.md)
  - [MilitaryEndUser](docs/MilitaryEndUser.md)
