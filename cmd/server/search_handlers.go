@@ -334,11 +334,11 @@ var (
 		},
 	}
 
-	gatherings = append(baseGatherings, euGatherings...)
+	allGatherings = append(baseGatherings, euGatherings...)
 )
 
 func buildFullSearchResponse(searcher *searcher, filters filterRequest, limit int, minMatch float64, name string) *searchResponse {
-	return buildFullSearchResponseWith(searcher, gatherings, filters, limit, minMatch, name)
+	return buildFullSearchResponseWith(searcher, allGatherings, filters, limit, minMatch, name)
 }
 
 func buildFullSearchResponseWith(searcher *searcher, searchGatherings []searchGather, filters filterRequest, limit int, minMatch float64, name string) *searchResponse {
