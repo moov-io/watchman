@@ -204,7 +204,7 @@ func cslRecords(logger log.Logger, initialDir string) (*csl.CSL, error) {
 	return cslRecords, err
 }
 
-func euCSLRecords(logger log.Logger, initialDir string) ([]*csl.EUCSLRow, error) {
+func euCSLRecords(logger log.Logger, initialDir string) ([]*csl.EUCSLRecord, error) {
 	file, err := csl.DownloadEU(logger, initialDir)
 	if err != nil {
 		logger.Warn().LogErrorf("skipping CSL download: %v", err)
@@ -258,7 +258,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 		stats.Errors = append(stats.Errors, fmt.Errorf("EUCSL: %v", err))
 	}
 
-	euCSLs := precomputeCSLEntities[csl.EUCSLRow](euConsolidatedList, s.pipe)
+	euCSLs := precomputeCSLEntities[csl.EUCSLRecord](euConsolidatedList, s.pipe)
 
 	// csl records from US downloaded here
 	consolidatedLists, err := cslRecords(s.logger, initialDir)

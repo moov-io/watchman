@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-func ReadEUFile(path string) ([]*EUCSLRow, EUCSL, error) {
+func ReadEUFile(path string) ([]*EUCSLRecord, EUCSL, error) {
 	fd, err := os.Open(path)
 	if err != nil {
 		return nil, nil, err
@@ -24,14 +24,13 @@ func ReadEUFile(path string) ([]*EUCSLRow, EUCSL, error) {
 	return rows, rowsMap, nil
 }
 
-func ParseEU(r io.Reader) ([]*EUCSLRow, EUCSL, error) {
+func ParseEU(r io.Reader) ([]*EUCSLRecord, EUCSL, error) {
 	reader := csv.NewReader(r)
 	// sets comma delim to ; and ignores " in non quoted field and size of columns
 	// https://stackoverflow.com/questions/31326659/golang-csv-error-bare-in-non-quoted-field
 	// https://stackoverflow.com/questions/61336787/how-do-i-fix-the-wrong-number-of-fields-with-the-missing-commas-in-csv-file-in
 	reader.Comma = ';'
 	reader.LazyQuotes = true
-	// reader.FieldsPerRecord = -1
 
 	report := make(EUCSL)
 	_, err := reader.Read()
@@ -64,206 +63,82 @@ func ParseEU(r io.Reader) ([]*EUCSLRow, EUCSL, error) {
 		logicalID, _ := strconv.Atoi(record[EntityLogicalIdx])
 		// check if entry does not exist
 		if val, ok := report[logicalID]; !ok {
-			row := unmarshalFirstEUCSLRow(record)
+			// creates the initial record
+			row := new(EUCSLRecord)
+			unmarshalRecord(record, row)
 
 			report[logicalID] = row
 		} else {
 			// we found an entry in the map and need to append
-			unmarshalNextEUCSLRow(record, val)
+			unmarshalRecord(record, val)
 		}
 
 	}
-	var totalReport []*EUCSLRow
+	var totalReport []*EUCSLRecord
 	for _, row := range report {
 		totalReport = append(totalReport, row)
 	}
 	return totalReport, report, nil
 }
 
-func unmarshalFirstEUCSLRow(csvRecord []string) *EUCSLRow {
-	row := NewEUCSLRow()
+func unmarshalRecord(csvRecord []string, euCSLRecord *EUCSLRecord) {
+	euCSLRecord.EntityLogicalID, _ = strconv.Atoi(csvRecord[EntityLogicalIdx])
 
-	row.FileGenerationDate = csvRecord[FileGenerationDateIdx]
-	row.Entity.ReferenceNumber = csvRecord[ReferenceNumberIdx]
-	row.Entity.LogicalID, _ = strconv.Atoi(csvRecord[EntityLogicalIdx])
-	row.Entity.Remark = csvRecord[EntityRemarkIdx]
-	row.Entity.SubjectType.ClassificationCode = csvRecord[EntitySubjectTypeIdx]
-	row.Entity.Regulation.PublicationURL = csvRecord[EntityRegulationPublicationURLIdx]
+	// entity
+	if csvRecord[FileGenerationDateIdx] != "" {
+		euCSLRecord.FileGenerationDate = csvRecord[FileGenerationDateIdx]
+	}
+	if csvRecord[ReferenceNumberIdx] != "" {
+		euCSLRecord.EntityReferenceNumber = csvRecord[ReferenceNumberIdx]
+	}
+	if csvRecord[EntityRemarkIdx] != "" {
+		euCSLRecord.EntityRemark = csvRecord[EntityRemarkIdx]
+	}
+	if csvRecord[EntitySubjectTypeIdx] != "" {
+		euCSLRecord.EntitySubjectType = csvRecord[EntitySubjectTypeIdx]
+	}
+	if csvRecord[EntityRegulationPublicationURLIdx] != "" {
+		euCSLRecord.EntityPublicationURL = csvRecord[EntityRegulationPublicationURLIdx]
+	}
 
-	var newNameAlias *NameAlias
+	// name alias
 	if csvRecord[NameAliasWholeNameIdx] != "" {
-		newNameAlias = new(NameAlias)
-		newNameAlias.WholeName = csvRecord[NameAliasWholeNameIdx]
+		euCSLRecord.NameAliasWholeNames = append(euCSLRecord.NameAliasWholeNames, csvRecord[NameAliasWholeNameIdx])
 	}
 	if csvRecord[NameAliasTitleIdx] != "" {
-		if newNameAlias == nil {
-			newNameAlias = new(NameAlias)
-		}
-		newNameAlias.Title = csvRecord[NameAliasTitleIdx]
+		euCSLRecord.NameAliasTitles = append(euCSLRecord.NameAliasTitles, csvRecord[NameAliasTitleIdx])
 	}
-	if newNameAlias != nil {
-		row.NameAliases = append(row.NameAliases, newNameAlias)
-	}
-
-	var newAddress *Address
+	// address
 	if csvRecord[AddressCityIdx] != "" {
-		newAddress = new(Address)
-		newAddress.City = csvRecord[AddressCityIdx]
+		euCSLRecord.AddressCities = append(euCSLRecord.AddressCities, csvRecord[AddressCityIdx])
 	}
 	if csvRecord[AddressStreetIdx] != "" {
-		if newAddress == nil {
-			newAddress = new(Address)
-		}
-		newAddress.Street = csvRecord[AddressStreetIdx]
+		euCSLRecord.AddressStreets = append(euCSLRecord.AddressStreets, csvRecord[AddressStreetIdx])
 	}
 	if csvRecord[AddressPoBoxIdx] != "" {
-		if newAddress == nil {
-			newAddress = new(Address)
-		}
-		newAddress.PoBox = csvRecord[AddressPoBoxIdx]
+		euCSLRecord.AddressPoBoxes = append(euCSLRecord.AddressPoBoxes, csvRecord[AddressPoBoxIdx])
 	}
 	if csvRecord[AddressZipCodeIdx] != "" {
-		if newAddress == nil {
-			newAddress = new(Address)
-		}
-		newAddress.ZipCode = csvRecord[AddressZipCodeIdx]
+		euCSLRecord.AddressZipCodes = append(euCSLRecord.AddressZipCodes, csvRecord[AddressZipCodeIdx])
 	}
 	if csvRecord[AddressCountryDescriptionIdx] != "" {
-		if newAddress == nil {
-			newAddress = new(Address)
-		}
-		newAddress.CountryDescription = csvRecord[AddressCountryDescriptionIdx]
-	}
-	if newAddress != nil {
-		row.Addresses = append(row.Addresses, newAddress)
+		euCSLRecord.AddressCountryDescriptions = append(euCSLRecord.AddressCountryDescriptions, csvRecord[AddressCountryDescriptionIdx])
 	}
 
-	var newBirthDate *BirthDate
+	// birthdate
 	if csvRecord[BirthDateIdx] != "" {
-		newBirthDate = new(BirthDate)
-		newBirthDate.BirthDate = csvRecord[BirthDateIdx]
+		euCSLRecord.BirthDates = append(euCSLRecord.BirthDates, csvRecord[BirthDateIdx])
 	}
 	if csvRecord[BirthDateCityIdx] != "" {
-		if newBirthDate == nil {
-			newBirthDate = new(BirthDate)
-		}
-		newBirthDate.City = csvRecord[BirthDateCityIdx]
+		euCSLRecord.BirthCities = append(euCSLRecord.BirthCities, csvRecord[BirthDateCityIdx])
 	}
 	if csvRecord[BirthDateCountryIdx] != "" {
-		if newBirthDate == nil {
-			newBirthDate = new(BirthDate)
-		}
-		newBirthDate.CountryDescription = csvRecord[BirthDateCountryIdx]
-	}
-	if newBirthDate != nil {
-		row.BirthDates = append(row.BirthDates, newBirthDate)
+		euCSLRecord.BirthCountries = append(euCSLRecord.BirthCountries, csvRecord[BirthDateCountryIdx])
 	}
 
-	var newIdentification *Identification
+	// identifications
 	if csvRecord[IdentificationValidFromIdx] != "" {
-		newIdentification = new(Identification)
-		newIdentification.ValidFrom = csvRecord[IdentificationValidFromIdx]
-	}
-	if csvRecord[IdentificationValidToIdx] != "" {
-		if newIdentification == nil {
-			newIdentification = new(Identification)
-		}
-		newIdentification.ValidTo = csvRecord[IdentificationValidToIdx]
-	}
-	if newIdentification != nil {
-		row.Identifications = append(row.Identifications, newIdentification)
-	}
-
-	return row
-}
-
-func unmarshalNextEUCSLRow(csvRecord []string, row *EUCSLRow) {
-	// NameAlias
-	var newNameAlias *NameAlias
-	if csvRecord[NameAliasWholeNameIdx] != "" {
-		newNameAlias = new(NameAlias)
-		newNameAlias.WholeName = csvRecord[NameAliasWholeNameIdx]
-	}
-	if csvRecord[NameAliasTitleIdx] != "" {
-		if newNameAlias == nil {
-			newNameAlias = new(NameAlias)
-		}
-		newNameAlias.Title = csvRecord[NameAliasTitleIdx]
-	}
-	if newNameAlias != nil {
-		row.NameAliases = append(row.NameAliases, newNameAlias)
-	}
-
-	// Address
-	var newAddress *Address
-	if csvRecord[AddressCityIdx] != "" {
-		newAddress = new(Address)
-		newAddress.City = csvRecord[AddressCityIdx]
-	}
-	if csvRecord[AddressStreetIdx] != "" {
-		if newAddress == nil {
-			newAddress = &Address{}
-		}
-		newAddress.Street = csvRecord[AddressStreetIdx]
-	}
-	if csvRecord[AddressPoBoxIdx] != "" {
-		if newAddress == nil {
-			newAddress = &Address{}
-		}
-		newAddress.PoBox = csvRecord[AddressPoBoxIdx]
-	}
-	if csvRecord[AddressZipCodeIdx] != "" {
-		if newAddress == nil {
-			newAddress.ZipCode = csvRecord[AddressZipCodeIdx]
-		}
-		newAddress.ZipCode = csvRecord[AddressZipCodeIdx]
-	}
-	if csvRecord[AddressCountryDescriptionIdx] != "" {
-		if newAddress == nil {
-			newAddress = &Address{}
-		}
-		newAddress.CountryDescription = csvRecord[AddressCountryDescriptionIdx]
-	}
-	if newAddress != nil {
-		row.Addresses = append(row.Addresses, newAddress)
-	}
-
-	// BirthDate
-	var newBirthDate *BirthDate
-	if csvRecord[BirthDateIdx] != "" {
-		newBirthDate = new(BirthDate)
-		newBirthDate.BirthDate = csvRecord[BirthDateIdx]
-	}
-	if csvRecord[BirthDateCityIdx] != "" {
-		if newBirthDate == nil {
-			newBirthDate = new(BirthDate)
-		}
-		newBirthDate.City = csvRecord[BirthDateCityIdx]
-	}
-	if csvRecord[BirthDateCountryIdx] != "" {
-		if newBirthDate == nil {
-			newBirthDate = new(BirthDate)
-		}
-		newBirthDate.CountryDescription = csvRecord[BirthDateCountryIdx]
-	}
-	if newBirthDate != nil {
-		row.BirthDates = append(row.BirthDates, newBirthDate)
-	}
-
-	var newIdentification *Identification
-	if csvRecord[IdentificationValidFromIdx] != "" {
-		newIdentification = new(Identification)
-		newIdentification.ValidFrom = csvRecord[IdentificationValidFromIdx]
-	}
-
-	if csvRecord[IdentificationValidToIdx] != "" {
-		if newIdentification == nil {
-			newIdentification = new(Identification)
-		}
-		newIdentification.ValidTo = csvRecord[IdentificationValidToIdx]
-	}
-
-	if newIdentification != nil {
-		row.Identifications = append(row.Identifications, newIdentification)
+		euCSLRecord.ValidFromTo = make(map[string]string)
+		euCSLRecord.ValidFromTo[csvRecord[IdentificationValidFromIdx]] = csvRecord[IdentificationValidToIdx]
 	}
 }

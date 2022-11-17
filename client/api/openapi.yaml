@@ -921,56 +921,6 @@ paths:
       summary: Search US CSL
       tags:
       - Watchman
-  /search/eu-csl:
-    get:
-      description: Search the EU Consolidated Screening List
-      operationId: searchEUCSL
-      parameters:
-      - description: Optional Request ID allows application developer to trace requests
-          through the system's logs
-        explode: false
-        in: header
-        name: X-Request-ID
-        required: false
-        schema:
-          example: 94c825ee
-          type: string
-        style: simple
-      - description: Name which could correspond to an entry on the EU CSL
-        explode: true
-        in: query
-        name: name
-        required: false
-        schema:
-          example: Jane Smith
-          type: string
-        style: form
-      - description: Maximum number of downloads to return sorted by their timestamp
-          in decending order.
-        explode: true
-        in: query
-        name: limit
-        required: false
-        schema:
-          example: 25
-          type: integer
-        style: form
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Search'
-          description: SDNs returned from a search
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Error occurred, see response body.
-      summary: Search US CSL
-      tags:
-      - Watchman
   /downloads:
     get:
       description: Return list of recent downloads of list data.
@@ -2102,9 +2052,107 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
-    euConsolidatedSanctionsList:
+    EUConsolidatedSanctionsList:
+      example:
+        birthCities:
+        - birthCities
+        - birthCities
+        entitySubjectType: entitySubjectType
+        nameAliasTitles:
+        - nameAliasTitles
+        - nameAliasTitles
+        addressPoBoxes:
+        - addressPoBoxes
+        - addressPoBoxes
+        addressCities:
+        - addressCities
+        - addressCities
+        match: 0.92
+        birthDates:
+        - birthDates
+        - birthDates
+        entityPublicationURL: entityPublicationURL
+        entityLogicalId: 13
+        nameAliasWholeNames:
+        - nameAliasWholeNames
+        - nameAliasWholeNames
+        validFromTo: '{}'
+        addressZipCodes:
+        - addressZipCodes
+        - addressZipCodes
+        addressCountryDescriptions:
+        - addressCountryDescriptions
+        - addressCountryDescriptions
+        entityReferenceNumber: entityReferenceNumber
+        addressStreets:
+        - addressStreets
+        - addressStreets
+        birthCountries:
+        - birthCountries
+        - birthCountries
+        fileGenerationDate: 28/10/2022
+        entityRemark: entityRemark
       properties:
-        ...
+        fileGenerationDate:
+          example: 28/10/2022
+          type: string
+        entityLogicalId:
+          example: 13
+          type: integer
+        entityRemark:
+          type: string
+        entitySubjectType:
+          type: string
+        entityPublicationURL:
+          type: string
+        entityReferenceNumber:
+          type: string
+        nameAliasWholeNames:
+          items:
+            type: string
+          type: array
+        nameAliasTitles:
+          items:
+            type: string
+          type: array
+        addressCities:
+          items:
+            type: string
+          type: array
+        addressStreets:
+          items:
+            type: string
+          type: array
+        addressPoBoxes:
+          items:
+            type: string
+          type: array
+        addressZipCodes:
+          items:
+            type: string
+          type: array
+        addressCountryDescriptions:
+          items:
+            type: string
+          type: array
+        birthDates:
+          items:
+            type: string
+          type: array
+        birthCities:
+          items:
+            type: string
+          type: array
+        birthCountries:
+          items:
+            type: string
+          type: array
+        validFromTo:
+          type: object
+        match:
+          description: Match percentage of search query
+          example: 0.92
+          type: number
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       example:
@@ -2400,6 +2448,83 @@ components:
           sourceListURL: http://bit.ly/1MLgou0
           startDate: 6/21/16
           frNotice: 81 FR 61595
+        euConsolidatedSanctionsList:
+        - birthCities:
+          - birthCities
+          - birthCities
+          entitySubjectType: entitySubjectType
+          nameAliasTitles:
+          - nameAliasTitles
+          - nameAliasTitles
+          addressPoBoxes:
+          - addressPoBoxes
+          - addressPoBoxes
+          addressCities:
+          - addressCities
+          - addressCities
+          match: 0.92
+          birthDates:
+          - birthDates
+          - birthDates
+          entityPublicationURL: entityPublicationURL
+          entityLogicalId: 13
+          nameAliasWholeNames:
+          - nameAliasWholeNames
+          - nameAliasWholeNames
+          validFromTo: '{}'
+          addressZipCodes:
+          - addressZipCodes
+          - addressZipCodes
+          addressCountryDescriptions:
+          - addressCountryDescriptions
+          - addressCountryDescriptions
+          entityReferenceNumber: entityReferenceNumber
+          addressStreets:
+          - addressStreets
+          - addressStreets
+          birthCountries:
+          - birthCountries
+          - birthCountries
+          fileGenerationDate: 28/10/2022
+          entityRemark: entityRemark
+        - birthCities:
+          - birthCities
+          - birthCities
+          entitySubjectType: entitySubjectType
+          nameAliasTitles:
+          - nameAliasTitles
+          - nameAliasTitles
+          addressPoBoxes:
+          - addressPoBoxes
+          - addressPoBoxes
+          addressCities:
+          - addressCities
+          - addressCities
+          match: 0.92
+          birthDates:
+          - birthDates
+          - birthDates
+          entityPublicationURL: entityPublicationURL
+          entityLogicalId: 13
+          nameAliasWholeNames:
+          - nameAliasWholeNames
+          - nameAliasWholeNames
+          validFromTo: '{}'
+          addressZipCodes:
+          - addressZipCodes
+          - addressZipCodes
+          addressCountryDescriptions:
+          - addressCountryDescriptions
+          - addressCountryDescriptions
+          entityReferenceNumber: entityReferenceNumber
+          addressStreets:
+          - addressStreets
+          - addressStreets
+          birthCountries:
+          - birthCountries
+          - birthCountries
+          fileGenerationDate: 28/10/2022
+          entityRemark: entityRemark
         militaryEndUsers:
         - addresses: Xiujia Bay, Weiyong Dt, Xian, 710021, CN
           endDate: endDate
@@ -2631,7 +2756,7 @@ components:
           type: array
         euConsolidatedSanctionsList:
           items:
-            $ref: '#/components/schemas/euConsolidatedSanctionsList'
+            $ref: '#/components/schemas/EUConsolidatedSanctionsList'
           type: array
         refreshedAt:
           format: date-time

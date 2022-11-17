@@ -171,7 +171,7 @@ type searchResponse struct {
 	NonSDNMenuBasedSanctionsList           []*Result[csl.NS_MBS] `json:"nonSDNMenuBasedSanctionsList"`
 
 	// EU - Consolidated Sanctions List
-	EUCSL []*Result[csl.EUCSLRow] `json:"euConsolidatedSanctionsList"`
+	EUCSL []*Result[csl.EUCSLRecord] `json:"euConsolidatedSanctionsList"`
 
 	// Metadata
 	RefreshedAt time.Time `json:"refreshedAt"`
@@ -266,7 +266,7 @@ func searchViaQ(logger log.Logger, searcher *searcher, name string) http.Handler
 type searchGather func(searcher *searcher, filters filterRequest, limit int, minMatch float64, name string, resp *searchResponse)
 
 var (
-	gatherings = []searchGather{
+	baseGatherings = append([]searchGather{
 		// OFAC SDN Search
 		func(s *searcher, filters filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			sdns := s.FindSDNsByRemarksID(limit, name)
@@ -288,7 +288,7 @@ var (
 		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			resp.DeniedPersons = s.TopDPs(limit, minMatch, name)
 		},
-	}
+	}, cslGatherings...)
 
 	// Consolidated Screening List Results
 	cslGatherings = []searchGather{
@@ -333,16 +333,12 @@ var (
 			resp.EUCSL = s.TopEUCSL(limit, minMatch, name)
 		},
 	}
+
+	allGatherings = append(baseGatherings, euGatherings...)
 )
 
-func generateAllGatherings() []searchGather {
-	gatherings = append(gatherings, cslGatherings...)
-	gatherings = append(gatherings, euGatherings...)
-	return gatherings
-}
-
 func buildFullSearchResponse(searcher *searcher, filters filterRequest, limit int, minMatch float64, name string) *searchResponse {
-	return buildFullSearchResponseWith(searcher, generateAllGatherings(), filters, limit, minMatch, name)
+	return buildFullSearchResponseWith(searcher, allGatherings, filters, limit, minMatch, name)
 }
 
 func buildFullSearchResponseWith(searcher *searcher, searchGatherings []searchGather, filters filterRequest, limit int, minMatch float64, name string) *searchResponse {
@@ -453,6 +449,8 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 			// BIS
 			DeniedPersons: searcher.TopDPs(limit, minMatch, nameSlug),
 			BISEntities:   searcher.TopBISEntities(limit, minMatch, nameSlug),
+			// EUCSL
+			EUCSL: searcher.TopEUCSL(limit, minMatch, nameSlug),
 			// Metadata
 			RefreshedAt: searcher.lastRefreshedAt,
 		})

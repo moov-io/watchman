@@ -38,12 +38,12 @@ func searchEUCSL(logger log.Logger, searcher *searcher) http.HandlerFunc {
 }
 
 // TopEUCSL searches the EU Sanctions list by Name and Alias
-func (s *searcher) TopEUCSL(limit int, minMatch float64, name string) []*Result[csl.EUCSLRow] {
+func (s *searcher) TopEUCSL(limit int, minMatch float64, name string) []*Result[csl.EUCSLRecord] {
 	s.RLock()
 	defer s.RUnlock()
 
 	s.Gate.Start()
 	defer s.Gate.Done()
 
-	return topResults[csl.EUCSLRow](limit, minMatch, name, s.EUCSL)
+	return topResults[csl.EUCSLRecord](limit, minMatch, name, s.EUCSL)
 }

@@ -1,21 +1,60 @@
 package csl
 
 // CLS - Consolidated List Sanctions from European Union
-// TODO: does this need to be in csl (ask Adam from moov)
 
-// TODO: get this from env
-// download uri
-// https://webgate.ec.europa.eu/fsd/fsf/public/files/csvFullSanctionsList_1_1/content?token=dG9rZW4tMjAxNw
-// protocol: https://
-// hostname: webgate.ec.europa.eu
-// path: /fsd/fsf/public/files/csvFullSanctionsList_1_1/content
-// query: ?token=dG9rZW4tMjAxNw
+// struct to hold the rows from the csv data before merge
+type EUCSL map[int]*EUCSLRecord
 
-// struct to hold the rows from the csv data
-type EUCSL map[int]*EUCSLRow
+type EUCSLRecord struct {
+	FileGenerationDate         string            `json:"fileGenerationDate"`
+	EntityLogicalID            int               `json:"entityLogicalId"`
+	EntityRemark               string            `json:"entityRemark"`
+	EntitySubjectType          string            `json:"entitySubjectType"`
+	EntityPublicationURL       string            `json:"entityPublicationURL"`
+	EntityReferenceNumber      string            `json:"entityReferenceNumber"`
+	NameAliasWholeNames        []string          `json:"nameAliasWholeNames"`
+	NameAliasTitles            []string          `json:"nameAliasTitles"`
+	AddressCities              []string          `json:"addressCities"`
+	AddressStreets             []string          `json:"addressStreets"`
+	AddressPoBoxes             []string          `json:"addressPoBoxs"`
+	AddressZipCodes            []string          `json:"addressZipCodes"`
+	AddressCountryDescriptions []string          `json:"addressCountryDescriptions"`
+	BirthDates                 []string          `json:"birthDates"`
+	BirthCities                []string          `json:"birthCities"`
+	BirthCountries             []string          `json:"birthCountries"`
+	ValidFromTo                map[string]string `json:"validFromTo"`
+}
 
-// type EUCSLSheet []*EUCSLRow
+// header indicies
+const (
+	FileGenerationDateIdx             = 0
+	EntityLogicalIdx                  = 1
+	ReferenceNumberIdx                = 2
+	EntityRemarkIdx                   = 6
+	EntitySubjectTypeIdx              = 8
+	EntityRegulationPublicationURLIdx = 15
 
+	NameAliasWholeNameIdx = 19
+	NameAliasTitleIdx     = 22
+
+	AddressCityIdx               = 34
+	AddressStreetIdx             = 35
+	AddressPoBoxIdx              = 36
+	AddressZipCodeIdx            = 37
+	AddressCountryDescriptionIdx = 43
+
+	BirthDateIdx        = 54
+	BirthDateCityIdx    = 65
+	BirthDateCountryIdx = 67
+
+	IdentificationValidFromIdx = 86
+	IdentificationValidToIdx   = 87
+)
+
+// below is the original struct used to parse the document
+// fields commented out are not parsed
+// this was refactored to be a flatter structure but is left in for documentation
+// use the EUCSLRecord struct above
 type EUCSLRow struct {
 	FileGenerationDate string            `json:"fileGenerationDate"`
 	Entity             *Entity           `json:"entity"`
@@ -87,7 +126,7 @@ type BirthDate struct {
 	// YearRangeFrom      string
 	// YearRangeTo        string
 	// Circa              string
-	// CaldendarType      string // TODO: this could be an enum
+	// CaldendarType      string
 	// ZipCode            string
 	// Region             string
 	// Place              string
@@ -106,7 +145,7 @@ type Identification struct {
 	// ReportedLost       bool
 	// RevokedByIssuer    bool
 	// LogicalID          int64
-	// Diplomatic         string // TODO: not sure about this field
+	// Diplomatic         string
 	// IssuedBy           string
 	// IssuedDate         string
 	ValidFrom string `json:"validFrom"`
@@ -119,43 +158,4 @@ type Identification struct {
 	// CountryDescription string
 	// RegulationLanguage string
 	// Remark             string
-}
-
-// header indicies
-const (
-	FileGenerationDateIdx             = 0
-	EntityLogicalIdx                  = 1
-	ReferenceNumberIdx                = 2
-	EntityRemarkIdx                   = 6
-	EntitySubjectTypeIdx              = 8
-	EntityRegulationPublicationURLIdx = 15
-
-	NameAliasWholeNameIdx = 19
-	NameAliasTitleIdx     = 22
-
-	AddressCityIdx               = 34
-	AddressStreetIdx             = 35
-	AddressPoBoxIdx              = 36
-	AddressZipCodeIdx            = 37
-	AddressCountryDescriptionIdx = 43
-
-	BirthDateIdx        = 54
-	BirthDateCityIdx    = 65
-	BirthDateCountryIdx = 67
-
-	IdentificationValidFromIdx = 86
-	IdentificationValidToIdx   = 87
-)
-
-func NewEUCSLRow() *EUCSLRow {
-	row := new(EUCSLRow)
-	row.Entity = new(Entity)
-	row.Entity.SubjectType = new(SubjectType)
-	row.Entity.Regulation = new(Regulation)
-	row.NameAliases = make([]*NameAlias, 0)
-	row.Addresses = make([]*Address, 0)
-	row.BirthDates = make([]*BirthDate, 0)
-	row.Identifications = make([]*Identification, 0)
-
-	return row
 }
