@@ -1,7 +1,7 @@
 PLATFORM=$(shell uname -s | tr '[:upper:]' '[:lower:]')
 VERSION := $(shell grep -Eo '(v[0-9]+[\.][0-9]+[\.][0-9]+(-[a-zA-Z0-9]*)?)' version.go)
 
-.PHONY: run build build-server build-examples docker release check
+.PHONY: run build build-server build-examples docker release check test
 
 run:
 	CGO_ENABLED=1 go run github.com/moov-io/watchman/cmd/server
@@ -124,6 +124,15 @@ test-integration: clean-integration
 	sleep 30
 	curl -v http://localhost:9094/data/refresh # hangs until download and parsing completes
 	./bin/batchsearch -local -threshold 0.95
+
+test: run-test-db
+	time go test ./... && echo $$?
+
+test-verbose: run-test-db
+	time go test -v ./... && echo $$?
+
+run-test-db:
+	docker-compose up -d mysql
 
 # From https://github.com/genuinetools/img
 .PHONY: AUTHORS

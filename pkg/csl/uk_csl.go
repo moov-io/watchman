@@ -23,7 +23,7 @@ const (
 	PostalCodeIdx      = 25
 	CountryIdx         = 26
 	OtherInfoIdx       = 27
-	GroupTypeidx       = 28
+	GroupTypeIdx       = 28
 	ListedDateIdx      = 32
 	UKSancListDateIdx  = 33
 	LastUpdatedIdx     = 34

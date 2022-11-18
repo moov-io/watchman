@@ -29,11 +29,11 @@ func TestReadUK(t *testing.T) {
 	expectedAddressSix := "Damascus"
 	expectedCountry := "Syria"
 	expectedOtherInfo := "(UK Sanctions List Ref):SYR0306 (UK Statement of Reasons):Front company for the acquisition of sensitive equipment related to the production of chemical weapons by the Syrian Scientific Studies and Research Center (SSRC) also known as Centre d'études et de recherches syrien (CERS). Owned or controlled by or otherwise associated with the SSRC. (Phone number):(1) +963112121816 (2) +963112121834 (3) +963112212743 (4) +963112214650 (5) +963115110117"
-	// expectedGroupType := "Entity"
-	// expectedListedDate := "16/02/2015"
-	// expectedUKSancListDate := "31/12/2020"
-	// expectedLastUpdatedDate := "16/09/2022"
-	// expectedGroupID := 13226
+	expectedGroupType := "Entity"
+	expectedListedDate := "02/12/2011"
+	expectedUKSancListDate := "31/12/2020"
+	expectedLastUpdatedDate := "13/05/2022"
+	expectedGroupID := 12431
 
 	testRow := ukCSLMap[groupID]
 
@@ -60,4 +60,9 @@ func TestReadUK(t *testing.T) {
 	assert.Equal(t, expectedAddressSix, testRow.AddressesSix[0])
 	assert.Equal(t, expectedCountry, testRow.Countries[0])
 	assert.Equal(t, expectedOtherInfo, testRow.OtherInfos[0])
+	assert.Equal(t, expectedGroupType, testRow.GroupTypes[0])
+	assert.Equal(t, expectedListedDate, testRow.ListedDates[0])
+	assert.Equal(t, expectedLastUpdatedDate, testRow.LastUpdates[0])
+	assert.Equal(t, expectedUKSancListDate, testRow.SanctionListDates[0])
+	assert.Equal(t, expectedGroupID, testRow.GroupID)
 }

@@ -128,4 +128,20 @@ func unmarshalUKRecord(csvRecord []string, ukCSLRecord *UKCSLRecord) {
 	if csvRecord[OtherInfoIdx] != "" {
 		ukCSLRecord.OtherInfos = append(ukCSLRecord.OtherInfos, csvRecord[OtherInfoIdx])
 	}
+	if csvRecord[GroupTypeIdx] != "" {
+		ukCSLRecord.GroupTypes = append(ukCSLRecord.GroupTypes, csvRecord[GroupTypeIdx])
+	}
+	if csvRecord[ListedDateIdx] != "" {
+		ukCSLRecord.ListedDates = append(ukCSLRecord.ListedDates, csvRecord[ListedDateIdx])
+	}
+	if csvRecord[LastUpdatedIdx] != "" {
+		ukCSLRecord.LastUpdates = append(ukCSLRecord.LastUpdates, csvRecord[LastUpdatedIdx])
+	}
+	if csvRecord[UKSancListDateIdx] != "" {
+		ukCSLRecord.SanctionListDates = append(ukCSLRecord.SanctionListDates, csvRecord[UKSancListDateIdx])
+	}
+	if csvRecord[GroupdIdx] != "" {
+		groupID, _ := strconv.Atoi(csvRecord[GroupdIdx])
+		ukCSLRecord.GroupID = groupID
+	}
 }
