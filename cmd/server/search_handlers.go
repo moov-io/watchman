@@ -173,6 +173,9 @@ type searchResponse struct {
 	// EU - Consolidated Sanctions List
 	EUCSL []*Result[csl.EUCSLRecord] `json:"euConsolidatedSanctionsList"`
 
+	// UK - Consolidated Sanctions List
+	UKCSL []*Result[csl.UKCSLRecord] `json:"ukConsolidatedSanctionsList"`
+
 	// Metadata
 	RefreshedAt time.Time `json:"refreshedAt"`
 }
@@ -331,6 +334,13 @@ var (
 	euGatherings = []searchGather{
 		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			resp.EUCSL = s.TopEUCSL(limit, minMatch, name)
+		},
+	}
+
+	// eu - consolidated sanctions list
+	ukGatherings = []searchGather{
+		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
+			resp.UKCSL = s.TopUKCSL(limit, minMatch, name)
 		},
 	}
 

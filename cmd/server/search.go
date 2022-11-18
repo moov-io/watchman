@@ -61,6 +61,9 @@ type searcher struct {
 	// EU Consolidated List of Sactions
 	EUCSL []*Result[csl.EUCSLRecord]
 
+	// UK Consolidated List of Sactions
+	UKCSL []*Result[csl.UKCSLRecord]
+
 	// metadata
 	lastRefreshedAt time.Time
 	sync.RWMutex    // protects all above fields
