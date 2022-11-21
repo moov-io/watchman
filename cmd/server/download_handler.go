@@ -42,6 +42,8 @@ func manualRefreshHandler(logger log.Logger, searcher *searcher, updates chan *D
 				"SSI":         log.Int(stats.SectoralSanctions),
 				"DPL":         log.Int(stats.DeniedPersons),
 				"BISEntities": log.Int(stats.BISEntities),
+				"EUCSL":       log.Int(stats.EUCSL),
+				"UKCSL":       log.Int(stats.UKCSL),
 			}).Logf("admin: finished data refresh %v ago", time.Since(stats.RefreshedAt))
 
 			w.WriteHeader(http.StatusOK)

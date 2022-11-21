@@ -174,6 +174,7 @@ func main() {
 			"CMIC":        log.Int(stats.ChineseMilitaryIndustrialComplex),
 			"NS_MBS":      log.Int(stats.NonSDNMenuBasedSanctions),
 			"EU_CSL":      log.Int(stats.EUCSL),
+			"UK_CSL":      log.Int(stats.UKCSL),
 		}).Logf("data refreshed %v ago", time.Since(stats.RefreshedAt))
 	}
 

@@ -36,6 +36,7 @@ func addSearchRoutes(logger log.Logger, r *mux.Router, searcher *searcher) {
 	r.Methods("GET").Path("/search").HandlerFunc(search(logger, searcher))
 	r.Methods("GET").Path("/search/us-csl").HandlerFunc(searchUSCSL(logger, searcher))
 	r.Methods("GET").Path("/search/eu-csl").HandlerFunc(searchEUCSL(logger, searcher))
+	r.Methods("GET").Path("/search/uk-csl").HandlerFunc(searchUKCSL(logger, searcher))
 }
 
 func extractSearchLimit(r *http.Request) int {

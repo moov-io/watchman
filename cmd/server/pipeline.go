@@ -38,6 +38,8 @@ type Name struct {
 
 	eu_csl *csl.EUCSLRecord
 
+	uk_csl *csl.UKCSLRecord
+
 	dp    *dpl.DPL
 	el    *csl.EL
 	addrs []*ofac.Address
@@ -152,6 +154,17 @@ func cslName(item interface{}) *Name {
 				Original:  v.NameAliasWholeNames[0],
 				Processed: v.NameAliasWholeNames[0],
 				eu_csl:    v,
+				altNames:  alts,
+			}
+		}
+	case *csl.UKCSLRecord:
+		if len(v.Names) >= 1 {
+			var alts []string
+			alts = append(alts, v.Names...)
+			return &Name{
+				Original:  v.Names[0],
+				Processed: v.Names[0],
+				uk_csl:    v,
 				altNames:  alts,
 			}
 		}

@@ -82,63 +82,112 @@ func ParseUK(r io.Reader) ([]*UKCSLRecord, UKCSL, error) {
 	return totalReport, report, nil
 }
 
+func arrayContains(checkArray []string, nameToCheck string) bool {
+	var nameAlreadyExists bool = false
+	for _, name := range checkArray {
+		if name == nameToCheck {
+			nameAlreadyExists = true
+			break
+		}
+	}
+	return nameAlreadyExists
+}
+
 func unmarshalUKRecord(csvRecord []string, ukCSLRecord *UKCSLRecord) {
 	if csvRecord[UKNameIdx] != "" {
-		ukCSLRecord.Names = append(ukCSLRecord.Names, csvRecord[UKNameIdx])
+		if !arrayContains(ukCSLRecord.Names, csvRecord[UKNameIdx]) {
+			ukCSLRecord.Names = append(ukCSLRecord.Names, csvRecord[UKNameIdx])
+		}
 	}
 	if csvRecord[UKTitleIdx] != "" {
-		ukCSLRecord.Titles = append(ukCSLRecord.Titles, csvRecord[UKTitleIdx])
+		if !arrayContains(ukCSLRecord.Titles, csvRecord[UKTitleIdx]) {
+			ukCSLRecord.Titles = append(ukCSLRecord.Titles, csvRecord[UKTitleIdx])
+		}
 	}
 	if csvRecord[DOBhIdx] != "" {
-		ukCSLRecord.DatesOfBirth = append(ukCSLRecord.DatesOfBirth, csvRecord[DOBhIdx])
+		if !arrayContains(ukCSLRecord.DatesOfBirth, csvRecord[DOBhIdx]) {
+			ukCSLRecord.DatesOfBirth = append(ukCSLRecord.DatesOfBirth, csvRecord[DOBhIdx])
+		}
 	}
 	if csvRecord[TownOfBirthIdx] != "" {
-		ukCSLRecord.TownsOfBirth = append(ukCSLRecord.TownsOfBirth, csvRecord[TownOfBirthIdx])
+		if !arrayContains(ukCSLRecord.TownsOfBirth, csvRecord[TownOfBirthIdx]) {
+			ukCSLRecord.TownsOfBirth = append(ukCSLRecord.TownsOfBirth, csvRecord[TownOfBirthIdx])
+		}
 	}
 	if csvRecord[CountryOfBirthIdx] != "" {
-		ukCSLRecord.CountriesOfBirth = append(ukCSLRecord.CountriesOfBirth, csvRecord[CountryOfBirthIdx])
+		if !arrayContains(ukCSLRecord.CountriesOfBirth, csvRecord[CountryOfBirthIdx]) {
+			ukCSLRecord.CountriesOfBirth = append(ukCSLRecord.CountriesOfBirth, csvRecord[CountryOfBirthIdx])
+		}
 	}
 	if csvRecord[UKNationalitiesIdx] != "" {
-		ukCSLRecord.Nationalities = append(ukCSLRecord.Nationalities, csvRecord[UKNationalitiesIdx])
+		if !arrayContains(ukCSLRecord.Nationalities, csvRecord[UKNationalitiesIdx]) {
+			ukCSLRecord.Nationalities = append(ukCSLRecord.Nationalities, csvRecord[UKNationalitiesIdx])
+		}
 	}
 	if csvRecord[AddressOneIdx] != "" {
-		ukCSLRecord.Addresses = append(ukCSLRecord.Addresses, csvRecord[AddressOneIdx])
+		if !arrayContains(ukCSLRecord.Addresses, csvRecord[AddressOneIdx]) {
+			ukCSLRecord.Addresses = append(ukCSLRecord.Addresses, csvRecord[AddressOneIdx])
+		}
 	}
 	if csvRecord[AddressTwoIdx] != "" {
-		ukCSLRecord.AddressesTwo = append(ukCSLRecord.AddressesTwo, csvRecord[AddressTwoIdx])
+		if !arrayContains(ukCSLRecord.AddressesTwo, csvRecord[AddressTwoIdx]) {
+			ukCSLRecord.AddressesTwo = append(ukCSLRecord.AddressesTwo, csvRecord[AddressTwoIdx])
+		}
 	}
 	if csvRecord[AddressThreeIdx] != "" {
-		ukCSLRecord.AddressesThree = append(ukCSLRecord.AddressesThree, csvRecord[AddressThreeIdx])
+		if !arrayContains(ukCSLRecord.AddressesThree, csvRecord[AddressThreeIdx]) {
+			ukCSLRecord.AddressesThree = append(ukCSLRecord.AddressesThree, csvRecord[AddressThreeIdx])
+		}
 	}
 	if csvRecord[AddressFourIdx] != "" {
-		ukCSLRecord.AddressesFour = append(ukCSLRecord.AddressesFour, csvRecord[AddressFourIdx])
+		if !arrayContains(ukCSLRecord.AddressesFour, csvRecord[AddressFourIdx]) {
+			ukCSLRecord.AddressesFour = append(ukCSLRecord.AddressesFour, csvRecord[AddressFourIdx])
+		}
 	}
 	if csvRecord[AddressFiveIdx] != "" {
-		ukCSLRecord.AddressesFive = append(ukCSLRecord.AddressesFive, csvRecord[AddressFiveIdx])
+		if !arrayContains(ukCSLRecord.AddressesFive, csvRecord[AddressFiveIdx]) {
+			ukCSLRecord.AddressesFive = append(ukCSLRecord.AddressesFive, csvRecord[AddressFiveIdx])
+		}
 	}
 	if csvRecord[AddressSixIdx] != "" {
-		ukCSLRecord.AddressesSix = append(ukCSLRecord.AddressesSix, csvRecord[AddressSixIdx])
+		if !arrayContains(ukCSLRecord.AddressesSix, csvRecord[AddressSixIdx]) {
+			ukCSLRecord.AddressesSix = append(ukCSLRecord.AddressesSix, csvRecord[AddressSixIdx])
+		}
 	}
 	if csvRecord[PostalCodeIdx] != "" {
-		ukCSLRecord.PostalCodes = append(ukCSLRecord.PostalCodes, csvRecord[PostalCodeIdx])
+		if !arrayContains(ukCSLRecord.PostalCodes, csvRecord[PostalCodeIdx]) {
+			ukCSLRecord.PostalCodes = append(ukCSLRecord.PostalCodes, csvRecord[PostalCodeIdx])
+		}
 	}
 	if csvRecord[CountryIdx] != "" {
-		ukCSLRecord.Countries = append(ukCSLRecord.Countries, csvRecord[CountryIdx])
+		if !arrayContains(ukCSLRecord.Countries, csvRecord[CountryIdx]) {
+			ukCSLRecord.Countries = append(ukCSLRecord.Countries, csvRecord[CountryIdx])
+		}
 	}
 	if csvRecord[OtherInfoIdx] != "" {
-		ukCSLRecord.OtherInfos = append(ukCSLRecord.OtherInfos, csvRecord[OtherInfoIdx])
+		if !arrayContains(ukCSLRecord.OtherInfos, csvRecord[OtherInfoIdx]) {
+			ukCSLRecord.OtherInfos = append(ukCSLRecord.OtherInfos, csvRecord[OtherInfoIdx])
+		}
 	}
 	if csvRecord[GroupTypeIdx] != "" {
-		ukCSLRecord.GroupTypes = append(ukCSLRecord.GroupTypes, csvRecord[GroupTypeIdx])
+		if !arrayContains(ukCSLRecord.GroupTypes, csvRecord[GroupTypeIdx]) {
+			ukCSLRecord.GroupTypes = append(ukCSLRecord.GroupTypes, csvRecord[GroupTypeIdx])
+		}
 	}
 	if csvRecord[ListedDateIdx] != "" {
-		ukCSLRecord.ListedDates = append(ukCSLRecord.ListedDates, csvRecord[ListedDateIdx])
+		if !arrayContains(ukCSLRecord.ListedDates, csvRecord[ListedDateIdx]) {
+			ukCSLRecord.ListedDates = append(ukCSLRecord.ListedDates, csvRecord[ListedDateIdx])
+		}
 	}
 	if csvRecord[LastUpdatedIdx] != "" {
-		ukCSLRecord.LastUpdates = append(ukCSLRecord.LastUpdates, csvRecord[LastUpdatedIdx])
+		if !arrayContains(ukCSLRecord.LastUpdates, csvRecord[LastUpdatedIdx]) {
+			ukCSLRecord.LastUpdates = append(ukCSLRecord.LastUpdates, csvRecord[LastUpdatedIdx])
+		}
 	}
 	if csvRecord[UKSancListDateIdx] != "" {
-		ukCSLRecord.SanctionListDates = append(ukCSLRecord.SanctionListDates, csvRecord[UKSancListDateIdx])
+		if !arrayContains(ukCSLRecord.SanctionListDates, csvRecord[UKSancListDateIdx]) {
+			ukCSLRecord.SanctionListDates = append(ukCSLRecord.SanctionListDates, csvRecord[UKSancListDateIdx])
+		}
 	}
 	if csvRecord[GroupdIdx] != "" {
 		groupID, _ := strconv.Atoi(csvRecord[GroupdIdx])
