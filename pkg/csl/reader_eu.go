@@ -103,37 +103,57 @@ func unmarshalRecord(csvRecord []string, euCSLRecord *EUCSLRecord) {
 
 	// name alias
 	if csvRecord[NameAliasWholeNameIdx] != "" {
-		euCSLRecord.NameAliasWholeNames = append(euCSLRecord.NameAliasWholeNames, csvRecord[NameAliasWholeNameIdx])
+		if !arrayContains(euCSLRecord.NameAliasWholeNames, csvRecord[NameAliasWholeNameIdx]) {
+			euCSLRecord.NameAliasWholeNames = append(euCSLRecord.NameAliasWholeNames, csvRecord[NameAliasWholeNameIdx])
+		}
 	}
 	if csvRecord[NameAliasTitleIdx] != "" {
-		euCSLRecord.NameAliasTitles = append(euCSLRecord.NameAliasTitles, csvRecord[NameAliasTitleIdx])
+		if !arrayContains(euCSLRecord.NameAliasTitles, csvRecord[NameAliasTitleIdx]) {
+			euCSLRecord.NameAliasTitles = append(euCSLRecord.NameAliasTitles, csvRecord[NameAliasTitleIdx])
+		}
 	}
 	// address
 	if csvRecord[AddressCityIdx] != "" {
-		euCSLRecord.AddressCities = append(euCSLRecord.AddressCities, csvRecord[AddressCityIdx])
+		if !arrayContains(euCSLRecord.AddressCities, csvRecord[AddressCityIdx]) {
+			euCSLRecord.AddressCities = append(euCSLRecord.AddressCities, csvRecord[AddressCityIdx])
+		}
 	}
 	if csvRecord[AddressStreetIdx] != "" {
-		euCSLRecord.AddressStreets = append(euCSLRecord.AddressStreets, csvRecord[AddressStreetIdx])
+		if !arrayContains(euCSLRecord.AddressStreets, csvRecord[AddressStreetIdx]) {
+			euCSLRecord.AddressStreets = append(euCSLRecord.AddressStreets, csvRecord[AddressStreetIdx])
+		}
 	}
 	if csvRecord[AddressPoBoxIdx] != "" {
-		euCSLRecord.AddressPoBoxes = append(euCSLRecord.AddressPoBoxes, csvRecord[AddressPoBoxIdx])
+		if !arrayContains(euCSLRecord.AddressPoBoxes, csvRecord[AddressPoBoxIdx]) {
+			euCSLRecord.AddressPoBoxes = append(euCSLRecord.AddressPoBoxes, csvRecord[AddressPoBoxIdx])
+		}
 	}
 	if csvRecord[AddressZipCodeIdx] != "" {
-		euCSLRecord.AddressZipCodes = append(euCSLRecord.AddressZipCodes, csvRecord[AddressZipCodeIdx])
+		if !arrayContains(euCSLRecord.AddressZipCodes, csvRecord[AddressZipCodeIdx]) {
+			euCSLRecord.AddressZipCodes = append(euCSLRecord.AddressZipCodes, csvRecord[AddressZipCodeIdx])
+		}
 	}
 	if csvRecord[AddressCountryDescriptionIdx] != "" {
-		euCSLRecord.AddressCountryDescriptions = append(euCSLRecord.AddressCountryDescriptions, csvRecord[AddressCountryDescriptionIdx])
+		if !arrayContains(euCSLRecord.AddressCountryDescriptions, csvRecord[AddressCountryDescriptionIdx]) {
+			euCSLRecord.AddressCountryDescriptions = append(euCSLRecord.AddressCountryDescriptions, csvRecord[AddressCountryDescriptionIdx])
+		}
 	}
 
 	// birthdate
 	if csvRecord[BirthDateIdx] != "" {
-		euCSLRecord.BirthDates = append(euCSLRecord.BirthDates, csvRecord[BirthDateIdx])
+		if !arrayContains(euCSLRecord.BirthDates, csvRecord[BirthDateIdx]) {
+			euCSLRecord.BirthDates = append(euCSLRecord.BirthDates, csvRecord[BirthDateIdx])
+		}
 	}
 	if csvRecord[BirthDateCityIdx] != "" {
-		euCSLRecord.BirthCities = append(euCSLRecord.BirthCities, csvRecord[BirthDateCityIdx])
+		if !arrayContains(euCSLRecord.BirthCities, csvRecord[BirthDateCityIdx]) {
+			euCSLRecord.BirthCities = append(euCSLRecord.BirthCities, csvRecord[BirthDateCityIdx])
+		}
 	}
 	if csvRecord[BirthDateCountryIdx] != "" {
-		euCSLRecord.BirthCountries = append(euCSLRecord.BirthCountries, csvRecord[BirthDateCountryIdx])
+		if !arrayContains(euCSLRecord.BirthCountries, csvRecord[BirthDateCountryIdx]) {
+			euCSLRecord.BirthCountries = append(euCSLRecord.BirthCountries, csvRecord[BirthDateCountryIdx])
+		}
 	}
 
 	// identifications
