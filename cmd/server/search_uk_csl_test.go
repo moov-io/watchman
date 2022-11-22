@@ -19,15 +19,15 @@ import (
 
 func TestSearch_UK_CSL(t *testing.T) {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/search/uk-csl?name=organization", nil)
+	req := httptest.NewRequest("GET", "/search/uk-csl?name=%27ABD%20AL-NASIR", nil)
 
 	router := mux.NewRouter()
-	addSearchRoutes(log.NewNopLogger(), router, isnSearcher)
+	addSearchRoutes(log.NewNopLogger(), router, uk_cslSearcher)
 	router.ServeHTTP(w, req)
 	w.Flush()
 
 	require.Equal(t, http.StatusOK, w.Code)
-	require.Contains(t, w.Body.String(), `"match":0.6333`)
+	require.Contains(t, w.Body.String(), `"match":1`)
 
 	var wrapper struct {
 		UKCSL []csl.UKCSLRecord `json:"ukConsolidatedSanctionsList"`
@@ -35,5 +35,7 @@ func TestSearch_UK_CSL(t *testing.T) {
 	err := json.NewDecoder(w.Body).Decode(&wrapper)
 	require.NoError(t, err)
 
-	// require.Equal(t, "2d2db09c686e4829d0ef1b0b04145eec3d42cd88", prolif.EntityID)
+	require.Greater(t, len(wrapper.UKCSL), 0)
+
+	require.Equal(t, int(13720), wrapper.UKCSL[0].GroupID)
 }
