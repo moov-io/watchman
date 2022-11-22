@@ -85,6 +85,9 @@ func ParseUK(r io.Reader) ([]*UKCSLRecord, UKCSL, error) {
 
 func arrayContains(checkArray []string, nameToCheck string) bool {
 	var nameAlreadyExists bool = false
+	if nameToCheck == "" {
+		return true
+	}
 	for _, name := range checkArray {
 		if name == nameToCheck {
 			nameAlreadyExists = true
