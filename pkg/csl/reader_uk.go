@@ -141,36 +141,31 @@ func unmarshalUKRecord(csvRecord []string, ukCSLRecord *UKCSLRecord) {
 			ukCSLRecord.Nationalities = append(ukCSLRecord.Nationalities, csvRecord[UKNationalitiesIdx])
 		}
 	}
+
+	var addresses []string
 	if csvRecord[AddressOneIdx] != "" {
-		if !arrayContains(ukCSLRecord.Addresses, csvRecord[AddressOneIdx]) {
-			ukCSLRecord.Addresses = append(ukCSLRecord.Addresses, csvRecord[AddressOneIdx])
-		}
+		addresses = append(addresses, csvRecord[AddressOneIdx])
 	}
 	if csvRecord[AddressTwoIdx] != "" {
-		if !arrayContains(ukCSLRecord.AddressesTwo, csvRecord[AddressTwoIdx]) {
-			ukCSLRecord.AddressesTwo = append(ukCSLRecord.AddressesTwo, csvRecord[AddressTwoIdx])
-		}
+		addresses = append(addresses, csvRecord[AddressTwoIdx])
 	}
 	if csvRecord[AddressThreeIdx] != "" {
-		if !arrayContains(ukCSLRecord.AddressesThree, csvRecord[AddressThreeIdx]) {
-			ukCSLRecord.AddressesThree = append(ukCSLRecord.AddressesThree, csvRecord[AddressThreeIdx])
-		}
+		addresses = append(addresses, csvRecord[AddressThreeIdx])
 	}
 	if csvRecord[AddressFourIdx] != "" {
-		if !arrayContains(ukCSLRecord.AddressesFour, csvRecord[AddressFourIdx]) {
-			ukCSLRecord.AddressesFour = append(ukCSLRecord.AddressesFour, csvRecord[AddressFourIdx])
-		}
+		addresses = append(addresses, csvRecord[AddressFourIdx])
 	}
 	if csvRecord[AddressFiveIdx] != "" {
-		if !arrayContains(ukCSLRecord.AddressesFive, csvRecord[AddressFiveIdx]) {
-			ukCSLRecord.AddressesFive = append(ukCSLRecord.AddressesFive, csvRecord[AddressFiveIdx])
-		}
+		addresses = append(addresses, csvRecord[AddressFiveIdx])
 	}
 	if csvRecord[AddressSixIdx] != "" {
-		if !arrayContains(ukCSLRecord.AddressesSix, csvRecord[AddressSixIdx]) {
-			ukCSLRecord.AddressesSix = append(ukCSLRecord.AddressesSix, csvRecord[AddressSixIdx])
-		}
+		addresses = append(addresses, csvRecord[AddressSixIdx])
 	}
+	address := strings.Join(addresses, ", ")
+	if !arrayContains(ukCSLRecord.Addresses, address) {
+		ukCSLRecord.Addresses = append(ukCSLRecord.Addresses, address)
+	}
+
 	if csvRecord[PostalCodeIdx] != "" {
 		if !arrayContains(ukCSLRecord.PostalCodes, csvRecord[PostalCodeIdx]) {
 			ukCSLRecord.PostalCodes = append(ukCSLRecord.PostalCodes, csvRecord[PostalCodeIdx])
@@ -186,11 +181,11 @@ func unmarshalUKRecord(csvRecord []string, ukCSLRecord *UKCSLRecord) {
 			ukCSLRecord.OtherInfos = append(ukCSLRecord.OtherInfos, csvRecord[OtherInfoIdx])
 		}
 	}
-	if csvRecord[GroupTypeIdx] != "" {
-		if !arrayContains(ukCSLRecord.GroupTypes, csvRecord[GroupTypeIdx]) {
-			ukCSLRecord.GroupTypes = append(ukCSLRecord.GroupTypes, csvRecord[GroupTypeIdx])
-		}
+
+	if csvRecord[GroupTypeIdx] != "" && ukCSLRecord.GroupType == "" {
+		ukCSLRecord.GroupType = csvRecord[GroupTypeIdx]
 	}
+
 	if csvRecord[ListedDateIdx] != "" {
 		if !arrayContains(ukCSLRecord.ListedDates, csvRecord[ListedDateIdx]) {
 			ukCSLRecord.ListedDates = append(ukCSLRecord.ListedDates, csvRecord[ListedDateIdx])

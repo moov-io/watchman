@@ -1593,6 +1593,26 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
+    UKConsolidatedSanctionsList:
+      properties:
+        names:
+          type: array
+          items: 
+            type: string
+        addresses:
+          type: array
+          items:
+            type: string
+        countries:
+          type: array
+          items:
+            type: string
+        groupType:
+          type: string
+        match:
+          description: Match percentage of search query
+          example: 0.92
+          type: number
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       properties:
@@ -1692,6 +1712,10 @@ components:
         euConsolidatedSanctionsList:
           items:
             $ref: '#/components/schemas/EUConsolidatedSanctionsList'
+          type: array
+        ukConsolidatedSanctionsList:
+          items:
+            $ref: '#/components/schemas/UKConsolidatedSanctionsList'
           type: array
         # Metadata
         refreshedAt:

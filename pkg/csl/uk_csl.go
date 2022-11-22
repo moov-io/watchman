@@ -46,15 +46,10 @@ type UKCSLRecord struct {
 	CountriesOfBirth  []string `json:"countriesOfBirth"`
 	Nationalities     []string `json:"nationalities"`
 	Addresses         []string `json:"addresses"`
-	AddressesTwo      []string `json:"addressesTwo"`
-	AddressesThree    []string `json:"addressesThree"`
-	AddressesFour     []string `json:"addressesFour"`
-	AddressesFive     []string `json:"addressesFive"`
-	AddressesSix      []string `json:"addressesSix"`
 	PostalCodes       []string `json:"postalCodes"`
 	Countries         []string `json:"countries"`
 	OtherInfos        []string `json:"otherInfo"`
-	GroupTypes        []string `json:"groupType"`
+	GroupType         string   `json:"groupType"`
 	ListedDates       []string `json:"listedDate"`
 	SanctionListDates []string `json:"sanctionListDate"`
 	LastUpdates       []string `json:"lastUpdated"`

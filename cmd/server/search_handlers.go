@@ -462,6 +462,8 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 			BISEntities:   searcher.TopBISEntities(limit, minMatch, nameSlug),
 			// EUCSL
 			EUCSL: searcher.TopEUCSL(limit, minMatch, nameSlug),
+			// UKCSL
+			UKCSL: searcher.TopUKCSL(limit, minMatch, nameSlug),
 			// Metadata
 			RefreshedAt: searcher.lastRefreshedAt,
 		})
