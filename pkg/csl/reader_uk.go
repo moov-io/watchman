@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"strings"
 )
 
 func ReadUKFile(path string) ([]*UKCSLRecord, UKCSL, error) {
@@ -94,11 +95,27 @@ func arrayContains(checkArray []string, nameToCheck string) bool {
 }
 
 func unmarshalUKRecord(csvRecord []string, ukCSLRecord *UKCSLRecord) {
+	var names []string
 	if csvRecord[UKNameIdx] != "" {
-		if !arrayContains(ukCSLRecord.Names, csvRecord[UKNameIdx]) {
-			ukCSLRecord.Names = append(ukCSLRecord.Names, csvRecord[UKNameIdx])
-		}
+		names = append(names, csvRecord[UKNameIdx])
 	}
+	if csvRecord[UKNameTwoIdx] != "" {
+		names = append(names, csvRecord[UKNameTwoIdx])
+	}
+	if csvRecord[UKNameThreeIdx] != "" {
+		names = append(names, csvRecord[UKNameThreeIdx])
+	}
+	if csvRecord[UKNameFourIdx] != "" {
+		names = append(names, csvRecord[UKNameFourIdx])
+	}
+	if csvRecord[UKNameFiveIdx] != "" {
+		names = append(names, csvRecord[UKNameFiveIdx])
+	}
+	name := strings.Join(names, " ")
+	if !arrayContains(ukCSLRecord.Names, name) {
+		ukCSLRecord.Names = append(ukCSLRecord.Names, name)
+	}
+
 	if csvRecord[UKTitleIdx] != "" {
 		if !arrayContains(ukCSLRecord.Titles, csvRecord[UKTitleIdx]) {
 			ukCSLRecord.Titles = append(ukCSLRecord.Titles, csvRecord[UKTitleIdx])
