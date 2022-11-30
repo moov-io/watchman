@@ -125,15 +125,6 @@ test-integration: clean-integration
 	curl -v http://localhost:9094/data/refresh # hangs until download and parsing completes
 	./bin/batchsearch -local -threshold 0.95
 
-test: run-test-db
-	time go test ./... && echo $$?
-
-test-verbose: run-test-db
-	time go test -v ./... && echo $$?
-
-run-test-db:
-	docker-compose up -d mysql
-
 # From https://github.com/genuinetools/img
 .PHONY: AUTHORS
 AUTHORS:
