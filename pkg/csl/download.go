@@ -10,22 +10,19 @@ import (
 	"os"
 
 	"github.com/moov-io/base/log"
+	"github.com/moov-io/base/strx"
 	"github.com/moov-io/watchman/pkg/download"
 )
 
 var (
-	cslDownloadTemplate = func() string {
-		if w := os.Getenv("CSL_DOWNLOAD_TEMPLATE"); w != "" {
-			return w
-		}
-		return "https://api.trade.gov/static/consolidated_screening_list/%s"
-	}()
+	publicUSDownloadURL = "https://api.trade.gov/static/consolidated_screening_list/%s"
+	usDownloadURL       = strx.Or(os.Getenv("CSL_DOWNLOAD_TEMPLATE"), os.Getenv("US_CSL_DOWNLOAD_URL"), publicUSDownloadURL)
 )
 
 func Download(logger log.Logger, initialDir string) (string, error) {
 	dl := download.New(logger, download.HTTPClient)
 
-	cslURL, err := buildDownloadURL(cslDownloadTemplate)
+	cslURL, err := buildDownloadURL(usDownloadURL)
 	if err != nil {
 		return "", err
 	}

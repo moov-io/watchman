@@ -16,15 +16,17 @@ import (
 var (
 	// Token is hardcoded on the EU site, but we offer an override.
 	// https://data.europa.eu/data/datasets/consolidated-list-of-persons-groups-and-entities-subject-to-eu-financial-sanctions?locale=en
-	token = strx.Or(os.Getenv("EU_CSL_TOKEN"), "dG9rZW4tMjAxNw")
-	uri   = fmt.Sprintf("https://webgate.ec.europa.eu/fsd/fsf/public/files/csvFullSanctionsList_1_1/content?token=%s", token)
+	token               = strx.Or(os.Getenv("EU_CSL_TOKEN"), "dG9rZW4tMjAxNw")
+	publicEUDownloadURL = fmt.Sprintf("https://webgate.ec.europa.eu/fsd/fsf/public/files/csvFullSanctionsList_1_1/content?token=%s", token)
+
+	euDownloadURL = strx.Or(os.Getenv("EU_CSL_DOWNLOAD_URL"), publicEUDownloadURL)
 )
 
 func DownloadEU(logger log.Logger, initialDir string) (string, error) {
 	dl := download.New(logger, download.HTTPClient)
 
 	euCSLNameAndSource := make(map[string]string)
-	euCSLNameAndSource["eu_csl.csv"] = uri
+	euCSLNameAndSource["eu_csl.csv"] = euDownloadURL
 
 	file, err := dl.GetFiles(initialDir, euCSLNameAndSource)
 	if len(file) == 0 || err != nil {
