@@ -3,6 +3,7 @@
 ADDITIONS
 
 - search: Add the EU Consolidated Screening List
+- search: Add the UK Consolidated Screening List
 
 IMPROVEMENTS
 
