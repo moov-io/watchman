@@ -6,8 +6,10 @@ package csl
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/moov-io/base/log"
+	"github.com/moov-io/base/strx"
 	"github.com/moov-io/watchman/pkg/download"
 )
 
@@ -20,7 +22,7 @@ func DownloadUK(logger log.Logger, initialDir string) (string, error) {
 	dl := download.New(logger, download.HTTPClient)
 
 	ukCSLNameAndSource := make(map[string]string)
-	ukCSLNameAndSource["ConList.csv"] = ukuri
+	ukCSLNameAndSource["ConList.csv"] = strx.Or(os.Getenv("UK_URI"), ukuri)
 
 	file, err := dl.GetFiles(initialDir, ukCSLNameAndSource)
 	if len(file) == 0 || err != nil {
