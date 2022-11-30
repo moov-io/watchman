@@ -75,6 +75,16 @@ func precomputeCSLEntities[T any](items []*T, pipe *pipeliner) []*Result[T] {
 					pipe.Do(alt)
 					altNames = append(altNames, alt.Processed)
 				}
+			} else if name == "Names" && _type == "[]string" {
+				alts, ok := elm.Field(i).Interface().([]string)
+				if !ok {
+					continue
+				}
+				for j := range alts {
+					alt := &Name{Processed: alts[j]}
+					pipe.Do(alt)
+					altNames = append(altNames, alt.Processed)
+				}
 			}
 		}
 

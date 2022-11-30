@@ -20,7 +20,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSearch__US_CSL(t *testing.T) {
+func TestSearch_US_CSL(t *testing.T) {
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/search/us-csl?name=Khan&limit=1", nil)
 

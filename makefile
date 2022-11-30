@@ -1,7 +1,7 @@
 PLATFORM=$(shell uname -s | tr '[:upper:]' '[:lower:]')
 VERSION := $(shell grep -Eo '(v[0-9]+[\.][0-9]+[\.][0-9]+(-[a-zA-Z0-9]*)?)' version.go)
 
-.PHONY: run build build-server build-examples docker release check
+.PHONY: run build build-server build-examples docker release check test
 
 run:
 	CGO_ENABLED=1 go run github.com/moov-io/watchman/cmd/server

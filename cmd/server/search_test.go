@@ -48,6 +48,7 @@ var (
 	ns_mbsSearcher    = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
 
 	eu_cslSearcher = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	uk_cslSearcher = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
 )
 
 func init() {
@@ -347,6 +348,13 @@ func init() {
 		BirthCities:                []string{"al-Awja, near Tikrit"},
 		BirthCountries:             []string{"IRAQ"},
 		ValidFromTo:                map[string]string{"2022": "2030"},
+	}}, noLogPipeliner)
+
+	uk_cslSearcher.UKCSL = precomputeCSLEntities[csl.UKCSLRecord]([]*csl.UKCSLRecord{{
+		Names:     []string{"'ABD AL-NASIR"},
+		Addresses: []string{"Tall 'Afar"},
+		GroupType: "Individual",
+		GroupID:   13720,
 	}}, noLogPipeliner)
 }
 

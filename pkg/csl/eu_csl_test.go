@@ -13,7 +13,7 @@ import (
 )
 
 func TestEUCSL(t *testing.T) {
-	t.Skip("CSL is currently broken, looks like they require API access now")
+	t.Skip("EU CSL is currently broken, looks like they require API access now")
 
 	if testing.Short() {
 		t.Skip("ignorning network test")

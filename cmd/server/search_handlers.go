@@ -36,6 +36,7 @@ func addSearchRoutes(logger log.Logger, r *mux.Router, searcher *searcher) {
 	r.Methods("GET").Path("/search").HandlerFunc(search(logger, searcher))
 	r.Methods("GET").Path("/search/us-csl").HandlerFunc(searchUSCSL(logger, searcher))
 	r.Methods("GET").Path("/search/eu-csl").HandlerFunc(searchEUCSL(logger, searcher))
+	r.Methods("GET").Path("/search/uk-csl").HandlerFunc(searchUKCSL(logger, searcher))
 }
 
 func extractSearchLimit(r *http.Request) int {
@@ -172,6 +173,9 @@ type searchResponse struct {
 
 	// EU - Consolidated Sanctions List
 	EUCSL []*Result[csl.EUCSLRecord] `json:"euConsolidatedSanctionsList"`
+
+	// UK - Consolidated Sanctions List
+	UKCSL []*Result[csl.UKCSLRecord] `json:"ukConsolidatedSanctionsList"`
 
 	// Metadata
 	RefreshedAt time.Time `json:"refreshedAt"`
@@ -334,6 +338,13 @@ var (
 		},
 	}
 
+	// eu - consolidated sanctions list
+	ukGatherings = []searchGather{
+		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
+			resp.UKCSL = s.TopUKCSL(limit, minMatch, name)
+		},
+	}
+
 	allGatherings = append(baseGatherings, euGatherings...)
 )
 
@@ -451,6 +462,8 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 			BISEntities:   searcher.TopBISEntities(limit, minMatch, nameSlug),
 			// EUCSL
 			EUCSL: searcher.TopEUCSL(limit, minMatch, nameSlug),
+			// UKCSL
+			UKCSL: searcher.TopUKCSL(limit, minMatch, nameSlug),
 			// Metadata
 			RefreshedAt: searcher.lastRefreshedAt,
 		})

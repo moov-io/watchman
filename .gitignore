@@ -29,3 +29,5 @@ openapi-generator*jar
 
 webui/build/
 webui/node_modules/
+
+makefile.dev

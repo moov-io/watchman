@@ -2153,6 +2153,38 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
+    UKConsolidatedSanctionsList:
+      example:
+        addresses:
+        - addresses
+        - addresses
+        groupType: groupType
+        names:
+        - names
+        - names
+        match: 0.92
+        countries:
+        - countries
+        - countries
+      properties:
+        names:
+          items:
+            type: string
+          type: array
+        addresses:
+          items:
+            type: string
+          type: array
+        countries:
+          items:
+            type: string
+          type: array
+        groupType:
+          type: string
+        match:
+          description: Match percentage of search query
+          example: 0.92
+          type: number
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       example:
@@ -2288,6 +2320,29 @@ components:
           state: TX
           effectiveDate: 06/15/2016
           expirationDate: 06/15/2025
+        ukConsolidatedSanctionsList:
+        - addresses:
+          - addresses
+          - addresses
+          groupType: groupType
+          names:
+          - names
+          - names
+          match: 0.92
+          countries:
+          - countries
+          - countries
+        - addresses:
+          - addresses
+          - addresses
+          groupType: groupType
+          names:
+          - names
+          - names
+          match: 0.92
+          countries:
+          - countries
+          - countries
         palestinianLegislativeCouncil:
         - addresses:
           - 123 Dunbar Street, Testerville, TX, Palestine
@@ -2757,6 +2812,10 @@ components:
         euConsolidatedSanctionsList:
           items:
             $ref: '#/components/schemas/EUConsolidatedSanctionsList'
+          type: array
+        ukConsolidatedSanctionsList:
+          items:
+            $ref: '#/components/schemas/UKConsolidatedSanctionsList'
           type: array
         refreshedAt:
           format: date-time
