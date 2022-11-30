@@ -22,7 +22,7 @@ func createTestWatchRepository(t *testing.T) *sqliteWatchRepository {
 }
 
 func TestCompanyWatch(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteWatchRepository) {
 		companyID := base.ID()
@@ -50,7 +50,7 @@ func TestCompanyWatch(t *testing.T) {
 }
 
 func TestCompanyNameWatch(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteWatchRepository) {
 		err := repo.removeCompanyNameWatch(base.ID())
@@ -78,7 +78,7 @@ func TestCompanyNameWatch(t *testing.T) {
 }
 
 func TestCustomerWatch(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteWatchRepository) {
 		customerID := base.ID()
@@ -106,7 +106,7 @@ func TestCustomerWatch(t *testing.T) {
 }
 
 func TestCustomerNameWatch(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteWatchRepository) {
 		err := repo.removeCustomerNameWatch(base.ID())
@@ -134,7 +134,7 @@ func TestCustomerNameWatch(t *testing.T) {
 }
 
 func TestWatchCursor_ID(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteWatchRepository) {
 		cur := repo.getWatchesCursor(log.NewNopLogger(), 4) // batchSize is divided in 4 parts to equally grab customer, customer name, company, and company name watches
@@ -185,6 +185,8 @@ func TestWatchCursor_ID(t *testing.T) {
 }
 
 func TestWatchCursor_Names(t *testing.T) {
+	t.Skip("Watches are on their way out...")
+
 	check := func(t *testing.T, repo *sqliteWatchRepository) {
 		cur := repo.getWatchesCursor(log.NewNopLogger(), 4)
 

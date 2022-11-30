@@ -123,7 +123,7 @@ func TestCompany_getById(t *testing.T) {
 }
 
 func TestCompany_get(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCompanyRepository) {
 		w := httptest.NewRecorder()
@@ -186,7 +186,7 @@ func TestCompany_EmptyHTTP(t *testing.T) {
 }
 
 func TestCompany_addWatch(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCompanyRepository) {
 		w := httptest.NewRecorder()
@@ -226,6 +226,8 @@ func TestCompany_addWatch(t *testing.T) {
 }
 
 func TestCompany_addWatchNoBody(t *testing.T) {
+	t.Skip("Watches are on their way out...")
+
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/ofac/companies/foo/watch", nil)
 	req.Header.Set("x-user-id", "test")
@@ -244,7 +246,7 @@ func TestCompany_addWatchNoBody(t *testing.T) {
 }
 
 func TestCompany_addWatchMissingAuthToken(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCompanyRepository) {
 		watchRepo := createTestWatchRepository(t)
@@ -279,7 +281,7 @@ func TestCompany_addWatchMissingAuthToken(t *testing.T) {
 }
 
 func TestCompany_addNameWatch(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCompanyRepository) {
 		w := httptest.NewRecorder()
@@ -320,7 +322,7 @@ func TestCompany_addNameWatch(t *testing.T) {
 }
 
 func TestCompany_addCompanyNameWatchNoBody(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCompanyRepository) {
 		w := httptest.NewRecorder()
@@ -367,7 +369,7 @@ func TestCompany_addCompanyNameWatchNoBody(t *testing.T) {
 }
 
 func TestCompany_updateUnsafe(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCompanyRepository) {
 		w := httptest.NewRecorder()
@@ -400,7 +402,7 @@ func TestCompany_updateUnsafe(t *testing.T) {
 }
 
 func TestCompany_updateException(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCompanyRepository) {
 		w := httptest.NewRecorder()
@@ -466,7 +468,7 @@ func TestCompany_updateUnknown(t *testing.T) {
 }
 
 func TestCompany_updateNoUserId(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCompanyRepository) {
 		w := httptest.NewRecorder()
@@ -496,7 +498,7 @@ func TestCompany_updateNoUserId(t *testing.T) {
 }
 
 func TestCompany_updateNoBody(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCompanyRepository) {
 		w := httptest.NewRecorder()
@@ -527,7 +529,7 @@ func TestCompany_updateNoBody(t *testing.T) {
 }
 
 func TestCompany_removeWatch(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCompanyRepository) {
 		w := httptest.NewRecorder()
@@ -558,7 +560,7 @@ func TestCompany_removeWatch(t *testing.T) {
 }
 
 func TestCompany_removeNameWatch(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCompanyRepository) {
 		w := httptest.NewRecorder()
@@ -590,7 +592,7 @@ func TestCompany_removeNameWatch(t *testing.T) {
 }
 
 func TestCompanyRepository(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCompanyRepository) {
 		companyID, userID := base.ID(), base.ID()

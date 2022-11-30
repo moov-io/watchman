@@ -188,7 +188,7 @@ func TestCustomer_EmptyHTTP(t *testing.T) {
 }
 
 func TestCustomer_addWatch(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		w := httptest.NewRecorder()
@@ -228,6 +228,8 @@ func TestCustomer_addWatch(t *testing.T) {
 }
 
 func TestCustomer_addWatchNoBody(t *testing.T) {
+	t.Skip("Watches are on their way out...")
+
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/ofac/customers/foo/watch", nil)
 	req.Header.Set("x-user-id", "test")
@@ -246,7 +248,7 @@ func TestCustomer_addWatchNoBody(t *testing.T) {
 }
 
 func TestCustomer_addWatchMissingAuthToken(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		watchRepo := createTestWatchRepository(t)
@@ -281,7 +283,7 @@ func TestCustomer_addWatchMissingAuthToken(t *testing.T) {
 }
 
 func TestCustomer_addNameWatch(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		w := httptest.NewRecorder()
@@ -322,7 +324,7 @@ func TestCustomer_addNameWatch(t *testing.T) {
 }
 
 func TestCustomer_addCustomerNameWatchNoBody(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		w := httptest.NewRecorder()
@@ -369,7 +371,7 @@ func TestCustomer_addCustomerNameWatchNoBody(t *testing.T) {
 }
 
 func TestCustomer_updateUnsafe(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		w := httptest.NewRecorder()
@@ -401,7 +403,7 @@ func TestCustomer_updateUnsafe(t *testing.T) {
 }
 
 func TestCustomer_updateException(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		w := httptest.NewRecorder()
@@ -433,7 +435,7 @@ func TestCustomer_updateException(t *testing.T) {
 }
 
 func TestCustomer_updateUnknown(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		w := httptest.NewRecorder()
@@ -465,7 +467,7 @@ func TestCustomer_updateUnknown(t *testing.T) {
 }
 
 func TestCustomer_updateNoUserId(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		w := httptest.NewRecorder()
@@ -495,7 +497,7 @@ func TestCustomer_updateNoUserId(t *testing.T) {
 }
 
 func TestCustomer_updateNoBody(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		w := httptest.NewRecorder()
@@ -526,7 +528,7 @@ func TestCustomer_updateNoBody(t *testing.T) {
 }
 
 func TestCustomer_removeWatch(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		w := httptest.NewRecorder()
@@ -557,7 +559,7 @@ func TestCustomer_removeWatch(t *testing.T) {
 }
 
 func TestCustomer_removeNameWatch(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		w := httptest.NewRecorder()
@@ -589,7 +591,7 @@ func TestCustomer_removeNameWatch(t *testing.T) {
 }
 
 func TestCustomerRepository(t *testing.T) {
-	t.Parallel()
+	t.Skip("Watches are on their way out...")
 
 	check := func(t *testing.T, repo *sqliteCustomerRepository) {
 		customerID, userID := base.ID(), base.ID()
