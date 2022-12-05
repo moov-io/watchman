@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestReadUK(t *testing.T) {
-	ukCSL, ukCSLMap, err := ReadUKFile(filepath.Join("..", "..", "test", "testdata", "ConList.csv"))
+func TestReadUKCSL(t *testing.T) {
+	ukCSL, ukCSLMap, err := ReadUKCSLFile(filepath.Join("..", "..", "test", "testdata", "ConList.csv"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,4 +67,14 @@ func TestReadUK(t *testing.T) {
 	assert.Equal(t, expectedLastUpdatedDate, testRow.LastUpdates[0])
 	assert.Equal(t, expectedUKSancListDate, testRow.SanctionListDates[0])
 	assert.Equal(t, expectedGroupID, testRow.GroupID)
+}
+
+func TestReadUKSanctionsList(t *testing.T) {
+	// test we don't err on parsing the content
+	totalReport, uniqueIDToRecord, err := ReadUKSanctionsListFile("../../test/testdata/UK_Sanctions_List.ods")
+	assert.NoError(t, err)
+
+	// test that we get something more than an empty sanctions list record
+	assert.Greater(t, len(totalReport), 0)
+	assert.Greater(t, len(uniqueIDToRecord), 0)
 }

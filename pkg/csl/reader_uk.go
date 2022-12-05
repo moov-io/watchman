@@ -8,16 +8,18 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/knieriem/odf/ods"
 )
 
-func ReadUKFile(path string) ([]*UKCSLRecord, UKCSL, error) {
+func ReadUKCSLFile(path string) ([]*UKCSLRecord, UKCSL, error) {
 	fd, err := os.Open(path)
 	if err != nil {
 		return nil, nil, err
 	}
 	defer fd.Close()
 
-	rows, rowsMap, err := ParseUK(fd)
+	rows, rowsMap, err := ParseUKCSL(fd)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -25,7 +27,7 @@ func ReadUKFile(path string) ([]*UKCSLRecord, UKCSL, error) {
 	return rows, rowsMap, nil
 }
 
-func ParseUK(r io.Reader) ([]*UKCSLRecord, UKCSL, error) {
+func ParseUKCSL(r io.Reader) ([]*UKCSLRecord, UKCSL, error) {
 	reader := csv.NewReader(r)
 	reader.FieldsPerRecord = 36
 
@@ -67,12 +69,12 @@ func ParseUK(r io.Reader) ([]*UKCSLRecord, UKCSL, error) {
 		if val, ok := report[groupID]; !ok {
 			// creates the initial record
 			row := new(UKCSLRecord)
-			unmarshalUKRecord(record, row)
+			unmarshalUKCSLRecord(record, row)
 
 			report[groupID] = row
 		} else {
 			// we found an entry in the map and need to append
-			unmarshalUKRecord(record, val)
+			unmarshalUKCSLRecord(record, val)
 		}
 
 	}
@@ -83,21 +85,7 @@ func ParseUK(r io.Reader) ([]*UKCSLRecord, UKCSL, error) {
 	return totalReport, report, nil
 }
 
-func arrayContains(checkArray []string, nameToCheck string) bool {
-	var nameAlreadyExists bool = false
-	if nameToCheck == "" {
-		return true
-	}
-	for _, name := range checkArray {
-		if name == nameToCheck {
-			nameAlreadyExists = true
-			break
-		}
-	}
-	return nameAlreadyExists
-}
-
-func unmarshalUKRecord(csvRecord []string, ukCSLRecord *UKCSLRecord) {
+func unmarshalUKCSLRecord(csvRecord []string, ukCSLRecord *UKCSLRecord) {
 	var names []string
 	if csvRecord[UKNameIdx] != "" {
 		names = append(names, csvRecord[UKNameIdx])
@@ -208,4 +196,116 @@ func unmarshalUKRecord(csvRecord []string, ukCSLRecord *UKCSLRecord) {
 		groupID, _ := strconv.Atoi(csvRecord[GroupdIdx])
 		ukCSLRecord.GroupID = groupID
 	}
+}
+
+func ReadUKSanctionsListFile(path string) ([]*UKSanctionsListRecord, UKSanctionsListMap, error) {
+	fd, err := ods.Open(path)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer fd.Close()
+
+	rows, rowsMap, err := ParseUKSanctionsList(fd)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return rows, rowsMap, nil
+}
+
+// func ParseUKSanctionsList(r io.Reader, fileSize int64) ([]*UKSanctionsListRecord, UKSanctionsListMap, error) {
+func ParseUKSanctionsList(file *ods.File) ([]*UKSanctionsListRecord, UKSanctionsListMap, error) {
+	// read from the ods document
+	var totalReport []*UKSanctionsListRecord
+	var report UKSanctionsListMap
+
+	var doc ods.Doc
+	if err := file.ParseContent(&doc); err != nil {
+		if err != nil {
+			return totalReport, report, err
+		}
+	}
+
+	// unmarshal each row into a uk sanctions list record
+	if len(doc.Table) > 0 {
+		for _, record := range doc.Table[0].Strings() {
+			if len(record) == 0 {
+				continue
+			}
+
+			fmt.Println(record)
+			if len(record) < UKSL_CountryOfBirth {
+				continue
+			}
+			// need a length of row check since we are using the string representation
+			uniqueID := record[UKSL_UniqueIDIdx]
+
+			if val, ok := report[uniqueID]; !ok {
+				row := new(UKSanctionsListRecord)
+				row.UniqueID = uniqueID
+				unmarshalUKSanctionsListRecord(record, row)
+			} else {
+				unmarshalUKSanctionsListRecord(record, val)
+			}
+		}
+	}
+
+	for _, row := range report {
+		totalReport = append(totalReport, row)
+	}
+	return totalReport, report, nil
+}
+
+func unmarshalUKSanctionsListRecord(record []string, ukSLRecord *UKSanctionsListRecord) {
+	if record[UKSL_LastUpdatedIdx] != "" && ukSLRecord.LastUpdated == "" {
+		ukSLRecord.LastUpdated = record[UKSL_LastUpdatedIdx]
+	}
+
+	if record[UKSL_OFSI_GroupIDIdx] != "" && ukSLRecord.OFSIGroupID == "" {
+		ukSLRecord.OFSIGroupID = record[UKSL_OFSI_GroupIDIdx]
+	}
+
+	if record[UKSL_UNReferenceNumberIdx] != "" && ukSLRecord.UNReferenceNumber == "" {
+		ukSLRecord.UNReferenceNumber = record[UKSL_UNReferenceNumberIdx]
+	}
+
+	// consolidate names
+	var names []string
+	if record[UKSL_Name6Idx] != "" {
+		names = append(names, record[UKSL_Name6Idx])
+	}
+	if record[UKSL_Name1Idx] != "" {
+		names = append(names, record[UKSL_Name1Idx])
+	}
+	if record[UKSL_Name2Idx] != "" {
+		names = append(names, record[UKSL_Name2Idx])
+	}
+	if record[UKSL_Name3Idx] != "" {
+		names = append(names, record[UKSL_Name3Idx])
+	}
+	if record[UKSL_Name4Idx] != "" {
+		names = append(names, record[UKSL_Name4Idx])
+	}
+	if record[UKSL_Name5Idx] != "" {
+		names = append(names, record[UKSL_Name5Idx])
+	}
+	name := strings.Join(names, " ")
+	if !arrayContains(ukSLRecord.Names, name) {
+		ukSLRecord.Names = append(ukSLRecord.Names, name)
+	}
+	// consolidate addresses
+}
+
+func arrayContains(checkArray []string, nameToCheck string) bool {
+	var nameAlreadyExists bool = false
+	if nameToCheck == "" {
+		return true
+	}
+	for _, name := range checkArray {
+		if name == nameToCheck {
+			nameAlreadyExists = true
+			break
+		}
+	}
+	return nameAlreadyExists
 }

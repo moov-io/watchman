@@ -223,13 +223,13 @@ func euCSLRecords(logger log.Logger, initialDir string) ([]*csl.EUCSLRecord, err
 }
 
 func ukCSLRecords(logger log.Logger, initialDir string) ([]*csl.UKCSLRecord, error) {
-	file, err := csl.DownloadUK(logger, initialDir)
+	file, err := csl.DownloadUKCSL(logger, initialDir)
 	if err != nil {
 		logger.Warn().LogErrorf("skipping UK CSL download: %v", err)
 		// no error to return because we skip the download
 		return nil, nil
 	}
-	cslRecords, _, err := csl.ReadUKFile(file)
+	cslRecords, _, err := csl.ReadUKCSLFile(file)
 	if err != nil {
 		return nil, err
 	}
