@@ -228,24 +228,21 @@ func ParseUKSanctionsList(file *ods.File) ([]*UKSanctionsListRecord, UKSanctions
 
 	// unmarshal each row into a uk sanctions list record
 	if len(doc.Table) > 0 {
-		for _, record := range doc.Table[0].Strings() {
-			if len(record) == 0 {
+		for _, record := range doc.Table[0].Row {
+			if record.IsEmpty() {
 				continue
 			}
 
-			fmt.Println(record)
-			if len(record) < UKSL_CountryOfBirth {
-				continue
-			}
 			// need a length of row check since we are using the string representation
-			uniqueID := record[UKSL_UniqueIDIdx]
+			uniqueIDCell := record.Cell[UKSL_UniqueIDIdx]
+			uniqueID := uniqueIDCell.Value
 
 			if val, ok := report[uniqueID]; !ok {
 				row := new(UKSanctionsListRecord)
 				row.UniqueID = uniqueID
-				unmarshalUKSanctionsListRecord(record, row)
+				unmarshalUKSanctionsListRecord(record.Cell, row)
 			} else {
-				unmarshalUKSanctionsListRecord(record, val)
+				unmarshalUKSanctionsListRecord(record.Cell, val)
 			}
 		}
 	}
@@ -256,38 +253,38 @@ func ParseUKSanctionsList(file *ods.File) ([]*UKSanctionsListRecord, UKSanctions
 	return totalReport, report, nil
 }
 
-func unmarshalUKSanctionsListRecord(record []string, ukSLRecord *UKSanctionsListRecord) {
-	if record[UKSL_LastUpdatedIdx] != "" && ukSLRecord.LastUpdated == "" {
-		ukSLRecord.LastUpdated = record[UKSL_LastUpdatedIdx]
+func unmarshalUKSanctionsListRecord(record []ods.Cell, ukSLRecord *UKSanctionsListRecord) {
+	if record[UKSL_LastUpdatedIdx].Value != "" && ukSLRecord.LastUpdated == "" {
+		ukSLRecord.LastUpdated = record[UKSL_LastUpdatedIdx].Value
 	}
 
-	if record[UKSL_OFSI_GroupIDIdx] != "" && ukSLRecord.OFSIGroupID == "" {
-		ukSLRecord.OFSIGroupID = record[UKSL_OFSI_GroupIDIdx]
+	if record[UKSL_OFSI_GroupIDIdx].Value != "" && ukSLRecord.OFSIGroupID == "" {
+		ukSLRecord.OFSIGroupID = record[UKSL_OFSI_GroupIDIdx].Value
 	}
 
-	if record[UKSL_UNReferenceNumberIdx] != "" && ukSLRecord.UNReferenceNumber == "" {
-		ukSLRecord.UNReferenceNumber = record[UKSL_UNReferenceNumberIdx]
+	if record[UKSL_UNReferenceNumberIdx].Value != "" && ukSLRecord.UNReferenceNumber == "" {
+		ukSLRecord.UNReferenceNumber = record[UKSL_UNReferenceNumberIdx].Value
 	}
 
 	// consolidate names
 	var names []string
-	if record[UKSL_Name6Idx] != "" {
-		names = append(names, record[UKSL_Name6Idx])
+	if record[UKSL_Name6Idx].Value != "" {
+		names = append(names, record[UKSL_Name6Idx].Value)
 	}
-	if record[UKSL_Name1Idx] != "" {
-		names = append(names, record[UKSL_Name1Idx])
+	if record[UKSL_Name1Idx].Value != "" {
+		names = append(names, record[UKSL_Name1Idx].Value)
 	}
-	if record[UKSL_Name2Idx] != "" {
-		names = append(names, record[UKSL_Name2Idx])
+	if record[UKSL_Name2Idx].Value != "" {
+		names = append(names, record[UKSL_Name2Idx].Value)
 	}
-	if record[UKSL_Name3Idx] != "" {
-		names = append(names, record[UKSL_Name3Idx])
+	if record[UKSL_Name3Idx].Value != "" {
+		names = append(names, record[UKSL_Name3Idx].Value)
 	}
-	if record[UKSL_Name4Idx] != "" {
-		names = append(names, record[UKSL_Name4Idx])
+	if record[UKSL_Name4Idx].Value != "" {
+		names = append(names, record[UKSL_Name4Idx].Value)
 	}
-	if record[UKSL_Name5Idx] != "" {
-		names = append(names, record[UKSL_Name5Idx])
+	if record[UKSL_Name5Idx].Value != "" {
+		names = append(names, record[UKSL_Name5Idx].Value)
 	}
 	name := strings.Join(names, " ")
 	if !arrayContains(ukSLRecord.Names, name) {
