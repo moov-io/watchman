@@ -239,6 +239,20 @@ func ukCSLRecords(logger log.Logger, initialDir string) ([]*csl.UKCSLRecord, err
 	return cslRecords, err
 }
 
+func ukSanctionsListRecords(logger log.Logger, initialDir string) ([]*csl.UKSanctionsListRecord, error) {
+	file, err := csl.DownloadUKSanctionsList(logger, initialDir)
+	if err != nil {
+		logger.Warn().LogErrorf("skipping UK Sanctions List download: %v", err)
+		// no error to return because we skip the download
+		return nil, nil
+	}
+	records, _, err := csl.ReadUKSanctionsListFile(file)
+	if err != nil {
+		return nil, err
+	}
+	return records, err
+}
+
 // refreshData reaches out to the various websites to download the latest
 // files, runs each list's parser, and index data for searches.
 func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
@@ -289,6 +303,14 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 
 	ukCSLs := precomputeCSLEntities[csl.UKCSLRecord](ukConsolidatedList, s.pipe)
 
+	ukSanctionsList, err := ukSanctionsListRecords(s.logger, initialDir)
+	if err != nil {
+		lastDataRefreshFailure.WithLabelValues("UKCSL").Set(float64(time.Now().Unix()))
+		stats.Errors = append(stats.Errors, fmt.Errorf("UKCSL: %v", err))
+	}
+
+	ukSLs := precomputeCSLEntities[csl.UKSanctionsListRecord](ukSanctionsList, s.pipe)
+
 	// csl records from US downloaded here
 	consolidatedLists, err := cslRecords(s.logger, initialDir)
 	if err != nil {
@@ -330,6 +352,9 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 
 	// UK - CSL
 	stats.UKCSL = len(ukCSLs)
+
+	// UK - CSL
+	stats.UKSanctionsList = len(ukSLs)
 
 	// record prometheus metrics
 	lastDataRefreshCount.WithLabelValues("SDNs").Set(float64(len(sdns)))
