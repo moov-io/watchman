@@ -489,6 +489,8 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 			EUCSL: searcher.TopEUCSL(limit, minMatch, nameSlug),
 			// UKCSL
 			UKCSL: searcher.TopUKCSL(limit, minMatch, nameSlug),
+			// UKSanctionsList
+			UKSanctionsList: searcher.TopUKSanctionsList(limit, minMatch, nameSlug),
 			// Metadata
 			RefreshedAt: searcher.lastRefreshedAt,
 		})
