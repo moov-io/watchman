@@ -1,6 +1,7 @@
 package csl
 
 import (
+	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"testing"
@@ -71,10 +72,29 @@ func TestReadUKCSL(t *testing.T) {
 
 func TestReadUKSanctionsList(t *testing.T) {
 	// test we don't err on parsing the content
-	totalReport, uniqueIDToRecord, err := ReadUKSanctionsListFile("../../test/testdata/UK_Sanctions_List.ods")
+	totalReport, report, err := ReadUKSanctionsListFile("../../test/testdata/UK_Sanctions_List.ods")
 	assert.NoError(t, err)
 
 	// test that we get something more than an empty sanctions list record
-	assert.Greater(t, len(totalReport), 0)
-	assert.Greater(t, len(uniqueIDToRecord), 0)
+	assert.NotEmpty(t, totalReport)
+	assert.NotEmpty(t, report)
+	assert.GreaterOrEqual(t, len(totalReport), 3728)
+
+	if record, ok := report["AFG0001"]; ok {
+		reportBytes, _ := json.MarshalIndent(record, "", "  ")
+		fmt.Println(string(reportBytes))
+
+		assert.Equal(t, "12/01/2022", record.LastUpdated)
+		assert.Equal(t, "12703", record.OFSIGroupID)
+		assert.Equal(t, "TAe.010", record.UNReferenceNumber)
+		assert.Equal(t, "HAJI KHAIRULLAH HAJI SATTAR MONEY EXCHANGE", record.Names[0])
+		assert.Len(t, record.Names, 9)
+		assert.Equal(t, "Primary Name", record.NameTitle)
+		assert.NotEmpty(t, record.NonLatinScriptNames)
+		assert.Equal(t, UKSLEntity, *record.EntityType)
+		assert.NotEmpty(t, record.Addresses)
+		// assert.NotEmpty(t, record.CountryOfBirth)
+	} else {
+		t.Fatal("record not found")
+	}
 }

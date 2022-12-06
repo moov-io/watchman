@@ -64,40 +64,68 @@ const (
 	UKSL_OFSI_GroupIDIdx      = 2 // this is the group ID from the consolidated sanctions list
 	UKSL_UNReferenceNumberIdx = 3
 	// Name info
-	UKSL_Name6Idx         = 4
-	UKSL_Name1Idx         = 5
-	UKSL_Name2Idx         = 6
-	UKSL_Name3Idx         = 7
-	UKSL_Name4Idx         = 8
-	UKSL_Name5Idx         = 9
-	UKSL_NameTypeIdx      = 10 // either Primary Name or Alias
-	UKSL_AliasStrengthIdx = 11
-	UKSL_TitleIdx         = 12
-	UKSL_NonLatinScript   = 13
-	UKSL_NonLatinType     = 14
-	UKSL_NonLatinLanguage = 15
-	UKSL_EntityType       = 17 // individual, entity, ship
-	UKSL_OtherInfo        = 20
+	UKSL_Name6Idx            = 4
+	UKSL_Name1Idx            = 5
+	UKSL_Name2Idx            = 6
+	UKSL_Name3Idx            = 7
+	UKSL_Name4Idx            = 8
+	UKSL_Name5Idx            = 9
+	UKSL_NameTypeIdx         = 10 // either Primary Name or Alias
+	UKSL_AliasStrengthIdx    = 11
+	UKSL_TitleIdx            = 12
+	UKSL_NonLatinScriptIdx   = 13
+	UKSL_NonLatinTypeIdx     = 14
+	UKSL_NonLatinLanguageIdx = 15
+	UKSL_EntityTypeIdx       = 17 // individual, entity, ship
+	UKSL_OtherInfoIdx        = 20
 	// Address Info
-	UKSL_AddressLine1   = 22
-	UKSL_AddressLine2   = 23
-	UKSL_AddressLine3   = 24
-	UKSL_AddressLine4   = 25
-	UKSL_AddressLine5   = 26
-	UKSL_AddressLine6   = 27
-	UKSL_PostalCode     = 28
-	UKSL_AddressCountry = 29
-	UKSL_CountryOfBirth = 43
+	UKSL_AddressLine1Idx   = 22
+	UKSL_AddressLine2Idx   = 23
+	UKSL_AddressLine3Idx   = 24
+	UKSL_AddressLine4Idx   = 25
+	UKSL_AddressLine5Idx   = 26
+	UKSL_AddressLine6Idx   = 27
+	UKSL_PostalCodeIdx     = 28
+	UKSL_AddressCountryIdx = 29
+	UKSL_CountryOfBirthIdx = 43
 )
 
 type UKSanctionsListRecord struct {
-	LastUpdated       string
-	UniqueID          string
-	OFSIGroupID       string
-	UNReferenceNumber string
-	Names             []string
-	Addresses         []string
-	PostalCodes       []string
-	AddressCountries  []string
-	CountryOfBirth    string
+	LastUpdated         string
+	UniqueID            string
+	OFSIGroupID         string
+	UNReferenceNumber   string
+	Names               []string
+	NameTitle           string
+	NonLatinScriptNames []string
+	EntityType          *UKSLEntityType
+	Addresses           []string
+	// PostalCodes         []string
+	// AddressCountries    []string
+	CountryOfBirth string
+}
+
+type UKSLEntityType string
+
+var EntityStringMap map[string]UKSLEntityType = map[string]UKSLEntityType{
+	"Individual": UKSLIndividual,
+	"Entity":     UKSLEntity,
+	"Ship":       UKSLShip,
+}
+
+var EntityEnumMap map[UKSLEntityType]string = map[UKSLEntityType]string{
+	UKSLIndividual: "Individual",
+	UKSLEntity:     "Entity",
+	UKSLShip:       "Ship",
+}
+
+const (
+	Undefined      UKSLEntityType = ""
+	UKSLIndividual UKSLEntityType = "Individual"
+	UKSLEntity     UKSLEntityType = "Entity"
+	UKSLShip       UKSLEntityType = "Ship"
+)
+
+func (et UKSLEntityType) String() string {
+	return string(et)
 }

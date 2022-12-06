@@ -1,6 +1,7 @@
 package csl
 
 import (
+	"bytes"
 	"encoding/csv"
 	"errors"
 	"fmt"
@@ -213,11 +214,10 @@ func ReadUKSanctionsListFile(path string) ([]*UKSanctionsListRecord, UKSanctions
 	return rows, rowsMap, nil
 }
 
-// func ParseUKSanctionsList(r io.Reader, fileSize int64) ([]*UKSanctionsListRecord, UKSanctionsListMap, error) {
 func ParseUKSanctionsList(file *ods.File) ([]*UKSanctionsListRecord, UKSanctionsListMap, error) {
 	// read from the ods document
 	var totalReport []*UKSanctionsListRecord
-	var report UKSanctionsListMap
+	report := UKSanctionsListMap{}
 
 	var doc ods.Doc
 	if err := file.ParseContent(&doc); err != nil {
@@ -228,19 +228,24 @@ func ParseUKSanctionsList(file *ods.File) ([]*UKSanctionsListRecord, UKSanctions
 
 	// unmarshal each row into a uk sanctions list record
 	if len(doc.Table) > 0 {
-		for _, record := range doc.Table[0].Row {
-			if record.IsEmpty() {
+		for i, record := range doc.Table[0].Row {
+
+			// manually skip the header and extra rows
+			if record.IsEmpty() || i <= 2 {
 				continue
 			}
 
 			// need a length of row check since we are using the string representation
 			uniqueIDCell := record.Cell[UKSL_UniqueIDIdx]
-			uniqueID := uniqueIDCell.Value
+			b := new(bytes.Buffer)
+			uniqueID := uniqueIDCell.PlainText(b)
 
 			if val, ok := report[uniqueID]; !ok {
 				row := new(UKSanctionsListRecord)
 				row.UniqueID = uniqueID
 				unmarshalUKSanctionsListRecord(record.Cell, row)
+
+				report[uniqueID] = row
 			} else {
 				unmarshalUKSanctionsListRecord(record.Cell, val)
 			}
@@ -250,47 +255,116 @@ func ParseUKSanctionsList(file *ods.File) ([]*UKSanctionsListRecord, UKSanctions
 	for _, row := range report {
 		totalReport = append(totalReport, row)
 	}
+	// reportBytes, _ := json.MarshalIndent(totalReport, "", "  ")
+	// fmt.Println(string(reportBytes))
 	return totalReport, report, nil
 }
 
 func unmarshalUKSanctionsListRecord(record []ods.Cell, ukSLRecord *UKSanctionsListRecord) {
-	if record[UKSL_LastUpdatedIdx].Value != "" && ukSLRecord.LastUpdated == "" {
-		ukSLRecord.LastUpdated = record[UKSL_LastUpdatedIdx].Value
+	if len(record) < UKSL_CountryOfBirthIdx {
+		return
 	}
 
-	if record[UKSL_OFSI_GroupIDIdx].Value != "" && ukSLRecord.OFSIGroupID == "" {
-		ukSLRecord.OFSIGroupID = record[UKSL_OFSI_GroupIDIdx].Value
+	b := new(bytes.Buffer)
+	if !record[UKSL_LastUpdatedIdx].IsEmpty() && ukSLRecord.LastUpdated == "" {
+		ukSLRecord.LastUpdated = record[UKSL_LastUpdatedIdx].PlainText(b)
 	}
 
-	if record[UKSL_UNReferenceNumberIdx].Value != "" && ukSLRecord.UNReferenceNumber == "" {
-		ukSLRecord.UNReferenceNumber = record[UKSL_UNReferenceNumberIdx].Value
+	if !record[UKSL_OFSI_GroupIDIdx].IsEmpty() && ukSLRecord.OFSIGroupID == "" {
+		ukSLRecord.OFSIGroupID = record[UKSL_OFSI_GroupIDIdx].PlainText(b)
+	}
+
+	if !record[UKSL_UNReferenceNumberIdx].IsEmpty() && ukSLRecord.UNReferenceNumber == "" {
+		ukSLRecord.UNReferenceNumber = record[UKSL_UNReferenceNumberIdx].PlainText(b)
 	}
 
 	// consolidate names
 	var names []string
-	if record[UKSL_Name6Idx].Value != "" {
-		names = append(names, record[UKSL_Name6Idx].Value)
+	if !record[UKSL_Name6Idx].IsEmpty() {
+		names = append(names, record[UKSL_Name6Idx].PlainText(b))
 	}
-	if record[UKSL_Name1Idx].Value != "" {
-		names = append(names, record[UKSL_Name1Idx].Value)
+	if !record[UKSL_Name1Idx].IsEmpty() {
+		names = append(names, record[UKSL_Name1Idx].PlainText(b))
 	}
-	if record[UKSL_Name2Idx].Value != "" {
-		names = append(names, record[UKSL_Name2Idx].Value)
+	if !record[UKSL_Name2Idx].IsEmpty() {
+		names = append(names, record[UKSL_Name2Idx].PlainText(b))
 	}
-	if record[UKSL_Name3Idx].Value != "" {
-		names = append(names, record[UKSL_Name3Idx].Value)
+	if !record[UKSL_Name3Idx].IsEmpty() {
+		names = append(names, record[UKSL_Name3Idx].PlainText(b))
 	}
-	if record[UKSL_Name4Idx].Value != "" {
-		names = append(names, record[UKSL_Name4Idx].Value)
+	if !record[UKSL_Name4Idx].IsEmpty() {
+		names = append(names, record[UKSL_Name4Idx].PlainText(b))
 	}
-	if record[UKSL_Name5Idx].Value != "" {
-		names = append(names, record[UKSL_Name5Idx].Value)
+	if !record[UKSL_Name5Idx].IsEmpty() {
+		names = append(names, record[UKSL_Name5Idx].PlainText(b))
 	}
 	name := strings.Join(names, " ")
-	if !arrayContains(ukSLRecord.Names, name) {
+	if !strings.EqualFold(strings.TrimSpace(name), "") && !arrayContains(ukSLRecord.Names, name) {
 		ukSLRecord.Names = append(ukSLRecord.Names, name)
 	}
+
+	if !record[UKSL_NameTypeIdx].IsEmpty() && ukSLRecord.NameTitle == "" {
+		ukSLRecord.NameTitle = record[UKSL_NameTypeIdx].PlainText(b)
+	}
+
+	if !record[UKSL_NonLatinScriptIdx].IsEmpty() && !arrayContains(ukSLRecord.NonLatinScriptNames, record[UKSL_NonLatinScriptIdx].PlainText(b)) {
+		ukSLRecord.NonLatinScriptNames = append(ukSLRecord.NonLatinScriptNames, record[UKSL_NonLatinScriptIdx].PlainText(b))
+	}
+
+	if !record[UKSL_EntityTypeIdx].IsEmpty() && ukSLRecord.EntityType == nil {
+		cellValue := record[UKSL_EntityTypeIdx].PlainText(b)
+		entityType := EntityStringMap[cellValue]
+		ukSLRecord.EntityType = &entityType
+	}
+
 	// consolidate addresses
+	var addresses []string
+	addr1 := record[UKSL_AddressLine1Idx]
+	addr2 := record[UKSL_AddressLine2Idx]
+	addr3 := record[UKSL_AddressLine3Idx]
+	addr4 := record[UKSL_AddressLine4Idx]
+	addr5 := record[UKSL_AddressLine5Idx]
+	addr6 := record[UKSL_AddressLine6Idx]
+
+	if !addr1.IsEmpty() {
+		addresses = append(addresses, addr1.PlainText(b))
+	}
+	if !addr2.IsEmpty() {
+		addresses = append(addresses, addr2.PlainText(b))
+	}
+	if !addr3.IsEmpty() {
+		addresses = append(addresses, addr3.PlainText(b))
+	}
+	if !addr4.IsEmpty() {
+		addresses = append(addresses, addr4.PlainText(b))
+	}
+	if !addr5.IsEmpty() {
+		addresses = append(addresses, addr5.PlainText(b))
+	}
+	if !addr6.IsEmpty() {
+		addresses = append(addresses, addr6.PlainText(b))
+	}
+	postalCode := record[UKSL_PostalCodeIdx]
+	postalCodeValue := record[UKSL_PostalCodeIdx].PlainText(b)
+	if !postalCode.IsEmpty() {
+		addresses = append(addresses, postalCodeValue)
+	}
+	addrCountries := record[UKSL_AddressCountryIdx]
+	addrCountriesValue := record[UKSL_AddressCountryIdx].PlainText(b)
+	if !addrCountries.IsEmpty() {
+		addresses = append(addresses, addrCountriesValue)
+	}
+
+	address := strings.Join(addresses, ", ")
+	if !strings.EqualFold(strings.TrimSpace(address), "") && !arrayContains(ukSLRecord.Addresses, address) {
+		ukSLRecord.Addresses = append(ukSLRecord.Addresses, address)
+	}
+
+	cob := record[UKSL_CountryOfBirthIdx]
+	cobValue := record[UKSL_CountryOfBirthIdx].PlainText(b)
+	if !cob.IsEmpty() && ukSLRecord.CountryOfBirth != "" {
+		ukSLRecord.CountryOfBirth = cobValue
+	}
 }
 
 func arrayContains(checkArray []string, nameToCheck string) bool {
