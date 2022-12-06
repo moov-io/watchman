@@ -341,8 +341,12 @@ func unmarshalUKSanctionsListRecord(record []ods.Cell, ukSLRecord *UKSanctionsLi
 	if !addr5.IsEmpty() {
 		addresses = append(addresses, addr5.PlainText(b))
 	}
+	addr6Value := addr6.PlainText(b)
 	if !addr6.IsEmpty() {
-		addresses = append(addresses, addr6.PlainText(b))
+		addresses = append(addresses, addr6Value)
+		if !arrayContains(ukSLRecord.StateLocalities, addr6Value) {
+			ukSLRecord.StateLocalities = append(ukSLRecord.StateLocalities, addr6Value)
+		}
 	}
 	postalCode := record[UKSL_PostalCodeIdx]
 	postalCodeValue := record[UKSL_PostalCodeIdx].PlainText(b)
@@ -353,6 +357,9 @@ func unmarshalUKSanctionsListRecord(record []ods.Cell, ukSLRecord *UKSanctionsLi
 	addrCountriesValue := record[UKSL_AddressCountryIdx].PlainText(b)
 	if !addrCountries.IsEmpty() {
 		addresses = append(addresses, addrCountriesValue)
+		if !arrayContains(ukSLRecord.AddressCountries, addrCountriesValue) {
+			ukSLRecord.AddressCountries = append(ukSLRecord.AddressCountries, addrCountriesValue)
+		}
 	}
 
 	address := strings.Join(addresses, ", ")

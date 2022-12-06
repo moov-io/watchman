@@ -93,7 +93,9 @@ func TestReadUKSanctionsList(t *testing.T) {
 		assert.NotEmpty(t, record.NonLatinScriptNames)
 		assert.Equal(t, UKSLEntity, *record.EntityType)
 		assert.NotEmpty(t, record.Addresses)
-		// assert.NotEmpty(t, record.CountryOfBirth)
+		assert.NotEmpty(t, record.StateLocalities)
+		assert.NotEmpty(t, record.AddressCountries)
+		assert.Empty(t, record.CountryOfBirth)
 	} else {
 		t.Fatal("record not found")
 	}

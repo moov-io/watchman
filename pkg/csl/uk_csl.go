@@ -100,9 +100,9 @@ type UKSanctionsListRecord struct {
 	NonLatinScriptNames []string
 	EntityType          *UKSLEntityType
 	Addresses           []string
-	// PostalCodes         []string
-	// AddressCountries    []string
-	CountryOfBirth string
+	StateLocalities     []string
+	AddressCountries    []string
+	CountryOfBirth      string
 }
 
 type UKSLEntityType string
