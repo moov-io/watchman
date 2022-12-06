@@ -77,6 +77,9 @@ type DownloadStats struct {
 	// EU Consolidated Sanctions List
 	UKCSL int `json:"UKSanctionsList"`
 
+	// UK Sanctions List
+	UKSanctionsList int `json:"ukSanctionsList"`
+
 	Errors      []error   `json:"-"`
 	RefreshedAt time.Time `json:"timestamp"`
 }

@@ -177,6 +177,9 @@ type searchResponse struct {
 	// UK - Consolidated Sanctions List
 	UKCSL []*Result[csl.UKCSLRecord] `json:"ukConsolidatedSanctionsList"`
 
+	// UK Sanctions List
+	UKSanctionsList []*Result[csl.UKSanctionsListRecord] `json:"ukSanctionsList"`
+
 	// Metadata
 	RefreshedAt time.Time `json:"refreshedAt"`
 }
@@ -270,7 +273,7 @@ func searchViaQ(logger log.Logger, searcher *searcher, name string) http.Handler
 type searchGather func(searcher *searcher, filters filterRequest, limit int, minMatch float64, name string, resp *searchResponse)
 
 var (
-	baseGatherings = append([]searchGather{
+	baseGatherings = []searchGather{
 		// OFAC SDN Search
 		func(s *searcher, filters filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			sdns := s.FindSDNsByRemarksID(limit, name)
@@ -292,7 +295,7 @@ var (
 		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			resp.DeniedPersons = s.TopDPs(limit, minMatch, name)
 		},
-	}, cslGatherings...)
+	}
 
 	// Consolidated Screening List Results
 	cslGatherings = []searchGather{
@@ -338,15 +341,37 @@ var (
 		},
 	}
 
-	// eu - consolidated sanctions list
+	// uk - consolidated sanctions list
 	ukGatherings = []searchGather{
 		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
 			resp.UKCSL = s.TopUKCSL(limit, minMatch, name)
 		},
+		func(s *searcher, _ filterRequest, limit int, minMatch float64, name string, resp *searchResponse) {
+			resp.UKSanctionsList = s.TopUKSanctionsList(limit, minMatch, name)
+		},
 	}
 
-	allGatherings = append(baseGatherings, euGatherings...)
+	allGatherings = concateMultipleSlices([][]searchGather{baseGatherings, cslGatherings, euGatherings, ukGatherings})
 )
+
+// this function taken from here https://freshman.tech/snippets/go/concatenate-slices/
+// and modified to be specific to searchGather slices
+func concateMultipleSlices(slices [][]searchGather) []searchGather {
+	var totalLen int
+	for _, s := range slices {
+		totalLen += len(s)
+	}
+
+	result := make([]searchGather, totalLen)
+
+	var i int
+
+	for _, s := range slices {
+		i += copy(result[i:], s)
+	}
+
+	return result
+}
 
 func buildFullSearchResponse(searcher *searcher, filters filterRequest, limit int, minMatch float64, name string) *searchResponse {
 	return buildFullSearchResponseWith(searcher, allGatherings, filters, limit, minMatch, name)

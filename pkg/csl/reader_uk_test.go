@@ -1,7 +1,6 @@
 package csl
 
 import (
-	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"testing"
@@ -81,9 +80,6 @@ func TestReadUKSanctionsList(t *testing.T) {
 	assert.GreaterOrEqual(t, len(totalReport), 3728)
 
 	if record, ok := report["AFG0001"]; ok {
-		reportBytes, _ := json.MarshalIndent(record, "", "  ")
-		fmt.Println(string(reportBytes))
-
 		assert.Equal(t, "12/01/2022", record.LastUpdated)
 		assert.Equal(t, "12703", record.OFSIGroupID)
 		assert.Equal(t, "TAe.010", record.UNReferenceNumber)

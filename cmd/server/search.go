@@ -61,8 +61,11 @@ type searcher struct {
 	// EU Consolidated List of Sactions
 	EUCSL []*Result[csl.EUCSLRecord]
 
-	// UK Consolidated List of Sactions
+	// UK Consolidated List of Sactions - OFSI
 	UKCSL []*Result[csl.UKCSLRecord]
+
+	// UK Sanctions List
+	UKSanctionsList []*Result[csl.UKSanctionsListRecord]
 
 	// metadata
 	lastRefreshedAt time.Time
