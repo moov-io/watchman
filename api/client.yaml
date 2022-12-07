@@ -1745,6 +1745,10 @@ components:
           items:
             $ref: '#/components/schemas/UKConsolidatedSanctionsList'
           type: array
+        ukSanctionsList:
+          items:
+            $ref: '#/components/schemas/UKSanctionsList'
+          type: array
         # Metadata
         refreshedAt:
           type: string
