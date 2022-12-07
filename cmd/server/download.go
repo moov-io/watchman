@@ -353,7 +353,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	// UK - CSL
 	stats.UKCSL = len(ukCSLs)
 
-	// UK - CSL
+	// UK - Sanctions List
 	stats.UKSanctionsList = len(ukSLs)
 
 	// record prometheus metrics
@@ -374,6 +374,8 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	lastDataRefreshCount.WithLabelValues("EUCSL").Set(float64(len(euCSLs)))
 	// UK CSL
 	lastDataRefreshCount.WithLabelValues("UKCSL").Set(float64(len(ukCSLs)))
+	// UK Sanctions List
+	lastDataRefreshCount.WithLabelValues("UKSL").Set(float64(len(ukSLs)))
 
 	if len(stats.Errors) > 0 {
 		return stats, stats
@@ -403,6 +405,8 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	s.EUCSL = euCSLs
 	//UKCSL
 	s.UKCSL = ukCSLs
+	//UKSanctionsList
+	s.UKSanctionsList = ukSLs
 	// metadata
 	s.lastRefreshedAt = stats.RefreshedAt
 	s.Unlock()

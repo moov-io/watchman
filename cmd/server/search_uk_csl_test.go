@@ -39,3 +39,26 @@ func TestSearch_UK_CSL(t *testing.T) {
 
 	require.Equal(t, int(13720), wrapper.UKCSL[0].GroupID)
 }
+
+func TestSearch_UK_SanctionsList(t *testing.T) {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/search/uk-csl?name=HAJI%20KHAIRULLAH%20HAJI%20SATTAR%20MONEY%20EXCHANGE", nil)
+
+	router := mux.NewRouter()
+	addSearchRoutes(log.NewNopLogger(), router, uk_sanctionsListSearcher)
+	router.ServeHTTP(w, req)
+	w.Flush()
+
+	require.Equal(t, http.StatusOK, w.Code)
+	require.Contains(t, w.Body.String(), `"match":1`)
+
+	var wrapper struct {
+		UKSanctionsList []csl.UKSanctionsListRecord `json:"ukSanctionsList"`
+	}
+	err := json.NewDecoder(w.Body).Decode(&wrapper)
+	require.NoError(t, err)
+
+	require.Greater(t, len(wrapper.UKSanctionsList), 0)
+
+	require.Equal(t, "AFG0001", wrapper.UKSanctionsList[0].UniqueID)
+}

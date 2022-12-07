@@ -47,8 +47,9 @@ var (
 	cmicSearcher      = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
 	ns_mbsSearcher    = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
 
-	eu_cslSearcher = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
-	uk_cslSearcher = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	eu_cslSearcher           = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	uk_cslSearcher           = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	uk_sanctionsListSearcher = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
 )
 
 func init() {
@@ -350,11 +351,17 @@ func init() {
 		ValidFromTo:                map[string]string{"2022": "2030"},
 	}}, noLogPipeliner)
 
-	uk_cslSearcher.UKCSL = precomputeCSLEntities[csl.UKCSLRecord]([]*csl.UKCSLRecord{{
+	uk_cslSearcher.UKCSL = precomputeCSLEntities([]*csl.UKCSLRecord{{
 		Names:     []string{"'ABD AL-NASIR"},
 		Addresses: []string{"Tall 'Afar"},
 		GroupType: "Individual",
 		GroupID:   13720,
+	}}, noLogPipeliner)
+
+	uk_sanctionsListSearcher.UKSanctionsList = precomputeCSLEntities([]*csl.UKSanctionsListRecord{{
+		Names:     []string{"HAJI KHAIRULLAH HAJI SATTAR MONEY EXCHANGE"},
+		Addresses: []string{"Branch Office 2, Peshawar, Khyber Paktunkhwa Province, Pakistan"},
+		UniqueID:  "AFG0001",
 	}}, noLogPipeliner)
 }
 
@@ -413,6 +420,10 @@ func verifyDownloadStats(b *testing.B) {
 
 	// EU - CSL
 	require.Greater(b, testSearcherStats.EUCSL, 1)
+	// UK - CSL
+	require.Greater(b, testSearcherStats.UKCSL, 1)
+	// UK - SanctionsList
+	require.Greater(b, testSearcherStats.UKSanctionsList, 1)
 }
 
 func TestJaroWinkler(t *testing.T) {
