@@ -84,6 +84,7 @@ Class | Method | HTTP request | Description
  - [Ssi](docs/Ssi.md)
  - [SsiType](docs/SsiType.md)
  - [UkConsolidatedSanctionsList](docs/UkConsolidatedSanctionsList.md)
+ - [UkSanctionsList](docs/UkSanctionsList.md)
  - [Unverified](docs/Unverified.md)
  - [UpdateOfacCompanyStatus](docs/UpdateOfacCompanyStatus.md)
  - [UpdateOfacCustomerStatus](docs/UpdateOfacCustomerStatus.md)

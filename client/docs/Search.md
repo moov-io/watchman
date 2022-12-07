@@ -21,6 +21,7 @@ Name | Type | Description | Notes
 **NonSDNMenuBasedSanctionsList** | [**[]NonSdnMenuBasedSanctionsList**](NonSDNMenuBasedSanctionsList.md) |  | [optional] 
 **EuConsolidatedSanctionsList** | [**[]EuConsolidatedSanctionsList**](EUConsolidatedSanctionsList.md) |  | [optional] 
 **UkConsolidatedSanctionsList** | [**[]UkConsolidatedSanctionsList**](UKConsolidatedSanctionsList.md) |  | [optional] 
+**UkSanctionsList** | [**[]UkSanctionsList**](UKSanctionsList.md) |  | [optional] 
 **RefreshedAt** | [**time.Time**](time.Time.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
