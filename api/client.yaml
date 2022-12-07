@@ -1613,6 +1613,34 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
+    UKSanctionsList:
+      properties:
+        names:
+          type: array
+          items: 
+            type: string
+        nonLatinNames:
+          type: array
+          items:
+            type: string
+        entityType:
+          type: string
+        addresses:
+          type: array
+          items:
+            type: string
+        addressCountries:
+          type: array
+          items:
+            type: string
+        stateLocalities:
+          type: array
+          items:
+            type: string
+        match:
+          description: Match percentage of search query
+          example: 0.92
+          type: number
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       properties:
