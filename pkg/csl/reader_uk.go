@@ -219,8 +219,8 @@ func ParseUKSanctionsList(file *ods.File) ([]*UKSanctionsListRecord, UKSanctions
 	var totalReport []*UKSanctionsListRecord
 	report := UKSanctionsListMap{}
 
-	var doc ods.Doc
-	if err := file.ParseContent(&doc); err != nil {
+	doc := new(ods.Doc)
+	if err := file.ParseContent(doc); err != nil {
 		if err != nil {
 			return totalReport, report, err
 		}

@@ -43,7 +43,7 @@ func DownloadUKSanctionsList(logger log.Logger, initialDir string) (string, erro
 
 	file, err := dl.GetFiles(initialDir, ukSanctionsNameAndSource)
 	if len(file) == 0 || err != nil {
-		return "", fmt.Errorf("uk csl download: %v", err)
+		return "", fmt.Errorf("uk download: %v", err)
 	}
 	return file[0], nil
 }
