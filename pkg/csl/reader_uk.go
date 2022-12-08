@@ -212,10 +212,6 @@ func ReadUKSanctionsListFile(path string) ([]*UKSanctionsListRecord, UKSanctions
 	}
 	defer fd.Close()
 
-	if fd == nil {
-		return nil, nil, errors.New("file was expected to not be nil but is")
-	}
-
 	rows, rowsMap, err := ParseUKSanctionsList(fd)
 	if err != nil {
 		return nil, nil, err
