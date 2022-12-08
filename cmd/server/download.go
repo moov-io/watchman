@@ -246,6 +246,7 @@ func ukSanctionsListRecords(logger log.Logger, initialDir string) ([]*csl.UKSanc
 		// no error to return because we skip the download
 		return nil, nil
 	}
+
 	records, _, err := csl.ReadUKSanctionsListFile(file)
 	if err != nil {
 		return nil, err

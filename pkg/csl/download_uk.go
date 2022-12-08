@@ -18,6 +18,7 @@ var (
 	publicUKCSLDownloadURL = "https://ofsistorage.blob.core.windows.net/publishlive/2022format/ConList.csv"
 	ukCSLDownloadURL       = strx.Or(os.Getenv("UK_CSL_DOWNLOAD_URL"), publicUKCSLDownloadURL)
 
+	// https://www.gov.uk/government/publications/the-uk-sanctions-list
 	publicUKSanctionsListURL = "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1121113/UK_Sanctions_List.ods"
 	ukSanctionsListURL       = strx.Or(os.Getenv("UK_SANCTIONS_LIST_URL"), publicUKSanctionsListURL)
 )
