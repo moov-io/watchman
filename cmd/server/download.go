@@ -306,8 +306,8 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 
 	ukSanctionsList, err := ukSanctionsListRecords(s.logger, initialDir)
 	if err != nil {
-		lastDataRefreshFailure.WithLabelValues("UKCSL").Set(float64(time.Now().Unix()))
-		stats.Errors = append(stats.Errors, fmt.Errorf("UKCSL: %v", err))
+		lastDataRefreshFailure.WithLabelValues("UKSanctionsList").Set(float64(time.Now().Unix()))
+		stats.Errors = append(stats.Errors, fmt.Errorf("UKSanctionsList: %v", err))
 	}
 
 	ukSLs := precomputeCSLEntities[csl.UKSanctionsListRecord](ukSanctionsList, s.pipe)

@@ -14,6 +14,9 @@ import (
 )
 
 func ReadUKCSLFile(path string) ([]*UKCSLRecord, UKCSL, error) {
+	if path == "" {
+		return nil, nil, errors.New("path was empty for ukcsl file")
+	}
 	fd, err := os.Open(path)
 	if err != nil {
 		return nil, nil, err
@@ -200,11 +203,18 @@ func unmarshalUKCSLRecord(csvRecord []string, ukCSLRecord *UKCSLRecord) {
 }
 
 func ReadUKSanctionsListFile(path string) ([]*UKSanctionsListRecord, UKSanctionsListMap, error) {
+	if path == "" {
+		return nil, nil, errors.New("path was empty for uk sanctions list file")
+	}
 	fd, err := ods.Open(path)
 	if err != nil {
 		return nil, nil, err
 	}
 	defer fd.Close()
+
+	if fd == nil {
+		return nil, nil, errors.New("file was expected to not be nil but is")
+	}
 
 	rows, rowsMap, err := ParseUKSanctionsList(fd)
 	if err != nil {
@@ -255,8 +265,6 @@ func ParseUKSanctionsList(file *ods.File) ([]*UKSanctionsListRecord, UKSanctions
 	for _, row := range report {
 		totalReport = append(totalReport, row)
 	}
-	// reportBytes, _ := json.MarshalIndent(totalReport, "", "  ")
-	// fmt.Println(string(reportBytes))
 	return totalReport, report, nil
 }
 
