@@ -56,7 +56,10 @@ func manualRefreshHandler(logger log.Logger, searcher *searcher, updates chan *D
 			}).Logf("admin: finished data refresh %v ago", time.Since(stats.RefreshedAt))
 
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(stats)
+			if err = json.NewEncoder(w).Encode(stats); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
 		}
 	}
 }
