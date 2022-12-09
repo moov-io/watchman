@@ -72,10 +72,10 @@ type DownloadStats struct {
 	NonSDNMenuBasedSanctions         int `json:"nonSDNMenuBasedSanctions"`
 
 	// EU Consolidated Sanctions List
-	EUCSL int `json:"EuropeanSanctionsList"`
+	EUCSL int `json:"europeanSanctionsList"`
 
-	// EU Consolidated Sanctions List
-	UKCSL int `json:"UKSanctionsList"`
+	// UK Consolidated Sanctions List
+	UKCSL int `json:"ukConsolidatedSanctionsList"`
 
 	// UK Sanctions List
 	UKSanctionsList int `json:"ukSanctionsList"`
