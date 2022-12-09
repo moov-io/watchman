@@ -120,8 +120,8 @@ clean-integration:
 	docker-compose kill && docker-compose rm -v -f
 
 test-integration: clean-integration
-	docker-compose up -d
-	sleep 30
+	docker compose up -d
+	sleep 75
 	curl -v http://localhost:9094/data/refresh # hangs until download and parsing completes
 	./bin/batchsearch -local -threshold 0.95
 

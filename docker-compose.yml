@@ -21,6 +21,9 @@ services:
 
   watchman:
     image: moov/watchman:latest
+    build:
+      context: .
+      dockerfile: ./Dockerfile
     environment:
       INITIAL_DATA_DIRECTORY: /data/
     volumes:
