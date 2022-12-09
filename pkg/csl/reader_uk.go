@@ -212,7 +212,13 @@ func ReadUKSanctionsListFile(path string) ([]*UKSanctionsListRecord, UKSanctions
 	}
 	defer fd.Close()
 
-	rows, rowsMap, err := ParseUKSanctionsList(fd)
+	doc := new(ods.Doc)
+	err = fd.ParseContent(doc)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	rows, rowsMap, err := parseUKSanctionsList(doc)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -220,17 +226,10 @@ func ReadUKSanctionsListFile(path string) ([]*UKSanctionsListRecord, UKSanctions
 	return rows, rowsMap, nil
 }
 
-func ParseUKSanctionsList(file *ods.File) ([]*UKSanctionsListRecord, UKSanctionsListMap, error) {
+func parseUKSanctionsList(doc *ods.Doc) ([]*UKSanctionsListRecord, UKSanctionsListMap, error) {
 	// read from the ods document
 	var totalReport []*UKSanctionsListRecord
 	report := UKSanctionsListMap{}
-
-	doc := new(ods.Doc)
-	if err := file.ParseContent(doc); err != nil {
-		if err != nil {
-			return totalReport, report, err
-		}
-	}
 
 	// unmarshal each row into a uk sanctions list record
 	if len(doc.Table) > 0 {

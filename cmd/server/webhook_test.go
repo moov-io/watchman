@@ -6,6 +6,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -117,6 +118,7 @@ func TestWebhook_call(t *testing.T) {
 	// override to add test TLS certificate
 	if tr, ok := webhookHTTPClient.Transport.(*http.Transport); ok {
 		if ctr, ok := server.Client().Transport.(*http.Transport); ok {
+			tr.TLSClientConfig = new(tls.Config)
 			tr.TLSClientConfig.RootCAs = ctr.TLSClientConfig.RootCAs
 		} else {
 			t.Errorf("unknown server.Client().Transport type: %T", server.Client().Transport)
