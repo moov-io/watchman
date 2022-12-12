@@ -55,20 +55,7 @@ func manualRefreshHandler(logger log.Logger, searcher *searcher, updates chan *D
 				"UKSanctionsList": log.Int(stats.UKSanctionsList),
 			}).Logf("admin: finished data refresh %v ago", time.Since(stats.RefreshedAt))
 
-			jsonResponse, err := json.Marshal(stats)
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				logger.LogErrorf("ERROR: admin: problem encoding download stats: ", err)
-				return
-			}
-
-			logger.LogErrorf("DEBUG: admin: Stats JSON: %s", string(jsonResponse))
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			_, err = w.Write(jsonResponse)
-			if err != nil {
-				logger.LogErrorf("ERROR: admin: problem writing response body: ", err)
-			}
+			json.NewEncoder(w).Encode(stats)
 		}
 	}
 }
