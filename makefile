@@ -122,10 +122,10 @@ clean-integration:
 # TODO: this test is working but due to a default timeout on the admin server we get an empty reply
 # for now this shouldn't hold up out CI pipeline
 test-integration: clean-integration
-	# docker compose up -d
-	# sleep 75
-	# time curl -v --max-time 90 http://localhost:9094/data/refresh # hangs until download and parsing completes
-	# ./bin/batchsearch -local -threshold 0.95
+	docker compose up -d
+	sleep 75
+	time curl -v --max-time 90 http://localhost:9094/data/refresh # hangs until download and parsing completes
+	./bin/batchsearch -local -threshold 0.95
 
 # From https://github.com/genuinetools/img
 .PHONY: AUTHORS
