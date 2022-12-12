@@ -52,6 +52,11 @@ Lists included in search are:
       - [Palestinian Legislative Council List](https://www.treasury.gov/resource-center/sanctions/Terrorism-Proliferation-Narcotics/Pages/pa.aspx)
    - Department of the Treasury – Office of Foreign Assets Control
       - [Sectoral Sanctions Identifications List](http://www.treasury.gov/resource-center/sanctions/SDN-List/Pages/ssi_list.aspx)
+- [EU - Consolidated Sanctions List](https://data.europa.eu/data/datasets/consolidated-list-of-persons-groups-and-entities-subject-to-eu-financial-sanctions?locale=en)
+   - NOTE: it is recommended to create your own account through the eu [website](https://webgate.ec.europa.eu/fsd/fsf)
+      - then use the token described under the "Show settings for crawler/robot" section
+- [UK - OFSI Sactions List](https://www.gov.uk/government/publications/financial-sanctions-consolidated-list-of-targets/consolidated-list-of-targets#contents)
+- [UK - Sanctions List](https://www.gov.uk/government/publications/the-uk-sanctions-list)
 
 All United States and European Union companies are required to comply with various regulations and sanction lists (such as the US Patriot Act requiring compliance with the BIS Denied Persons List). Moov's primary usage for this project is with ACH origination in our [paygate](https://github.com/moov-io/paygate) project.
 
