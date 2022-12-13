@@ -13,7 +13,7 @@ import (
 )
 
 func TestUKCSL(t *testing.T) {
-	t.Skip("UK CSL is currently broken, looks like they require API access now")
+	t.Skip("skipping UK CSL download")
 
 	if testing.Short() {
 		t.Skip("ignorning network test")
@@ -23,13 +23,35 @@ func TestUKCSL(t *testing.T) {
 	dir, err := os.MkdirTemp("", "ukcsl")
 	require.NoError(t, err)
 
-	file, err := DownloadUK(logger, dir)
+	file, err := DownloadUKCSL(logger, dir)
 	require.NoError(t, err)
 
-	ukcslRecords, _, err := ReadUKFile(file)
+	ukcslRecords, _, err := ReadUKCSLFile(file)
 	require.NoError(t, err)
 
 	if len(ukcslRecords) == 0 {
 		t.Error("parsed zero UK CSL records")
+	}
+}
+
+func TestUKSanctionsList(t *testing.T) {
+	t.Skip("skipping UK Sanctions List download")
+
+	if testing.Short() {
+		t.Skip("ignorning network test")
+	}
+
+	logger := log.NewNopLogger()
+	dir, err := os.MkdirTemp("", "ukSanctionsList")
+	require.NoError(t, err)
+
+	file, err := DownloadUKSanctionsList(logger, dir)
+	require.NoError(t, err)
+
+	ukSanctionsListRecords, _, err := ReadUKSanctionsListFile(file)
+	require.NoError(t, err)
+
+	if len(ukSanctionsListRecords) == 0 {
+		t.Error("parsed zero UK Sanctions List records")
 	}
 }

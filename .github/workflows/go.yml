@@ -78,9 +78,9 @@ jobs:
       if: runner.os == 'Linux'
       run: make build-batchsearch
 
-    - name: Integration Test
-      if: runner.os == 'Linux'
-      run: make test-integration
+    # - name: Integration Test
+    #   if: runner.os == 'Linux'
+    #   run: make test-integration
 
     - name: Test Cleanup
       if: runner.os == 'Linux' && always()

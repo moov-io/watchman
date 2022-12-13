@@ -2185,6 +2185,52 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
+    UKSanctionsList:
+      example:
+        stateLocalities:
+        - stateLocalities
+        - stateLocalities
+        addresses:
+        - addresses
+        - addresses
+        names:
+        - names
+        - names
+        entityType: entityType
+        addressCountries:
+        - addressCountries
+        - addressCountries
+        match: 0.92
+        nonLatinNames:
+        - nonLatinNames
+        - nonLatinNames
+      properties:
+        names:
+          items:
+            type: string
+          type: array
+        nonLatinNames:
+          items:
+            type: string
+          type: array
+        entityType:
+          type: string
+        addresses:
+          items:
+            type: string
+          type: array
+        addressCountries:
+          items:
+            type: string
+          type: array
+        stateLocalities:
+          items:
+            type: string
+          type: array
+        match:
+          description: Match percentage of search query
+          example: 0.92
+          type: number
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       example:
@@ -2472,6 +2518,41 @@ components:
           sdnName: BANCO NACIONAL DE CUBA
           title: Title of an individual
           remarks: Additional info
+        ukSanctionsList:
+        - stateLocalities:
+          - stateLocalities
+          - stateLocalities
+          addresses:
+          - addresses
+          - addresses
+          names:
+          - names
+          - names
+          entityType: entityType
+          addressCountries:
+          - addressCountries
+          - addressCountries
+          match: 0.92
+          nonLatinNames:
+          - nonLatinNames
+          - nonLatinNames
+        - stateLocalities:
+          - stateLocalities
+          - stateLocalities
+          addresses:
+          - addresses
+          - addresses
+          names:
+          - names
+          - names
+          entityType: entityType
+          addressCountries:
+          - addressCountries
+          - addressCountries
+          match: 0.92
+          nonLatinNames:
+          - nonLatinNames
+          - nonLatinNames
         bisEntities:
         - licenseRequirement: For all items subject to the EAR. (See ¬ß744.11 of the
             EAR).
@@ -2816,6 +2897,10 @@ components:
         ukConsolidatedSanctionsList:
           items:
             $ref: '#/components/schemas/UKConsolidatedSanctionsList'
+          type: array
+        ukSanctionsList:
+          items:
+            $ref: '#/components/schemas/UKSanctionsList'
           type: array
         refreshedAt:
           format: date-time

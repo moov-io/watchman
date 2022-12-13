@@ -34,11 +34,12 @@ type AddOfacCompanyNameWatchOpts struct {
 /*
 AddOfacCompanyNameWatch Watch company
 Watch a company by its name. The match percentage will be included in the webhook&#39;s JSON payload.
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param name Company name used to match and send watch notifications
- * @param ofacWatchRequest
- * @param optional nil or *AddOfacCompanyNameWatchOpts - Optional Parameters:
- * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param name Company name used to match and send watch notifications
+  - @param ofacWatchRequest
+  - @param optional nil or *AddOfacCompanyNameWatchOpts - Optional Parameters:
+  - @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+
 @return OfacWatch
 */
 func (a *WatchmanApiService) AddOfacCompanyNameWatch(ctx _context.Context, name string, ofacWatchRequest OfacWatchRequest, localVarOptionals *AddOfacCompanyNameWatchOpts) (OfacWatch, *_nethttp.Response, error) {
@@ -133,11 +134,12 @@ type AddOfacCompanyWatchOpts struct {
 /*
 AddOfacCompanyWatch Watch OFAC company
 Add ID watch on an OFAC Company.
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param companyID Company ID
- * @param ofacWatchRequest
- * @param optional nil or *AddOfacCompanyWatchOpts - Optional Parameters:
- * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param companyID Company ID
+  - @param ofacWatchRequest
+  - @param optional nil or *AddOfacCompanyWatchOpts - Optional Parameters:
+  - @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+
 @return OfacWatch
 */
 func (a *WatchmanApiService) AddOfacCompanyWatch(ctx _context.Context, companyID string, ofacWatchRequest OfacWatchRequest, localVarOptionals *AddOfacCompanyWatchOpts) (OfacWatch, *_nethttp.Response, error) {
@@ -234,11 +236,12 @@ type AddOfacCustomerNameWatchOpts struct {
 /*
 AddOfacCustomerNameWatch Watch customer
 Watch a customer by its name. The match percentage will be included in the webhook&#39;s JSON payload.
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param name Individual name used to match and send watch notifications
- * @param ofacWatchRequest
- * @param optional nil or *AddOfacCustomerNameWatchOpts - Optional Parameters:
- * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param name Individual name used to match and send watch notifications
+  - @param ofacWatchRequest
+  - @param optional nil or *AddOfacCustomerNameWatchOpts - Optional Parameters:
+  - @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+
 @return OfacWatch
 */
 func (a *WatchmanApiService) AddOfacCustomerNameWatch(ctx _context.Context, name string, ofacWatchRequest OfacWatchRequest, localVarOptionals *AddOfacCustomerNameWatchOpts) (OfacWatch, *_nethttp.Response, error) {
@@ -333,11 +336,12 @@ type AddOfacCustomerWatchOpts struct {
 /*
 AddOfacCustomerWatch Watch OFAC customer
 Add ID watch on an OFAC Customer.
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param customerID Customer ID
- * @param ofacWatchRequest
- * @param optional nil or *AddOfacCustomerWatchOpts - Optional Parameters:
- * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param customerID Customer ID
+  - @param ofacWatchRequest
+  - @param optional nil or *AddOfacCustomerWatchOpts - Optional Parameters:
+  - @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+
 @return OfacWatch
 */
 func (a *WatchmanApiService) AddOfacCustomerWatch(ctx _context.Context, customerID string, ofacWatchRequest OfacWatchRequest, localVarOptionals *AddOfacCustomerWatchOpts) (OfacWatch, *_nethttp.Response, error) {
@@ -435,10 +439,11 @@ type GetLatestDownloadsOpts struct {
 /*
 GetLatestDownloads Get latest downloads
 Return list of recent downloads of list data.
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param optional nil or *GetLatestDownloadsOpts - Optional Parameters:
- * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
- * @param "Limit" (optional.Int32) -  Maximum number of downloads to return sorted by their timestamp in decending order.
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param optional nil or *GetLatestDownloadsOpts - Optional Parameters:
+  - @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+  - @param "Limit" (optional.Int32) -  Maximum number of downloads to return sorted by their timestamp in decending order.
+
 @return []Download
 */
 func (a *WatchmanApiService) GetLatestDownloads(ctx _context.Context, localVarOptionals *GetLatestDownloadsOpts) ([]Download, *_nethttp.Response, error) {
@@ -533,10 +538,11 @@ type GetOfacCompanyOpts struct {
 /*
 GetOfacCompany Get company
 Get information about a company, trust, or organization such as addresses, alternate names, and remarks.
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param companyID Company ID
- * @param optional nil or *GetOfacCompanyOpts - Optional Parameters:
- * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param companyID Company ID
+  - @param optional nil or *GetOfacCompanyOpts - Optional Parameters:
+  - @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+
 @return OfacCompany
 */
 func (a *WatchmanApiService) GetOfacCompany(ctx _context.Context, companyID string, localVarOptionals *GetOfacCompanyOpts) (OfacCompany, *_nethttp.Response, error) {
@@ -630,10 +636,11 @@ type GetOfacCustomerOpts struct {
 /*
 GetOfacCustomer Get customer
 Get information about a customer&#39;s addresses, alternate names, and SDN metadata.
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param customerID Customer ID
- * @param optional nil or *GetOfacCustomerOpts - Optional Parameters:
- * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param customerID Customer ID
+  - @param optional nil or *GetOfacCustomerOpts - Optional Parameters:
+  - @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+
 @return OfacCustomer
 */
 func (a *WatchmanApiService) GetOfacCustomer(ctx _context.Context, customerID string, localVarOptionals *GetOfacCustomerOpts) (OfacCustomer, *_nethttp.Response, error) {
@@ -727,10 +734,11 @@ type GetSDNOpts struct {
 /*
 GetSDN Get SDN
 Get SDN details
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param sdnID SDN ID
- * @param optional nil or *GetSDNOpts - Optional Parameters:
- * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param sdnID SDN ID
+  - @param optional nil or *GetSDNOpts - Optional Parameters:
+  - @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+
 @return OfacSdn
 */
 func (a *WatchmanApiService) GetSDN(ctx _context.Context, sdnID string, localVarOptionals *GetSDNOpts) (OfacSdn, *_nethttp.Response, error) {
@@ -823,10 +831,11 @@ type GetSDNAddressesOpts struct {
 
 /*
 GetSDNAddresses Get SDN addresses
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param sdnID SDN ID
- * @param optional nil or *GetSDNAddressesOpts - Optional Parameters:
- * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param sdnID SDN ID
+  - @param optional nil or *GetSDNAddressesOpts - Optional Parameters:
+  - @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+
 @return []OfacEntityAddress
 */
 func (a *WatchmanApiService) GetSDNAddresses(ctx _context.Context, sdnID string, localVarOptionals *GetSDNAddressesOpts) ([]OfacEntityAddress, *_nethttp.Response, error) {
@@ -919,10 +928,11 @@ type GetSDNAltNamesOpts struct {
 
 /*
 GetSDNAltNames Get SDN alt names
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param sdnID SDN ID
- * @param optional nil or *GetSDNAltNamesOpts - Optional Parameters:
- * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param sdnID SDN ID
+  - @param optional nil or *GetSDNAltNamesOpts - Optional Parameters:
+  - @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+
 @return []OfacAlt
 */
 func (a *WatchmanApiService) GetSDNAltNames(ctx _context.Context, sdnID string, localVarOptionals *GetSDNAltNamesOpts) ([]OfacAlt, *_nethttp.Response, error) {
@@ -1016,10 +1026,11 @@ type GetUIValuesOpts struct {
 /*
 GetUIValues Get UI values
 Return an ordered distinct list of keys for an SDN property.
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param key SDN property to lookup. Values are sdnType, ofacProgram
- * @param optional nil or *GetUIValuesOpts - Optional Parameters:
- * @param "Limit" (optional.Int32) -  Maximum number of UI keys returned
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param key SDN property to lookup. Values are sdnType, ofacProgram
+  - @param optional nil or *GetUIValuesOpts - Optional Parameters:
+  - @param "Limit" (optional.Int32) -  Maximum number of UI keys returned
+
 @return []SdnType
 */
 func (a *WatchmanApiService) GetUIValues(ctx _context.Context, key SdnType, localVarOptionals *GetUIValuesOpts) ([]SdnType, *_nethttp.Response, error) {
@@ -1108,7 +1119,7 @@ func (a *WatchmanApiService) GetUIValues(ctx _context.Context, key SdnType, loca
 /*
 Ping Ping Watchman service
 Check if the Watchman service is running.
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 */
 func (a *WatchmanApiService) Ping(ctx _context.Context) (*_nethttp.Response, error) {
 	var (
@@ -1177,11 +1188,11 @@ type RemoveOfacCompanyNameWatchOpts struct {
 /*
 RemoveOfacCompanyNameWatch Remove company watch
 Delete a company name watch.
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param watchID Watch ID, used to identify a specific watch
- * @param name Company name watch
- * @param optional nil or *RemoveOfacCompanyNameWatchOpts - Optional Parameters:
- * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param watchID Watch ID, used to identify a specific watch
+  - @param name Company name watch
+  - @param optional nil or *RemoveOfacCompanyNameWatchOpts - Optional Parameters:
+  - @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
 */
 func (a *WatchmanApiService) RemoveOfacCompanyNameWatch(ctx _context.Context, watchID string, name string, localVarOptionals *RemoveOfacCompanyNameWatchOpts) (*_nethttp.Response, error) {
 	var (
@@ -1265,11 +1276,11 @@ type RemoveOfacCompanyWatchOpts struct {
 /*
 RemoveOfacCompanyWatch Remove company watch
 Delete a company ID watch.
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param companyID Company ID
- * @param watchID Watch ID, used to identify a specific watch
- * @param optional nil or *RemoveOfacCompanyWatchOpts - Optional Parameters:
- * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param companyID Company ID
+  - @param watchID Watch ID, used to identify a specific watch
+  - @param optional nil or *RemoveOfacCompanyWatchOpts - Optional Parameters:
+  - @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
 */
 func (a *WatchmanApiService) RemoveOfacCompanyWatch(ctx _context.Context, companyID string, watchID string, localVarOptionals *RemoveOfacCompanyWatchOpts) (*_nethttp.Response, error) {
 	var (
@@ -1354,11 +1365,11 @@ type RemoveOfacCustomerNameWatchOpts struct {
 /*
 RemoveOfacCustomerNameWatch Remove customer watch
 Delete a customer name watch.
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param watchID Watch ID, used to identify a specific watch
- * @param name Customer or Company name watch
- * @param optional nil or *RemoveOfacCustomerNameWatchOpts - Optional Parameters:
- * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param watchID Watch ID, used to identify a specific watch
+  - @param name Customer or Company name watch
+  - @param optional nil or *RemoveOfacCustomerNameWatchOpts - Optional Parameters:
+  - @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
 */
 func (a *WatchmanApiService) RemoveOfacCustomerNameWatch(ctx _context.Context, watchID string, name string, localVarOptionals *RemoveOfacCustomerNameWatchOpts) (*_nethttp.Response, error) {
 	var (
@@ -1442,11 +1453,11 @@ type RemoveOfacCustomerWatchOpts struct {
 /*
 RemoveOfacCustomerWatch Remove customer watch
 Delete a customer ID watch.
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param customerID Customer ID
- * @param watchID Watch ID, used to identify a specific watch
- * @param optional nil or *RemoveOfacCustomerWatchOpts - Optional Parameters:
- * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param customerID Customer ID
+  - @param watchID Watch ID, used to identify a specific watch
+  - @param optional nil or *RemoveOfacCustomerWatchOpts - Optional Parameters:
+  - @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
 */
 func (a *WatchmanApiService) RemoveOfacCustomerWatch(ctx _context.Context, customerID string, watchID string, localVarOptionals *RemoveOfacCustomerWatchOpts) (*_nethttp.Response, error) {
 	var (
@@ -1544,23 +1555,24 @@ type SearchOpts struct {
 
 /*
 Search Search
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param optional nil or *SearchOpts - Optional Parameters:
- * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
- * @param "Q" (optional.String) -  Search across Name, Alt Names, and SDN Address fields for all available sanctions lists. Entries may be returned in all response sub-objects.
- * @param "Name" (optional.String) -  Name which could correspond to an entry on the SDN, Denied Persons, Sectoral Sanctions Identifications, or BIS Entity List sanctions lists. Alt names are also searched.
- * @param "Address" (optional.String) -  Physical address which could correspond to a human on the SDN list. Only Address results will be returned.
- * @param "City" (optional.String) -  City name as desginated by SDN guidelines. Only Address results will be returned.
- * @param "State" (optional.String) -  State name as desginated by SDN guidelines. Only Address results will be returned.
- * @param "Providence" (optional.String) -  Providence name as desginated by SDN guidelines. Only Address results will be returned.
- * @param "Zip" (optional.String) -  Zip code as desginated by SDN guidelines. Only Address results will be returned.
- * @param "Country" (optional.String) -  Country name as desginated by SDN guidelines. Only Address results will be returned.
- * @param "AltName" (optional.String) -  Alternate name which could correspond to a human on the SDN list. Only Alt name results will be returned.
- * @param "Id" (optional.String) -  ID value often found in remarks property of an SDN. Takes the form of 'No. NNNNN' as an alphanumeric value.
- * @param "MinMatch" (optional.Float32) -  Match percentage that search query must obtain for results to be returned.
- * @param "Limit" (optional.Int32) -  Maximum results returned by a search. Results are sorted by their match percentage in decending order.
- * @param "SdnType" (optional.Interface of SdnType) -  Optional filter to only return SDNs whose type case-insensitively matches.
- * @param "Program" (optional.String) -  Optional filter to only return SDNs whose program case-insensitively matches.
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param optional nil or *SearchOpts - Optional Parameters:
+  - @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+  - @param "Q" (optional.String) -  Search across Name, Alt Names, and SDN Address fields for all available sanctions lists. Entries may be returned in all response sub-objects.
+  - @param "Name" (optional.String) -  Name which could correspond to an entry on the SDN, Denied Persons, Sectoral Sanctions Identifications, or BIS Entity List sanctions lists. Alt names are also searched.
+  - @param "Address" (optional.String) -  Physical address which could correspond to a human on the SDN list. Only Address results will be returned.
+  - @param "City" (optional.String) -  City name as desginated by SDN guidelines. Only Address results will be returned.
+  - @param "State" (optional.String) -  State name as desginated by SDN guidelines. Only Address results will be returned.
+  - @param "Providence" (optional.String) -  Providence name as desginated by SDN guidelines. Only Address results will be returned.
+  - @param "Zip" (optional.String) -  Zip code as desginated by SDN guidelines. Only Address results will be returned.
+  - @param "Country" (optional.String) -  Country name as desginated by SDN guidelines. Only Address results will be returned.
+  - @param "AltName" (optional.String) -  Alternate name which could correspond to a human on the SDN list. Only Alt name results will be returned.
+  - @param "Id" (optional.String) -  ID value often found in remarks property of an SDN. Takes the form of 'No. NNNNN' as an alphanumeric value.
+  - @param "MinMatch" (optional.Float32) -  Match percentage that search query must obtain for results to be returned.
+  - @param "Limit" (optional.Int32) -  Maximum results returned by a search. Results are sorted by their match percentage in decending order.
+  - @param "SdnType" (optional.Interface of SdnType) -  Optional filter to only return SDNs whose type case-insensitively matches.
+  - @param "Program" (optional.String) -  Optional filter to only return SDNs whose program case-insensitively matches.
+
 @return Search
 */
 func (a *WatchmanApiService) Search(ctx _context.Context, localVarOptionals *SearchOpts) (Search, *_nethttp.Response, error) {
@@ -1696,11 +1708,12 @@ type SearchUSCSLOpts struct {
 /*
 SearchUSCSL Search US CSL
 Search the US Consolidated Screening List
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param optional nil or *SearchUSCSLOpts - Optional Parameters:
- * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
- * @param "Name" (optional.String) -  Name which could correspond to an entry on the CSL
- * @param "Limit" (optional.Int32) -  Maximum number of downloads to return sorted by their timestamp in decending order.
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param optional nil or *SearchUSCSLOpts - Optional Parameters:
+  - @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+  - @param "Name" (optional.String) -  Name which could correspond to an entry on the CSL
+  - @param "Limit" (optional.Int32) -  Maximum number of downloads to return sorted by their timestamp in decending order.
+
 @return Search
 */
 func (a *WatchmanApiService) SearchUSCSL(ctx _context.Context, localVarOptionals *SearchUSCSLOpts) (Search, *_nethttp.Response, error) {
@@ -1799,12 +1812,12 @@ type UpdateOfacCompanyStatusOpts struct {
 /*
 UpdateOfacCompanyStatus Update company
 Update a Company&#39;s sanction status to always block or always allow transactions.
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param companyID Company ID
- * @param updateOfacCompanyStatus
- * @param optional nil or *UpdateOfacCompanyStatusOpts - Optional Parameters:
- * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
- * @param "XUserID" (optional.String) -  User ID used to perform this search
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param companyID Company ID
+  - @param updateOfacCompanyStatus
+  - @param optional nil or *UpdateOfacCompanyStatusOpts - Optional Parameters:
+  - @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+  - @param "XUserID" (optional.String) -  User ID used to perform this search
 */
 func (a *WatchmanApiService) UpdateOfacCompanyStatus(ctx _context.Context, companyID string, updateOfacCompanyStatus UpdateOfacCompanyStatus, localVarOptionals *UpdateOfacCompanyStatusOpts) (*_nethttp.Response, error) {
 	var (
@@ -1893,12 +1906,12 @@ type UpdateOfacCustomerStatusOpts struct {
 /*
 UpdateOfacCustomerStatus Update customer
 Update a Customer sanction status to always block or always allow transactions.
- * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param customerID Customer ID
- * @param updateOfacCustomerStatus
- * @param optional nil or *UpdateOfacCustomerStatusOpts - Optional Parameters:
- * @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
- * @param "XUserID" (optional.String) -  User ID used to perform this search
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param customerID Customer ID
+  - @param updateOfacCustomerStatus
+  - @param optional nil or *UpdateOfacCustomerStatusOpts - Optional Parameters:
+  - @param "XRequestID" (optional.String) -  Optional Request ID allows application developer to trace requests through the system's logs
+  - @param "XUserID" (optional.String) -  User ID used to perform this search
 */
 func (a *WatchmanApiService) UpdateOfacCustomerStatus(ctx _context.Context, customerID string, updateOfacCustomerStatus UpdateOfacCustomerStatus, localVarOptionals *UpdateOfacCustomerStatusOpts) (*_nethttp.Response, error) {
 	var (

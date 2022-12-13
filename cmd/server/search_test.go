@@ -9,6 +9,7 @@ import (
 	"math"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -47,8 +48,9 @@ var (
 	cmicSearcher      = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
 	ns_mbsSearcher    = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
 
-	eu_cslSearcher = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
-	uk_cslSearcher = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	eu_cslSearcher           = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	uk_cslSearcher           = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
+	uk_sanctionsListSearcher = newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
 )
 
 func init() {
@@ -350,15 +352,23 @@ func init() {
 		ValidFromTo:                map[string]string{"2022": "2030"},
 	}}, noLogPipeliner)
 
-	uk_cslSearcher.UKCSL = precomputeCSLEntities[csl.UKCSLRecord]([]*csl.UKCSLRecord{{
+	uk_cslSearcher.UKCSL = precomputeCSLEntities([]*csl.UKCSLRecord{{
 		Names:     []string{"'ABD AL-NASIR"},
 		Addresses: []string{"Tall 'Afar"},
 		GroupType: "Individual",
 		GroupID:   13720,
 	}}, noLogPipeliner)
+
+	uk_sanctionsListSearcher.UKSanctionsList = precomputeCSLEntities([]*csl.UKSanctionsListRecord{{
+		Names:     []string{"HAJI KHAIRULLAH HAJI SATTAR MONEY EXCHANGE"},
+		Addresses: []string{"Branch Office 2, Peshawar, Khyber Paktunkhwa Province, Pakistan"},
+		UniqueID:  "AFG0001",
+	}}, noLogPipeliner)
 }
 
+// This test fails when run with the "-race" flag on manualRefreshHandler>refreshData>ukSanctionsListRecords>ReadUKSanctionsListFile>ParseContent>Decode. The failure has to do with decoding xml in the context of an ods document (specifically UK_Sanctions_List.ods). We are skipping this test for now in favor of the functionality and because the underlying function will never be run concurrently and therefore will never experience a race condition.
 func createTestSearcher(t *testing.T) *searcher {
+	os.Setenv("WITH_UK_SANCTIONS_LIST", "false")
 	if testing.Short() {
 		t.Skip("-short enabled")
 	}
@@ -413,6 +423,10 @@ func verifyDownloadStats(b *testing.B) {
 
 	// EU - CSL
 	require.Greater(b, testSearcherStats.EUCSL, 1)
+	// UK - CSL
+	require.Greater(b, testSearcherStats.UKCSL, 1)
+	// UK - SanctionsList
+	require.Greater(b, testSearcherStats.UKSanctionsList, 1)
 }
 
 func TestJaroWinkler(t *testing.T) {

@@ -36,17 +36,25 @@ func manualRefreshHandler(logger log.Logger, searcher *searcher, updates chan *D
 			}()
 
 			logger.Info().With(log.Fields{
-				"SDNs":        log.Int(stats.SDNs),
-				"AltNames":    log.Int(stats.Alts),
-				"Addresses":   log.Int(stats.Addresses),
-				"SSI":         log.Int(stats.SectoralSanctions),
-				"DPL":         log.Int(stats.DeniedPersons),
-				"BISEntities": log.Int(stats.BISEntities),
-				"EUCSL":       log.Int(stats.EUCSL),
-				"UKCSL":       log.Int(stats.UKCSL),
+				"SDNs":            log.Int(stats.SDNs),
+				"AltNames":        log.Int(stats.Alts),
+				"Addresses":       log.Int(stats.Addresses),
+				"SSI":             log.Int(stats.SectoralSanctions),
+				"DPL":             log.Int(stats.DeniedPersons),
+				"BISEntities":     log.Int(stats.BISEntities),
+				"UVL":             log.Int(stats.Unverified),
+				"ISN":             log.Int(stats.NonProliferationSanctions),
+				"FSE":             log.Int(stats.ForeignSanctionsEvaders),
+				"PLC":             log.Int(stats.PalestinianLegislativeCouncil),
+				"CAP":             log.Int(stats.CAPTA),
+				"DTC":             log.Int(stats.ITARDebarred),
+				"CMIC":            log.Int(stats.ChineseMilitaryIndustrialComplex),
+				"NS_MBS":          log.Int(stats.NonSDNMenuBasedSanctions),
+				"EUCSL":           log.Int(stats.EUCSL),
+				"UKCSL":           log.Int(stats.UKCSL),
+				"UKSanctionsList": log.Int(stats.UKSanctionsList),
 			}).Logf("admin: finished data refresh %v ago", time.Since(stats.RefreshedAt))
 
-			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(stats)
 		}
 	}

@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	moovhttp "github.com/moov-io/base/http"
@@ -72,10 +73,13 @@ type DownloadStats struct {
 	NonSDNMenuBasedSanctions         int `json:"nonSDNMenuBasedSanctions"`
 
 	// EU Consolidated Sanctions List
-	EUCSL int `json:"EuropeanSanctionsList"`
+	EUCSL int `json:"europeanSanctionsList"`
 
-	// EU Consolidated Sanctions List
-	UKCSL int `json:"UKSanctionsList"`
+	// UK Consolidated Sanctions List
+	UKCSL int `json:"ukConsolidatedSanctionsList"`
+
+	// UK Sanctions List
+	UKSanctionsList int `json:"ukSanctionsList"`
 
 	Errors      []error   `json:"-"`
 	RefreshedAt time.Time `json:"timestamp"`
@@ -223,17 +227,32 @@ func euCSLRecords(logger log.Logger, initialDir string) ([]*csl.EUCSLRecord, err
 }
 
 func ukCSLRecords(logger log.Logger, initialDir string) ([]*csl.UKCSLRecord, error) {
-	file, err := csl.DownloadUK(logger, initialDir)
+	file, err := csl.DownloadUKCSL(logger, initialDir)
 	if err != nil {
 		logger.Warn().LogErrorf("skipping UK CSL download: %v", err)
 		// no error to return because we skip the download
 		return nil, nil
 	}
-	cslRecords, _, err := csl.ReadUKFile(file)
+	cslRecords, _, err := csl.ReadUKCSLFile(file)
 	if err != nil {
 		return nil, err
 	}
 	return cslRecords, err
+}
+
+func ukSanctionsListRecords(logger log.Logger, initialDir string) ([]*csl.UKSanctionsListRecord, error) {
+	file, err := csl.DownloadUKSanctionsList(logger, initialDir)
+	if err != nil {
+		logger.Warn().LogErrorf("skipping UK Sanctions List download: %v", err)
+		// no error to return because we skip the download
+		return nil, nil
+	}
+
+	records, _, err := csl.ReadUKSanctionsListFile(file)
+	if err != nil {
+		return nil, err
+	}
+	return records, err
 }
 
 // refreshData reaches out to the various websites to download the latest
@@ -285,6 +304,20 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	}
 
 	ukCSLs := precomputeCSLEntities[csl.UKCSLRecord](ukConsolidatedList, s.pipe)
+
+	var ukSLs []*Result[csl.UKSanctionsListRecord]
+	withSanctionsList := os.Getenv("WITH_UK_SANCTIONS_LIST")
+	if strings.ToLower(withSanctionsList) == "true" {
+		ukSanctionsList, err := ukSanctionsListRecords(s.logger, initialDir)
+		if err != nil {
+			lastDataRefreshFailure.WithLabelValues("UKSanctionsList").Set(float64(time.Now().Unix()))
+			stats.Errors = append(stats.Errors, fmt.Errorf("UKSanctionsList: %v", err))
+		}
+		ukSLs = precomputeCSLEntities[csl.UKSanctionsListRecord](ukSanctionsList, s.pipe)
+
+		stats.UKSanctionsList = len(ukSLs)
+		lastDataRefreshCount.WithLabelValues("UKSL").Set(float64(len(ukSLs)))
+	}
 
 	// csl records from US downloaded here
 	consolidatedLists, err := cslRecords(s.logger, initialDir)
@@ -375,6 +408,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	s.EUCSL = euCSLs
 	//UKCSL
 	s.UKCSL = ukCSLs
+	s.UKSanctionsList = ukSLs
 	// metadata
 	s.lastRefreshedAt = stats.RefreshedAt
 	s.Unlock()

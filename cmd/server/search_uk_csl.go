@@ -47,3 +47,14 @@ func (s *searcher) TopUKCSL(limit int, minMatch float64, name string) []*Result[
 
 	return topResults[csl.UKCSLRecord](limit, minMatch, name, s.UKCSL)
 }
+
+// TopUKSanctionsList searches the UK Sanctions list by Name and Alias
+func (s *searcher) TopUKSanctionsList(limit int, minMatch float64, name string) []*Result[csl.UKSanctionsListRecord] {
+	s.RLock()
+	defer s.RUnlock()
+
+	s.Gate.Start()
+	defer s.Gate.Done()
+
+	return topResults[csl.UKSanctionsListRecord](limit, minMatch, name, s.UKSanctionsList)
+}
