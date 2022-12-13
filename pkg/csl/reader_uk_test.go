@@ -2,6 +2,7 @@ package csl
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -69,9 +70,8 @@ func TestReadUKCSL(t *testing.T) {
 	assert.Equal(t, expectedGroupID, testRow.GroupID)
 }
 
-// This test fails when run with the "-race" flag on manualRefreshHandler>refreshData>ukSanctionsListRecords>ReadUKSanctionsListFile>ParseContent>Decode. The failure has to do with decoding xml in the context of an ods document (specifically UK_Sanctions_List.ods). We are skipping this test for now in favor of the functionality and because the underlying function will never be run concurrently and therefore will never experience a race condition.
 func TestReadUKSanctionsList(t *testing.T) {
-	t.Skip("test skipped due to panic on -race")
+	os.Setenv("WITH_UK_SANCTIONS_LIST", "false")
 	// test we don't err on parsing the content
 	totalReport, report, err := ReadUKSanctionsListFile("../../test/testdata/UK_Sanctions_List.ods")
 	assert.NoError(t, err)

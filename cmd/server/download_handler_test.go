@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/moov-io/base"
@@ -15,10 +16,9 @@ import (
 	"github.com/moov-io/watchman/internal/database"
 )
 
-// This test fails when run with the "-race" flag on manualRefreshHandler>refreshData>ukSanctionsListRecords>ReadUKSanctionsListFile>ParseContent>Decode. The failure has to do with decoding xml in the context of an ods document (specifically UK_Sanctions_List.ods). We are skipping this test for now in favor of the functionality and because the underlying function will never be run concurrently and therefore will never experience a race condition.
 func TestDownload__manualRefreshPath(t *testing.T) {
-	t.Skip("test skipped due to panic on -race")
 	t.Parallel()
+	os.Setenv("WITH_UK_SANCTIONS_LIST", "false")
 
 	if testing.Short() {
 		return

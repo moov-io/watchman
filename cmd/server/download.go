@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	moovhttp "github.com/moov-io/base/http"
@@ -304,13 +305,19 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 
 	ukCSLs := precomputeCSLEntities[csl.UKCSLRecord](ukConsolidatedList, s.pipe)
 
-	ukSanctionsList, err := ukSanctionsListRecords(s.logger, initialDir)
-	if err != nil {
-		lastDataRefreshFailure.WithLabelValues("UKSanctionsList").Set(float64(time.Now().Unix()))
-		stats.Errors = append(stats.Errors, fmt.Errorf("UKSanctionsList: %v", err))
-	}
+	var ukSLs []*Result[csl.UKSanctionsListRecord]
+	withSanctionsList := os.Getenv("WITH_UK_SANCTIONS_LIST")
+	if strings.ToLower(withSanctionsList) == "true" {
+		ukSanctionsList, err := ukSanctionsListRecords(s.logger, initialDir)
+		if err != nil {
+			lastDataRefreshFailure.WithLabelValues("UKSanctionsList").Set(float64(time.Now().Unix()))
+			stats.Errors = append(stats.Errors, fmt.Errorf("UKSanctionsList: %v", err))
+		}
+		ukSLs = precomputeCSLEntities[csl.UKSanctionsListRecord](ukSanctionsList, s.pipe)
 
-	ukSLs := precomputeCSLEntities[csl.UKSanctionsListRecord](ukSanctionsList, s.pipe)
+		stats.UKSanctionsList = len(ukSLs)
+		lastDataRefreshCount.WithLabelValues("UKSL").Set(float64(len(ukSLs)))
+	}
 
 	// csl records from US downloaded here
 	consolidatedLists, err := cslRecords(s.logger, initialDir)
@@ -354,9 +361,6 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	// UK - CSL
 	stats.UKCSL = len(ukCSLs)
 
-	// UK - Sanctions List
-	stats.UKSanctionsList = len(ukSLs)
-
 	// record prometheus metrics
 	lastDataRefreshCount.WithLabelValues("SDNs").Set(float64(len(sdns)))
 	lastDataRefreshCount.WithLabelValues("SSIs").Set(float64(len(ssis)))
@@ -375,8 +379,6 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	lastDataRefreshCount.WithLabelValues("EUCSL").Set(float64(len(euCSLs)))
 	// UK CSL
 	lastDataRefreshCount.WithLabelValues("UKCSL").Set(float64(len(ukCSLs)))
-	// UK Sanctions List
-	lastDataRefreshCount.WithLabelValues("UKSL").Set(float64(len(ukSLs)))
 
 	if len(stats.Errors) > 0 {
 		return stats, stats
@@ -406,7 +408,6 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	s.EUCSL = euCSLs
 	//UKCSL
 	s.UKCSL = ukCSLs
-	//UKSanctionsList
 	s.UKSanctionsList = ukSLs
 	// metadata
 	s.lastRefreshedAt = stats.RefreshedAt
