@@ -55,7 +55,7 @@ Refer to the MySQL driver documentation for [connection parameters](https://gith
 
 ### SQLite
 
-- `SQLITE_DB_PATH`: Local filepath location for the paygate SQLite database. (Default: `watchman.db`)
+- `SQLITE_DB_PATH`: Local filepath location for the SQLite database. (Default: `watchman.db`)
 
 Refer to the SQLite driver documentation for [connection parameters](https://github.com/mattn/go-sqlite3#connection-string).
 
