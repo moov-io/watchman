@@ -53,8 +53,8 @@ Lists included in search are:
    - Department of the Treasury – Office of Foreign Assets Control
       - [Sectoral Sanctions Identifications List](http://www.treasury.gov/resource-center/sanctions/SDN-List/Pages/ssi_list.aspx)
 - [EU - Consolidated Sanctions List](https://data.europa.eu/data/datasets/consolidated-list-of-persons-groups-and-entities-subject-to-eu-financial-sanctions?locale=en)
-   - NOTE: it is recommended to create your own account through the eu [website](https://webgate.ec.europa.eu/fsd/fsf)
-      - then use the token described under the "Show settings for crawler/robot" section
+   - NOTE: it is recommended to [create your own europa.eu account](https://webgate.ec.europa.eu/cas/login) and then access the [EU Financial Sanctions Files](https://webgate.ec.europa.eu/fsd/fsf)
+      - Use the token described under the "Show settings for crawler/robot" section
 - [UK - OFSI Sactions List](https://www.gov.uk/government/publications/financial-sanctions-consolidated-list-of-targets/consolidated-list-of-targets#contents)
 - [UK - Sanctions List](https://www.gov.uk/government/publications/the-uk-sanctions-list)
 
