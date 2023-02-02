@@ -1,4 +1,4 @@
-## v0.24.0 (Unreleased)
+## v0.24.0 (Released 2023-02-02)
 
 ADDITIONS
 
@@ -13,8 +13,12 @@ IMPROVEMENTS
 
 BUILD
 
-- build(deps): bump nokogiri from 1.13.6 to 1.13.9 in /docs
+- build: upgrade golang to 1.20
+- build: try using hashicorp-forge/go-test-split-action to speedup tests
+- build(deps): bump activesupport from 6.0.3.4 to 6.0.6.1 in /docs
+- build(deps): bump json5 from 1.0.1 to 1.0.2 in /webui
 - build(deps): bump loader-utils from 2.0.0 to 2.0.4 in /webui
+- build(deps): bump nokogiri from 1.13.6 to 1.13.9 in /docs
 
 ## v0.23.1 (Released 2022-10-17)
 
