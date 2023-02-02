@@ -25,15 +25,11 @@ jobs:
       if: runner.os == 'Linux'
       run: docker-compose up -d mysql
 
-    - name: Check (Linux)
+    - name: Short Tests
       if: runner.os == 'Linux'
-      run: make check
-
-    - name: Check (Non-Linux)
-      if: runner.os != 'Linux'
-      run: make check
       env:
         GOTEST_FLAGS: "-short"
+      run: make check
 
   create_release:
     name: Create Release
