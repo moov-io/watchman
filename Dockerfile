@@ -1,11 +1,11 @@
-FROM golang:1.20-buster as builder
+FROM golang:1.20-bullseye as builder
 WORKDIR /go/src/github.com/moov-io/watchman
 RUN apt-get update && apt-get upgrade -y && apt-get install make gcc g++
 COPY . .
 RUN go mod download
 RUN make build-server
 
-FROM node:18-buster as frontend
+FROM node:19-bullseye as frontend
 COPY webui/ /watchman/
 WORKDIR /watchman/
 RUN npm install --legacy-peer-deps
