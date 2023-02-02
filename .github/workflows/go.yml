@@ -13,6 +13,10 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+        # Settings for test_split
+        total_test_splits: [5]
+        index: [0, 1, 2, 3, 4]
+
     steps:
     - name: Set up Go 1.x
       uses: actions/setup-go@v2
@@ -27,22 +31,28 @@ jobs:
       if: runner.os == 'Windows'
       run: choco install -y make mingw
 
-    - name: Build
-      run: make build
-
     - name: Setup
       if: runner.os == 'Linux'
       run: docker-compose up -d mysql
 
-    - name: Check (Linux)
+    - name: Generate go test Slice
+      id: test_split
+      uses: hashicorp-forge/go-test-split-action@v1
+      with:
+        total: ${{ matrix.total_test_splits }}
+        index: ${{ matrix.index }}
+
+    - name: Run Tests (Linux)
       if: runner.os == 'Linux'
+      env:
+        GOTEST_FLAGS: '-run "${{ steps.test_split.outputs.run}}"'
       run: make check
 
-    - name: Check (Non-Linux)
+    - name: Run Short Tests (Non-Linux)
       if: runner.os != 'Linux'
-      run: make check
       env:
-        GOTEST_FLAGS: "-short"
+        GOTEST_FLAGS: '-short -run "${{ steps.test_split.outputs.run}}"'
+      run: make check
 
     - name: Upload Code Coverage
       if: runner.os == 'Linux'
@@ -69,6 +79,9 @@ jobs:
         sudo systemctl disable mono-xsp4.service || true
         sudo systemctl stop mono-xsp4.service || true
         sudo killall mono || true
+
+    - name: Build Frontend
+      run: make build
 
     - name: Docker Build
       if: runner.os == 'Linux'
