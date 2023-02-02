@@ -18,14 +18,14 @@ jobs:
         index: [0, 1, 2, 3, 4]
 
     steps:
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v2
-      with:
-        go-version: '>= 1.19.1'
-      id: go
-
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
+
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v3
+      with:
+        go-version: '>= 1.20'
+      id: go
 
     - name: Install make (Windows)
       if: runner.os == 'Windows'
@@ -64,12 +64,12 @@ jobs:
     steps:
     - name: Setup Node / NPM
       if: runner.os == 'Linux'
-      uses: actions/setup-node@v2-beta
+      uses: actions/setup-node@v3
       with:
-        node-version: '16'
+        node-version: '19'
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     # disable and stop mono-xsp4.service
     # Details: https://github.com/actions/virtual-environments/issues/2821
