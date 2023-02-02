@@ -12,24 +12,20 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest]
         # Settings for test_split
         total_test_splits: [5]
         index: [0, 1, 2, 3, 4]
 
     steps:
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v2
-      with:
-        go-version: '>= 1.19.1'
-      id: go
-
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
-    - name: Install make (Windows)
-      if: runner.os == 'Windows'
-      run: choco install -y make mingw
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v3
+      with:
+        go-version: '>= 1.20'
+      id: go
 
     - name: Setup
       if: runner.os == 'Linux'
@@ -58,18 +54,39 @@ jobs:
       if: runner.os == 'Linux'
       run: bash <(curl -s https://codecov.io/bash)
 
+  winbuild:
+    name: Build (Windows)
+    runs-on: [ windows-latest ]
+    steps:
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v3
+
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v3
+      with:
+        go-version: '>= 1.20'
+      id: go
+
+    - name: Install make (Windows)
+      run: |
+        choco install -y make mingw
+
+    - name: Run Short Tests (Non-Linux)
+      run: |
+        go test ./... -short
+
   docker:
     name: Docker build
     runs-on: [ ubuntu-latest ]
     steps:
     - name: Setup Node / NPM
       if: runner.os == 'Linux'
-      uses: actions/setup-node@v2-beta
+      uses: actions/setup-node@v3
       with:
-        node-version: '16'
+        node-version: '19'
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     # disable and stop mono-xsp4.service
     # Details: https://github.com/actions/virtual-environments/issues/2821
