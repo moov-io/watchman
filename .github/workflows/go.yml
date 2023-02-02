@@ -43,11 +43,12 @@ jobs:
         index: ${{ matrix.index }}
 
     - name: Run Tests (Linux)
+      if: runner.os == 'Linux'
       env:
         GOTEST_FLAGS: '-run "${{ steps.test_split.outputs.run}}"'
       run: make check
 
-    - name: Check (Non-Linux)
+    - name: Run Short Tests (Non-Linux)
       if: runner.os != 'Linux'
       env:
         GOTEST_FLAGS: '-short -run "${{ steps.test_split.outputs.run}}"'
