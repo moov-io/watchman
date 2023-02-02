@@ -1,4 +1,4 @@
-FROM golang:1.20-alpine as builder
+FROM golang:1.20-buster as builder
 WORKDIR /go/src/github.com/moov-io/watchman
 RUN apt-get update && apt-get upgrade -y && apt-get install make gcc g++
 COPY . .
