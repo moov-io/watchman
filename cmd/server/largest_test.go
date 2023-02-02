@@ -8,14 +8,9 @@ import (
 	"math"
 	"math/rand"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 )
-
-func init() {
-	rand.Seed(time.Now().Unix())
-}
 
 func randomWeight() float64 {
 	//nolint:gosec
@@ -44,7 +39,9 @@ func TestLargest(t *testing.T) {
 		if i+1 > len(xs.items)-1 {
 			continue // don't hit index out of bounds
 		}
-
+		if xs.items[i].weight < 0.0001 {
+			t.Fatalf("weight of %.2f is too low", xs.items[i].weight)
+		}
 		if xs.items[i].weight < xs.items[i+1].weight {
 			t.Errorf("xs.items[%d].weight=%.2f < xs.items[%d].weight=%.2f", i, xs.items[i].weight, i+1, xs.items[i+1].weight)
 		}
