@@ -1,3 +1,15 @@
+## v0.24.1 (Released 2023-02-16)
+
+IMPROVEMENTS
+
+- fix: filter SDNs in async search rather than truncate
+
+BUILD
+
+- build: update Go dependencies
+- docs: bundle update
+- webui: npm audit fix
+
 ## v0.24.0 (Released 2023-02-02)
 
 ADDITIONS
