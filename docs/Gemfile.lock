@@ -22,7 +22,7 @@ GEM
     coffee-script-source (1.11.1)
     colorator (1.1.0)
     commonmarker (0.23.8)
-    concurrent-ruby (1.2.0)
+    concurrent-ruby (1.2.2)
     dnsruby (1.61.9)
       simpleidn (~> 0.1)
     em-websocket (0.5.3)
@@ -270,7 +270,7 @@ DEPENDENCIES
   bulma-clean-theme
   github-pages
   jekyll-feed (~> 0.12)
-  tzinfo (~> 1.2)
+  tzinfo (~> 2.0)
   tzinfo-data
   wdm (~> 0.1.1)
 

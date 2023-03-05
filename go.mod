@@ -6,7 +6,7 @@ require (
 	github.com/abadojack/whatlanggo v1.0.1
 	github.com/antihax/optional v1.0.0
 	github.com/bbalet/stopwords v1.0.0
-	github.com/docker/docker v20.10.13+incompatible
+	github.com/docker/docker v20.10.23+incompatible
 	github.com/go-kit/kit v0.12.0
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/gorilla/mux v1.8.0
@@ -16,11 +16,11 @@ require (
 	github.com/moov-io/base v0.39.0
 	github.com/pariz/gountries v0.1.6
 	github.com/prometheus/client_golang v1.14.0
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673
-	go4.org v0.0.0-20201209231011-d4a079459e60
-	golang.org/x/oauth2 v0.5.0
-	golang.org/x/text v0.7.0
+	go4.org v0.0.0-20230225012048-214862532bf5
+	golang.org/x/oauth2 v0.6.0
+	golang.org/x/text v0.8.0
 )
 
 require (
@@ -37,8 +37,8 @@ require (
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/rickar/cal/v2 v2.1.10 // indirect
 	golang.org/x/crypto v0.6.0 // indirect
-	golang.org/x/net v0.7.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/net v0.8.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
