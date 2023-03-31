@@ -202,7 +202,7 @@ func dplRecords(logger log.Logger, initialDir string) ([]*dpl.DPL, error) {
 func cslRecords(logger log.Logger, initialDir string) (*csl.CSL, error) {
 	file, err := csl.Download(logger, initialDir)
 	if err != nil {
-		logger.Warn().LogErrorf("skipping CSL download: %v", err)
+		logger.Warn().Logf("skipping CSL download: %v", err)
 		return &csl.CSL{}, nil
 	}
 	cslRecords, err := csl.ReadFile(file)
@@ -215,7 +215,7 @@ func cslRecords(logger log.Logger, initialDir string) (*csl.CSL, error) {
 func euCSLRecords(logger log.Logger, initialDir string) ([]*csl.EUCSLRecord, error) {
 	file, err := csl.DownloadEU(logger, initialDir)
 	if err != nil {
-		logger.Warn().LogErrorf("skipping EU CSL download: %v", err)
+		logger.Warn().Logf("skipping EU CSL download: %v", err)
 		// no error to return because we skip the download
 		return nil, nil
 	}
@@ -229,7 +229,7 @@ func euCSLRecords(logger log.Logger, initialDir string) ([]*csl.EUCSLRecord, err
 func ukCSLRecords(logger log.Logger, initialDir string) ([]*csl.UKCSLRecord, error) {
 	file, err := csl.DownloadUKCSL(logger, initialDir)
 	if err != nil {
-		logger.Warn().LogErrorf("skipping UK CSL download: %v", err)
+		logger.Warn().Logf("skipping UK CSL download: %v", err)
 		// no error to return because we skip the download
 		return nil, nil
 	}
@@ -243,7 +243,7 @@ func ukCSLRecords(logger log.Logger, initialDir string) ([]*csl.UKCSLRecord, err
 func ukSanctionsListRecords(logger log.Logger, initialDir string) ([]*csl.UKSanctionsListRecord, error) {
 	file, err := csl.DownloadUKSanctionsList(logger, initialDir)
 	if err != nil {
-		logger.Warn().LogErrorf("skipping UK Sanctions List download: %v", err)
+		logger.Warn().Logf("skipping UK Sanctions List download: %v", err)
 		// no error to return because we skip the download
 		return nil, nil
 	}

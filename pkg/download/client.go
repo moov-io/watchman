@@ -115,7 +115,7 @@ func (dl *Downloader) GetFiles(initialDir string, namesAndSources map[string]str
 			if err != nil {
 				logger.Error().LogErrorf("FAILURE after %v to download: %v", dur, err)
 			} else {
-				logger.Error().LogErrorf("successful download after %v", dur)
+				logger.Info().Logf("successful download after %v", dur)
 			}
 
 			mu.Lock()

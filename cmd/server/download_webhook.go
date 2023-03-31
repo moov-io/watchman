@@ -27,7 +27,7 @@ func callDownloadWebook(logger log.Logger, stats *DownloadStats) {
 
 	statusCode, err := callWebhook(&body, webhookURL, webhookAuthToken)
 	if err != nil {
-		logger.Error().LogErrorf("calling download webhook: %v", err)
+		logger.Error().LogErrorf("problem calling download webhook: %v", err)
 	} else {
 		logger.Info().Logf("http status code %d from download webhook", statusCode)
 	}
