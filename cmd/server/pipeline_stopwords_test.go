@@ -72,7 +72,7 @@ func TestStopwords__clean(t *testing.T) {
 	for i := range cases {
 		result := removeStopwords(cases[i].in, cases[i].lang)
 		if result != cases[i].expected {
-			t.Errorf("\n#%d in=%q  lang=%v\ngot=%q", i, cases[i].in, cases[i].lang, result)
+			t.Errorf("\n#%d in=%q  lang=%v\n  got=%q\n  exp=%q", i, cases[i].in, cases[i].lang, result, cases[i].expected)
 		}
 	}
 }
@@ -112,6 +112,21 @@ func TestStopwords__apply(t *testing.T) {
 			testName: "ssi business",
 			in:       &Name{Processed: "Trees and Trucks", ssi: &csl.SSI{Type: "business"}},
 			expected: "trees trucks",
+		},
+		{
+			testName: "Issue 483 #1",
+			in:       &Name{Processed: "11420 CORP.", sdn: &ofac.SDN{SDNType: "business"}},
+			expected: "11420 corp",
+		},
+		{
+			testName: "Issue 483 #2",
+			in:       &Name{Processed: "11,420.2-1 CORP.", sdn: &ofac.SDN{SDNType: "business"}},
+			expected: "11,420.2-1 corp",
+		},
+		{
+			testName: "Issue 483 #3",
+			in:       &Name{Processed: "11AA420 CORP.", sdn: &ofac.SDN{SDNType: "business"}},
+			expected: "11aa420 corp",
 		},
 	}
 

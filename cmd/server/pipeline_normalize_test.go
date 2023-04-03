@@ -31,6 +31,9 @@ func TestPrecompute(t *testing.T) {
 		{"convert IAcute", "Delcy Rodríguez", "delcy rodriguez"},
 		{"issue 58", "Raúl Castro", "raul castro"},
 		{"remove hyphen", "ANGLO-CARIBBEAN ", "anglo caribbean"},
+		// Issue 483
+		{"issue 483 #1", "11420 CORP.", "11420 corp"},
+		{"issue 483 #2", "11,420.2-1 CORP.", "114202 1 corp"},
 	}
 	for i, tc := range tests {
 		guess := precompute(tc.input)

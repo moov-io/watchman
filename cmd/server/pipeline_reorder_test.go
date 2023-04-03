@@ -49,4 +49,19 @@ func TestReorderSDNName(t *testing.T) {
 			t.Errorf("reorderSDNName(%q)=%q expected %q", cases[i].input, guess, cases[i].expected)
 		}
 	}
+
+	// Entities
+	cases = []struct {
+		input, expected string
+	}{
+		// Issue 483
+		{"11420 CORP.", "11420 CORP."},
+		{"11,420.2-1 CORP.", "11,420.2-1 CORP."},
+	}
+	for i := range cases {
+		guess := reorderSDNName(cases[i].input, "") // blank refers to a company
+		if guess != cases[i].expected {
+			t.Errorf("reorderSDNName(%q)=%q expected %q", cases[i].input, guess, cases[i].expected)
+		}
+	}
 }
