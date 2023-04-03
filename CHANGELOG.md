@@ -1,3 +1,17 @@
+## v0.24.2 (Released 2023-04-03)
+
+IMPROVEMENTS
+
+- fix: keep numbers during stopwords step
+- fix: stop setting level=error for info logs
+
+BUILD
+
+- bump golang.org/x/crypto to v0.6.0
+- bump golang.org/x/net from 0.6.0 to 0.7.0
+- build(deps): bump activesupport from 6.1.7.2 to 7.0.4.3 in /docs
+- build(deps): bump webpack from 5.75.0 to 5.76.1 in /webui
+
 ## v0.24.1 (Released 2023-02-16)
 
 IMPROVEMENTS
