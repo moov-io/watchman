@@ -64,6 +64,11 @@ func TestFullPipeline(t *testing.T) {
 		{company("MKS INTERNATIONAL CO. LTD."), "mks international"},                                                    // SDN 21553
 		{company("SHANGHAI NORTH TRANSWAY INTERNATIONAL TRADING CO."), "shanghai north transway international trading"}, // SDN 22246
 
+		// Keep numbers
+		{company("11420 CORP."), "11420 corp"},
+		{company("11AA420 CORP."), "11aa420 corp"},
+		{company("11,420.2-1 CORP."), "114202 1 corp"},
+
 		// Remove stopwords
 		{company("INVERSIONES LA QUINTA Y CIA. LTDA."), "inversiones la quinta y cia"},
 

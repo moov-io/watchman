@@ -51,6 +51,10 @@ func TestRemoveCompanyTitles(t *testing.T) {
 		{"MC OVERSEAS TRADING COMPANY SA DE CV", "MC OVERSEAS TRADING COMPANY"},                                // SDN 10252
 		{"SIRJANCO TRADING L.L.C.", "SIRJANCO TRADING"},                                                        // SDN 15985
 
+		// Issue 483
+		{"11420 CORP.", "11420 CORP."},
+		{"11,420.2-1 CORP.", "11,420.2-1 CORP."},
+
 		// Controls
 		{"TADBIR ECONOMIC DEVELOPMENT GROUP", "TADBIR ECONOMIC DEVELOPMENT GROUP"}, // SDN 16006
 		{"DI LAURO, Marco", "DI LAURO, Marco"},                                     // SDN 16128

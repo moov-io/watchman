@@ -6,6 +6,7 @@ package main
 
 import (
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -48,11 +49,29 @@ func (s *stopwordsStep) apply(in *Name) error {
 	return nil
 }
 
+var (
+	numberRegex = regexp.MustCompile(`([\d\.\,\-]{1,}[\d]{1,})`)
+)
+
 func removeStopwords(in string, lang whatlanggo.Lang) string {
 	if keepStopwords {
 		return in
 	}
-	return strings.TrimSpace(stopwords.CleanString(strings.ToLower(in), lang.Iso6391(), false))
+
+	var out []string
+	words := strings.Fields(strings.ToLower(in))
+	for i := range words {
+		cleaned := strings.TrimSpace(words[i])
+
+		// When the word is a number leave it alone
+		if !numberRegex.MatchString(cleaned) {
+			cleaned = strings.TrimSpace(stopwords.CleanString(cleaned, lang.Iso6391(), false))
+		}
+		if cleaned != "" {
+			out = append(out, cleaned)
+		}
+	}
+	return strings.Join(out, " ")
 }
 
 // detectLanguage will return a guess as to the appropriate language a given SDN's name
