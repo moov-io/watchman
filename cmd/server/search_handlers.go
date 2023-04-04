@@ -89,58 +89,38 @@ func readAddressSearchRequest(u *url.URL) addressSearchRequest {
 func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w = wrapResponseWriter(logger, w, r)
-		requestID := moovhttp.GetRequestID(r)
 
 		// Search over all fields
 		if q := strings.TrimSpace(r.URL.Query().Get("q")); q != "" {
-			logger.Info().With(log.Fields{
-				"requestID": log.String(requestID),
-			}).Logf("searching all names and address for %s", q)
-			searchViaQ(logger, searcher, q)(w, r)
+			searchViaQ(searcher, q)(w, r)
 			return
 		}
 
 		// Search by ID (found in an SDN's Remarks property)
 		if id := strings.TrimSpace(r.URL.Query().Get("id")); id != "" {
-			logger.Info().With(log.Fields{
-				"requestID": log.String(requestID),
-			}).Logf("searching SDNs by remarks ID for %s", id)
-			searchByRemarksID(logger, searcher, id)(w, r)
+			searchByRemarksID(searcher, id)(w, r)
 			return
 		}
 
 		// Search by Name
 		if name := strings.TrimSpace(r.URL.Query().Get("name")); name != "" {
 			if req := readAddressSearchRequest(r.URL); !req.empty() {
-				logger.Info().With(log.Fields{
-					"requestID": log.String(requestID),
-				}).Logf("searching SDN names='%s' and addresses", name)
-				searchViaAddressAndName(logger, searcher, name, req)(w, r)
-				return
+				searchViaAddressAndName(searcher, name, req)(w, r)
+			} else {
+				searchByName(searcher, name)(w, r)
 			}
-
-			logger.Info().With(log.Fields{
-				"requestID": log.String(requestID),
-			}).Logf("searching SDN names for %s", name)
-			searchByName(logger, searcher, name)(w, r)
 			return
 		}
 
 		// Search by Alt Name
 		if alt := strings.TrimSpace(r.URL.Query().Get("altName")); alt != "" {
-			logger.Info().With(log.Fields{
-				"requestID": log.String(requestID),
-			}).Logf("searching SDN alt names for %s", alt)
-			searchByAltName(logger, searcher, alt)(w, r)
+			searchByAltName(searcher, alt)(w, r)
 			return
 		}
 
 		// Search Addresses
 		if req := readAddressSearchRequest(r.URL); !req.empty() {
-			logger.Info().With(log.Fields{
-				"requestID": log.String(requestID),
-			}).Logf("searching address for %#v", req)
-			searchByAddress(logger, searcher, req)(w, r)
+			searchByAddress(searcher, req)(w, r)
 			return
 		}
 
@@ -207,7 +187,7 @@ func buildAddressCompares(req addressSearchRequest) []func(*Address) *item {
 	return compares
 }
 
-func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchRequest) http.HandlerFunc {
+func searchByAddress(searcher *searcher, req addressSearchRequest) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if req.empty() {
 			w.WriteHeader(http.StatusBadRequest)
@@ -242,7 +222,7 @@ func searchByAddress(logger log.Logger, searcher *searcher, req addressSearchReq
 	}
 }
 
-func searchViaQ(logger log.Logger, searcher *searcher, name string) http.HandlerFunc {
+func searchViaQ(searcher *searcher, name string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name = strings.TrimSpace(name)
 		if name == "" {
@@ -374,7 +354,7 @@ func buildFullSearchResponseWith(searcher *searcher, searchGatherings []searchGa
 	return &resp
 }
 
-func searchViaAddressAndName(logger log.Logger, searcher *searcher, name string, req addressSearchRequest) http.HandlerFunc {
+func searchViaAddressAndName(searcher *searcher, name string, req addressSearchRequest) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name = strings.TrimSpace(name)
 		if name == "" || req.empty() {
@@ -407,7 +387,7 @@ func searchViaAddressAndName(logger log.Logger, searcher *searcher, name string,
 	}
 }
 
-func searchByRemarksID(logger log.Logger, searcher *searcher, id string) http.HandlerFunc {
+func searchByRemarksID(searcher *searcher, id string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if id == "" {
 			moovhttp.Problem(w, errNoSearchParams)
@@ -435,7 +415,7 @@ func searchByRemarksID(logger log.Logger, searcher *searcher, id string) http.Ha
 	}
 }
 
-func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.HandlerFunc {
+func searchByName(searcher *searcher, nameSlug string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		nameSlug = strings.TrimSpace(nameSlug)
 		if nameSlug == "" {
@@ -478,7 +458,7 @@ func searchByName(logger log.Logger, searcher *searcher, nameSlug string) http.H
 	}
 }
 
-func searchByAltName(logger log.Logger, searcher *searcher, altSlug string) http.HandlerFunc {
+func searchByAltName(searcher *searcher, altSlug string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		altSlug = strings.TrimSpace(altSlug)
 		if altSlug == "" {
