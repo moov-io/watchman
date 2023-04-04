@@ -6,7 +6,7 @@ require (
 	github.com/abadojack/whatlanggo v1.0.1
 	github.com/antihax/optional v1.0.0
 	github.com/bbalet/stopwords v1.0.0
-	github.com/docker/docker v20.10.23+incompatible
+	github.com/docker/docker v20.10.24+incompatible
 	github.com/go-kit/kit v0.12.0
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/gorilla/mux v1.8.0
