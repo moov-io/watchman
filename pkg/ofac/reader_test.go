@@ -97,7 +97,7 @@ func TestSDNComments(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := fd.Write([]byte(`28264,"hone Number 8613314257947; alt. Phone Number 8618004121000; Identification Number 210302198701102136 (China); a.k.a. "blackjack1987"; a.k.a. "khaleesi"; Linked To: LAZARUS GROUP."`)); err != nil {
+	if _, err := fd.WriteString(`28264,"hone Number 8613314257947; alt. Phone Number 8618004121000; Identification Number 210302198701102136 (China); a.k.a. "blackjack1987"; a.k.a. "khaleesi"; Linked To: LAZARUS GROUP."`); err != nil {
 		t.Fatal(err)
 	}
 

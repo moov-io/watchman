@@ -9,7 +9,6 @@ import (
 	"math"
 	"net/http/httptest"
 	"net/url"
-	"os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -367,7 +366,7 @@ func init() {
 }
 
 func createTestSearcher(t *testing.T) *searcher {
-	os.Setenv("WITH_UK_SANCTIONS_LIST", "false")
+	t.Setenv("WITH_UK_SANCTIONS_LIST", "false")
 	if testing.Short() {
 		t.Skip("-short enabled")
 	}

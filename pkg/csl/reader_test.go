@@ -50,7 +50,7 @@ func TestRead_missingRow(t *testing.T) {
 	require.NoError(t, err)
 	t.Cleanup(func() { os.Remove(fd.Name()) })
 
-	_, err = fd.Write([]byte(`  \n invalid  \n  \n`))
+	_, err = fd.WriteString(`  \n invalid  \n  \n`)
 	require.NoError(t, err)
 
 	resp, err := ReadFile(fd.Name())

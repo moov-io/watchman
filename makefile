@@ -34,7 +34,7 @@ ifeq ($(OS),Windows_NT)
 else
 	@wget -O lint-project.sh https://raw.githubusercontent.com/moov-io/infra/master/go/lint-project.sh
 	@chmod +x ./lint-project.sh
-	./lint-project.sh
+	STRICT_GOLANGCI_LINTERS=no GOLANGCI_LINTERS=gocheckcompilerdirectives,mirror,tenv ./lint-project.sh
 endif
 
 .PHONY: admin

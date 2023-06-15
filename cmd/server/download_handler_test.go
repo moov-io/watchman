@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 
 	"github.com/moov-io/base"
@@ -18,7 +17,7 @@ import (
 
 func TestDownload__manualRefreshPath(t *testing.T) {
 	t.Parallel()
-	os.Setenv("WITH_UK_SANCTIONS_LIST", "false")
+	t.Setenv("WITH_UK_SANCTIONS_LIST", "false")
 
 	if testing.Short() {
 		return

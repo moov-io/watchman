@@ -2,7 +2,6 @@ package csl
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"testing"
 
@@ -71,7 +70,7 @@ func TestReadUKCSL(t *testing.T) {
 }
 
 func TestReadUKSanctionsList(t *testing.T) {
-	os.Setenv("WITH_UK_SANCTIONS_LIST", "false")
+	t.Setenv("WITH_UK_SANCTIONS_LIST", "false")
 	// test we don't err on parsing the content
 	totalReport, report, err := ReadUKSanctionsListFile("../../test/testdata/UK_Sanctions_List.ods")
 	assert.NoError(t, err)
