@@ -74,7 +74,7 @@ A web UI is included with Watchman for inspecting OFAC results.
 - [FDIC Bank Secrecy Act / Anti-Money Laundering](https://www.fdic.gov/resources/bankers/bank-secrecy-act/)
 - [FFIEC BSA/AML Risk Assessment](https://bsaaml.ffiec.gov/manual/BSAAMLRiskAssessment/01)
 - [Frequently Asked Questions Regarding Customer Due Diligence Requirements for Financial Institutions](https://www.fincen.gov/sites/default/files/2018-04/FinCEN_Guidance_CDD_FAQ_FINAL_508_2.pdf)
-- [OFAC FAQ #249 - How is the Score calculated?](https://home.treasury.gov/policy-issues/financial-sanctions/faqs/topic/1636)
+- [OFAC FAQ #249 - How is the Score calculated?](https://ofac.treasury.gov/faqs/249)
 - [Sound Practices for Model Risk Management: Supervisory Guidance on Model Risk Management](https://www.occ.gov/news-issuances/bulletins/2011/bulletin-2011-12.html)
 - [Application of Jaro-Winkler String Comparator in Enhancing Veterans Administrative Records](https://nces.ed.gov/FCSM/pdf/H_4HyoParkFCSM2018final.pdf)
 - [Efficient Approximate Entity Matching Using Jaro-Winkler Distance](https://jqin.gitee.io/files/wise2017-wang.pdf)
