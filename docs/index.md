@@ -21,19 +21,24 @@ Lists included in search are:
     - Includes SDN, SDN Alternative Names, SDN Addresses
 - [United States Consolidated Screening List](https://www.export.gov/article2?id=Consolidated-Screening-List)
    - Department of Commerce – Bureau of Industry and Security
-      - [Denied Persons List](http://www.bis.doc.gov/dpl/default.shtm)
-      - [Unverified List](http://www.bis.doc.gov/enforcement/unverifiedlist/unverified_parties.html)
-      - [Entity List](http://www.bis.doc.gov/entities/default.htm)
+      - [Denied Persons List](https://www.bis.doc.gov/index.php/policy-guidance/lists-of-parties-of-concern/denied-persons-list)
+      - [Unverified List](https://www.bis.doc.gov/index.php/policy-guidance/lists-of-parties-of-concern/unverified-list)
+      - [Entity List](https://www.bis.doc.gov/index.php/policy-guidance/lists-of-parties-of-concern/entity-list)
    - Department of State – Bureau of International Security and Non-proliferation
       - [Nonproliferation Sanctions](http://www.state.gov/t/isn/c15231.htm)
    - Department of State – Directorate of Defense Trade Controls
       - ITAR Debarred (DTC)
    - Department of the Treasury – Office of Foreign Assets Control
-      - [Specially Designated Nationals List](http://www.treasury.gov/resource-center/sanctions/SDN-List/Pages/default.aspx)
-      - [Foreign Sanctions Evaders List](http://www.treasury.gov/resource-center/sanctions/SDN-List/Pages/fse_list.aspx)
-      - [Sectoral Sanctions Identifications List](http://www.treasury.gov/resource-center/sanctions/SDN-List/Pages/ssi_list.aspx)
-      - [Palestinian Legislative Council List](https://www.treasury.gov/resource-center/sanctions/Terrorism-Proliferation-Narcotics/Pages/pa.aspx)
+      - [Specially Designated Nationals List](https://ofac.treasury.gov/specially-designated-nationals-list-data-formats-data-schemas)
+      - [Foreign Sanctions Evaders List](https://ofac.treasury.gov/consolidated-sanctions-list-non-sdn-lists/foreign-sanctions-evaders-fse-list)
+      - [Sectoral Sanctions Identifications List](https://ofac.treasury.gov/consolidated-sanctions-list-non-sdn-lists/sectoral-sanctions-identifications-ssi-list)
+      - [Palestinian Legislative Council List](https://ofac.treasury.gov/consolidated-sanctions-list/non-sdn-palestinian-legislative-council-ns-plc-list)
    - Department of the Treasury – Office of Foreign Assets Control
-      - [Sectoral Sanctions Identifications List](http://www.treasury.gov/resource-center/sanctions/SDN-List/Pages/ssi_list.aspx)
+      - [Sectoral Sanctions Identifications List](https://ofac.treasury.gov/consolidated-sanctions-list-non-sdn-lists/sectoral-sanctions-identifications-ssi-list)
+- [EU - Consolidated Sanctions List](https://data.europa.eu/data/datasets/consolidated-list-of-persons-groups-and-entities-subject-to-eu-financial-sanctions?locale=en)
+   - NOTE: it is recommended to [create your own europa.eu account](https://webgate.ec.europa.eu/cas/login) and then access the [EU Financial Sanctions Files](https://webgate.ec.europa.eu/fsd/fsf)
+      - Use the token described under the "Show settings for crawler/robot" section
+- [UK - OFSI Sactions List](https://www.gov.uk/government/publications/financial-sanctions-consolidated-list-of-targets/consolidated-list-of-targets#contents)
+- [UK - Sanctions List](https://www.gov.uk/government/publications/the-uk-sanctions-list) (Disabled by default)
 
 All United States and European Union companies are required to comply with various regulations and sanction lists (such as the US Patriot Act requiring compliance with the BIS Denied Persons List).
