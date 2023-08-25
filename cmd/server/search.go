@@ -627,7 +627,7 @@ func readFloat(override string, value float64) float64 {
 	if override != "" {
 		n, err := strconv.ParseFloat(override, 32)
 		if err != nil {
-			panic(fmt.Errorf("unable to parse %q as float64", override))
+			panic(fmt.Errorf("unable to parse %q as float64", override)) //nolint:forbidigo
 		}
 		return n
 	}
@@ -638,7 +638,7 @@ func readInt(override string, value int) int {
 	if override != "" {
 		n, err := strconv.ParseInt(override, 10, 32)
 		if err != nil {
-			panic(fmt.Errorf("unable to parse %q as int", override))
+			panic(fmt.Errorf("unable to parse %q as int", override)) //nolint:forbidigo
 		}
 		return int(n)
 	}

@@ -41,10 +41,9 @@ var (
 
 func init() {
 	maxWorkers, err := strconv.ParseInt(strx.Or(os.Getenv("WEBHOOK_MAX_WORKERS"), "10"), 10, 32)
-	if err != nil {
-		panic(fmt.Sprintf("ERROR reading WEBHOOK_MAX_WORKERS: %v", err))
+	if err == nil {
+		webhookGate = syncutil.NewGate(int(maxWorkers))
 	}
-	webhookGate = syncutil.NewGate(int(maxWorkers))
 }
 
 // callWebhook will take `body` as JSON and make a POST request to the provided webhook url.
@@ -65,8 +64,10 @@ func callWebhook(body *bytes.Buffer, webhook string, authToken string) (int, err
 	}
 
 	// Guard HTTP calls in-flight
-	webhookGate.Start()
-	defer webhookGate.Done()
+	if webhookGate != nil {
+		webhookGate.Start()
+		defer webhookGate.Done()
+	}
 
 	resp, err := webhookHTTPClient.Do(req)
 	if resp == nil || err != nil {
