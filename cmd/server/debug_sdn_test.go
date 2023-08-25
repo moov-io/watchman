@@ -13,10 +13,16 @@ import (
 	"github.com/moov-io/base"
 	"github.com/moov-io/base/admin"
 	"github.com/moov-io/base/log"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestDebug__SDN(t *testing.T) {
-	svc := admin.NewServer(":0")
+	svc, err := admin.New(admin.Opts{
+		Addr: ":0",
+	})
+	require.NoError(t, err)
+
 	go svc.Listen()
 	defer svc.Shutdown()
 
@@ -26,9 +32,7 @@ func TestDebug__SDN(t *testing.T) {
 	req.Header.Set("x-request-id", base.ID())
 
 	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
@@ -42,14 +46,9 @@ func TestDebug__SDN(t *testing.T) {
 			ParsedRemarksID string `json:"parsedRemarksId"`
 		} `json:"debug"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		t.Fatal(err)
-	}
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	require.NoError(t, err)
 
-	if response.Debug.IndexedName != "nicolas maduro moros" {
-		t.Errorf("debug: indexed name: %v", response.Debug.IndexedName)
-	}
-	if response.Debug.ParsedRemarksID != "5892464" {
-		t.Errorf("got parsed ID: %s", response.Debug.ParsedRemarksID)
-	}
+	require.Equal(t, "nicolas maduro moros", response.Debug.IndexedName)
+	require.Equal(t, "5892464", response.Debug.ParsedRemarksID)
 }
