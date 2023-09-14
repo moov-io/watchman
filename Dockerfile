@@ -1,4 +1,4 @@
-FROM golang:1.20-bullseye as backend
+FROM golang:1.21-bullseye as backend
 WORKDIR /go/src/github.com/moov-io/watchman
 RUN apt-get update && apt-get upgrade -y && apt-get install make gcc g++
 COPY . .
