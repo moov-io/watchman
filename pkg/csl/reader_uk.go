@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/csv"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"strconv"
@@ -58,7 +57,6 @@ func ParseUKCSL(r io.Reader) ([]*UKCSLRecord, UKCSL, error) {
 		}
 
 		if len(record) <= 1 {
-			fmt.Println("record is <= 1", record)
 			continue // skip empty records
 		}
 

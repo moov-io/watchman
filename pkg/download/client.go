@@ -153,13 +153,13 @@ func (dl *Downloader) retryDownload(dir, filename, downloadURL string) error {
 
 		resp, err := dl.HTTP.Do(req)
 		if err != nil {
-			fmt.Println("err while doing client request: ", err)
+			dl.Logger.Error().LogErrorf("err while doing client request: ", err)
 			time.Sleep(100 * time.Millisecond)
 			continue // retry
 		}
 
 		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-			fmt.Println("we experienced a problem in the dl: ", resp.StatusCode)
+			dl.Logger.Error().LogErrorf("we experienced a problem in the dl: %v", resp.StatusCode)
 		}
 
 		// Copy resp.Body into a file in our temp dir

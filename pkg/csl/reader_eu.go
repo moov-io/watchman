@@ -35,7 +35,7 @@ func ParseEU(r io.Reader) ([]*EUCSLRecord, EUCSL, error) {
 	report := make(EUCSL)
 	_, err := reader.Read()
 	if err != nil {
-		fmt.Println("failed to read csv: ", err)
+		return nil, report, fmt.Errorf("failed to read csv: %w", err)
 	}
 	for {
 		record, err := reader.Read()
@@ -54,7 +54,6 @@ func ParseEU(r io.Reader) ([]*EUCSLRecord, EUCSL, error) {
 		}
 
 		if len(record) <= 1 {
-			fmt.Println("record is <= 1", record)
 			continue // skip empty records
 		}
 
