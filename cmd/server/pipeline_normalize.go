@@ -17,8 +17,7 @@ var (
 	punctuationReplacer = strings.NewReplacer(".", "", ",", "", "-", " ", "  ", " ")
 )
 
-type normalizeStep struct {
-}
+type normalizeStep struct{}
 
 func (s *normalizeStep) apply(in *Name) error {
 	in.Processed = precompute(in.Processed)

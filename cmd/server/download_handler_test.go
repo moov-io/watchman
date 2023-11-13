@@ -19,9 +19,7 @@ func TestDownload__manualRefreshPath(t *testing.T) {
 	if testing.Short() {
 		return
 	}
-
 	t.Setenv("WITH_UK_SANCTIONS_LIST", "false")
-	t.Parallel()
 
 	check := func(t *testing.T, repo *sqliteDownloadRepository) {
 		searcher := newSearcher(log.NewNopLogger(), noLogPipeliner, 1)
