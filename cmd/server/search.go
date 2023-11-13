@@ -655,7 +655,9 @@ func jaroWinkler(s1, s2 string) float64 {
 	return jaroWinklerWithFavoritism(s1, s2, exactMatchFavoritism)
 }
 
-const adjacentSimilarityPositions = 3
+var (
+	adjacentSimilarityPositions = readInt(os.Getenv("ADJACENT_SIMILARITY_POSITIONS"), 3)
+)
 
 func jaroWinklerWithFavoritism(s1, s2 string, favoritism float64) float64 {
 	maxMatch := func(word string, s1Idx int, parts []string) float64 {
