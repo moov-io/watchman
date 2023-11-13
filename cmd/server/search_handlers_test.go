@@ -30,13 +30,8 @@ func TestSearch__Address(t *testing.T) {
 	router.ServeHTTP(w, req)
 	w.Flush()
 
-	if w.Code != http.StatusOK {
-		t.Errorf("bogus status code: %d", w.Code)
-	}
-
-	if v := w.Body.String(); !strings.Contains(v, `"match":1`) {
-		t.Fatalf("%#v", v)
-	}
+	require.Equal(t, http.StatusOK, w.Code)
+	require.Contains(t, w.Body.String(), `"match":0.88194`)
 
 	var wrapper struct {
 		Addresses []*ofac.Address `json:"addresses"`
@@ -265,25 +260,14 @@ func TestSearch__NameAndAltName(t *testing.T) {
 	}
 
 	// OFAC
-	if wrapper.SDNs[0].EntityID != "2681" {
-		t.Errorf("%#v", wrapper.SDNs[0])
-	}
-	if wrapper.AltNames[0].EntityID != "4691" {
-		t.Errorf("%#v", wrapper.AltNames[0].EntityID)
-	}
-	if wrapper.Addresses[0].EntityID != "735" {
-		t.Errorf("%#v", wrapper.Addresses[0].EntityID)
-	}
-	if wrapper.SectoralSanctions[0].EntityID != "18782" {
-		t.Errorf("%#v", wrapper.SectoralSanctions[0].EntityID)
-	}
+	require.Equal(t, "2681", wrapper.SDNs[0].EntityID)
+	require.Equal(t, "4691", wrapper.AltNames[0].EntityID)
+	require.Equal(t, "735", wrapper.Addresses[0].EntityID)
+	require.Equal(t, "18782", wrapper.SectoralSanctions[0].EntityID)
+
 	// BIS
-	if wrapper.DeniedPersons[0].StreetAddress != "P.O. BOX 28360" {
-		t.Errorf("%#v", wrapper.DeniedPersons[0].StreetAddress)
-	}
-	if wrapper.BISEntities[0].Name != "Mohammad Jan Khan Mangal" {
-		t.Errorf("%#v", wrapper.BISEntities[0])
-	}
+	require.Equal(t, "P.O. BOX 28360", wrapper.DeniedPersons[0].StreetAddress)
+	require.Equal(t, "Luqman Yasin Yunus Shgragi", wrapper.BISEntities[0].Name)
 }
 
 func TestSearch__Name(t *testing.T) {
@@ -304,13 +288,8 @@ func TestSearch__Name(t *testing.T) {
 	router.ServeHTTP(w, req)
 	w.Flush()
 
-	if w.Code != http.StatusOK {
-		t.Errorf("bogus status code: %d", w.Code)
-	}
-
-	if v := w.Body.String(); !strings.Contains(v, `"match":1`) {
-		t.Error(v)
-	}
+	require.Equal(t, http.StatusOK, w.Code)
+	require.Contains(t, w.Body.String(), `"match":0.89166`)
 
 	var wrapper struct {
 		// OFAC

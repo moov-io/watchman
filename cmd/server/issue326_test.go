@@ -16,17 +16,17 @@ func TestIssue326(t *testing.T) {
 
 	// Cuba
 	score := jaroWinkler(precompute("Huawei Cuba"), precompute("Huawei"))
-	assert.Equal(t, 0.8055555555555556, score)
+	assert.Equal(t, 0.7444444444444445, score)
 
 	// India
 	score = jaroWinkler(india, precompute("Huawei"))
 	assert.Equal(t, 0.4846031746031746, score)
 	score = jaroWinkler(india, precompute("Huawei Technologies"))
-	assert.Equal(t, 0.6903174603174603, score)
+	assert.Equal(t, 0.6084415584415584, score)
 
 	// Investment
 	score = jaroWinkler(investment, precompute("Huawei"))
 	assert.Equal(t, 0.3788888888888889, score)
 	score = jaroWinkler(investment, precompute("Huawei Technologies"))
-	assert.Equal(t, 0.7377777777777779, score)
+	assert.Equal(t, 0.5419191919191919, score)
 }
