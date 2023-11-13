@@ -16,7 +16,7 @@ func TestIssue115__TopSDNs(t *testing.T) {
 	eql(t, "george bush jaroWinkler", score, 0.896)
 
 	score = jaroWinkler("g", "geoergebush")
-	eql(t, "g vs geoergebush", score, 0.697)
+	eql(t, "g vs geoergebush", score, 0.070)
 
 	pipe := noLogPipeliner
 	s := newSearcher(log.NewNopLogger(), pipe, 1)

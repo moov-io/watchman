@@ -660,9 +660,9 @@ var (
 )
 
 func jaroWinklerWithFavoritism(s1, s2 string, favoritism float64) float64 {
-	maxMatch := func(word string, s1Idx int, parts []string) float64 {
-		if len(parts) == 0 {
-			return 0.0
+	maxMatch := func(word string, s1Idx int, parts []string) (float64, string) {
+		if word == "" || len(parts) == 0 {
+			return 0.0, ""
 		}
 
 		// We're only looking for the highest match close
@@ -670,15 +670,17 @@ func jaroWinklerWithFavoritism(s1, s2 string, favoritism float64) float64 {
 		end := s1Idx + adjacentSimilarityPositions
 
 		var max float64
+		var maxTerm string
 		for i := start; i < end; i++ {
 			if i >= 0 && len(parts) > i {
 				score := smetrics.JaroWinkler(word, parts[i], boostThreshold, prefixSize)
 				if score > max {
 					max = score
+					maxTerm = parts[i]
 				}
 			}
 		}
-		return max
+		return max, maxTerm
 	}
 
 	s1Parts, s2Parts := strings.Fields(s1), strings.Fields(s2)
@@ -688,16 +690,26 @@ func jaroWinklerWithFavoritism(s1, s2 string, favoritism float64) float64 {
 
 	var scores []float64
 	for i := range s1Parts {
-		max := maxMatch(s1Parts[i], i, s2Parts)
+		max, term := maxMatch(s1Parts[i], i, s2Parts)
 		if max >= 1.0 {
+			// Perfect match
 			max += favoritism
+			scores = append(scores, max)
+		} else {
+			// Apply an additional weight based on similarity of term lengths,
+			// so terms which are closer in length match higher.
+			s1 := float64(len(s1Parts[i]))
+			t := float64(len(term)) - 1
+			weight := math.Min(math.Abs(s1/t), 1.0)
+
+			scores = append(scores, max*weight)
 		}
-		scores = append(scores, max)
 	}
 
 	// average the highest N scores where N is the words in our query (s2).
+	// Only truncate scores if there are enough words (aka more than First/Last).
 	sort.Float64s(scores)
-	if len(s1Parts) > len(s2Parts) && len(s2Parts) > 2 {
+	if len(s1Parts) > len(s2Parts) && len(s2Parts) > 5 {
 		scores = scores[len(s1Parts)-len(s2Parts):]
 	}
 

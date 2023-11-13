@@ -97,9 +97,7 @@ func TestSearcher_TopSSIs_limit(t *testing.T) {
 	if len(ssis) != 2 {
 		t.Fatalf("Expected 2 results, found %d", len(ssis))
 	}
-	if ssis[0].Data.EntityID != "18736" {
-		t.Errorf("%#v", ssis[0].Data)
-	}
+	require.Equal(t, "18782", ssis[0].Data.EntityID)
 }
 
 func TestSearcher_TopSSIs_reportAltNameWeight(t *testing.T) {
