@@ -648,21 +648,32 @@ func readInt(override string, value int) int {
 // jaroWinkler runs the similarly named algorithm over the two input strings and averages their match percentages
 // according to the second string (assumed to be the user's query)
 //
+// Terms are compared between a few adjacent terms and accumulate the highest near-neighbor match.
+//
 // For more details see https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance
 func jaroWinkler(s1, s2 string) float64 {
 	return jaroWinklerWithFavoritism(s1, s2, exactMatchFavoritism)
 }
 
+const adjacentSimilarityPositions = 3
+
 func jaroWinklerWithFavoritism(s1, s2 string, favoritism float64) float64 {
-	maxMatch := func(word string, parts []string) float64 {
+	maxMatch := func(word string, s1Idx int, parts []string) float64 {
 		if len(parts) == 0 {
 			return 0.0
 		}
 
-		max := smetrics.JaroWinkler(word, parts[0], boostThreshold, prefixSize)
-		for i := 1; i < len(parts); i++ {
-			if score := smetrics.JaroWinkler(word, parts[i], boostThreshold, prefixSize); score > max {
-				max = score
+		// We're only looking for the highest match close
+		start := s1Idx - adjacentSimilarityPositions
+		end := s1Idx + adjacentSimilarityPositions
+
+		var max float64
+		for i := start; i < end; i++ {
+			if i >= 0 && len(parts) > i {
+				score := smetrics.JaroWinkler(word, parts[i], boostThreshold, prefixSize)
+				if score > max {
+					max = score
+				}
 			}
 		}
 		return max
@@ -675,7 +686,7 @@ func jaroWinklerWithFavoritism(s1, s2 string, favoritism float64) float64 {
 
 	var scores []float64
 	for i := range s1Parts {
-		max := maxMatch(s1Parts[i], s2Parts)
+		max := maxMatch(s1Parts[i], i, s2Parts)
 		if max >= 1.0 {
 			max += favoritism
 		}
@@ -692,7 +703,6 @@ func jaroWinklerWithFavoritism(s1, s2 string, favoritism float64) float64 {
 	for i := range scores {
 		sum += scores[i]
 	}
-
 	return math.Min(sum/float64(len(scores)), 1.00)
 }
 
