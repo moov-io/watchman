@@ -1,4 +1,4 @@
-FROM golang:1.20-alpine as builder
+FROM golang:1.21-alpine as builder
 RUN apk add -U make git
 RUN adduser -D -g '' --shell /bin/false moov
 WORKDIR /go/src/github.com/moov-io/watchman
