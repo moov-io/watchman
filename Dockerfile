@@ -1,11 +1,11 @@
-FROM golang:1.21-bullseye as backend
+FROM golang:1.21-bookworm as backend
 WORKDIR /go/src/github.com/moov-io/watchman
 RUN apt-get update && apt-get upgrade -y && apt-get install make gcc g++
 COPY . .
 RUN go mod download
 RUN make build-server
 
-FROM node:19-bullseye as frontend
+FROM node:21-bookworm as frontend
 COPY webui/ /watchman/
 WORKDIR /watchman/
 RUN npm install --legacy-peer-deps

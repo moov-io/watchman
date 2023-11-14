@@ -31,5 +31,6 @@ services:
     ports:
       - "8084:8084"
       - "9094:9094"
+
 networks:
   intranet: {}
