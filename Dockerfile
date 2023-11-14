@@ -22,6 +22,6 @@ ENV WEB_ROOT=/watchman/
 
 # USER moov # TODO(adam): non-root users
 
-EXPOSE 8080
-EXPOSE 9090
+EXPOSE 8084
+EXPOSE 9094
 ENTRYPOINT ["/bin/server"]
