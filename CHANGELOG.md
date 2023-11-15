@@ -1,3 +1,22 @@
+## v0.25.0 (Released 2023-11-15)
+
+This release of Watchman lowers most match percentages by comparing names better.
+
+IMPROVEMENTS
+
+- fix: close xml encoder
+- fix: panic cleanup from newer linter rules
+- cmd/server: only check adjacent terms for local jaro max score
+- cmd/server: read ADJACENT_SIMILARITY_POSITIONS env var
+- cmd/server: weight term score by length similarity
+
+BUILD
+
+- build: bump numerous javascript dependencies
+- build: update to Go 1.21
+- build: update to node 20
+- build: update Debian, Fedora, node, and Go base images
+
 ## v0.24.2 (Released 2023-04-03)
 
 IMPROVEMENTS
