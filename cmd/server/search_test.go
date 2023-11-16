@@ -459,18 +459,26 @@ func TestJaroWinkler(t *testing.T) {
 		{"nicolas maduro", "nicolas moros maduro", 1.0},
 
 		// customer examples
-		{"ian mckinley", "tian xiang 7", 0.75},
-		{"bindaree food group pty ltd", "independent insurance group ltd", 0.728},
-		{"p.c.c. (singapore) private limited", "culver max entertainment private limited", 0.753},
-		{"zincum llc", "easy verification inc.", 0.639},
-		{"transpetrochart co ltd", "jx metals trading co.", 0.616},
-		{"technolab", "moomoo technologies inc", 0.714},
-		{"sewa security services", "sesa - safety & environmental services australia pty ltd", 0.673},
+		{"ian", "ian mckinley", 0.9},
+		{"iap", "ian mckinley", 0.411},
+		{"ian mckinley", "ian", 0.819},
+		{"ian mckinley", "iap", 0.654},
+		{"ian mckinley", "tian xiang 7", 0.5},
+		{"bindaree food group pty", precompute("independent insurance group ltd"), 0.659}, // precompute removes ltd
+		{"bindaree food group pty ltd", "independent insurance group ltd", 0.728},         // only matches higher from 'ltd'
+		{"p.c.c. (singapore) private limited", "culver max entertainment private limited", 0.602},
+		{"zincum llc", "easy verification inc.", 0.426},
+		{"transpetrochart co ltd", "jx metals trading co.", 0.544},
+		{"technolab", "moomoo technologies inc", 0.291},
+		{"sewa security services", "sesa - safety & environmental services australia pty ltd", 0.247},
 		{"bueno", "20/f rykadan capital twr135 hoi bun rd, kwun tong 135 hoi bun rd., kwun tong", 0.0},
 
 		// example cases
 		{"nicolas maduro", "nicolás maduro", 0.961},
 		{"nicolas maduro", precompute("nicolás maduro"), 1.0},
+		{"nic maduro", "nicolas maduro", 0.717},
+		{"nick maduro", "nicolas maduro", 0.769},
+		{"nicolas maduroo", "nicolas maduro", 0.986},
 		{"nicolas maduro", "nicolas maduro", 1.0},
 		{"maduro, nicolas", "maduro, nicolas", 1.0},
 		{"maduro moros, nicolas", "maduro moros, nicolas", 1.0},
@@ -492,21 +500,30 @@ func TestJaroWinkler(t *testing.T) {
 		{"the group for the preservation of the holy sites", "the bridgespan group", 0.448},
 		{precompute("the group for the preservation of the holy sites"), precompute("the bridgespan group"), 0.448},
 		{"group preservation holy sites", "bridgespan group", 0.619},
+
 		{"the group for the preservation of the holy sites", "the logan group", 0.424},
 		{precompute("the group for the preservation of the holy sites"), precompute("the logan group"), 0.424},
 		{"group preservation holy sites", "logan group", 0.478},
+
 		{"the group for the preservation of the holy sites", "the anything group", 0.437},
 		{precompute("the group for the preservation of the holy sites"), precompute("the anything group"), 0.437},
 		{"group preservation holy sites", "anything group", 0.585},
+
 		{"the group for the preservation of the holy sites", "the hello world group", 0.47},
 		{precompute("the group for the preservation of the holy sites"), precompute("the hello world group"), 0.47},
 		{"group preservation holy sites", "hello world group", 0.515},
+
 		{"the group for the preservation of the holy sites", "the group", 0.416},
 		{precompute("the group for the preservation of the holy sites"), precompute("the group"), 0.416},
 		{"group preservation holy sites", "group", 0.460},
+
 		{"the group for the preservation of the holy sites", "The flibbity jibbity flobbity jobbity grobbity zobbity group", 0.403},
-		{precompute("the group for the preservation of the holy sites"), precompute("the flibbity jibbity flobbity jobbity grobbity zobbity group"), 0.459},
-		{"group preservation holy sites", "flibbity jibbity flobbity jobbity grobbity zobbity group", 0.329},
+		{
+			precompute("the group for the preservation of the holy sites"),
+			precompute("the flibbity jibbity flobbity jobbity grobbity zobbity group"),
+			0.459,
+		},
+		{"group preservation holy sites", "flibbity jibbity flobbity jobbity grobbity zobbity group", 0.239},
 
 		// precompute
 		{"i c sogo kenkyusho", precompute("A.I.C. SOGO KENKYUSHO"), 0.5},

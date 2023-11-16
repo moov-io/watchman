@@ -692,10 +692,33 @@ func jaroWinklerWithFavoritism(s1, s2 string, favoritism float64) float64 {
 	for i := range s1Parts {
 		max, term := maxMatch(s1Parts[i], i, s2Parts)
 		if max >= 1.0 {
-			// Perfect match
+			// If the query is longer than our indexed term (and both are longer than most names)
+			// we want to reduce the maximum weight proportionally by the term difference, which
+			// forces more terms to match instead of one or two dominating the weight.
+			if (len(s2Parts) > len(s1Parts)) && (len(s1Parts) > 3 || len(s2Parts) > 3) {
+				max *= (float64(len(s1Parts)) / float64(len(s2Parts)))
+				goto add
+			}
+			// If the indexed term is really short cap the match at 90%.
+			// This sill allows names to match highly with a couple different characters.
+			if len(s1Parts) < 2 && len(s2Parts) > 1 {
+				max *= 0.9
+				goto add
+			}
+			// Otherwise, apply Perfect match favoritism
 			max += favoritism
+		add:
 			scores = append(scores, max)
 		} else {
+			// If there are more terms in the user's query than what's indexed then
+			// adjust the max lower by the proportion of different terms.
+			//
+			// We do this to decrease the importance of a short (often common) term.
+			if len(s2Parts) > len(s1Parts) {
+				scores = append(scores, max*float64(len(s1Parts))/float64(len(s2Parts)))
+				continue
+			}
+
 			// Apply an additional weight based on similarity of term lengths,
 			// so terms which are closer in length match higher.
 			s1 := float64(len(s1Parts[i]))
