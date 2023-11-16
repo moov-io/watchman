@@ -31,6 +31,7 @@ func TestSearch_US_CSL(t *testing.T) {
 
 	require.Equal(t, http.StatusOK, w.Code)
 	require.Contains(t, w.Body.String(), `"match":0.6333`)
+	require.Contains(t, w.Body.String(), `"matchedName":"zaman"`)
 
 	var wrapper struct {
 		NonProliferationSanctions []csl.ISN `json:"nonProliferationSanctions"`

@@ -8,8 +8,9 @@ import "sync"
 
 // item represents an arbitrary value with an associated weight
 type item struct {
-	value  interface{}
-	weight float64
+	matched string
+	value   interface{}
+	weight  float64
 }
 
 // newLargest returns a `largest` instance which can be used to track items with the highest weights

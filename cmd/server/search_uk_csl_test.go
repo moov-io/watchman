@@ -28,6 +28,7 @@ func TestSearch_UK_CSL(t *testing.T) {
 
 	require.Equal(t, http.StatusOK, w.Code)
 	require.Contains(t, w.Body.String(), `"match":1`)
+	require.Contains(t, w.Body.String(), `"matchedName":"'abd al nasir"`)
 
 	var wrapper struct {
 		UKCSL []csl.UKCSLRecord `json:"ukConsolidatedSanctionsList"`
@@ -51,6 +52,7 @@ func TestSearch_UK_SanctionsList(t *testing.T) {
 
 	require.Equal(t, http.StatusOK, w.Code)
 	require.Contains(t, w.Body.String(), `"match":1`)
+	require.Contains(t, w.Body.String(), `"matchedName":"haji khairullah haji sattar money exchange"`)
 
 	var wrapper struct {
 		UKSanctionsList []csl.UKSanctionsListRecord `json:"ukSanctionsList"`
