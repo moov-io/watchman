@@ -1141,6 +1141,10 @@ components:
           type: number
           description: Match percentage of search query
           example: 0.91
+        matchedName:
+          type: string
+          desc: The highest scoring term from the search query
+          example: Jane Doe
     MilitaryEndUser:
       properties:
         entityID:
@@ -1165,6 +1169,10 @@ components:
           type: number
           description: Match percentage of search query
           example: 0.92
+        matchedName:
+          type: string
+          desc: The highest scoring term from the search query
+          example: Jane Doe
     Unverified:
       properties:
         entityID:
@@ -1189,6 +1197,10 @@ components:
           type: number
           description: Match percentage of search query
           example: 0.92
+        matchedName:
+          type: string
+          desc: The highest scoring term from the search query
+          example: Jane Doe
     NonProliferationSanction:
       properties:
         entityID:
@@ -1233,6 +1245,10 @@ components:
           type: number
           description: Match percentage of search query
           example: 0.92
+        matchedName:
+          type: string
+          desc: The highest scoring term from the search query
+          example: Jane Doe
     ForeignSanctionsEvader:
       properties:
         entityID:
@@ -1281,6 +1297,10 @@ components:
           type: number
           description: Match percentage of search query
           example: 0.92
+        matchedName:
+          type: string
+          desc: The highest scoring term from the search query
+          example: Jane Doe
     PalestinianLegislativeCouncil:
       properties:
         entityID:
@@ -1333,6 +1353,10 @@ components:
           type: number
           description: Match percentage of search query
           example: 0.92
+        matchedName:
+          type: string
+          desc: The highest scoring term from the search query
+          example: Jane Doe
     CAPTAList:
       properties:
         entityID:
@@ -1391,6 +1415,10 @@ components:
           type: number
           description: Match percentage of search query
           example: 0.92
+        matchedName:
+          type: string
+          desc: The highest scoring term from the search query
+          example: Jane Doe
     ITARDebarred:
       properties:
         entityID:
@@ -1419,6 +1447,10 @@ components:
           type: number
           description: Match percentage of search query
           example: 0.92
+        matchedName:
+          type: string
+          desc: The highest scoring term from the search query
+          example: Jane Doe
     NonSDNChineseMilitaryIndustrialComplex:
       properties:
         entityID:
@@ -1475,6 +1507,10 @@ components:
           type: number
           description: Match percentage of search query
           example: 0.92
+        matchedName:
+          type: string
+          desc: The highest scoring term from the search query
+          example: Jane Doe
     NonSDNMenuBasedSanctionsList:
       properties:
         EntityID:
@@ -1531,6 +1567,10 @@ components:
           type: number
           description: Match percentage of search query
           example: 0.92
+        matchedName:
+          type: string
+          desc: The highest scoring term from the search query
+          example: Jane Doe
     EUConsolidatedSanctionsList:
       properties:
         fileGenerationDate:
@@ -1593,11 +1633,15 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
+        matchedName:
+          type: string
+          desc: The highest scoring term from the search query
+          example: Jane Doe
     UKConsolidatedSanctionsList:
       properties:
         names:
           type: array
-          items: 
+          items:
             type: string
         addresses:
           type: array
@@ -1613,11 +1657,15 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
+        matchedName:
+          type: string
+          desc: The highest scoring term from the search query
+          example: Jane Doe
     UKSanctionsList:
       properties:
         names:
           type: array
-          items: 
+          items:
             type: string
         nonLatinNames:
           type: array
@@ -1641,6 +1689,10 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
+        matchedName:
+          type: string
+          desc: The highest scoring term from the search query
+          example: Jane Doe
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       properties:

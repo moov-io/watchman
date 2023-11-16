@@ -6,7 +6,6 @@ package main
 
 import (
 	"encoding/json"
-	"math"
 	"reflect"
 	"sync"
 )
@@ -14,7 +13,9 @@ import (
 type Result[T any] struct {
 	Data T
 
-	match           float64
+	match       float64
+	matchedName string
+
 	precomputedName string
 	precomputedAlts []string
 }
@@ -40,6 +41,7 @@ func (e Result[T]) MarshalJSON() ([]byte, error) {
 	}
 
 	result["match"] = e.match
+	result["matchedName"] = e.matchedName
 
 	return json.Marshal(result)
 }
@@ -60,15 +62,21 @@ func topResults[T any](limit int, minMatch float64, name string, data []*Result[
 			defer wg.Done()
 
 			it := &item{
-				value:  data[i],
-				weight: jaroWinkler(data[i].precomputedName, name),
+				matched: data[i].precomputedName,
+				value:   data[i],
+				weight:  jaroWinkler(data[i].precomputedName, name),
 			}
 
 			for _, alt := range data[i].precomputedAlts {
 				if alt == "" {
 					continue
 				}
-				it.weight = math.Max(it.weight, jaroWinkler(alt, name))
+
+				score := jaroWinkler(alt, name)
+				if score > it.weight {
+					it.matched = alt
+					it.weight = score
+				}
 			}
 
 			xs.add(it)
@@ -86,6 +94,7 @@ func topResults[T any](limit int, minMatch float64, name string, data []*Result[
 			res := &Result[T]{
 				Data:            vv.Data,
 				match:           v.weight,
+				matchedName:     v.matched,
 				precomputedName: vv.precomputedName,
 				precomputedAlts: vv.precomputedAlts,
 			}

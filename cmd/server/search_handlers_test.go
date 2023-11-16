@@ -66,13 +66,9 @@ func TestSearch__AddressCountry(t *testing.T) {
 	router.ServeHTTP(w, req)
 	w.Flush()
 
-	if w.Code != http.StatusOK {
-		t.Errorf("bogus status code: %d", w.Code)
-	}
+	require.Equal(t, http.StatusOK, w.Code)
+	require.Contains(t, w.Body.String(), `"match":1`)
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":1`) {
-		t.Errorf("%#v", v)
-	}
 }
 
 func TestSearch__AddressMulti(t *testing.T) {
@@ -84,13 +80,9 @@ func TestSearch__AddressMulti(t *testing.T) {
 	router.ServeHTTP(w, req)
 	w.Flush()
 
-	if w.Code != http.StatusOK {
-		t.Errorf("bogus status code: %d", w.Code)
-	}
+	require.Equal(t, http.StatusOK, w.Code)
+	require.Contains(t, w.Body.String(), `"match":0.8847`)
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.8847`) {
-		t.Errorf("%#v", v)
-	}
 }
 
 func TestSearch__AddressProvidence(t *testing.T) {
@@ -102,13 +94,9 @@ func TestSearch__AddressProvidence(t *testing.T) {
 	router.ServeHTTP(w, req)
 	w.Flush()
 
-	if w.Code != http.StatusOK {
-		t.Errorf("bogus status code: %d", w.Code)
-	}
+	require.Equal(t, http.StatusOK, w.Code)
+	require.Contains(t, w.Body.String(), `"match":0.923`)
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.923`) {
-		t.Errorf("%#v", v)
-	}
 }
 
 func TestSearch__AddressCity(t *testing.T) {
@@ -120,13 +108,9 @@ func TestSearch__AddressCity(t *testing.T) {
 	router.ServeHTTP(w, req)
 	w.Flush()
 
-	if w.Code != http.StatusOK {
-		t.Errorf("bogus status code: %d", w.Code)
-	}
+	require.Equal(t, http.StatusOK, w.Code)
+	require.Contains(t, w.Body.String(), `"match":0.923`)
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.923`) {
-		t.Errorf("%#v", v)
-	}
 }
 
 func TestSearch__AddressState(t *testing.T) {
@@ -138,13 +122,9 @@ func TestSearch__AddressState(t *testing.T) {
 	router.ServeHTTP(w, req)
 	w.Flush()
 
-	if w.Code != http.StatusOK {
-		t.Errorf("bogus status code: %d", w.Code)
-	}
+	require.Equal(t, http.StatusOK, w.Code)
+	require.Contains(t, w.Body.String(), `"match":0.923`)
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.923`) {
-		t.Errorf("%#v", v)
-	}
 }
 
 func TestSearch__NameAndAddress(t *testing.T) {
