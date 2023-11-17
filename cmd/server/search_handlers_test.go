@@ -270,6 +270,7 @@ func TestSearch__Name(t *testing.T) {
 
 	require.Equal(t, http.StatusOK, w.Code)
 	require.Contains(t, w.Body.String(), `"match":0.89166`)
+	require.Contains(t, w.Body.String(), `"matchedName":"dr ayman al zawahiri"`)
 
 	var wrapper struct {
 		// OFAC
@@ -317,9 +318,9 @@ func TestSearch__AltName(t *testing.T) {
 		t.Errorf("bogus status code: %d", w.Code)
 	}
 
-	if v := w.Body.String(); !strings.Contains(v, `"match":0.5`) {
-		t.Error(v)
-	}
+	require.Equal(t, http.StatusOK, w.Code)
+	require.Contains(t, w.Body.String(), `"match":0.5`)
+	require.Contains(t, w.Body.String(), `"matchedName":"i c sogo kenkyusho"`)
 
 	var wrapper struct {
 		Alts []*ofac.AlternateIdentity `json:"altNames"`
