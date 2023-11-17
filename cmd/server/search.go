@@ -266,8 +266,9 @@ func (s *searcher) TopAltNames(limit int, minMatch float64, alt string) []Alt {
 			defer wg.Done()
 			defer s.Gate.Done()
 			xs.add(&item{
-				value:  s.Alts[i],
-				weight: jaroWinkler(s.Alts[i].name, alt),
+				matched: s.Alts[i].name,
+				value:   s.Alts[i],
+				weight:  jaroWinkler(s.Alts[i].name, alt),
 			})
 		}(i)
 	}
@@ -282,6 +283,7 @@ func (s *searcher) TopAltNames(limit int, minMatch float64, alt string) []Alt {
 			}
 			alt := *aa
 			alt.match = v.weight
+			alt.matchedName = v.matched
 			out = append(out, alt)
 		}
 	}
@@ -385,8 +387,9 @@ func (s *searcher) TopSDNs(limit int, minMatch float64, name string, keepSDN fun
 			defer wg.Done()
 			defer s.Gate.Done()
 			xs.add(&item{
-				value:  s.SDNs[i],
-				weight: jaroWinkler(s.SDNs[i].name, name),
+				matched: s.SDNs[i].name,
+				value:   s.SDNs[i],
+				weight:  jaroWinkler(s.SDNs[i].name, name),
 			})
 		}(i)
 	}
@@ -401,6 +404,7 @@ func (s *searcher) TopSDNs(limit int, minMatch float64, name string, keepSDN fun
 			}
 			sdn := *ss // deref for a copy
 			sdn.match = v.weight
+			sdn.matchedName = v.matched
 			out = append(out, &sdn)
 		}
 	}
@@ -427,8 +431,9 @@ func (s *searcher) TopDPs(limit int, minMatch float64, name string) []DP {
 			defer wg.Done()
 			defer s.Gate.Done()
 			xs.add(&item{
-				value:  s.DPs[i],
-				weight: jaroWinkler(s.DPs[i].name, name),
+				matched: s.DPs[i].name,
+				value:   s.DPs[i],
+				weight:  jaroWinkler(s.DPs[i].name, name),
 			})
 		}(i)
 	}
@@ -443,6 +448,7 @@ func (s *searcher) TopDPs(limit int, minMatch float64, name string) []DP {
 			}
 			dp := *ss
 			dp.match = v.weight
+			dp.matchedName = v.matched
 			out = append(out, dp)
 		}
 	}
@@ -455,6 +461,9 @@ type SDN struct {
 
 	// match holds the match ratio for an SDN in search results
 	match float64
+
+	// matchedName holds the highest scoring term from the search query
+	matchedName string
 
 	// name is precomputed for speed
 	name string
@@ -471,10 +480,12 @@ type SDN struct {
 func (s SDN) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		*ofac.SDN
-		Match float64 `json:"match"`
+		Match       float64 `json:"match"`
+		MatchedName string  `json:"matchedName"`
 	}{
 		s.SDN,
 		s.match,
+		s.matchedName,
 	})
 }
 
@@ -545,7 +556,11 @@ func precomputeAddresses(adds []*ofac.Address) []*Address {
 type Alt struct {
 	AlternateIdentity *ofac.AlternateIdentity
 
-	match float64 // match %
+	// match holds the match ratio for an Alt in search results
+	match float64
+
+	// matchedName holds the highest scoring term from the search query
+	matchedName string
 
 	// name is precomputed for speed
 	name string
@@ -555,10 +570,12 @@ type Alt struct {
 func (a Alt) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		*ofac.AlternateIdentity
-		Match float64 `json:"match"`
+		Match       float64 `json:"match"`
+		MatchedName string  `json:"matchedName"`
 	}{
 		a.AlternateIdentity,
 		a.match,
+		a.matchedName,
 	})
 }
 
@@ -584,6 +601,7 @@ func precomputeAlts(alts []*ofac.AlternateIdentity, pipe *pipeliner) []*Alt {
 type DP struct {
 	DeniedPerson *dpl.DPL
 	match        float64
+	matchedName  string
 	name         string
 }
 
@@ -591,10 +609,12 @@ type DP struct {
 func (d DP) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		*dpl.DPL
-		Match float64 `json:"match"`
+		Match       float64 `json:"match"`
+		MatchedName string  `json:"matchedName"`
 	}{
 		d.DeniedPerson,
 		d.match,
+		d.matchedName,
 	})
 }
 

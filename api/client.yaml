@@ -917,6 +917,10 @@ components:
           type: number
           description: Match percentage of search query
           example: 0.91
+        matchedName:
+          type: string
+          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
+          example: jane doe
     OfacEntityAddresses:
       type: array
       items:
@@ -969,6 +973,10 @@ components:
           type: number
           description: Match percentage of search query
           example: 0.91
+        matchedName:
+          type: string
+          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
+          example: jane doe
     SdnType:
       description: 'Used for classifying SDNs — typically represents an individual or company'
       type: string
@@ -1039,6 +1047,10 @@ components:
           type: number
           description: Match percentage of search query
           example: 0.92
+        matchedName:
+          type: string
+          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
+          example: jane doe
     SSI:
       description: Treasury Department Sectoral Sanctions Identifications List (SSI)
       properties:
@@ -1094,6 +1106,10 @@ components:
           type: number
           description: Match percentage of search query
           example: 0.91
+        matchedName:
+          type: string
+          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
+          example: jane doe
     BISEntities:
       description: Bureau of Industry and Security Entity List
       properties:
@@ -1143,8 +1159,8 @@ components:
           example: 0.91
         matchedName:
           type: string
-          desc: The highest scoring term from the search query
-          example: Jane Doe
+          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
+          example: jane doe
     MilitaryEndUser:
       properties:
         entityID:
@@ -1171,8 +1187,8 @@ components:
           example: 0.92
         matchedName:
           type: string
-          desc: The highest scoring term from the search query
-          example: Jane Doe
+          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
+          example: jane doe
     Unverified:
       properties:
         entityID:
@@ -1199,8 +1215,8 @@ components:
           example: 0.92
         matchedName:
           type: string
-          desc: The highest scoring term from the search query
-          example: Jane Doe
+          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
+          example: jane doe
     NonProliferationSanction:
       properties:
         entityID:
@@ -1247,8 +1263,8 @@ components:
           example: 0.92
         matchedName:
           type: string
-          desc: The highest scoring term from the search query
-          example: Jane Doe
+          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
+          example: jane doe
     ForeignSanctionsEvader:
       properties:
         entityID:
@@ -1299,8 +1315,8 @@ components:
           example: 0.92
         matchedName:
           type: string
-          desc: The highest scoring term from the search query
-          example: Jane Doe
+          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
+          example: jane doe
     PalestinianLegislativeCouncil:
       properties:
         entityID:
@@ -1355,8 +1371,8 @@ components:
           example: 0.92
         matchedName:
           type: string
-          desc: The highest scoring term from the search query
-          example: Jane Doe
+          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
+          example: jane doe
     CAPTAList:
       properties:
         entityID:
@@ -1417,8 +1433,8 @@ components:
           example: 0.92
         matchedName:
           type: string
-          desc: The highest scoring term from the search query
-          example: Jane Doe
+          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
+          example: jane doe
     ITARDebarred:
       properties:
         entityID:
@@ -1449,8 +1465,8 @@ components:
           example: 0.92
         matchedName:
           type: string
-          desc: The highest scoring term from the search query
-          example: Jane Doe
+          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
+          example: jane doe
     NonSDNChineseMilitaryIndustrialComplex:
       properties:
         entityID:
@@ -1509,8 +1525,8 @@ components:
           example: 0.92
         matchedName:
           type: string
-          desc: The highest scoring term from the search query
-          example: Jane Doe
+          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
+          example: jane doe
     NonSDNMenuBasedSanctionsList:
       properties:
         EntityID:
@@ -1569,8 +1585,8 @@ components:
           example: 0.92
         matchedName:
           type: string
-          desc: The highest scoring term from the search query
-          example: Jane Doe
+          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
+          example: jane doe
     EUConsolidatedSanctionsList:
       properties:
         fileGenerationDate:
@@ -1635,8 +1651,8 @@ components:
           type: number
         matchedName:
           type: string
-          desc: The highest scoring term from the search query
-          example: Jane Doe
+          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
+          example: jane doe
     UKConsolidatedSanctionsList:
       properties:
         names:
@@ -1659,8 +1675,8 @@ components:
           type: number
         matchedName:
           type: string
-          desc: The highest scoring term from the search query
-          example: Jane Doe
+          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
+          example: jane doe
     UKSanctionsList:
       properties:
         names:
@@ -1691,8 +1707,8 @@ components:
           type: number
         matchedName:
           type: string
-          desc: The highest scoring term from the search query
-          example: Jane Doe
+          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
+          example: jane doe
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       properties:
