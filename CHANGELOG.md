@@ -1,3 +1,14 @@
+## v0.26.0 (Released 2023-11-20)
+
+This release of Watchman has removed Company/Customer models and Watches. They've been deprecated for a while and do not perform as users expect. Stay tuned for a future Moov OSS project integrating with Watchman for sanctions screening.
+
+IMPROVEMENTS
+
+- feat: return matchedName in non-OFAC results
+- search: apply more edge case logic to decrease bad scoring
+- search: return matchedName for OFAC SDNs, Alts, and DPL records
+- test: remove duplicate (and skipped) UK/EU CSL tests
+
 ## v0.25.0 (Released 2023-11-15)
 
 This release of Watchman lowers most match percentages by comparing names better.
