@@ -30,598 +30,6 @@ paths:
       summary: Ping Watchman service
       tags:
       - Watchman
-  /ofac/companies/{companyID}:
-    get:
-      description: Get information about a company, trust, or organization such as
-        addresses, alternate names, and remarks.
-      operationId: getOfacCompany
-      parameters:
-      - description: Optional Request ID allows application developer to trace requests
-          through the system's logs
-        explode: false
-        in: header
-        name: X-Request-ID
-        required: false
-        schema:
-          example: 94c825ee
-          type: string
-        style: simple
-      - description: Company ID
-        explode: false
-        in: path
-        name: companyID
-        required: true
-        schema:
-          example: 1d1c824a
-          type: string
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OfacCompany'
-          description: Company and associated metadata
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Error occurred, see response body.
-      summary: Get company
-      tags:
-      - Watchman
-    put:
-      description: Update a Company's sanction status to always block or always allow
-        transactions.
-      operationId: updateOfacCompanyStatus
-      parameters:
-      - description: Optional Request ID allows application developer to trace requests
-          through the system's logs
-        explode: false
-        in: header
-        name: X-Request-ID
-        required: false
-        schema:
-          example: 94c825ee
-          type: string
-        style: simple
-      - description: User ID used to perform this search
-        explode: false
-        in: header
-        name: X-User-ID
-        required: false
-        schema:
-          type: string
-        style: simple
-      - description: Company ID
-        explode: false
-        in: path
-        name: companyID
-        required: true
-        schema:
-          example: 8d49fd61
-          type: string
-        style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateOfacCompanyStatus'
-        required: true
-      responses:
-        "200":
-          description: Company status updated
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Error occurred, see response body.
-      summary: Update company
-      tags:
-      - Watchman
-  /ofac/companies/{companyID}/watch:
-    post:
-      description: Add ID watch on an OFAC Company.
-      operationId: addOfacCompanyWatch
-      parameters:
-      - description: Optional Request ID allows application developer to trace requests
-          through the system's logs
-        explode: false
-        in: header
-        name: X-Request-ID
-        required: false
-        schema:
-          example: 94c825ee
-          type: string
-        style: simple
-      - description: Company ID
-        explode: false
-        in: path
-        name: companyID
-        required: true
-        schema:
-          example: c3cf0f66
-          type: string
-        style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OfacWatchRequest'
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OfacWatch'
-          description: Company watch added
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Error occurred, see response body.
-        "404":
-          description: Company not found
-      summary: Watch OFAC company
-      tags:
-      - Watchman
-  /ofac/companies/{companyID}/watch/{watchID}:
-    delete:
-      description: Delete a company ID watch.
-      operationId: removeOfacCompanyWatch
-      parameters:
-      - description: Optional Request ID allows application developer to trace requests
-          through the system's logs
-        explode: false
-        in: header
-        name: X-Request-ID
-        required: false
-        schema:
-          example: 94c825ee
-          type: string
-        style: simple
-      - description: Company ID
-        explode: false
-        in: path
-        name: companyID
-        required: true
-        schema:
-          example: c3cf0f66
-          type: string
-        style: simple
-      - description: Watch ID, used to identify a specific watch
-        explode: false
-        in: path
-        name: watchID
-        required: true
-        schema:
-          example: 0c5e215c
-          type: string
-        style: simple
-      responses:
-        "200":
-          description: Company watch removed
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Error occurred, see response body.
-      summary: Remove company watch
-      tags:
-      - Watchman
-  /ofac/companies/watch:
-    post:
-      description: Watch a company by its name. The match percentage will be included
-        in the webhook's JSON payload.
-      operationId: addOfacCompanyNameWatch
-      parameters:
-      - description: Optional Request ID allows application developer to trace requests
-          through the system's logs
-        explode: false
-        in: header
-        name: X-Request-ID
-        required: false
-        schema:
-          example: 94c825ee
-          type: string
-        style: simple
-      - description: Company name used to match and send watch notifications
-        explode: true
-        in: query
-        name: name
-        required: true
-        schema:
-          example: Jane Smith
-          type: string
-        style: form
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OfacWatchRequest'
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OfacWatch'
-          description: Company watch applied
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Error occurred, see response body.
-      summary: Watch company
-      tags:
-      - Watchman
-  /ofac/companies/watch/{watchID}:
-    delete:
-      description: Delete a company name watch.
-      operationId: removeOfacCompanyNameWatch
-      parameters:
-      - description: Optional Request ID allows application developer to trace requests
-          through the system's logs
-        explode: false
-        in: header
-        name: X-Request-ID
-        required: false
-        schema:
-          example: 94c825ee
-          type: string
-        style: simple
-      - description: Watch ID, used to identify a specific watch
-        explode: false
-        in: path
-        name: watchID
-        required: true
-        schema:
-          example: 0c5e215c
-          type: string
-        style: simple
-      - description: Company name watch
-        explode: true
-        in: query
-        name: name
-        required: true
-        schema:
-          example: Jane Smith
-          type: string
-        style: form
-      responses:
-        "200":
-          description: Company watch removed
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Error occurred, see response body.
-      summary: Remove company watch
-      tags:
-      - Watchman
-  /ofac/customers/{customerID}:
-    get:
-      description: Get information about a customer's addresses, alternate names,
-        and SDN metadata.
-      operationId: getOfacCustomer
-      parameters:
-      - description: Optional Request ID allows application developer to trace requests
-          through the system's logs
-        explode: false
-        in: header
-        name: X-Request-ID
-        required: false
-        schema:
-          example: 94c825ee
-          type: string
-        style: simple
-      - description: Customer ID
-        explode: false
-        in: path
-        name: customerID
-        required: true
-        schema:
-          example: c3cf0f66
-          type: string
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OfacCustomer'
-          description: Customer and associated metadata
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Error occurred, see response body.
-      summary: Get customer
-      tags:
-      - Watchman
-    put:
-      description: Update a Customer sanction status to always block or always allow
-        transactions.
-      operationId: updateOfacCustomerStatus
-      parameters:
-      - description: Optional Request ID allows application developer to trace requests
-          through the system's logs
-        explode: false
-        in: header
-        name: X-Request-ID
-        required: false
-        schema:
-          example: 94c825ee
-          type: string
-        style: simple
-      - description: User ID used to perform this search
-        explode: false
-        in: header
-        name: X-User-ID
-        required: false
-        schema:
-          type: string
-        style: simple
-      - description: Customer ID
-        explode: false
-        in: path
-        name: customerID
-        required: true
-        schema:
-          example: c3cf0f66
-          type: string
-        style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateOfacCustomerStatus'
-        required: true
-      responses:
-        "200":
-          description: Customer status updated
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Error occurred, see response body.
-      summary: Update customer
-      tags:
-      - Watchman
-  /ofac/customers/{customerID}/watch:
-    post:
-      description: Add ID watch on an OFAC Customer.
-      operationId: addOfacCustomerWatch
-      parameters:
-      - description: Optional Request ID allows application developer to trace requests
-          through the system's logs
-        explode: false
-        in: header
-        name: X-Request-ID
-        required: false
-        schema:
-          example: 94c825ee
-          type: string
-        style: simple
-      - description: Customer ID
-        explode: false
-        in: path
-        name: customerID
-        required: true
-        schema:
-          example: c3cf0f66
-          type: string
-        style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OfacWatchRequest'
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OfacWatch'
-          description: Customer watch added
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Error occurred, see response body.
-        "404":
-          description: Customer not found
-      summary: Watch OFAC customer
-      tags:
-      - Watchman
-  /ofac/customers/{customerID}/watch/{watchID}:
-    delete:
-      description: Delete a customer ID watch.
-      operationId: removeOfacCustomerWatch
-      parameters:
-      - description: Optional Request ID allows application developer to trace requests
-          through the system's logs
-        explode: false
-        in: header
-        name: X-Request-ID
-        required: false
-        schema:
-          example: 94c825ee
-          type: string
-        style: simple
-      - description: Customer ID
-        explode: false
-        in: path
-        name: customerID
-        required: true
-        schema:
-          example: c3cf0f66
-          type: string
-        style: simple
-      - description: Watch ID, used to identify a specific watch
-        explode: false
-        in: path
-        name: watchID
-        required: true
-        schema:
-          example: 0c5e215c
-          type: string
-        style: simple
-      responses:
-        "200":
-          description: Customer watch removed
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Error occurred, see response body.
-      summary: Remove customer watch
-      tags:
-      - Watchman
-  /ofac/customers/watch:
-    post:
-      description: Watch a customer by its name. The match percentage will be included
-        in the webhook's JSON payload.
-      operationId: addOfacCustomerNameWatch
-      parameters:
-      - description: Optional Request ID allows application developer to trace requests
-          through the system's logs
-        explode: false
-        in: header
-        name: X-Request-ID
-        required: false
-        schema:
-          example: 94c825ee
-          type: string
-        style: simple
-      - description: Individual name used to match and send watch notifications
-        explode: true
-        in: query
-        name: name
-        required: true
-        schema:
-          example: Jane Smith
-          type: string
-        style: form
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OfacWatchRequest'
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OfacWatch'
-          description: Customer watch applied
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Error occurred, see response body.
-      summary: Watch customer
-      tags:
-      - Watchman
-  /ofac/customers/watch/{watchID}:
-    delete:
-      description: Delete a customer name watch.
-      operationId: removeOfacCustomerNameWatch
-      parameters:
-      - description: Optional Request ID allows application developer to trace requests
-          through the system's logs
-        explode: false
-        in: header
-        name: X-Request-ID
-        required: false
-        schema:
-          example: 94c825ee
-          type: string
-        style: simple
-      - description: Watch ID, used to identify a specific watch
-        explode: false
-        in: path
-        name: watchID
-        required: true
-        schema:
-          example: 0c5e215c
-          type: string
-        style: simple
-      - description: Customer or Company name watch
-        explode: true
-        in: query
-        name: name
-        required: true
-        schema:
-          example: Jane Smith
-          type: string
-        style: form
-      responses:
-        "200":
-          description: Company or Customer watch removed
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Error occurred, see response body.
-      summary: Remove customer watch
-      tags:
-      - Watchman
-  /ofac/sdn/{sdnID}:
-    get:
-      description: Get SDN details
-      operationId: getSDN
-      parameters:
-      - description: Optional Request ID allows application developer to trace requests
-          through the system's logs
-        explode: false
-        in: header
-        name: X-Request-ID
-        required: false
-        schema:
-          example: 94c825ee
-          type: string
-        style: simple
-      - description: SDN ID
-        explode: false
-        in: path
-        name: sdnID
-        required: true
-        schema:
-          example: 564dd7d1
-          type: string
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OfacSDN'
-          description: SDN metadata
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Error occurred, see response body.
-      summary: Get SDN
-      tags:
-      - Watchman
   /ofac/sdn/{sdnID}/alts:
     get:
       operationId: getSDNAltNames
@@ -1002,178 +410,6 @@ paths:
       - Watchman
 components:
   schemas:
-    OfacCompany:
-      description: OFAC Company and metadata
-      example:
-        addresses:
-        - country: Japan
-          address: 123 73th St
-          cityStateProvincePostalCode: Tokyo 103
-          match: 0.91
-          entityID: "2112"
-          addressID: "201"
-        - country: Japan
-          address: 123 73th St
-          cityStateProvincePostalCode: Tokyo 103
-          match: 0.91
-          entityID: "2112"
-          addressID: "201"
-        alts:
-        - alternateID: "220"
-          alternateRemarks: Extra information
-          alternateType: aka
-          match: 0.91
-          entityID: "306"
-          alternateName: NATIONAL BANK OF CUBA
-        - alternateID: "220"
-          alternateRemarks: Extra information
-          alternateType: aka
-          match: 0.91
-          entityID: "306"
-          alternateName: NATIONAL BANK OF CUBA
-        ID: 9574756b
-        sdn:
-          sdnType: individual
-          match: 0.91
-          entityID: "1231"
-          programs:
-          - CUBA
-          sdnName: BANCO NACIONAL DE CUBA
-          title: Title of an individual
-          remarks: Additional info
-        status:
-          note: Incorrect match
-          createdAt: 2000-01-23T04:56:07.000+00:00
-          userID: 349661f9
-          status: unsafe
-      properties:
-        ID:
-          description: OFAC Company ID
-          example: 9574756b
-          type: string
-        sdn:
-          $ref: '#/components/schemas/OfacSDN'
-        addresses:
-          items:
-            $ref: '#/components/schemas/OfacEntityAddress'
-          type: array
-        alts:
-          items:
-            $ref: '#/components/schemas/OfacAlt'
-          type: array
-        status:
-          $ref: '#/components/schemas/OfacCompanyStatus'
-    OfacCompanyStatus:
-      description: Status properties of an OFAC Company
-      example:
-        note: Incorrect match
-        createdAt: 2000-01-23T04:56:07.000+00:00
-        userID: 349661f9
-        status: unsafe
-      properties:
-        userID:
-          description: User ID provided when updating status
-          example: 349661f9
-          type: string
-        note:
-          description: Optional note from updating status
-          example: Incorrect match
-          type: string
-        status:
-          description: Manually applied status for OFAC Company
-          enum:
-          - unsafe
-          - exception
-          type: string
-        createdAt:
-          format: date-time
-          type: string
-    OfacCustomer:
-      description: OFAC Customer and metadata
-      example:
-        addresses:
-        - country: Japan
-          address: 123 73th St
-          cityStateProvincePostalCode: Tokyo 103
-          match: 0.91
-          entityID: "2112"
-          addressID: "201"
-        - country: Japan
-          address: 123 73th St
-          cityStateProvincePostalCode: Tokyo 103
-          match: 0.91
-          entityID: "2112"
-          addressID: "201"
-        alts:
-        - alternateID: "220"
-          alternateRemarks: Extra information
-          alternateType: aka
-          match: 0.91
-          entityID: "306"
-          alternateName: NATIONAL BANK OF CUBA
-        - alternateID: "220"
-          alternateRemarks: Extra information
-          alternateType: aka
-          match: 0.91
-          entityID: "306"
-          alternateName: NATIONAL BANK OF CUBA
-        ID: 9574756b
-        sdn:
-          sdnType: individual
-          match: 0.91
-          entityID: "1231"
-          programs:
-          - CUBA
-          sdnName: BANCO NACIONAL DE CUBA
-          title: Title of an individual
-          remarks: Additional info
-        status:
-          note: Incorrect match
-          createdAt: 2000-01-23T04:56:07.000+00:00
-          userID: 349661f9
-          status: unsafe
-      properties:
-        ID:
-          description: OFAC Customer ID
-          example: 9574756b
-          type: string
-        sdn:
-          $ref: '#/components/schemas/OfacSDN'
-        addresses:
-          items:
-            $ref: '#/components/schemas/OfacEntityAddress'
-          type: array
-        alts:
-          items:
-            $ref: '#/components/schemas/OfacAlt'
-          type: array
-        status:
-          $ref: '#/components/schemas/OfacCustomerStatus'
-    OfacCustomerStatus:
-      description: Status properties of an OFAC Customer
-      example:
-        note: Incorrect match
-        createdAt: 2000-01-23T04:56:07.000+00:00
-        userID: 349661f9
-        status: unsafe
-      properties:
-        userID:
-          description: User ID provided when updating status
-          example: 349661f9
-          type: string
-        note:
-          description: Optional note from updating status
-          example: Incorrect match
-          type: string
-        status:
-          description: Manually applied status for OFAC Customer
-          enum:
-          - unsafe
-          - exception
-          type: string
-        createdAt:
-          format: date-time
-          type: string
     OfacSDN:
       description: Specially designated national from OFAC list
       example:
@@ -1184,6 +420,7 @@ components:
         - CUBA
         sdnName: BANCO NACIONAL DE CUBA
         title: Title of an individual
+        matchedName: jane doe
         remarks: Additional info
       properties:
         entityID:
@@ -1212,6 +449,11 @@ components:
           description: Match percentage of search query
           example: 0.91
           type: number
+        matchedName:
+          description: The highest scoring term from the search query. This term is
+            the precomputed indexed value used by the search algorithm.
+          example: jane doe
+          type: string
     OfacEntityAddresses:
       items:
         $ref: '#/components/schemas/OfacEntityAddress'
@@ -1258,6 +500,7 @@ components:
         match: 0.91
         entityID: "306"
         alternateName: NATIONAL BANK OF CUBA
+        matchedName: jane doe
       properties:
         entityID:
           example: "306"
@@ -1278,6 +521,11 @@ components:
           description: Match percentage of search query
           example: 0.91
           type: number
+        matchedName:
+          description: The highest scoring term from the search query. This term is
+            the precomputed indexed value used by the search algorithm.
+          example: jane doe
+          type: string
     SdnType:
       description: Used for classifying SDNs — typically represents an individual
         or company
@@ -1309,6 +557,7 @@ components:
         name: ISMAEL RETA
         action: FR NOTICE ADDED
         state: TX
+        matchedName: jane doe
         effectiveDate: 06/15/2016
         expirationDate: 06/15/2025
       properties:
@@ -1366,6 +615,11 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
+        matchedName:
+          description: The highest scoring term from the search query. This term is
+            the precomputed indexed value used by the search algorithm.
+          example: jane doe
+          type: string
     SSI:
       description: Treasury Department Sectoral Sanctions Identifications List (SSI)
       example:
@@ -1387,6 +641,7 @@ components:
         - UKRAINE-EO13662
         - SYRIA
         sourceListURL: http://bit.ly/1MLgou0
+        matchedName: jane doe
         remarks:
         - 'For more information on directives, please visit the following link: http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives.'
         - '(Linked To: OPEN JOINT-STOCK COMPANY ROSNEFT OIL COMPANY)'
@@ -1455,6 +710,11 @@ components:
           description: Match percentage of search query
           example: 0.91
           type: number
+        matchedName:
+          description: The highest scoring term from the search query. This term is
+            the precomputed indexed value used by the search algorithm.
+          example: jane doe
+          type: string
     BISEntities:
       description: Bureau of Industry and Security Entity List
       example:
@@ -1471,6 +731,7 @@ components:
         name: Luhansk People¬ís Republic
         match: 0.91
         sourceListURL: http://bit.ly/1MLgou0
+        matchedName: jane doe
         startDate: 6/21/16
         frNotice: 81 FR 61595
       properties:
@@ -1522,6 +783,11 @@ components:
           description: Match percentage of search query
           example: 0.91
           type: number
+        matchedName:
+          description: The highest scoring term from the search query. This term is
+            the precomputed indexed value used by the search algorithm.
+          example: jane doe
+          type: string
     MilitaryEndUser:
       example:
         addresses: Xiujia Bay, Weiyong Dt, Xian, 710021, CN
@@ -1530,6 +796,7 @@ components:
         match: 0.92
         FRNotice: 85 FR 83799
         entityID: 26744194bd9b5cbec49db6ee29a4b53c697c7420
+        matchedName: jane doe
         startDate: 2020-12-23
       properties:
         entityID:
@@ -1553,6 +820,11 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
+        matchedName:
+          description: The highest scoring term from the search query. This term is
+            the precomputed indexed value used by the search algorithm.
+          example: jane doe
+          type: string
     Unverified:
       example:
         sourceInfoURL: http://bit.ly/1Qi4R7Z
@@ -1562,6 +834,7 @@ components:
         match: 0.92
         entityID: f15fa805ff4ac5e09026f5e78011a1bb6b26dec2
         sourceListURL: http://bit.ly/1iwwTSJ
+        matchedName: jane doe
       properties:
         entityID:
           example: f15fa805ff4ac5e09026f5e78011a1bb6b26dec2
@@ -1585,6 +858,11 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
+        matchedName:
+          description: The highest scoring term from the search query. This term is
+            the precomputed indexed value used by the search algorithm.
+          example: jane doe
+          type: string
     NonProliferationSanction:
       example:
         sourceInfoURL: http://bit.ly/1NuVFxV
@@ -1600,6 +878,7 @@ components:
         - Export-Import Bank Act
         - Nuclear Proliferation Prevention Act
         sourceListURL: http://bit.ly/1NuVFxV
+        matchedName: jane doe
         startDate: 2009-01-09
         remarks: Associated with the A.Q. Khan Network
       properties:
@@ -1645,23 +924,29 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
+        matchedName:
+          description: The highest scoring term from the search query. This term is
+            the precomputed indexed value used by the search algorithm.
+          example: jane doe
+          type: string
     ForeignSanctionsEvader:
       example:
-        sourceInfoURL: http://bit.ly/1N1docf
         addresses: []
         entityNumber: "17526"
-        citizenships: CH
-        name: BEKTAS, Halis
         match: 0.92
-        IDs:
-        - CH, X0906223, Passport
         entityID: "17526"
-        programs:
-        - SYRIA
-        - FSE-SY
         datesOfBirth: 1966-02-13
         type: Individual
         sourceListURL: https://bit.ly/1QWTIfE
+        sourceInfoURL: http://bit.ly/1N1docf
+        citizenships: CH
+        name: BEKTAS, Halis
+        IDs:
+        - CH, X0906223, Passport
+        programs:
+        - SYRIA
+        - FSE-SY
+        matchedName: jane doe
       properties:
         entityID:
           example: "17526"
@@ -1709,6 +994,11 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
+        matchedName:
+          description: The highest scoring term from the search query. This term is
+            the precomputed indexed value used by the search algorithm.
+          example: jane doe
+          type: string
     PalestinianLegislativeCouncil:
       example:
         addresses:
@@ -1727,6 +1017,7 @@ components:
         programs:
         - NS-PLC
         - Office of Misinformation
+        matchedName: jane doe
         remarks: HAMAS - Der al-Balah
       properties:
         entityID:
@@ -1778,27 +1069,33 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
+        matchedName:
+          description: The highest scoring term from the search query. This term is
+            the precomputed indexed value used by the search algorithm.
+          example: jane doe
+          type: string
     CAPTAList:
       example:
-        sourceInfoURL: http://bit.ly/2PqohAD
         addresses: Bld 3 8/15, Rozhdestvenka St., Moscow, 107996, RU
+        entityNumber: "20002"
+        match: 0.92
+        entityID: "20002"
+        type: Entity
+        sourceListURL: sourceListURL
+        sourceInfoURL: http://bit.ly/2PqohAD
         alternateNames:
         - BM BANK JSC
         - BM BANK AO
         - AKTSIONERNOE OBSHCHESTVO BM BANK
-        entityNumber: "20002"
         name: BM BANK PUBLIC JOINT STOCK COMPANY
-        match: 0.92
         IDs:
         - RU, 1027700159497, Registration Number
         - RU, 29292940, Government Gazette Number
         - MOSWRUMM, SWIFT/BIC
-        entityID: "20002"
         programs:
         - UKRAINE-EO13662
         - RUSSIA-EO14024
-        type: Entity
-        sourceListURL: sourceListURL
+        matchedName: jane doe
         remarks:
         - All offices worldwide
       properties:
@@ -1857,6 +1154,11 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
+        matchedName:
+          description: The highest scoring term from the search query. This term is
+            the precomputed indexed value used by the search algorithm.
+          example: jane doe
+          type: string
     ITARDebarred:
       example:
         sourceInfoURL: http://bit.ly/307FuRQ
@@ -1868,6 +1170,7 @@ components:
         match: 0.92
         entityID: d44d88d0265d93927b9ff1c13bbbb7c7db64142c
         sourceListURL: http://bit.ly/307FuRQ
+        matchedName: jane doe
       properties:
         entityID:
           example: d44d88d0265d93927b9ff1c13bbbb7c7db64142c
@@ -1895,26 +1198,32 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
+        matchedName:
+          description: The highest scoring term from the search query. This term is
+            the precomputed indexed value used by the search algorithm.
+          example: jane doe
+          type: string
     NonSDNChineseMilitaryIndustrialComplex:
       example:
-        sourceInfoURL: https://bit.ly/3zsMQ4n
         addresses:
         - C/O Vistra Corporate Services Centre, Wickhams Cay II, Road Town, VG1110,
           VG
+        entityNumber: "32091"
+        match: 0.92
+        entityID: "32091"
+        type: Entity
+        sourceListURL: https://bit.ly/1QWTIfE
+        sourceInfoURL: https://bit.ly/3zsMQ4n
         alternateNames:
         - PROVEN HONOUR CAPITAL LTD
         - PROVEN HONOUR
-        entityNumber: "32091"
         name: PROVEN HONOUR CAPITAL LIMITED
-        match: 0.92
         IDs:
         - Proven Honour Capital Ltd, Issuer Name
         - XS1233275194, ISIN
-        entityID: "32091"
         programs:
         - CMIC-EO13959
-        type: Entity
-        sourceListURL: https://bit.ly/1QWTIfE
+        matchedName: jane doe
         remarks:
         - '(Linked To: HUAWEI INVESTMENT & HOLDING CO., LTD.)'
       properties:
@@ -1973,6 +1282,11 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
+        matchedName:
+          description: The highest scoring term from the search query. This term is
+            the precomputed indexed value used by the search algorithm.
+          example: jane doe
+          type: string
     NonSDNMenuBasedSanctionsList:
       example:
         EntityID: "17016"
@@ -1995,6 +1309,7 @@ components:
         - GAZPROMBANK OPEN JOINT STOCK COMPANY
         - BANK GPB JSC
         - GAZPROMBANK AO
+        matchedName: jane doe
         Name: GAZPROMBANK JOINT STOCK COMPANY
       properties:
         EntityID:
@@ -2052,6 +1367,11 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
+        matchedName:
+          description: The highest scoring term from the search query. This term is
+            the precomputed indexed value used by the search algorithm.
+          example: jane doe
+          type: string
     EUConsolidatedSanctionsList:
       example:
         birthCities:
@@ -2090,6 +1410,7 @@ components:
         birthCountries:
         - birthCountries
         - birthCountries
+        matchedName: jane doe
         fileGenerationDate: 28/10/2022
         entityRemark: entityRemark
       properties:
@@ -2153,6 +1474,11 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
+        matchedName:
+          description: The highest scoring term from the search query. This term is
+            the precomputed indexed value used by the search algorithm.
+          example: jane doe
+          type: string
     UKConsolidatedSanctionsList:
       example:
         addresses:
@@ -2166,6 +1492,7 @@ components:
         countries:
         - countries
         - countries
+        matchedName: jane doe
       properties:
         names:
           items:
@@ -2185,6 +1512,11 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
+        matchedName:
+          description: The highest scoring term from the search query. This term is
+            the precomputed indexed value used by the search algorithm.
+          example: jane doe
+          type: string
     UKSanctionsList:
       example:
         stateLocalities:
@@ -2204,6 +1536,7 @@ components:
         nonLatinNames:
         - nonLatinNames
         - nonLatinNames
+        matchedName: jane doe
       properties:
         names:
           items:
@@ -2231,84 +1564,55 @@ components:
           description: Match percentage of search query
           example: 0.92
           type: number
-    UpdateOfacCompanyStatus:
-      description: Request body to update a company status.
-      example:
-        notes: False positive
-        status: unsafe
-      properties:
-        status:
-          description: Manual override of company/SDN sanction status
-          enum:
-          - unsafe
-          - exception
+        matchedName:
+          description: The highest scoring term from the search query. This term is
+            the precomputed indexed value used by the search algorithm.
+          example: jane doe
           type: string
-        notes:
-          description: Free form notes about manually changing the Company status
-          example: False positive
-          type: string
-      required:
-      - status
-    UpdateOfacCustomerStatus:
-      description: Request body to update a customers status.
-      example:
-        notes: False positive
-        status: unsafe
-      properties:
-        status:
-          description: Manual override of customer/SDN sanction status
-          enum:
-          - unsafe
-          - exception
-          type: string
-        notes:
-          description: Free form notes about manually changing the Customer status
-          example: False positive
-          type: string
-      required:
-      - status
     Search:
       description: Search results containing SDNs, alternate names, and/or addreses
       example:
         nonSDNChineseMilitaryIndustrialComplex:
-        - sourceInfoURL: https://bit.ly/3zsMQ4n
-          addresses:
+        - addresses:
           - C/O Vistra Corporate Services Centre, Wickhams Cay II, Road Town, VG1110,
             VG
+          entityNumber: "32091"
+          match: 0.92
+          entityID: "32091"
+          type: Entity
+          sourceListURL: https://bit.ly/1QWTIfE
+          sourceInfoURL: https://bit.ly/3zsMQ4n
           alternateNames:
           - PROVEN HONOUR CAPITAL LTD
           - PROVEN HONOUR
-          entityNumber: "32091"
           name: PROVEN HONOUR CAPITAL LIMITED
-          match: 0.92
           IDs:
           - Proven Honour Capital Ltd, Issuer Name
           - XS1233275194, ISIN
-          entityID: "32091"
           programs:
           - CMIC-EO13959
-          type: Entity
-          sourceListURL: https://bit.ly/1QWTIfE
+          matchedName: jane doe
           remarks:
           - '(Linked To: HUAWEI INVESTMENT & HOLDING CO., LTD.)'
-        - sourceInfoURL: https://bit.ly/3zsMQ4n
-          addresses:
+        - addresses:
           - C/O Vistra Corporate Services Centre, Wickhams Cay II, Road Town, VG1110,
             VG
+          entityNumber: "32091"
+          match: 0.92
+          entityID: "32091"
+          type: Entity
+          sourceListURL: https://bit.ly/1QWTIfE
+          sourceInfoURL: https://bit.ly/3zsMQ4n
           alternateNames:
           - PROVEN HONOUR CAPITAL LTD
           - PROVEN HONOUR
-          entityNumber: "32091"
           name: PROVEN HONOUR CAPITAL LIMITED
-          match: 0.92
           IDs:
           - Proven Honour Capital Ltd, Issuer Name
           - XS1233275194, ISIN
-          entityID: "32091"
           programs:
           - CMIC-EO13959
-          type: Entity
-          sourceListURL: https://bit.ly/1QWTIfE
+          matchedName: jane doe
           remarks:
           - '(Linked To: HUAWEI INVESTMENT & HOLDING CO., LTD.)'
         altNames:
@@ -2318,12 +1622,14 @@ components:
           match: 0.91
           entityID: "306"
           alternateName: NATIONAL BANK OF CUBA
+          matchedName: jane doe
         - alternateID: "220"
           alternateRemarks: Extra information
           alternateType: aka
           match: 0.91
           entityID: "306"
           alternateName: NATIONAL BANK OF CUBA
+          matchedName: jane doe
         addresses:
         - country: Japan
           address: 123 73th St
@@ -2350,6 +1656,7 @@ components:
           name: ISMAEL RETA
           action: FR NOTICE ADDED
           state: TX
+          matchedName: jane doe
           effectiveDate: 06/15/2016
           expirationDate: 06/15/2025
         - country: United States
@@ -2364,6 +1671,7 @@ components:
           name: ISMAEL RETA
           action: FR NOTICE ADDED
           state: TX
+          matchedName: jane doe
           effectiveDate: 06/15/2016
           expirationDate: 06/15/2025
         ukConsolidatedSanctionsList:
@@ -2378,6 +1686,7 @@ components:
           countries:
           - countries
           - countries
+          matchedName: jane doe
         - addresses:
           - addresses
           - addresses
@@ -2389,6 +1698,7 @@ components:
           countries:
           - countries
           - countries
+          matchedName: jane doe
         palestinianLegislativeCouncil:
         - addresses:
           - 123 Dunbar Street, Testerville, TX, Palestine
@@ -2406,6 +1716,7 @@ components:
           programs:
           - NS-PLC
           - Office of Misinformation
+          matchedName: jane doe
           remarks: HAMAS - Der al-Balah
         - addresses:
           - 123 Dunbar Street, Testerville, TX, Palestine
@@ -2423,6 +1734,7 @@ components:
           programs:
           - NS-PLC
           - Office of Misinformation
+          matchedName: jane doe
           remarks: HAMAS - Der al-Balah
         itarDebarred:
         - sourceInfoURL: http://bit.ly/307FuRQ
@@ -2434,6 +1746,7 @@ components:
           match: 0.92
           entityID: d44d88d0265d93927b9ff1c13bbbb7c7db64142c
           sourceListURL: http://bit.ly/307FuRQ
+          matchedName: jane doe
         - sourceInfoURL: http://bit.ly/307FuRQ
           alternateNames:
           - Yasmin Tariq
@@ -2443,6 +1756,7 @@ components:
           match: 0.92
           entityID: d44d88d0265d93927b9ff1c13bbbb7c7db64142c
           sourceListURL: http://bit.ly/307FuRQ
+          matchedName: jane doe
         unverifiedCSL:
         - sourceInfoURL: http://bit.ly/1Qi4R7Z
           addresses:
@@ -2451,6 +1765,7 @@ components:
           match: 0.92
           entityID: f15fa805ff4ac5e09026f5e78011a1bb6b26dec2
           sourceListURL: http://bit.ly/1iwwTSJ
+          matchedName: jane doe
         - sourceInfoURL: http://bit.ly/1Qi4R7Z
           addresses:
           - Komitas 26/114, Yerevan, Armenia, AM
@@ -2458,47 +1773,50 @@ components:
           match: 0.92
           entityID: f15fa805ff4ac5e09026f5e78011a1bb6b26dec2
           sourceListURL: http://bit.ly/1iwwTSJ
+          matchedName: jane doe
         captaList:
-        - sourceInfoURL: http://bit.ly/2PqohAD
-          addresses: Bld 3 8/15, Rozhdestvenka St., Moscow, 107996, RU
+        - addresses: Bld 3 8/15, Rozhdestvenka St., Moscow, 107996, RU
+          entityNumber: "20002"
+          match: 0.92
+          entityID: "20002"
+          type: Entity
+          sourceListURL: sourceListURL
+          sourceInfoURL: http://bit.ly/2PqohAD
           alternateNames:
           - BM BANK JSC
           - BM BANK AO
           - AKTSIONERNOE OBSHCHESTVO BM BANK
-          entityNumber: "20002"
           name: BM BANK PUBLIC JOINT STOCK COMPANY
-          match: 0.92
           IDs:
           - RU, 1027700159497, Registration Number
           - RU, 29292940, Government Gazette Number
           - MOSWRUMM, SWIFT/BIC
-          entityID: "20002"
           programs:
           - UKRAINE-EO13662
           - RUSSIA-EO14024
-          type: Entity
-          sourceListURL: sourceListURL
+          matchedName: jane doe
           remarks:
           - All offices worldwide
-        - sourceInfoURL: http://bit.ly/2PqohAD
-          addresses: Bld 3 8/15, Rozhdestvenka St., Moscow, 107996, RU
+        - addresses: Bld 3 8/15, Rozhdestvenka St., Moscow, 107996, RU
+          entityNumber: "20002"
+          match: 0.92
+          entityID: "20002"
+          type: Entity
+          sourceListURL: sourceListURL
+          sourceInfoURL: http://bit.ly/2PqohAD
           alternateNames:
           - BM BANK JSC
           - BM BANK AO
           - AKTSIONERNOE OBSHCHESTVO BM BANK
-          entityNumber: "20002"
           name: BM BANK PUBLIC JOINT STOCK COMPANY
-          match: 0.92
           IDs:
           - RU, 1027700159497, Registration Number
           - RU, 29292940, Government Gazette Number
           - MOSWRUMM, SWIFT/BIC
-          entityID: "20002"
           programs:
           - UKRAINE-EO13662
           - RUSSIA-EO14024
-          type: Entity
-          sourceListURL: sourceListURL
+          matchedName: jane doe
           remarks:
           - All offices worldwide
         SDNs:
@@ -2509,6 +1827,7 @@ components:
           - CUBA
           sdnName: BANCO NACIONAL DE CUBA
           title: Title of an individual
+          matchedName: jane doe
           remarks: Additional info
         - sdnType: individual
           match: 0.91
@@ -2517,6 +1836,7 @@ components:
           - CUBA
           sdnName: BANCO NACIONAL DE CUBA
           title: Title of an individual
+          matchedName: jane doe
           remarks: Additional info
         ukSanctionsList:
         - stateLocalities:
@@ -2536,6 +1856,7 @@ components:
           nonLatinNames:
           - nonLatinNames
           - nonLatinNames
+          matchedName: jane doe
         - stateLocalities:
           - stateLocalities
           - stateLocalities
@@ -2553,6 +1874,7 @@ components:
           nonLatinNames:
           - nonLatinNames
           - nonLatinNames
+          matchedName: jane doe
         bisEntities:
         - licenseRequirement: For all items subject to the EAR. (See ¬ß744.11 of the
             EAR).
@@ -2567,6 +1889,7 @@ components:
           name: Luhansk People¬ís Republic
           match: 0.91
           sourceListURL: http://bit.ly/1MLgou0
+          matchedName: jane doe
           startDate: 6/21/16
           frNotice: 81 FR 61595
         - licenseRequirement: For all items subject to the EAR. (See ¬ß744.11 of the
@@ -2582,6 +1905,7 @@ components:
           name: Luhansk People¬ís Republic
           match: 0.91
           sourceListURL: http://bit.ly/1MLgou0
+          matchedName: jane doe
           startDate: 6/21/16
           frNotice: 81 FR 61595
         euConsolidatedSanctionsList:
@@ -2621,6 +1945,7 @@ components:
           birthCountries:
           - birthCountries
           - birthCountries
+          matchedName: jane doe
           fileGenerationDate: 28/10/2022
           entityRemark: entityRemark
         - birthCities:
@@ -2659,6 +1984,7 @@ components:
           birthCountries:
           - birthCountries
           - birthCountries
+          matchedName: jane doe
           fileGenerationDate: 28/10/2022
           entityRemark: entityRemark
         militaryEndUsers:
@@ -2668,6 +1994,7 @@ components:
           match: 0.92
           FRNotice: 85 FR 83799
           entityID: 26744194bd9b5cbec49db6ee29a4b53c697c7420
+          matchedName: jane doe
           startDate: 2020-12-23
         - addresses: Xiujia Bay, Weiyong Dt, Xian, 710021, CN
           endDate: endDate
@@ -2675,38 +2002,41 @@ components:
           match: 0.92
           FRNotice: 85 FR 83799
           entityID: 26744194bd9b5cbec49db6ee29a4b53c697c7420
+          matchedName: jane doe
           startDate: 2020-12-23
         foreignSanctionsEvaders:
-        - sourceInfoURL: http://bit.ly/1N1docf
-          addresses: []
+        - addresses: []
           entityNumber: "17526"
-          citizenships: CH
-          name: BEKTAS, Halis
           match: 0.92
-          IDs:
-          - CH, X0906223, Passport
           entityID: "17526"
-          programs:
-          - SYRIA
-          - FSE-SY
           datesOfBirth: 1966-02-13
           type: Individual
           sourceListURL: https://bit.ly/1QWTIfE
-        - sourceInfoURL: http://bit.ly/1N1docf
-          addresses: []
-          entityNumber: "17526"
+          sourceInfoURL: http://bit.ly/1N1docf
           citizenships: CH
           name: BEKTAS, Halis
-          match: 0.92
           IDs:
           - CH, X0906223, Passport
-          entityID: "17526"
           programs:
           - SYRIA
           - FSE-SY
+          matchedName: jane doe
+        - addresses: []
+          entityNumber: "17526"
+          match: 0.92
+          entityID: "17526"
           datesOfBirth: 1966-02-13
           type: Individual
           sourceListURL: https://bit.ly/1QWTIfE
+          sourceInfoURL: http://bit.ly/1N1docf
+          citizenships: CH
+          name: BEKTAS, Halis
+          IDs:
+          - CH, X0906223, Passport
+          programs:
+          - SYRIA
+          - FSE-SY
+          matchedName: jane doe
         nonSDNMenuBasedSanctionsList:
         - EntityID: "17016"
           Programs:
@@ -2729,6 +2059,7 @@ components:
           - GAZPROMBANK OPEN JOINT STOCK COMPANY
           - BANK GPB JSC
           - GAZPROMBANK AO
+          matchedName: jane doe
           Name: GAZPROMBANK JOINT STOCK COMPANY
         - EntityID: "17016"
           Programs:
@@ -2751,6 +2082,7 @@ components:
           - GAZPROMBANK OPEN JOINT STOCK COMPANY
           - BANK GPB JSC
           - GAZPROMBANK AO
+          matchedName: jane doe
           Name: GAZPROMBANK JOINT STOCK COMPANY
         refreshedAt: 2000-01-23T04:56:07.000+00:00
         sectoralSanctions:
@@ -2772,6 +2104,7 @@ components:
           - UKRAINE-EO13662
           - SYRIA
           sourceListURL: http://bit.ly/1MLgou0
+          matchedName: jane doe
           remarks:
           - 'For more information on directives, please visit the following link:
             http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives.'
@@ -2794,6 +2127,7 @@ components:
           - UKRAINE-EO13662
           - SYRIA
           sourceListURL: http://bit.ly/1MLgou0
+          matchedName: jane doe
           remarks:
           - 'For more information on directives, please visit the following link:
             http://www.treasury.gov/resource-center/sanctions/Programs/Pages/ukraine.aspx#directives.'
@@ -2812,6 +2146,7 @@ components:
           - Export-Import Bank Act
           - Nuclear Proliferation Prevention Act
           sourceListURL: http://bit.ly/1NuVFxV
+          matchedName: jane doe
           startDate: 2009-01-09
           remarks: Associated with the A.Q. Khan Network
         - sourceInfoURL: http://bit.ly/1NuVFxV
@@ -2827,6 +2162,7 @@ components:
           - Export-Import Bank Act
           - Nuclear Proliferation Prevention Act
           sourceListURL: http://bit.ly/1NuVFxV
+          matchedName: jane doe
           startDate: 2009-01-09
           remarks: Associated with the A.Q. Khan Network
       properties:
@@ -2905,35 +2241,6 @@ components:
         refreshedAt:
           format: date-time
           type: string
-    OfacWatch:
-      description: Customer or Company watch
-      example:
-        watchID: 08ddba92
-      properties:
-        watchID:
-          description: Object representing a customer or company watch
-          example: 08ddba92
-          type: string
-    OfacWatchRequest:
-      description: Webhook or other means of notification on search criteria. OFAC
-        will make a POST request with a body of the customer or company (SDN, AltNames,
-        and Address).
-      example:
-        webhook: https://api.example.com/ofac/webhook
-        authToken: 75d0384b-a105-4048-9fce-91a280ce7337
-      properties:
-        authToken:
-          description: Private token supplied by clients to be used for authenticating
-            webhooks.
-          example: 75d0384b-a105-4048-9fce-91a280ce7337
-          type: string
-        webhook:
-          description: HTTPS url for webhook on search match
-          example: https://api.example.com/ofac/webhook
-          type: string
-      required:
-      - authToken
-      - webhook
     Downloads:
       items:
         $ref: '#/components/schemas/Download'

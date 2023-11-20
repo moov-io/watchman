@@ -1135,36 +1135,6 @@ components:
           type: string
           description: "The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm."
           example: "jane doe"
-    UpdateOfacCompanyStatus:
-      description: Request body to update a company status.
-      properties:
-        status:
-          description: Manual override of company/SDN sanction status
-          type: string
-          enum:
-            - unsafe
-            - exception
-        notes:
-          description: Free form notes about manually changing the Company status
-          type: string
-          example: "False positive"
-      required:
-        - status
-    UpdateOfacCustomerStatus:
-      description: Request body to update a customers status.
-      properties:
-        status:
-          description: Manual override of customer/SDN sanction status
-          type: string
-          enum:
-            - unsafe
-            - exception
-        notes:
-          description: Free form notes about manually changing the Customer status
-          type: string
-          example: "False positive"
-      required:
-        - status
     Search:
       description: Search results containing SDNs, alternate names, and/or addreses
       properties:
@@ -1248,27 +1218,6 @@ components:
           type: string
           format: date-time
           example: "2006-01-02T15:04:05"
-    OfacWatch:
-      description: Customer or Company watch
-      properties:
-        watchID:
-          description: Object representing a customer or company watch
-          type: string
-          example: 08ddba92
-    OfacWatchRequest:
-      description: Webhook or other means of notification on search criteria. OFAC will make a POST request with a body of the customer or company (SDN, AltNames, and Address).
-      properties:
-        authToken:
-          description: Private token supplied by clients to be used for authenticating webhooks.
-          type: string
-          example: 75d0384b-a105-4048-9fce-91a280ce7337
-        webhook:
-          description: HTTPS url for webhook on search match
-          type: string
-          example: https://api.example.com/ofac/webhook
-      required:
-        - authToken
-        - webhook
     Downloads:
       type: array
       items:

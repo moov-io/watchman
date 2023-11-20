@@ -33,26 +33,13 @@ All URIs are relative to *http://localhost:8084*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*WatchmanApi* | [**AddOfacCompanyNameWatch**](docs/WatchmanApi.md#addofaccompanynamewatch) | **Post** /ofac/companies/watch | Watch company
-*WatchmanApi* | [**AddOfacCompanyWatch**](docs/WatchmanApi.md#addofaccompanywatch) | **Post** /ofac/companies/{companyID}/watch | Watch OFAC company
-*WatchmanApi* | [**AddOfacCustomerNameWatch**](docs/WatchmanApi.md#addofaccustomernamewatch) | **Post** /ofac/customers/watch | Watch customer
-*WatchmanApi* | [**AddOfacCustomerWatch**](docs/WatchmanApi.md#addofaccustomerwatch) | **Post** /ofac/customers/{customerID}/watch | Watch OFAC customer
 *WatchmanApi* | [**GetLatestDownloads**](docs/WatchmanApi.md#getlatestdownloads) | **Get** /downloads | Get latest downloads
-*WatchmanApi* | [**GetOfacCompany**](docs/WatchmanApi.md#getofaccompany) | **Get** /ofac/companies/{companyID} | Get company
-*WatchmanApi* | [**GetOfacCustomer**](docs/WatchmanApi.md#getofaccustomer) | **Get** /ofac/customers/{customerID} | Get customer
-*WatchmanApi* | [**GetSDN**](docs/WatchmanApi.md#getsdn) | **Get** /ofac/sdn/{sdnID} | Get SDN
 *WatchmanApi* | [**GetSDNAddresses**](docs/WatchmanApi.md#getsdnaddresses) | **Get** /ofac/sdn/{sdnID}/addresses | Get SDN addresses
 *WatchmanApi* | [**GetSDNAltNames**](docs/WatchmanApi.md#getsdnaltnames) | **Get** /ofac/sdn/{sdnID}/alts | Get SDN alt names
 *WatchmanApi* | [**GetUIValues**](docs/WatchmanApi.md#getuivalues) | **Get** /ui/values/{key} | Get UI values
 *WatchmanApi* | [**Ping**](docs/WatchmanApi.md#ping) | **Get** /ping | Ping Watchman service
-*WatchmanApi* | [**RemoveOfacCompanyNameWatch**](docs/WatchmanApi.md#removeofaccompanynamewatch) | **Delete** /ofac/companies/watch/{watchID} | Remove company watch
-*WatchmanApi* | [**RemoveOfacCompanyWatch**](docs/WatchmanApi.md#removeofaccompanywatch) | **Delete** /ofac/companies/{companyID}/watch/{watchID} | Remove company watch
-*WatchmanApi* | [**RemoveOfacCustomerNameWatch**](docs/WatchmanApi.md#removeofaccustomernamewatch) | **Delete** /ofac/customers/watch/{watchID} | Remove customer watch
-*WatchmanApi* | [**RemoveOfacCustomerWatch**](docs/WatchmanApi.md#removeofaccustomerwatch) | **Delete** /ofac/customers/{customerID}/watch/{watchID} | Remove customer watch
 *WatchmanApi* | [**Search**](docs/WatchmanApi.md#search) | **Get** /search | Search
 *WatchmanApi* | [**SearchUSCSL**](docs/WatchmanApi.md#searchuscsl) | **Get** /search/us-csl | Search US CSL
-*WatchmanApi* | [**UpdateOfacCompanyStatus**](docs/WatchmanApi.md#updateofaccompanystatus) | **Put** /ofac/companies/{companyID} | Update company
-*WatchmanApi* | [**UpdateOfacCustomerStatus**](docs/WatchmanApi.md#updateofaccustomerstatus) | **Put** /ofac/customers/{customerID} | Update customer
 
 
 ## Documentation For Models
@@ -70,14 +57,8 @@ Class | Method | HTTP request | Description
  - [NonSdnChineseMilitaryIndustrialComplex](docs/NonSdnChineseMilitaryIndustrialComplex.md)
  - [NonSdnMenuBasedSanctionsList](docs/NonSdnMenuBasedSanctionsList.md)
  - [OfacAlt](docs/OfacAlt.md)
- - [OfacCompany](docs/OfacCompany.md)
- - [OfacCompanyStatus](docs/OfacCompanyStatus.md)
- - [OfacCustomer](docs/OfacCustomer.md)
- - [OfacCustomerStatus](docs/OfacCustomerStatus.md)
  - [OfacEntityAddress](docs/OfacEntityAddress.md)
  - [OfacSdn](docs/OfacSdn.md)
- - [OfacWatch](docs/OfacWatch.md)
- - [OfacWatchRequest](docs/OfacWatchRequest.md)
  - [PalestinianLegislativeCouncil](docs/PalestinianLegislativeCouncil.md)
  - [SdnType](docs/SdnType.md)
  - [Search](docs/Search.md)
@@ -86,8 +67,6 @@ Class | Method | HTTP request | Description
  - [UkConsolidatedSanctionsList](docs/UkConsolidatedSanctionsList.md)
  - [UkSanctionsList](docs/UkSanctionsList.md)
  - [Unverified](docs/Unverified.md)
- - [UpdateOfacCompanyStatus](docs/UpdateOfacCompanyStatus.md)
- - [UpdateOfacCustomerStatus](docs/UpdateOfacCustomerStatus.md)
 
 
 ## Documentation For Authorization

@@ -83,13 +83,11 @@ Moov Watchman is actively used in multiple production environments. Please star 
 
 ## Usage
 
-The Watchman project implements an HTTP server and [Go library](https://pkg.go.dev/github.com/moov-io/watchman) for searching, parsing, and downloading lists. We also have an [example](https://pkg.go.dev/github.com/moov-io/watchman/examples) of the webhook service. Below, you can find a detailed list of features offered by Watchman:
+The Watchman project implements an HTTP server and [Go library](https://pkg.go.dev/github.com/moov-io/watchman) for searching, parsing, and downloading lists. Below, you can find a detailed list of features offered by Watchman:
 
-- Download OFAC, BIS Denied Persons List (DPL), and various other data sources on startup
+- Download OFAC, US/UK/EU CSL, BIS Denied Persons List (DPL), and various other data sources on startup
   - Admin endpoint to [manually refresh OFAC and DPL data](docs/runbook.md#force-data-refresh)
 - Index data for searches
-- Async searches and notifications (webhooks)
-- Manual overrides to mark a `Company` or `Customer` as `unsafe` (blocked) or `exception` (never blocked).
 - Library for OFAC and BIS DPL data to download and parse their custom files
 
 ### Docker
@@ -246,17 +244,9 @@ Refer to the MySQL driver documentation for [connection parameters](https://gith
 
 Refer to the SQLite driver documentation for [connection parameters](https://github.com/mattn/go-sqlite3#connection-string).
 
-#### Webhook notifications
-
-When Watchman sends a [webhook](https://en.wikipedia.org/wiki/Webhook) to your application, the body will contain a JSON representation of the [Company](https://godoc.org/github.com/moov-io/watchman/client#OfacCompany) or [Customer](https://godoc.org/github.com/moov-io/watchman/client#OfacCustomer) model as the body to a POST request. You can see an [example in Go](examples/webhook/webhook.go).
-
-An `Authorization` header will also be sent with the `authToken` provided when setting up the watch. Clients should verify this token to ensure authenticated communication.
-
-Webhook notifications are run after the OFAC data is successfully refreshed, which is determined by the `DATA_REFRESH_INTERVAL` environmental variable.
-
 ##### Downloads
 
-Moov Watchman supports sending a webhook when the underlying data is refreshed. The body will be the count of entities indexed for each list. The body will be in JSON format and the same schema as the manual data refresh endpoint.
+Moov Watchman supports sending a webhook (`POST` HTTP Request) when the underlying data is refreshed. The body will be the count of entities indexed for each list. The body will be in JSON format and the same schema as the manual data refresh endpoint.
 
 ##### Watching a specific customer or company by ID
 

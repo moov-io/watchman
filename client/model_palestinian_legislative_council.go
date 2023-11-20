@@ -25,4 +25,6 @@ type PalestinianLegislativeCouncil struct {
 	SourceInfoURL  string   `json:"sourceInfoURL,omitempty"`
 	// Match percentage of search query
 	Match float32 `json:"match,omitempty"`
+	// The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
+	MatchedName string `json:"matchedName,omitempty"`
 }
