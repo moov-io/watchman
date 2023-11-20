@@ -157,9 +157,6 @@ jobs:
     - name: Docker watchmantest
       run: make docker-watchmantest
 
-    - name: Docker Webhook Example
-      run: make docker-webhook
-
     - name: Docker Push
       run: |+
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
