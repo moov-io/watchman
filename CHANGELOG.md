@@ -1,4 +1,4 @@
-## v0.26.0 (Released 2023-11-20)
+## v0.26.1 (Released 2023-11-20)
 
 This release of Watchman has removed Company/Customer models and Watches. They've been deprecated for a while and do not perform as users expect. Stay tuned for a future Moov OSS project integrating with Watchman for sanctions screening.
 
