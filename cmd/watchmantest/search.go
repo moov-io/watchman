@@ -32,17 +32,6 @@ func searchByName(ctx context.Context, api *moov.APIClient, name string) (*moov.
 	if len(search.SDNs) == 0 {
 		return nil, fmt.Errorf("searchByName: found no SDNs for %q", name)
 	}
-
-	// Find Customer or company
-	if search.SDNs[0].SdnType == moov.SDNTYPE_INDIVIDUAL {
-		if err := getCustomer(ctx, api, search.SDNs[0].EntityID); err != nil {
-			return nil, err
-		}
-	} else {
-		if err := getCompany(ctx, api, search.SDNs[0].EntityID); err != nil {
-			return nil, err
-		}
-	}
 	return &search.SDNs[0], nil
 }
 
@@ -114,30 +103,6 @@ func getSDNAltNames(ctx context.Context, api *moov.APIClient, id string) error {
 	}
 	if alt[0].EntityID != id {
 		return fmt.Errorf("loadAltNames: wrong AltName: expected %s but got %s", id, alt[0].EntityID)
-	}
-	return nil
-}
-
-func getCustomer(ctx context.Context, api *moov.APIClient, id string) error {
-	cust, resp, err := api.WatchmanApi.GetOfacCustomer(ctx, id, nil)
-	if err != nil {
-		return fmt.Errorf("loadCustomer: %v", err)
-	}
-	defer resp.Body.Close()
-	if cust.ID != id {
-		return fmt.Errorf("loadCustomer: wrong Customer: expected %s but got %s", id, cust.ID)
-	}
-	return nil
-}
-
-func getCompany(ctx context.Context, api *moov.APIClient, id string) error {
-	company, resp, err := api.WatchmanApi.GetOfacCompany(ctx, id, nil)
-	if err != nil {
-		return fmt.Errorf("loadCompany: %v", err)
-	}
-	defer resp.Body.Close()
-	if company.ID != id {
-		return fmt.Errorf("loadCompany: wrong Company: expected %s but got %s", id, company.ID)
 	}
 	return nil
 }

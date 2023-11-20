@@ -150,7 +150,7 @@ func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo down
 					"UK_CSL":           log.Int(stats.UKCSL),
 				}).Logf("data refreshed %v ago", time.Since(stats.RefreshedAt))
 			}
-			updates <- stats // send stats for re-search and watch notifications
+			updates <- stats // send stats back
 		}
 	}
 }

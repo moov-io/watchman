@@ -184,33 +184,18 @@ func main() {
 		}).Logf("data refreshed %v ago", time.Since(stats.RefreshedAt))
 	}
 
-	// Setup Watch and Webhook database wrapper
-	watchRepo := &sqliteWatchRepository{db, logger}
-	defer watchRepo.close()
-	webhookRepo := &sqliteWebhookRepository{db}
-	defer webhookRepo.close()
-
-	// Setup company / customer repositories
-	companyRepo := &sqliteCompanyRepository{db, logger}
-	defer companyRepo.close()
-	custRepo := &sqliteCustomerRepository{db, logger}
-	defer custRepo.close()
-
 	// Setup periodic download and re-search
 	updates := make(chan *DownloadStats)
 	dataRefreshInterval = getDataRefreshInterval(logger, os.Getenv("DATA_REFRESH_INTERVAL"))
 	go searcher.periodicDataRefresh(dataRefreshInterval, downloadRepo, updates)
 	go handleDownloadStats(updates, func(stats *DownloadStats) {
 		callDownloadWebook(logger, stats)
-		searcher.spawnResearching(logger, companyRepo, custRepo, watchRepo, webhookRepo)
 	})
 
 	// Add manual data refresh endpoint
 	adminServer.AddHandler(manualRefreshPath, manualRefreshHandler(logger, searcher, updates, downloadRepo))
 
 	// Add searcher for HTTP routes
-	addCompanyRoutes(logger, router, searcher, companyRepo, watchRepo)
-	addCustomerRoutes(logger, router, searcher, custRepo, watchRepo)
 	addSDNRoutes(logger, router, searcher)
 	addSearchRoutes(logger, router, searcher)
 	addDownloadRoutes(logger, router, downloadRepo)

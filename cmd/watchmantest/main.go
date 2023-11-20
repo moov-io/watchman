@@ -17,7 +17,6 @@
 //	2019/02/14 23:37:44.434534 main.go:76: [SUCCESS] ping
 //	2019/02/14 23:37:44.435204 main.go:83: [SUCCESS] last download was: 3h45m58s ago
 //	2019/02/14 23:37:44.440230 main.go:96: [SUCCESS] name search passed, query="moh"
-//	2019/02/14 23:37:44.441506 main.go:104: [SUCCESS] added customer=24032 watch
 //	2019/02/14 23:37:44.445473 main.go:118: [SUCCESS] alt name search passed
 //	2019/02/14 23:37:44.449367 main.go:123: [SUCCESS] address search passed
 //
@@ -44,7 +43,6 @@ import (
 var (
 	flagApiAddress = flag.String("address", internal.DefaultApiAddress, "Moov API address")
 	flagLocal      = flag.Bool("local", false, "Use local HTTP addresses")
-	flagWebhook    = flag.String("webhook", "https://moov.io/watchman", "Secure HTTP address for webhooks")
 
 	flagRequestID = flag.String("request-id", "", "Override what is set for the X-Request-ID HTTP header")
 )
@@ -94,22 +92,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("[FAILURE] problem searching SDNs: %v", err)
 	} else {
-		log.Printf("[SUCCESS] name search passed, query=%q", query)
-	}
-
-	// Add watch on the SDN
-	if sdn.SdnType == moov.SDNTYPE_INDIVIDUAL {
-		if err := addCustomerWatch(ctx, api, sdn.EntityID, *flagWebhook); err != nil {
-			log.Fatalf("[FAILURE] problem adding customer watch: %v", err)
-		} else {
-			log.Printf("[SUCCESS] added customer=%s watch", sdn.EntityID)
-		}
-	} else {
-		if err := addCompanyWatch(ctx, api, sdn.EntityID, *flagWebhook); err != nil {
-			log.Fatalf("[FAILURE] problem adding company watch: %v", err)
-		} else {
-			log.Printf("[SUCCESS] added company=%s watch", sdn.EntityID)
-		}
+		log.Printf("[SUCCESS] name search passed, query=%q sdn=%q", query, sdn.EntityID)
 	}
 
 	// Load alt names and addresses

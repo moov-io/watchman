@@ -1,12 +1,12 @@
 PLATFORM=$(shell uname -s | tr '[:upper:]' '[:lower:]')
 VERSION := $(shell grep -Eo '(v[0-9]+[\.][0-9]+[\.][0-9]+(-[a-zA-Z0-9]*)?)' version.go)
 
-.PHONY: run build build-server build-examples docker release check test
+.PHONY: run build build-server docker release check test
 
 run:
 	CGO_ENABLED=1 go run github.com/moov-io/watchman/cmd/server
 
-build: build-server build-batchsearch build-watchmantest build-examples
+build: build-server build-batchsearch build-watchmantest
 ifeq ($(OS),Windows_NT)
 	@echo "Skipping webui build on Windows."
 else
@@ -21,11 +21,6 @@ build-batchsearch:
 
 build-watchmantest:
 	CGO_ENABLED=0 go build -o ./bin/watchmantest github.com/moov-io/watchman/cmd/watchmantest
-
-build-examples: build-webhook-example
-
-build-webhook-example:
-	CGO_ENABLED=0 go build -o ./bin/webhook-example github.com/moov-io/watchman/examples/webhook
 
 .PHONY: check
 check:
@@ -73,7 +68,7 @@ else
 	CGO_ENABLED=1 GOOS=$(PLATFORM) go build -o bin/watchman-$(PLATFORM)-amd64 github.com/moov-io/watchman/cmd/server
 endif
 
-docker: clean docker-hub docker-openshift docker-static docker-watchmantest docker-webhook
+docker: clean docker-hub docker-openshift docker-static docker-watchmantest
 
 docker-hub:
 	docker build --pull -t moov/watchman:$(VERSION) -f Dockerfile .
@@ -90,10 +85,6 @@ docker-watchmantest:
 	docker build --pull -t moov/watchmantest:$(VERSION) -f ./cmd/watchmantest/Dockerfile .
 	docker tag moov/watchmantest:$(VERSION) moov/watchmantest:latest
 
-docker-webhook:
-	docker build --pull -t moov/watchman-webhook-example:$(VERSION) -f ./examples/webhook/Dockerfile .
-	docker tag moov/watchman-webhook-example:$(VERSION) moov/watchman-webhook-example:latest
-
 release: docker AUTHORS
 	go vet ./...
 	go test -coverprofile=cover-$(VERSION).out ./...
@@ -104,7 +95,6 @@ release-push:
 	docker push moov/watchman:latest
 	docker push moov/watchman:static
 	docker push moov/watchmantest:$(VERSION)
-	docker push moov/watchman-webhook-example:$(VERSION)
 
 quay-push:
 	docker push quay.io/moov/watchman:$(VERSION)

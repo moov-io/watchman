@@ -14,7 +14,6 @@ $ watchmantest -local moh
 2019/02/14 23:37:44.434534 main.go:76: [SUCCESS] ping
 2019/02/14 23:37:44.435204 main.go:83: [SUCCESS] last download was: 3h45m58s ago
 2019/02/14 23:37:44.440230 main.go:96: [SUCCESS] name search passed, query="moh"
-2019/02/14 23:37:44.441506 main.go:104: [SUCCESS] added customer=24032 watch
 2019/02/14 23:37:44.445473 main.go:118: [SUCCESS] alt name search passed
 2019/02/14 23:37:44.449367 main.go:123: [SUCCESS] address search passed
 ```

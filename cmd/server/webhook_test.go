@@ -14,25 +14,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/moov-io/base"
-	"github.com/moov-io/watchman/internal/database"
+	"github.com/moov-io/base/log"
 )
 
 var (
-	// customerWebhook reads a Customer in JSON from the incoming request and replies
-	// with the Customer.ID
-	customerWebhook = func(w http.ResponseWriter, r *http.Request) {
-		var cust Customer
-		if err := json.NewDecoder(r.Body).Decode(&cust); err != nil {
+	downloadWebhook = func(w http.ResponseWriter, r *http.Request) {
+		var stats DownloadStats
+		if err := json.NewDecoder(r.Body).Decode(&stats); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
 		} else {
-			if cust.ID == "" {
+			if stats.SDNs != 101 {
 				w.WriteHeader(http.StatusBadRequest)
 				return
 			}
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(cust.ID))
 		}
 	}
 
@@ -112,7 +108,7 @@ func TestWebhook_call(t *testing.T) {
 		return
 	}
 
-	server := httptest.NewTLSServer(http.HandlerFunc(customerWebhook))
+	server := httptest.NewTLSServer(http.HandlerFunc(downloadWebhook))
 	defer server.Close()
 
 	// override to add test TLS certificate
@@ -127,15 +123,17 @@ func TestWebhook_call(t *testing.T) {
 		t.Fatalf("%T %#v", webhookHTTPClient.Transport, webhookHTTPClient.Transport)
 	}
 
-	custRepo := createTestCustomerRepository(t)
-	defer custRepo.close()
-
-	// execute webhook with arbitrary Customer
-	body, err := getCustomerBody(customerSearcher, "watchID", "306", 1.0, custRepo)
-	if body == nil {
-		t.Fatalf("nil body: %v", err)
+	stats := &DownloadStats{
+		SDNs:        101,
+		RefreshedAt: time.Now().In(time.UTC),
 	}
-	if _, err := callWebhook(body, server.URL, "authToken"); err != nil {
+
+	t.Setenv("DOWNLOAD_WEBHOOK_URL", server.URL)
+	t.Setenv("DOWNLOAD_WEBHOOK_AUTH_TOKEN", "authToken")
+
+	logger := log.NewTestLogger()
+	err := callDownloadWebook(logger, stats)
+	if err != nil {
 		t.Fatal(err)
 	}
 }
@@ -151,23 +149,4 @@ func TestWebhook__CallErr(t *testing.T) {
 	if status != 0 {
 		t.Errorf("bogus HTTP status: %d", status)
 	}
-}
-
-func TestWebhook_record(t *testing.T) {
-	t.Parallel()
-
-	check := func(t *testing.T, repo *sqliteWebhookRepository) {
-		if err := repo.recordWebhook(base.ID(), time.Now(), 200); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	// SQLite tests
-	sqliteDB := database.CreateTestSqliteDB(t)
-	defer sqliteDB.Close()
-	check(t, &sqliteWebhookRepository{sqliteDB.DB})
-
-	// MySQL tests
-	mysqlDB := database.TestMySQLConnection(t)
-	check(t, &sqliteWebhookRepository{mysqlDB})
 }

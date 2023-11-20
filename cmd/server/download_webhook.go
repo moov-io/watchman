@@ -7,18 +7,19 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"os"
 	"strings"
 
 	"github.com/moov-io/base/log"
 )
 
-func callDownloadWebook(logger log.Logger, stats *DownloadStats) {
+func callDownloadWebook(logger log.Logger, stats *DownloadStats) error {
 	webhookURL := strings.TrimSpace(os.Getenv("DOWNLOAD_WEBHOOK_URL"))
 	webhookAuthToken := strings.TrimSpace(os.Getenv("DOWNLOAD_WEBHOOK_AUTH_TOKEN"))
 
 	if webhookURL == "" {
-		return
+		return nil
 	}
 	logger.Info().Log("sending stats to download webhook url")
 
@@ -27,8 +28,10 @@ func callDownloadWebook(logger log.Logger, stats *DownloadStats) {
 
 	statusCode, err := callWebhook(&body, webhookURL, webhookAuthToken)
 	if err != nil {
-		logger.Error().LogErrorf("problem calling download webhook: %v", err)
+		err = fmt.Errorf("problem calling download webhook: %w", err)
+		return logger.Error().LogError(err).Err()
 	} else {
 		logger.Info().Logf("http status code %d from download webhook", statusCode)
 	}
+	return nil
 }
