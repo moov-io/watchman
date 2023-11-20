@@ -28,503 +28,7 @@ paths:
         '200':
           description: Service is running properly
 
-  # Company Endpoints
-  /ofac/companies/{companyID}:
-    get:
-      tags: [Watchman]
-      summary: Get company
-      description: Get information about a company, trust, or organization such as addresses, alternate names, and remarks.
-      operationId: getOfacCompany
-      parameters:
-        - name: X-Request-ID
-          in: header
-          description: Optional Request ID allows application developer to trace requests through the system's logs
-          schema:
-            type: string
-            example: 94c825ee
-        - name: companyID
-          in: path
-          description: Company ID
-          required: true
-          schema:
-            type: string
-            example: 1d1c824a
-      responses:
-        '200':
-          description: Company and associated metadata
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OfacCompany'
-        '400':
-          description: Error occurred, see response body.
-          content:
-            application/json:
-              schema:
-                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
-
-    put:
-      tags: [Watchman]
-      summary: Update company
-      description: Update a Company's sanction status to always block or always allow transactions.
-      operationId: updateOfacCompanyStatus
-      parameters:
-        - name: X-Request-ID
-          in: header
-          description: Optional Request ID allows application developer to trace requests through the system's logs
-          schema:
-            type: string
-            example: 94c825ee
-        - name: X-User-ID
-          in: header
-          description: User ID used to perform this search
-          schema:
-            type: string
-        - name: companyID
-          in: path
-          description: Company ID
-          required: true
-          schema:
-            type: string
-            example: 8d49fd61
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateOfacCompanyStatus'
-      responses:
-        '200':
-          description: Company status updated
-        '400':
-          description: Error occurred, see response body.
-          content:
-            application/json:
-              schema:
-                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
-
-  /ofac/companies/{companyID}/watch:
-    post:
-      tags: [Watchman]
-      summary: Watch OFAC company
-      description: Add ID watch on an OFAC Company.
-      operationId: addOfacCompanyWatch
-      parameters:
-        - name: X-Request-ID
-          in: header
-          description: Optional Request ID allows application developer to trace requests through the system's logs
-          schema:
-            type: string
-            example: 94c825ee
-        - name: companyID
-          in: path
-          description: Company ID
-          required: true
-          schema:
-            type: string
-            example: c3cf0f66
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OfacWatchRequest'
-      responses:
-        '200':
-          description: Company watch added
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OfacWatch'
-        '400':
-          description: Error occurred, see response body.
-          content:
-            application/json:
-              schema:
-                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
-        '404':
-          description: Company not found
-
-  /ofac/companies/{companyID}/watch/{watchID}:
-    delete:
-      tags: [Watchman]
-      summary: Remove company watch
-      description: Delete a company ID watch.
-      operationId: removeOfacCompanyWatch
-      parameters:
-        - name: X-Request-ID
-          in: header
-          description: Optional Request ID allows application developer to trace requests through the system's logs
-          schema:
-            type: string
-            example: 94c825ee
-        - name: companyID
-          in: path
-          description: Company ID
-          required: true
-          schema:
-            type: string
-            example: c3cf0f66
-        - name: watchID
-          in: path
-          description: Watch ID, used to identify a specific watch
-          required: true
-          schema:
-            type: string
-            example: 0c5e215c
-      responses:
-        '200':
-          description: Company watch removed
-        '400':
-          description: Error occurred, see response body.
-          content:
-            application/json:
-              schema:
-                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
-
-  /ofac/companies/watch:
-    post:
-      tags: [Watchman]
-      summary: Watch company
-      description: Watch a company by its name. The match percentage will be included in the webhook's JSON payload.
-      operationId: addOfacCompanyNameWatch
-      parameters:
-        - name: X-Request-ID
-          in: header
-          description: Optional Request ID allows application developer to trace requests through the system's logs
-          schema:
-            type: string
-            example: 94c825ee
-        - name: name
-          in: query
-          required: true
-          description: Company name used to match and send watch notifications
-          schema:
-            type: string
-            example: Jane Smith
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OfacWatchRequest'
-      responses:
-        '200':
-          description: Company watch applied
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OfacWatch'
-        '400':
-          description: Error occurred, see response body.
-          content:
-            application/json:
-              schema:
-                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
-
-  /ofac/companies/watch/{watchID}:
-    delete:
-      tags: [Watchman]
-      summary: Remove company watch
-      description: Delete a company name watch.
-      operationId: removeOfacCompanyNameWatch
-      parameters:
-        - name: X-Request-ID
-          in: header
-          description: Optional Request ID allows application developer to trace requests through the system's logs
-          schema:
-            type: string
-            example: 94c825ee
-        - name: watchID
-          in: path
-          description: Watch ID, used to identify a specific watch
-          required: true
-          schema:
-            type: string
-            example: 0c5e215c
-        - name: name
-          in: query
-          description: Company name watch
-          required: true
-          schema:
-            type: string
-            example: Jane Smith
-      responses:
-        '200':
-          description: Company watch removed
-        '400':
-          description: Error occurred, see response body.
-          content:
-            application/json:
-              schema:
-                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
-
-  # Customer Endpoints
-  /ofac/customers/{customerID}:
-    get:
-      tags: [Watchman]
-      summary: Get customer
-      description: Get information about a customer's addresses, alternate names, and SDN metadata.
-      operationId: getOfacCustomer
-      parameters:
-        - name: X-Request-ID
-          in: header
-          description: Optional Request ID allows application developer to trace requests through the system's logs
-          schema:
-            type: string
-            example: 94c825ee
-        - name: customerID
-          in: path
-          description: Customer ID
-          required: true
-          schema:
-            type: string
-            example: c3cf0f66
-      responses:
-        '200':
-          description: Customer and associated metadata
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OfacCustomer'
-        '400':
-          description: Error occurred, see response body.
-          content:
-            application/json:
-              schema:
-                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
-
-    put:
-      tags: [Watchman]
-      summary: Update customer
-      description: Update a Customer sanction status to always block or always allow transactions.
-      operationId: updateOfacCustomerStatus
-      parameters:
-        - name: X-Request-ID
-          in: header
-          description: Optional Request ID allows application developer to trace requests through the system's logs
-          schema:
-            type: string
-            example: 94c825ee
-        - name: X-User-ID
-          in: header
-          description: User ID used to perform this search
-          schema:
-            type: string
-        - name: customerID
-          in: path
-          description: Customer ID
-          required: true
-          schema:
-            type: string
-            example: c3cf0f66
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateOfacCustomerStatus'
-      responses:
-        '200':
-          description: Customer status updated
-        '400':
-          description: Error occurred, see response body.
-          content:
-            application/json:
-              schema:
-                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
-
-  /ofac/customers/{customerID}/watch:
-    post:
-      tags: [Watchman]
-      summary: Watch OFAC customer
-      description: Add ID watch on an OFAC Customer.
-      operationId: addOfacCustomerWatch
-      parameters:
-        - name: X-Request-ID
-          in: header
-          description: Optional Request ID allows application developer to trace requests through the system's logs
-          schema:
-            type: string
-            example: 94c825ee
-        - name: customerID
-          in: path
-          description: Customer ID
-          required: true
-          schema:
-            type: string
-            example: c3cf0f66
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OfacWatchRequest'
-      responses:
-        '200':
-          description: Customer watch added
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OfacWatch'
-        '400':
-          description: Error occurred, see response body.
-          content:
-            application/json:
-              schema:
-                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
-        '404':
-          description: Customer not found
-
-  /ofac/customers/{customerID}/watch/{watchID}:
-    delete:
-      tags: [Watchman]
-      summary: Remove customer watch
-      description: Delete a customer ID watch.
-      operationId: removeOfacCustomerWatch
-      parameters:
-        - name: X-Request-ID
-          in: header
-          description: Optional Request ID allows application developer to trace requests through the system's logs
-          schema:
-            type: string
-            example: 94c825ee
-        - name: customerID
-          in: path
-          description: Customer ID
-          required: true
-          schema:
-            type: string
-            example: c3cf0f66
-        - name: watchID
-          in: path
-          description: Watch ID, used to identify a specific watch
-          required: true
-          schema:
-            type: string
-            example: 0c5e215c
-      responses:
-        '200':
-          description: Customer watch removed
-        '400':
-          description: Error occurred, see response body.
-          content:
-            application/json:
-              schema:
-                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
-
-  /ofac/customers/watch:
-    post:
-      tags: [Watchman]
-      summary: Watch customer
-      description: Watch a customer by its name. The match percentage will be included in the webhook's JSON payload.
-      operationId: addOfacCustomerNameWatch
-      parameters:
-        - name: X-Request-ID
-          in: header
-          description: Optional Request ID allows application developer to trace requests through the system's logs
-          schema:
-            type: string
-            example: 94c825ee
-        - name: name
-          in: query
-          required: true
-          description: Individual name used to match and send watch notifications
-          schema:
-            type: string
-            example: Jane Smith
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OfacWatchRequest'
-      responses:
-        '200':
-          description: Customer watch applied
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OfacWatch'
-        '400':
-          description: Error occurred, see response body.
-          content:
-            application/json:
-              schema:
-                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
-
-  /ofac/customers/watch/{watchID}:
-    delete:
-      tags: [Watchman]
-      summary: Remove customer watch
-      description: Delete a customer name watch.
-      operationId: removeOfacCustomerNameWatch
-      parameters:
-        - name: X-Request-ID
-          in: header
-          description: Optional Request ID allows application developer to trace requests through the system's logs
-          schema:
-            type: string
-            example: 94c825ee
-        - name: watchID
-          in: path
-          description: Watch ID, used to identify a specific watch
-          required: true
-          schema:
-            type: string
-            example: 0c5e215c
-        - name: name
-          in: query
-          description: Customer or Company name watch
-          required: true
-          schema:
-            type: string
-            example: Jane Smith
-      responses:
-        '200':
-          description: Company or Customer watch removed
-        '400':
-          description: Error occurred, see response body.
-          content:
-            application/json:
-              schema:
-                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
-
-  # SDN Endpoints
-  /ofac/sdn/{sdnID}:
-    get:
-      tags: [Watchman]
-      summary: Get SDN
-      description: Get SDN details
-      operationId: getSDN
-      parameters:
-        - name: X-Request-ID
-          in: header
-          description: Optional Request ID allows application developer to trace requests through the system's logs
-          schema:
-            type: string
-            example: 94c825ee
-        - in: path
-          name: sdnID
-          required: true
-          description: SDN ID
-          schema:
-            type: string
-            example: 564dd7d1
-      responses:
-        '200':
-          description: SDN metadata
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OfacSDN'
-        '400':
-          description: Error occurred, see response body.
-          content:
-            application/json:
-              schema:
-                $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
-
+  # OFAC endpoints
   /ofac/sdn/{sdnID}/alts:
     get:
       tags: [Watchman]
@@ -702,6 +206,8 @@ paths:
               schema:
                 $ref: 'https://raw.githubusercontent.com/moov-io/base/master/api/common.yaml#/components/schemas/Error'
 
+  # US, UK, and EU Consolidated Screening List endpoints
+  # TODO(adam): add UK and EU CSL endpoints
   /search/us-csl:
     get:
       tags: [Watchman]
@@ -809,86 +315,6 @@ paths:
 
 components:
   schemas:
-    OfacCompany:
-      description: OFAC Company and metadata
-      properties:
-        ID:
-          description: OFAC Company ID
-          type: string
-          example: 9574756b
-        sdn:
-          $ref: '#/components/schemas/OfacSDN'
-        addresses:
-          type: array
-          items:
-            $ref: '#/components/schemas/OfacEntityAddress'
-        alts:
-          type: array
-          items:
-            $ref: '#/components/schemas/OfacAlt'
-        status:
-          $ref: '#/components/schemas/OfacCompanyStatus'
-    OfacCompanyStatus:
-      description: Status properties of an OFAC Company
-      properties:
-        userID:
-          description: User ID provided when updating status
-          type: string
-          example: 349661f9
-        note:
-          description: Optional note from updating status
-          type: string
-          example: 'Incorrect match'
-        status:
-          description: Manually applied status for OFAC Company
-          type: string
-          enum:
-            - unsafe
-            - exception
-        createdAt:
-          type: string
-          format: date-time
-          example: "2006-01-02T15:04:05"
-    OfacCustomer:
-      description: OFAC Customer and metadata
-      properties:
-        ID:
-          description: OFAC Customer ID
-          type: string
-          example: 9574756b
-        sdn:
-          $ref: '#/components/schemas/OfacSDN'
-        addresses:
-          type: array
-          items:
-            $ref: '#/components/schemas/OfacEntityAddress'
-        alts:
-          type: array
-          items:
-            $ref: '#/components/schemas/OfacAlt'
-        status:
-          $ref: '#/components/schemas/OfacCustomerStatus'
-    OfacCustomerStatus:
-      description: Status properties of an OFAC Customer
-      properties:
-        userID:
-          description: User ID provided when updating status
-          type: string
-          example: 349661f9
-        note:
-          description: Optional note from updating status
-          type: string
-          example: 'Incorrect match'
-        status:
-          description: Manually applied status for OFAC Customer
-          type: string
-          enum:
-            - unsafe
-            - exception
-        createdAt:
-          type: string
-          format: date-time
-          example: "2006-01-02T15:04:05"
     OfacSDN:
       description: Specially designated national from OFAC list
       properties:
@@ -919,8 +345,8 @@ components:
           example: 0.91
         matchedName:
           type: string
-          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
-          example: jane doe
+          description: "The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm."
+          example: "jane doe"
     OfacEntityAddresses:
       type: array
       items:
@@ -975,8 +401,8 @@ components:
           example: 0.91
         matchedName:
           type: string
-          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
-          example: jane doe
+          description: "The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm."
+          example: "jane doe"
     SdnType:
       description: 'Used for classifying SDNs — typically represents an individual or company'
       type: string
@@ -1049,8 +475,8 @@ components:
           example: 0.92
         matchedName:
           type: string
-          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
-          example: jane doe
+          description: "The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm."
+          example: "jane doe"
     SSI:
       description: Treasury Department Sectoral Sanctions Identifications List (SSI)
       properties:
@@ -1108,8 +534,8 @@ components:
           example: 0.91
         matchedName:
           type: string
-          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
-          example: jane doe
+          description: "The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm."
+          example: "jane doe"
     BISEntities:
       description: Bureau of Industry and Security Entity List
       properties:
@@ -1159,8 +585,8 @@ components:
           example: 0.91
         matchedName:
           type: string
-          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
-          example: jane doe
+          description: "The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm."
+          example: "jane doe"
     MilitaryEndUser:
       properties:
         entityID:
@@ -1187,8 +613,8 @@ components:
           example: 0.92
         matchedName:
           type: string
-          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
-          example: jane doe
+          description: "The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm."
+          example: "jane doe"
     Unverified:
       properties:
         entityID:
@@ -1215,8 +641,8 @@ components:
           example: 0.92
         matchedName:
           type: string
-          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
-          example: jane doe
+          description: "The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm."
+          example: "jane doe"
     NonProliferationSanction:
       properties:
         entityID:
@@ -1263,8 +689,8 @@ components:
           example: 0.92
         matchedName:
           type: string
-          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
-          example: jane doe
+          description: "The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm."
+          example: "jane doe"
     ForeignSanctionsEvader:
       properties:
         entityID:
@@ -1315,8 +741,8 @@ components:
           example: 0.92
         matchedName:
           type: string
-          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
-          example: jane doe
+          description: "The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm."
+          example: "jane doe"
     PalestinianLegislativeCouncil:
       properties:
         entityID:
@@ -1371,8 +797,8 @@ components:
           example: 0.92
         matchedName:
           type: string
-          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
-          example: jane doe
+          description: "The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm."
+          example: "jane doe"
     CAPTAList:
       properties:
         entityID:
@@ -1433,8 +859,8 @@ components:
           example: 0.92
         matchedName:
           type: string
-          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
-          example: jane doe
+          description: "The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm."
+          example: "jane doe"
     ITARDebarred:
       properties:
         entityID:
@@ -1465,8 +891,8 @@ components:
           example: 0.92
         matchedName:
           type: string
-          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
-          example: jane doe
+          description: "The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm."
+          example: "jane doe"
     NonSDNChineseMilitaryIndustrialComplex:
       properties:
         entityID:
@@ -1525,8 +951,8 @@ components:
           example: 0.92
         matchedName:
           type: string
-          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
-          example: jane doe
+          description: "The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm."
+          example: "jane doe"
     NonSDNMenuBasedSanctionsList:
       properties:
         EntityID:
@@ -1585,8 +1011,8 @@ components:
           example: 0.92
         matchedName:
           type: string
-          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
-          example: jane doe
+          description: "The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm."
+          example: "jane doe"
     EUConsolidatedSanctionsList:
       properties:
         fileGenerationDate:
@@ -1651,8 +1077,8 @@ components:
           type: number
         matchedName:
           type: string
-          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
-          example: jane doe
+          description: "The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm."
+          example: "jane doe"
     UKConsolidatedSanctionsList:
       properties:
         names:
@@ -1675,8 +1101,8 @@ components:
           type: number
         matchedName:
           type: string
-          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
-          example: jane doe
+          description: "The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm."
+          example: "jane doe"
     UKSanctionsList:
       properties:
         names:
@@ -1707,8 +1133,8 @@ components:
           type: number
         matchedName:
           type: string
-          desc: The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm.
-          example: jane doe
+          description: "The highest scoring term from the search query. This term is the precomputed indexed value used by the search algorithm."
+          example: "jane doe"
     UpdateOfacCompanyStatus:
       description: Request body to update a company status.
       properties:
