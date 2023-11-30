@@ -7,6 +7,7 @@ package main
 import (
 	"encoding/json"
 	"reflect"
+	"strings"
 	"sync"
 )
 
@@ -52,6 +53,8 @@ func topResults[T any](limit int, minMatch float64, name string, data []*Result[
 	}
 
 	name = precompute(name)
+	nameTokens := strings.Fields(name)
+
 	xs := newLargest(limit, minMatch)
 
 	var wg sync.WaitGroup
@@ -64,7 +67,7 @@ func topResults[T any](limit int, minMatch float64, name string, data []*Result[
 			it := &item{
 				matched: data[i].precomputedName,
 				value:   data[i],
-				weight:  jaroWinkler(data[i].precomputedName, name),
+				weight:  bestPairsJaroWinkler(nameTokens, data[i].precomputedName),
 			}
 
 			for _, alt := range data[i].precomputedAlts {
@@ -72,7 +75,7 @@ func topResults[T any](limit int, minMatch float64, name string, data []*Result[
 					continue
 				}
 
-				score := jaroWinkler(alt, name)
+				score := bestPairsJaroWinkler(nameTokens, alt)
 				if score > it.weight {
 					it.matched = alt
 					it.weight = score
