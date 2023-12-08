@@ -581,9 +581,9 @@ func TestSearch_liveData(t *testing.T) {
 		name  string
 		match float64 // top match %
 	}{
-		{"Nicolas MADURO", 0.910},
-		{"nicolas maduro", 0.910},
-		{"NICOLAS maduro", 0.910},
+		{"Nicolas MADURO", 0.958},
+		{"nicolas maduro", 0.958},
+		{"NICOLAS maduro", 0.958},
 	}
 
 	keeper := keepSDN(filterRequest{})
@@ -753,7 +753,7 @@ func TestSearch__TopSDNs(t *testing.T) {
 	if len(sdns) == 0 {
 		t.Fatal("empty SDNs")
 	}
-	require.Equal(t, "2681", sdns[0].EntityID)
+	require.Equal(t, "2676", sdns[0].EntityID)
 }
 
 func TestSearch__TopDPs(t *testing.T) {

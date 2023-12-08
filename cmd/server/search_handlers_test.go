@@ -269,7 +269,7 @@ func TestSearch__Name(t *testing.T) {
 	w.Flush()
 
 	require.Equal(t, http.StatusOK, w.Code)
-	require.Contains(t, w.Body.String(), `"match":0.89166`)
+	require.Contains(t, w.Body.String(), `"match":0.95588`)
 	require.Contains(t, w.Body.String(), `"matchedName":"dr ayman al zawahiri"`)
 
 	var wrapper struct {
@@ -319,7 +319,7 @@ func TestSearch__AltName(t *testing.T) {
 	}
 
 	require.Equal(t, http.StatusOK, w.Code)
-	require.Contains(t, w.Body.String(), `"match":0.5`)
+	require.Contains(t, w.Body.String(), `"match":0.98`)
 	require.Contains(t, w.Body.String(), `"matchedName":"i c sogo kenkyusho"`)
 
 	var wrapper struct {

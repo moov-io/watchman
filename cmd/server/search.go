@@ -747,11 +747,11 @@ func precomputeDPs(persons []*dpl.DPL, pipe *pipeliner) []*DP {
 
 var (
 	// Jaro-Winkler parameters
-	boostThreshold = readFloat(os.Getenv("JARO_WINKLER_BOOST_THRESHOLD"), 0.81)
+	boostThreshold = readFloat(os.Getenv("JARO_WINKLER_BOOST_THRESHOLD"), 0.7)
 	prefixSize     = readInt(os.Getenv("JARO_WINKLER_PREFIX_SIZE"), 4)
-	//cCustomised Jaro-Winkler parameters
+	// Customised Jaro-Winkler parameters
 	lengthDifferenceCutoffFactor  = readFloat(os.Getenv("LENGTH_DIFFERENCE_CUTOFF_FACTOR"), 0.9)
-	lengthDifferencePenaltyWeight = readFloat(os.Getenv("LENGTH_DIFFERENCE_PENALTY_WEIGHT"), 0.4)
+	lengthDifferencePenaltyWeight = readFloat(os.Getenv("LENGTH_DIFFERENCE_PENALTY_WEIGHT"), 0.3)
 	differentLetterPenaltyWeight  = readFloat(os.Getenv("DIFFERENT_LETTER_PENALTY_WEIGHT"), 0.9)
 
 	// Watchman parameters
