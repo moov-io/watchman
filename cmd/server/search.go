@@ -349,7 +349,7 @@ func bestPairsJaroWinkler(searchTokens []string, indexed string) float64 {
 	//unmatched portion, then scale down the final score.
 	matchedIndexLength := 0
 	for i, str := range indexedTokens {
-		if matchedIndexTokens[i] == true {
+		if matchedIndexTokens[i] {
 			matchedIndexLength += len(str)
 		}
 	}
