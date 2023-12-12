@@ -330,7 +330,7 @@ func bestPairsJaroWinkler(searchTokens []string, indexed string) float64 {
 	totalWeightedScores := 0.0
 	for _, score := range scores {
 		//If neither the search token nor index token have been matched so far
-		if matchedSearchTokens[score.searchTokenIdx] == false && matchedIndexTokens[score.indexTokenIdx] == false {
+		if !matchedSearchTokens[score.searchTokenIdx] && !matchedIndexTokens[score.indexTokenIdx] {
 			//Weight the importance of this word score by its character length
 			searchToken := searchTokens[score.searchTokenIdx]
 			indexToken := indexedTokens[score.indexTokenIdx]
