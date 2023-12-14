@@ -30,8 +30,8 @@ func TestSearch_US_CSL(t *testing.T) {
 	w.Flush()
 
 	require.Equal(t, http.StatusOK, w.Code)
-	require.Contains(t, w.Body.String(), `"match":0.6333`)
-	require.Contains(t, w.Body.String(), `"matchedName":"zaman"`)
+	require.Contains(t, w.Body.String(), `"match":0.89`)
+	require.Contains(t, w.Body.String(), `"matchedName":"abdul qadeer khan"`)
 
 	var wrapper struct {
 		NonProliferationSanctions []csl.ISN `json:"nonProliferationSanctions"`
@@ -76,7 +76,7 @@ func TestSearcher_TopMEUs(t *testing.T) {
 	require.Len(t, meus, 1)
 
 	require.Equal(t, "d54346ef81802673c1b1daeb2ca8bd5d13755abd", meus[0].Data.EntityID)
-	require.Equal(t, "0.70597", fmt.Sprintf("%.5f", meus[0].match))
+	require.Equal(t, "0.88750", fmt.Sprintf("%.5f", meus[0].match))
 }
 
 func TestSearcher_TopSSIs(t *testing.T) {
@@ -120,7 +120,7 @@ func TestSearcher_TopISNs(t *testing.T) {
 
 	isn := isns[0]
 	require.Equal(t, "2d2db09c686e4829d0ef1b0b04145eec3d42cd88", isn.Data.EntityID)
-	require.Equal(t, "0.92", fmt.Sprintf("%.2f", isn.match))
+	require.Equal(t, "0.93", fmt.Sprintf("%.2f", isn.match))
 }
 
 func TestSearcher_TopUVLs(t *testing.T) {

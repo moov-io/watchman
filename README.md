@@ -184,7 +184,7 @@ You should get this response:
 PONG
 ```
 
-### Configuration settings
+### Configuration settings 
 
 | Environmental Variable | Description | Default |
 |-----|-----|-----|
@@ -192,6 +192,10 @@ PONG
 | `INITIAL_DATA_DIRECTORY` | Directory filepath with initial files to use instead of downloading. Periodic downloads will replace the initial files. | Empty |
 | `ADJACENT_SIMILARITY_POSITIONS` | How many nearby words to search for highest max similarly score. | 3 |
 | `EXACT_MATCH_FAVORITISM` | Extra weighting assigned to exact matches. | 0.0 |
+| `LENGTH_DIFFERENCE_CUTOFF_FACTOR` | Minimum ratio for the length of two matching tokens, before they score is penalised. | 0.9       | 
+| `LENGTH_DIFFERENCE_PENALTY_WEIGHT` | Weight of penalty applied to scores when two matching tokens have different lengths. | 0.3    |
+| `DIFFERENT_LETTER_PENALTY_WEIGHT` | Weight of penalty applied to scores when two matching tokens begin with different letters. | 0.9   |
+| `UNMATCHED_INDEX_TOKEN_WEIGHT` | Weight of penalty applied to scores when part of the indexed name isn't matched. | 0.15    |
 | `JARO_WINKLER_BOOST_THRESHOLD` | Jaro-Winkler boost threshold. | 0.7 |
 | `JARO_WINKLER_PREFIX_SIZE` | Jaro-Winkler prefix size. | 4 |
 | `WEBHOOK_BATCH_SIZE` | How many watches to read from database per batch of async searches. | 100 |
