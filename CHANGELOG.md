@@ -1,3 +1,22 @@
+## v0.27.0 (Released 2023-12-14)
+
+This release of Watchman includes additional improvements to the search match scores to [reduce false positives and increase true positive matches](https://github.com/moov-io/watchman/pull/524#issue-2031927107). A few of the specific improvements are:
+
+1. Compare tokens in the search to the index tokens
+   - i.e. "find matches for every search token" rather than "find match for every indexed token"
+   - Improves scores of searches that don't include "middle" names
+   - Prevents sanctioned names that are 1 word (HADI, EMMA, KAMILA) matching long searches
+   - Has a side-effect that short search terms will have more false positives. I think this is a good trade off as the sanction lists will always contain the full name, but the search might not
+2. Once a token has matched something, it can't match a different token
+   - This prevents names with repeated words having artificially high scores
+   - e.g. prevents any search containing "Vladimir" matching "VLADIMIROV, Vladimir Vladimirovich"
+3. Weights each word-score by the length of the word, relative to the search and indexed name
+   - This corrects for error that is introduced by splitting names into tokens and doing piecewise Jaro-Winkler scoring
+   - Combing word-scores using a simple average gives short words (like Li, Al) equal weight to much longer words
+   - The length-weighted scores are comparable to what you get by doing whole-name to whole-name Jaro-Winkler comparison
+4. Punishes word-scores when the matching tokens have significantly different length
+5. Punishes word-scores when the matching tokens start with different letters
+
 ## v0.26.1 (Released 2023-11-20)
 
 This release of Watchman has removed Company/Customer models and Watches. They've been deprecated for a while and do not perform as users expect. Stay tuned for a future Moov OSS project integrating with Watchman for sanctions screening.
