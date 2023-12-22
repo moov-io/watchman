@@ -33,6 +33,7 @@ var (
 
 // TODO: modify existing search endpoint with additional eu info and add an eu only endpoint
 func addSearchRoutes(logger log.Logger, r *mux.Router, searcher *searcher) {
+	r.Methods("GET").Path("/crypto").HandlerFunc(searchByCryptoAddress(logger, searcher))
 	r.Methods("GET").Path("/search").HandlerFunc(search(logger, searcher))
 	r.Methods("GET").Path("/search/us-csl").HandlerFunc(searchUSCSL(logger, searcher))
 	r.Methods("GET").Path("/search/eu-csl").HandlerFunc(searchEUCSL(logger, searcher))

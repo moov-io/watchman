@@ -69,4 +69,15 @@ type SDNComments struct {
 	EntityID string `json:"entityID"`
 	// RemarksExtended is remarks extended on a Specially Designated National
 	RemarksExtended string `json:"remarksExtended"`
+	// DigitalCurrencyAddresses are wallet addresses for digital currencies
+	DigitalCurrencyAddresses []DigitalCurrencyAddress `json:"digitalCurrencyAddresses"`
+}
+
+type DigitalCurrencyAddress struct {
+	// Currency is the name of the digital currency.
+	// Examples: XBT (Bitcoin), ETH (Ethereum)
+	Currency string
+
+	// Address is a digital wallet address
+	Address string
 }
