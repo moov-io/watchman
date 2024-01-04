@@ -233,8 +233,9 @@ func csvSDNCommentsFile(path string) (*Results, error) {
 		}
 		line = replaceNull(line)
 		out = append(out, &SDNComments{
-			EntityID:        line[0],
-			RemarksExtended: line[1],
+			EntityID:                 line[0],
+			RemarksExtended:          line[1],
+			DigitalCurrencyAddresses: readDigitalCurrencyAddresses(line[1]),
 		})
 	}
 	return &Results{SDNComments: out}, nil
@@ -261,4 +262,60 @@ func cleanPrgmsList(s string) string {
 func splitPrograms(in string) []string {
 	norm := cleanPrgmsList(in)
 	return strings.Split(norm, "; ")
+}
+
+var (
+	digitalCurrencies = []string{
+		"XBT",  // Bitcoin
+		"ETH",  // Ethereum
+		"XMR",  // Monero
+		"LTC",  // Litecoin
+		"ZEC",  // ZCash
+		"DASH", // Dash
+		"BTG",  // Bitcoin Gold
+		"ETC",  // Ethereum Classic
+		"BSV",  // Bitcoin Satoshi Vision
+		"BCH",  // Bitcoin Cash
+		"XVG",  // Verge
+		"USDC", // USD Coin
+		"USDT", // USD Tether
+		"XRP",  // Ripple
+		"TRX",  // Tron
+		"ARB",  // Arbitrum
+		"BSC",  // Binance Smart Chain
+	}
+)
+
+func readDigitalCurrencyAddresses(remarks string) []DigitalCurrencyAddress {
+	var out []DigitalCurrencyAddress
+
+	// The format is semicolon delineated, but "Digital Currency Address" is sometimes truncated badly
+	//
+	//   alt. Digital Currency Address - XBT 12jVCWW1ZhTLA5yVnroEJswqKwsfiZKsax;
+	//
+	parts := strings.Split(remarks, ";")
+	for i := range parts {
+		// Check if the currency is in the remark
+		var addressIndex int
+		for j := range digitalCurrencies {
+			idx := strings.Index(parts[i], fmt.Sprintf(" %s ", digitalCurrencies[j]))
+			if idx > -1 {
+				addressIndex = idx
+				break
+			}
+		}
+		if addressIndex > 0 {
+			fields := strings.Fields(parts[i][addressIndex:])
+			if len(fields) < 2 {
+				break // bad parsing
+			}
+			out = append(out, DigitalCurrencyAddress{
+				Currency: fields[0],
+				Address:  fields[1],
+			})
+			continue
+		}
+	}
+
+	return out
 }

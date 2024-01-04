@@ -281,6 +281,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	sdns := precomputeSDNs(results.SDNs, results.Addresses, s.pipe)
 	adds := precomputeAddresses(results.Addresses)
 	alts := precomputeAlts(results.AlternateIdentities, s.pipe)
+	sdnComments := results.SDNComments
 
 	deniedPersons, err := dplRecords(s.logger, initialDir)
 	if err != nil {
@@ -390,6 +391,7 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	s.SDNs = sdns
 	s.Addresses = adds
 	s.Alts = alts
+	s.SDNComments = sdnComments
 	// BIS
 	s.DPs = dps
 	// CSL

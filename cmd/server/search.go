@@ -36,9 +36,10 @@ var (
 // This data comes from various US and EU Federal agencies
 type searcher struct {
 	// OFAC
-	SDNs      []*SDN
-	Addresses []*Address
-	Alts      []*Alt
+	SDNs        []*SDN
+	Addresses   []*Address
+	Alts        []*Alt
+	SDNComments []*ofac.SDNComments
 
 	// BIS
 	DPs []*DP
@@ -410,6 +411,10 @@ func (s *searcher) debugSDN(entityID string) *SDN {
 	s.RLock()
 	defer s.RUnlock()
 
+	return s.findSDNWithoutLock(entityID)
+}
+
+func (s *searcher) findSDNWithoutLock(entityID string) *SDN {
 	for i := range s.SDNs {
 		if s.SDNs[i].EntityID == entityID {
 			return s.SDNs[i]
