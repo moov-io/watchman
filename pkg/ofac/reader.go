@@ -252,6 +252,30 @@ func splitPrograms(in string) []string {
 	return strings.Split(norm, "; ")
 }
 
+func splitRemarks(input string) []string {
+	return strings.Split(input, ";")
+}
+
+func findRemarkValues(remarks []string, suffix string) []string {
+	var out []string
+	if suffix == "" {
+		return out
+	}
+	for i := range remarks {
+		idx := strings.Index(remarks[i], suffix)
+		if idx == -1 {
+			continue // not found
+		}
+
+		value := remarks[i][idx+len(suffix):]
+		value = strings.TrimPrefix(value, ":") // identifiers can end with a colon
+		value = strings.TrimSuffix(value, ";")
+		value = strings.TrimSuffix(value, ".")
+		out = append(out, strings.TrimSpace(value))
+	}
+	return out
+}
+
 var (
 	digitalCurrencies = []string{
 		"XBT",  // Bitcoin
@@ -281,7 +305,7 @@ func readDigitalCurrencyAddresses(remarks string) []DigitalCurrencyAddress {
 	//
 	//   alt. Digital Currency Address - XBT 12jVCWW1ZhTLA5yVnroEJswqKwsfiZKsax;
 	//
-	parts := strings.Split(remarks, ";")
+	parts := splitRemarks(remarks)
 	for i := range parts {
 		// Check if the currency is in the remark
 		var addressIndex int

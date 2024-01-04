@@ -30,7 +30,7 @@ var (
 	EntityBusiness      EntityType = "business"
 	EntityAircraft      EntityType = "aircraft"
 	EntityVessel        EntityType = "vessel"
-	EntityCryptoAddress EntityType = "crypto-address"
+	EntityCryptoAddress EntityType = "crypto-address" // TODO(adam): Does this make sense?
 )
 
 type SourceList string
@@ -59,8 +59,24 @@ var (
 	GenderFemale  Gender = "female"
 )
 
+type ContactInfo struct {
+	EmailAddresses []string
+	PhoneNumbers   []string
+	FaxNumbers     []string
+}
+
+// TODO(adam):
+//
+// Website www.tidewaterco.com;
+// Email Address info@tidewaterco.com;    alt. Email Address info@tidewaterco.ir;
+// Telephone: 982188553321; Alt. Telephone: 982188554432;
+// Fax: 982188717367; Alt. Fax: 982188708761;
+//
+// 12803,"TIDEWATER MIDDLE EAST CO.",-0- ,"SDGT] [NPWMD] [IRGC] [IFSR] [IFCA",-0- ,-0- ,-0- ,-0- ,-0- ,-0- ,-0- ,"  alt. Email Address info@tidewaterco.ir; IFCA Determination - Port Operator; Additional Sanctions Information - Subject to Secondary Sanctions; Business Registration Document # 18745 (Iran);   Alt. Fax: 982188708911."
+
 type GovernmentID struct {
 	Type       GovernmentIDType `json:"type"`
+	Country    string           `json:"country"` // ISO-3166
 	Identifier string           `json:"identifier"`
 }
 
