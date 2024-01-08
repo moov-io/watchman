@@ -76,7 +76,7 @@ type ContactInfo struct {
 
 type GovernmentID struct {
 	Type       GovernmentIDType `json:"type"`
-	Country    string           `json:"country"` // ISO-3166
+	Country    string           `json:"country"` // ISO-3166 // TODO(adam):
 	Identifier string           `json:"identifier"`
 }
 
@@ -98,16 +98,10 @@ type Business struct {
 // TODO(adam): Look at OpenSanctions for tax ID codes
 // https://www.opensanctions.org/reference/#schema.Company
 type Identifier struct {
-	Type       IdentifierType `json:"type"`
-	Identifier string         `json:"value"`
+	Name       string `json:"string"`
+	Country    string `json:"country"` // ISO-3166 // TODO(adam):
+	Identifier string `json:"value"`
 }
-
-type IdentifierType string
-
-var (
-	Identifier_US_EIN IdentifierType = "us_ein"
-	Identifier_US_SSN IdentifierType = "us_ssn"
-)
 
 // Organization
 //
@@ -122,7 +116,7 @@ type Organization struct {
 type Aircraft struct {
 	Name         string       `json:"name"`
 	Type         AircraftType `json:"type"`
-	Flag         string       `json:"flag"` // ISO-3166
+	Flag         string       `json:"flag"` // ISO-3166 // TODO(adam):
 	Built        *time.Time   `json:"built"`
 	ICAOCode     string       `json:"icaoCode"` // ICAO aircraft type designator
 	Model        string       `json:"model"`
@@ -143,7 +137,7 @@ type Vessel struct {
 	Name      string     `json:"name"`
 	IMONumber string     `json:"imoNumber"`
 	Type      VesselType `json:"type"`
-	Flag      string     `json:"flag"` // ISO-3166
+	Flag      string     `json:"flag"` // ISO-3166 // TODO(adam):
 	Built     *time.Time `json:"built"`
 	Model     string     `json:"model"`
 	Tonnage   int        `json:"tonnage"`
