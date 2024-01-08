@@ -174,6 +174,7 @@ func ofacRecords(logger log.Logger, initialDir string) (*ofac.Results, error) {
 			}
 			if rr != nil {
 				res = rr
+				res.SDNs = mergeSpilloverRecords(res.SDNs, res.SDNComments)
 			}
 		} else {
 			rr, err := ofac.Read(files[i])
@@ -184,11 +185,22 @@ func ofacRecords(logger log.Logger, initialDir string) (*ofac.Results, error) {
 				res.Addresses = append(res.Addresses, rr.Addresses...)
 				res.AlternateIdentities = append(res.AlternateIdentities, rr.AlternateIdentities...)
 				res.SDNs = append(res.SDNs, rr.SDNs...)
-				res.SDNComments = append(res.SDNComments, rr.SDNComments...)
+				res.SDNs = mergeSpilloverRecords(res.SDNs, rr.SDNComments)
 			}
 		}
 	}
 	return res, err
+}
+
+func mergeSpilloverRecords(sdns []*ofac.SDN, comments []*ofac.SDNComments) []*ofac.SDN {
+	for i := range sdns {
+		for j := range comments {
+			if sdns[i].EntityID == comments[j].EntityID {
+				sdns[i].Remarks += comments[j].RemarksExtended
+			}
+		}
+	}
+	return sdns
 }
 
 func dplRecords(logger log.Logger, initialDir string) ([]*dpl.DPL, error) {

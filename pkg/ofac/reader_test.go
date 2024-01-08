@@ -16,36 +16,32 @@ import (
 // TestOFAC__read validates reading an OFAC Address CSV File
 func TestOFAC__read(t *testing.T) {
 	res, err := Read(filepath.Join("..", "..", "test", "testdata", "add.csv"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(res.Addresses) == 0 {
-		t.Errorf("found no Addresses")
-	}
+	require.NoError(t, err)
+	require.Len(t, res.Addresses, 11696)
+	require.Len(t, res.AlternateIdentities, 0)
+	require.Len(t, res.SDNs, 0)
+	require.Len(t, res.SDNComments, 0)
 
 	res, err = Read(filepath.Join("..", "..", "test", "testdata", "alt.csv"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(res.AlternateIdentities) == 0 {
-		t.Errorf("found no AlternateIdentities")
-	}
+	require.NoError(t, err)
+	require.Len(t, res.Addresses, 0)
+	require.Len(t, res.AlternateIdentities, 9682)
+	require.Len(t, res.SDNs, 0)
+	require.Len(t, res.SDNComments, 0)
 
 	res, err = Read(filepath.Join("..", "..", "test", "testdata", "sdn.csv"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(res.SDNs) == 0 {
-		t.Errorf("found no SDNs")
-	}
+	require.NoError(t, err)
+	require.Len(t, res.Addresses, 0)
+	require.Len(t, res.AlternateIdentities, 0)
+	require.Len(t, res.SDNs, 7379)
+	require.Len(t, res.SDNComments, 0)
 
 	res, err = Read(filepath.Join("..", "..", "test", "testdata", "sdn_comments.csv"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(res.SDNComments) == 0 {
-		t.Errorf("found no SDN comments")
-	}
+	require.NoError(t, err)
+	require.Len(t, res.Addresses, 0)
+	require.Len(t, res.AlternateIdentities, 0)
+	require.Len(t, res.SDNs, 0)
+	require.Len(t, res.SDNComments, 13)
 }
 
 func TestReplaceNull(t *testing.T) {
