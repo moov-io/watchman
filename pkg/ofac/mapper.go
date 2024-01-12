@@ -51,17 +51,10 @@ func ToEntity(sdn SDN) search.Entity[SDN] {
 			Gender: search.Gender(strings.ToLower(firstValue(findMatchingRemarks(remarks, "Gender")))),
 		}
 		out.Person.BirthDate = withFirstP(findMatchingRemarks(remarks, "DOB"), func(in remark) *time.Time {
-			// TODO(adam): handle
-			// DOB 01 Apr 1950
-			// DOB 01 Feb 1958 to 28 Feb 1958
-			// DOB 1928
-			// DOB 1929 to 1930
-			// DOB Sep 1958
-			// DOB circa 01 Jan 1961
-			// DOB circa 1934
-			// DOB circa 1979-1982
-
-			t, _ := time.Parse("02 Jan 2006", in.value)
+			t, err := parseTime(dobPatterns, in.value)
+			if t.IsZero() || err != nil {
+				return nil
+			}
 			return &t
 		})
 
@@ -78,50 +71,46 @@ func ToEntity(sdn SDN) search.Entity[SDN] {
 	case "vessel":
 		out.Type = search.EntityVessel
 		out.Vessel = &search.Vessel{
-			Name: sdn.SDNName,
-
-			// IMONumber string     `json:"imoNumber"`
-			// Type      VesselType `json:"type"`
-			// Flag      string     `json:"flag"` // ISO-3166
+			Name:      sdn.SDNName,
+			IMONumber: firstValue(findMatchingRemarks(remarks, "IMO")),
+			Type: withFirstF(findMatchingRemarks(remarks, "Vessel Type"), func(r remark) search.VesselType {
+				return search.VesselType(r.value) // TODO(adam): OFAC values are not an enum
+			}),
+			Flag: firstValue(findMatchingRemarks(remarks, "Flag")), // TODO(adam): ISO-3166
 			// Built     *time.Time `json:"built"`
 			// Model     string     `json:"model"`
 			// Tonnage   int        `json:"tonnage"` // TODO(adam): remove , and ParseInt
-			// MMSI      string     `json:"mmsi"` // Maritime Mobile Service Identity
+			MMSI: firstValue(findMatchingRemarks(remarks, "MMSI")),
 		}
-
-		// TODO(adam):
-		// Vessel Registration Identification IMO 9569712;
-		// MMSI 572469210;
-		//
-		// Former Vessel Flag None Identified;        alt. Former Vessel Flag Tanzania;
 
 	case "aircraft":
 		out.Type = search.EntityAircraft
 		out.Aircraft = &search.Aircraft{
 			Name: sdn.SDNName,
-
 			// Type         AircraftType `json:"type"`
-			// Flag         string       `json:"flag"` // ISO-3166
-			// Built        *time.Time   `json:"built"`
+			Flag: firstValue(findMatchingRemarks(remarks, "Flag")), // TODO(adam): ISO-3166
+			Built: withFirstP(findMatchingRemarks(remarks, "Manufacture Date"), func(in remark) *time.Time {
+				t, err := parseTime(dobPatterns, in.value)
+				if t.IsZero() || err != nil {
+					return nil
+				}
+				return &t
+			}),
 			// ICAOCode     string       `json:"icaoCode"` // ICAO aircraft type designator
-			// Model        string       `json:"model"`
-			// SerialNumber string       `json:"serialNumber"`
+			Model: firstValue(findMatchingRemarks(remarks, "Aircraft Model")),
+			SerialNumber: withFirstF(findMatchingRemarks(remarks, "Serial Number"), func(r remark) string {
+				// Trim parens from these remarks
+				// e.g. "Aircraft Manufacturer's Serial Number (MSN) 1023409321;"
+				idx := strings.Index(r.value, ")")
+				if idx > -1 && len(r.value) > idx+1 {
+					r.value = strings.TrimSpace(r.value[idx+1:])
+				}
+				return r.value
+			}),
 		}
 
 		// TODO(adam):
-		// Aircraft Construction Number (also called L/N or S/N or F/N) 10907;
-		//
-		// Aircraft Manufacture Date 1992;
-		// Aircraft Manufacture Date 01 Dec 1981;
-		// Aircraft Manufacture Date Apr 1993;
-		//
-		// Aircraft Model IL76-TD;
-		// Aircraft Model B.747-422
-		// Aircraft Model Gulfstream 200
-		//
 		// Aircraft Operator YAS AIR;
-		// Aircraft Manufacturer's Serial Number (MSN) 1023409321;
-		//
 		// Previous Aircraft Tail Number 2-WGLP
 	}
 
@@ -157,6 +146,42 @@ func makeIdentifiers(remarks []string, needles []string) []search.Identifier {
 		}
 	}
 	return out
+}
+
+var (
+	dobPatterns = []string{
+		"02 Jan 2006", // 01 Apr 1950
+		"Jan 2006",    // Sep 1958
+		"2006",        // 1928
+	}
+)
+
+func parseTime(acceptedLayouts []string, value string) (time.Time, error) {
+	// We don't currently support ranges for birth dates, so take the first date provided
+	// Examples include:
+	// 01 Feb 1958 to 28 Feb 1958
+	// circa 1934
+	// circa 1979-1982
+	value = strings.TrimSpace(strings.ReplaceAll(value, "circa", ""))
+
+	parts := strings.Split(value, "to")
+	if len(parts) > 1 {
+		value = parts[0]
+	} else {
+		parts = strings.Split(value, "-")
+		if len(parts) > 1 {
+			value = parts[0]
+		}
+	}
+	value = strings.TrimSpace(value)
+
+	for i := range acceptedLayouts {
+		tt, err := time.Parse(acceptedLayouts[i], value)
+		if !tt.IsZero() && err == nil {
+			return tt, nil
+		}
+	}
+	return time.Time{}, nil
 }
 
 // TODO(adam):
