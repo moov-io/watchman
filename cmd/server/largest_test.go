@@ -119,12 +119,13 @@ func BenchmarkLargest(b *testing.B) {
 
 			g := &errgroup.Group{}
 			for i := range scores {
+				score := scores[i]
 				g.Go(func() error {
 					xs.add(&item{
 						value: SDN{
-							name: fmt.Sprintf("%.2f", scores[i]),
+							name: fmt.Sprintf("%.2f", score),
 						},
-						weight: scores[i],
+						weight: score,
 					})
 					return nil
 				})
