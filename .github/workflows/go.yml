@@ -79,6 +79,12 @@ jobs:
     name: Docker build
     runs-on: [ ubuntu-latest ]
     steps:
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v4
+      with:
+        go-version: stable
+      id: go
+
     - name: Setup Node / NPM
       if: runner.os == 'Linux'
       uses: actions/setup-node@v3
