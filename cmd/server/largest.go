@@ -4,7 +4,10 @@
 
 package main
 
-import "sync"
+import (
+	"slices"
+	"sync"
+)
 
 // item represents an arbitrary value with an associated weight
 type item struct {
@@ -32,12 +35,12 @@ type largest struct {
 }
 
 func (xs *largest) add(it *item) {
-	xs.mu.Lock()
-	defer xs.mu.Unlock()
-
 	if it.weight < xs.minMatch {
 		return // skip item as it's below our threshold
 	}
+
+	xs.mu.Lock()
+	defer xs.mu.Unlock()
 
 	for i := range xs.items {
 		if xs.items[i] == nil {
@@ -45,10 +48,7 @@ func (xs *largest) add(it *item) {
 			break
 		}
 		if xs.items[i].weight < it.weight {
-			// insert at i, slide other items over
-			xs.items = append(xs.items, nil)
-			copy(xs.items[i+1:], xs.items[i:])
-			xs.items[i] = it
+			xs.items = slices.Insert(xs.items, i, it)
 			break
 		}
 	}
