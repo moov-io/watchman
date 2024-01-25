@@ -98,7 +98,7 @@ func (ss *DownloadStats) MarshalJSON() ([]byte, error) {
 		DownloadStats
 		Errors []string `json:"errors"`
 	}
-	var errors []string
+	errors := make([]string, 0, len(ss.Errors))
 	for i := range ss.Errors {
 		errors = append(errors, ss.Errors[i].Error())
 	}

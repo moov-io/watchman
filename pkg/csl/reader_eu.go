@@ -73,7 +73,7 @@ func ParseEU(r io.Reader) ([]*EUCSLRecord, EUCSL, error) {
 		}
 
 	}
-	var totalReport []*EUCSLRecord
+	totalReport := make([]*EUCSLRecord, 0, len(report))
 	for _, row := range report {
 		totalReport = append(totalReport, row)
 	}

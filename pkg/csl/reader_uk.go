@@ -80,7 +80,7 @@ func ParseUKCSL(r io.Reader) ([]*UKCSLRecord, UKCSL, error) {
 		}
 
 	}
-	var totalReport []*UKCSLRecord
+	totalReport := make([]*UKCSLRecord, 0, len(report))
 	for _, row := range report {
 		totalReport = append(totalReport, row)
 	}

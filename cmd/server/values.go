@@ -48,7 +48,7 @@ func (acc accumulator) add(value string) {
 }
 
 func (acc accumulator) getValues() []string {
-	var out []string
+	out := make([]string, 0, len(acc.values))
 	for _, v := range acc.values {
 		out = append(out, v)
 	}

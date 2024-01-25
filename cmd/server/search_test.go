@@ -365,8 +365,10 @@ func init() {
 	}}, noLogPipeliner)
 }
 
-func createTestSearcher(t *testing.T) *searcher {
+func createTestSearcher(t testing.TB) *searcher {
+	t.Helper()
 	t.Setenv("WITH_UK_SANCTIONS_LIST", "false")
+
 	if testing.Short() {
 		t.Skip("-short enabled")
 	}
@@ -424,7 +426,7 @@ func verifyDownloadStats(b *testing.B) {
 	// UK - CSL
 	require.Greater(b, testSearcherStats.UKCSL, 1)
 	// UK - SanctionsList
-	require.Greater(b, testSearcherStats.UKSanctionsList, 1)
+	require.Equal(b, 0, testSearcherStats.UKSanctionsList)
 }
 
 func TestJaroWinkler(t *testing.T) {

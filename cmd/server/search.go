@@ -216,7 +216,7 @@ func TopAddressesFn(limit int, minMatch float64, addresses []*Address, compare f
 }
 
 func largestToAddresses(xs *largest) []Address {
-	out := make([]Address, 0)
+	out := make([]Address, 0, xs.capacity)
 	for i := range xs.items {
 		if v := xs.items[i]; v != nil {
 			aa, ok := v.value.(*Address)
@@ -276,7 +276,7 @@ func (s *searcher) TopAltNames(limit int, minMatch float64, alt string) []Alt {
 	}
 	wg.Wait()
 
-	out := make([]Alt, 0)
+	out := make([]Alt, 0, limit)
 	for i := range xs.items {
 		if v := xs.items[i]; v != nil {
 			aa, ok := v.value.(*Alt)
@@ -313,7 +313,7 @@ func bestPairsJaroWinkler(searchTokens []string, indexed string) float64 {
 	indexTokensLength := sumLength(indexedTokens)
 
 	//Compare each search token to each indexed token. Sort the results in descending order
-	scores := make([]Score, 0)
+	scores := make([]Score, 0, len(searchTokens)+len(indexedTokens))
 	for searchIdx, searchToken := range searchTokens {
 		for indexIdx, indexedToken := range indexedTokens {
 			score := customJaroWinkler(indexedToken, searchToken)
@@ -510,7 +510,7 @@ func (s *searcher) TopSDNs(limit int, minMatch float64, name string, keepSDN fun
 	}
 	wg.Wait()
 
-	out := make([]*SDN, 0)
+	out := make([]*SDN, 0, limit)
 	for i := range xs.items {
 		if v := xs.items[i]; v != nil {
 			ss, ok := v.value.(*SDN)
@@ -555,7 +555,7 @@ func (s *searcher) TopDPs(limit int, minMatch float64, name string) []DP {
 	}
 	wg.Wait()
 
-	out := make([]DP, 0)
+	out := make([]DP, 0, limit)
 	for _, thisItem := range xs.items {
 		if v := thisItem; v != nil {
 			ss, ok := v.value.(*DP)
