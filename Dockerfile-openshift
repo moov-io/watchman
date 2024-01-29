@@ -2,7 +2,8 @@ FROM quay.io/fedora/fedora:40-x86_64 as builder
 RUN yum install -y git golang make npm wget glibc
 WORKDIR /opt/app-root/src/
 COPY . .
-RUN make build
+RUN go mod download
+RUN make build-server
 
 FROM node:21-bookworm as frontend
 COPY webui/ /watchman/
