@@ -149,7 +149,9 @@ func main() {
 	} else {
 		pipeline = newPipeliner(log.NewNopLogger())
 	}
-	searcher := newSearcher(logger, pipeline, *flagWorkers)
+
+	searchWorkers := readInt(os.Getenv("SEARCH_MAX_WORKERS"), *flagWorkers)
+	searcher := newSearcher(logger, pipeline, searchWorkers)
 
 	// Add debug routes
 	adminServer.AddHandler(debugSDNPath, debugSDNHandler(logger, searcher))
