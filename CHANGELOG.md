@@ -1,3 +1,23 @@
+## v0.28.0 (Released 2024-01-29)
+
+ADDITIONS
+
+- feat: add `/crypto` endpoint and extract digital currency addresses from OFAC
+- feat: add `SEARCH_MAX_WORKERS`
+
+IMPROVEMENTS
+
+- build: fix npm build for Openshift
+- build: force latest stable Go when building docker images
+- fix: accumulate SDN comments for merging overflow after all files are read
+- fix: allocate known-capacity arrays
+- fix: copy extended remarks from sdn_comments.csv
+- largest: improve performance, simplify insert step
+
+BUILD
+
+- build(deps): bump golang.org/x/crypto from 0.15.0 to 0.17.0
+
 ## v0.27.0 (Released 2023-12-14)
 
 This release of Watchman includes additional improvements to the search match scores to [reduce false positives and increase true positive matches](https://github.com/moov-io/watchman/pull/524#issue-2031927107). A few of the specific improvements are:
