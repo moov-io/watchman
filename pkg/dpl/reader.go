@@ -28,19 +28,17 @@ func Read(f io.ReadCloser) ([]*DPL, error) {
 	for {
 		line, err := reader.Read()
 		if err != nil {
-			if err != nil {
-				// reached the last line
-				if errors.Is(err, io.EOF) {
-					break
-				}
-				// malformed row
-				if errors.Is(err, csv.ErrFieldCount) ||
-					errors.Is(err, csv.ErrBareQuote) ||
-					errors.Is(err, csv.ErrQuote) {
-					continue
-				}
-				return nil, err
+			// reached the last line
+			if errors.Is(err, io.EOF) {
+				break
 			}
+			// malformed row
+			if errors.Is(err, csv.ErrFieldCount) ||
+				errors.Is(err, csv.ErrBareQuote) ||
+				errors.Is(err, csv.ErrQuote) {
+				continue
+			}
+			return nil, err
 		}
 
 		if len(line) < 12 || (len(line) >= 2 && line[1] == "Street_Address") {

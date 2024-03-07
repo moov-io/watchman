@@ -25,7 +25,7 @@ func TestDownloader(t *testing.T) {
 	if len(files) != 4 {
 		t.Errorf("OFAC: found %d files", len(files))
 	}
-	for fn, _ := range files {
+	for fn := range files {
 		name := filepath.Base(fn)
 		switch name {
 		case "add.csv", "alt.csv", "sdn.csv", "sdn_comments.csv":
@@ -58,7 +58,7 @@ func TestDownloader__initialDir(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for fn, _ := range files {
+	for fn := range files {
 		switch filepath.Base(fn) {
 		case "sdn.txt":
 			bs, err := os.ReadFile(fn)

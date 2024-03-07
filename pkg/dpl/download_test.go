@@ -26,7 +26,7 @@ func TestDownloader(t *testing.T) {
 	if len(file) == 0 {
 		t.Fatal("no DPL file")
 	}
-	for filename, _ := range file {
+	for filename := range file {
 		if !strings.EqualFold("dpl.txt", filepath.Base(filename)) {
 			t.Errorf("unknown file %s", file)
 		}
