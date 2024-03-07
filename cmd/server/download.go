@@ -163,37 +163,14 @@ func ofacRecords(logger log.Logger, initialDir string) (*ofac.Results, error) {
 	if len(files) == 0 {
 		return nil, errors.New("no OFAC Results")
 	}
-
-	var res *ofac.Results
-	for i := range files {
-		// Does order matter?
-
-		if i == 0 {
-			rr, err := ofac.Read(files[i])
-			if err != nil {
-				return nil, fmt.Errorf("reading %s: %v", files[i], err)
-			}
-			if rr != nil {
-				res = rr
-			}
-		} else {
-			rr, err := ofac.Read(files[i])
-			if err != nil {
-				return nil, fmt.Errorf("read and replace: %v", err)
-			}
-			if rr != nil {
-				res.Addresses = append(res.Addresses, rr.Addresses...)
-				res.AlternateIdentities = append(res.AlternateIdentities, rr.AlternateIdentities...)
-				res.SDNs = append(res.SDNs, rr.SDNs...)
-				res.SDNComments = append(res.SDNComments, rr.SDNComments...)
-			}
-		}
+	res, err := ofac.Read(files)
+	if err != nil {
+		return nil, err
 	}
 
 	// Merge comments into SDNs
 	res.SDNs = mergeSpilloverRecords(res.SDNs, res.SDNComments)
-
-	return res, err
+	return res, nil
 }
 
 func mergeSpilloverRecords(sdns []*ofac.SDN, comments []*ofac.SDNComments) []*ofac.SDN {
@@ -212,7 +189,8 @@ func dplRecords(logger log.Logger, initialDir string) ([]*dpl.DPL, error) {
 	if err != nil {
 		return nil, err
 	}
-	return dpl.Read(file)
+
+	return dpl.Read(file["dpl.txt"])
 }
 
 func cslRecords(logger log.Logger, initialDir string) (*csl.CSL, error) {
@@ -221,11 +199,11 @@ func cslRecords(logger log.Logger, initialDir string) (*csl.CSL, error) {
 		logger.Warn().Logf("skipping CSL download: %v", err)
 		return &csl.CSL{}, nil
 	}
-	cslRecords, err := csl.ReadFile(file)
+	cslRecords, err := csl.ReadFile(file["csl.csv"])
 	if err != nil {
 		return nil, err
 	}
-	return cslRecords, err
+	return cslRecords, nil
 }
 
 func euCSLRecords(logger log.Logger, initialDir string) ([]*csl.EUCSLRecord, error) {
@@ -235,11 +213,13 @@ func euCSLRecords(logger log.Logger, initialDir string) ([]*csl.EUCSLRecord, err
 		// no error to return because we skip the download
 		return nil, nil
 	}
-	cslRecords, _, err := csl.ReadEUFile(file)
+
+	cslRecords, _, err := csl.ParseEU(file["eu_csl.csv"])
 	if err != nil {
 		return nil, err
 	}
 	return cslRecords, err
+
 }
 
 func ukCSLRecords(logger log.Logger, initialDir string) ([]*csl.UKCSLRecord, error) {
@@ -249,7 +229,7 @@ func ukCSLRecords(logger log.Logger, initialDir string) ([]*csl.UKCSLRecord, err
 		// no error to return because we skip the download
 		return nil, nil
 	}
-	cslRecords, _, err := csl.ReadUKCSLFile(file)
+	cslRecords, _, err := csl.ReadUKCSLFile(file["ConList.csv"])
 	if err != nil {
 		return nil, err
 	}
@@ -264,7 +244,7 @@ func ukSanctionsListRecords(logger log.Logger, initialDir string) ([]*csl.UKSanc
 		return nil, nil
 	}
 
-	records, _, err := csl.ReadUKSanctionsListFile(file)
+	records, _, err := csl.ReadUKSanctionsListFile(file["UK_Sanctions_List.ods"])
 	if err != nil {
 		return nil, err
 	}
@@ -341,6 +321,9 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	if err != nil {
 		lastDataRefreshFailure.WithLabelValues("CSL").Set(float64(time.Now().Unix()))
 		stats.Errors = append(stats.Errors, fmt.Errorf("CSL: %v", err))
+	}
+	if consolidatedLists == nil {
+		consolidatedLists = new(csl.CSL)
 	}
 	els := precomputeCSLEntities[csl.EL](consolidatedLists.ELs, s.pipe)
 	meus := precomputeCSLEntities[csl.MEU](consolidatedLists.MEUs, s.pipe)

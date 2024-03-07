@@ -5,6 +5,7 @@
 package ofac
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -15,28 +16,35 @@ import (
 
 // TestOFAC__read validates reading an OFAC Address CSV File
 func TestOFAC__read(t *testing.T) {
-	res, err := Read(filepath.Join("..", "..", "test", "testdata", "add.csv"))
+	testdata := func(fn string) map[string]io.ReadCloser {
+		fd, err := os.Open(filepath.Join("..", "..", "test", "testdata", fn))
+		if err != nil {
+			t.Error(err)
+		}
+		return map[string]io.ReadCloser{fn: fd}
+	}
+	res, err := Read(testdata("add.csv"))
 	require.NoError(t, err)
 	require.Len(t, res.Addresses, 11696)
 	require.Len(t, res.AlternateIdentities, 0)
 	require.Len(t, res.SDNs, 0)
 	require.Len(t, res.SDNComments, 0)
 
-	res, err = Read(filepath.Join("..", "..", "test", "testdata", "alt.csv"))
+	res, err = Read(testdata("alt.csv"))
 	require.NoError(t, err)
 	require.Len(t, res.Addresses, 0)
 	require.Len(t, res.AlternateIdentities, 9682)
 	require.Len(t, res.SDNs, 0)
 	require.Len(t, res.SDNComments, 0)
 
-	res, err = Read(filepath.Join("..", "..", "test", "testdata", "sdn.csv"))
+	res, err = Read(testdata("sdn.csv"))
 	require.NoError(t, err)
 	require.Len(t, res.Addresses, 0)
 	require.Len(t, res.AlternateIdentities, 0)
 	require.Len(t, res.SDNs, 7379)
 	require.Len(t, res.SDNComments, 0)
 
-	res, err = Read(filepath.Join("..", "..", "test", "testdata", "sdn_comments.csv"))
+	res, err = Read(testdata("sdn_comments.csv"))
 	require.NoError(t, err)
 	require.Len(t, res.Addresses, 0)
 	require.Len(t, res.AlternateIdentities, 0)
@@ -98,9 +106,9 @@ func TestSDNComments(t *testing.T) {
 	if _, err := fd.WriteString(`28264,"hone Number 8613314257947; alt. Phone Number 8618004121000; Identification Number 210302198701102136 (China); a.k.a. "blackjack1987"; a.k.a. "khaleesi"; Linked To: LAZARUS GROUP."`); err != nil {
 		t.Fatal(err)
 	}
-
+	fd.Seek(0, 0)
 	// read with lazy quotes enabled
-	if res, err := csvSDNCommentsFile(fd.Name()); err != nil {
+	if res, err := csvSDNCommentsFile(fd); err != nil {
 		t.Errorf("unexpected error: %v", err)
 	} else {
 		if len(res.SDNComments) != 1 {
@@ -118,8 +126,8 @@ func TestSDNComments_CryptoCurrencies(t *testing.T) {
 
 	_, err = fd.WriteString(`42496," alt. Digital Currency Address - XBT 12jVCWW1ZhTLA5yVnroEJswqKwsfiZKsax; alt. Digital Currency Address - XBT 1J378PbmTKn2sEw6NBrSWVfjZLBZW3DZem; alt. Digital Currency Address - XBT 18aqbRhHupgvC9K8qEqD78phmTQQWs7B5d; alt. Digital Currency Address - XBT 16ti2EXaae5izfkUZ1Zc59HMcsdnHpP5QJ; Secondary sanctions risk: North Korea Sanctions Regulations, sections 510.201 and 510.210; Transactions Prohibited For Persons Owned or Controlled By U.S. Financial Institutions: North Korea Sanctions Regulations section 510.214; Passport E59165201 (China) expires 01 Sep 2025; Identification Number 371326198812157611 (China); a.k.a. 'WAKEMEUPUPUP'; a.k.a. 'FAST4RELEASE'; Linked To: LAZARUS GROUP."`)
 	require.NoError(t, err)
-
-	sdn, err := csvSDNCommentsFile(fd.Name())
+	fd.Seek(0, 0)
+	sdn, err := csvSDNCommentsFile(fd)
 	require.NoError(t, err)
 	require.Len(t, sdn.SDNComments, 1)
 

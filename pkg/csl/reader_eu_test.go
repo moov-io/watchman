@@ -1,6 +1,7 @@
 package csl
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -8,7 +9,11 @@ import (
 )
 
 func TestReadEU(t *testing.T) {
-	euCSL, euCSLMap, err := ReadEUFile(filepath.Join("..", "..", "test", "testdata", "eu_csl.csv"))
+	fd, err := os.Open(filepath.Join("..", "..", "test", "testdata", "eu_csl.csv"))
+	if err != nil {
+		t.Error(err)
+	}
+	euCSL, euCSLMap, err := ParseEU(fd)
 	if err != nil {
 		t.Fatal(err)
 	}

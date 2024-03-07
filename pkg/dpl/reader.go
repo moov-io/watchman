@@ -8,17 +8,14 @@ import (
 	"encoding/csv"
 	"errors"
 	"io"
-	"os"
 )
 
 // Read parses DPL records from a TXT file and populates the associated arrays.
 //
 // For more details on the raw DPL files see https://moov-io.github.io/watchman/file-structure.html
-func Read(path string) ([]*DPL, error) {
-	// open txt file
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, err
+func Read(f io.ReadCloser) ([]*DPL, error) {
+	if f == nil {
+		return nil, errors.New("DPL file is empty or missing")
 	}
 	defer f.Close()
 

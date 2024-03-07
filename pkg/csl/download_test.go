@@ -5,6 +5,7 @@
 package csl
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -22,13 +23,14 @@ func TestDownload(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if file == "" {
+	if len(file) == 0 {
 		t.Fatal("no CSL file")
 	}
-	defer os.RemoveAll(filepath.Dir(file))
 
-	if !strings.EqualFold("csl.csv", filepath.Base(file)) {
-		t.Errorf("unknown file %s", file)
+	for fn := range file {
+		if !strings.EqualFold("csl.csv", filepath.Base(fn)) {
+			t.Errorf("unknown file %s", fn)
+		}
 	}
 }
 
@@ -55,20 +57,22 @@ func TestDownload_initialDir(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if file == "" {
+	if len(file) == 0 {
 		t.Fatal("no CSL file")
 	}
 
-	if strings.EqualFold("csl.csv", filepath.Base(file)) {
-		bs, err := os.ReadFile(file)
-		if err != nil {
-			t.Fatal(err)
+	for fn, fd := range file {
+		if strings.EqualFold("csl.csv", filepath.Base(fn)) {
+			bs, err := io.ReadAll(fd)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if v := string(bs); v != "file=csl.csv" {
+				t.Errorf("csl.csv: %v", v)
+			}
+		} else {
+			t.Fatalf("unknown file: %v", file)
 		}
-		if v := string(bs); v != "file=csl.csv" {
-			t.Errorf("csl.csv: %v", v)
-		}
-	} else {
-		t.Fatalf("unknown file: %v", file)
 	}
 }
 

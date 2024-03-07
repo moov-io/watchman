@@ -7,10 +7,12 @@ package main
 import (
 	"crypto/rand"
 	"fmt"
+	"io"
 	"math/big"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -56,7 +58,11 @@ func BenchmarkSearchHandler(b *testing.B) {
 }
 
 func BenchmarkJaroWinkler(b *testing.B) {
-	results, err := ofac.Read(filepath.Join("..", "..", "test", "testdata", "sdn.csv"))
+	fd, err := os.Open(filepath.Join("..", "..", "test", "testdata", "sdn.csv"))
+	if err != nil {
+		b.Error(err)
+	}
+	results, err := ofac.Read(map[string]io.ReadCloser{"sdn.csv": fd})
 	require.NoError(b, err)
 	require.Len(b, results.SDNs, 7379)
 

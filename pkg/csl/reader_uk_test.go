@@ -2,6 +2,7 @@ package csl
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -9,7 +10,11 @@ import (
 )
 
 func TestReadUKCSL(t *testing.T) {
-	ukCSL, ukCSLMap, err := ReadUKCSLFile(filepath.Join("..", "..", "test", "testdata", "ConList.csv"))
+	fd, err := os.Open(filepath.Join("..", "..", "test", "testdata", "ConList.csv"))
+	if err != nil {
+		t.Error(err)
+	}
+	ukCSL, ukCSLMap, err := ReadUKCSLFile(fd)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,8 +76,13 @@ func TestReadUKCSL(t *testing.T) {
 
 func TestReadUKSanctionsList(t *testing.T) {
 	t.Setenv("WITH_UK_SANCTIONS_LIST", "false")
+
+	fd, err := os.Open(filepath.Join("..", "..", "test", "testdata", "UK_Sanctions_List.ods"))
+	if err != nil {
+		t.Error(err)
+	}
 	// test we don't err on parsing the content
-	totalReport, report, err := ReadUKSanctionsListFile("../../test/testdata/UK_Sanctions_List.ods")
+	totalReport, report, err := ReadUKSanctionsListFile(fd)
 	assert.NoError(t, err)
 
 	// test that we get something more than an empty sanctions list record

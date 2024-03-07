@@ -6,6 +6,7 @@ package csl
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/moov-io/base/log"
@@ -22,15 +23,12 @@ var (
 	euDownloadURL = strx.Or(os.Getenv("EU_CSL_DOWNLOAD_URL"), publicEUDownloadURL)
 )
 
-func DownloadEU(logger log.Logger, initialDir string) (string, error) {
+func DownloadEU(logger log.Logger, initialDir string) (map[string]io.ReadCloser, error) {
 	dl := download.New(logger, download.HTTPClient)
 
 	euCSLNameAndSource := make(map[string]string)
 	euCSLNameAndSource["eu_csl.csv"] = euDownloadURL
 
-	file, err := dl.GetFiles(initialDir, euCSLNameAndSource)
-	if len(file) == 0 || err != nil {
-		return "", fmt.Errorf("eu csl download: %v", err)
-	}
-	return file[0], nil
+	return dl.GetFiles(initialDir, euCSLNameAndSource)
+
 }

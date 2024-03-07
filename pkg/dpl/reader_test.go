@@ -5,12 +5,17 @@
 package dpl
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 )
 
 func TestDPL__read(t *testing.T) {
-	dpls, err := Read(filepath.Join("..", "..", "test", "testdata", "dpl.txt"))
+	fd, err := os.Open(filepath.Join("..", "..", "test", "testdata", "dpl.txt"))
+	if err != nil {
+		t.Error(err)
+	}
+	dpls, err := Read(fd)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -19,7 +24,11 @@ func TestDPL__read(t *testing.T) {
 	}
 
 	// this file is formatted incorrectly for DPL, so we expect all rows to be skipped
-	got, err := Read(filepath.Join("..", "..", "test", "testdata", "sdn.csv"))
+	fd, err = os.Open(filepath.Join("..", "..", "test", "testdata", "sdn.csv"))
+	if err != nil {
+		t.Error(err)
+	}
+	got, err := Read(fd)
 	if err != nil {
 		t.Fatal(err)
 	}

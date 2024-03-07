@@ -6,6 +6,7 @@ package csl
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -24,13 +25,14 @@ func TestUKCSLDownload(t *testing.T) {
 		t.Fatal(err)
 	}
 	fmt.Println("file in test: ", file)
-	if file == "" {
+	if len(file) == 0 {
 		t.Fatal("no UK CSL file")
 	}
-	defer os.RemoveAll(filepath.Dir(file))
 
-	if !strings.EqualFold("ConList.csv", filepath.Base(file)) {
-		t.Errorf("unknown file %s", file)
+	for fn := range file {
+		if !strings.EqualFold("ConList.csv", filepath.Base(fn)) {
+			t.Errorf("unknown file %s", file)
+		}
 	}
 }
 
@@ -55,20 +57,22 @@ func TestUKCSLDownload_initialDir(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if file == "" {
+	if len(file) == 0 {
 		t.Fatal("no UK CSL file")
 	}
 
-	if strings.EqualFold("ConList.csv", filepath.Base(file)) {
-		bs, err := os.ReadFile(file)
-		if err != nil {
-			t.Fatal(err)
+	for fn, fd := range file {
+		if strings.EqualFold("ConList.csv", filepath.Base(fn)) {
+			bs, err := io.ReadAll(fd)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if v := string(bs); v != "file=ConList.csv" {
+				t.Errorf("ConList.csv: %v", v)
+			}
+		} else {
+			t.Fatalf("unknown file: %v", file)
 		}
-		if v := string(bs); v != "file=ConList.csv" {
-			t.Errorf("ConList.csv: %v", v)
-		}
-	} else {
-		t.Fatalf("unknown file: %v", file)
 	}
 }
 
@@ -82,13 +86,14 @@ func TestUKSanctionsListDownload(t *testing.T) {
 		t.Fatal(err)
 	}
 	fmt.Println("file in test: ", file)
-	if file == "" {
+	if len(file) == 0 {
 		t.Fatal("no UK Sanctions List file")
 	}
-	defer os.RemoveAll(filepath.Dir(file))
 
-	if !strings.EqualFold("UK_Sanctions_List.ods", filepath.Base(file)) {
-		t.Errorf("unknown file %s", file)
+	for fn := range file {
+		if !strings.EqualFold("UK_Sanctions_List.ods", filepath.Base(fn)) {
+			t.Errorf("unknown file %s", file)
+		}
 	}
 }
 
@@ -113,19 +118,22 @@ func TestUKSanctionsListDownload_initialDir(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if file == "" {
+
+	if len(file) == 0 {
 		t.Fatal("no UK Sanctions List file")
 	}
 
-	if strings.EqualFold("UK_Sanctions_List.ods", filepath.Base(file)) {
-		_, err := os.ReadFile(file)
-		if err != nil {
-			t.Fatal(err)
+	for fn, fd := range file {
+		if strings.EqualFold("UK_Sanctions_List.ods", filepath.Base(fn)) {
+			_, err := io.ReadAll(fd)
+			if err != nil {
+				t.Fatal(err)
+			}
+			// if v := string(bs); v != "file=UK_Sanctions_List.ods" {
+			// 	t.Errorf("UK_Sanctions_List.ods: %v", v)
+			// }
+		} else {
+			t.Fatalf("unknown file: %v", file)
 		}
-		// if v := string(bs); v != "file=UK_Sanctions_List.ods" {
-		// 	t.Errorf("UK_Sanctions_List.ods: %v", v)
-		// }
-	} else {
-		t.Fatalf("unknown file: %v", file)
 	}
 }

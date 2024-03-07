@@ -5,20 +5,15 @@ import (
 	"encoding/csv"
 	"errors"
 	"io"
-	"os"
 	"strconv"
 	"strings"
 
 	"github.com/knieriem/odf/ods"
 )
 
-func ReadUKCSLFile(path string) ([]*UKCSLRecord, UKCSL, error) {
-	if path == "" {
-		return nil, nil, errors.New("path was empty for ukcsl file")
-	}
-	fd, err := os.Open(path)
-	if err != nil {
-		return nil, nil, err
+func ReadUKCSLFile(fd io.ReadCloser) ([]*UKCSLRecord, UKCSL, error) {
+	if fd == nil {
+		return nil, nil, errors.New("uk CSL file is empty or missing")
 	}
 	defer fd.Close()
 
@@ -200,11 +195,16 @@ func unmarshalUKCSLRecord(csvRecord []string, ukCSLRecord *UKCSLRecord) {
 	}
 }
 
-func ReadUKSanctionsListFile(path string) ([]*UKSanctionsListRecord, UKSanctionsListMap, error) {
-	if path == "" {
-		return nil, nil, errors.New("path was empty for uk sanctions list file")
+func ReadUKSanctionsListFile(f io.ReadCloser) ([]*UKSanctionsListRecord, UKSanctionsListMap, error) {
+	if f == nil {
+		return nil, nil, errors.New("uk sanctions list file is empty or missing")
 	}
-	fd, err := ods.Open(path)
+	defer f.Close()
+	content, err := io.ReadAll(f)
+	if err != nil {
+		return nil, nil, err
+	}
+	fd, err := ods.NewReader(bytes.NewReader(content), int64(len(content)))
 	if err != nil {
 		return nil, nil, err
 	}
