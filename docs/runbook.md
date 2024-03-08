@@ -43,14 +43,6 @@ The URL can be changed, but must end with `dpl.txt` in the final URL path segmen
 
 You can specify the `INITIAL_DATA_DIRECTORY=test/testdata/` environmental variable for Watchman to initially load data from a local filesystem. The data will be refreshed normally, but not downloaded on startup.
 
-## Change SQLite storage location
-
-To change where the SQLite database is stored on disk, set `SQLITE_DB_PATH` as an environmental variable.
-
-## Webhook batch processing size
-
-The size of each batch of watches to be processed (and their webhook called) can be adjusted with `WEBHOOK_BATCH_SIZE=100`. This is intended for performance improvements by using a larger batch size.
-
 ## Alert on stale data
 
 Watchman [reports several Prometheus metrics](./metrics.md) that can be scraped. Operators should be familar with them to monitor and support Watchman.

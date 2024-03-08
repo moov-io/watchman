@@ -27,10 +27,6 @@ jobs:
         go-version: stable
       id: go
 
-    - name: Setup
-      if: runner.os == 'Linux'
-      run: docker-compose up -d mysql
-
     - name: Generate go test Slice
       id: test_split
       uses: hashicorp-forge/go-test-split-action@v1

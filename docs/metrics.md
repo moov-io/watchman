@@ -60,14 +60,3 @@ match_percentages_sum{type="address"} 2277.222222222333
 match_percentages_count{type="address"} 2927
 ```
 
-## MySQL connections
-
-`mysql_connections` represents the current count of idle, active, and open connections to the configured MySQL database.
-
-```
-# HELP mysql_connections How many MySQL connections and what status they're in.
-# TYPE mysql_connections gauge
-mysql_connections{state="idle"} 1
-mysql_connections{state="inuse"} 0
-mysql_connections{state="open"} 1
-```
