@@ -43,13 +43,12 @@ type Downloader struct {
 	Logger log.Logger
 }
 
-// GetFiles will download all provided files, return their filepaths, and store them in a
-// temporary directory and an error otherwise.
+// GetFiles will initiate download of all provided files, return an io.ReadCloser to their content
 //
 // initialDir is an optional filepath to look for files in before attempting to download.
 //
-// Callers are expected to cleanup the temp directory.
-func (dl *Downloader) GetFiles(initialDir string, namesAndSources map[string]string) (map[string]io.ReadCloser, error) {
+// Callers are expected to call the io.Closer interface method when they are done with the file
+func (dl *Downloader) GetFiles(dir string, namesAndSources map[string]string) (map[string]io.ReadCloser, error) {
 	if dl == nil {
 		return nil, errors.New("nil Downloader")
 	}
@@ -61,19 +60,6 @@ func (dl *Downloader) GetFiles(initialDir string, namesAndSources map[string]str
 	}
 
 	// Check the initial directory for files we don't need to download
-	var dir string
-	if initialDir != "" {
-		dir = initialDir // empty, but use it as a directory
-	}
-	// Create a temporary directory for downloads if needed
-	if dir == "" {
-		temp, err := os.MkdirTemp("", "downloader")
-		if err != nil {
-			return nil, fmt.Errorf("downloader: unable to make temp dir: %v", err)
-		}
-		dir = temp
-	}
-
 	localFiles, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, fmt.Errorf("readdir %s: %v", dir, err)
@@ -93,6 +79,7 @@ findfiles:
 				fd, err := os.Open(fn)
 				if err != nil {
 					dl.Logger.Error().LogErrorf("could not read file from %v initialDir: %v", fn, err)
+					fd.Close()
 					continue
 				}
 				mu.Lock()
