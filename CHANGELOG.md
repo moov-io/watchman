@@ -1,3 +1,9 @@
+## v0.28.2 (Released 2024-03-12)
+
+IMPROVEMENTS
+
+- fix: download all files if the initial dir does not exist
+
 ## v0.28.1 (Released 2024-03-12)
 
 IMPROVEMENTS
