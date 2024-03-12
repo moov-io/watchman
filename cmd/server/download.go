@@ -273,6 +273,9 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 		lastDataRefreshFailure.WithLabelValues("SDNs").Set(float64(time.Now().Unix()))
 		stats.Errors = append(stats.Errors, fmt.Errorf("OFAC: %v", err))
 	}
+	if results == nil {
+		results = &ofac.Results{}
+	}
 
 	sdns := precomputeSDNs(results.SDNs, results.Addresses, s.pipe)
 	adds := precomputeAddresses(results.Addresses)
