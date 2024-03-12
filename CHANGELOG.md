@@ -1,3 +1,14 @@
+## v0.28.1 (Released 2024-03-12)
+
+IMPROVEMENTS
+
+- fix: close and cleanup downloaded files after successful parsing
+
+BUILD
+
+- build(deps-dev): bump nokogiri from 1.13.10 to 1.16.2 in /docs
+- chore(deps): update dependency github-pages to v231
+
 ## v0.28.0 (Released 2024-01-29)
 
 ADDITIONS
