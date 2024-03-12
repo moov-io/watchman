@@ -60,10 +60,8 @@ func (dl *Downloader) GetFiles(dir string, namesAndSources map[string]string) (m
 	}
 
 	// Check the initial directory for files we don't need to download
-	localFiles, err := os.ReadDir(dir)
-	if err != nil {
-		return nil, fmt.Errorf("readdir %s: %v", dir, err)
-	}
+	// do not treat an nonexisting directory as error
+	localFiles, _ := os.ReadDir(dir)
 
 	var mu sync.Mutex
 	out := make(map[string]io.ReadCloser)
