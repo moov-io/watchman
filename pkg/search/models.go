@@ -3,9 +3,10 @@ package search
 import "time"
 
 type Entity[T any] struct {
-	Name   string     `json:"name"`
-	Type   EntityType `json:"entityType"`
-	Source SourceList `json:"sourceList"`
+	Name     string     `json:"name"`
+	Type     EntityType `json:"entityType"`
+	Source   SourceList `json:"sourceList"`
+	SourceID string     `json:"sourceID"` // TODO(adam):
 
 	// TODO(adam): What has opensanctions done to normalize and join this data
 	// Review https://www.opensanctions.org/reference/
@@ -44,6 +45,7 @@ var (
 
 type Person struct {
 	Name      string     `json:"name"`
+	AltNames  []string   `json:"altNames"`
 	Gender    Gender     `json:"gender"`
 	BirthDate *time.Time `json:"birthDate"`
 	DeathDate *time.Time `json:"deathDate"`
