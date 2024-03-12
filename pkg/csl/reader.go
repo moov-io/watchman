@@ -4,17 +4,14 @@ import (
 	"encoding/csv"
 	"errors"
 	"io"
-	"os"
 	"strings"
 )
 
-func ReadFile(path string) (*CSL, error) {
-	fd, err := os.Open(path)
-	if err != nil {
-		return nil, err
+func ReadFile(fd io.ReadCloser) (*CSL, error) {
+	if fd == nil {
+		return nil, errors.New("CSL file is empty or missing")
 	}
 	defer fd.Close()
-
 	return Parse(fd)
 }
 

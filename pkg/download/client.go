@@ -22,7 +22,7 @@ import (
 
 var (
 	HTTPClient = &http.Client{
-		Timeout: 15 * time.Second,
+		Timeout: 45 * time.Second,
 	}
 )
 
@@ -43,13 +43,12 @@ type Downloader struct {
 	Logger log.Logger
 }
 
-// GetFiles will download all provided files, return their filepaths, and store them in a
-// temporary directory and an error otherwise.
+// GetFiles will initiate download of all provided files, return an io.ReadCloser to their content
 //
 // initialDir is an optional filepath to look for files in before attempting to download.
 //
-// Callers are expected to cleanup the temp directory.
-func (dl *Downloader) GetFiles(initialDir string, namesAndSources map[string]string) ([]string, error) {
+// Callers are expected to call the io.Closer interface method when they are done with the file
+func (dl *Downloader) GetFiles(dir string, namesAndSources map[string]string) (map[string]io.ReadCloser, error) {
 	if dl == nil {
 		return nil, errors.New("nil Downloader")
 	}
@@ -61,45 +60,35 @@ func (dl *Downloader) GetFiles(initialDir string, namesAndSources map[string]str
 	}
 
 	// Check the initial directory for files we don't need to download
-	var dir string
-	if initialDir != "" {
-		dir = initialDir // empty, but use it as a directory
-	}
-	// Create a temporary directory for downloads if needed
-	if dir == "" {
-		temp, err := os.MkdirTemp("", "downloader")
-		if err != nil {
-			return nil, fmt.Errorf("downloader: unable to make temp dir: %v", err)
-		}
-		dir = temp
-	}
-
 	localFiles, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, fmt.Errorf("readdir %s: %v", dir, err)
 	}
 
 	var mu sync.Mutex
-	var out []string
-
+	out := make(map[string]io.ReadCloser)
 	var wg sync.WaitGroup
 	wg.Add(len(namesAndSources))
+
+findfiles:
 	for name, source := range namesAndSources {
 		// Check if we have the file locally first
-		found := false
-		for i := range localFiles {
-			if strings.EqualFold(filepath.Base(localFiles[i].Name()), name) {
-				found = true
+		for _, file := range localFiles {
+			if strings.EqualFold(filepath.Base(file.Name()), name) {
+				fn := filepath.Join(dir, file.Name())
+				fd, err := os.Open(fn)
+				if err != nil {
+					dl.Logger.Error().LogErrorf("could not read file from %v initialDir: %v", fn, err)
+					fd.Close()
+					continue
+				}
 				mu.Lock()
-				out = append(out, filepath.Join(dir, localFiles[i].Name()))
+				out[name] = fd
 				mu.Unlock()
-				break
+				// file is found, skip downloading
+				wg.Done()
+				continue findfiles
 			}
-		}
-		// Skip downloading this file since we found it
-		if found {
-			wg.Done()
-			continue
 		}
 
 		// Download missing files
@@ -109,17 +98,17 @@ func (dl *Downloader) GetFiles(initialDir string, namesAndSources map[string]str
 			logger := dl.createLogger(filename, downloadURL)
 
 			startTime := time.Now().In(time.UTC)
-			err := dl.retryDownload(dir, filename, downloadURL)
+			content, err := dl.retryDownload(downloadURL)
 			dur := time.Now().In(time.UTC).Sub(startTime)
 
 			if err != nil {
 				logger.Error().LogErrorf("FAILURE after %v to download: %v", dur, err)
-			} else {
-				logger.Info().Logf("successful download after %v", dur)
+				return
 			}
 
+			logger.Info().Logf("successful download after %v", dur)
 			mu.Lock()
-			out = append(out, filepath.Join(dir, filename))
+			out[filename] = content
 			mu.Unlock()
 		}(&wg, name, source)
 	}
@@ -140,41 +129,29 @@ func (dl *Downloader) createLogger(filename, downloadURL string) log.Logger {
 	})
 }
 
-func (dl *Downloader) retryDownload(dir, filename, downloadURL string) error {
+func (dl *Downloader) retryDownload(downloadURL string) (io.ReadCloser, error) {
 	// Allow a couple retries for various sources (some are flakey)
 	for i := 0; i < 3; i++ {
 		req, err := http.NewRequest(http.MethodGet, downloadURL, nil)
 		if err != nil {
-			return dl.Logger.Error().LogErrorf("error building HTTP request: %v", err).Err()
+			return nil, dl.Logger.Error().LogErrorf("error building HTTP request: %v", err).Err()
 		}
 		req.Header.Set("User-Agent", fmt.Sprintf("moov-io/watchman:%v", watchman.Version))
 		// in order to get passed europes 406 (Not Accepted)
 		req.Header.Set("accept-language", "en-US,en;q=0.9")
 
 		resp, err := dl.HTTP.Do(req)
+
 		if err != nil {
 			dl.Logger.Error().LogErrorf("err while doing client request: ", err)
 			time.Sleep(100 * time.Millisecond)
-			continue // retry
+			continue
 		}
-
 		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-			dl.Logger.Error().LogErrorf("we experienced a problem in the dl: %v", resp.StatusCode)
-		}
-
-		// Copy resp.Body into a file in our temp dir
-		fd, err := os.Create(filepath.Join(dir, filename))
-		if err != nil {
 			resp.Body.Close()
-			return fmt.Errorf("attempt %d failed to create file: %v", i, err)
+			continue
 		}
-
-		io.Copy(fd, resp.Body) // copy file contents
-
-		// close the open files
-		fd.Close()
-		resp.Body.Close()
-		return nil // quit after successful download
+		return resp.Body, nil
 	}
-	return nil
+	return nil, errors.New("error max retries reached while trying to obtain file")
 }

@@ -5,7 +5,7 @@
 package csl
 
 import (
-	"fmt"
+	"io"
 	"os"
 
 	"github.com/moov-io/base/log"
@@ -23,28 +23,20 @@ var (
 	ukSanctionsListURL       = strx.Or(os.Getenv("UK_SANCTIONS_LIST_URL"), publicUKSanctionsListURL)
 )
 
-func DownloadUKCSL(logger log.Logger, initialDir string) (string, error) {
+func DownloadUKCSL(logger log.Logger, initialDir string) (map[string]io.ReadCloser, error) {
 	dl := download.New(logger, download.HTTPClient)
 
 	ukCSLNameAndSource := make(map[string]string)
 	ukCSLNameAndSource["ConList.csv"] = ukCSLDownloadURL
 
-	file, err := dl.GetFiles(initialDir, ukCSLNameAndSource)
-	if len(file) == 0 || err != nil {
-		return "", fmt.Errorf("uk csl download: %v", err)
-	}
-	return file[0], nil
+	return dl.GetFiles(initialDir, ukCSLNameAndSource)
 }
 
-func DownloadUKSanctionsList(logger log.Logger, initialDir string) (string, error) {
+func DownloadUKSanctionsList(logger log.Logger, initialDir string) (map[string]io.ReadCloser, error) {
 	dl := download.New(logger, download.HTTPClient)
 
 	ukSanctionsNameAndSource := make(map[string]string)
 	ukSanctionsNameAndSource["UK_Sanctions_List.ods"] = ukSanctionsListURL
 
-	file, err := dl.GetFiles(initialDir, ukSanctionsNameAndSource)
-	if len(file) == 0 || err != nil {
-		return "", fmt.Errorf("uk download: %v", err)
-	}
-	return file[0], nil
+	return dl.GetFiles(initialDir, ukSanctionsNameAndSource)
 }

@@ -14,7 +14,6 @@ import (
 )
 
 func TestCSL(t *testing.T) {
-	t.Skip("CSL is currently broken, looks like they require API access now")
 
 	if testing.Short() {
 		t.Skip("ignorning network test")
@@ -27,7 +26,7 @@ func TestCSL(t *testing.T) {
 	file, err := Download(logger, dir)
 	require.NoError(t, err)
 
-	cslRecords, err := ReadFile(file)
+	cslRecords, err := ReadFile(file["csl.csv"])
 	require.NoError(t, err)
 
 	if len(cslRecords.SSIs) == 0 {

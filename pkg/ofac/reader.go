@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"path/filepath"
 	"strings"
 )
@@ -17,37 +16,39 @@ import (
 // Read will consume the file at path and attempt to parse it was a CSV OFAC file.
 //
 // For more details on the raw OFAC files see https://moov-io.github.io/watchman/file-structure.html
-func Read(path string) (*Results, error) {
-	switch filepath.Base(path) {
-	case "add.csv":
-		res, err := csvAddressFile(path)
-		if err != nil {
-			return res, fmt.Errorf("add.csv: %v", err)
-		}
-		return res, err
+func Read(files map[string]io.ReadCloser) (*Results, error) {
+	res := new(Results)
+	for filename, file := range files {
+		switch filepath.Base(filename) {
+		case "add.csv":
+			err := res.append(csvAddressFile(file))
+			if err != nil {
+				return nil, fmt.Errorf("add.csv: %v", err)
+			}
+		case "alt.csv":
+			err := res.append(csvAlternateIdentityFile(file))
+			if err != nil {
+				return nil, fmt.Errorf("add.csv: %v", err)
+			}
 
-	case "alt.csv":
-		res, err := csvAlternateIdentityFile(path)
-		if err != nil {
-			return res, fmt.Errorf("alt.csv: %v", err)
-		}
-		return res, err
+		case "sdn.csv":
+			err := res.append(csvSDNFile(file))
+			if err != nil {
+				return nil, fmt.Errorf("add.csv: %v", err)
+			}
 
-	case "sdn.csv":
-		res, err := csvSDNFile(path)
-		if err != nil {
-			return res, fmt.Errorf("sdn.csv: %v", err)
-		}
-		return res, err
+		case "sdn_comments.csv":
+			err := res.append(csvSDNCommentsFile(file))
+			if err != nil {
+				return nil, fmt.Errorf("add.csv: %v", err)
+			}
 
-	case "sdn_comments.csv":
-		res, err := csvSDNCommentsFile(path)
-		if err != nil {
-			return res, fmt.Errorf("sdn_comments.csv: %v", err)
+		default:
+			file.Close()
+			return nil, fmt.Errorf("error: file %s does not have a handler for processing", filename)
 		}
-		return res, err
 	}
-	return nil, nil
+	return res, nil
 }
 
 type Results struct {
@@ -64,14 +65,19 @@ type Results struct {
 	SDNComments []*SDNComments `json:"sdnComments"`
 }
 
-func csvAddressFile(path string) (*Results, error) {
-	// Open CSV file
-	f, err := os.Open(path)
+func (r *Results) append(rr *Results, err error) error {
 	if err != nil {
-		return nil, err
+		return err
 	}
-	defer f.Close()
+	r.Addresses = append(r.Addresses, rr.Addresses...)
+	r.AlternateIdentities = append(r.AlternateIdentities, rr.AlternateIdentities...)
+	r.SDNs = append(r.SDNs, rr.SDNs...)
+	r.SDNComments = append(r.SDNComments, rr.SDNComments...)
+	return nil
+}
 
+func csvAddressFile(f io.ReadCloser) (*Results, error) {
+	defer f.Close()
 	var out []*Address
 
 	// Read File into a Variable
@@ -108,14 +114,8 @@ func csvAddressFile(path string) (*Results, error) {
 	return &Results{Addresses: out}, nil
 }
 
-func csvAlternateIdentityFile(path string) (*Results, error) {
-	// Open CSV file
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
+func csvAlternateIdentityFile(f io.ReadCloser) (*Results, error) {
 	defer f.Close()
-
 	var out []*AlternateIdentity
 
 	// Read File into a Variable
@@ -150,14 +150,8 @@ func csvAlternateIdentityFile(path string) (*Results, error) {
 	return &Results{AlternateIdentities: out}, nil
 }
 
-func csvSDNFile(path string) (*Results, error) {
-	// Open CSV file
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
+func csvSDNFile(f io.ReadCloser) (*Results, error) {
 	defer f.Close()
-
 	var out []*SDN
 
 	// Read File into a Variable
@@ -199,14 +193,8 @@ func csvSDNFile(path string) (*Results, error) {
 	return &Results{SDNs: out}, nil
 }
 
-func csvSDNCommentsFile(path string) (*Results, error) {
-	// Open CSV file
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
+func csvSDNCommentsFile(f io.ReadCloser) (*Results, error) {
 	defer f.Close()
-
 	// Read File into a Variable
 	r := csv.NewReader(f)
 	r.LazyQuotes = true

@@ -7,8 +7,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -25,7 +27,11 @@ var (
 
 func init() {
 	// Set SDN Comments
-	ofacResults, err := ofac.Read(filepath.Join("..", "..", "test", "testdata", "sdn_comments.csv"))
+	fd, err := os.Open(filepath.Join("..", "..", "test", "testdata", "sdn_comments.csv"))
+	if err != nil {
+		panic(fmt.Sprintf("%v", err))
+	}
+	ofacResults, err := ofac.Read(map[string]io.ReadCloser{"sdn_comments.csv": fd})
 	if err != nil {
 		panic(fmt.Sprintf("ERROR reading sdn_comments.csv: %v", err))
 	}

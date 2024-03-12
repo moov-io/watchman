@@ -6,6 +6,7 @@ package csl
 
 import (
 	"fmt"
+	"io"
 	"net/url"
 	"os"
 
@@ -19,22 +20,18 @@ var (
 	usDownloadURL       = strx.Or(os.Getenv("CSL_DOWNLOAD_TEMPLATE"), os.Getenv("US_CSL_DOWNLOAD_URL"), publicUSDownloadURL)
 )
 
-func Download(logger log.Logger, initialDir string) (string, error) {
+func Download(logger log.Logger, initialDir string) (map[string]io.ReadCloser, error) {
 	dl := download.New(logger, download.HTTPClient)
 
 	cslURL, err := buildDownloadURL(usDownloadURL)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	cslNameAndSource := make(map[string]string)
 	cslNameAndSource["csl.csv"] = cslURL
 
-	file, err := dl.GetFiles(initialDir, cslNameAndSource)
-	if len(file) == 0 || err != nil {
-		return "", fmt.Errorf("csl download: %v", err)
-	}
-	return file[0], nil
+	return dl.GetFiles(initialDir, cslNameAndSource)
 }
 
 func buildDownloadURL(urlStr string) (string, error) {

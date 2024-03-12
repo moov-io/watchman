@@ -13,7 +13,11 @@ import (
 )
 
 func TestRead(t *testing.T) {
-	csl, err := ReadFile(filepath.Join("..", "..", "test", "testdata", "csl.csv"))
+	fd, err := os.Open(filepath.Join("..", "..", "test", "testdata", "csl.csv"))
+	if err != nil {
+		t.Error(err)
+	}
+	csl, err := ReadFile(fd)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -52,8 +56,8 @@ func TestRead_missingRow(t *testing.T) {
 
 	_, err = fd.WriteString(`  \n invalid  \n  \n`)
 	require.NoError(t, err)
-
-	resp, err := ReadFile(fd.Name())
+	fd.Seek(0, 0)
+	resp, err := ReadFile(fd)
 	require.NoError(t, err)
 
 	require.Len(t, resp.ELs, 0)
@@ -62,7 +66,12 @@ func TestRead_missingRow(t *testing.T) {
 }
 
 func TestRead_invalidRow(t *testing.T) {
-	csl, err := ReadFile(filepath.Join("..", "..", "test", "testdata", "invalidFiles", "csl.csv"))
+
+	fd, err := os.Open(filepath.Join("..", "..", "test", "testdata", "invalidFiles", "csl.csv"))
+	if err != nil {
+		t.Error(err)
+	}
+	csl, err := ReadFile(fd)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -394,9 +403,9 @@ func Test__Issue326EL(t *testing.T) {
 	if err := fd.Sync(); err != nil {
 		t.Fatal(err)
 	}
-
+	fd.Seek(0, 0)
 	// read the line back
-	csl, err := ReadFile(fd.Name())
+	csl, err := ReadFile(fd)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -452,8 +461,11 @@ func Test_expandProgramsList(t *testing.T) {
 func TestCSL__UniqueIDs(t *testing.T) {
 	// CSL datafiles have added a unique identifier as the first column.
 	// We need verify the old and new file formats can be parsed.
-
-	records, err := ReadFile(filepath.Join("..", "..", "test", "testdata", "csl-unique-ids.csv"))
+	fd, err := os.Open(filepath.Join("..", "..", "test", "testdata", "csl-unique-ids.csv"))
+	if err != nil {
+		t.Error(err)
+	}
+	records, err := ReadFile(fd)
 	if err != nil {
 		t.Fatal(err)
 	}

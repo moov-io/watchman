@@ -5,6 +5,7 @@
 package dpl
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -22,13 +23,13 @@ func TestDownloader(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if file == "" {
+	if len(file) == 0 {
 		t.Fatal("no DPL file")
 	}
-	defer os.RemoveAll(filepath.Dir(file))
-
-	if !strings.EqualFold("dpl.txt", filepath.Base(file)) {
-		t.Errorf("unknown file %s", file)
+	for filename := range file {
+		if !strings.EqualFold("dpl.txt", filepath.Base(filename)) {
+			t.Errorf("unknown file %s", file)
+		}
 	}
 }
 
@@ -54,19 +55,20 @@ func TestDownloader__initialDir(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if file == "" {
+	if len(file) == 0 {
 		t.Fatal("no DPL file")
 	}
-
-	if strings.EqualFold("dpl.txt", filepath.Base(file)) {
-		bs, err := os.ReadFile(file)
-		if err != nil {
-			t.Fatal(err)
+	for fn, fd := range file {
+		if strings.EqualFold("dpl.txt", filepath.Base(fn)) {
+			bs, err := io.ReadAll(fd)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if v := string(bs); v != "file=dpl.txt" {
+				t.Errorf("dpl.txt: %v", v)
+			}
+		} else {
+			t.Fatalf("unknown file: %v", file)
 		}
-		if v := string(bs); v != "file=dpl.txt" {
-			t.Errorf("dpl.txt: %v", v)
-		}
-	} else {
-		t.Fatalf("unknown file: %v", file)
 	}
 }
