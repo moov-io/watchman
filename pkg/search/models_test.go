@@ -23,6 +23,7 @@ func TestEntityJSON(t *testing.T) {
   "name": "",
   "entityType": "",
   "sourceList": "",
+  "sourceID": "",
   "person": null,
   "business": null,
   "organization": null,
