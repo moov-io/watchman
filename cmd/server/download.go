@@ -6,22 +6,18 @@ package main
 
 import (
 	"bytes"
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
 	"os"
 	"strings"
 	"time"
 
-	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/pkg/csl"
 	"github.com/moov-io/watchman/pkg/dpl"
 	"github.com/moov-io/watchman/pkg/ofac"
 
-	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -110,7 +106,7 @@ func (ss *DownloadStats) MarshalJSON() ([]byte, error) {
 
 // periodicDataRefresh will forever block for interval's duration and then download and reparse the data.
 // Download stats are recorded as part of a successful re-download and parse.
-func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo downloadRepository, updates chan *DownloadStats) {
+func (s *searcher) periodicDataRefresh(interval time.Duration, updates chan *DownloadStats) {
 	if interval == 0*time.Second {
 		s.logger.Logf("not scheduling periodic refreshing duration=%v", interval)
 		return
@@ -123,7 +119,6 @@ func (s *searcher) periodicDataRefresh(interval time.Duration, downloadRepo down
 				s.logger.Info().Logf("ERROR: refreshing data: %v", err)
 			}
 		} else {
-			downloadRepo.recordStats(stats)
 			if s.logger != nil {
 				s.logger.Info().With(log.Fields{
 					// OFAC
@@ -449,86 +444,4 @@ func lastRefresh(dir string) time.Time {
 		}
 	}
 	return oldest.In(time.UTC)
-}
-
-func addDownloadRoutes(logger log.Logger, r *mux.Router, repo downloadRepository) {
-	r.Methods("GET").Path("/downloads").HandlerFunc(getLatestDownloads(logger, repo))
-}
-
-func getLatestDownloads(logger log.Logger, repo downloadRepository) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w = wrapResponseWriter(logger, w, r)
-
-		limit := extractSearchLimit(r)
-		downloads, err := repo.latestDownloads(limit)
-		if err != nil {
-			moovhttp.Problem(w, err)
-			return
-		}
-
-		logger.Info().With(log.Fields{
-			"requestID": log.String(moovhttp.GetRequestID(r)),
-		}).Log("get latest downloads")
-
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(downloads); err != nil {
-			moovhttp.Problem(w, err)
-			return
-		}
-	}
-}
-
-type downloadRepository interface {
-	latestDownloads(limit int) ([]DownloadStats, error)
-	recordStats(stats *DownloadStats) error
-}
-
-type sqliteDownloadRepository struct {
-	db     *sql.DB
-	logger log.Logger
-}
-
-func (r *sqliteDownloadRepository) close() error {
-	return r.db.Close()
-}
-
-func (r *sqliteDownloadRepository) recordStats(stats *DownloadStats) error {
-	if stats == nil {
-		return errors.New("recordStats: nil downloadStats")
-	}
-
-	query := `insert into download_stats (downloaded_at, sdns, alt_names, addresses, sectoral_sanctions, denied_persons, bis_entities) values (?, ?, ?, ?, ?, ?, ?);`
-	stmt, err := r.db.Prepare(query)
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(stats.RefreshedAt, stats.SDNs, stats.Alts, stats.Addresses, stats.SectoralSanctions, stats.DeniedPersons, stats.BISEntities)
-	return err
-}
-
-func (r *sqliteDownloadRepository) latestDownloads(limit int) ([]DownloadStats, error) {
-	query := `select downloaded_at, sdns, alt_names, addresses, sectoral_sanctions, denied_persons, bis_entities from download_stats order by downloaded_at desc limit ?;`
-	stmt, err := r.db.Prepare(query)
-	if err != nil {
-		return nil, err
-	}
-	defer stmt.Close()
-
-	rows, err := stmt.Query(limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var downloads []DownloadStats
-	for rows.Next() {
-		var dl DownloadStats
-		if err := rows.Scan(&dl.RefreshedAt, &dl.SDNs, &dl.Alts, &dl.Addresses, &dl.SectoralSanctions, &dl.DeniedPersons, &dl.BISEntities); err == nil {
-			downloads = append(downloads, dl)
-		}
-	}
-	return downloads, rows.Err()
 }

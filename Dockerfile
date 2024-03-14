@@ -1,22 +1,18 @@
-FROM golang:1.21-bookworm as backend
-WORKDIR /go/src/github.com/moov-io/watchman
-RUN apt-get update && apt-get upgrade -y && apt-get install make gcc g++
-COPY . .
+FROM golang:alpine as backend
+WORKDIR /src
+COPY . /src
 RUN go mod download
-RUN make build-server
+RUN CGO_ENABLED=0 go build -o ./bin/server /src/cmd/server
 
-FROM node:21-bookworm as frontend
+FROM node:21-alpine as frontend
 COPY webui/ /watchman/
 WORKDIR /watchman/
 RUN npm install --legacy-peer-deps
 RUN npm run build
 
-FROM debian:stable-slim
+FROM alpine:latest
 LABEL maintainer="Moov <oss@moov.io>"
-
-RUN apt-get update && apt-get upgrade -y && apt-get install -y ca-certificates
-COPY --from=backend /go/src/github.com/moov-io/watchman/bin/server /bin/server
-
+COPY --from=backend /src/bin/server /bin/server
 COPY --from=frontend /watchman/build/ /watchman/
 ENV WEB_ROOT=/watchman/
 
