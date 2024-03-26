@@ -1,4 +1,4 @@
-FROM golang:1.21-bookworm as backend
+FROM golang:1.22-bookworm as backend
 WORKDIR /go/src/github.com/moov-io/watchman
 RUN apt-get update && apt-get upgrade -y && apt-get install make gcc g++
 COPY . .
