@@ -4,7 +4,7 @@ VERSION := $(shell grep -Eo '(v[0-9]+[\.][0-9]+[\.][0-9]+(-[a-zA-Z0-9]*)?)' vers
 .PHONY: run build build-server docker release check test
 
 run:
-	CGO_ENABLED=1 go run github.com/moov-io/watchman/cmd/server
+	CGO_ENABLED=0 go run github.com/moov-io/watchman/cmd/server
 
 build: build-server build-batchsearch build-watchmantest
 ifeq ($(OS),Windows_NT)
@@ -14,7 +14,7 @@ else
 endif
 
 build-server:
-	CGO_ENABLED=1 go build -o ./bin/server github.com/moov-io/watchman/cmd/server
+	CGO_ENABLED=0 go build -o ./bin/server github.com/moov-io/watchman/cmd/server
 
 build-batchsearch:
 	CGO_ENABLED=0 go build -o ./bin/batchsearch github.com/moov-io/watchman/cmd/batchsearch
@@ -63,9 +63,9 @@ endif
 
 dist: clean build
 ifeq ($(OS),Windows_NT)
-	CGO_ENABLED=1 GOOS=windows go build -o bin/watchman.exe github.com/moov-io/watchman/cmd/server
+	CGO_ENABLED=0 GOOS=windows go build -o bin/watchman.exe github.com/moov-io/watchman/cmd/server
 else
-	CGO_ENABLED=1 GOOS=$(PLATFORM) go build -o bin/watchman-$(PLATFORM)-amd64 github.com/moov-io/watchman/cmd/server
+	CGO_ENABLED=0 GOOS=$(PLATFORM) go build -o bin/watchman-$(PLATFORM)-amd64 github.com/moov-io/watchman/cmd/server
 endif
 
 docker: clean docker-hub docker-openshift docker-static docker-watchmantest

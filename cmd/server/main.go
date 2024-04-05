@@ -20,11 +20,11 @@ import (
 	"time"
 
 	"github.com/moov-io/base/admin"
+
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/base/http/bind"
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman"
-	"github.com/moov-io/watchman/internal/database"
 
 	"github.com/gorilla/mux"
 )
@@ -65,18 +65,6 @@ func main() {
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
 		errs <- fmt.Errorf("signal: %v", <-c)
-	}()
-
-	// Setup database connection
-	db, err := database.New(logger, os.Getenv("DATABASE_TYPE"))
-	if err != nil {
-		logger.Logf("database problem: %v", err)
-		os.Exit(1)
-	}
-	defer func() {
-		if err := db.Close(); err != nil {
-			logger.LogError(err)
-		}
 	}()
 
 	// Setup business HTTP routes
@@ -139,10 +127,6 @@ func main() {
 	}()
 	defer adminServer.Shutdown()
 
-	// Setup download repository
-	downloadRepo := &sqliteDownloadRepository{db, logger}
-	defer downloadRepo.close()
-
 	var pipeline *pipeliner
 	if debug, err := strconv.ParseBool(os.Getenv("DEBUG_NAME_PIPELINE")); debug && err == nil {
 		pipeline = newPipeliner(logger)
@@ -161,10 +145,6 @@ func main() {
 		logger.LogErrorf("ERROR: failed to download/parse initial data: %v", err)
 		os.Exit(1)
 	} else {
-		if err := downloadRepo.recordStats(stats); err != nil {
-			logger.LogErrorf("ERROR: failed to record download stats: %v", err)
-			os.Exit(1)
-		}
 		logger.Info().With(log.Fields{
 			"SDNs":             log.Int(stats.SDNs),
 			"AltNames":         log.Int(stats.Alts),
@@ -189,18 +169,17 @@ func main() {
 	// Setup periodic download and re-search
 	updates := make(chan *DownloadStats)
 	dataRefreshInterval = getDataRefreshInterval(logger, os.Getenv("DATA_REFRESH_INTERVAL"))
-	go searcher.periodicDataRefresh(dataRefreshInterval, downloadRepo, updates)
+	go searcher.periodicDataRefresh(dataRefreshInterval, updates)
 	go handleDownloadStats(updates, func(stats *DownloadStats) {
 		callDownloadWebook(logger, stats)
 	})
 
 	// Add manual data refresh endpoint
-	adminServer.AddHandler(manualRefreshPath, manualRefreshHandler(logger, searcher, updates, downloadRepo))
+	adminServer.AddHandler(manualRefreshPath, manualRefreshHandler(logger, searcher, updates))
 
 	// Add searcher for HTTP routes
 	addSDNRoutes(logger, router, searcher)
 	addSearchRoutes(logger, router, searcher)
-	addDownloadRoutes(logger, router, downloadRepo)
 	addValuesRoutes(logger, router, searcher)
 
 	// Setup our web UI to be served as well

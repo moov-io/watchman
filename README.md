@@ -199,7 +199,6 @@ PONG
 | `UNMATCHED_INDEX_TOKEN_WEIGHT` | Weight of penalty applied to scores when part of the indexed name isn't matched. | 0.15    |
 | `JARO_WINKLER_BOOST_THRESHOLD` | Jaro-Winkler boost threshold. | 0.7 |
 | `JARO_WINKLER_PREFIX_SIZE` | Jaro-Winkler prefix size. | 4 |
-| `WEBHOOK_BATCH_SIZE` | How many watches to read from database per batch of async searches. | 100 |
 | `LOG_FORMAT` | Format for logging lines to be written as. | Options: `json`, `plain` - Default: `plain` |
 | `LOG_LEVEL` | Level of logging to emit. | Options: `trace`, `info` - Default: `info` |
 | `BASE_PATH` | HTTP path to serve API and web UI from. | `/` |
@@ -207,7 +206,6 @@ PONG
 | `HTTP_ADMIN_BIND_ADDRESS` | Address to bind admin HTTP server on. This overrides the command-line flag `-admin.addr`. | Default: `:9094` |
 | `HTTPS_CERT_FILE` | Filepath containing a certificate (or intermediate chain) to be served by the HTTP server. Requires all traffic be over secure HTTP. | Empty |
 | `HTTPS_KEY_FILE`  | Filepath of a private key matching the leaf certificate from `HTTPS_CERT_FILE`. | Empty |
-| `DATABASE_TYPE` | Which database option to use (Options: `sqlite`, `mysql`). | Default: `sqlite` |
 | `WEB_ROOT` | Directory to serve web UI from. | Default: `webui/` |
 | `WEBHOOK_MAX_WORKERS` | Maximum number of workers processing webhooks. | Default: 10 |
 | `DOWNLOAD_WEBHOOK_URL` | Optional webhook URL called when data downloads / refreshes occur. | Empty |
@@ -228,27 +226,6 @@ PONG
 | `KEEP_STOPWORDS` | Boolean to keep stopwords in names. | `false` |
 | `DEBUG_NAME_PIPELINE` | Boolean to print debug messages for each name (SDN, SSI) processing step. | `false` |
 
-#### Storage
-
-Based on `DATABASE_TYPE`, the following environmental variables will be read to configure connections for a specific database.
-
-##### MySQL
-
-- `MYSQL_ADDRESS`: TCP address for connecting to the MySQL server. (example: `tcp(hostname:3306)`)
-- `MYSQL_DATABASE`: Name of database to connect into.
-- `MYSQL_PASSWORD`: Password of user account for authentication.
-- `MYSQL_USER`: Username used for authentication.
-
-Refer to the MySQL driver documentation for [connection parameters](https://github.com/go-sql-driver/mysql#dsn-data-source-name).
-
-- `MYSQL_TIMEOUT`: Timeout parameter specified on (DSN) data source name. (Default: `30s`)
-
-##### SQLite
-
-- `SQLITE_DB_PATH`: Local filepath location for the SQLite database. (Default: `watchman.db`)
-
-Refer to the SQLite driver documentation for [connection parameters](https://github.com/mattn/go-sqlite3#connection-string).
-
 ##### Downloads
 
 Moov Watchman supports sending a webhook (`POST` HTTP Request) when the underlying data is refreshed. The body will be the count of entities indexed for each list. The body will be in JSON format and the same schema as the manual data refresh endpoint.
@@ -268,8 +245,6 @@ Moov Watchman supports sending a webhook periodically with a free-form name of a
 - `last_data_refresh_count`: Count of records for a given sanction or entity list.
 - `match_percentages` A histogram which holds the match percentages with a label (`type`) of searches.
    - `type`: Can be address, q, remarksID, name, altName
-- `mysql_connections`: Number of MySQL connections and their statuses.
-- `sqlite_connections`: Number of SQLite connections and their statuses.
 
 ### Data persistence
 

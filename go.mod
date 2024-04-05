@@ -7,12 +7,9 @@ require (
 	github.com/antihax/optional v1.0.0
 	github.com/bbalet/stopwords v1.0.0
 	github.com/go-kit/kit v0.13.0
-	github.com/go-sql-driver/mysql v1.7.1
 	github.com/gorilla/mux v1.8.1
 	github.com/jaswdr/faker v1.19.1
 	github.com/knieriem/odf v0.1.0
-	github.com/lopezator/migrator v0.3.1
-	github.com/mattn/go-sqlite3 v1.14.18
 	github.com/moov-io/base v0.48.2
 	github.com/pariz/gountries v0.1.6
 	github.com/prometheus/client_golang v1.17.0
@@ -37,7 +34,6 @@ require (
 	github.com/prometheus/common v0.45.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/rickar/cal/v2 v2.1.13 // indirect
-	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
