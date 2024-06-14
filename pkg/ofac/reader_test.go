@@ -120,6 +120,51 @@ func TestSDNComments(t *testing.T) {
 	}
 }
 
+func TestSDN__remarks(t *testing.T) {
+	// individual
+	remarks := splitRemarks("DOB 12 Oct 1972; POB Corozal, Belize; Passport 0291622 (Belize); Linked To: D'S SUPERMARKET COMPANY LTD.")
+	expected := []string{"12 Oct 1972"}
+	require.ElementsMatch(t, expected, findRemarkValues(remarks, "DOB"))
+	expected = []string{"0291622 (Belize)"}
+	require.ElementsMatch(t, expected, findRemarkValues(remarks, "Passport"))
+
+	// Contact info
+	remarks = splitRemarks("Website www.nitc.co.ir; Email Address info@nitc.co.ir; alt. Email Address administrator@nitc.co.ir; IFCA Determination - Involved in the Shipping Sector; Additional Sanctions Information - Subject to Secondary Sanctions; Telephone (98)(21)(66153220); Telephone (98)(21)(23803202); Telephone (98)(21)(23803303); Telephone (98)(21)(66153224); Telephone (98)(21)(23802230); Telephone (98)(9121115315);  Telephone (98)(9128091642); Telephone (98)(9127389031); Fax (98)(21)(22224537); Fax (98)(21)(23803318); Fax (98)(21)(22013392); Fax (98)(21)(22058763).")
+	expected = []string{"www.nitc.co.ir"}
+	require.ElementsMatch(t, expected, findRemarkValues(remarks, "Website"))
+	expected = []string{"info@nitc.co.ir", "administrator@nitc.co.ir"}
+	require.ElementsMatch(t, expected, findRemarkValues(remarks, "Email Address"))
+	expected = []string{"(98)(21)(66153220)", "(98)(21)(23803202)", "(98)(21)(23803303)", "(98)(21)(66153224)", "(98)(21)(23802230)", "(98)(9121115315)", "(98)(9128091642)", "(98)(9127389031)"}
+	require.ElementsMatch(t, expected, findRemarkValues(remarks, "Telephone"))
+	expected = []string{"(98)(21)(22224537)", "(98)(21)(23803318)", "(98)(21)(22013392)", "(98)(21)(22058763)"}
+	require.ElementsMatch(t, expected, findRemarkValues(remarks, "Fax"))
+
+	// Vessel
+	remarks = splitRemarks("Former Vessel Flag Malta; alt. Former Vessel Flag Tuvalu; alt. Former Vessel Flag None Identified; alt. Former Vessel Flag Tanzania; Additional Sanctions Information - Subject to Secondary Sanctions; Vessel Registration Identification IMO 9187629; MMSI 572469210; Linked To: NATIONAL IRANIAN TANKER COMPANY.")
+	expected = []string{"9187629"}
+	require.ElementsMatch(t, expected, findRemarkValues(remarks, "Vessel Registration Identification IMO"))
+	expected = []string{"572469210"}
+	require.ElementsMatch(t, expected, findRemarkValues(remarks, "MMSI"))
+
+	// Aircraft
+	remarks = splitRemarks("Aircraft Construction Number (also called L/N or S/N or F/N) 8401; Aircraft Manufacture Date 1992; Aircraft Model IL76-TD; Aircraft Operator YAS AIR; Aircraft Manufacturer's Serial Number (MSN) 1023409321; Linked To: POUYA AIR.")
+	expected = []string{"1992"}
+	require.ElementsMatch(t, expected, findRemarkValues(remarks, "Manufacture Date"))
+	expected = []string{"IL76-TD"}
+	require.ElementsMatch(t, expected, findRemarkValues(remarks, "Model"))
+	expected = []string{"(MSN) 1023409321"}
+	require.ElementsMatch(t, expected, findRemarkValues(remarks, "Serial Number"))
+
+	t.Run("error conditions", func(t *testing.T) {
+		remarks = splitRemarks("")
+		require.Len(t, findRemarkValues(remarks, ""), 0)
+		require.Len(t, findRemarkValues(remarks, "DOB"), 0)
+
+		remarks = splitRemarks("  ;  ;;;;;  ;   ;")
+		require.Len(t, findRemarkValues(remarks, "DOB"), 0)
+	})
+}
+
 func TestSDNComments_CryptoCurrencies(t *testing.T) {
 	fd, err := os.CreateTemp("", "sdn-comments")
 	require.NoError(t, err)
