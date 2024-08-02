@@ -117,5 +117,5 @@ jobs:
     - name: Test Cleanup
       if: runner.os == 'Linux' && always()
       run: |
-        docker-compose logs
+        docker compose logs
         make clean-integration
