@@ -107,7 +107,7 @@ cover-web:
 	go tool cover -html=cover.out
 
 clean-integration:
-	docker-compose kill && docker-compose rm -v -f
+	docker compose kill && docker compose rm -v -f
 
 # TODO: this test is working but due to a default timeout on the admin server we get an empty reply
 # for now this shouldn't hold up out CI pipeline
