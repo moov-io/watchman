@@ -47,10 +47,10 @@ func TestAddressSimilarity(t *testing.T) {
 			addr1: baseAddress,
 			addr2: func() Address {
 				a := baseAddress
-				a.StreetName = "MAINN"
+				a.StreetName = "FLOWER"
 				return a
 			}(),
-			expected: 0.99,
+			expected: 0.75,
 		},
 		{
 			name:  "Different ZIPCode",
@@ -67,10 +67,10 @@ func TestAddressSimilarity(t *testing.T) {
 			addr1: baseAddress,
 			addr2: func() Address {
 				a := baseAddress
-				a.City = "OTHERTOWN"
+				a.City = "CEDAR BEVERTON"
 				return a
 			}(),
-			expected: 0.967,
+			expected: 0.94,
 		},
 		{
 			name:  "Different State",
