@@ -1,4 +1,4 @@
-## v0.29.0 (Released 2024-10-07)
+## v0.29.1 (Released 2024-10-07)
 
 IMPROVEMENTS
 
