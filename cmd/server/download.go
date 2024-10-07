@@ -6,6 +6,7 @@ package main
 
 import (
 	"bytes"
+	"cmp"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,6 +15,7 @@ import (
 	"time"
 
 	"github.com/moov-io/base/log"
+	"github.com/moov-io/base/strx"
 	"github.com/moov-io/watchman/pkg/csl"
 	"github.com/moov-io/watchman/pkg/dpl"
 	"github.com/moov-io/watchman/pkg/ofac"
@@ -284,12 +286,15 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	}
 	dps := precomputeDPs(deniedPersons, s.pipe)
 
-	euConsolidatedList, err := euCSLRecords(s.logger, initialDir)
-	if err != nil {
-		lastDataRefreshFailure.WithLabelValues("EUCSL").Set(float64(time.Now().Unix()))
-		stats.Errors = append(stats.Errors, fmt.Errorf("EUCSL: %v", err))
+	var euConsolidatedList []*csl.EUCSLRecord
+	withEUScreeningList := cmp.Or(os.Getenv("WITH_EU_SCREENING_LIST"), "true")
+	if strx.Yes(withEUScreeningList) {
+		euConsolidatedList, err = euCSLRecords(s.logger, initialDir)
+		if err != nil {
+			lastDataRefreshFailure.WithLabelValues("EUCSL").Set(float64(time.Now().Unix()))
+			stats.Errors = append(stats.Errors, fmt.Errorf("EUCSL: %v", err))
+		}
 	}
-
 	euCSLs := precomputeCSLEntities[csl.EUCSLRecord](euConsolidatedList, s.pipe)
 
 	ukConsolidatedList, err := ukCSLRecords(s.logger, initialDir)
@@ -301,8 +306,8 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	ukCSLs := precomputeCSLEntities[csl.UKCSLRecord](ukConsolidatedList, s.pipe)
 
 	var ukSLs []*Result[csl.UKSanctionsListRecord]
-	withSanctionsList := os.Getenv("WITH_UK_SANCTIONS_LIST")
-	if strings.ToLower(withSanctionsList) == "true" {
+	withUKSanctionsList := os.Getenv("WITH_UK_SANCTIONS_LIST")
+	if strings.ToLower(withUKSanctionsList) == "true" {
 		ukSanctionsList, err := ukSanctionsListRecords(s.logger, initialDir)
 		if err != nil {
 			lastDataRefreshFailure.WithLabelValues("UKSanctionsList").Set(float64(time.Now().Unix()))
