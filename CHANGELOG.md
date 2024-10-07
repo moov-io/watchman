@@ -1,3 +1,36 @@
+## v0.29.0 (Released 2024-10-07)
+
+IMPROVEMENTS
+
+- feat: read WITH_EU_SCREENING_LIST as option to skip EU CSL list
+- feat: usaddress: add Similarity function
+- remove MySQL and sqlite dependencies, resolves #468
+- remove bloat not needed any more when we build with CGO_ENABLED=0
+- remove database from dependencies and build system
+
+BUILD
+
+- build(deps): bump body-parser and express in /webui
+- build(deps): bump braces from 3.0.2 to 3.0.3 in /webui
+- build(deps): bump ejs from 3.1.9 to 3.1.10 in /webui
+- build(deps): bump express from 4.18.2 to 4.19.2 in /webui
+- build(deps): bump follow-redirects from 1.15.4 to 1.15.6 in /webui
+- build(deps): bump google.golang.org/protobuf from 1.31.0 to 1.33.0
+- build(deps): bump micromatch from 4.0.5 to 4.0.8 in /webui
+- build(deps): bump rexml from 3.2.6 to 3.3.6 in /docs
+- build(deps): bump rollup from 2.79.1 to 2.79.2 in /webui
+- build(deps): bump webpack from 5.89.0 to 5.95.0 in /webui
+- build(deps): bump webpack-dev-middleware from 5.3.3 to 5.3.4 in /webui
+- build(deps): bump webrick from 1.8.1 to 1.8.2 in /docs
+- build(deps-dev): bump nokogiri from 1.16.2 to 1.16.5 in /docs
+- build: convert docker-compose to docker compose
+- build: switch from docker-compose
+- chore(deps): update dependency github-pages to v232
+- fix(deps): update dependency express to v4.19.2 [security]
+- fix(deps): update react monorepo to v18.3.1
+- fix(deps): updates `body-parser` from 1.20.2 to 1.20.3
+- fix(deps): updates `express` from 4.19.2 to 4.21.0
+
 ## v0.28.2 (Released 2024-03-12)
 
 IMPROVEMENTS
