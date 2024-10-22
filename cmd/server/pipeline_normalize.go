@@ -6,6 +6,7 @@ package main
 
 import (
 	"strings"
+	"sync"
 	"unicode"
 
 	"golang.org/x/text/runes"
@@ -34,7 +35,35 @@ func precompute(s string) string {
 	trimmed := strings.TrimSpace(strings.ToLower(punctuationReplacer.Replace(s)))
 
 	// UTF-8 normalization
-	t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC) // Mn: nonspacing marks
-	result, _, _ := transform.String(t, trimmed)
+	chain := getTransformChain()
+	defer saveBuffer(chain)
+
+	result, _, _ := transform.String(chain, trimmed)
 	return result
+}
+
+var (
+	transformChainPool = sync.Pool{
+		New: func() any {
+			return newTransformChain()
+		},
+	}
+)
+
+func newTransformChain() transform.Transformer {
+	nonspacingMarksRemover := runes.Remove(runes.In(unicode.Mn)) // Mn: nonspacing marks
+	return transform.Chain(norm.NFD, nonspacingMarksRemover, norm.NFC)
+}
+
+func getTransformChain() transform.Transformer {
+	t, ok := transformChainPool.Get().(transform.Transformer)
+	if !ok {
+		return newTransformChain()
+	}
+	return t
+}
+
+func saveBuffer(t transform.Transformer) {
+	t.Reset()
+	transformChainPool.Put(t)
 }

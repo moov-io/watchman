@@ -129,9 +129,9 @@ func main() {
 
 	var pipeline *pipeliner
 	if debug, err := strconv.ParseBool(os.Getenv("DEBUG_NAME_PIPELINE")); debug && err == nil {
-		pipeline = newPipeliner(logger)
+		pipeline = newPipeliner(logger, true)
 	} else {
-		pipeline = newPipeliner(log.NewNopLogger())
+		pipeline = newPipeliner(log.NewNopLogger(), false)
 	}
 
 	searchWorkers := readInt(os.Getenv("SEARCH_MAX_WORKERS"), *flagWorkers)

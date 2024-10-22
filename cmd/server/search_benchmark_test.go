@@ -19,8 +19,14 @@ func BenchmarkSearch__All(b *testing.B) {
 	searcher := createBenchmarkSearcher(b)
 	b.ResetTimer()
 
+	var filters filterRequest
+
 	for i := 0; i < b.N; i++ {
-		buildFullSearchResponse(searcher, filterRequest{}, 10, 0.0, fake.Person().Name())
+		b.StopTimer()
+		name := fake.Person().Name()
+		b.StartTimer()
+
+		buildFullSearchResponse(searcher, filters, 10, 0.0, name)
 	}
 }
 
