@@ -17,7 +17,7 @@ var (
 		steps:  []step{},
 	}
 
-	noLogPipeliner = newPipeliner(log.NewNopLogger())
+	noLogPipeliner = newPipeliner(log.NewNopLogger(), false)
 )
 
 func TestPipelineNoop(t *testing.T) {
@@ -75,6 +75,7 @@ func TestFullPipeline(t *testing.T) {
 		// Normalize ("-" -> " ")
 		{company("ANGLO-CARIBBEAN CO., LTD."), "anglo caribbean"},
 	}
+
 	for i := range cases {
 		if err := noLogPipeliner.Do(cases[i].in); err != nil {
 			t.Error(err)

@@ -210,15 +210,21 @@ func (ds *debugStep) apply(in *Name) error {
 	return nil
 }
 
-func newPipeliner(logger log.Logger) *pipeliner {
+func newPipeliner(logger log.Logger, debug bool) *pipeliner {
+	steps := []step{
+		&reorderSDNStep{},
+		&companyNameCleanupStep{},
+		&stopwordsStep{},
+		&normalizeStep{},
+	}
+	if debug {
+		for i := range steps {
+			steps[i] = &debugStep{logger: logger, step: steps[i]}
+		}
+	}
 	return &pipeliner{
 		logger: logger,
-		steps: []step{
-			&debugStep{logger: logger, step: &reorderSDNStep{}},
-			&debugStep{logger: logger, step: &companyNameCleanupStep{}},
-			&debugStep{logger: logger, step: &stopwordsStep{}},
-			&debugStep{logger: logger, step: &normalizeStep{}},
-		},
+		steps:  steps,
 	}
 }
 
