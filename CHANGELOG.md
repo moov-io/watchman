@@ -1,3 +1,15 @@
+## v0.29.2 (Released 2024-10-23)
+
+IMPROVEMENTS
+
+- cmd/server: only wrap pipeline steps with debugStep during debugging
+- cmd/server: pool x/text/transform.Transformer instances
+
+BUILD
+
+- build: update golang.org/x/text
+- cmd/server: reduce memory usage in benchmark setup
+
 ## v0.29.1 (Released 2024-10-07)
 
 IMPROVEMENTS
