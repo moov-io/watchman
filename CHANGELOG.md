@@ -1,3 +1,12 @@
+## v0.30.0 (Released 2024-10-24)
+
+ADDITIONS
+
+Watchman now filters out indexed records based on the first character's phonetic match. This is helpful to eliminate most
+low scoring results and reduces CPU usage.
+
+You can force scoring search terms against every indexed record by setting `DISABLE_PHONETIC_FILTERING=yes`.
+
 ## v0.29.2 (Released 2024-10-23)
 
 IMPROVEMENTS

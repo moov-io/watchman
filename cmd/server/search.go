@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/moov-io/base/log"
+	"github.com/moov-io/base/strx"
 	"github.com/moov-io/watchman/pkg/csl"
 	"github.com/moov-io/watchman/pkg/dpl"
 	"github.com/moov-io/watchman/pkg/ofac"
@@ -312,12 +313,21 @@ func bestPairsJaroWinkler(searchTokens []string, indexed string) float64 {
 	searchTokensLength := sumLength(searchTokens)
 	indexTokensLength := sumLength(indexedTokens)
 
+	disablePhoneticFiltering := strx.Yes(os.Getenv("DISABLE_PHONETIC_FILTERING"))
+
 	//Compare each search token to each indexed token. Sort the results in descending order
-	scores := make([]Score, 0, len(searchTokens)+len(indexedTokens))
+	scoresCapacity := (len(searchTokens) + len(indexedTokens))
+	if !disablePhoneticFiltering {
+		scoresCapacity /= 5 // reduce the capacity as many terms don't phonetically match
+	}
+	scores := make([]Score, 0, scoresCapacity)
 	for searchIdx, searchToken := range searchTokens {
 		for indexIdx, indexedToken := range indexedTokens {
-			score := customJaroWinkler(indexedToken, searchToken)
-			scores = append(scores, Score{score, searchIdx, indexIdx})
+			// Compare the first letters phonetically and only run jaro-winkler on those which are similar
+			if disablePhoneticFiltering || firstCharacterSoundexMatch(indexedToken, searchToken) {
+				score := customJaroWinkler(indexedToken, searchToken)
+				scores = append(scores, Score{score, searchIdx, indexIdx})
+			}
 		}
 	}
 	sort.Slice(scores[:], func(i, j int) bool {

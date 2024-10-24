@@ -441,12 +441,12 @@ func TestJaroWinkler(t *testing.T) {
 		{strings.ToLower("WEI Zhao"), precompute("WEI, Zhao"), 1.0},
 
 		// apply jaroWinkler in both directions
-		{"jane doe", "jan lahore", 0.596},
-		{"jan lahore", "jane doe", 0.596},
+		{"jane doe", "jan lahore", 0.439},
+		{"jan lahore", "jane doe", 0.549},
 
 		// real world case
-		{"john doe", "paul john", 0.533},
-		{"john doe", "john othername", 0.672},
+		{"john doe", "paul john", 0.624},
+		{"john doe", "john othername", 0.440},
 
 		// close match
 		{"jane doe", "jane doe2", 0.940},
@@ -465,12 +465,12 @@ func TestJaroWinkler(t *testing.T) {
 		{"iap", "ian mckinley", 0.352},
 		{"ian mckinley", "ian", 0.891},
 		{"ian mckinley", "iap", 0.733},
-		{"ian mckinley", "tian xiang 7", 0.526},
-		{"bindaree food group pty", precompute("independent insurance group ltd"), 0.576}, // precompute removes ltd
-		{"bindaree food group pty ltd", "independent insurance group ltd", 0.631},         // only matches higher from 'ltd'
-		{"p.c.c. (singapore) private limited", "culver max entertainment private limited", 0.658},
-		{"zincum llc", "easy verification inc.", 0.380},
-		{"transpetrochart co ltd", "jx metals trading co.", 0.496},
+		{"ian mckinley", "tian xiang 7", 0.000},
+		{"bindaree food group pty", precompute("independent insurance group ltd"), 0.269}, // precompute removes ltd
+		{"bindaree food group pty ltd", "independent insurance group ltd", 0.401},         // only matches higher from 'ltd'
+		{"p.c.c. (singapore) private limited", "culver max entertainment private limited", 0.514},
+		{"zincum llc", "easy verification inc.", 0.000},
+		{"transpetrochart co ltd", "jx metals trading co.", 0.431},
 		{"technolab", "moomoo technologies inc", 0.565},
 		{"sewa security services", "sesa - safety & environmental services australia pty ltd", 0.480},
 		{"bueno", "20/f rykadan capital twr135 hoi bun rd, kwun tong 135 hoi bun rd., kwun tong", 0.094},
@@ -494,7 +494,7 @@ func TestJaroWinkler(t *testing.T) {
 		{"nicolas, maduro moros", "nicolás maduro", 0.906},
 		{"africada financial services bureau change", "skylight", 0.441},
 		{"africada financial services bureau change", "skylight financial inc", 0.658},
-		{"africada financial services bureau change", "skylight services inc", 0.621},
+		{"africada financial services bureau change", "skylight services inc", 0.599},
 		{"africada financial services bureau change", "skylight financial services", 0.761},
 		{"africada financial services bureau change", "skylight financial services inc", 0.730},
 
@@ -503,29 +503,29 @@ func TestJaroWinkler(t *testing.T) {
 		{precompute("the group for the preservation of the holy sites"), precompute("the bridgespan group"), 0.682},
 		{"group preservation holy sites", "bridgespan group", 0.652},
 
-		{"the group for the preservation of the holy sites", "the logan group", 0.730},
-		{precompute("the group for the preservation of the holy sites"), precompute("the logan group"), 0.730},
-		{"group preservation holy sites", "logan group", 0.649},
+		{"the group for the preservation of the holy sites", "the logan group", 0.670},
+		{precompute("the group for the preservation of the holy sites"), precompute("the logan group"), 0.670},
+		{"group preservation holy sites", "logan group", 0.586},
 
-		{"the group for the preservation of the holy sites", "the anything group", 0.698},
-		{precompute("the group for the preservation of the holy sites"), precompute("the anything group"), 0.698},
-		{"group preservation holy sites", "anything group", 0.585},
+		{"the group for the preservation of the holy sites", "the anything group", 0.546},
+		{precompute("the group for the preservation of the holy sites"), precompute("the anything group"), 0.546},
+		{"group preservation holy sites", "anything group", 0.488},
 
-		{"the group for the preservation of the holy sites", "the hello world group", 0.706},
-		{precompute("the group for the preservation of the holy sites"), precompute("the hello world group"), 0.706},
-		{"group preservation holy sites", "hello world group", 0.560},
+		{"the group for the preservation of the holy sites", "the hello world group", 0.637},
+		{precompute("the group for the preservation of the holy sites"), precompute("the hello world group"), 0.637},
+		{"group preservation holy sites", "hello world group", 0.577},
 
 		{"the group for the preservation of the holy sites", "the group", 0.880},
 		{precompute("the group for the preservation of the holy sites"), precompute("the group"), 0.880},
 		{"group preservation holy sites", "group", 0.879},
 
-		{"the group for the preservation of the holy sites", "The flibbity jibbity flobbity jobbity grobbity zobbity group", 0.426},
+		{"the group for the preservation of the holy sites", "The flibbity jibbity flobbity jobbity grobbity zobbity group", 0.345},
 		{
 			precompute("the group for the preservation of the holy sites"),
 			precompute("the flibbity jibbity flobbity jobbity grobbity zobbity group"),
-			0.446,
+			0.366,
 		},
-		{"group preservation holy sites", "flibbity jibbity flobbity jobbity grobbity zobbity group", 0.334},
+		{"group preservation holy sites", "flibbity jibbity flobbity jobbity grobbity zobbity group", 0.263},
 
 		// precompute
 		{"i c sogo kenkyusho", precompute("A.I.C. SOGO KENKYUSHO"), 0.858},

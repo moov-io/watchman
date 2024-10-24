@@ -241,13 +241,14 @@ func TestSearch__NameAndAltName(t *testing.T) {
 
 	// OFAC
 	require.Equal(t, "2681", wrapper.SDNs[0].EntityID)
-	require.Equal(t, "4691", wrapper.AltNames[0].EntityID)
+	require.Equal(t, "HAWATMA, Nayif", wrapper.SDNs[0].SDNName)
+	require.Equal(t, "559", wrapper.AltNames[0].EntityID)
 	require.Equal(t, "735", wrapper.Addresses[0].EntityID)
-	require.Equal(t, "18782", wrapper.SectoralSanctions[0].EntityID)
+	require.Equal(t, "18736", wrapper.SectoralSanctions[0].EntityID)
 
 	// BIS
 	require.Equal(t, "P.O. BOX 28360", wrapper.DeniedPersons[0].StreetAddress)
-	require.Equal(t, "Luqman Yasin Yunus Shgragi", wrapper.BISEntities[0].Name)
+	require.Equal(t, "Mohammad Jan Khan Mangal", wrapper.BISEntities[0].Name)
 }
 
 func TestSearch__Name(t *testing.T) {
@@ -288,21 +289,13 @@ func TestSearch__Name(t *testing.T) {
 		t.Fatalf("SDNs=%d Alts=%d SSIs=%d DPs=%d ELs=%d",
 			len(wrapper.SDNs), len(wrapper.Alts), len(wrapper.SSIs), len(wrapper.DPs), len(wrapper.ELs))
 	}
-	if wrapper.SDNs[0].EntityID != "2676" {
-		t.Errorf("%#v", wrapper.SDNs[0])
-	}
-	if wrapper.Alts[0].EntityID != "4691" {
-		t.Errorf("%#v", wrapper.Alts[0])
-	}
-	if wrapper.SSIs[0].EntityID != "18782" {
-		t.Errorf("%#v", wrapper.SSIs[0])
-	}
-	if wrapper.DPs[0].Name != "AL NASER WINGS AIRLINES" {
-		t.Errorf("%#v", wrapper.DPs[0])
-	}
-	if wrapper.ELs[0].Name != "Luqman Yasin Yunus Shgragi" {
-		t.Errorf("%#v", wrapper.ELs[0])
-	}
+
+	require.Equal(t, "2676", wrapper.SDNs[0].EntityID)
+	require.Equal(t, "4691", wrapper.Alts[0].EntityID)
+
+	require.Equal(t, "18736", wrapper.SSIs[0].EntityID)
+	require.Equal(t, "AL NASER WINGS AIRLINES", wrapper.DPs[0].Name)
+	require.Equal(t, "Luqman Yasin Yunus Shgragi", wrapper.ELs[0].Name)
 }
 
 func TestSearch__AltName(t *testing.T) {

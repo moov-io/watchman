@@ -15,7 +15,7 @@ func TestBestPairsJaroWinkler__FalsePositives(t *testing.T) {
 	// 1. SDN Entity 40273, VLADIMIROV, Vladimir Vladimirovich
 	oldScore, newScore := compareAlgorithms("vladimirov vladimir vladimirovich", "vladimir levenshtein")
 	eql(t, "Score is too high", oldScore, 0.961)
-	eql(t, "New score is better", newScore, 0.603)
+	eql(t, "New score is better", newScore, 0.527)
 
 	// 2. SDN Entity 7788 "SHAQIRI, Shaqir"
 	oldScore, newScore = compareAlgorithms("shaqiri shaqir", "zaid shakir")
@@ -42,7 +42,7 @@ func TestBestPairsJaroWinkler__FalsePositives(t *testing.T) {
 	// Words that start with different letters shouldn't match very highly
 	oldScore, newScore = compareAlgorithms("dominguez", "jimenez")
 	eql(t, "Score is too high", oldScore, 0.690)
-	eql(t, "New score is better", newScore, 0.580)
+	eql(t, "New score is better", newScore, 0.0)
 }
 
 func TestBestPairsJaroWinkler__TruePositives(t *testing.T) {

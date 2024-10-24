@@ -84,19 +84,3 @@ func BenchmarkJaroWinkler(b *testing.B) {
 		}
 	})
 }
-
-// goos: darwin
-// goarch: amd64
-// pkg: github.com/moov-io/watchman/cmd/server
-// cpu: Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz
-// BenchmarkSearchHandler-16    	    2728	 131 213 518 ns/op	34812129 B/op	 1486792 allocs/op
-// PASS
-// ok  	github.com/moov-io/watchman/cmd/server	413.248s
-
-// goos: darwin
-// goarch: amd64
-// pkg: github.com/moov-io/watchman/cmd/server
-// cpu: Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz
-// BenchmarkSearchHandler-16    	    2079	 174 594 246 ns/op	49797019 B/op	 1638732 allocs/op
-// PASS
-// ok  	github.com/moov-io/watchman/cmd/server	419.284s
