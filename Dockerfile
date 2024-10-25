@@ -1,10 +1,12 @@
 FROM golang:alpine as backend
+ARG VERSION
 WORKDIR /src
 COPY . /src
 RUN go mod download
-RUN CGO_ENABLED=0 go build -o ./bin/server /src/cmd/server
+RUN CGO_ENABLED=0 go build -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/server /src/cmd/server
 
 FROM node:21-alpine as frontend
+ARG VERSION
 COPY webui/ /watchman/
 WORKDIR /watchman/
 RUN npm install --legacy-peer-deps
@@ -16,8 +18,8 @@ COPY --from=backend /src/bin/server /bin/server
 COPY --from=frontend /watchman/build/ /watchman/
 ENV WEB_ROOT=/watchman/
 
-# USER moov # TODO(adam): non-root users
 
 EXPOSE 8084
 EXPOSE 9094
+
 ENTRYPOINT ["/bin/server"]

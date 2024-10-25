@@ -1,5 +1,18 @@
 PLATFORM=$(shell uname -s | tr '[:upper:]' '[:lower:]')
-VERSION := $(shell grep -Eo '(v[0-9]+[\.][0-9]+[\.][0-9]+(-[a-zA-Z0-9]*)?)' version.go)
+
+ifndef VERSION
+	ifndef RELEASE
+	# If we're not publishing a release, set the dev commit hash
+		ifndef DEV_TAG_SHA
+			COMMIT_HASH :=$(shell git rev-parse --short=7 HEAD)
+		else
+			COMMIT_HASH :=$(shell echo ${DEV_TAG_SHA} | cut -c 1-7)
+		endif
+		VERSION := dev-${COMMIT_HASH}
+	else
+		VERSION := $(shell git describe --tags --abbrev=0)
+	endif
+endif
 
 .PHONY: run build build-server docker release check test
 
@@ -14,13 +27,13 @@ else
 endif
 
 build-server:
-	CGO_ENABLED=0 go build -o ./bin/server github.com/moov-io/watchman/cmd/server
+	CGO_ENABLED=0 go build -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/server github.com/moov-io/watchman/cmd/server
 
 build-batchsearch:
-	CGO_ENABLED=0 go build -o ./bin/batchsearch github.com/moov-io/watchman/cmd/batchsearch
+	CGO_ENABLED=0 go build -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/batchsearch github.com/moov-io/watchman/cmd/batchsearch
 
 build-watchmantest:
-	CGO_ENABLED=0 go build -o ./bin/watchmantest github.com/moov-io/watchman/cmd/watchmantest
+	CGO_ENABLED=0 go build -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/watchmantest github.com/moov-io/watchman/cmd/watchmantest
 
 .PHONY: check
 check:
@@ -71,18 +84,18 @@ endif
 docker: clean docker-hub docker-openshift docker-static docker-watchmantest
 
 docker-hub:
-	docker build --pull -t moov/watchman:$(VERSION) -f Dockerfile .
+	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman:$(VERSION) -f Dockerfile .
 	docker tag moov/watchman:$(VERSION) moov/watchman:latest
 
 docker-openshift:
-	docker build --pull -t quay.io/moov/watchman:$(VERSION) -f Dockerfile-openshift --build-arg VERSION=$(VERSION) .
+	docker build --pull --build-arg VERSION=${VERSION} -t quay.io/moov/watchman:$(VERSION) -f Dockerfile-openshift --build-arg VERSION=$(VERSION) .
 	docker tag quay.io/moov/watchman:$(VERSION) quay.io/moov/watchman:latest
 
 docker-static:
-	docker build --pull -t moov/watchman:static -f Dockerfile-static .
+	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman:static -f Dockerfile-static .
 
 docker-watchmantest:
-	docker build --pull -t moov/watchmantest:$(VERSION) -f ./cmd/watchmantest/Dockerfile .
+	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchmantest:$(VERSION) -f ./cmd/watchmantest/Dockerfile .
 	docker tag moov/watchmantest:$(VERSION) moov/watchmantest:latest
 
 release: docker AUTHORS
