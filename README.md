@@ -207,6 +207,7 @@ PONG
 | `HTTP_ADMIN_BIND_ADDRESS` | Address to bind admin HTTP server on. This overrides the command-line flag `-admin.addr`. | Default: `:9094` |
 | `HTTPS_CERT_FILE` | Filepath containing a certificate (or intermediate chain) to be served by the HTTP server. Requires all traffic be over secure HTTP. | Empty |
 | `HTTPS_KEY_FILE`  | Filepath of a private key matching the leaf certificate from `HTTPS_CERT_FILE`. | Empty |
+| `DISABLE_WEB_UI` | Skip serving and setup of the web UI. | Default: `false` |
 | `WEB_ROOT` | Directory to serve web UI from. | Default: `webui/` |
 | `WEBHOOK_MAX_WORKERS` | Maximum number of workers processing webhooks. | Default: 10 |
 | `DOWNLOAD_WEBHOOK_URL` | Optional webhook URL called when data downloads / refreshes occur. | Empty |

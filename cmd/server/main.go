@@ -234,6 +234,16 @@ func getDataRefreshInterval(logger log.Logger, env string) time.Duration {
 }
 
 func setupWebui(logger log.Logger, r *mux.Router, basePath string) {
+	var disableWebUI bool
+	if val, err := strconv.ParseBool(os.Getenv("DISABLE_WEB_UI")); err == nil {
+		disableWebUI = val
+	}
+
+	if disableWebUI {
+		logger.Log("Disabling webui")
+		return
+	}
+
 	dir := os.Getenv("WEB_ROOT")
 	if dir == "" {
 		dir = filepath.Join("webui", "build")
