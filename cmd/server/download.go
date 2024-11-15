@@ -286,24 +286,27 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	}
 	dps := precomputeDPs(deniedPersons, s.pipe)
 
-	var euConsolidatedList []*csl.EUCSLRecord
+	var euCSLs []*Result[csl.EUCSLRecord]
 	withEUScreeningList := cmp.Or(os.Getenv("WITH_EU_SCREENING_LIST"), "true")
 	if strx.Yes(withEUScreeningList) {
-		euConsolidatedList, err = euCSLRecords(s.logger, initialDir)
+		euConsolidatedList, err := euCSLRecords(s.logger, initialDir)
 		if err != nil {
 			lastDataRefreshFailure.WithLabelValues("EUCSL").Set(float64(time.Now().Unix()))
 			stats.Errors = append(stats.Errors, fmt.Errorf("EUCSL: %v", err))
 		}
-	}
-	euCSLs := precomputeCSLEntities[csl.EUCSLRecord](euConsolidatedList, s.pipe)
-
-	ukConsolidatedList, err := ukCSLRecords(s.logger, initialDir)
-	if err != nil {
-		lastDataRefreshFailure.WithLabelValues("UKCSL").Set(float64(time.Now().Unix()))
-		stats.Errors = append(stats.Errors, fmt.Errorf("UKCSL: %v", err))
+		euCSLs = precomputeCSLEntities[csl.EUCSLRecord](euConsolidatedList, s.pipe)
 	}
 
-	ukCSLs := precomputeCSLEntities[csl.UKCSLRecord](ukConsolidatedList, s.pipe)
+	var ukCSLs []*Result[csl.UKCSLRecord]
+	withUKCSLSanctionsList := cmp.Or(os.Getenv("WITH_UK_CSL_SANCTIONS_LIST"), "true")
+	if strx.Yes(withUKCSLSanctionsList) {
+		ukConsolidatedList, err := ukCSLRecords(s.logger, initialDir)
+		if err != nil {
+			lastDataRefreshFailure.WithLabelValues("UKCSL").Set(float64(time.Now().Unix()))
+			stats.Errors = append(stats.Errors, fmt.Errorf("UKCSL: %v", err))
+		}
+		ukCSLs = precomputeCSLEntities[csl.UKCSLRecord](ukConsolidatedList, s.pipe)
+	}
 
 	var ukSLs []*Result[csl.UKSanctionsListRecord]
 	withUKSanctionsList := os.Getenv("WITH_UK_SANCTIONS_LIST")
