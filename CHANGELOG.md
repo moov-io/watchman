@@ -1,3 +1,14 @@
+## v0.31.0 (Released 2024-11-21)
+
+IMPROVEMENTS
+
+- feat: Add environment configuration to disable Web UI
+- feat: Add environment configuration to disable UK CSL download
+
+BUILD
+
+- build(deps): bump rexml from 3.3.6 to 3.3.9 in /docs
+
 ## v0.30.0 (Released 2024-10-24)
 
 ADDITIONS

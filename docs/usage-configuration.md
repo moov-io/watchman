@@ -1,6 +1,6 @@
 ---
 layout: page
-title: API configuration
+title: Configuration
 hide_hero: true
 show_sidebar: false
 menubar: docs-menu
@@ -28,6 +28,7 @@ menubar: docs-menu
 | `HTTP_ADMIN_BIND_ADDRESS` | Address to bind admin HTTP server on. This overrides the command-line flag `-admin.addr`. | Default: `:9094` |
 | `HTTPS_CERT_FILE` | Filepath containing a certificate (or intermediate chain) to be served by the HTTP server. Requires all traffic be over secure HTTP. | Empty |
 | `HTTPS_KEY_FILE`  | Filepath of a private key matching the leaf certificate from `HTTPS_CERT_FILE`. | Empty |
+| `DISABLE_WEB_UI` | Skip serving and setup of the web UI. | Default: `false` |
 | `WEB_ROOT` | Directory to serve web UI from. | Default: `webui/` |
 | `WEBHOOK_MAX_WORKERS` | Maximum number of workers processing webhooks. | Default: 10 |
 | `DOWNLOAD_WEBHOOK_URL` | Optional webhook URL called when data downloads / refreshes occur. | Empty |
@@ -41,6 +42,7 @@ menubar: docs-menu
 | `DPL_DOWNLOAD_TEMPLATE` | HTTP address for downloading the DPL. | `https://www.bis.doc.gov/dpl/%s` |
 | `EU_CSL_DOWNLOAD_URL` | Use an alternate URL for downloading EU Consolidated Screening List | Subresource of `webgate.ec.europa.eu` |
 | `WITH_EU_SCREENING_LIST` | Download and parse the EU Consolidated Screening List | Default: `true` |
+| `WITH_UK_CSL_SANCTIONS_LIST` | Download and parse the UK CSL Sanctions List on startup. | Default: `true` |
 | `UK_CSL_DOWNLOAD_URL` | Use an alternate URL for downloading UK Consolidated Screening List | Subresource of `www.gov.uk` |
 | `UK_SANCTIONS_LIST_URL` | Use an alternate URL for downloading UK Sanctions List | Subresource of `www.gov.uk` |
 | `WITH_UK_SANCTIONS_LIST` | Download and parse the UK Sanctions List on startup. | Default: `false` |
