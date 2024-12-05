@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "express": "4.21.0",
+    "express": "4.21.2",
     "express-winston": "3.4.0",
     "history": "4.10.1",
     "http-proxy-middleware": "0.21.0",
