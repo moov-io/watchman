@@ -40,3 +40,5 @@
       link: /runbook/
     - name: Prometheus metrics
       link: /metrics/
+    - name: Caching Data Files
+      link: /cache-data-files/
