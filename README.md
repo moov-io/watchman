@@ -220,6 +220,9 @@ PONG
 | `OFAC_DOWNLOAD_TEMPLATE` | HTTP address for downloading raw OFAC files. | `https://www.treasury.gov/ofac/downloads/%s` |
 | `DPL_DOWNLOAD_TEMPLATE` | HTTP address for downloading the DPL. | `https://www.bis.doc.gov/dpl/%s` |
 | `EU_CSL_DOWNLOAD_URL` | Use an alternate URL for downloading EU Consolidated Screening List | Subresource of `webgate.ec.europa.eu` |
+| `WITH_OFAC_LIST` | Download and parse the US OFAC List | Default: `true` |
+| `WITH_US_DPL_LIST` | Download and parse the US Denied Persons List (DPL) | Default: `true` |
+| `WITH_US_CSL_SANCTIONS_LIST` | Download and parse the US Consolidated Screening List | Default: `true` |
 | `WITH_EU_SCREENING_LIST` | Download and parse the EU Consolidated Screening List | Default: `true` |
 | `WITH_UK_CSL_SANCTIONS_LIST` | Download and parse the UK CSL Sanctions List on startup. | Default: `true` |
 | `UK_CSL_DOWNLOAD_URL` | Use an alternate URL for downloading UK Consolidated Screening List | Subresource of `www.gov.uk` |
