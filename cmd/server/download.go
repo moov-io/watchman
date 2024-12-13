@@ -263,26 +263,35 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 		RefreshedAt: lastRefresh(initialDir),
 	}
 
+	var err error
 	lastDataRefreshFailure.WithLabelValues("SDNs").Set(float64(time.Now().Unix()))
 
-	results, err := ofacRecords(s.logger, initialDir)
-	if err != nil {
-		lastDataRefreshFailure.WithLabelValues("SDNs").Set(float64(time.Now().Unix()))
-		stats.Errors = append(stats.Errors, fmt.Errorf("OFAC: %v", err))
+	var ofacResults *ofac.Results
+	withOFACList := cmp.Or(os.Getenv("WITH_OFAC_LIST"), "true")
+	if strx.Yes(withOFACList) {
+		ofacResults, err = ofacRecords(s.logger, initialDir)
+		if err != nil {
+			lastDataRefreshFailure.WithLabelValues("SDNs").Set(float64(time.Now().Unix()))
+			stats.Errors = append(stats.Errors, fmt.Errorf("OFAC: %v", err))
+		}
 	}
-	if results == nil {
-		results = &ofac.Results{}
+	if ofacResults == nil {
+		ofacResults = &ofac.Results{}
 	}
 
-	sdns := precomputeSDNs(results.SDNs, results.Addresses, s.pipe)
-	adds := precomputeAddresses(results.Addresses)
-	alts := precomputeAlts(results.AlternateIdentities, s.pipe)
-	sdnComments := results.SDNComments
+	sdns := precomputeSDNs(ofacResults.SDNs, ofacResults.Addresses, s.pipe)
+	adds := precomputeAddresses(ofacResults.Addresses)
+	alts := precomputeAlts(ofacResults.AlternateIdentities, s.pipe)
+	sdnComments := ofacResults.SDNComments
 
-	deniedPersons, err := dplRecords(s.logger, initialDir)
-	if err != nil {
-		lastDataRefreshFailure.WithLabelValues("DPs").Set(float64(time.Now().Unix()))
-		stats.Errors = append(stats.Errors, fmt.Errorf("DPL: %v", err))
+	var deniedPersons []*dpl.DPL
+	withDPLList := cmp.Or(os.Getenv("WITH_US_DPL_LIST"), "true")
+	if strx.Yes(withDPLList) {
+		deniedPersons, err = dplRecords(s.logger, initialDir)
+		if err != nil {
+			lastDataRefreshFailure.WithLabelValues("DPs").Set(float64(time.Now().Unix()))
+			stats.Errors = append(stats.Errors, fmt.Errorf("DPL: %v", err))
+		}
 	}
 	dps := precomputeDPs(deniedPersons, s.pipe)
 
@@ -323,25 +332,30 @@ func (s *searcher) refreshData(initialDir string) (*DownloadStats, error) {
 	}
 
 	// csl records from US downloaded here
-	consolidatedLists, err := cslRecords(s.logger, initialDir)
-	if err != nil {
-		lastDataRefreshFailure.WithLabelValues("CSL").Set(float64(time.Now().Unix()))
-		stats.Errors = append(stats.Errors, fmt.Errorf("CSL: %v", err))
+	var usConsolidatedLists *csl.CSL
+	withUSConsolidatedLists := cmp.Or(os.Getenv("WITH_US_CSL_SANCTIONS_LIST"), "true")
+	if strx.Yes(withUSConsolidatedLists) {
+		usConsolidatedLists, err = cslRecords(s.logger, initialDir)
+		if err != nil {
+			lastDataRefreshFailure.WithLabelValues("CSL").Set(float64(time.Now().Unix()))
+			stats.Errors = append(stats.Errors, fmt.Errorf("US CSL: %v", err))
+		}
 	}
-	if consolidatedLists == nil {
-		consolidatedLists = new(csl.CSL)
+	if usConsolidatedLists == nil {
+		usConsolidatedLists = new(csl.CSL)
 	}
-	els := precomputeCSLEntities[csl.EL](consolidatedLists.ELs, s.pipe)
-	meus := precomputeCSLEntities[csl.MEU](consolidatedLists.MEUs, s.pipe)
-	ssis := precomputeCSLEntities[csl.SSI](consolidatedLists.SSIs, s.pipe)
-	uvls := precomputeCSLEntities[csl.UVL](consolidatedLists.UVLs, s.pipe)
-	isns := precomputeCSLEntities[csl.ISN](consolidatedLists.ISNs, s.pipe)
-	fses := precomputeCSLEntities[csl.FSE](consolidatedLists.FSEs, s.pipe)
-	plcs := precomputeCSLEntities[csl.PLC](consolidatedLists.PLCs, s.pipe)
-	caps := precomputeCSLEntities[csl.CAP](consolidatedLists.CAPs, s.pipe)
-	dtcs := precomputeCSLEntities[csl.DTC](consolidatedLists.DTCs, s.pipe)
-	cmics := precomputeCSLEntities[csl.CMIC](consolidatedLists.CMICs, s.pipe)
-	ns_mbss := precomputeCSLEntities[csl.NS_MBS](consolidatedLists.NS_MBSs, s.pipe)
+
+	els := precomputeCSLEntities[csl.EL](usConsolidatedLists.ELs, s.pipe)
+	meus := precomputeCSLEntities[csl.MEU](usConsolidatedLists.MEUs, s.pipe)
+	ssis := precomputeCSLEntities[csl.SSI](usConsolidatedLists.SSIs, s.pipe)
+	uvls := precomputeCSLEntities[csl.UVL](usConsolidatedLists.UVLs, s.pipe)
+	isns := precomputeCSLEntities[csl.ISN](usConsolidatedLists.ISNs, s.pipe)
+	fses := precomputeCSLEntities[csl.FSE](usConsolidatedLists.FSEs, s.pipe)
+	plcs := precomputeCSLEntities[csl.PLC](usConsolidatedLists.PLCs, s.pipe)
+	caps := precomputeCSLEntities[csl.CAP](usConsolidatedLists.CAPs, s.pipe)
+	dtcs := precomputeCSLEntities[csl.DTC](usConsolidatedLists.DTCs, s.pipe)
+	cmics := precomputeCSLEntities[csl.CMIC](usConsolidatedLists.CMICs, s.pipe)
+	ns_mbss := precomputeCSLEntities[csl.NS_MBS](usConsolidatedLists.NS_MBSs, s.pipe)
 
 	// OFAC
 	stats.SDNs = len(sdns)
