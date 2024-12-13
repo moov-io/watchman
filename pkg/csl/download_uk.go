@@ -19,7 +19,7 @@ var (
 	ukCSLDownloadURL       = strx.Or(os.Getenv("UK_CSL_DOWNLOAD_URL"), publicUKCSLDownloadURL)
 
 	// https://www.gov.uk/government/publications/the-uk-sanctions-list
-	publicUKSanctionsListURL = "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1121113/UK_Sanctions_List.ods"
+	publicUKSanctionsListURL = "https://assets.publishing.service.gov.uk/media/6756dae7f96f5424a4b87791/UK_Sanctions_List.ods"
 	ukSanctionsListURL       = strx.Or(os.Getenv("UK_SANCTIONS_LIST_URL"), publicUKSanctionsListURL)
 )
 
