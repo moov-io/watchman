@@ -141,7 +141,7 @@ func (dl *Downloader) retryDownload(downloadURL string) (io.ReadCloser, error) {
 		resp, err := dl.HTTP.Do(req)
 
 		if err != nil {
-			dl.Logger.Error().LogErrorf("err while doing client request: ", err)
+			dl.Logger.Error().LogErrorf("err while doing client request: %v", err)
 			time.Sleep(100 * time.Millisecond)
 			continue
 		}
