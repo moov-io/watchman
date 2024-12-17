@@ -21,6 +21,11 @@ type Entity[T any] struct {
 
 	Addresses []Address `json:"addresses"`
 
+	Affiliations   []Affiliation    `json:"affiliations"`
+	SanctionsInfo  *SanctionsInfo   `json:"sanctionsInfo"`
+	HistoricalInfo []HistoricalInfo `json:"historicalInfo"`
+	Titles         []string         `json:"titles"`
+
 	SourceData T `json:"sourceData"` // Contains all original list data with source list naming
 }
 
@@ -49,6 +54,7 @@ type Person struct {
 	Gender    Gender     `json:"gender"`
 	BirthDate *time.Time `json:"birthDate"`
 	DeathDate *time.Time `json:"deathDate"`
+	Titles    []string   `json:"titles"`
 
 	GovernmentIDs []GovernmentID `json:"governmentIDs"`
 }
@@ -85,7 +91,21 @@ type GovernmentID struct {
 type GovernmentIDType string
 
 var (
-	GovernmentIDPassport GovernmentIDType = "passport"
+	GovernmentIDPassport            GovernmentIDType = "passport"
+	GovernmentIDDriversLicense      GovernmentIDType = "drivers-license"
+	GovernmentIDNational            GovernmentIDType = "national-id"
+	GovernmentIDTax                 GovernmentIDType = "tax-id"
+	GovernmentIDSSN                 GovernmentIDType = "ssn"
+	GovernmentIDCedula              GovernmentIDType = "cedula"
+	GovernmentIDCURP                GovernmentIDType = "curp"
+	GovernmentIDCUIT                GovernmentIDType = "cuit"
+	GovernmentIDElectoral           GovernmentIDType = "electoral"
+	GovernmentIDBusinessRegisration GovernmentIDType = "business-registration"
+	GovernmentIDCommercialRegistry  GovernmentIDType = "commercial-registry"
+	GovernmentIDBirthCert           GovernmentIDType = "birth-certificate"
+	GovernmentIDRefugee             GovernmentIDType = "refugee-id"
+	GovernmentIDDiplomaticPass      GovernmentIDType = "diplomatic-passport"
+	GovernmentIDPersonalID          GovernmentIDType = "personal-id"
 )
 
 type Business struct {
@@ -136,14 +156,17 @@ var (
 //
 // TODO(adam): https://www.opensanctions.org/reference/#schema.Vessel
 type Vessel struct {
-	Name      string     `json:"name"`
-	IMONumber string     `json:"imoNumber"`
-	Type      VesselType `json:"type"`
-	Flag      string     `json:"flag"` // ISO-3166 // TODO(adam):
-	Built     *time.Time `json:"built"`
-	Model     string     `json:"model"`
-	Tonnage   int        `json:"tonnage"`
-	MMSI      string     `json:"mmsi"` // Maritime Mobile Service Identity
+	Name                   string     `json:"name"`
+	IMONumber              string     `json:"imoNumber"`
+	Type                   VesselType `json:"type"`
+	Flag                   string     `json:"flag"` // ISO-3166 // TODO(adam):
+	Built                  *time.Time `json:"built"`
+	Model                  string     `json:"model"`
+	Tonnage                int        `json:"tonnage"`
+	MMSI                   string     `json:"mmsi"` // Maritime Mobile Service Identity
+	CallSign               string     `json:"callSign"`
+	GrossRegisteredTonnage int        `json:"grossRegisteredTonnage"`
+	Owner                  string     `json:"owner"`
 }
 
 type VesselType string
@@ -175,4 +198,22 @@ type Address struct {
 
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
+}
+
+type Affiliation struct {
+	EntityName string `json:"entityName"`
+	Type       string `json:"type"` // e.g., "Linked To", "Subsidiary Of", "Owned By"
+	Details    string `json:"details,omitempty"`
+}
+
+type SanctionsInfo struct {
+	Programs    []string `json:"programs"`    // e.g., "SDGT", "IRGC"
+	Secondary   bool     `json:"secondary"`   // Subject to secondary sanctions
+	Description string   `json:"description"` // Additional details
+}
+
+type HistoricalInfo struct {
+	Type  string    `json:"type"`  // e.g., "Former Name", "Previous Flag"
+	Value string    `json:"value"` // The historical value
+	Date  time.Time `json:"date,omitempty"`
 }

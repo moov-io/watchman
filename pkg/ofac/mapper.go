@@ -2,151 +2,29 @@ package ofac
 
 import (
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/moov-io/watchman/pkg/search"
 )
 
-func PtrToEntity(sdn *SDN) search.Entity[SDN] {
-	if sdn != nil {
-		return ToEntity(*sdn)
-	}
-	return search.Entity[SDN]{}
-}
-
-// TODO(adam): Accept Addresses, Alts, Comments
-
-func ToEntity(sdn SDN) search.Entity[SDN] {
-	out := search.Entity[SDN]{
-		Name:       sdn.SDNName,
-		Source:     search.SourceUSOFAC,
-		SourceData: sdn,
-	}
-
-	remarks := splitRemarks(sdn.Remarks)
-
-	switch strings.ToLower(strings.TrimSpace(sdn.SDNType)) {
-	case "-0-", "":
-		out.Type = search.EntityBusiness
-		// Set properties
-		out.Business = &search.Business{
-			Name: sdn.SDNName,
-		}
-		out.Business.Identifier = makeIdentifiers(remarks, []string{
-			"Branch Unit Number",
-			"Business Number",
-			"Business Registration Document",
-			"Business Registration Number",
-			"Certificate of Incorporation Number",
-			"Chamber of Commerce Number",
-			"Chinese Commercial Code",
-			"Registered Charity No.",
-		})
-
-	case "individual":
-		out.Type = search.EntityPerson
-		out.Person = &search.Person{
-			Name:   sdn.SDNName,
-			Gender: search.Gender(strings.ToLower(firstValue(findMatchingRemarks(remarks, "Gender")))),
-		}
-		out.Person.BirthDate = withFirstP(findMatchingRemarks(remarks, "DOB"), func(in remark) *time.Time {
-			t, err := parseTime(dobPatterns, in.value)
-			if t.IsZero() || err != nil {
-				return nil
-			}
-			return &t
-		})
-
-		// TODO(adam):
-		// citizen Venezuela
-		//
-		// nationality Russia;
-		// nationality: Eritrean
-		//
-		// POB 'Adlun, Lebanon
-		// Alt. POB: Keren Eritrea
-		// POB Abadan, Iran
-
-	case "vessel":
-		out.Type = search.EntityVessel
-		out.Vessel = &search.Vessel{
-			Name:      sdn.SDNName,
-			IMONumber: firstValue(findMatchingRemarks(remarks, "IMO")),
-			Type: withFirstF(findMatchingRemarks(remarks, "Vessel Type"), func(r remark) search.VesselType {
-				return search.VesselType(r.value) // TODO(adam): OFAC values are not an enum
-			}),
-			Flag: firstValue(findMatchingRemarks(remarks, "Flag")), // TODO(adam): ISO-3166
-			// Built     *time.Time `json:"built"`
-			// Model     string     `json:"model"`
-			// Tonnage   int        `json:"tonnage"` // TODO(adam): remove , and ParseInt
-			MMSI: firstValue(findMatchingRemarks(remarks, "MMSI")),
-		}
-
-	case "aircraft":
-		out.Type = search.EntityAircraft
-		out.Aircraft = &search.Aircraft{
-			Name: sdn.SDNName,
-			// Type         AircraftType `json:"type"`
-			Flag: firstValue(findMatchingRemarks(remarks, "Flag")), // TODO(adam): ISO-3166
-			Built: withFirstP(findMatchingRemarks(remarks, "Manufacture Date"), func(in remark) *time.Time {
-				t, err := parseTime(dobPatterns, in.value)
-				if t.IsZero() || err != nil {
-					return nil
-				}
-				return &t
-			}),
-			// ICAOCode     string       `json:"icaoCode"` // ICAO aircraft type designator
-			Model: firstValue(findMatchingRemarks(remarks, "Aircraft Model")),
-			SerialNumber: withFirstF(findMatchingRemarks(remarks, "Serial Number"), func(r remark) string {
-				// Trim parens from these remarks
-				// e.g. "Aircraft Manufacturer's Serial Number (MSN) 1023409321;"
-				idx := strings.Index(r.value, ")")
-				if idx > -1 && len(r.value) > idx+1 {
-					r.value = strings.TrimSpace(r.value[idx+1:])
-				}
-				return r.value
-			}),
-		}
-
-		// TODO(adam):
-		// Aircraft Operator YAS AIR;
-		// Previous Aircraft Tail Number 2-WGLP
-	}
-
-	return out
-}
-
-var parenCountryRegex = regexp.MustCompile(`\(([\w\s]+)\)`)
-
-func makeIdentifier(remarks []string, suffix string) *search.Identifier {
-	found := findMatchingRemarks(remarks, suffix)
-	if len(found) == 0 {
-		return nil
-	}
-
-	// Often the country is in parenthesis at the end, so let's look for that
-	//
-	// Business Number 51566843 (Hong Kong)
-	country := parenCountryRegex.FindString(found[0].value)
-	country = strings.TrimPrefix(strings.TrimSuffix(country, ")"), "(")
-
-	return &search.Identifier{
-		Name:       found[0].fullName,
-		Country:    country, // ISO-3166 // TODO(adam):
-		Identifier: found[0].value,
-	}
-}
-
-func makeIdentifiers(remarks []string, needles []string) []search.Identifier {
-	var out []search.Identifier
-	for i := range needles {
-		if id := makeIdentifier(remarks, needles[i]); id != nil {
-			out = append(out, *id)
-		}
-	}
-	return out
-}
+// Regular expressions for parsing various fields
+var (
+	akaRegex = regexp.MustCompile(`(?i)a\.k\.a\.\s+'([^']+)'`)
+	// Matches both "citizen Venezuela" and "nationality: Russia"
+	citizenshipRegex = regexp.MustCompile(`(?i)(citizen|nationality)[:\s]+([^;,]+)`)
+	// Matches both "POB Baghdad, Iraq" and "Alt. POB: Keren Eritrea"
+	pobRegex = regexp.MustCompile(`(?i)(?:Alt\.)?\s*POB:?\s+([^;]+)`)
+	// Contact information patterns
+	emailRegex = regexp.MustCompile(`(?i)(?:Email|EMAIL)[:\s]+([^;]+)`)
+	phoneRegex = regexp.MustCompile(`(?i)(?:Telephone|Phone|PHONE)[:\s]+([^;]+)`)
+	faxRegex   = regexp.MustCompile(`(?i)Fax[:\s]+([^;]+)`)
+	// Website patterns
+	websiteRegex = regexp.MustCompile(`(?i)(?:Website|http)[:\s]+([^;\s]+)`)
+	// Country extraction pattern
+	countryParenRegex = regexp.MustCompile(`\(([\w\s]+)\)`)
+)
 
 var (
 	dobPatterns = []string{
@@ -156,14 +34,49 @@ var (
 	}
 )
 
-func parseTime(acceptedLayouts []string, value string) (time.Time, error) {
-	// We don't currently support ranges for birth dates, so take the first date provided
-	// Examples include:
-	// 01 Feb 1958 to 28 Feb 1958
-	// circa 1934
-	// circa 1979-1982
-	value = strings.TrimSpace(strings.ReplaceAll(value, "circa", ""))
+func makeIdentifiers(remarks []string, needles []string) []search.Identifier {
+	seen := make(map[string]bool)
+	var out []search.Identifier
 
+	for i := range needles {
+		if id := makeIdentifier(remarks, needles[i]); id != nil {
+			// Create unique key from name and country
+			key := id.Name + "|" + id.Country
+			if !seen[key] {
+				seen[key] = true
+				out = append(out, *id)
+			}
+		}
+	}
+	return out
+}
+
+func makeIdentifier(remarks []string, suffix string) *search.Identifier {
+	found := findMatchingRemarks(remarks, suffix)
+	if len(found) == 0 {
+		return nil
+	}
+
+	// Often the country is in parenthesis at the end, so let's look for that
+	// Example: Business Number 51566843 (Hong Kong)
+	country := ""
+	value := found[0].value
+
+	if matches := countryParenRegex.FindStringSubmatch(value); len(matches) > 1 {
+		country = matches[1]
+		// Remove the country part from the value
+		value = strings.TrimSpace(countryParenRegex.ReplaceAllString(value, ""))
+	}
+
+	return &search.Identifier{
+		Name:       strings.TrimSpace(found[0].fullName),
+		Country:    country,
+		Identifier: value,
+	}
+}
+
+func parseTime(acceptedLayouts []string, value string) (time.Time, error) {
+	value = strings.TrimSpace(strings.ReplaceAll(value, "circa", ""))
 	parts := strings.Split(value, "to")
 	if len(parts) > 1 {
 		value = parts[0]
@@ -184,8 +97,427 @@ func parseTime(acceptedLayouts []string, value string) (time.Time, error) {
 	return time.Time{}, nil
 }
 
-// TODO(adam):
-// Drop "alt. "
+func extractCountry(remark string) string {
+	matches := countryParenRegex.FindStringSubmatch(remark)
+	if len(matches) > 1 {
+		return matches[1]
+	}
+	return ""
+}
+
+func ToEntity(sdn SDN) search.Entity[SDN] {
+	out := search.Entity[SDN]{
+		Name:       sdn.SDNName,
+		Source:     search.SourceUSOFAC,
+		SourceData: sdn,
+	}
+
+	remarks := splitRemarks(sdn.Remarks)
+	affiliations, sanctionsInfo, historicalInfo, titles := parseRemarks(remarks)
+
+	out.Affiliations = affiliations
+	out.SanctionsInfo = sanctionsInfo
+	out.HistoricalInfo = historicalInfo
+	out.Titles = titles
+	out.CryptoAddresses = parseCryptoAddresses(remarks)
+
+	// Extract common fields regardless of entity type
+	out.Addresses = parseAddresses(remarks)
+
+	switch strings.ToLower(strings.TrimSpace(sdn.SDNType)) {
+	case "-0-", "":
+		out.Type = search.EntityBusiness
+		out.Business = &search.Business{
+			Name: sdn.SDNName,
+		}
+		out.Business.Identifier = makeIdentifiers(remarks, []string{
+			"Branch Unit Number",
+			"Business Number",
+			"Business Registration Document",
+			"Business Registration Number",
+			"Certificate of Incorporation Number",
+			"Chamber of Commerce Number",
+			"Chinese Commercial Code",
+			"Registered Charity No.",
+			"Commercial Registry Number",
+			"Company Number",
+			"Enterprise Number",
+			"Legal Entity Number",
+			"Registration Number",
+		})
+
+	case "individual":
+		out.Type = search.EntityPerson
+		out.Person = &search.Person{
+			Name:   sdn.SDNName,
+			Gender: search.Gender(strings.ToLower(firstValue(findMatchingRemarks(remarks, "Gender")))),
+		}
+
+		// Title from SDN field needs to be prepended if non-empty
+		if sdn.Title != "" {
+			titles = append([]string{sdn.Title}, titles...)
+		}
+		out.Titles = titles
+
+		// Extract alternative names
+		out.Person.AltNames = parseAltNames(remarks)
+
+		// Handle birth date
+		out.Person.BirthDate = withFirstP(findMatchingRemarks(remarks, "DOB"), func(in remark) *time.Time {
+			t, err := parseTime(dobPatterns, in.value)
+			if t.IsZero() || err != nil {
+				return nil
+			}
+			return &t
+		})
+
+		// Parse government IDs
+		out.Person.GovernmentIDs = parseGovernmentIDs(remarks)
+
+	case "vessel":
+		out.Type = search.EntityVessel
+		out.Vessel = &search.Vessel{
+			Name:      sdn.SDNName,
+			IMONumber: firstValue(findMatchingRemarks(remarks, "IMO")),
+			Type: withFirstF(findMatchingRemarks(remarks, "Vessel Type"), func(r remark) search.VesselType {
+				return normalizeVesselType(r.value)
+			}),
+			Flag:                   normalizeCountryCode(firstValue(findMatchingRemarks(remarks, "Flag"))),
+			MMSI:                   firstValue(findMatchingRemarks(remarks, "MMSI")),
+			Tonnage:                parseTonnage(firstValue(findMatchingRemarks(remarks, "Tonnage"))),
+			CallSign:               sdn.CallSign,
+			GrossRegisteredTonnage: parseTonnage(sdn.GrossRegisteredTonnage),
+			Owner:                  sdn.VesselOwner,
+		}
+
+	case "aircraft":
+		out.Type = search.EntityAircraft
+		out.Aircraft = &search.Aircraft{
+			Name: sdn.SDNName,
+			Type: normalizeAircraftType(firstValue(findMatchingRemarks(remarks, "Aircraft Type"))),
+			Flag: normalizeCountryCode(firstValue(findMatchingRemarks(remarks, "Flag"))),
+			Built: withFirstP(findMatchingRemarks(remarks, "Manufacture Date"), func(in remark) *time.Time {
+				t, err := parseTime(dobPatterns, in.value)
+				if t.IsZero() || err != nil {
+					return nil
+				}
+				return &t
+			}),
+			Model:        firstValue(findMatchingRemarks(remarks, "Aircraft Model")),
+			SerialNumber: parseSerialNumber(remarks),
+			ICAOCode:     firstValue(findMatchingRemarks(remarks, "ICAO Code")),
+		}
+	}
+
+	return out
+}
+
+func parseAltNames(remarks []string) []string {
+	var names []string
+	for _, r := range remarks {
+		matches := akaRegex.FindAllStringSubmatch(r, -1)
+		for _, m := range matches {
+			if len(m) > 1 {
+				name := strings.Trim(m[1], "'")
+				names = append(names, name)
+			}
+		}
+	}
+	return names
+}
+
+var (
+	// Passports
+	governmentIDPassportRegex       = regexp.MustCompile(`(?i)Passport\s+(?:#|No\.|Number)?\s*([A-Z0-9]+)`)
+	governmentIDDiplomaticPassRegex = regexp.MustCompile(`(?i)Diplomatic\s+Passport\s+([A-Z0-9]+)`)
+
+	// Drivers Licenses
+	governmentIDDriversLicenseRegex = regexp.MustCompile(`(?i)Driver'?s?\s+License\s+(?:No\.|Number)?\s*(?:[A-Z]-)?([A-Z0-9]+)`)
+
+	// National IDs
+	governmentIDNationalRegex   = regexp.MustCompile(`(?i)National\s+ID\s+(?:No\.|Number)?\s*([A-Z0-9-]+)`)
+	governmentIDPersonalIDRegex = regexp.MustCompile(`(?i)Personal\s+ID\s+(?:Card)?\s*(?:No\.|Number)?\s*([A-Z0-9-]+)`)
+
+	// Tax IDs
+	governmentIDTaxRegex  = regexp.MustCompile(`(?i)Tax\s+ID\s+(?:No\.|Number)?\s*([A-Z0-9-]+)`)
+	governmentIDCUITRegex = regexp.MustCompile(`(?i)C\.?U\.?I\.?T\.?\s+(?:No\.|Number)?\s*([A-Z0-9-]+)`)
+
+	// Social Security Numbers
+	governmentIDSSNRegex = regexp.MustCompile(`(?i)SSN\s+([0-9-]+)`)
+
+	// Latin American IDs
+	governmentIDCedulaRegex = regexp.MustCompile(`(?i)Cedula\s+(?:No\.|Number)?\s*([A-Z0-9-]+)`)
+	governmentIDCURPRegex   = regexp.MustCompile(`(?i)C\.?U\.?R\.?P\.?\s+(?:#|No\.|Number)?\s*([A-Z0-9-]+)`)
+
+	// Electoral IDs
+	governmentIDElectoralRegex = regexp.MustCompile(`(?i)Electoral\s+Registry\s+(?:No\.|Number)?\s*([A-Z0-9-]+)`)
+
+	// Business Registration
+	governmentIDBusinessRegistrationRegex = regexp.MustCompile(`(?i)Business\s+Registration\s+(?:No\.|Number|Document)?\s*([A-Z0-9-]+)`)
+	governmentIDCommercialRegistryRegex   = regexp.MustCompile(`(?i)Commercial\s+Registry\s+(?:No\.|Number)?\s*([A-Z0-9-./]+)`)
+
+	// Birth Certificates
+	governmentIDBirthCertRegex = regexp.MustCompile(`(?i)Birth\s+Certificate\s+(?:No\.|Number)?\s*([A-Z0-9]+)`)
+
+	// Refugee Documents
+	governmentIDRefugeeRegex = regexp.MustCompile(`(?i)Refugee\s+ID\s+(?:Card)?\s*([A-Z0-9]+)`)
+)
+
+func parseGovernmentIDs(remarks []string) []search.GovernmentID {
+	var ids []search.GovernmentID
+
+	// Map of regex patterns to GovernmentIDType
+	idPatterns := map[*regexp.Regexp]search.GovernmentIDType{
+		governmentIDPassportRegex:             search.GovernmentIDPassport,
+		governmentIDDriversLicenseRegex:       search.GovernmentIDDriversLicense,
+		governmentIDPassportRegex:             search.GovernmentIDPassport,
+		governmentIDDiplomaticPassRegex:       search.GovernmentIDDiplomaticPass,
+		governmentIDDriversLicenseRegex:       search.GovernmentIDDriversLicense,
+		governmentIDNationalRegex:             search.GovernmentIDNational,
+		governmentIDPersonalIDRegex:           search.GovernmentIDPersonalID,
+		governmentIDTaxRegex:                  search.GovernmentIDTax,
+		governmentIDCUITRegex:                 search.GovernmentIDCUIT,
+		governmentIDSSNRegex:                  search.GovernmentIDSSN,
+		governmentIDCedulaRegex:               search.GovernmentIDCedula,
+		governmentIDCURPRegex:                 search.GovernmentIDCURP,
+		governmentIDElectoralRegex:            search.GovernmentIDElectoral,
+		governmentIDBusinessRegistrationRegex: search.GovernmentIDBusinessRegisration,
+		governmentIDCommercialRegistryRegex:   search.GovernmentIDCommercialRegistry,
+		governmentIDBirthCertRegex:            search.GovernmentIDBirthCert,
+		governmentIDRefugeeRegex:              search.GovernmentIDRefugee,
+	}
+
+	for _, r := range remarks {
+		for re, idType := range idPatterns {
+			if matches := re.FindStringSubmatch(r); len(matches) > 1 {
+				// Clean the identifier by removing trailing punctuation
+				identifier := strings.TrimRight(matches[1], ".;,")
+
+				// Extract country and dates if present
+				country := extractCountry(r)
+
+				// Some IDs have issued/expiry dates - we could add these to the GovernmentID struct
+				// issued := extractDate(r, "issued")
+				// expires := extractDate(r, "expires")
+
+				ids = append(ids, search.GovernmentID{
+					Type:       idType,
+					Country:    normalizeCountryCode(country),
+					Identifier: identifier,
+				})
+			}
+		}
+	}
+
+	return ids
+}
+
+func normalizeCountryCode(country string) string {
+	// TODO: Implement conversion to ISO-3166
+	return strings.TrimSpace(country)
+}
+
+func normalizeVesselType(vesselType string) search.VesselType {
+	switch strings.ToLower(strings.TrimSpace(vesselType)) {
+	case "cargo":
+		return search.VesselTypeCargo
+	default:
+		return search.VesselTypeUnknown
+	}
+}
+
+func normalizeAircraftType(aircraftType string) search.AircraftType {
+	switch strings.ToLower(strings.TrimSpace(aircraftType)) {
+	case "cargo":
+		return search.AircraftCargo
+	default:
+		return search.AircraftTypeUnknown
+	}
+}
+
+func parseTonnage(value string) int {
+	// Remove commas and convert to int
+	value = strings.ReplaceAll(value, ",", "")
+	tonnage, _ := strconv.Atoi(value)
+	return tonnage
+}
+
+func parseSerialNumber(remarks []string) string {
+	for _, r := range findMatchingRemarks(remarks, "Serial Number") {
+		// Remove parenthetical content and clean
+		idx := strings.Index(r.value, ")")
+		if idx > -1 && len(r.value) > idx+1 {
+			return strings.TrimSpace(r.value[idx+1:])
+		}
+		return strings.TrimSpace(r.value)
+	}
+	return ""
+}
+
+func parseAddresses(remarks []string) []search.Address {
+	// TODO: Implement address parsing
+	return nil
+}
+
+var (
+	// Regular expressions for parsing relationships and sanctions
+	linkedToRegex   = regexp.MustCompile(`(?i)Linked\s+To:\s+([^;]+)`)
+	subsidiaryRegex = regexp.MustCompile(`(?i)Subsidiary\s+Of:\s+([^;]+)`)
+	ownedByRegex    = regexp.MustCompile(`(?i)(?:Owned|Controlled)\s+By:\s+([^;]+)`)
+	sanctionsRegex  = regexp.MustCompile(`(?i)Additional\s+Sanctions\s+Information\s+-\s+([^;]+)`)
+	formerNameRegex = regexp.MustCompile(`(?i)(?:Former|Previous|f\.k\.a\.|p\.k\.a\.)\s+(?:Name|Vessel):\s+([^;]+)`)
+	titleRegex      = regexp.MustCompile(`(?i)Title:\s+([^;]+)`)
+
+	cryptoAddressRegex = regexp.MustCompile(`(?i)Digital\s+Currency\s+Address\s+-\s+([A-Z0-9]+)\s+([A-Z0-9]+)`) // Matches "Digital Currency Address - XBT 1234abc..."
+)
+
+func parseRemarks(remarks []string) ([]search.Affiliation, *search.SanctionsInfo, []search.HistoricalInfo, []string) {
+	var affiliations []search.Affiliation
+	var historicalInfo []search.HistoricalInfo
+	var titles []string
+	sanctionsInfo := &search.SanctionsInfo{}
+
+	for _, remark := range remarks {
+		// Parse affiliations
+		if matches := linkedToRegex.FindAllStringSubmatch(remark, -1); matches != nil {
+			for _, m := range matches {
+				affiliations = append(affiliations, search.Affiliation{
+					EntityName: strings.TrimSpace(m[1]),
+					Type:       "Linked To",
+				})
+			}
+		}
+
+		// Parse subsidiary relationships
+		if matches := subsidiaryRegex.FindAllStringSubmatch(remark, -1); matches != nil {
+			for _, m := range matches {
+				affiliations = append(affiliations, search.Affiliation{
+					EntityName: strings.TrimSpace(m[1]),
+					Type:       "Subsidiary Of",
+				})
+			}
+		}
+
+		// Parse owned/controlled by relationships
+		if matches := ownedByRegex.FindAllStringSubmatch(remark, -1); matches != nil {
+			for _, m := range matches {
+				affiliations = append(affiliations, search.Affiliation{
+					EntityName: strings.TrimSpace(m[1]),
+					Type:       "Subsidiary Of",
+				})
+			}
+		}
+
+		// Parse sanctions information
+		if matches := sanctionsRegex.FindStringSubmatch(remark); matches != nil {
+			info := strings.TrimSpace(matches[1])
+			sanctionsInfo.Description = info
+			if strings.Contains(strings.ToLower(info), "secondary sanctions") {
+				sanctionsInfo.Secondary = true
+			}
+		}
+
+		// Parse historical information
+		if matches := formerNameRegex.FindAllStringSubmatch(remark, -1); matches != nil {
+			for _, m := range matches {
+				historicalInfo = append(historicalInfo, search.HistoricalInfo{
+					Type:  "Former Name",
+					Value: strings.TrimSpace(m[1]),
+				})
+			}
+		}
+
+		// Parse titles
+		if matches := titleRegex.FindAllStringSubmatch(remark, -1); matches != nil {
+			for _, m := range matches {
+				titles = append(titles, strings.TrimSpace(m[1]))
+			}
+		}
+	}
+
+	return deduplicateAffiliations(affiliations),
+		sanitizeSanctionsInfo(sanctionsInfo),
+		deduplicateHistoricalInfo(historicalInfo),
+		deduplicateTitles(titles)
+}
+
+func deduplicateAffiliations(affiliations []search.Affiliation) []search.Affiliation {
+	seen := make(map[string]bool)
+	var result []search.Affiliation
+
+	for _, aff := range affiliations {
+		key := aff.Type + "|" + aff.EntityName
+		if !seen[key] {
+			seen[key] = true
+			result = append(result, aff)
+		}
+	}
+	return result
+}
+
+func sanitizeSanctionsInfo(info *search.SanctionsInfo) *search.SanctionsInfo {
+	if info == nil || (info.Description == "" && !info.Secondary && len(info.Programs) == 0) {
+		return nil
+	}
+	return info
+}
+
+func deduplicateHistoricalInfo(info []search.HistoricalInfo) []search.HistoricalInfo {
+	seen := make(map[string]bool)
+	var result []search.HistoricalInfo
+
+	for _, hi := range info {
+		key := hi.Type + "|" + hi.Value
+		if !seen[key] {
+			seen[key] = true
+			result = append(result, hi)
+		}
+	}
+	return result
+}
+
+func deduplicateTitles(titles []string) []string {
+	seen := make(map[string]bool)
+	var result []string
+
+	for _, title := range titles {
+		if !seen[title] {
+			seen[title] = true
+			result = append(result, title)
+		}
+	}
+	return result
+}
+
+func parseCryptoAddresses(remarks []string) []search.CryptoAddress {
+	var addresses []search.CryptoAddress
+
+	for _, remark := range remarks {
+		matches := cryptoAddressRegex.FindAllStringSubmatch(remark, -1)
+		for _, m := range matches {
+			if len(m) > 2 {
+				addresses = append(addresses, search.CryptoAddress{
+					Currency: strings.TrimSpace(m[1]),
+					Address:  strings.TrimSpace(m[2]),
+				})
+			}
+		}
+	}
+
+	// Deduplicate addresses
+	seen := make(map[string]bool)
+	var unique []search.CryptoAddress
+
+	for _, addr := range addresses {
+		key := addr.Currency + "|" + addr.Address
+		if !seen[key] {
+			seen[key] = true
+			unique = append(unique, addr)
+		}
+	}
+
+	return unique
+}
 
 // ContactInfo
 // Fax: 0097282858208.
@@ -213,10 +545,8 @@ func parseTime(acceptedLayouts []string, value string) (time.Time, error) {
 // Website Oboronlogistika.ru
 // Website http://comitet.su/about/
 // http://www.saraproperties.co.uk (website).
-
 // a.k.a. 'ABU AHMAD ISHAB'.
 // a.k.a. 'ZAMANI, Aziz Shah'
-
 // GovernmentIDs
 //
 // Cedula No. 94428531 (Colombia)

@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"testing"
 	"time"
 
@@ -25,100 +26,6 @@ func testInputs(tb testing.TB, paths ...string) map[string]io.ReadCloser {
 		input[filename] = fd
 	}
 	return input
-}
-
-func TestMapper__Person(t *testing.T) {
-	res, err := Read(testInputs(t, filepath.Join("..", "..", "test", "testdata", "sdn.csv")))
-	require.NoError(t, err)
-
-	var sdn *SDN
-	for i := range res.SDNs {
-		if res.SDNs[i].EntityID == "15102" {
-			sdn = res.SDNs[i]
-		}
-	}
-	require.NotNil(t, sdn)
-
-	e := ToEntity(*sdn)
-	require.Equal(t, "MORENO, Daniel", e.Name)
-	require.Equal(t, search.EntityPerson, e.Type)
-	require.Equal(t, search.SourceUSOFAC, e.Source)
-
-	require.NotNil(t, e.Person)
-	require.Equal(t, "MORENO, Daniel", e.Person.Name)
-	require.Equal(t, "", string(e.Person.Gender))
-	require.Equal(t, "1972-10-12T00:00:00Z", e.Person.BirthDate.Format(time.RFC3339))
-	require.Nil(t, e.Person.DeathDate)
-	require.Len(t, e.Person.GovernmentIDs, 0)
-
-	require.Nil(t, e.Business)
-	require.Nil(t, e.Organization)
-	require.Nil(t, e.Aircraft)
-	require.Nil(t, e.Vessel)
-
-	require.Equal(t, "15102", e.SourceData.EntityID)
-}
-
-func TestMapper__Vessel(t *testing.T) {
-	res, err := Read(testInputs(t, filepath.Join("..", "..", "test", "testdata", "sdn.csv")))
-	require.NoError(t, err)
-
-	var sdn *SDN
-	for i := range res.SDNs {
-		if res.SDNs[i].EntityID == "15036" {
-			sdn = res.SDNs[i]
-		}
-	}
-	require.NotNil(t, sdn)
-
-	e := ToEntity(*sdn)
-	require.Equal(t, "ARTAVIL", e.Name)
-	require.Equal(t, search.EntityVessel, e.Type)
-	require.Equal(t, search.SourceUSOFAC, e.Source)
-
-	require.Nil(t, e.Person)
-	require.Nil(t, e.Business)
-	require.Nil(t, e.Organization)
-	require.Nil(t, e.Aircraft)
-	require.NotNil(t, e.Vessel)
-
-	require.Equal(t, "ARTAVIL", e.Vessel.Name)
-	require.Equal(t, "Malta", e.Vessel.Flag)
-	require.Equal(t, "9187629", e.Vessel.IMONumber)
-	require.Equal(t, "572469210", e.Vessel.MMSI)
-
-	require.Equal(t, "15036", e.SourceData.EntityID)
-}
-
-func TestMapper__Aircraft(t *testing.T) {
-	res, err := Read(testInputs(t, filepath.Join("..", "..", "test", "testdata", "sdn.csv")))
-	require.NoError(t, err)
-
-	var sdn *SDN
-	for i := range res.SDNs {
-		if res.SDNs[i].EntityID == "18158" {
-			sdn = res.SDNs[i]
-		}
-	}
-	require.NotNil(t, sdn)
-
-	e := ToEntity(*sdn)
-	require.Equal(t, "MSN 550", e.Name)
-	require.Equal(t, search.EntityAircraft, e.Type)
-	require.Equal(t, search.SourceUSOFAC, e.Source)
-
-	require.Nil(t, e.Person)
-	require.Nil(t, e.Business)
-	require.Nil(t, e.Organization)
-	require.NotNil(t, e.Aircraft)
-	require.Nil(t, e.Vessel)
-
-	require.Equal(t, "MSN 550", e.Aircraft.Name)
-	require.Equal(t, "1995-01-01", e.Aircraft.Built.Format(time.DateOnly))
-	require.Equal(t, "Airbus A321-131", e.Aircraft.Model)
-	require.Equal(t, "550", e.Aircraft.SerialNumber)
-
-	require.Equal(t, "18158", e.SourceData.EntityID)
 }
 
 func TestParseTime(t *testing.T) {
@@ -147,4 +54,307 @@ func TestParseTime(t *testing.T) {
 		tt, _ = parseTime(dobPatterns, "circa 1979-1982")
 		require.Equal(t, "1979-01-01", tt.Format(time.DateOnly))
 	})
+}
+
+func TestParseGovernmentIDs(t *testing.T) {
+	tests := []struct {
+		name    string
+		remarks []string
+		want    []search.GovernmentID
+	}{
+		{
+			name: "passport only",
+			remarks: []string{
+				"Passport A123456 (Iran) expires 2024",
+			},
+			want: []search.GovernmentID{
+				{
+					Type:       search.GovernmentIDPassport,
+					Country:    "Iran",
+					Identifier: "A123456",
+				},
+			},
+		},
+		{
+			name: "drivers license only",
+			remarks: []string{
+				"Driver's License No. 04900377 (Moldova) issued 02 Jul 2004",
+			},
+			want: []search.GovernmentID{
+				{
+					Type:       search.GovernmentIDDriversLicense,
+					Country:    "Moldova",
+					Identifier: "04900377",
+				},
+			},
+		},
+		{
+			name: "multiple IDs",
+			remarks: []string{
+				"Passport A123456 (Iran) expires 2024",
+				"Driver's License No. 04900377 (Moldova) issued 02 Jul 2004",
+			},
+			want: []search.GovernmentID{
+				{
+					Type:       search.GovernmentIDPassport,
+					Country:    "Iran",
+					Identifier: "A123456",
+				},
+				{
+					Type:       search.GovernmentIDDriversLicense,
+					Country:    "Moldova",
+					Identifier: "04900377",
+				},
+			},
+		},
+		{
+			name: "various driver license formats",
+			remarks: []string{
+				"Driver License M600161650080 (United States)",
+				"Drivers License No. B-12345 (Canada)",
+				"Driver's License Number 987654321 (Mexico)",
+			},
+			want: []search.GovernmentID{
+				{
+					Type:       search.GovernmentIDDriversLicense,
+					Country:    "United States",
+					Identifier: "M600161650080",
+				},
+				{
+					Type:       search.GovernmentIDDriversLicense,
+					Country:    "Canada",
+					Identifier: "12345",
+				},
+				{
+					Type:       search.GovernmentIDDriversLicense,
+					Country:    "Mexico",
+					Identifier: "987654321",
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := parseGovernmentIDs(tt.remarks)
+			require.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestParseRemarks(t *testing.T) {
+	tests := []struct {
+		name             string
+		remarks          []string
+		wantAffiliations []search.Affiliation
+		wantSanctions    *search.SanctionsInfo
+		wantHistorical   []search.HistoricalInfo
+		wantTitles       []string
+	}{
+		{
+			name: "complete remarks",
+			remarks: []string{
+				"Linked To: ISLAMIC REVOLUTIONARY GUARD CORPS (IRGC)-QODS FORCE; " +
+					"Subsidiary Of: BANK OF IRAN; " +
+					"Additional Sanctions Information - Subject to Secondary Sanctions; " +
+					"Former Name: TEHRAN BANK; Former Name: GLORY; " +
+					"Title: Director; Title: Board Member",
+			},
+			wantAffiliations: []search.Affiliation{
+				{
+					EntityName: "ISLAMIC REVOLUTIONARY GUARD CORPS (IRGC)-QODS FORCE",
+					Type:       "Linked To",
+				},
+				{
+					EntityName: "BANK OF IRAN",
+					Type:       "Subsidiary Of",
+				},
+			},
+			wantSanctions: &search.SanctionsInfo{
+				Description: "Subject to Secondary Sanctions",
+				Secondary:   true,
+			},
+			wantHistorical: []search.HistoricalInfo{
+				{
+					Type:  "Former Name",
+					Value: "TEHRAN BANK",
+				},
+				{
+					Type:  "Former Name",
+					Value: "GLORY",
+				},
+			},
+			wantTitles: []string{
+				"Director",
+				"Board Member",
+			},
+		},
+		{
+			name: "deduplication test",
+			remarks: []string{
+				"Linked To: CORP A; Linked To: CORP A",         // Duplicate affiliation
+				"Former Name: OLD NAME; Former Name: OLD NAME", // Duplicate historical
+				"Title: CEO; Title: CEO",                       // Duplicate title
+			},
+			wantAffiliations: []search.Affiliation{
+				{
+					EntityName: "CORP A",
+					Type:       "Linked To",
+				},
+			},
+			wantSanctions: nil,
+			wantHistorical: []search.HistoricalInfo{
+				{
+					Type:  "Former Name",
+					Value: "OLD NAME",
+				},
+			},
+			wantTitles: []string{"CEO"},
+		},
+		{
+			name: "multiple relationships",
+			remarks: []string{
+				"Linked To: CORP A; Controlled By: CORP B; Owned By: CORP C",
+			},
+			wantAffiliations: []search.Affiliation{
+				{
+					EntityName: "CORP A",
+					Type:       "Linked To",
+				},
+				{
+					EntityName: "CORP B",
+					Type:       "Subsidiary Of",
+				},
+				{
+					EntityName: "CORP C",
+					Type:       "Subsidiary Of",
+				},
+			},
+			wantSanctions:  nil,
+			wantHistorical: nil,
+			wantTitles:     nil,
+		},
+		{
+			name:             "empty remarks",
+			remarks:          []string{},
+			wantAffiliations: nil,
+			wantSanctions:    nil,
+			wantHistorical:   nil,
+			wantTitles:       nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotAff, gotSanc, gotHist, gotTitles := parseRemarks(tt.remarks)
+
+			// Sort affiliations for consistent comparison
+			sort.Slice(gotAff, func(i, j int) bool {
+				if gotAff[i].Type != gotAff[j].Type {
+					return gotAff[i].Type < gotAff[j].Type
+				}
+				return gotAff[i].EntityName < gotAff[j].EntityName
+			})
+			sort.Slice(tt.wantAffiliations, func(i, j int) bool {
+				if tt.wantAffiliations[i].Type != tt.wantAffiliations[j].Type {
+					return tt.wantAffiliations[i].Type < tt.wantAffiliations[j].Type
+				}
+				return tt.wantAffiliations[i].EntityName < tt.wantAffiliations[j].EntityName
+			})
+
+			// Test affiliations
+			require.Equal(t, tt.wantAffiliations, gotAff)
+
+			// Test sanctions info
+			if tt.wantSanctions == nil {
+				require.Nil(t, gotSanc)
+			} else {
+				require.Equal(t, tt.wantSanctions.Description, gotSanc.Description)
+				require.Equal(t, tt.wantSanctions.Secondary, gotSanc.Secondary)
+			}
+
+			// Sort historical info
+			sort.Slice(gotHist, func(i, j int) bool {
+				return gotHist[i].Value < gotHist[j].Value
+			})
+			sort.Slice(tt.wantHistorical, func(i, j int) bool {
+				return tt.wantHistorical[i].Value < tt.wantHistorical[j].Value
+			})
+
+			// Test historical info
+			require.Equal(t, tt.wantHistorical, gotHist)
+
+			// Sort titles
+			sort.Strings(gotTitles)
+			sort.Strings(tt.wantTitles)
+
+			// Test titles
+			require.Equal(t, tt.wantTitles, gotTitles)
+		})
+	}
+}
+
+func TestParseCryptoAddresses(t *testing.T) {
+	tests := []struct {
+		name    string
+		remarks []string
+		want    []search.CryptoAddress
+	}{
+		{
+			name: "single address",
+			remarks: []string{
+				"Digital Currency Address - XBT bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4",
+			},
+			want: []search.CryptoAddress{
+				{
+					Currency: "XBT",
+					Address:  "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4",
+				},
+			},
+		},
+		{
+			name: "multiple addresses",
+			remarks: []string{
+				"Digital Currency Address - XBT bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4",
+				"Digital Currency Address - ETH 0xb794f5ea0ba39494ce839613fffba74279579268",
+			},
+			want: []search.CryptoAddress{
+				{
+					Currency: "XBT",
+					Address:  "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4",
+				},
+				{
+					Currency: "ETH",
+					Address:  "0xb794f5ea0ba39494ce839613fffba74279579268",
+				},
+			},
+		},
+		{
+			name: "duplicate addresses",
+			remarks: []string{
+				"Digital Currency Address - XBT bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4",
+				"Digital Currency Address - XBT bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4",
+			},
+			want: []search.CryptoAddress{
+				{
+					Currency: "XBT",
+					Address:  "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4",
+				},
+			},
+		},
+		{
+			name: "no addresses",
+			remarks: []string{
+				"Some other remark",
+			},
+			want: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := parseCryptoAddresses(tt.remarks)
+			require.Equal(t, tt.want, got)
+		})
+	}
 }
