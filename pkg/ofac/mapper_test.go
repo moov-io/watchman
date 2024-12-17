@@ -1,6 +1,8 @@
 package ofac
 
 import (
+	"io"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -10,8 +12,23 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func testInputs(tb testing.TB, paths ...string) map[string]io.ReadCloser {
+	tb.Helper()
+
+	input := make(map[string]io.ReadCloser)
+	for _, path := range paths {
+		_, filename := filepath.Split(path)
+
+		fd, err := os.Open(path)
+		require.NoError(tb, err)
+
+		input[filename] = fd
+	}
+	return input
+}
+
 func TestMapper__Person(t *testing.T) {
-	res, err := Read(filepath.Join("..", "..", "test", "testdata", "sdn.csv"))
+	res, err := Read(testInputs(t, filepath.Join("..", "..", "test", "testdata", "sdn.csv")))
 	require.NoError(t, err)
 
 	var sdn *SDN
@@ -43,7 +60,7 @@ func TestMapper__Person(t *testing.T) {
 }
 
 func TestMapper__Vessel(t *testing.T) {
-	res, err := Read(filepath.Join("..", "..", "test", "testdata", "sdn.csv"))
+	res, err := Read(testInputs(t, filepath.Join("..", "..", "test", "testdata", "sdn.csv")))
 	require.NoError(t, err)
 
 	var sdn *SDN
@@ -74,7 +91,7 @@ func TestMapper__Vessel(t *testing.T) {
 }
 
 func TestMapper__Aircraft(t *testing.T) {
-	res, err := Read(filepath.Join("..", "..", "test", "testdata", "sdn.csv"))
+	res, err := Read(testInputs(t, filepath.Join("..", "..", "test", "testdata", "sdn.csv")))
 	require.NoError(t, err)
 
 	var sdn *SDN
