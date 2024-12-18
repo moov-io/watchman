@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-13] # TODO(adam): macos-latest (ARM)
 
     steps:
     - name: Check out code into the Go module directory
@@ -23,6 +23,9 @@ jobs:
       with:
         go-version: stable
       id: go
+
+    - name: Install deps
+      run: make install
 
     - name: Run Tests (Linux)
       if: runner.os == 'Linux'
@@ -52,6 +55,9 @@ jobs:
     - name: Install make (Windows)
       run: |
         choco install -y make mingw
+
+    - name: Install deps
+      run: make install
 
     - name: Run Short Tests (Non-Linux)
       run: |
@@ -85,23 +91,12 @@ jobs:
         sudo systemctl stop mono-xsp4.service || true
         sudo killall mono || true
 
+    - name: Install deps
+      run: make install
+
     - name: Build Frontend
       run: make build
 
     - name: Docker Build
       if: runner.os == 'Linux'
       run: make docker-hub
-
-    - name: Build batchsearch
-      if: runner.os == 'Linux'
-      run: make build-batchsearch
-
-    # - name: Integration Test
-    #   if: runner.os == 'Linux'
-    #   run: make test-integration
-
-    - name: Test Cleanup
-      if: runner.os == 'Linux' && always()
-      run: |
-        docker compose logs
-        make clean-integration

@@ -25,6 +25,9 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Install deps
+      run: make install
+
     - name: Fuzz
       run: |
         go test ./pkg/usaddress/... -fuzz Fuzz -fuzztime 10m

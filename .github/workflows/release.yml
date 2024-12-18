@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-13, windows-latest] # TODO(adam): macos-latest (ARM)
     steps:
     - name: Set up Go 1.x
       uses: actions/setup-go@v5
@@ -20,6 +20,9 @@ jobs:
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v4
+
+    - name: Install deps
+      run: make install
 
     - name: Short Tests
       if: runner.os == 'Linux'
@@ -58,7 +61,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-13, windows-latest] # TODO(adam): macos-latest (ARM)
     steps:
     - name: Set up Go 1.x
       uses: actions/setup-go@v5
@@ -73,6 +76,9 @@ jobs:
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v4
+
+    - name: Install deps
+      run: make install
 
     - name: Load Release URL File from release job
       uses: actions/download-artifact@v4
@@ -150,9 +156,6 @@ jobs:
 
     - name: Docker Static
       run: make docker-static
-
-    - name: Docker watchmantest
-      run: make docker-watchmantest
 
     - name: Docker Push
       run: |+
