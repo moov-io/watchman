@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/moov-io/watchman/pkg/address"
 	"github.com/moov-io/watchman/pkg/search"
 )
 
@@ -212,6 +213,14 @@ func ToEntity(sdn SDN) search.Entity[SDN] {
 	return out
 }
 
+func parseAddresses(inputs []string) []search.Address {
+	out := make([]search.Address, len(inputs))
+	for i := range inputs {
+		out[i] = address.ParseAddress(inputs[i])
+	}
+	return out
+}
+
 func parseAltNames(remarks []string) []string {
 	var names []string
 	for _, r := range remarks {
@@ -288,21 +297,23 @@ func parseGovernmentIDs(remarks []string) []search.GovernmentID {
 	}
 
 	for _, r := range remarks {
+		// Extract country first
+		countryRaw := extractCountry(r)
+		country := normalizeCountry(countryRaw)
+
+		// Remove the country from the remark for cleaner ID extraction
+		remarkWithoutCountry := r
+		if countryRaw != "" {
+			remarkWithoutCountry = strings.TrimSpace(strings.ReplaceAll(r, "("+countryRaw+")", ""))
+		}
+
 		for re, idType := range idPatterns {
-			if matches := re.FindStringSubmatch(r); len(matches) > 1 {
-				// Clean the identifier by removing trailing punctuation
+			if matches := re.FindStringSubmatch(remarkWithoutCountry); len(matches) > 1 {
 				identifier := strings.TrimRight(matches[1], ".;,")
-
-				// Extract country and dates if present
-				country := extractCountry(r)
-
-				// Some IDs have issued/expiry dates - we could add these to the GovernmentID struct
-				// issued := extractDate(r, "issued")
-				// expires := extractDate(r, "expires")
 
 				ids = append(ids, search.GovernmentID{
 					Type:       idType,
-					Country:    normalizeCountryCode(country),
+					Country:    country, // Use the extracted and normalized country
 					Identifier: identifier,
 				})
 			}
@@ -310,6 +321,38 @@ func parseGovernmentIDs(remarks []string) []search.GovernmentID {
 	}
 
 	return ids
+}
+
+func normalizeCountry(country string) string {
+	// Mapping of common country name variations to standard names
+	countryMap := map[string]string{
+		"USA":    "United States",
+		"U.S.A.": "United States",
+		"US":     "United States",
+		"U.S.":   "United States",
+		"UK":     "United Kingdom",
+		"U.K.":   "United Kingdom",
+		"UAE":    "United Arab Emirates",
+		"ROK":    "South Korea",
+		"DPRK":   "North Korea",
+		"PRC":    "China",
+		"ROC":    "Taiwan",
+		"россия": "Russia",
+		"РОССИЯ": "Russia",
+		"中国":     "China",
+		"日本":     "Japan",
+		"한국":     "South Korea",
+		"España": "Spain",
+		"ESPAÑA": "Spain",
+	}
+
+	// First try direct mapping
+	if normalized, exists := countryMap[strings.ToUpper(strings.TrimSpace(country))]; exists {
+		return normalized
+	}
+
+	// If no direct mapping, return original (could be extended with more sophisticated matching)
+	return country
 }
 
 func normalizeCountryCode(country string) string {
@@ -352,11 +395,6 @@ func parseSerialNumber(remarks []string) string {
 		return strings.TrimSpace(r.value)
 	}
 	return ""
-}
-
-func parseAddresses(remarks []string) []search.Address {
-	// TODO: Implement address parsing
-	return nil
 }
 
 var (
