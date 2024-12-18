@@ -157,9 +157,6 @@ jobs:
     - name: Docker Static
       run: make docker-static
 
-    - name: Docker watchmantest
-      run: make docker-watchmantest
-
     - name: Docker Push
       run: |+
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin

@@ -85,7 +85,7 @@ install-libpostal:
 
 .PHONY: install install-linux install-macos install-windows install-libpostal
 
-build: build-server build-batchsearch build-watchmantest
+build: build-server build-batchsearch
 ifeq ($(OS),Windows_NT)
 	@echo "Skipping webui build on Windows."
 else
@@ -147,7 +147,7 @@ else
 	CGO_ENABLED=0 GOOS=$(PLATFORM) go build -o bin/watchman-$(PLATFORM)-amd64 github.com/moov-io/watchman/cmd/server
 endif
 
-docker: clean docker-hub docker-openshift docker-static docker-watchmantest
+docker: clean docker-hub docker-openshift docker-static
 
 docker-hub:
 	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman:$(VERSION) -f Dockerfile .
@@ -160,10 +160,6 @@ docker-openshift:
 docker-static:
 	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman:static -f Dockerfile-static .
 
-docker-watchmantest:
-	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchmantest:$(VERSION) -f ./cmd/watchmantest/Dockerfile .
-	docker tag moov/watchmantest:$(VERSION) moov/watchmantest:latest
-
 release: docker AUTHORS
 	go vet ./...
 	go test -coverprofile=cover-$(VERSION).out ./...
@@ -173,7 +169,6 @@ release-push:
 	docker push moov/watchman:$(VERSION)
 	docker push moov/watchman:latest
 	docker push moov/watchman:static
-	docker push moov/watchmantest:$(VERSION)
 
 quay-push:
 	docker push quay.io/moov/watchman:$(VERSION)
