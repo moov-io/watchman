@@ -7,16 +7,42 @@ RUN dnf install -y --allowerasing --setopt=tsflags=nodocs \
     automake \
     libtool \
     pkgconfig \
+    gcc \
+    gcc-c++ \
+    make \
+    git \
     && dnf clean all
+
+# Install libpostal with models - Fixed path handling
+RUN git clone https://github.com/openvenues/libpostal \
+    && cd libpostal \
+    && ./bootstrap.sh \
+    && ./configure --prefix=/usr/local \
+    && make -j4 \
+    && make install \
+    && mkdir -p /usr/local/share/libpostal \
+    && cd src \
+    && PATH=$PATH:/usr/local/bin ./libpostal_data download all /usr/local/share/libpostal \
+    && chown -R 1001:0 /usr/local \
+    && chmod -R g=u /usr/local
 
 # Stage 2: Build the application
 FROM registry.access.redhat.com/ubi9/go-toolset as builder
 ARG VERSION
 WORKDIR /opt/app-root/src/
+
+# Copy the entire /usr and /usr/local directories
 COPY --from=builder-deps /usr /usr
+COPY --from=builder-deps /usr/local /usr/local
+
+# Set environment variables for build
+ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
+ENV LD_LIBRARY_PATH=/usr/local/lib
+
+# Copy source and build
 COPY . .
 RUN go mod download
-RUN make install
+USER 1001
 RUN VERSION=${VERSION} make build-server
 
 # Stage 3: Frontend build
@@ -32,7 +58,25 @@ ARG VERSION=unknown
 LABEL maintainer="Moov <oss@moov.io>"
 LABEL name="watchman"
 LABEL version=$VERSION
+
+# Install runtime dependencies
+USER root
+RUN microdnf install -y \
+    libstdc++ \
+    && microdnf clean all
+
+# Copy libpostal files and setup
+COPY --from=builder-deps /usr/local /usr/local
+ENV LD_LIBRARY_PATH=/usr/local/lib
+
+# Copy application files
 COPY --from=builder /opt/app-root/src/bin/server /bin/server
 COPY --from=frontend /watchman/build/ /watchman/
 ENV WEB_ROOT=/watchman/
+
+# Set final permissions
+RUN chown -R 1001:0 /bin/server /watchman \
+    && chmod -R g=u /bin/server /watchman
+
+USER 1001
 ENTRYPOINT ["/bin/server"]
