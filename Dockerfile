@@ -1,11 +1,18 @@
+# Backend build stage
 FROM golang:1.23-bookworm as backend
 ARG VERSION
 WORKDIR /src
-COPY . /src
-RUN go mod download
-RUN apt-get update && apt-get install -y curl autoconf automake libtool pkg-config git
 
-# Clone and install libpostal
+# Install system dependencies first
+RUN apt-get update && apt-get install -y \
+    curl \
+    autoconf \
+    automake \
+    libtool \
+    pkg-config \
+    git
+
+# Clone and build libpostal (rarely changes)
 RUN git clone https://github.com/openvenues/libpostal.git /src/libpostal
 WORKDIR /src/libpostal
 RUN ./bootstrap.sh && \
@@ -14,45 +21,55 @@ RUN ./bootstrap.sh && \
     make install && \
     ldconfig
 
-# Download libpostal data files
+# Download libpostal data (rarely changes)
 RUN libpostal_data download all /usr/local/share/libpostal
 
-# Build the application
-WORKDIR /src
-RUN go build -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/server /src/cmd/server
+# Copy go.mod and go.sum first to cache dependencies
+COPY go.mod go.sum /src/
+RUN go mod download
 
+# Now copy the rest of the source code (frequently changes)
+COPY . /src/
+WORKDIR /src
+RUN VERSION=${VERSION} make build-server
+
+# Frontend build stage
 FROM node:22-bookworm as frontend
 ARG VERSION
-COPY webui/ /watchman/
 WORKDIR /watchman/
+
+# Copy package files first to cache dependencies
+COPY webui/package*.json webui/
+WORKDIR /watchman/webui/
 RUN npm install --legacy-peer-deps
+
+# Copy and build frontend source (frequently changes)
+COPY webui/ ./
 RUN npm run build
 
+# Final stage
 FROM debian:bookworm
 LABEL maintainer="Moov <oss@moov.io>"
 
-# Install required runtime dependencies
+# Install runtime dependencies
 RUN apt-get update && \
     apt-get install -y \
     libssl3 \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Create necessary directories
+# Create necessary directories and copy libpostal files
 RUN mkdir -p /usr/local/share/libpostal
-
-# Copy libpostal shared libraries and configuration
 COPY --from=backend /usr/local/lib/libpostal.so* /usr/local/lib/
 COPY --from=backend /usr/local/lib/pkgconfig/libpostal.pc /usr/local/lib/pkgconfig/
 COPY --from=backend /usr/local/share/libpostal/ /usr/local/share/libpostal/
-
-# Update shared library cache
 RUN ldconfig
 
 # Copy application files
 COPY --from=backend /src/bin/server /bin/server
-COPY --from=frontend /watchman/build/ /watchman/
+COPY --from=frontend /watchman/webui/build/ /watchman/
 
+# Set environment variables
 ENV WEB_ROOT=/watchman/
 ENV LD_LIBRARY_PATH=/usr/local/lib
 ENV LIBPOSTAL_DATA_DIR=/usr/local/share/libpostal
