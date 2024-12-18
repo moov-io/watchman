@@ -37,5 +37,5 @@ func (c *controller) AppendRoutes(router *mux.Router) *mux.Router {
 }
 
 func (c *controller) search(w http.ResponseWriter, r *http.Request) {
-	// TODO(adam):
+	c.service.Search(r.Context())
 }
