@@ -65,8 +65,7 @@ endif
 	@$(MAKE) install-libpostal
 
 install-windows:
-	pacman -Syu
-	pacman -S autoconf automake curl git make libtool gcc mingw-w64-x86_64-gcc
+	choco install -y mingw autoconf automake curl git make libtool gcc
 	@$(MAKE) install-libpostal
 
 install-libpostal:
