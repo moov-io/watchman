@@ -79,6 +79,7 @@ install-libpostal:
 		make install && \
 		make download-models; \
 	else \
+		$(SUDO) mkdir -p /usr/local/share/libpostal && \
 		$(SUDO) make install && \
 		$(SUDO) make download-models; \
 	fi
