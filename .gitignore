@@ -28,6 +28,8 @@ openapi-generator*jar
 
 *.db
 
+/libpostal/
+
 webui/build/
 webui/node_modules/
 

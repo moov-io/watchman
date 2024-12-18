@@ -19,6 +19,72 @@ endif
 run:
 	CGO_ENABLED=0 go run github.com/moov-io/watchman/cmd/server
 
+# Detect OS
+ifeq ($(OS),Windows_NT)
+    detected_OS := Windows
+else
+    detected_OS := $(shell uname -s)
+endif
+
+# Detect architecture for macOS
+ifeq ($(detected_OS),Darwin)
+    ARCH := $(shell uname -m)
+    ifeq ($(ARCH),arm64)
+        CONFIGURE_FLAGS := --datadir=/tmp/libpostal-data --disable-sse2
+    else
+        CONFIGURE_FLAGS := --datadir=/tmp/libpostal-data
+    endif
+else
+    CONFIGURE_FLAGS := --datadir=/tmp/libpostal-data
+endif
+
+# Installation target
+install:
+ifeq ($(detected_OS),Windows)
+	@$(MAKE) install-windows
+else ifeq ($(detected_OS),Linux)
+	@$(MAKE) install-linux
+else ifeq ($(detected_OS),Darwin)
+	@$(MAKE) install-macos
+else
+	@echo "Unsupported operating system: $(detected_OS)"
+	@exit 1
+endif
+
+install-linux:
+	sudo apt-get install -y curl autoconf automake libtool pkg-config
+	@$(MAKE) install-libpostal
+
+install-macos:
+	brew install curl autoconf automake libtool pkg-config
+	@echo "Detecting architecture: $(ARCH)"
+ifeq ($(ARCH),arm64)
+	@echo "ARM architecture detected (M1/M2). SSE2 will be disabled."
+else
+	@echo "Intel architecture detected. SSE2 optimizations will be enabled."
+endif
+	@$(MAKE) install-libpostal
+
+install-windows:
+	pacman -Syu
+	pacman -S autoconf automake curl git make libtool gcc mingw-w64-x86_64-gcc
+	@$(MAKE) install-libpostal
+
+install-libpostal:
+	@echo "Cloning libpostal repository..."
+	git clone https://github.com/openvenues/libpostal || true
+	cd libpostal && \
+	./bootstrap.sh && \
+	./configure $(CONFIGURE_FLAGS) && \
+	make -j$(shell nproc || echo 4) && \
+	if [ "$(detected_OS)" = "Windows" ]; then \
+		make install; \
+	else \
+		sudo make install; \
+	fi
+
+.PHONY: install install-linux install-macos install-windows install-libpostal
+
 build: build-server build-batchsearch build-watchmantest
 ifeq ($(OS),Windows_NT)
 	@echo "Skipping webui build on Windows."
@@ -38,7 +104,7 @@ build-watchmantest:
 .PHONY: check
 check:
 ifeq ($(OS),Windows_NT)
-	@echo "Skipping checks on Windows, currently unsupported."
+	go test ./... -short
 else
 	@wget -O lint-project.sh https://raw.githubusercontent.com/moov-io/infra/master/go/lint-project.sh
 	@chmod +x ./lint-project.sh

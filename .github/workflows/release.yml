@@ -21,6 +21,9 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v4
 
+    - name: Install deps
+      run: make install
+
     - name: Short Tests
       if: runner.os == 'Linux'
       env:
@@ -73,6 +76,9 @@ jobs:
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v4
+
+    - name: Install deps
+      run: make install
 
     - name: Load Release URL File from release job
       uses: actions/download-artifact@v4
