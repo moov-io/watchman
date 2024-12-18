@@ -17,7 +17,7 @@ endif
 .PHONY: run build build-server docker release check test
 
 run:
-	CGO_ENABLED=0 go run github.com/moov-io/watchman/cmd/server
+	go run github.com/moov-io/watchman/cmd/server
 
 # Detect OS
 ifeq ($(OS),Windows_NT)
@@ -93,13 +93,10 @@ else
 endif
 
 build-server:
-	CGO_ENABLED=0 go build -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/server github.com/moov-io/watchman/cmd/server
+	go build -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/server github.com/moov-io/watchman/cmd/server
 
 build-batchsearch:
-	CGO_ENABLED=0 go build -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/batchsearch github.com/moov-io/watchman/cmd/batchsearch
-
-build-watchmantest:
-	CGO_ENABLED=0 go build -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/watchmantest github.com/moov-io/watchman/cmd/watchmantest
+	go build -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/batchsearch github.com/moov-io/watchman/cmd/batchsearch
 
 .PHONY: check
 check:
@@ -142,9 +139,9 @@ endif
 
 dist: clean build
 ifeq ($(OS),Windows_NT)
-	CGO_ENABLED=0 GOOS=windows go build -o bin/watchman.exe github.com/moov-io/watchman/cmd/server
+	GOOS=windows go build -o bin/watchman.exe github.com/moov-io/watchman/cmd/server
 else
-	CGO_ENABLED=0 GOOS=$(PLATFORM) go build -o bin/watchman-$(PLATFORM)-amd64 github.com/moov-io/watchman/cmd/server
+	GOOS=$(PLATFORM) go build -o bin/watchman-$(PLATFORM)-amd64 github.com/moov-io/watchman/cmd/server
 endif
 
 docker: clean docker-hub docker-openshift docker-static
