@@ -31,6 +31,10 @@ func TestEntityJSON(t *testing.T) {
   "vessel": null,
   "cryptoAddresses": null,
   "addresses": null,
+  "affiliations": null,
+  "sanctionsInfo": null,
+  "historicalInfo": null,
+  "titles": null,
   "sourceData": {
     "entityID": "12345"
   }

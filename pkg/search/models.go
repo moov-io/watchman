@@ -1,6 +1,8 @@
 package search
 
-import "time"
+import (
+	"time"
+)
 
 type Entity[T any] struct {
 	Name     string     `json:"name"`
