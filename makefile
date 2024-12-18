@@ -30,12 +30,10 @@ endif
 ifeq ($(detected_OS),Darwin)
     ARCH := $(shell uname -m)
     ifeq ($(ARCH),arm64)
-        CONFIGURE_FLAGS := --datadir=/tmp/libpostal-data --disable-sse2
-    else
-        CONFIGURE_FLAGS := --datadir=/tmp/libpostal-data
+        CONFIGURE_FLAGS := --disable-sse2
     endif
 else
-    CONFIGURE_FLAGS := --datadir=/tmp/libpostal-data
+    CONFIGURE_FLAGS :=
 endif
 
 # Detect if we need sudo
@@ -79,14 +77,16 @@ install-libpostal:
 	./configure $(CONFIGURE_FLAGS) && \
 	make -j$(shell nproc || echo 4) && \
 	if [ "$(detected_OS)" = "Windows" ]; then \
-		make install; \
+		make install && \
+		make download-models; \
 	else \
-		$(SUDO) make install; \
+		$(SUDO) make install && \
+		$(SUDO) make download-models; \
 	fi
 
 .PHONY: install install-linux install-macos install-windows install-libpostal
 
-build: build-server build-batchsearch
+build: build-server
 ifeq ($(OS),Windows_NT)
 	@echo "Skipping webui build on Windows."
 else
@@ -94,10 +94,7 @@ else
 endif
 
 build-server:
-	go build -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/server github.com/moov-io/watchman/cmd/server
-
-build-batchsearch:
-	go build -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/batchsearch github.com/moov-io/watchman/cmd/batchsearch
+	go build -buildvcs=false -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/server github.com/moov-io/watchman/cmd/server
 
 .PHONY: check
 check:
@@ -171,27 +168,3 @@ release-push:
 quay-push:
 	docker push quay.io/moov/watchman:$(VERSION)
 	docker push quay.io/moov/watchman:latest
-
-.PHONY: cover-test cover-web
-cover-test:
-	go test -coverprofile=cover.out ./...
-cover-web:
-	go tool cover -html=cover.out
-
-clean-integration:
-	docker compose kill && docker compose rm -v -f
-
-# TODO: this test is working but due to a default timeout on the admin server we get an empty reply
-# for now this shouldn't hold up out CI pipeline
-test-integration: clean-integration
-	docker compose up -d
-	sleep 30
-	time curl -v --max-time 30 http://localhost:9094/data/refresh # hangs until download and parsing completes
-	./bin/batchsearch -local -threshold 0.95
-
-# From https://github.com/genuinetools/img
-.PHONY: AUTHORS
-AUTHORS:
-	@$(file >$@,# This file lists all individuals having contributed content to the repository.)
-	@$(file >>$@,# For how it is generated, see `make AUTHORS`.)
-	@echo "$(shell git log --format='\n%aN <%aE>' | LC_ALL=C.UTF-8 sort -uf)" >> $@

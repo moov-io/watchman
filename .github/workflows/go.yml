@@ -100,17 +100,3 @@ jobs:
     - name: Docker Build
       if: runner.os == 'Linux'
       run: make docker-hub
-
-    - name: Build batchsearch
-      if: runner.os == 'Linux'
-      run: make build-batchsearch
-
-    # - name: Integration Test
-    #   if: runner.os == 'Linux'
-    #   run: make test-integration
-
-    - name: Test Cleanup
-      if: runner.os == 'Linux' && always()
-      run: |
-        docker compose logs
-        make clean-integration
