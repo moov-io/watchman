@@ -1,6 +1,7 @@
 package ofac
 
 import (
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -106,7 +107,7 @@ func extractCountry(remark string) string {
 	return ""
 }
 
-func ToEntity(sdn SDN) search.Entity[SDN] {
+func ToEntity(sdn SDN, addresses []Address, comments []SDNComments) search.Entity[SDN] {
 	out := search.Entity[SDN]{
 		Name:       sdn.SDNName,
 		Source:     search.SourceUSOFAC,
@@ -123,7 +124,7 @@ func ToEntity(sdn SDN) search.Entity[SDN] {
 	out.CryptoAddresses = parseCryptoAddresses(remarks)
 
 	// Extract common fields regardless of entity type
-	out.Addresses = parseAddresses(remarks)
+	out.Addresses = parseAddresses(addresses)
 
 	switch strings.ToLower(strings.TrimSpace(sdn.SDNType)) {
 	case "-0-", "":
@@ -213,10 +214,12 @@ func ToEntity(sdn SDN) search.Entity[SDN] {
 	return out
 }
 
-func parseAddresses(inputs []string) []search.Address {
+func parseAddresses(inputs []Address) []search.Address {
 	out := make([]search.Address, len(inputs))
 	for i := range inputs {
-		out[i] = address.ParseAddress(inputs[i])
+		addr := fmt.Sprintf("%s %s %s", inputs[i].Address, inputs[i].CityStateProvincePostalCode, inputs[i].Country)
+
+		out[i] = address.ParseAddress(addr)
 	}
 	return out
 }
