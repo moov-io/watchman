@@ -38,6 +38,9 @@ else
     CONFIGURE_FLAGS := --datadir=/tmp/libpostal-data
 endif
 
+# Detect if we need sudo
+SUDO := $(shell if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then echo "sudo"; else echo ""; fi)
+
 # Installation target
 install:
 ifeq ($(detected_OS),Windows)
@@ -52,12 +55,10 @@ else
 endif
 
 install-linux:
-	sudo apt-get install -y curl autoconf automake libtool pkg-config
 	@$(MAKE) install-libpostal
 
 install-macos:
 	brew install curl autoconf automake libtool pkg-config
-	@echo "Detecting architecture: $(ARCH)"
 ifeq ($(ARCH),arm64)
 	@echo "ARM architecture detected (M1/M2). SSE2 will be disabled."
 else
@@ -80,7 +81,7 @@ install-libpostal:
 	if [ "$(detected_OS)" = "Windows" ]; then \
 		make install; \
 	else \
-		sudo make install; \
+		$(SUDO) make install; \
 	fi
 
 .PHONY: install install-linux install-macos install-windows install-libpostal
