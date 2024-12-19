@@ -24,9 +24,6 @@ jobs:
         go-version: stable
       id: go
 
-    - name: Install deps
-      run: make install
-
     - name: Run Tests (Linux)
       if: runner.os == 'Linux'
       run: make check
@@ -55,9 +52,6 @@ jobs:
     - name: Install make (Windows)
       run: |
         choco install -y make mingw
-
-    - name: Install deps
-      run: make install
 
     - name: Run Short Tests (Non-Linux)
       run: |
@@ -90,9 +84,6 @@ jobs:
         sudo systemctl disable mono-xsp4.service || true
         sudo systemctl stop mono-xsp4.service || true
         sudo killall mono || true
-
-    - name: Install deps
-      run: make install
 
     - name: Build Frontend
       run: make build
