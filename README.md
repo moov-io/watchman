@@ -259,20 +259,11 @@ By design, Watchman  **does not persist** (save) any data about the search queri
 
 ### Go library
 
-This project uses [Go Modules](https://go.dev/blog/using-go-modules) and Go v1.18 or newer. See [Golang's install instructions](https://golang.org/doc/install) for help setting up Go. You can download the source code and we offer [tagged and released versions](https://github.com/moov-io/watchman/releases/latest) as well. We highly recommend you use a tagged release for production.
-
-```
-$ git@github.com:moov-io/watchman.git
-
-# Pull down into the Go Module cache
-$ go get -u github.com/moov-io/watchman
-
-$ go doc github.com/moov-io/watchman/client Search
-```
+Watchman offers [several packages for usage as libraries](https://pkg.go.dev/github.com/moov-io/watchman/pkg).
 
 ### In-browser Watchman search
 
-Using our [in-browser utility](https://oss.moov.io/watchman/), you can instantly perform advanced Watchman searches. Simply fill search fields and generate a detailed report that includes match percentage, alternative names, effective/expiration dates, IDs, addresses, and other useful information. This tool is particularly useful for completing quick searches with the aid of a intuitive interface.
+Using the [WebUI](https://moov-io.github.io/watchman/webui/), you can instantly perform advanced OFAC Watchman searches. Simply fill search fields and generate a detailed report that includes match percentage, alternative names, effective/expiration dates, IDs, addresses, and other useful information. This tool is particularly useful for completing quick searches with the aid of a intuitive interface.
 
 ## Reporting blocks to OFAC
 
@@ -309,7 +300,7 @@ Note: 32-bit platforms have known issues and are not supported.
 
 Yes please! Please review our [Contributing guide](CONTRIBUTING.md) and [Code of Conduct](https://github.com/moov-io/ach/blob/master/CODE_OF_CONDUCT.md) to get started! Checkout our [issues for first time contributors](https://github.com/moov-io/watchman/contribute) for something to help out with.
 
-This project uses [Go Modules](https://go.dev/blog/using-go-modules) and Go v1.18 or newer. See [Golang's install instructions](https://golang.org/doc/install) for help setting up Go. You can download the source code and we offer [tagged and released versions](https://github.com/moov-io/watchman/releases/latest) as well. We highly recommend you use a tagged release for production.
+Run `make install` to setup [gopostal](https://github.com/openvenues/gopostal) / [libpostal](https://github.com/openvenues/libpostal) for Watchman.
 
 ### Releasing
 

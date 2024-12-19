@@ -20,11 +20,13 @@ import (
 	"time"
 
 	"github.com/moov-io/base/admin"
-
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/base/http/bind"
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman"
+	searchv2 "github.com/moov-io/watchman/internal/search"
+	"github.com/moov-io/watchman/pkg/ofac"
+	pubsearch "github.com/moov-io/watchman/pkg/search"
 
 	"github.com/gorilla/mux"
 )
@@ -182,6 +184,10 @@ func main() {
 	addSearchRoutes(logger, router, searcher)
 	addValuesRoutes(logger, router, searcher)
 
+	genericSDNs := generalizeOFACSDNs(searcher.SDNs, searcher.Addresses)
+	v2SearchService := searchv2.NewService[ofac.SDN](logger, genericSDNs)
+	addSearchV2Routes(logger, router, v2SearchService)
+
 	// Setup our web UI to be served as well
 	setupWebui(logger, router, *flagBasePath)
 
@@ -262,4 +268,34 @@ func handleDownloadStats(updates chan *DownloadStats, handle func(stats *Downloa
 			handle(stats)
 		}
 	}
+}
+
+func generalizeOFACSDNs(input []*SDN, ofacAddresses []*Address) []pubsearch.Entity[ofac.SDN] {
+	var out []pubsearch.Entity[ofac.SDN]
+	for _, sdn := range input {
+		if sdn.SDN == nil {
+			continue
+		}
+
+		var addresses []ofac.Address
+		for _, ofacAddr := range ofacAddresses {
+			if ofacAddr.Address == nil {
+				continue
+			}
+
+			if sdn.EntityID == ofacAddr.Address.EntityID {
+				addresses = append(addresses, *ofacAddr.Address)
+			}
+		}
+
+		entity := ofac.ToEntity(*sdn.SDN, addresses, nil)
+		if len(entity.Addresses) > 0 && entity.Addresses[0].Line1 != "" {
+			out = append(out, entity)
+		}
+	}
+	return out
+}
+
+func addSearchV2Routes(logger log.Logger, r *mux.Router, service searchv2.Service) {
+	searchv2.NewController(logger, service).AppendRoutes(r)
 }
