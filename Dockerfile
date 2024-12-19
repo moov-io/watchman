@@ -31,7 +31,7 @@ RUN go mod download
 # Now copy the rest of the source code (frequently changes)
 COPY . /src/
 WORKDIR /src
-RUN VERSION=${VERSION} make build-server
+RUN VERSION=${VERSION} GOTAGS="-tags libpostal" make build-server
 
 # Frontend build stage
 FROM node:22-bookworm as frontend

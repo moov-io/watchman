@@ -59,7 +59,7 @@ RUN mkdir -p bin && \
     chmod -R g=u .
 
 USER 1001
-RUN VERSION=${VERSION} make build-server
+RUN VERSION=${VERSION} GOTAGS="-tags libpostal" make build-server
 
 # Stage 3: Frontend build
 FROM node:21-bookworm as frontend

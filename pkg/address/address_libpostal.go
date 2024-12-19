@@ -1,3 +1,5 @@
+//go:build libpostal
+
 package address
 
 import (

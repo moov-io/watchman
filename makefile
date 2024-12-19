@@ -77,11 +77,9 @@ install-libpostal:
 	./configure $(CONFIGURE_FLAGS) && \
 	make -j$(shell nproc || echo 4) && \
 	if [ "$(detected_OS)" = "Windows" ]; then \
-		make install && \
-		make download-models; \
+		make install; \
 	else \
-		$(SUDO) make install && \
-		$(SUDO) make download-models; \
+		$(SUDO) make install; \
 	fi
 
 .PHONY: install install-linux install-macos install-windows install-libpostal
@@ -94,7 +92,7 @@ else
 endif
 
 build-server:
-	go build -buildvcs=false -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/server github.com/moov-io/watchman/cmd/server
+	go build -buildvcs=false ${GOTAGS} -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/server github.com/moov-io/watchman/cmd/server
 
 .PHONY: check
 check:
