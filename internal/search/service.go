@@ -29,7 +29,7 @@ func (s *service[T]) Search(ctx context.Context) {
 	for _, entity := range s.entities {
 		if len(entity.Addresses) > 0 {
 			bs, _ := json.Marshal(entity)
-			fmt.Printf("\n\n %s \n", string(bs))
+			fmt.Printf("\n\n %s \n", string(bs)) //nolint:forbidigo
 			return
 		}
 	}
