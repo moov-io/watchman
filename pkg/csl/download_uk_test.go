@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/moov-io/base/log"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUKCSLDownload(t *testing.T) {
@@ -76,12 +77,25 @@ func TestUKCSLDownload_initialDir(t *testing.T) {
 	}
 }
 
+func TestUKSanctionsListIndex(t *testing.T) {
+	if testing.Short() {
+		return
+	}
+
+	logger := log.NewTestLogger()
+	foundURL, err := fetchLatestUKSanctionsListURL(logger, "")
+	require.NoError(t, err)
+
+	require.Contains(t, foundURL, "UK_Sanctions_List.ods")
+}
+
 func TestUKSanctionsListDownload(t *testing.T) {
 	if testing.Short() {
 		return
 	}
 
-	file, err := DownloadUKSanctionsList(log.NewNopLogger(), "")
+	logger := log.NewTestLogger()
+	file, err := DownloadUKSanctionsList(logger, "")
 	if err != nil {
 		t.Fatal(err)
 	}
