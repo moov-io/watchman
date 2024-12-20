@@ -235,7 +235,7 @@ func ukCSLRecords(logger log.Logger, initialDir string) ([]*csl.UKCSLRecord, err
 
 func ukSanctionsListRecords(logger log.Logger, initialDir string) ([]*csl.UKSanctionsListRecord, error) {
 	file, err := csl.DownloadUKSanctionsList(logger, initialDir)
-	if err != nil {
+	if file == nil || err != nil {
 		logger.Warn().Logf("skipping UK Sanctions List download: %v", err)
 		// no error to return because we skip the download
 		return nil, nil
