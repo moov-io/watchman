@@ -74,7 +74,7 @@ COPY webui/ ./
 RUN npm run build
 
 # Stage 4: Final stage
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.5-1733767867
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.5-1734497536
 ARG VERSION=unknown
 LABEL maintainer="Moov <oss@moov.io>"
 LABEL name="watchman"
