@@ -11,7 +11,7 @@ import (
 
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/base/log"
-	"github.com/moov-io/watchman/pkg/csl"
+	"github.com/moov-io/watchman/pkg/csl_us"
 )
 
 func searchUSCSL(logger log.Logger, searcher *searcher) http.HandlerFunc {
@@ -101,122 +101,122 @@ func precomputeCSLEntities[T any](items []*T, pipe *pipeliner) []*Result[T] {
 }
 
 // TopBISEntities searches BIS Entity List records by name and alias
-func (s *searcher) TopBISEntities(limit int, minMatch float64, name string) []*Result[csl.EL] {
+func (s *searcher) TopBISEntities(limit int, minMatch float64, name string) []*Result[csl_us.EL] {
 	s.RLock()
 	defer s.RUnlock()
 
 	s.Gate.Start() // TODO(adam): This used to be on a pre-record gate, so this may have different perf metrics
 	defer s.Gate.Done()
 
-	return topResults[csl.EL](limit, minMatch, name, s.BISEntities)
+	return topResults[csl_us.EL](limit, minMatch, name, s.BISEntities)
 }
 
 // TopMEUs searches Military End User records by name and alias
-func (s *searcher) TopMEUs(limit int, minMatch float64, name string) []*Result[csl.MEU] {
+func (s *searcher) TopMEUs(limit int, minMatch float64, name string) []*Result[csl_us.MEU] {
 	s.RLock()
 	defer s.RUnlock()
 
 	s.Gate.Start()
 	defer s.Gate.Done()
 
-	return topResults[csl.MEU](limit, minMatch, name, s.MilitaryEndUsers)
+	return topResults[csl_us.MEU](limit, minMatch, name, s.MilitaryEndUsers)
 }
 
 // TopSSIs searches Sectoral Sanctions records by Name and Alias
-func (s *searcher) TopSSIs(limit int, minMatch float64, name string) []*Result[csl.SSI] {
+func (s *searcher) TopSSIs(limit int, minMatch float64, name string) []*Result[csl_us.SSI] {
 	s.RLock()
 	defer s.RUnlock()
 
 	s.Gate.Start()
 	defer s.Gate.Done()
 
-	return topResults[csl.SSI](limit, minMatch, name, s.SSIs)
+	return topResults[csl_us.SSI](limit, minMatch, name, s.SSIs)
 }
 
 // TopUVLs search Unverified Lists records by Name and Alias
-func (s *searcher) TopUVLs(limit int, minMatch float64, name string) []*Result[csl.UVL] {
+func (s *searcher) TopUVLs(limit int, minMatch float64, name string) []*Result[csl_us.UVL] {
 	s.RLock()
 	defer s.RUnlock()
 
 	s.Gate.Start()
 	defer s.Gate.Done()
 
-	return topResults[csl.UVL](limit, minMatch, name, s.UVLs)
+	return topResults[csl_us.UVL](limit, minMatch, name, s.UVLs)
 }
 
 // TopISNs searches Nonproliferation Sanctions records by Name and Alias
-func (s *searcher) TopISNs(limit int, minMatch float64, name string) []*Result[csl.ISN] {
+func (s *searcher) TopISNs(limit int, minMatch float64, name string) []*Result[csl_us.ISN] {
 	s.RLock()
 	defer s.RUnlock()
 
 	s.Gate.Start()
 	defer s.Gate.Done()
 
-	return topResults[csl.ISN](limit, minMatch, name, s.ISNs)
+	return topResults[csl_us.ISN](limit, minMatch, name, s.ISNs)
 }
 
 // TopFSEs searches Foreign Sanctions Evaders records by Name and Alias
-func (s *searcher) TopFSEs(limit int, minMatch float64, name string) []*Result[csl.FSE] {
+func (s *searcher) TopFSEs(limit int, minMatch float64, name string) []*Result[csl_us.FSE] {
 	s.RLock()
 	defer s.RUnlock()
 
 	s.Gate.Start()
 	defer s.Gate.Done()
 
-	return topResults[csl.FSE](limit, minMatch, name, s.FSEs)
+	return topResults[csl_us.FSE](limit, minMatch, name, s.FSEs)
 }
 
 // TopPLCs searches Palestinian Legislative Council records by Name and Alias
-func (s *searcher) TopPLCs(limit int, minMatch float64, name string) []*Result[csl.PLC] {
+func (s *searcher) TopPLCs(limit int, minMatch float64, name string) []*Result[csl_us.PLC] {
 	s.RLock()
 	defer s.RUnlock()
 
 	s.Gate.Start()
 	defer s.Gate.Done()
 
-	return topResults[csl.PLC](limit, minMatch, name, s.PLCs)
+	return topResults[csl_us.PLC](limit, minMatch, name, s.PLCs)
 }
 
 // TopCAPs searches the CAPTA list by Name and Alias
-func (s *searcher) TopCAPs(limit int, minMatch float64, name string) []*Result[csl.CAP] {
+func (s *searcher) TopCAPs(limit int, minMatch float64, name string) []*Result[csl_us.CAP] {
 	s.RLock()
 	defer s.RUnlock()
 
 	s.Gate.Start()
 	defer s.Gate.Done()
 
-	return topResults[csl.CAP](limit, minMatch, name, s.CAPs)
+	return topResults[csl_us.CAP](limit, minMatch, name, s.CAPs)
 }
 
 // TopDTCs searches the ITAR Debarred list by Name and Alias
-func (s *searcher) TopDTCs(limit int, minMatch float64, name string) []*Result[csl.DTC] {
+func (s *searcher) TopDTCs(limit int, minMatch float64, name string) []*Result[csl_us.DTC] {
 	s.RLock()
 	defer s.RUnlock()
 
 	s.Gate.Start()
 	defer s.Gate.Done()
 
-	return topResults[csl.DTC](limit, minMatch, name, s.DTCs)
+	return topResults[csl_us.DTC](limit, minMatch, name, s.DTCs)
 }
 
 // TopCMICs searches the Non-SDN Chinese Military Industrial Complex list by Name and Alias
-func (s *searcher) TopCMICs(limit int, minMatch float64, name string) []*Result[csl.CMIC] {
+func (s *searcher) TopCMICs(limit int, minMatch float64, name string) []*Result[csl_us.CMIC] {
 	s.RLock()
 	defer s.RUnlock()
 
 	s.Gate.Start()
 	defer s.Gate.Done()
 
-	return topResults[csl.CMIC](limit, minMatch, name, s.CMICs)
+	return topResults[csl_us.CMIC](limit, minMatch, name, s.CMICs)
 }
 
 // TopNS_MBS searches the Non-SDN Menu Based Sanctions list by Name and Alias
-func (s *searcher) TopNS_MBS(limit int, minMatch float64, name string) []*Result[csl.NS_MBS] {
+func (s *searcher) TopNS_MBS(limit int, minMatch float64, name string) []*Result[csl_us.NS_MBS] {
 	s.RLock()
 	defer s.RUnlock()
 
 	s.Gate.Start()
 	defer s.Gate.Done()
 
-	return topResults[csl.NS_MBS](limit, minMatch, name, s.NS_MBSs)
+	return topResults[csl_us.NS_MBS](limit, minMatch, name, s.NS_MBSs)
 }

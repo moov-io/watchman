@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/moov-io/base/log"
-	"github.com/moov-io/watchman/pkg/csl"
+	"github.com/moov-io/watchman/pkg/csl_uk"
 
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/require"
@@ -31,7 +31,7 @@ func TestSearch_UK_CSL(t *testing.T) {
 	require.Contains(t, w.Body.String(), `"matchedName":"'abd al nasir"`)
 
 	var wrapper struct {
-		UKCSL []csl.UKCSLRecord `json:"ukConsolidatedSanctionsList"`
+		UKCSL []csl_uk.CSLRecord `json:"ukConsolidatedSanctionsList"`
 	}
 	err := json.NewDecoder(w.Body).Decode(&wrapper)
 	require.NoError(t, err)
@@ -55,7 +55,7 @@ func TestSearch_UK_SanctionsList(t *testing.T) {
 	require.Contains(t, w.Body.String(), `"matchedName":"haji khairullah haji sattar money exchange"`)
 
 	var wrapper struct {
-		UKSanctionsList []csl.UKSanctionsListRecord `json:"ukSanctionsList"`
+		UKSanctionsList []csl_uk.SanctionsListRecord `json:"ukSanctionsList"`
 	}
 	err := json.NewDecoder(w.Body).Decode(&wrapper)
 	require.NoError(t, err)

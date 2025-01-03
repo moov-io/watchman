@@ -19,7 +19,9 @@ import (
 
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/base/strx"
-	"github.com/moov-io/watchman/pkg/csl"
+	"github.com/moov-io/watchman/pkg/csl_eu"
+	"github.com/moov-io/watchman/pkg/csl_uk"
+	"github.com/moov-io/watchman/pkg/csl_us"
 	"github.com/moov-io/watchman/pkg/dpl"
 	"github.com/moov-io/watchman/pkg/ofac"
 
@@ -48,26 +50,26 @@ type searcher struct {
 	// TODO: this could be refactored into sub structs that have us/eu (and eventually others)
 
 	// US Consolidated Screening List
-	BISEntities      []*Result[csl.EL]
-	MilitaryEndUsers []*Result[csl.MEU]
-	SSIs             []*Result[csl.SSI]
-	UVLs             []*Result[csl.UVL]
-	ISNs             []*Result[csl.ISN]
-	FSEs             []*Result[csl.FSE]
-	PLCs             []*Result[csl.PLC]
-	CAPs             []*Result[csl.CAP]
-	DTCs             []*Result[csl.DTC]
-	CMICs            []*Result[csl.CMIC]
-	NS_MBSs          []*Result[csl.NS_MBS]
+	BISEntities      []*Result[csl_us.EL]
+	MilitaryEndUsers []*Result[csl_us.MEU]
+	SSIs             []*Result[csl_us.SSI]
+	UVLs             []*Result[csl_us.UVL]
+	ISNs             []*Result[csl_us.ISN]
+	FSEs             []*Result[csl_us.FSE]
+	PLCs             []*Result[csl_us.PLC]
+	CAPs             []*Result[csl_us.CAP]
+	DTCs             []*Result[csl_us.DTC]
+	CMICs            []*Result[csl_us.CMIC]
+	NS_MBSs          []*Result[csl_us.NS_MBS]
 
 	// EU Consolidated List of Sactions
-	EUCSL []*Result[csl.EUCSLRecord]
+	EUCSL []*Result[csl_eu.CSLRecord]
 
 	// UK Consolidated List of Sactions - OFSI
-	UKCSL []*Result[csl.UKCSLRecord]
+	UKCSL []*Result[csl_uk.CSLRecord]
 
 	// UK Sanctions List
-	UKSanctionsList []*Result[csl.UKSanctionsListRecord]
+	UKSanctionsList []*Result[csl_uk.SanctionsListRecord]
 
 	// metadata
 	lastRefreshedAt time.Time

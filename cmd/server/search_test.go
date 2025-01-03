@@ -15,7 +15,9 @@ import (
 	"testing"
 
 	"github.com/moov-io/base/log"
-	"github.com/moov-io/watchman/pkg/csl"
+	"github.com/moov-io/watchman/pkg/csl_eu"
+	"github.com/moov-io/watchman/pkg/csl_uk"
+	"github.com/moov-io/watchman/pkg/csl_us"
 	"github.com/moov-io/watchman/pkg/dpl"
 	"github.com/moov-io/watchman/pkg/ofac"
 	"github.com/stretchr/testify/require"
@@ -141,7 +143,7 @@ func init() {
 			FRCitation:     "67 F.R. 7354 2/19/02 66 F.R. 48998 9/25/01 62 F.R. 26471 5/14/97 62 F.R. 34688 6/27/97 62 F.R. 60063 11/6/97 63 F.R. 25817 5/11/98 63 F.R. 58707 11/2/98 64 F.R. 23049 4/29/99",
 		},
 	}, noLogPipeliner)
-	ssiSearcher.SSIs = precomputeCSLEntities[csl.SSI]([]*csl.SSI{
+	ssiSearcher.SSIs = precomputeCSLEntities[csl_us.SSI]([]*csl_us.SSI{
 		{
 			EntityID:       "18782",
 			Type:           "Entity",
@@ -167,7 +169,7 @@ func init() {
 			SourceInfoURL:  "http://bit.ly/1MLgou0",
 		},
 	}, noLogPipeliner)
-	meuSearcher.MilitaryEndUsers = precomputeCSLEntities[csl.MEU]([]*csl.MEU{
+	meuSearcher.MilitaryEndUsers = precomputeCSLEntities[csl_us.MEU]([]*csl_us.MEU{
 		{
 			EntityID:  "26744194bd9b5cbec49db6ee29a4b53c697c7420",
 			Name:      "AECC Aviation Power Co. Ltd.",
@@ -185,7 +187,7 @@ func init() {
 			EndDate:   "",
 		},
 	}, noLogPipeliner)
-	bisEntitySearcher.BISEntities = precomputeCSLEntities[csl.EL]([]*csl.EL{
+	bisEntitySearcher.BISEntities = precomputeCSLEntities[csl_us.EL]([]*csl_us.EL{
 		{
 			Name:               "Mohammad Jan Khan Mangal",
 			AlternateNames:     []string{"Air I"},
@@ -209,7 +211,7 @@ func init() {
 			SourceInfoURL:      "http://bit.ly/1L47xrV",
 		},
 	}, noLogPipeliner)
-	isnSearcher.ISNs = precomputeCSLEntities[csl.ISN]([]*csl.ISN{
+	isnSearcher.ISNs = precomputeCSLEntities[csl_us.ISN]([]*csl_us.ISN{
 		{
 			EntityID:              "2d2db09c686e4829d0ef1b0b04145eec3d42cd88",
 			Programs:              []string{"E.O. 13382", "Export-Import Bank Act", "Nuclear Proliferation Prevention Act"},
@@ -222,7 +224,7 @@ func init() {
 			SourceInfoURL:         "http://bit.ly/1NuVFxV",
 		},
 	}, noLogPipeliner)
-	uvlSearcher.UVLs = precomputeCSLEntities[csl.UVL]([]*csl.UVL{
+	uvlSearcher.UVLs = precomputeCSLEntities[csl_us.UVL]([]*csl_us.UVL{
 		{
 			EntityID:      "f15fa805ff4ac5e09026f5e78011a1bb6b26dec2",
 			Name:          "Atlas Sanatgaran",
@@ -231,7 +233,7 @@ func init() {
 			SourceInfoURL: "http://bit.ly/1Qi4R7Z",
 		},
 	}, noLogPipeliner)
-	fseSearcher.FSEs = precomputeCSLEntities[csl.FSE]([]*csl.FSE{
+	fseSearcher.FSEs = precomputeCSLEntities[csl_us.FSE]([]*csl_us.FSE{
 		{
 			EntityID:      "17526",
 			EntityNumber:  "17526",
@@ -246,7 +248,7 @@ func init() {
 			IDs:           []string{"CH, X0906223, Passport"},
 		},
 	}, noLogPipeliner)
-	plcSearcher.PLCs = precomputeCSLEntities[csl.PLC]([]*csl.PLC{
+	plcSearcher.PLCs = precomputeCSLEntities[csl_us.PLC]([]*csl_us.PLC{
 		{
 			EntityID:       "9702",
 			EntityNumber:   "9702",
@@ -262,7 +264,7 @@ func init() {
 			SourceInfoURL:  "http://bit.ly/2tjOLpx",
 		},
 	}, noLogPipeliner)
-	capSearcher.CAPs = precomputeCSLEntities[csl.CAP]([]*csl.CAP{
+	capSearcher.CAPs = precomputeCSLEntities[csl_us.CAP]([]*csl_us.CAP{
 		{
 			EntityID:      "20002",
 			EntityNumber:  "20002",
@@ -286,7 +288,7 @@ func init() {
 				"Financial Institution, Target Type"},
 		},
 	}, noLogPipeliner)
-	dtcSearcher.DTCs = precomputeCSLEntities[csl.DTC]([]*csl.DTC{
+	dtcSearcher.DTCs = precomputeCSLEntities[csl_us.DTC]([]*csl_us.DTC{
 		{
 			EntityID:              "d44d88d0265d93927b9ff1c13bbbb7c7db64142c",
 			Name:                  "Yasmin Ahmed",
@@ -296,7 +298,7 @@ func init() {
 			SourceInfoURL:         "http://bit.ly/307FuRQ",
 		},
 	}, noLogPipeliner)
-	cmicSearcher.CMICs = precomputeCSLEntities[csl.CMIC]([]*csl.CMIC{
+	cmicSearcher.CMICs = precomputeCSLEntities[csl_us.CMIC]([]*csl_us.CMIC{
 		{
 			EntityID:       "32091",
 			EntityNumber:   "32091",
@@ -313,7 +315,7 @@ func init() {
 				"02 Aug 2021, Effective Date (CMIC)", "03 Jun 2022, Purchase/Sales For Divestment Date (CMIC)"},
 		},
 	}, noLogPipeliner)
-	ns_mbsSearcher.NS_MBSs = precomputeCSLEntities[csl.NS_MBS]([]*csl.NS_MBS{
+	ns_mbsSearcher.NS_MBSs = precomputeCSLEntities[csl_us.NS_MBS]([]*csl_us.NS_MBS{
 		{
 			EntityID:       "17016",
 			EntityNumber:   "17016",
@@ -332,7 +334,7 @@ func init() {
 		},
 	}, noLogPipeliner)
 
-	eu_cslSearcher.EUCSL = precomputeCSLEntities[csl.EUCSLRecord]([]*csl.EUCSLRecord{{
+	eu_cslSearcher.EUCSL = precomputeCSLEntities[csl_eu.CSLRecord]([]*csl_eu.CSLRecord{{
 		FileGenerationDate:         "28/10/2022",
 		EntityLogicalID:            13,
 		EntityRemark:               "(UNSC RESOLUTION 1483)",
@@ -351,14 +353,14 @@ func init() {
 		ValidFromTo:                map[string]string{"2022": "2030"},
 	}}, noLogPipeliner)
 
-	uk_cslSearcher.UKCSL = precomputeCSLEntities([]*csl.UKCSLRecord{{
+	uk_cslSearcher.UKCSL = precomputeCSLEntities([]*csl_uk.CSLRecord{{
 		Names:     []string{"'ABD AL-NASIR"},
 		Addresses: []string{"Tall 'Afar"},
 		GroupType: "Individual",
 		GroupID:   13720,
 	}}, noLogPipeliner)
 
-	uk_sanctionsListSearcher.UKSanctionsList = precomputeCSLEntities([]*csl.UKSanctionsListRecord{{
+	uk_sanctionsListSearcher.UKSanctionsList = precomputeCSLEntities([]*csl_uk.SanctionsListRecord{{
 		Names:     []string{"HAJI KHAIRULLAH HAJI SATTAR MONEY EXCHANGE"},
 		Addresses: []string{"Branch Office 2, Peshawar, Khyber Paktunkhwa Province, Pakistan"},
 		UniqueID:  "AFG0001",

@@ -7,7 +7,7 @@ package main
 import (
 	"testing"
 
-	"github.com/moov-io/watchman/pkg/csl"
+	"github.com/moov-io/watchman/pkg/csl_us"
 	"github.com/moov-io/watchman/pkg/ofac"
 
 	"github.com/abadojack/whatlanggo"
@@ -105,12 +105,12 @@ func TestStopwords__apply(t *testing.T) {
 		},
 		{
 			testName: "ssi individual",
-			in:       &Name{Processed: "Trees and Trucks", ssi: &csl.SSI{Type: "individual"}},
+			in:       &Name{Processed: "Trees and Trucks", ssi: &csl_us.SSI{Type: "individual"}},
 			expected: "Trees and Trucks",
 		},
 		{
 			testName: "ssi business",
-			in:       &Name{Processed: "Trees and Trucks", ssi: &csl.SSI{Type: "business"}},
+			in:       &Name{Processed: "Trees and Trucks", ssi: &csl_us.SSI{Type: "business"}},
 			expected: "trees trucks",
 		},
 		{

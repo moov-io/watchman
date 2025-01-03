@@ -14,7 +14,7 @@ import (
 	"testing"
 
 	"github.com/moov-io/base/log"
-	"github.com/moov-io/watchman/pkg/csl"
+	"github.com/moov-io/watchman/pkg/csl_us"
 
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/require"
@@ -34,7 +34,7 @@ func TestSearch_US_CSL(t *testing.T) {
 	require.Contains(t, w.Body.String(), `"matchedName":"abdul qadeer khan"`)
 
 	var wrapper struct {
-		NonProliferationSanctions []csl.ISN `json:"nonProliferationSanctions"`
+		NonProliferationSanctions []csl_us.ISN `json:"nonProliferationSanctions"`
 	}
 	err := json.NewDecoder(w.Body).Decode(&wrapper)
 	require.NoError(t, err)

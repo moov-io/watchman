@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/moov-io/base/log"
-	"github.com/moov-io/watchman/pkg/csl"
+	"github.com/moov-io/watchman/pkg/csl_eu"
 
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/require"
@@ -32,7 +32,7 @@ func TestSearch__EU_CSL(t *testing.T) {
 	require.Contains(t, w.Body.String(), `"matchedName":"saddam hussein al tikriti"`)
 
 	var wrapper struct {
-		EUConsolidatedSanctionsList []csl.EUCSLRecord `json:"euConsolidatedSanctionsList"`
+		EUConsolidatedSanctionsList []csl_eu.CSLRecord `json:"euConsolidatedSanctionsList"`
 	}
 	err := json.NewDecoder(w.Body).Decode(&wrapper)
 	require.NoError(t, err)

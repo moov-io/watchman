@@ -9,7 +9,9 @@ import (
 	"fmt"
 
 	"github.com/moov-io/base/log"
-	"github.com/moov-io/watchman/pkg/csl"
+	"github.com/moov-io/watchman/pkg/csl_eu"
+	"github.com/moov-io/watchman/pkg/csl_uk"
+	"github.com/moov-io/watchman/pkg/csl_us"
 	"github.com/moov-io/watchman/pkg/dpl"
 	"github.com/moov-io/watchman/pkg/ofac"
 )
@@ -26,24 +28,24 @@ type Name struct {
 	// optional metadata of where a name came from
 	alt    *ofac.AlternateIdentity
 	sdn    *ofac.SDN
-	ssi    *csl.SSI
-	uvl    *csl.UVL
-	isn    *csl.ISN
-	fse    *csl.FSE
-	plc    *csl.PLC
-	cap    *csl.CAP
-	dtc    *csl.DTC
-	cmic   *csl.CMIC
-	ns_mbs *csl.NS_MBS
+	ssi    *csl_us.SSI
+	uvl    *csl_us.UVL
+	isn    *csl_us.ISN
+	fse    *csl_us.FSE
+	plc    *csl_us.PLC
+	cap    *csl_us.CAP
+	dtc    *csl_us.DTC
+	cmic   *csl_us.CMIC
+	ns_mbs *csl_us.NS_MBS
 
-	eu_csl *csl.EUCSLRecord
+	eu_csl *csl_eu.CSLRecord
 
-	uk_csl *csl.UKCSLRecord
+	uk_csl *csl_uk.CSLRecord
 
-	uk_sanctionsList *csl.UKSanctionsListRecord
+	uk_sanctionsList *csl_uk.SanctionsListRecord
 
 	dp    *dpl.DPL
-	el    *csl.EL
+	el    *csl_us.EL
 	addrs []*ofac.Address
 
 	altNames []string
@@ -76,79 +78,79 @@ func dpName(dp *dpl.DPL) *Name {
 
 func cslName(item interface{}) *Name {
 	switch v := item.(type) {
-	case *csl.EL:
+	case *csl_us.EL:
 		return &Name{
 			Original:  v.Name,
 			Processed: v.Name,
 			el:        v,
 		}
-	case *csl.MEU:
+	case *csl_us.MEU:
 		return &Name{
 			Original:  v.Name,
 			Processed: v.Name,
 		}
-	case *csl.SSI:
+	case *csl_us.SSI:
 		return &Name{
 			Original:  v.Name,
 			Processed: v.Name,
 			ssi:       v,
 			altNames:  v.AlternateNames,
 		}
-	case *csl.UVL:
+	case *csl_us.UVL:
 		return &Name{
 			Original:  v.Name,
 			Processed: v.Name,
 			uvl:       v,
 		}
-	case *csl.ISN:
+	case *csl_us.ISN:
 		return &Name{
 			Original:  v.Name,
 			Processed: v.Name,
 			isn:       v,
 			altNames:  v.AlternateNames,
 		}
-	case *csl.FSE:
+	case *csl_us.FSE:
 		return &Name{
 			Original:  v.Name,
 			Processed: v.Name,
 			fse:       v,
 		}
-	case *csl.PLC:
+	case *csl_us.PLC:
 		return &Name{
 			Original:  v.Name,
 			Processed: v.Name,
 			plc:       v,
 			altNames:  v.AlternateNames,
 		}
-	case *csl.CAP:
+	case *csl_us.CAP:
 		return &Name{
 			Original:  v.Name,
 			Processed: v.Name,
 			cap:       v,
 			altNames:  v.AlternateNames,
 		}
-	case *csl.DTC:
+	case *csl_us.DTC:
 		return &Name{
 			Original:  v.Name,
 			Processed: v.Name,
 			dtc:       v,
 			altNames:  v.AlternateNames,
 		}
-	case *csl.CMIC:
+	case *csl_us.CMIC:
 		return &Name{
 			Original:  v.Name,
 			Processed: v.Name,
 			cmic:      v,
 			altNames:  v.AlternateNames,
 		}
-	case *csl.NS_MBS:
+	case *csl_us.NS_MBS:
 		return &Name{
 			Original:  v.Name,
 			Processed: v.Name,
 			ns_mbs:    v,
 			altNames:  v.AlternateNames,
 		}
-	case *csl.EUCSLRecord:
+	case *csl_eu.CSLRecord:
 		if len(v.NameAliasWholeNames) >= 1 {
 			var alts []string
 			alts = append(alts, v.NameAliasWholeNames...)
@@ -159,7 +161,7 @@ func cslName(item interface{}) *Name {
 				altNames:  alts,
 			}
 		}
-	case *csl.UKCSLRecord:
+	case *csl_uk.CSLRecord:
 		if len(v.Names) >= 1 {
 			var alts []string
 			alts = append(alts, v.Names...)
@@ -170,7 +172,7 @@ func cslName(item interface{}) *Name {
 				altNames:  alts,
 			}
 		}
-	case *csl.UKSanctionsListRecord:
+	case *csl_uk.SanctionsListRecord:
 		if len(v.Names) >= 1 {
 			var alts []string
 			alts = append(alts, v.Names...)

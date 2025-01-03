@@ -13,7 +13,7 @@ import (
 	"testing"
 
 	"github.com/moov-io/base/log"
-	"github.com/moov-io/watchman/pkg/csl"
+	"github.com/moov-io/watchman/pkg/csl_us"
 	"github.com/moov-io/watchman/pkg/dpl"
 	"github.com/moov-io/watchman/pkg/ofac"
 
@@ -230,10 +230,10 @@ func TestSearch__NameAndAltName(t *testing.T) {
 		SDNs              []*ofac.SDN               `json:"SDNs"`
 		AltNames          []*ofac.AlternateIdentity `json:"altNames"`
 		Addresses         []*ofac.Address           `json:"addresses"`
-		SectoralSanctions []*csl.SSI                `json:"sectoralSanctions"`
+		SectoralSanctions []*csl_us.SSI             `json:"sectoralSanctions"`
 		// BIS
-		DeniedPersons []*dpl.DPL `json:"deniedPersons"`
-		BISEntities   []*csl.EL  `json:"bisEntities"`
+		DeniedPersons []*dpl.DPL   `json:"deniedPersons"`
+		BISEntities   []*csl_us.EL `json:"bisEntities"`
 	}
 	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
 		t.Fatal(err)
@@ -277,10 +277,10 @@ func TestSearch__Name(t *testing.T) {
 		// OFAC
 		SDNs []*ofac.SDN               `json:"SDNs"`
 		Alts []*ofac.AlternateIdentity `json:"altNames"`
-		SSIs []*csl.SSI                `json:"sectoralSanctions"`
+		SSIs []*csl_us.SSI             `json:"sectoralSanctions"`
 		// BIS
-		DPs []*dpl.DPL `json:"deniedPersons"`
-		ELs []*csl.EL  `json:"bisEntities"`
+		DPs []*dpl.DPL   `json:"deniedPersons"`
+		ELs []*csl_us.EL `json:"bisEntities"`
 	}
 	if err := json.NewDecoder(w.Body).Decode(&wrapper); err != nil {
 		t.Fatal(err)

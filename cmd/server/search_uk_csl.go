@@ -10,7 +10,7 @@ import (
 
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/base/log"
-	"github.com/moov-io/watchman/pkg/csl"
+	"github.com/moov-io/watchman/pkg/csl_uk"
 )
 
 // search UKCLS
@@ -37,24 +37,24 @@ func searchUKCSL(logger log.Logger, searcher *searcher) http.HandlerFunc {
 	}
 }
 
-// TopUKCSL searches the UK Sanctions list by Name and Alias
-func (s *searcher) TopUKCSL(limit int, minMatch float64, name string) []*Result[csl.UKCSLRecord] {
+// TopCSL searches the UK Sanctions list by Name and Alias
+func (s *searcher) TopUKCSL(limit int, minMatch float64, name string) []*Result[csl_uk.CSLRecord] {
 	s.RLock()
 	defer s.RUnlock()
 
 	s.Gate.Start()
 	defer s.Gate.Done()
 
-	return topResults[csl.UKCSLRecord](limit, minMatch, name, s.UKCSL)
+	return topResults[csl_uk.CSLRecord](limit, minMatch, name, s.UKCSL)
 }
 
 // TopUKSanctionsList searches the UK Sanctions list by Name and Alias
-func (s *searcher) TopUKSanctionsList(limit int, minMatch float64, name string) []*Result[csl.UKSanctionsListRecord] {
+func (s *searcher) TopUKSanctionsList(limit int, minMatch float64, name string) []*Result[csl_uk.SanctionsListRecord] {
 	s.RLock()
 	defer s.RUnlock()
 
 	s.Gate.Start()
 	defer s.Gate.Done()
 
-	return topResults[csl.UKSanctionsListRecord](limit, minMatch, name, s.UKSanctionsList)
+	return topResults[csl_uk.SanctionsListRecord](limit, minMatch, name, s.UKSanctionsList)
 }

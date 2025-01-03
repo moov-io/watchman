@@ -16,7 +16,9 @@ import (
 
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/base/log"
-	"github.com/moov-io/watchman/pkg/csl"
+	"github.com/moov-io/watchman/pkg/csl_eu"
+	"github.com/moov-io/watchman/pkg/csl_uk"
+	"github.com/moov-io/watchman/pkg/csl_us"
 
 	"github.com/go-kit/kit/metrics/prometheus"
 	"github.com/gorilla/mux"
@@ -140,26 +142,26 @@ type searchResponse struct {
 	DeniedPersons []DP `json:"deniedPersons"`
 
 	// Consolidated Screening List
-	BISEntities                            []*Result[csl.EL]     `json:"bisEntities"`
-	MilitaryEndUsers                       []*Result[csl.MEU]    `json:"militaryEndUsers"`
-	SectoralSanctions                      []*Result[csl.SSI]    `json:"sectoralSanctions"`
-	Unverified                             []*Result[csl.UVL]    `json:"unverifiedCSL"`
-	NonproliferationSanctions              []*Result[csl.ISN]    `json:"nonproliferationSanctions"`
-	ForeignSanctionsEvaders                []*Result[csl.FSE]    `json:"foreignSanctionsEvaders"`
-	PalestinianLegislativeCouncil          []*Result[csl.PLC]    `json:"palestinianLegislativeCouncil"`
-	CaptaList                              []*Result[csl.CAP]    `json:"captaList"`
-	ITARDebarred                           []*Result[csl.DTC]    `json:"itarDebarred"`
-	NonSDNChineseMilitaryIndustrialComplex []*Result[csl.CMIC]   `json:"nonSDNChineseMilitaryIndustrialComplex"`
-	NonSDNMenuBasedSanctionsList           []*Result[csl.NS_MBS] `json:"nonSDNMenuBasedSanctionsList"`
+	BISEntities                            []*Result[csl_us.EL]     `json:"bisEntities"`
+	MilitaryEndUsers                       []*Result[csl_us.MEU]    `json:"militaryEndUsers"`
+	SectoralSanctions                      []*Result[csl_us.SSI]    `json:"sectoralSanctions"`
+	Unverified                             []*Result[csl_us.UVL]    `json:"unverifiedCSL"`
+	NonproliferationSanctions              []*Result[csl_us.ISN]    `json:"nonproliferationSanctions"`
+	ForeignSanctionsEvaders                []*Result[csl_us.FSE]    `json:"foreignSanctionsEvaders"`
+	PalestinianLegislativeCouncil          []*Result[csl_us.PLC]    `json:"palestinianLegislativeCouncil"`
+	CaptaList                              []*Result[csl_us.CAP]    `json:"captaList"`
+	ITARDebarred                           []*Result[csl_us.DTC]    `json:"itarDebarred"`
+	NonSDNChineseMilitaryIndustrialComplex []*Result[csl_us.CMIC]   `json:"nonSDNChineseMilitaryIndustrialComplex"`
+	NonSDNMenuBasedSanctionsList           []*Result[csl_us.NS_MBS] `json:"nonSDNMenuBasedSanctionsList"`
 
 	// EU - Consolidated Sanctions List
-	EUCSL []*Result[csl.EUCSLRecord] `json:"euConsolidatedSanctionsList"`
+	EUCSL []*Result[csl_eu.CSLRecord] `json:"euConsolidatedSanctionsList"`
 
 	// UK - Consolidated Sanctions List
-	UKCSL []*Result[csl.UKCSLRecord] `json:"ukConsolidatedSanctionsList"`
+	UKCSL []*Result[csl_uk.CSLRecord] `json:"ukConsolidatedSanctionsList"`
 
 	// UK Sanctions List
-	UKSanctionsList []*Result[csl.UKSanctionsListRecord] `json:"ukSanctionsList"`
+	UKSanctionsList []*Result[csl_uk.SanctionsListRecord] `json:"ukSanctionsList"`
 
 	// Metadata
 	RefreshedAt time.Time `json:"refreshedAt"`

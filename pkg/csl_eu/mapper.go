@@ -1,22 +1,25 @@
-package csl
+// Copyright The Moov Authors
+// Use of this source code is governed by an Apache License
+// license that can be found in the LICENSE file.
+
+package csl_eu
 
 import (
 	"strings"
 	"time"
 
-	"github.com/moov-io/watchman/pkg/csl"
 	"github.com/moov-io/watchman/pkg/search"
 )
 
-func PtrToEntity(record *csl.EUCSLRecord) search.Entity[csl.EUCSLRecord] {
+func PtrToEntity(record *CSLRecord) search.Entity[CSLRecord] {
 	if record != nil {
 		return ToEntity(*record)
 	}
-	return search.Entity[csl.EUCSLRecord]{}
+	return search.Entity[CSLRecord]{}
 }
 
-func ToEntity(record csl.EUCSLRecord) search.Entity[csl.EUCSLRecord] {
-	out := search.Entity[csl.EUCSLRecord]{
+func ToEntity(record CSLRecord) search.Entity[CSLRecord] {
+	out := search.Entity[CSLRecord]{
 		Source:     search.SourceEUCSL,
 		SourceData: record,
 	}

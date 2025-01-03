@@ -10,7 +10,7 @@ import (
 
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/base/log"
-	"github.com/moov-io/watchman/pkg/csl"
+	"github.com/moov-io/watchman/pkg/csl_eu"
 )
 
 // search EUCLS
@@ -38,12 +38,12 @@ func searchEUCSL(logger log.Logger, searcher *searcher) http.HandlerFunc {
 }
 
 // TopEUCSL searches the EU Sanctions list by Name and Alias
-func (s *searcher) TopEUCSL(limit int, minMatch float64, name string) []*Result[csl.EUCSLRecord] {
+func (s *searcher) TopEUCSL(limit int, minMatch float64, name string) []*Result[csl_eu.CSLRecord] {
 	s.RLock()
 	defer s.RUnlock()
 
 	s.Gate.Start()
 	defer s.Gate.Done()
 
-	return topResults[csl.EUCSLRecord](limit, minMatch, name, s.EUCSL)
+	return topResults[csl_eu.CSLRecord](limit, minMatch, name, s.EUCSL)
 }

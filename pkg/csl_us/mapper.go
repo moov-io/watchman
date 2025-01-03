@@ -1,13 +1,16 @@
-package mapper
+// Copyright The Moov Authors
+// Use of this source code is governed by an Apache License
+// license that can be found in the LICENSE file.
+
+package csl_us
 
 import (
-	"github.com/moov-io/watchman/pkg/csl"
 	"github.com/moov-io/watchman/pkg/search"
 )
 
 // Entity List – Bureau of Industry and Security
-func EL_ToEntity(record csl.EL) search.Entity[csl.EL] {
-	out := search.Entity[csl.EL]{
+func EL_ToEntity(record EL) search.Entity[EL] {
+	out := search.Entity[EL]{
 		Source:     search.SourceUSCSL,
 		SourceData: record,
 	}
@@ -22,8 +25,8 @@ func EL_ToEntity(record csl.EL) search.Entity[csl.EL] {
 }
 
 // Military End User List
-func MEU_ToEntity(record csl.MEU) search.Entity[csl.MEU] {
-	out := search.Entity[csl.MEU]{
+func MEU_ToEntity(record MEU) search.Entity[MEU] {
+	out := search.Entity[MEU]{
 		Source:     search.SourceUSCSL,
 		SourceData: record,
 	}
@@ -37,8 +40,8 @@ func MEU_ToEntity(record csl.MEU) search.Entity[csl.MEU] {
 }
 
 // Sectoral Sanctions Identifications List (SSI) - Treasury Department
-func SSI_ToEntity(record csl.SSI) search.Entity[csl.SSI] {
-	out := search.Entity[csl.SSI]{
+func SSI_ToEntity(record SSI) search.Entity[SSI] {
+	out := search.Entity[SSI]{
 		Source:     search.SourceUSCSL,
 		SourceData: record,
 	}
@@ -55,8 +58,8 @@ func SSI_ToEntity(record csl.SSI) search.Entity[csl.SSI] {
 }
 
 // Unverified List – Bureau of Industry and Security
-func UVL_ToEntity(record csl.UVL) search.Entity[csl.UVL] {
-	out := search.Entity[csl.UVL]{
+func UVL_ToEntity(record UVL) search.Entity[UVL] {
+	out := search.Entity[UVL]{
 		Source:     search.SourceUSCSL,
 		SourceData: record,
 	}
@@ -68,8 +71,8 @@ func UVL_ToEntity(record csl.UVL) search.Entity[csl.UVL] {
 }
 
 // Foreign Sanctions Evaders (FSE) - Treasury Department
-func FSE_ToEntity(record csl.FSE) search.Entity[csl.FSE] {
-	out := search.Entity[csl.FSE]{
+func FSE_ToEntity(record FSE) search.Entity[FSE] {
+	out := search.Entity[FSE]{
 		Source:     search.SourceUSCSL,
 		SourceData: record,
 	}
@@ -85,8 +88,8 @@ func FSE_ToEntity(record csl.FSE) search.Entity[csl.FSE] {
 }
 
 // Nonproliferation Sanctions (ISN) - State Department
-func ISN_ToEntity(record csl.ISN) search.Entity[csl.ISN] {
-	out := search.Entity[csl.ISN]{
+func ISN_ToEntity(record ISN) search.Entity[ISN] {
+	out := search.Entity[ISN]{
 		Source:     search.SourceUSCSL,
 		SourceData: record,
 	}
@@ -100,8 +103,8 @@ func ISN_ToEntity(record csl.ISN) search.Entity[csl.ISN] {
 }
 
 // Palestinian Legislative Council List (PLC) - Treasury Department
-func PLC_ToEntity(record csl.PLC) search.Entity[csl.PLC] {
-	out := search.Entity[csl.PLC]{
+func PLC_ToEntity(record PLC) search.Entity[PLC] {
+	out := search.Entity[PLC]{
 		Source:     search.SourceUSCSL,
 		SourceData: record,
 	}
@@ -118,8 +121,8 @@ func PLC_ToEntity(record csl.PLC) search.Entity[csl.PLC] {
 }
 
 // CAPTA (formerly Foreign Financial Institutions Subject to Part 561 - Treasury Department)
-func CAP_ToEntity(record csl.CAP) search.Entity[csl.CAP] {
-	out := search.Entity[csl.CAP]{
+func CAP_ToEntity(record CAP) search.Entity[CAP] {
+	out := search.Entity[CAP]{
 		Source:     search.SourceUSCSL,
 		SourceData: record,
 	}
@@ -136,8 +139,8 @@ func CAP_ToEntity(record csl.CAP) search.Entity[csl.CAP] {
 }
 
 // ITAR Debarred (DTC) - State Department
-func DTC_ToEntity(record csl.DTC) search.Entity[csl.DTC] {
-	out := search.Entity[csl.DTC]{
+func DTC_ToEntity(record DTC) search.Entity[DTC] {
+	out := search.Entity[DTC]{
 		Source:     search.SourceUSCSL,
 		SourceData: record,
 	}
@@ -150,8 +153,8 @@ func DTC_ToEntity(record csl.DTC) search.Entity[csl.DTC] {
 }
 
 // Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department
-func CMIC_ToEntity(record csl.CMIC) search.Entity[csl.CMIC] {
-	out := search.Entity[csl.CMIC]{
+func CMIC_ToEntity(record CMIC) search.Entity[CMIC] {
+	out := search.Entity[CMIC]{
 		Source:     search.SourceUSCSL,
 		SourceData: record,
 	}
@@ -168,8 +171,8 @@ func CMIC_ToEntity(record csl.CMIC) search.Entity[csl.CMIC] {
 }
 
 // Non-SDN Menu-Based Sanctions List (NS-MBS List) - Treasury Department
-func NS_MBS_ToEntity(record csl.NS_MBS) search.Entity[csl.NS_MBS] {
-	out := search.Entity[csl.NS_MBS]{
+func NS_MBS_ToEntity(record NS_MBS) search.Entity[NS_MBS] {
+	out := search.Entity[NS_MBS]{
 		Source:     search.SourceUSCSL,
 		SourceData: record,
 	}
