@@ -14,6 +14,9 @@ type Service interface {
 }
 
 func NewService[T any](logger log.Logger, entities []search.Entity[T]) Service {
+
+	fmt.Printf("v2search NewService(%d entities)\n", len(entities)) //nolint:forbidigo
+
 	return &service[T]{
 		logger:   logger,
 		entities: entities,
@@ -33,4 +36,9 @@ func (s *service[T]) Search(ctx context.Context) {
 			return
 		}
 	}
+
+	// TODO(adam): use SearchedEntity
+	// type SearchedEntity[T any] struct {
+	// 	search.Entity[T]
+	// 	Match float64 `json:"match"`
 }

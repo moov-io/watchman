@@ -1,8 +1,8 @@
-// Copyright 2022 The Moov Authors
+// Copyright The Moov Authors
 // Use of this source code is governed by an Apache License
 // license that can be found in the LICENSE file.
 
-package main
+package prepare
 
 import (
 	"testing"
@@ -12,12 +12,12 @@ import (
 )
 
 var (
-	noopPipeliner = &pipeliner{
+	noopPipeliner = &Pipeliner{
 		logger: log.NewNopLogger(),
 		steps:  []step{},
 	}
 
-	noLogPipeliner = newPipeliner(log.NewNopLogger(), false)
+	noLogPipeliner = NewPipeliner(log.NewNopLogger(), false)
 )
 
 func TestPipelineNoop(t *testing.T) {

@@ -11,6 +11,7 @@ import (
 
 	moovhttp "github.com/moov-io/base/http"
 	"github.com/moov-io/base/log"
+	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/pkg/csl_us"
 )
 
@@ -37,16 +38,15 @@ func searchUSCSL(logger log.Logger, searcher *searcher) http.HandlerFunc {
 	}
 }
 
-func precomputeCSLEntities[T any](items []*T, pipe *pipeliner) []*Result[T] {
+func precomputeCSLEntities[T any](items []*T, pipe *prepare.Pipeliner) []*Result[T] {
 	out := make([]*Result[T], len(items))
 	if items == nil {
 		return out
 	}
 
 	for i, item := range items {
-		name := cslName(item)
+		name := prepare.CSLName(item)
 		if err := pipe.Do(name); err != nil {
-			pipe.logger.LogErrorf("problem pipelining %T: %v", item, err)
 			continue
 		}
 
@@ -63,7 +63,7 @@ func precomputeCSLEntities[T any](items []*T, pipe *pipeliner) []*Result[T] {
 					continue
 				}
 				for j := range alts {
-					alt := &Name{Processed: alts[j]}
+					alt := &prepare.Name{Processed: alts[j]}
 					pipe.Do(alt)
 					altNames = append(altNames, alt.Processed)
 				}
@@ -73,7 +73,7 @@ func precomputeCSLEntities[T any](items []*T, pipe *pipeliner) []*Result[T] {
 					continue
 				}
 				for j := range alts {
-					alt := &Name{Processed: alts[j]}
+					alt := &prepare.Name{Processed: alts[j]}
 					pipe.Do(alt)
 					altNames = append(altNames, alt.Processed)
 				}
@@ -83,7 +83,7 @@ func precomputeCSLEntities[T any](items []*T, pipe *pipeliner) []*Result[T] {
 					continue
 				}
 				for j := range alts {
-					alt := &Name{Processed: alts[j]}
+					alt := &prepare.Name{Processed: alts[j]}
 					pipe.Do(alt)
 					altNames = append(altNames, alt.Processed)
 				}

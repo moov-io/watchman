@@ -1,12 +1,14 @@
-// Copyright 2022 The Moov Authors
+// Copyright The Moov Authors
 // Use of this source code is governed by an Apache License
 // license that can be found in the LICENSE file.
 
-package main
+package stringscore_test
 
 import (
 	"strings"
 	"testing"
+
+	"github.com/moov-io/watchman/internal/stringscore"
 )
 
 func TestBestPairsJaroWinkler__FalsePositives(t *testing.T) {
@@ -70,7 +72,7 @@ func TestBestPairsJaroWinkler__TruePositives(t *testing.T) {
 }
 
 func compareAlgorithms(indexedName string, query string) (float64, float64) {
-	oldScore := jaroWinkler(indexedName, query)
-	newScore := bestPairsJaroWinkler(strings.Fields(query), indexedName)
+	oldScore := stringscore.JaroWinkler(indexedName, query)
+	newScore := stringscore.BestPairsJaroWinkler(strings.Fields(query), indexedName)
 	return oldScore, newScore
 }

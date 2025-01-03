@@ -8,14 +8,15 @@ import (
 	"testing"
 
 	"github.com/moov-io/base/log"
+	"github.com/moov-io/watchman/internal/stringscore"
 	"github.com/moov-io/watchman/pkg/ofac"
 )
 
 func TestIssue115__TopSDNs(t *testing.T) {
-	score := jaroWinkler("georgehabbash", "georgebush")
-	eql(t, "george bush jaroWinkler", score, 0.896)
+	score := stringscore.JaroWinkler("georgehabbash", "georgebush")
+	eql(t, "george bush stringscore.JaroWinkler", score, 0.896)
 
-	score = jaroWinkler("g", "geoergebush")
+	score = stringscore.JaroWinkler("g", "geoergebush")
 	eql(t, "g vs geoergebush", score, 0.070)
 
 	pipe := noLogPipeliner

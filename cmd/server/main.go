@@ -24,6 +24,7 @@ import (
 	"github.com/moov-io/base/http/bind"
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman"
+	"github.com/moov-io/watchman/internal/prepare"
 	searchv2 "github.com/moov-io/watchman/internal/search"
 	"github.com/moov-io/watchman/pkg/ofac"
 	pubsearch "github.com/moov-io/watchman/pkg/search"
@@ -129,11 +130,11 @@ func main() {
 	}()
 	defer adminServer.Shutdown()
 
-	var pipeline *pipeliner
+	var pipeline *prepare.Pipeliner
 	if debug, err := strconv.ParseBool(os.Getenv("DEBUG_NAME_PIPELINE")); debug && err == nil {
-		pipeline = newPipeliner(logger, true)
+		pipeline = prepare.NewPipeliner(logger, true)
 	} else {
-		pipeline = newPipeliner(log.NewNopLogger(), false)
+		pipeline = prepare.NewPipeliner(log.NewNopLogger(), false)
 	}
 
 	searchWorkers := readInt(os.Getenv("SEARCH_MAX_WORKERS"), *flagWorkers)
@@ -298,4 +299,15 @@ func generalizeOFACSDNs(input []*SDN, ofacAddresses []*Address) []pubsearch.Enti
 
 func addSearchV2Routes(logger log.Logger, r *mux.Router, service searchv2.Service) {
 	searchv2.NewController(logger, service).AppendRoutes(r)
+}
+
+func readInt(override string, value int) int {
+	if override != "" {
+		n, err := strconv.ParseInt(override, 10, 32)
+		if err != nil {
+			panic(fmt.Errorf("unable to parse %q as int", override)) //nolint:forbidigo
+		}
+		return int(n)
+	}
+	return value
 }

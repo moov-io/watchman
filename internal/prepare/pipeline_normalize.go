@@ -1,8 +1,8 @@
-// Copyright 2022 The Moov Authors
+// Copyright The Moov Authors
 // Use of this source code is governed by an Apache License
 // license that can be found in the LICENSE file.
 
-package main
+package prepare
 
 import (
 	"strings"
@@ -21,17 +21,17 @@ var (
 type normalizeStep struct{}
 
 func (s *normalizeStep) apply(in *Name) error {
-	in.Processed = precompute(in.Processed)
+	in.Processed = LowerAndRemovePunctuation(in.Processed)
 	return nil
 }
 
-// precompute will lowercase each substring and remove punctuation
+// LowerAndRemovePunctuation will lowercase each substring and remove punctuation
 //
 // This function is called on every record from the flat files and all
 // search requests (i.e. HTTP and searcher.TopNNNs methods).
 // See: https://godoc.org/golang.org/x/text/unicode/norm#Form
 // See: https://withblue.ink/2019/03/11/why-you-need-to-normalize-unicode-strings.html
-func precompute(s string) string {
+func LowerAndRemovePunctuation(s string) string {
 	trimmed := strings.TrimSpace(strings.ToLower(punctuationReplacer.Replace(s)))
 
 	// UTF-8 normalization

@@ -1,12 +1,11 @@
-// Copyright 2022 The Moov Authors
+// Copyright The Moov Authors
 // Use of this source code is governed by an Apache License
 // license that can be found in the LICENSE file.
 
-package main
+package prepare
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/pkg/csl_eu"
@@ -51,7 +50,7 @@ type Name struct {
 	altNames []string
 }
 
-func sdnName(sdn *ofac.SDN, addrs []*ofac.Address) *Name {
+func SdnName(sdn *ofac.SDN, addrs []*ofac.Address) *Name {
 	return &Name{
 		Original:  sdn.SDNName,
 		Processed: sdn.SDNName,
@@ -60,7 +59,7 @@ func sdnName(sdn *ofac.SDN, addrs []*ofac.Address) *Name {
 	}
 }
 
-func altName(alt *ofac.AlternateIdentity) *Name {
+func AltName(alt *ofac.AlternateIdentity) *Name {
 	return &Name{
 		Original:  alt.AlternateName,
 		Processed: alt.AlternateName,
@@ -68,7 +67,7 @@ func altName(alt *ofac.AlternateIdentity) *Name {
 	}
 }
 
-func dpName(dp *dpl.DPL) *Name {
+func DPName(dp *dpl.DPL) *Name {
 	return &Name{
 		Original:  dp.Name,
 		Processed: dp.Name,
@@ -76,7 +75,7 @@ func dpName(dp *dpl.DPL) *Name {
 	}
 }
 
-func cslName(item interface{}) *Name {
+func CSLName(item interface{}) *Name {
 	switch v := item.(type) {
 	case *csl_us.EL:
 		return &Name{
@@ -212,7 +211,7 @@ func (ds *debugStep) apply(in *Name) error {
 	return nil
 }
 
-func newPipeliner(logger log.Logger, debug bool) *pipeliner {
+func NewPipeliner(logger log.Logger, debug bool) *Pipeliner {
 	steps := []step{
 		&reorderSDNStep{},
 		&companyNameCleanupStep{},
@@ -224,27 +223,27 @@ func newPipeliner(logger log.Logger, debug bool) *pipeliner {
 			steps[i] = &debugStep{logger: logger, step: steps[i]}
 		}
 	}
-	return &pipeliner{
+	return &Pipeliner{
 		logger: logger,
 		steps:  steps,
 	}
 }
 
-type pipeliner struct {
+type Pipeliner struct {
 	logger log.Logger
 	steps  []step
 }
 
-func (p *pipeliner) Do(name *Name) error {
+func (p *Pipeliner) Do(name *Name) error {
 	if p == nil || p.steps == nil || p.logger == nil || name == nil {
-		return errors.New("nil pipeliner or Name")
+		return errors.New("nil Pipeliner or Name")
 	}
 	for i := range p.steps {
 		if name == nil {
-			return fmt.Errorf("%T: nil Name", p.steps[i])
+			return p.logger.Error().LogErrorf("%T: nil Name", p.steps[i]).Err()
 		}
 		if err := p.steps[i].apply(name); err != nil {
-			return fmt.Errorf("pipeline: %v", err)
+			return p.logger.Error().LogErrorf("pipeline: %v", err).Err()
 		}
 	}
 	return nil

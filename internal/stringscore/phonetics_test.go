@@ -1,4 +1,4 @@
-package main
+package stringscore
 
 import (
 	"strings"
@@ -24,12 +24,12 @@ func TestDisablePhoneticFiltering(t *testing.T) {
 	indexed := "tian xiang 7"
 
 	t.Setenv("DISABLE_PHONETIC_FILTERING", "no")
-	score := bestPairsJaroWinkler(search, indexed)
+	score := BestPairsJaroWinkler(search, indexed)
 	require.InDelta(t, 0.00, score, 0.01)
 
 	// Disable filtering (force the compare)
 	t.Setenv("DISABLE_PHONETIC_FILTERING", "yes")
 
-	score = bestPairsJaroWinkler(search, indexed)
+	score = BestPairsJaroWinkler(search, indexed)
 	require.InDelta(t, 0.544, score, 0.01)
 }

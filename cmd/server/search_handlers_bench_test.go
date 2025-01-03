@@ -5,20 +5,13 @@
 package main
 
 import (
-	"crypto/rand"
 	"fmt"
-	"io"
-	"math/big"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"os"
-	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/moov-io/base/log"
-	"github.com/moov-io/watchman/pkg/ofac"
 
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/require"
@@ -55,32 +48,4 @@ func BenchmarkSearchHandler(b *testing.B) {
 		})
 	}
 	require.NoError(b, g.Wait())
-}
-
-func BenchmarkJaroWinkler(b *testing.B) {
-	fd, err := os.Open(filepath.Join("..", "..", "test", "testdata", "sdn.csv"))
-	if err != nil {
-		b.Error(err)
-	}
-	results, err := ofac.Read(map[string]io.ReadCloser{"sdn.csv": fd})
-	require.NoError(b, err)
-	require.Len(b, results.SDNs, 7379)
-
-	randomIndex := func(length int) int {
-		n, err := rand.Int(rand.Reader, big.NewInt(1e9))
-		if err != nil {
-			panic(err)
-		}
-		return int(n.Int64()) % length
-	}
-
-	b.Run("bestPairsJaroWinkler", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			nameTokens := strings.Fields(fake.Person().Name())
-			idx := randomIndex(len(results.SDNs))
-
-			score := bestPairsJaroWinkler(nameTokens, results.SDNs[idx].SDNName)
-			require.Greater(b, score, -0.01)
-		}
-	})
 }

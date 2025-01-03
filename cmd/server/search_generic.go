@@ -9,6 +9,9 @@ import (
 	"reflect"
 	"strings"
 	"sync"
+
+	"github.com/moov-io/watchman/internal/prepare"
+	"github.com/moov-io/watchman/internal/stringscore"
 )
 
 type Result[T any] struct {
@@ -52,7 +55,7 @@ func topResults[T any](limit int, minMatch float64, name string, data []*Result[
 		return nil
 	}
 
-	name = precompute(name)
+	name = prepare.LowerAndRemovePunctuation(name)
 	nameTokens := strings.Fields(name)
 
 	xs := newLargest(limit, minMatch)
@@ -67,7 +70,7 @@ func topResults[T any](limit int, minMatch float64, name string, data []*Result[
 			it := &item{
 				matched: data[i].precomputedName,
 				value:   data[i],
-				weight:  bestPairsJaroWinkler(nameTokens, data[i].precomputedName),
+				weight:  stringscore.BestPairsJaroWinkler(nameTokens, data[i].precomputedName),
 			}
 
 			for _, alt := range data[i].precomputedAlts {
@@ -75,7 +78,7 @@ func topResults[T any](limit int, minMatch float64, name string, data []*Result[
 					continue
 				}
 
-				score := bestPairsJaroWinkler(nameTokens, alt)
+				score := stringscore.BestPairsJaroWinkler(nameTokens, alt)
 				if score > it.weight {
 					it.matched = alt
 					it.weight = score
