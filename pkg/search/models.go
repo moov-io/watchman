@@ -46,6 +46,8 @@ var (
 type SourceList string
 
 var (
+	SourceAPIRequest SourceList = "api-request"
+
 	SourceEUCSL  SourceList = "eu_csl"
 	SourceUKCSL  SourceList = "uk_csl"
 	SourceUSCSL  SourceList = "us_csl"
