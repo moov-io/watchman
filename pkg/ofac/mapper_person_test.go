@@ -44,7 +44,9 @@ func TestMapper__Person(t *testing.T) {
 	require.Nil(t, e.Aircraft)
 	require.Nil(t, e.Vessel)
 
-	require.Equal(t, "15102", e.SourceData.EntityID)
+	sourceData, ok := e.SourceData.(SDN)
+	require.True(t, ok)
+	require.Equal(t, "15102", sourceData.EntityID)
 }
 
 func TestMapper__CompletePerson(t *testing.T) {

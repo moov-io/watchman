@@ -4,7 +4,9 @@ import (
 	"time"
 )
 
-type Entity[T any] struct {
+type Value interface{}
+
+type Entity[T Value] struct {
 	Name     string     `json:"name"`
 	Type     EntityType `json:"entityType"`
 	Source   SourceList `json:"sourceList"`

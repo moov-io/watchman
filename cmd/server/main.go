@@ -185,8 +185,12 @@ func main() {
 	addSearchRoutes(logger, router, searcher)
 	addValuesRoutes(logger, router, searcher)
 
+	var genericEntities []pubsearch.Entity[pubsearch.Value]
+
 	genericSDNs := generalizeOFACSDNs(searcher.SDNs, searcher.Addresses)
-	v2SearchService := searchv2.NewService[ofac.SDN](logger, genericSDNs)
+	genericEntities = append(genericEntities, genericSDNs...)
+
+	v2SearchService := searchv2.NewService(logger, genericEntities)
 	addSearchV2Routes(logger, router, v2SearchService)
 
 	// Setup our web UI to be served as well
@@ -271,8 +275,8 @@ func handleDownloadStats(updates chan *DownloadStats, handle func(stats *Downloa
 	}
 }
 
-func generalizeOFACSDNs(input []*SDN, ofacAddresses []*Address) []pubsearch.Entity[ofac.SDN] {
-	var out []pubsearch.Entity[ofac.SDN]
+func generalizeOFACSDNs(input []*SDN, ofacAddresses []*Address) []pubsearch.Entity[pubsearch.Value] {
+	var out []pubsearch.Entity[pubsearch.Value]
 	for _, sdn := range input {
 		if sdn.SDN == nil {
 			continue

@@ -38,7 +38,9 @@ func TestMapper__Vessel(t *testing.T) {
 	require.Equal(t, "9187629", e.Vessel.IMONumber)
 	require.Equal(t, "572469210", e.Vessel.MMSI)
 
-	require.Equal(t, "15036", e.SourceData.EntityID)
+	sourceData, ok := e.SourceData.(SDN)
+	require.True(t, ok)
+	require.Equal(t, "15036", sourceData.EntityID)
 }
 
 func TestMapper__Aircraft(t *testing.T) {
@@ -69,7 +71,9 @@ func TestMapper__Aircraft(t *testing.T) {
 	require.Equal(t, "Airbus A321-131", e.Aircraft.Model)
 	require.Equal(t, "550", e.Aircraft.SerialNumber)
 
-	require.Equal(t, "18158", e.SourceData.EntityID)
+	sourceData, ok := e.SourceData.(SDN)
+	require.True(t, ok)
+	require.Equal(t, "18158", sourceData.EntityID)
 }
 
 func TestMapper__CompleteVessel(t *testing.T) {

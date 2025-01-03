@@ -111,8 +111,8 @@ func extractCountry(remark string) string {
 	return ""
 }
 
-func ToEntity(sdn SDN, addresses []Address, comments []SDNComments) search.Entity[SDN] {
-	out := search.Entity[SDN]{
+func ToEntity(sdn SDN, addresses []Address, comments []SDNComments) search.Entity[search.Value] {
+	out := search.Entity[search.Value]{
 		Name:       sdn.SDNName,
 		Source:     search.SourceUSOFAC,
 		SourceData: sdn,
