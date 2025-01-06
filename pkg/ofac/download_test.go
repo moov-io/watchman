@@ -7,9 +7,11 @@ package ofac
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/moov-io/base/log"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDownloader(t *testing.T) {
@@ -18,15 +20,11 @@ func TestDownloader(t *testing.T) {
 	}
 
 	files, err := Download(log.NewNopLogger(), "")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
+	require.Len(t, files, 4)
 
-	if len(files) != 4 {
-		t.Errorf("OFAC: found %d files", len(files))
-	}
 	for fn := range files {
-		name := filepath.Base(fn)
+		name := strings.ToLower(filepath.Base(fn))
 		switch name {
 		case "add.csv", "alt.csv", "sdn.csv", "sdn_comments.csv":
 			continue

@@ -15,17 +15,17 @@ import (
 
 var (
 	ofacFilenames = []string{
-		"add.csv",          // Address
-		"alt.csv",          // Alternate ID
-		"sdn.csv",          // Specially Designated National
-		"sdn_comments.csv", // Specially Designated National Comments
+		"ADD.CSV",          // Address
+		"ALT.CSV",          // Alternate ID
+		"SDN.CSV",          // Specially Designated National
+		"SDN_COMMENTS.CSV", // Specially Designated National Comments
 	}
 
 	ofacURLTemplate = func() string {
 		if v := os.Getenv("OFAC_DOWNLOAD_TEMPLATE"); v != "" {
 			return v
 		}
-		return "https://www.treasury.gov/ofac/downloads/%s"
+		return "https://sanctionslistservice.ofac.treas.gov/api/PublicationPreview/exports/%s"
 	}()
 )
 

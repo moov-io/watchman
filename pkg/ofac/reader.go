@@ -19,12 +19,13 @@ import (
 func Read(files map[string]io.ReadCloser) (*Results, error) {
 	res := new(Results)
 	for filename, file := range files {
-		switch filepath.Base(filename) {
+		switch strings.ToLower(filepath.Base(filename)) {
 		case "add.csv":
 			err := res.append(csvAddressFile(file))
 			if err != nil {
 				return nil, fmt.Errorf("add.csv: %v", err)
 			}
+
 		case "alt.csv":
 			err := res.append(csvAlternateIdentityFile(file))
 			if err != nil {

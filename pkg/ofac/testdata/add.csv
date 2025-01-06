@@ -21563,6 +21563,7 @@
 50541,76627,"CY-3046 Limassol, Patmou","Zakaki 11A","Cyprus",-0- 
 50541,76628,-0- ,-0- ,"Hungary",-0- 
 50542,76630,"VG Torta, OMC Chambers, Wickhams Cay 1.",-0- ,"Virgin Islands, British",-0- 
+50543,76632,"Room 103, Building 6, No. 9, Fenghao East Road, Haidian District","Beijing","China",-0- 
 50544,76634,"Ul. Timura Frunze, D. 11, Str. 1, Floor 1, Pomeshch. I, Kom. 2","Moscow 119021","Russia",-0- 
 50545,76637,-0- ,"Yitzhar","Region: West Bank",-0- 
 50546,76639,"Number 3, Kagzar Alley, Shahid Hedayeti Avenue, Shahid Soleimani Expressway","Tehran 1675646611","Iran",-0- 
@@ -22316,6 +22317,7 @@
 51394,78262,-0- ,-0- ,"Mexico",-0- 
 51395,78264,-0- ,-0- ,"Mexico",-0- 
 51396,78266,-0- ,-0- ,"Mexico",-0- 
+51399,78270,-0- ,"Tehran","Iran",-0- 
 51400,78275,-0- ,-0- ,"Lithuania",-0- 
 51400,78276,-0- ,"Santa Cruz de Tenerife","Spain",-0- 
 51401,78278,-0- ,-0- ,"Lithuania",-0- 
@@ -22336,6 +22338,7 @@
 51417,78312,"XVI Krajiske Motorizovane Brigade 63","Laktasi 78250","Bosnia and Herzegovina",-0- 
 51418,78325,-0- ,-0- ,"Bosnia and Herzegovina",-0- 
 51419,78317,-0- ,-0- ,"Venezuela",-0- 
+51420,78386,"Ul. Dinamovskaya D.1a, Office 409","Moscow 109044","Russia",-0- 
 51427,78329,"Nab. Kanala Griboedova D. 6/2, Lit. A","Saint Petersburg 191186","Russia",-0- 
 51427,78330,"PR-KT Malyi V.O.D. 43, K. 2, Lit. V, Floor 2, Pomeshch. 31","Saint Petersburg 199178","Russia",-0- 
 51428,78332,"Ul. Timiryazeva D. 7","Irkutsk 664003","Russia",-0- 
@@ -22367,6 +22370,7 @@
 51450,78770,-0- ,-0- ,"Israel",-0- 
 51451,78384,-0- ,-0- ,"Region: West Bank",-0- 
 51451,78771,-0- ,-0- ,"Israel",-0- 
+51452,78388,-0- ,"Moscow","Russia",-0- 
 51453,78391,"Ul. Staraya Basmannaya D. 19, Str. 12, Kom. 22","Moscow 105066","Russia",-0- 
 51454,78392,"Bld. 1, St Pyatnitskaya, 31/2","Moscow 119017","Russia",-0- 
 51455,78394,"Prosp. Pobedy D. 22","Cherepovets 162606","Russia",-0- 
@@ -22578,21 +22582,61 @@
 52189,79677,"d. 43 pom. 419, ul. Khabarovksaya","Yuzhno-Sakhalinsk 693020","Russia",-0- 
 52261,79821,"d. 15 k. 2 litera A pom.66-N ofis 625, liniya 26-Ya V.O.","St. Petersburg 199106","Russia",-0- 
 52263,79828,"Chengdu City High-Tech Zone, Tianfu Avenue North Section, Annex 18, Number 5","Chengdu, Sichuan","China",-0- 
+52265,79830,"Payam Rd, Mehrshahr","Karaj, Alborz Province","Iran",-0- 
+52269,79858,"80 Broad Street","Monrovia","Liberia",-0- 
+52269,79859,"2, Plastira Street, 166 73","Voula","Greece",-0- 
+52270,79841,"Trust Company Complex, Ajeltake Road","Majuro, Ajeltake Island 96960","Marshall Islands",-0- 
+52271,79842,-0- ,-0- ,-0- ,-0- 
+52272,79844,"Keizer Straat 40","Paramaribo","Suriname",-0- 
+52274,79847,"Unit 903, 9th Floor, Samarth Aishwarya, Off KL Walawalker Road","Mumbai 400053","India",-0- 
+52275,79848,-0- ,-0- ,-0- ,-0- 
+52284,79857,"Flat/Rm A 12/F ZJ 300, 300 Lockhart Road","Hong Kong","China",-0- 
+52285,79860,-0- ,-0- ,-0- ,-0- 
+52287,79863,-0- ,-0- ,-0- ,-0- 
+52288,79866,"Trust Company Complex, Ajeltake Road","Majuro, Ajeltake Island 96960","Marshall Islands",-0- 
 52291,79870,-0- ,"Shenyang","China",-0- 
 52291,79871,-0- ,"Pyongyang","Korea, North",-0- 
 52292,79873,-0- ,"Shenyang","China",-0- 
 52293,79875,-0- ,"Pyongyang","Korea, North",-0- 
+52294,79878,"Nasr Street","Sanaa","Yemen",-0- 
+52294,79879,"Street 75, Shiqiao Building, 3rd Floor, Door 4","Yiwu, Zhejiang","China",-0- 
+52297,79885,-0- ,-0- ,"Yemen",-0- 
+52298,79887,-0- ,-0- ,"Yemen",-0- 
 52299,79889,-0- ,-0- ,"Bosnia and Herzegovina",-0- 
 52300,79891,"Brace Pantica 2","Banja Luka 78000","Bosnia and Herzegovina",-0- 
 52301,79934,-0- ,-0- ,"Bosnia and Herzegovina",-0- 
+52302,79894,-0- ,-0- ,"Yemen",-0- 
+52304,79899,-0- ,"Hodeidah","Yemen",-0- 
+52304,79900,-0- ,"Sana'a","Yemen",-0- 
+52305,79901,"Unit 21-01, Level 21, Mercu Aspire KL Eco City, No 3 Jalan Bangsar","Kuala Lumpur 59200","Malaysia",-0- 
+52305,79902,"Suite A09-10 Block A Plaza Tarragon Kelana Jalan Ss6/6 Kelana Jaya","Petaling Jaya 47301","Malaysia",-0- 
+52307,79906,-0- ,"Sana'a","Yemen",-0- 
+52308,79908,-0- ,-0- ,"Yemen",-0- 
+52309,79988,-0- ,"Kuala Lumpur","Malaysia",-0- 
+52311,79912,"Unit 11-02, 11th Floor, Menara TJB, No. 9, Jalan Syed Mohd Mufti","Johor Bahru 80000","Malaysia",-0- 
+52316,79920,"Unit 11-02, 11th Floor, Menara TJB, No. 9, Jalan Syed Mohd Mufti","Johor Bahru 80000","Malaysia",-0- 
+52316,79921,"11-01, Jalan Balau 3, Taman Rinting, Masai","Johar Bahru 81750","Malaysia",-0- 
 52320,79927,-0- ,"Gradiska","Bosnia and Herzegovina",-0- 
 52321,79929,"Gornji Podgradci bb","Gradiska 78400","Bosnia and Herzegovina",-0- 
 52322,79931,-0- ,-0- ,"Bosnia and Herzegovina",-0- 
 52323,79933,"Ulica Jevrejska 67","Banja Luka 78000","Bosnia and Herzegovina",-0- 
 52324,79936,"Trg Krajine br. 2","Banja Luka 78000","Bosnia and Herzegovina",-0- 
+52325,79938,"Room 1202, Flat A, 12/F, Efficiency House, 35 Tai Yau Street, San Po Kong","Hong Kong","China",-0- 
+52325,79939,"39-09, Fuli Center, 6, Gangxing Lu, Zhongshan Qu","Dalian, Liaoning","China",-0- 
+52326,79940,-0- ,-0- ,-0- ,-0- 
+52327,79941,-0- ,-0- ,-0- ,-0- 
+52328,79942,-0- ,-0- ,-0- ,-0- 
+52329,79943,-0- ,-0- ,-0- ,-0- 
+52330,79945,"PO Box 1137","Victoria, Mahe Island","Seychelles",-0- 
+52331,79946,-0- ,-0- ,-0- ,-0- 
+52352,79989,-0- ,"Kuala Lumpur","Malaysia",-0- 
 52353,79991,-0- ,"Tehran","Iran",-0- 
 52353,79992,-0- ,-0- ,"Switzerland",-0- 
 52354,79994,"Ground Floor, No. 4, Payam Azadi cul-de-sac, Shahid Ahmad Ghasemi St., Timuri, Central Sector","Tehran City, Tehran Province","Iran",-0- 
 52355,79996,-0- ,"Lausanne","Switzerland",-0- 
 52356,79998,-0- ,"Tehran","Iran",-0- 
+52377,80019,"Varketili 3, 1 Micro Distr","Tbilisi","Georgia",-0- 
+52378,80021,-0- ,"Tbilisi","Georgia",-0- 
+52393,80049,-0- ,-0- ,"Georgia",-0- 
+52412,80068,-0- ,"Moscow","Russia",-0- 
 
