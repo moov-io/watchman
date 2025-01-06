@@ -22,7 +22,7 @@ func TestMapper__Person(t *testing.T) {
 	}
 	require.NotNil(t, sdn)
 
-	e := ToEntity(*sdn, nil, nil)
+	e := ToEntity(*sdn, nil, nil, nil)
 	require.Equal(t, "MORENO, Daniel", e.Name)
 	require.Equal(t, search.EntityPerson, e.Type)
 	require.Equal(t, search.SourceUSOFAC, e.Source)
@@ -57,7 +57,7 @@ func TestMapper__CompletePerson(t *testing.T) {
 		Remarks:  "DOB 28 Oct 1968; POB Baghdad, Iraq; Additional Sanctions Information - Subject to Secondary Sanctions Pursuant to the Hizballah Financial Sanctions Regulations; alt. Additional Sanctions Information - Subject to Secondary Sanctions; Gender Male; a.k.a. 'SHIBL, Hajji'; nationality Iran; Passport A123456 (Iran) expires 2024; Driver's License No. 04900377 (Moldova) issued 02 Jul 2004; Email Address test@example.com; Phone: +1-123-456-7890; Fax: +1-123-456-7899",
 	}
 
-	e := ToEntity(*sdn, nil, nil)
+	e := ToEntity(*sdn, nil, nil, nil)
 	require.Equal(t, "AL-ZAYDI, Shibl Muhsin 'Ubayd", e.Name)
 	require.Equal(t, search.EntityPerson, e.Type)
 	require.Equal(t, search.SourceUSOFAC, e.Source)
@@ -135,7 +135,7 @@ func TestMapper__CompletePersonWithRemarks(t *testing.T) {
 		Remarks:  "DOB 28 Oct 1968; POB Baghdad, Iraq; Gender Male; Title: Commander; Former Name: AL-ZAYDI, Muhammad; Linked To: ISLAMIC REVOLUTIONARY GUARD CORPS (IRGC)-QODS FORCE; Additional Sanctions Information - Subject to Secondary Sanctions",
 	}
 
-	e := ToEntity(*sdn, nil, nil)
+	e := ToEntity(*sdn, nil, nil, nil)
 
 	// Test affiliations
 	require.Len(t, e.Affiliations, 1)
@@ -165,7 +165,7 @@ func TestMapper__PersonWithTitle(t *testing.T) {
 		Remarks:  "Title: Regional Director",
 	}
 
-	e := ToEntity(*sdn, nil, nil)
+	e := ToEntity(*sdn, nil, nil, nil)
 	require.Equal(t, "SMITH, John", e.Name)
 	require.Equal(t, search.EntityPerson, e.Type)
 

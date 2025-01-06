@@ -17,7 +17,7 @@ func TestMapper__CompleteBusiness(t *testing.T) {
 		Remarks:  "Business Registration Number 51566843 (Hong Kong); Commercial Registry Number CH-020.1.066.499-9 (Switzerland); Company Number 05527424 (United Kingdom)",
 	}
 
-	e := ToEntity(*sdn, nil, nil)
+	e := ToEntity(*sdn, nil, nil, nil)
 	require.Equal(t, "ACME CORPORATION", e.Name)
 	require.Equal(t, search.EntityBusiness, e.Type)
 	require.Equal(t, search.SourceUSOFAC, e.Source)
@@ -60,7 +60,7 @@ func TestMapper__CompleteBusinessWithRemarks(t *testing.T) {
 		Remarks:  "Business Registration Number 51566843 (Hong Kong); Subsidiary Of: PARENT CORP; Former Name: OLD ACME LTD; Additional Sanctions Information - Subject to Secondary Sanctions",
 	}
 
-	e := ToEntity(*sdn, nil, nil)
+	e := ToEntity(*sdn, nil, nil, nil)
 
 	// Test affiliations
 	require.Len(t, e.Affiliations, 1)

@@ -293,7 +293,7 @@ func generalizeOFACSDNs(input []*SDN, ofacAddresses []*Address) []pubsearch.Enti
 			}
 		}
 
-		entity := ofac.ToEntity(*sdn.SDN, addresses, nil)
+		entity := ofac.ToEntity(*sdn.SDN, addresses, nil, nil)
 		if len(entity.Addresses) > 0 && entity.Addresses[0].Line1 != "" {
 			out = append(out, entity)
 		}

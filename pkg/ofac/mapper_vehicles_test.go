@@ -22,7 +22,7 @@ func TestMapper__Vessel(t *testing.T) {
 	}
 	require.NotNil(t, sdn)
 
-	e := ToEntity(*sdn, nil, nil)
+	e := ToEntity(*sdn, nil, nil, nil)
 	require.Equal(t, "ARTAVIL", e.Name)
 	require.Equal(t, search.EntityVessel, e.Type)
 	require.Equal(t, search.SourceUSOFAC, e.Source)
@@ -55,7 +55,7 @@ func TestMapper__Aircraft(t *testing.T) {
 	}
 	require.NotNil(t, sdn)
 
-	e := ToEntity(*sdn, nil, nil)
+	e := ToEntity(*sdn, nil, nil, nil)
 	require.Equal(t, "MSN 550", e.Name)
 	require.Equal(t, search.EntityAircraft, e.Type)
 	require.Equal(t, search.SourceUSOFAC, e.Source)
@@ -84,7 +84,7 @@ func TestMapper__CompleteVessel(t *testing.T) {
 		Remarks:  "Vessel Type Cargo; Flag Malta; IMO 9999999; MMSI 123456789; Tonnage 50,000",
 	}
 
-	e := ToEntity(*sdn, nil, nil)
+	e := ToEntity(*sdn, nil, nil, nil)
 	require.Equal(t, "CARGO VESSEL X", e.Name)
 	require.Equal(t, search.EntityVessel, e.Type)
 	require.Equal(t, search.SourceUSOFAC, e.Source)
@@ -112,7 +112,7 @@ func TestMapper__CompleteAircraft(t *testing.T) {
 		Remarks:  "Aircraft Type Cargo; Flag United States; Aircraft Model Boeing 747; Manufacture Date 01 Jan 1995; Serial Number (MSN) 12345; ICAO Code B744",
 	}
 
-	e := ToEntity(*sdn, nil, nil)
+	e := ToEntity(*sdn, nil, nil, nil)
 	require.Equal(t, "AIRCRAFT Y", e.Name)
 	require.Equal(t, search.EntityAircraft, e.Type)
 	require.Equal(t, search.SourceUSOFAC, e.Source)
@@ -180,7 +180,7 @@ func TestMapper__CompleteVesselWithAllFields(t *testing.T) {
 		Remarks:                "Vessel Type Cargo; Flag Malta; IMO 9999999; MMSI 123456789; Tonnage 50,000",
 	}
 
-	e := ToEntity(*sdn, nil, nil)
+	e := ToEntity(*sdn, nil, nil, nil)
 	require.Equal(t, "CARGO VESSEL X", e.Name)
 	require.Equal(t, search.EntityVessel, e.Type)
 	require.Equal(t, search.SourceUSOFAC, e.Source)
