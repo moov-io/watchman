@@ -11,7 +11,7 @@ import (
 )
 
 func TestMapper__Vessel(t *testing.T) {
-	res, err := Read(testInputs(t, filepath.Join("..", "..", "test", "testdata", "sdn.csv")))
+	res, err := Read(testInputs(t, filepath.Join("testdata", "sdn.csv")))
 	require.NoError(t, err)
 
 	var sdn *SDN
@@ -34,7 +34,7 @@ func TestMapper__Vessel(t *testing.T) {
 	require.NotNil(t, e.Vessel)
 
 	require.Equal(t, "ARTAVIL", e.Vessel.Name)
-	require.Equal(t, "Malta", e.Vessel.Flag)
+	require.Equal(t, "Iran", e.Vessel.Flag)
 	require.Equal(t, "9187629", e.Vessel.IMONumber)
 	require.Equal(t, "572469210", e.Vessel.MMSI)
 
@@ -44,7 +44,7 @@ func TestMapper__Vessel(t *testing.T) {
 }
 
 func TestMapper__Aircraft(t *testing.T) {
-	res, err := Read(testInputs(t, filepath.Join("..", "..", "test", "testdata", "sdn.csv")))
+	res, err := Read(testInputs(t, filepath.Join("testdata", "sdn.csv")))
 	require.NoError(t, err)
 
 	var sdn *SDN
@@ -81,7 +81,7 @@ func TestMapper__CompleteVessel(t *testing.T) {
 		EntityID: "67890",
 		SDNName:  "CARGO VESSEL X",
 		SDNType:  "vessel",
-		Remarks:  "Vessel Type Cargo; Flag Malta; IMO 9999999; MMSI 123456789; Tonnage 50,000",
+		Remarks:  "Vessel Type Cargo; Other Vessel Flag Malta; IMO 9999999; MMSI 123456789; Tonnage 50,000",
 	}
 
 	e := ToEntity(*sdn, nil, nil, nil)

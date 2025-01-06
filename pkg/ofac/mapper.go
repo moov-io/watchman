@@ -5,6 +5,7 @@
 package ofac
 
 import (
+	"cmp"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -204,10 +205,10 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []Alt
 			Name:                   sdn.SDNName,
 			AltNames:               altNames,
 			IMONumber:              firstValue(findMatchingRemarks(remarks, "IMO")),
-			Type:                   normalizeVesselType(sdn.VesselType),
-			Flag:                   normalizeCountryCode(sdn.VesselFlag),
+			Type:                   normalizeVesselType(cmp.Or(sdn.VesselType, firstValue(findMatchingRemarks(remarks, "Vessel Type")))),
+			Flag:                   normalizeCountryCode(cmp.Or(sdn.VesselFlag, firstValue(findMatchingRemarks(remarks, "Flag")))),
 			MMSI:                   firstValue(findMatchingRemarks(remarks, "MMSI")),
-			Tonnage:                parseTonnage(sdn.Tonnage),
+			Tonnage:                parseTonnage(cmp.Or(sdn.Tonnage, firstValue(findMatchingRemarks(remarks, "Tonnage")))),
 			CallSign:               sdn.CallSign,
 			GrossRegisteredTonnage: parseTonnage(sdn.GrossRegisteredTonnage),
 			Owner:                  sdn.VesselOwner,
