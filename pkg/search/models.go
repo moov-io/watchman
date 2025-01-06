@@ -21,9 +21,10 @@ type Entity[T Value] struct {
 	Aircraft     *Aircraft     `json:"aircraft"`
 	Vessel       *Vessel       `json:"vessel"`
 
-	CryptoAddresses []CryptoAddress `json:"cryptoAddresses"`
+	Contact   []ContactInfo `json:"contact"`
+	Addresses []Address     `json:"addresses"`
 
-	Addresses []Address `json:"addresses"`
+	CryptoAddresses []CryptoAddress `json:"cryptoAddresses"`
 
 	Affiliations   []Affiliation    `json:"affiliations"`
 	SanctionsInfo  *SanctionsInfo   `json:"sanctionsInfo"`
@@ -38,6 +39,7 @@ type EntityType string
 var (
 	EntityPerson        EntityType = "person"
 	EntityBusiness      EntityType = "business"
+	EntityOrganization  EntityType = "organization"
 	EntityAircraft      EntityType = "aircraft"
 	EntityVessel        EntityType = "vessel"
 	EntityCryptoAddress EntityType = "crypto-address" // TODO(adam): Does this make sense?
@@ -116,6 +118,7 @@ var (
 
 type Business struct {
 	Name       string       `json:"name"`
+	AltNames   []string     `json:"altNames"`
 	Created    *time.Time   `json:"created"`
 	Dissolved  *time.Time   `json:"dissolved"`
 	Identifier []Identifier `json:"identifier"`
@@ -136,6 +139,7 @@ type Identifier struct {
 // TODO(adam): https://www.opensanctions.org/reference/#schema.Organization
 type Organization struct {
 	Name       string       `json:"name"`
+	AltNames   []string     `json:"altNames"`
 	Created    *time.Time   `json:"created"`
 	Dissolved  *time.Time   `json:"dissolved"`
 	Identifier []Identifier `json:"identifier"`
@@ -143,6 +147,7 @@ type Organization struct {
 
 type Aircraft struct {
 	Name         string       `json:"name"`
+	AltNames     []string     `json:"altNames"`
 	Type         AircraftType `json:"type"`
 	Flag         string       `json:"flag"` // ISO-3166 // TODO(adam):
 	Built        *time.Time   `json:"built"`
@@ -163,6 +168,7 @@ var (
 // TODO(adam): https://www.opensanctions.org/reference/#schema.Vessel
 type Vessel struct {
 	Name                   string     `json:"name"`
+	AltNames               []string   `json:"altNames"`
 	IMONumber              string     `json:"imoNumber"`
 	Type                   VesselType `json:"type"`
 	Flag                   string     `json:"flag"` // ISO-3166 // TODO(adam):

@@ -1,388 +1,987 @@
 package search
 
 import (
+	"fmt"
 	"math"
 	"strings"
 	"time"
+
+	"github.com/moov-io/watchman/internal/stringscore"
 )
 
+// Similarity calculates a match score between a query and an index entity.
 func Similarity[Q any, I any](query Entity[Q], index Entity[I]) float64 {
-	var parts []partial
+	pieces := make([]scorePiece, 0)
 
-	// 1) Compare top-level entity fields
-	score, weight := compareStringField(query.Name, index.Name, 2.0)
-	parts = append(parts, partial{Score: score, Weight: weight})
+	// Primary identifiers (IMO number, Call Sign, etc.) - highest weight
+	exactMatchWeight := 50.0
+	pieces = append(pieces, compareExactIdentifiers(query, index, exactMatchWeight))
 
-	score, weight = compareStringField(string(query.Type), string(index.Type), 1.0)
-	parts = append(parts, partial{Score: score, Weight: weight})
+	// Name match is critical
+	nameWeight := 30.0
+	pieces = append(pieces, compareName(query, index, nameWeight))
 
-	score, weight = compareStringField(string(query.Source), string(index.Source), 1.0)
-	parts = append(parts, partial{Score: score, Weight: weight})
+	// Entity-specific comparisons (type, flag, etc)
+	entityWeight := 15.0
+	pieces = append(pieces, compareEntitySpecific(query, index, entityWeight))
 
-	score, weight = compareStringField(query.SourceID, index.SourceID, 1.0)
-	parts = append(parts, partial{Score: score, Weight: weight})
+	// Supporting information (addresses, sanctions, etc)
+	supportingWeight := 5.0
+	pieces = append(pieces, compareSupportingInfo(query, index, supportingWeight))
 
-	// Titles (slice of strings)
-	score, weight = compareStringSlice(query.Titles, index.Titles, 1.0)
-	parts = append(parts, partial{Score: score, Weight: weight})
-
-	// Person
-	if query.Person != nil && index.Person != nil {
-		// Name
-		score, weight = compareStringField(query.Person.Name, index.Person.Name, 2.0)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		// Gender
-		score, weight = compareStringField(string(query.Person.Gender), string(index.Person.Gender), 1.0)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		// BirthDate
-		score, weight = compareDateField(query.Person.BirthDate, index.Person.BirthDate, 2.0)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		// DeathDate
-		score, weight = compareDateField(query.Person.DeathDate, index.Person.DeathDate, 1.5)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		// AltNames
-		score, weight = compareStringSlice(query.Person.AltNames, index.Person.AltNames, 1.5)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		// Titles
-		score, weight = compareStringSlice(query.Person.Titles, index.Person.Titles, 1.0)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		// GovernmentIDs (naive)
-		if len(query.Person.GovernmentIDs) > 0 && len(index.Person.GovernmentIDs) > 0 {
-			var qIDs, iIDs []string
-			for _, gid := range query.Person.GovernmentIDs {
-				qIDs = append(qIDs, string(gid.Type), gid.Country, gid.Identifier)
-			}
-			for _, gid := range index.Person.GovernmentIDs {
-				iIDs = append(iIDs, string(gid.Type), gid.Country, gid.Identifier)
-			}
-			score, weight = compareStringSlice(qIDs, iIDs, 2.0)
-			parts = append(parts, partial{Score: score, Weight: weight})
-		}
-	}
-
-	// Business
-	if query.Business != nil && index.Business != nil {
-		score, weight = compareStringField(query.Business.Name, index.Business.Name, 2.0)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		score, weight = compareDateField(query.Business.Created, index.Business.Created, 1.5)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		score, weight = compareDateField(query.Business.Dissolved, index.Business.Dissolved, 1.0)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		// Compare Identifiers
-		if len(query.Business.Identifier) > 0 && len(index.Business.Identifier) > 0 {
-			var qIDs, iIDs []string
-			for _, id := range query.Business.Identifier {
-				qIDs = append(qIDs, id.Name, id.Country, id.Identifier)
-			}
-			for _, id := range index.Business.Identifier {
-				iIDs = append(iIDs, id.Name, id.Country, id.Identifier)
-			}
-			score, weight = compareStringSlice(qIDs, iIDs, 2.0)
-			parts = append(parts, partial{Score: score, Weight: weight})
-		}
-	}
-
-	// Organization
-	if query.Organization != nil && index.Organization != nil {
-		score, weight = compareStringField(query.Organization.Name, index.Organization.Name, 2.0)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		score, weight = compareDateField(query.Organization.Created, index.Organization.Created, 1.5)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		score, weight = compareDateField(query.Organization.Dissolved, index.Organization.Dissolved, 1.0)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		if len(query.Organization.Identifier) > 0 && len(index.Organization.Identifier) > 0 {
-			var qIDs, iIDs []string
-			for _, id := range query.Organization.Identifier {
-				qIDs = append(qIDs, id.Name, id.Country, id.Identifier)
-			}
-			for _, id := range index.Organization.Identifier {
-				iIDs = append(iIDs, id.Name, id.Country, id.Identifier)
-			}
-			score, weight = compareStringSlice(qIDs, iIDs, 2.0)
-			parts = append(parts, partial{Score: score, Weight: weight})
-		}
-	}
-
-	// Aircraft
-	if query.Aircraft != nil && index.Aircraft != nil {
-		score, weight = compareStringField(query.Aircraft.Name, index.Aircraft.Name, 2.0)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		score, weight = compareStringField(string(query.Aircraft.Type), string(index.Aircraft.Type), 1.5)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		score, weight = compareStringField(query.Aircraft.Flag, index.Aircraft.Flag, 1.0)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		score, weight = compareDateField(query.Aircraft.Built, index.Aircraft.Built, 1.0)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		score, weight = compareStringField(query.Aircraft.ICAOCode, index.Aircraft.ICAOCode, 1.0)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		score, weight = compareStringField(query.Aircraft.Model, index.Aircraft.Model, 1.0)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		score, weight = compareStringField(query.Aircraft.SerialNumber, index.Aircraft.SerialNumber, 1.5)
-		parts = append(parts, partial{Score: score, Weight: weight})
-	}
-
-	// Vessel
-	if query.Vessel != nil && index.Vessel != nil {
-		score, weight = compareStringField(query.Vessel.Name, index.Vessel.Name, 2.0)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		score, weight = compareStringField(query.Vessel.IMONumber, index.Vessel.IMONumber, 1.5)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		score, weight = compareStringField(string(query.Vessel.Type), string(index.Vessel.Type), 1.0)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		score, weight = compareStringField(query.Vessel.Flag, index.Vessel.Flag, 1.0)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		score, weight = compareDateField(query.Vessel.Built, index.Vessel.Built, 1.0)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		score, weight = compareStringField(query.Vessel.Model, index.Vessel.Model, 1.0)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		// Tonnage
-		if query.Vessel.Tonnage > 0 && index.Vessel.Tonnage > 0 {
-			diff := math.Abs(float64(query.Vessel.Tonnage) - float64(index.Vessel.Tonnage))
-			var matchScore float64
-			if diff == 0 {
-				matchScore = 1.0
-			} else if diff < 500 {
-				matchScore = 0.5
-			} else {
-				matchScore = 0
-			}
-			parts = append(parts, partial{Score: matchScore, Weight: 1.0})
-		}
-		score, weight = compareStringField(query.Vessel.MMSI, index.Vessel.MMSI, 1.0)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		score, weight = compareStringField(query.Vessel.CallSign, index.Vessel.CallSign, 1.0)
-		parts = append(parts, partial{Score: score, Weight: weight})
-		// GrossRegisteredTonnage
-		if query.Vessel.GrossRegisteredTonnage > 0 && index.Vessel.GrossRegisteredTonnage > 0 {
-			diff := math.Abs(float64(query.Vessel.GrossRegisteredTonnage) -
-				float64(index.Vessel.GrossRegisteredTonnage))
-			var matchScore float64
-			if diff == 0 {
-				matchScore = 1.0
-			} else if diff < 500 {
-				matchScore = 0.5
-			} else {
-				matchScore = 0
-			}
-			parts = append(parts, partial{Score: matchScore, Weight: 1.0})
-		}
-		score, weight = compareStringField(query.Vessel.Owner, index.Vessel.Owner, 1.0)
-		parts = append(parts, partial{Score: score, Weight: weight})
-	}
-
-	// CryptoAddresses
-	score, weight = compareCryptoAddresses(query.CryptoAddresses, index.CryptoAddresses, 1.5)
-	parts = append(parts, partial{Score: score, Weight: weight})
-
-	// Addresses
-	score, weight = compareAddresses(query.Addresses, index.Addresses, 1.5)
-	parts = append(parts, partial{Score: score, Weight: weight})
-
-	// Affiliations
-	score, weight = compareAffiliations(query.Affiliations, index.Affiliations, 1.0)
-	parts = append(parts, partial{Score: score, Weight: weight})
-
-	// SanctionsInfo
-	score, weight = compareSanctionsInfo(query.SanctionsInfo, index.SanctionsInfo, 1.5)
-	parts = append(parts, partial{Score: score, Weight: weight})
-
-	// HistoricalInfo
-	score, weight = compareHistoricalInfo(query.HistoricalInfo, index.HistoricalInfo, 1.0)
-	parts = append(parts, partial{Score: score, Weight: weight})
-
-	// SourceData (T) fields are not included in the scoring
-
-	return combineScores(parts)
+	// Compute final score with coverage logic
+	return calculateFinalScore(pieces, index)
 }
 
-// jaroWinklerDistance is a placeholder for your advanced string comparison.
-func jaroWinklerDistance(a, b string) float64 {
-	a = strings.TrimSpace(strings.ToLower(a))
-	b = strings.TrimSpace(strings.ToLower(b))
-	if a == "" || b == "" {
+// scorePiece is a partial scoring result from one comparison function
+type scorePiece struct {
+	score          float64 // 0-1 score for this piece
+	weight         float64 // Weight for this piece
+	matched        bool    // Whether there was a "match"
+	required       bool    // Whether this piece is "required" for a high overall score
+	exact          bool    // Whether this was an exact match
+	fieldsCompared int     // Number of fields actually compared in this piece
+	pieceType      string  // e.g. "name", "entity", "identifiers", etc.
+}
+
+func compareExactIdentifiers[Q any, I any](query Entity[Q], index Entity[I], weight float64) scorePiece {
+	matches := 0
+	totalWeight := 0.0
+	score := 0.0
+	fieldsCompared := 0
+	hasMatch := false
+
+	// For Vessel example:
+	if query.Vessel != nil && index.Vessel != nil {
+		// IMO Number
+		if query.Vessel.IMONumber != "" {
+			fieldsCompared++
+			if index.Vessel.IMONumber != "" && strings.EqualFold(query.Vessel.IMONumber, index.Vessel.IMONumber) {
+				matches++
+				hasMatch = true
+				score += 10.0
+				totalWeight += 10.0
+			}
+		}
+		// Call Sign
+		if query.Vessel.CallSign != "" {
+			fieldsCompared++
+			if index.Vessel.CallSign != "" && strings.EqualFold(query.Vessel.CallSign, index.Vessel.CallSign) {
+				matches++
+				hasMatch = true
+				score += 8.0
+				totalWeight += 8.0
+			}
+		}
+		// MMSI
+		if query.Vessel.MMSI != "" {
+			fieldsCompared++
+			if index.Vessel.MMSI != "" && strings.EqualFold(query.Vessel.MMSI, index.Vessel.MMSI) {
+				matches++
+				hasMatch = true
+				score += 6.0
+				totalWeight += 6.0
+			}
+		}
+	}
+
+	// Similar logic for Person, Aircraft, etc. as needed...
+
+	finalScore := 0.0
+	if totalWeight > 0 {
+		finalScore = score / totalWeight
+	}
+	// Penalty if we compared but found no matches
+	if fieldsCompared > 0 && matches == 0 {
+		finalScore = 0.1
+	}
+
+	return scorePiece{
+		score:          finalScore,
+		weight:         weight,
+		matched:        hasMatch,
+		required:       fieldsCompared > 0,
+		exact:          finalScore > 0.95,
+		fieldsCompared: fieldsCompared,
+		pieceType:      "identifiers",
+	}
+}
+
+func compareName[Q any, I any](query Entity[Q], index Entity[I], weight float64) scorePiece {
+	qName := strings.TrimSpace(strings.ToLower(query.Name))
+	iName := strings.TrimSpace(strings.ToLower(index.Name))
+
+	// If the query name is empty, skip
+	if qName == "" {
+		return scorePiece{score: 0, weight: 0, fieldsCompared: 0, pieceType: "name"}
+	}
+
+	// Exact match
+	if qName == iName {
+		return scorePiece{
+			score:          1.0,
+			weight:         weight,
+			matched:        true,
+			required:       true,
+			exact:          true,
+			fieldsCompared: 1,
+			pieceType:      "name",
+		}
+	}
+
+	// Fuzzy match
+	qTerms := strings.Fields(qName)
+	bestScore := stringscore.BestPairsJaroWinkler(qTerms, iName)
+
+	// Check alternate names if both are Person entities
+	if query.Person != nil && index.Person != nil {
+		for _, altName := range index.Person.AltNames {
+			altScore := stringscore.BestPairsJaroWinkler(qTerms, strings.ToLower(altName))
+			if altScore > bestScore {
+				bestScore = altScore
+			}
+		}
+	}
+	// Check historical info for "Former Name"
+	for _, hist := range index.HistoricalInfo {
+		if strings.EqualFold(hist.Type, "Former Name") {
+			histScore := stringscore.BestPairsJaroWinkler(qTerms, strings.ToLower(hist.Value))
+			if histScore > bestScore {
+				bestScore = histScore
+			}
+		}
+	}
+
+	return scorePiece{
+		score:          bestScore,
+		weight:         weight,
+		matched:        bestScore > 0.8,
+		required:       true,
+		exact:          bestScore > 0.99,
+		fieldsCompared: 1,
+		pieceType:      "name",
+	}
+}
+
+const (
+	debugEntitySpecific = true
+)
+
+func compareEntitySpecific[Q any, I any](query Entity[Q], index Entity[I], weight float64) scorePiece {
+	// If types don't match, it's an immediate 0
+	if query.Type != index.Type {
+		return scorePiece{
+			score:          0,
+			weight:         weight,
+			pieceType:      "entity",
+			fieldsCompared: 1,
+		}
+	}
+
+	var typeScore float64
+	var matched bool
+	var fieldsCompared int
+
+	switch query.Type {
+	case EntityVessel:
+		typeScore, matched, fieldsCompared = compareVesselFields(query.Vessel, index.Vessel)
+	case EntityPerson:
+		typeScore, matched, fieldsCompared = comparePersonFields(query.Person, index.Person)
+	case EntityAircraft:
+		typeScore, matched, fieldsCompared = compareAircraftFields(query.Aircraft, index.Aircraft)
+	case EntityBusiness:
+		typeScore, matched, fieldsCompared = compareBusinessFields(query.Business, index.Business)
+	case EntityOrganization:
+		typeScore, matched, fieldsCompared = compareOrganizationFields(query.Organization, index.Organization)
+	}
+	if debugEntitySpecific {
+		debug("%v  typeScore=%.4f  matched=%v  fieldsCompared=%v\n", query.Type, typeScore, matched, fieldsCompared)
+	}
+
+	return scorePiece{
+		score:          typeScore,
+		weight:         weight,
+		matched:        matched,
+		required:       fieldsCompared > 0,
+		exact:          typeScore > 0.95,
+		fieldsCompared: fieldsCompared + 1, // +1 for the type comparison
+		pieceType:      "entity",
+	}
+}
+
+const (
+	day = 24 * time.Hour
+)
+
+// -------------------------------
+// Person-Specific Fields
+// -------------------------------
+func comparePersonFields(query *Person, index *Person) (float64, bool, int) {
+	if query == nil || index == nil {
+		return 0, false, 0
+	}
+
+	scores := make([]float64, 0)
+	fieldsCompared := 0
+
+	// Birthdate
+	if query.BirthDate != nil && index.BirthDate != nil {
+		fieldsCompared++
+
+		qb := query.BirthDate.Truncate(day)
+		ib := index.BirthDate.Truncate(day)
+
+		if qb.Equal(ib) {
+			scores = append(scores, 1.0)
+		} else {
+			scores = append(scores, 0.0)
+		}
+	}
+
+	// Gender
+	if query.Gender != "" {
+		fieldsCompared++
+		if strings.EqualFold(string(query.Gender), string(index.Gender)) {
+			scores = append(scores, 1.0)
+		} else {
+			scores = append(scores, 0.0)
+		}
+	}
+
+	// Titles
+	if len(query.Titles) > 0 && len(index.Titles) > 0 {
+		fieldsCompared++
+		matches := 0
+		for _, qTitle := range query.Titles {
+			for _, iTitle := range index.Titles {
+				if strings.EqualFold(qTitle, iTitle) {
+					matches++
+					break
+				}
+			}
+		}
+		scores = append(scores, float64(matches)/float64(len(query.Titles)))
+	}
+
+	if len(scores) == 0 {
+		return 0, false, fieldsCompared
+	}
+
+	sum := 0.0
+	for _, s := range scores {
+		sum += s
+	}
+	avg := sum / float64(len(scores))
+
+	return avg, avg > 0.5, fieldsCompared
+}
+
+// -------------------------------
+// Vessel-Specific Fields
+// -------------------------------
+func compareVesselFields(query *Vessel, index *Vessel) (float64, bool, int) {
+	if query == nil || index == nil {
+		return 0, false, 0
+	}
+
+	type fieldScore struct {
+		score  float64
+		weight float64
+	}
+	var (
+		scores         []fieldScore
+		fieldsCompared int
+	)
+
+	// Compare only fields present in query
+	if query.CallSign != "" {
+		fieldsCompared++
+		if strings.EqualFold(query.CallSign, index.CallSign) {
+			scores = append(scores, fieldScore{1.0, 4.0})
+		} else {
+			scores = append(scores, fieldScore{0.0, 4.0})
+		}
+	}
+	if query.IMONumber != "" && index.IMONumber != "" {
+		fieldsCompared++
+		if strings.EqualFold(query.IMONumber, index.IMONumber) {
+			scores = append(scores, fieldScore{1.0, 4.0})
+		} else {
+			scores = append(scores, fieldScore{0.0, 4.0})
+		}
+	}
+	if query.Owner != "" {
+		fieldsCompared++
+		ownerTerms := strings.Fields(strings.ToLower(query.Owner))
+		ownerScore := stringscore.BestPairsJaroWinkler(ownerTerms, strings.ToLower(index.Owner))
+		scores = append(scores, fieldScore{ownerScore, 2.0})
+	}
+	if query.Flag != "" {
+		fieldsCompared++
+		if strings.EqualFold(query.Flag, index.Flag) {
+			scores = append(scores, fieldScore{1.0, 1.5})
+		} else {
+			scores = append(scores, fieldScore{0.0, 1.5})
+		}
+	}
+	if query.Type != "" {
+		fieldsCompared++
+		if strings.EqualFold(string(query.Type), string(index.Type)) {
+			scores = append(scores, fieldScore{1.0, 1.0})
+		} else {
+			scores = append(scores, fieldScore{0.0, 1.0})
+		}
+	}
+	if query.Tonnage > 0 && index.Tonnage > 0 {
+		fieldsCompared++
+		diff := math.Abs(float64(query.Tonnage - index.Tonnage))
+		s := vesselTonnageScore(diff)
+		scores = append(scores, fieldScore{s, 1.0})
+	}
+	if query.GrossRegisteredTonnage > 0 && index.GrossRegisteredTonnage > 0 {
+		fieldsCompared++
+		diff := math.Abs(float64(query.GrossRegisteredTonnage - index.GrossRegisteredTonnage))
+		s := vesselTonnageScore(diff)
+		scores = append(scores, fieldScore{s, 1.0})
+	}
+
+	if len(scores) == 0 {
+		return 0, false, fieldsCompared
+	}
+
+	var totalScore, totalWeight float64
+	for _, fs := range scores {
+		totalScore += fs.score * fs.weight
+		totalWeight += fs.weight
+	}
+	avgScore := totalScore / totalWeight
+
+	return avgScore, avgScore > 0.5, fieldsCompared
+}
+
+// Helper for vessel tonnage diffs
+func vesselTonnageScore(diff float64) float64 {
+	switch {
+	case diff == 0:
+		return 1.0
+	case diff < 100:
+		return 0.8
+	case diff < 500:
+		return 0.5
+	default:
 		return 0.0
 	}
-	if a == b {
-		return 1.0
-	}
-	// Replace with real logic
-	return 0.5
 }
 
-// compareStringField returns (score, weight).
-// If the query is empty, the field is skipped (no penalty, no weight).
-func compareStringField(queryVal, indexVal string, weight float64) (float64, float64) {
-	q := strings.TrimSpace(queryVal)
-	i := strings.TrimSpace(indexVal)
+// -------------------------------
+// Aircraft-Specific Fields
+// -------------------------------
+func compareAircraftFields(query *Aircraft, index *Aircraft) (float64, bool, int) {
+	if query == nil || index == nil {
+		return 0, false, 0
+	}
 
-	if q == "" {
-		return 0, 0
+	var scores []float64
+	fieldsCompared := 0
+
+	// ICAO
+	if query.ICAOCode != "" {
+		fieldsCompared++
+		if strings.EqualFold(query.ICAOCode, index.ICAOCode) {
+			scores = append(scores, 1.0)
+		} else {
+			scores = append(scores, 0.0)
+		}
 	}
-	if i == "" {
-		return 0, weight
+	// Model
+	if query.Model != "" {
+		fieldsCompared++
+		if strings.EqualFold(query.Model, index.Model) {
+			scores = append(scores, 1.0)
+		} else {
+			// fuzzy
+			qTerms := strings.Fields(strings.ToLower(query.Model))
+			modelScore := stringscore.BestPairsJaroWinkler(qTerms, strings.ToLower(index.Model))
+			scores = append(scores, modelScore)
+		}
 	}
-	dist := jaroWinklerDistance(q, i)
-	return dist * weight, weight
+	// Flag
+	if query.Flag != "" {
+		fieldsCompared++
+		if strings.EqualFold(query.Flag, index.Flag) {
+			scores = append(scores, 1.0)
+		} else {
+			scores = append(scores, 0.0)
+		}
+	}
+
+	if len(scores) == 0 {
+		return 0, false, fieldsCompared
+	}
+
+	sum := 0.0
+	for _, s := range scores {
+		sum += s
+	}
+	avg := sum / float64(len(scores))
+
+	return avg, avg > 0.5, fieldsCompared
 }
 
-// compareDateField treats nil query as "skip," nil index as mismatch, and
-// otherwise uses a simplistic "within 1 year => full match, within 5 => partial" strategy.
-func compareDateField(queryVal, indexVal *time.Time, weight float64) (float64, float64) {
-	if queryVal == nil {
-		return 0, 0
+// -------------------------------
+// Business-Specific Fields
+// -------------------------------
+// compareBusinessFields compares fields for the Business entity
+func compareBusinessFields(query *Business, index *Business) (float64, bool, int) {
+	if query == nil || index == nil {
+		return 0, false, 0
 	}
-	if indexVal == nil {
-		return 0, weight
-	}
-	diffYears := math.Abs(queryVal.Sub(*indexVal).Hours() / 24 / 365)
-	switch {
-	case diffYears < 1:
-		return weight, weight
-	case diffYears < 5:
-		return 0.5 * weight, weight
-	default:
-		return 0, weight
-	}
-}
 
-// compareStringSlice does a naive match by concatenating slices and comparing as one big string.
-// In real systems, you might do a best-match approach or measure how many elements overlap, etc.
-func compareStringSlice(queryVals, indexVals []string, weight float64) (float64, float64) {
-	if len(queryVals) == 0 {
-		return 0, 0
+	// We'll collect sub-scores with weights
+	type fieldScore struct {
+		score  float64
+		weight float64
 	}
-	if len(indexVals) == 0 {
-		return 0, weight
-	}
-	query := strings.Join(queryVals, " ")
-	index := strings.Join(indexVals, " ")
-	return compareStringField(query, index, weight)
-}
+	var scores []fieldScore
+	fieldsCompared := 0
 
-// compareAddresses is a placeholder. In reality, you'd want something more sophisticated
-// (e.g., best-match across addresses, geospatial closeness, etc.).
-func compareAddresses(qAddrs, iAddrs []Address, weight float64) (float64, float64) {
-	if len(qAddrs) == 0 {
-		return 0, 0
-	}
-	if len(iAddrs) == 0 {
-		return 0, weight
-	}
-	// Naive approach: just compare the first address line1, line2, city, etc. as a concatenated string
-	var qParts, iParts []string
-	for _, a := range qAddrs {
-		qParts = append(qParts, a.Line1, a.Line2, a.City, a.State, a.PostalCode, a.Country)
-	}
-	for _, a := range iAddrs {
-		iParts = append(iParts, a.Line1, a.Line2, a.City, a.State, a.PostalCode, a.Country)
-	}
-	query := strings.Join(qParts, " ")
-	index := strings.Join(iParts, " ")
-	return compareStringField(query, index, weight)
-}
+	fmt.Println("compareBusinessFields")
 
-// compareCryptoAddresses is a placeholder that just compares them all as one big string.
-func compareCryptoAddresses(qAddrs, iAddrs []CryptoAddress, weight float64) (float64, float64) {
-	if len(qAddrs) == 0 {
-		return 0, 0
+	// 1) Primary Name check (fuzzy or exact)
+	if query.Name != "" {
+		fieldsCompared++
+		if strings.EqualFold(query.Name, index.Name) {
+			// exact match
+			scores = append(scores, fieldScore{score: 1.0, weight: 4.0})
+		} else {
+			// fuzzy match
+			qTerms := strings.Fields(strings.ToLower(query.Name))
+			iName := strings.ToLower(index.Name)
+			nameScore := stringscore.BestPairsJaroWinkler(qTerms, iName)
+			scores = append(scores, fieldScore{score: nameScore, weight: 4.0})
+		}
 	}
-	if len(iAddrs) == 0 {
-		return 0, weight
-	}
-	var qParts, iParts []string
-	for _, ca := range qAddrs {
-		qParts = append(qParts, ca.Currency, ca.Address)
-	}
-	for _, ca := range iAddrs {
-		iParts = append(iParts, ca.Currency, ca.Address)
-	}
-	query := strings.Join(qParts, " ")
-	index := strings.Join(iParts, " ")
-	return compareStringField(query, index, weight)
-}
+	fmt.Printf(".Name  scores=%v  fieldsCompared=%v\n", scores, fieldsCompared)
 
-// compareAffiliations is another naive approach.
-// You could do more advanced logic to match entity names, types, etc.
-func compareAffiliations(qAffs, iAffs []Affiliation, weight float64) (float64, float64) {
-	if len(qAffs) == 0 {
-		return 0, 0
+	// 2) AltNames check
+	// If the query has alt names, let's see if any overlap. Or, if the index has alt names,
+	// we can see if the query.Name matches them.
+	// Typically you'd do something like your `Person.AltNames` logic. For simplicity:
+	if len(query.AltNames) > 0 && len(index.AltNames) > 0 {
+		fieldsCompared++
+		bestAltScore := 0.0
+		for _, qAlt := range query.AltNames {
+			for _, iAlt := range index.AltNames {
+				altScore := stringscore.BestPairsJaroWinkler(
+					strings.Fields(strings.ToLower(qAlt)),
+					strings.ToLower(iAlt),
+				)
+				if altScore > bestAltScore {
+					bestAltScore = altScore
+				}
+			}
+		}
+		// Weight alt names a bit lower than primary name
+		scores = append(scores, fieldScore{score: bestAltScore, weight: 2.0})
 	}
-	if len(iAffs) == 0 {
-		return 0, weight
-	}
-	// Just combine them all
-	var qParts, iParts []string
-	for _, aff := range qAffs {
-		qParts = append(qParts, aff.EntityName, aff.Type, aff.Details)
-	}
-	for _, aff := range iAffs {
-		iParts = append(iParts, aff.EntityName, aff.Type, aff.Details)
-	}
-	query := strings.Join(qParts, " ")
-	index := strings.Join(iParts, " ")
-	return compareStringField(query, index, weight)
-}
+	fmt.Printf(".AltName  scores=%v  fieldsCompared=%v\n", scores, fieldsCompared)
 
-// compareSanctionsInfo is naive. Potentially you'd do fuzzy set matching of programs, etc.
-func compareSanctionsInfo(qInfo, iInfo *SanctionsInfo, weight float64) (float64, float64) {
-	if qInfo == nil {
-		return 0, 0
+	// 3) Created date
+	if query.Created != nil && index.Created != nil {
+		fieldsCompared++
+		if query.Created.Equal(*index.Created) {
+			scores = append(scores, fieldScore{score: 1.0, weight: 1.0})
+		} else {
+			// partial credit if close
+			diffDays := math.Abs(query.Created.Sub(*index.Created).Hours() / 24)
+			switch {
+			case diffDays <= 1:
+				scores = append(scores, fieldScore{score: 0.9, weight: 1.0})
+			case diffDays <= 7:
+				scores = append(scores, fieldScore{score: 0.7, weight: 1.0})
+			default:
+				scores = append(scores, fieldScore{score: 0.0, weight: 1.0})
+			}
+		}
 	}
-	if iInfo == nil {
-		return 0, weight
-	}
-	// Combine programs and description
-	query := strings.Join(qInfo.Programs, " ") + " " + qInfo.Description
-	index := strings.Join(iInfo.Programs, " ") + " " + iInfo.Description
-	score, w := compareStringField(query, index, weight)
-	// If one is "secondary" and the other isn't, reduce score
-	if qInfo.Secondary != iInfo.Secondary && score > 0 {
-		score *= 0.5
-	}
-	return score, w
-}
+	fmt.Printf(".Created  scores=%v  fieldsCompared=%v\n", scores, fieldsCompared)
 
-// compareHistoricalInfo is naive. You might want date checks, type matching, etc.
-func compareHistoricalInfo(qHist, iHist []HistoricalInfo, weight float64) (float64, float64) {
-	if len(qHist) == 0 {
-		return 0, 0
+	// 4) Dissolved date
+	if query.Dissolved != nil && index.Dissolved != nil {
+		fieldsCompared++
+		if query.Dissolved.Equal(*index.Dissolved) {
+			scores = append(scores, fieldScore{score: 1.0, weight: 1.0})
+		} else {
+			// partial logic if you want to consider near-dates as partial matches
+			diffDays := math.Abs(query.Dissolved.Sub(*index.Dissolved).Hours() / 24)
+			switch {
+			case diffDays <= 1:
+				scores = append(scores, fieldScore{score: 0.9, weight: 1.0})
+			case diffDays <= 7:
+				scores = append(scores, fieldScore{score: 0.7, weight: 1.0})
+			default:
+				scores = append(scores, fieldScore{score: 0.0, weight: 1.0})
+			}
+		}
 	}
-	if len(iHist) == 0 {
-		return 0, weight
-	}
-	var qParts, iParts []string
-	for _, h := range qHist {
-		qParts = append(qParts, h.Type, h.Value)
-		// If you want to compare the date, you'd do it similarly to compareDateField
-	}
-	for _, h := range iHist {
-		iParts = append(iParts, h.Type, h.Value)
-	}
-	query := strings.Join(qParts, " ")
-	index := strings.Join(iParts, " ")
-	return compareStringField(query, index, weight)
-}
+	fmt.Printf(".Dissolved  scores=%v  fieldsCompared=%v\n", scores, fieldsCompared)
 
-type partial struct {
-	Score  float64
-	Weight float64
-}
+	// 5) Identifiers
+	// If you have multiple IDs in each, you might do a best match approach.
+	// For each query.Identifier, find best match in index.Identifier.
+	// Possibly weigh "Tax ID" or other critical IDs more heavily.
+	if len(query.Identifier) > 0 && len(index.Identifier) > 0 {
+		fieldsCompared++
+		bestIDScore := 0.0
+		for _, qID := range query.Identifier {
+			for _, iID := range index.Identifier {
+				// Example logic: exact match of "Identifier" + Country -> 1.0
+				// partial or mismatch -> 0.
+				// Could also do fuzzy or partial logic for qID.Identifier vs. iID.Identifier
+				if strings.EqualFold(qID.Identifier, iID.Identifier) &&
+					strings.EqualFold(qID.Country, iID.Country) &&
+					strings.EqualFold(qID.Name, iID.Name) {
+					// perfect
+					bestIDScore = 1.0
+					break
+				} else if strings.EqualFold(qID.Identifier, iID.Identifier) {
+					// partial
+					if bestIDScore < 0.8 {
+						bestIDScore = 0.8
+					}
+				} else {
+					// could do fuzzy on qID.Identifier vs. iID.Identifier if you want
+				}
+			}
+			if bestIDScore == 1.0 {
+				break
+			}
+		}
+		// Weight ID matches strongly
+		scores = append(scores, fieldScore{score: bestIDScore, weight: 5.0})
+	}
+	fmt.Printf(".Identifier  scores=%v  fieldsCompared=%v\n", scores, fieldsCompared)
 
-// combineScores sums partials into a final ratio in [0..1].
-func combineScores(partials []partial) float64 {
+	if len(scores) == 0 {
+		return 0, false, fieldsCompared
+	}
+
+	// Weighted average
 	var totalScore, totalWeight float64
-	for _, p := range partials {
-		totalScore += p.Score
-		totalWeight += p.Weight
+	for _, fs := range scores {
+		totalScore += fs.score * fs.weight
+		totalWeight += fs.weight
 	}
+	avgScore := totalScore / totalWeight
+
+	// We'll say it's "matched" if > 0.5 on average // TODO(adam): why so low?
+	return avgScore, avgScore > 0.5, fieldsCompared
+}
+
+// -------------------------------
+// Organization-Specific Fields
+// -------------------------------
+func compareOrganizationFields(query *Organization, index *Organization) (float64, bool, int) {
+	if query == nil || index == nil {
+		return 0, false, 0
+	}
+
+	fieldsCompared := 0
+	scores := make([]float64, 0)
+
+	// Created date
+	if query.Created != nil && index.Created != nil {
+		fieldsCompared++
+		if query.Created.Equal(*index.Created) {
+			scores = append(scores, 1.0)
+		} else {
+			diff := math.Abs(query.Created.Sub(*index.Created).Hours() / 24)
+			switch {
+			case diff <= 1:
+				scores = append(scores, 0.9)
+			case diff <= 7:
+				scores = append(scores, 0.7)
+			default:
+				scores = append(scores, 0.0)
+			}
+		}
+	}
+
+	if len(scores) == 0 {
+		return 0, false, fieldsCompared
+	}
+
+	sum := 0.0
+	for _, s := range scores {
+		sum += s
+	}
+	avg := sum / float64(len(scores))
+
+	return avg, avg > 0.5, fieldsCompared
+}
+
+// -------------------------------
+// Supporting Info (addresses, etc.)
+// -------------------------------
+func compareSupportingInfo[Q any, I any](query Entity[Q], index Entity[I], weight float64) scorePiece {
+	var pieces []float64
+	fieldsCompared := 0
+
+	// Compare addresses
+	if len(query.Addresses) > 0 && len(index.Addresses) > 0 {
+		bestAddress := 0.0
+		fieldsCompared++
+		for _, qAddr := range query.Addresses {
+			for _, iAddr := range index.Addresses {
+				addrScore := compareAddress(qAddr, iAddr)
+				if addrScore > bestAddress {
+					bestAddress = addrScore
+				}
+			}
+		}
+		pieces = append(pieces, bestAddress)
+	}
+
+	// Compare sanctions programs
+	if query.SanctionsInfo != nil && index.SanctionsInfo != nil {
+		fieldsCompared++
+		programScore := compareSanctionsPrograms(query.SanctionsInfo, index.SanctionsInfo)
+		pieces = append(pieces, programScore)
+	}
+
+	// Compare crypto addresses (exact matches only)
+	if len(query.CryptoAddresses) > 0 && len(index.CryptoAddresses) > 0 {
+		fieldsCompared++
+		matches := 0
+		for _, qCA := range query.CryptoAddresses {
+			for _, iCA := range index.CryptoAddresses {
+				if strings.EqualFold(qCA.Currency, iCA.Currency) &&
+					strings.EqualFold(qCA.Address, iCA.Address) {
+					matches++
+				}
+			}
+		}
+		score := float64(matches) / float64(len(query.CryptoAddresses))
+		pieces = append(pieces, score)
+	}
+
+	if len(pieces) == 0 {
+		return scorePiece{score: 0, weight: 0, fieldsCompared: 0, pieceType: "supporting"}
+	}
+
+	// Average of these pieces
+	sum := 0.0
+	for _, s := range pieces {
+		sum += s
+	}
+	avgScore := sum / float64(len(pieces))
+
+	return scorePiece{
+		score:          avgScore,
+		weight:         weight,
+		matched:        avgScore > 0.5,
+		required:       false,
+		exact:          avgScore > 0.99,
+		fieldsCompared: fieldsCompared,
+		pieceType:      "supporting",
+	}
+}
+
+// -------------------------------
+// Address comparison
+// -------------------------------
+func compareAddress(query Address, index Address) float64 {
+	var (
+		pieces  []float64
+		weights []float64
+	)
+
+	// Line1
+	if query.Line1 != "" {
+		qTerms := strings.Fields(query.Line1)
+		score := stringscore.BestPairsJaroWinkler(qTerms, index.Line1)
+		pieces = append(pieces, score)
+		weights = append(weights, 3.0)
+	}
+	// Line2
+	if query.Line2 != "" {
+		qTerms := strings.Fields(query.Line2)
+		score := stringscore.BestPairsJaroWinkler(qTerms, index.Line2)
+		pieces = append(pieces, score)
+		weights = append(weights, 1.0)
+	}
+	// City
+	if query.City != "" {
+		qTerms := strings.Fields(query.City)
+		score := stringscore.BestPairsJaroWinkler(qTerms, index.City)
+		pieces = append(pieces, score)
+		weights = append(weights, 2.0)
+	}
+	// State (exact)
+	if query.State != "" {
+		if strings.EqualFold(query.State, index.State) {
+			pieces = append(pieces, 1.0)
+		} else {
+			pieces = append(pieces, 0.0)
+		}
+		weights = append(weights, 1.0)
+	}
+	// Postal code (exact)
+	if query.PostalCode != "" {
+		if strings.EqualFold(query.PostalCode, index.PostalCode) {
+			pieces = append(pieces, 1.0)
+		} else {
+			pieces = append(pieces, 0.0)
+		}
+		weights = append(weights, 1.5)
+	}
+	// Country (exact)
+	if query.Country != "" {
+		if strings.EqualFold(query.Country, index.Country) {
+			pieces = append(pieces, 1.0)
+		} else {
+			pieces = append(pieces, 0.0)
+		}
+		weights = append(weights, 2.0)
+	}
+
+	if len(pieces) == 0 {
+		return 0
+	}
+
+	var totalScore, totalWeight float64
+	for i := range pieces {
+		totalScore += pieces[i] * weights[i]
+		totalWeight += weights[i]
+	}
+	return totalScore / totalWeight
+}
+
+func compareSanctionsPrograms(query *SanctionsInfo, index *SanctionsInfo) float64 {
+	if query == nil || index == nil {
+		return 0
+	}
+	if len(query.Programs) == 0 {
+		return 0
+	}
+
+	matches := 0
+	for _, qProgram := range query.Programs {
+		for _, iProgram := range index.Programs {
+			if strings.EqualFold(qProgram, iProgram) {
+				matches++
+				break
+			}
+		}
+	}
+
+	score := float64(matches) / float64(len(query.Programs))
+
+	// Adjust for mismatch on "secondary"
+	if query.Secondary != index.Secondary {
+		score *= 0.8
+	}
+	return score
+}
+
+// -------------------------------
+// Coverage Logic
+// -------------------------------
+
+// countIndexUniqueFields only counts fields relevant to the entity's type.
+// This prevents penalizing a Person for Vessel fields, etc.
+func countIndexUniqueFields[I any](index Entity[I]) int {
+	count := 0
+
+	switch index.Type {
+	case EntityVessel:
+		if index.Vessel != nil {
+			if index.Vessel.IMONumber != "" {
+				count++
+			}
+			if index.Vessel.CallSign != "" {
+				count++
+			}
+			if index.Vessel.MMSI != "" {
+				count++
+			}
+			if index.Vessel.Owner != "" {
+				count++
+			}
+			// If you want to treat name as part of "unique fields," do that outside or here
+		}
+	case EntityPerson:
+		if index.Person != nil {
+			if index.Person.BirthDate != nil {
+				count++
+			}
+			if index.Person.Gender != "" {
+				count++
+			}
+			if len(index.Person.Titles) > 0 {
+				count++
+			}
+		}
+	case EntityAircraft:
+		if index.Aircraft != nil {
+			if index.Aircraft.ICAOCode != "" {
+				count++
+			}
+			if index.Aircraft.Model != "" {
+				count++
+			}
+			if index.Aircraft.Flag != "" {
+				count++
+			}
+		}
+	case EntityBusiness:
+		if index.Business != nil {
+			// If there's a Name
+			if strings.TrimSpace(index.Business.Name) != "" {
+				count++
+			}
+			// If there's at least one alt name
+			if len(index.Business.AltNames) > 0 {
+				count++
+			}
+			// If there's a created date
+			if index.Business.Created != nil {
+				count++
+			}
+			// If there's a dissolved date
+			if index.Business.Dissolved != nil {
+				count++
+			}
+			// If there's at least one Identifier
+			if len(index.Business.Identifier) > 0 {
+				count++
+			}
+		}
+	case EntityOrganization:
+		if index.Organization != nil {
+			if index.Organization.Created != nil {
+				count++
+			}
+		}
+	}
+
+	// Regardless of type, if there's a non-blank Name, count it
+	if strings.TrimSpace(index.Name) != "" {
+		count++
+	}
+
+	// You could also count addresses, sanctions, etc. if relevant:
+	// if len(index.Addresses) > 0 { count++ }
+	// if index.SanctionsInfo != nil { count++ }
+	// etc.
+
+	return count
+}
+
+const (
+	debugFinalScores = true
+)
+
+// calculateFinalScore applies coverage logic and final adjustments.
+func calculateFinalScore[I any](pieces []scorePiece, index Entity[I]) float64 {
+	if len(pieces) == 0 {
+		return 0
+	}
+
+	var (
+		totalScore    float64
+		totalWeight   float64
+		hasExactMatch bool
+		hasNameMatch  bool
+	)
+
+	if debugFinalScores {
+		defer debug("\n")
+	}
+
+	// Sum up the piece scores
+	for _, piece := range pieces {
+		if debugFinalScores {
+			if debugFinalScores {
+				debug("%#v\n", piece)
+			}
+		}
+
+		// Skip zero-weight pieces entirely
+		if piece.weight <= 0 {
+			continue
+		}
+
+		// If "entity" piece has score=0 but fieldsCompared=1, that indicates a type mismatch => overall 0
+		// if piece.pieceType == "entity" && piece.fieldsCompared == 1 && piece.score == 0 {
+		// 	debug("entity - mismatch")
+		// 	return 0
+		// }
+
+		// Only accumulate if we actually compared some fields
+		if piece.fieldsCompared > 0 {
+			totalScore += piece.score * piece.weight
+			totalWeight += piece.weight
+
+			if piece.exact {
+				hasExactMatch = true
+			}
+			// If the piece is "required" and "matched," track if it's the name
+			if piece.required && piece.matched && piece.pieceType == "name" {
+				hasNameMatch = true
+			}
+		}
+	}
+
 	if totalWeight == 0 {
 		return 0
 	}
-	ratio := totalScore / totalWeight
-	if ratio < 0 {
-		return 0
-	} else if ratio > 1 {
-		return 1
+
+	baseScore := totalScore / totalWeight
+	if debugFinalScores {
+		debug("baseScore=%.4f  ", baseScore)
 	}
-	return ratio
+
+	// Coverage check: only count fields relevant to the index type
+	coveragePenalty := 1.0
+	indexUniqueCount := countIndexUniqueFields(index)
+	fieldsCompared := 0
+	for _, p := range pieces {
+		fieldsCompared += p.fieldsCompared
+	}
+	if debugFinalScores {
+		debug("fieldsCompared=%d  ", fieldsCompared)
+	}
+
+	if indexUniqueCount > 0 {
+		coverage := float64(fieldsCompared) / float64(indexUniqueCount)
+
+		// If coverage is very low (< 0.5) but the base score is high, reduce a bit
+		if coverage < 0.5 && baseScore > 0.6 {
+			coveragePenalty = 0.9
+		}
+	}
+
+	finalScore := baseScore * coveragePenalty
+	if debugFinalScores {
+		debug("coveragePenalty=%.2f  ", coveragePenalty)
+	}
+
+	// Perfect match boost: only if coverage wasn't penalized
+	if hasExactMatch && hasNameMatch && finalScore > 0.9 && coveragePenalty == 1.0 {
+		if debugFinalScores {
+			debug("PERFECT MATCH BOOST  ")
+		}
+
+		finalScore = math.Min(1.0, finalScore*1.15)
+	}
+	if debugFinalScores {
+		debug("finalScore=%.2f", finalScore)
+	}
+
+	return finalScore
+}
+
+func debug(pattern string, args ...any) {
+	fmt.Printf(pattern, args...) //nolint:forbidigo
 }

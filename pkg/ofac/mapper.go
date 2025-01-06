@@ -81,6 +81,16 @@ func makeIdentifier(remarks []string, suffix string) *search.Identifier {
 	}
 }
 
+func findDateStamp(matchingRemarks []remark) *time.Time {
+	return withFirstP(matchingRemarks, func(in remark) *time.Time {
+		t, err := parseTime(dobPatterns, in.value)
+		if t.IsZero() || err != nil {
+			return nil
+		}
+		return &t
+	})
+}
+
 func parseTime(acceptedLayouts []string, value string) (time.Time, error) {
 	value = strings.TrimSpace(strings.ReplaceAll(value, "circa", ""))
 	parts := strings.Split(value, "to")
@@ -111,7 +121,7 @@ func extractCountry(remark string) string {
 	return ""
 }
 
-func ToEntity(sdn SDN, addresses []Address, comments []SDNComments) search.Entity[search.Value] {
+func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []AlternateIdentity) search.Entity[search.Value] {
 	out := search.Entity[search.Value]{
 		Name:       sdn.SDNName,
 		Source:     search.SourceUSOFAC,
@@ -130,12 +140,22 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments) search.Entit
 	// Extract common fields regardless of entity type
 	out.Addresses = parseAddresses(addresses)
 
+	// Get all alternate names from both remarks and AlternateIdentity entries
+	altNames := make([]string, 0)
+	altNames = append(altNames, parseAltNames(remarks)...)
+	altNames = append(altNames, parseAltIdentities(altIds)...)
+	altNames = deduplicateStrings(altNames)
+
 	switch strings.ToLower(strings.TrimSpace(sdn.SDNType)) {
 	case "-0-", "":
 		out.Type = search.EntityBusiness
 		out.Business = &search.Business{
-			Name: sdn.SDNName,
+			Name:     sdn.SDNName,
+			AltNames: altNames,
 		}
+		out.Business.Created = findDateStamp(findMatchingRemarks(remarks, "Organization Established Date"))
+		// out.Business.Dissolved = findDateStamp(findMatchingRemarks(remarks, "TODO(adam)"))
+
 		out.Business.Identifier = makeIdentifiers(remarks, []string{
 			"Branch Unit Number",
 			"Business Number",
@@ -155,8 +175,9 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments) search.Entit
 	case "individual":
 		out.Type = search.EntityPerson
 		out.Person = &search.Person{
-			Name:   sdn.SDNName,
-			Gender: search.Gender(strings.ToLower(firstValue(findMatchingRemarks(remarks, "Gender")))),
+			Name:     sdn.SDNName,
+			AltNames: altNames,
+			Gender:   search.Gender(strings.ToLower(firstValue(findMatchingRemarks(remarks, "Gender")))),
 		}
 
 		// Title from SDN field needs to be prepended if non-empty
@@ -164,9 +185,6 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments) search.Entit
 			titles = append([]string{sdn.Title}, titles...)
 		}
 		out.Titles = titles
-
-		// Extract alternative names
-		out.Person.AltNames = parseAltNames(remarks)
 
 		// Handle birth date
 		out.Person.BirthDate = withFirstP(findMatchingRemarks(remarks, "DOB"), func(in remark) *time.Time {
@@ -183,14 +201,13 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments) search.Entit
 	case "vessel":
 		out.Type = search.EntityVessel
 		out.Vessel = &search.Vessel{
-			Name:      sdn.SDNName,
-			IMONumber: firstValue(findMatchingRemarks(remarks, "IMO")),
-			Type: withFirstF(findMatchingRemarks(remarks, "Vessel Type"), func(r remark) search.VesselType {
-				return normalizeVesselType(r.value)
-			}),
-			Flag:                   normalizeCountryCode(firstValue(findMatchingRemarks(remarks, "Flag"))),
+			Name:                   sdn.SDNName,
+			AltNames:               altNames,
+			IMONumber:              firstValue(findMatchingRemarks(remarks, "IMO")),
+			Type:                   normalizeVesselType(sdn.VesselType),
+			Flag:                   normalizeCountryCode(sdn.VesselFlag),
 			MMSI:                   firstValue(findMatchingRemarks(remarks, "MMSI")),
-			Tonnage:                parseTonnage(firstValue(findMatchingRemarks(remarks, "Tonnage"))),
+			Tonnage:                parseTonnage(sdn.Tonnage),
 			CallSign:               sdn.CallSign,
 			GrossRegisteredTonnage: parseTonnage(sdn.GrossRegisteredTonnage),
 			Owner:                  sdn.VesselOwner,
@@ -199,9 +216,10 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments) search.Entit
 	case "aircraft":
 		out.Type = search.EntityAircraft
 		out.Aircraft = &search.Aircraft{
-			Name: sdn.SDNName,
-			Type: normalizeAircraftType(firstValue(findMatchingRemarks(remarks, "Aircraft Type"))),
-			Flag: normalizeCountryCode(firstValue(findMatchingRemarks(remarks, "Flag"))),
+			Name:     sdn.SDNName,
+			AltNames: altNames,
+			Type:     normalizeAircraftType(firstValue(findMatchingRemarks(remarks, "Aircraft Type"))),
+			Flag:     normalizeCountryCode(firstValue(findMatchingRemarks(remarks, "Flag"))),
 			Built: withFirstP(findMatchingRemarks(remarks, "Manufacture Date"), func(in remark) *time.Time {
 				t, err := parseTime(dobPatterns, in.value)
 				if t.IsZero() || err != nil {
@@ -240,6 +258,31 @@ func parseAltNames(remarks []string) []string {
 		}
 	}
 	return names
+}
+
+func parseAltIdentities(altIds []AlternateIdentity) []string {
+	var names []string
+	for _, alt := range altIds {
+		if alt.AlternateName != "" {
+			names = append(names, strings.TrimSpace(alt.AlternateName))
+		}
+	}
+	return names
+}
+
+func deduplicateStrings(input []string) []string {
+	seen := make(map[string]bool)
+	var result []string
+
+	for _, str := range input {
+		// Normalize the string for comparison
+		normalized := strings.ToLower(strings.TrimSpace(str))
+		if !seen[normalized] {
+			seen[normalized] = true
+			result = append(result, str) // Keep original string formatting
+		}
+	}
+	return result
 }
 
 var (
