@@ -1,6 +1,9 @@
 package search_test
 
 import (
+	"bytes"
+	"fmt"
+	"io"
 	"testing"
 	"time"
 
@@ -190,17 +193,15 @@ func TestSimilarity_OFAC_SDN_Vessel(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			score := search.Similarity(tc.query, indexEntity)
+			score := search.DebugSimilarity(debug(t), tc.query, indexEntity)
 			require.InDelta(t, tc.expected, score, 0.02)
 
 			// Additional assertions for specific score thresholds
 			if tc.expected >= 0.95 {
-				require.GreaterOrEqual(t, score, 0.95,
-					"High confidence matches should score >= 0.95")
+				require.GreaterOrEqual(t, score, 0.95, "High confidence matches should score >= 0.95")
 			}
 			if tc.expected <= 0.40 {
-				require.LessOrEqual(t, score, 0.40,
-					"Clear mismatches should score <= 0.40")
+				require.LessOrEqual(t, score, 0.40, "Clear mismatches should score <= 0.40")
 			}
 		})
 	}
@@ -330,7 +331,7 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			score := search.Similarity(tc.query, indexEntity)
+			score := search.DebugSimilarity(debug(t), tc.query, indexEntity)
 			require.InDelta(t, tc.expected, score, 0.02)
 		})
 	}
@@ -472,7 +473,7 @@ func TestSimilarity_OFAC_SDN_Business(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			score := search.Similarity(tc.query, indexEntity)
+			score := search.DebugSimilarity(debug(t), tc.query, indexEntity)
 			require.InDelta(t, tc.expected, score, 0.05)
 		})
 	}
@@ -515,8 +516,22 @@ func TestSimilarity_Edge_Cases(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			score := search.Similarity(tc.query, indexEntity)
+			score := search.DebugSimilarity(debug(t), tc.query, indexEntity)
 			require.InDelta(t, tc.expected, score, 0.02)
 		})
 	}
+}
+
+func debug(t *testing.T) io.Writer {
+	t.Helper()
+
+	if testing.Verbose() {
+		buf := new(bytes.Buffer)
+		t.Cleanup(func() {
+			fmt.Printf("\n%s\n", buf.String())
+		})
+		return buf
+	}
+
+	return nil
 }

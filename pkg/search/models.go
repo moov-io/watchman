@@ -188,6 +188,9 @@ var (
 	VesselTypeCargo   VesselType = "cargo"
 )
 
+// CryptoAddress
+//
+// &cryptoAddress=XBT:x123456
 type CryptoAddress struct {
 	Currency string `json:"currency"`
 	Address  string `json:"address"`

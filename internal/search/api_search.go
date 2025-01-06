@@ -4,9 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/moov-io/base/log"
+	"github.com/moov-io/watchman/pkg/address"
 	"github.com/moov-io/watchman/pkg/search"
 
 	"github.com/gorilla/mux"
@@ -80,41 +83,128 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 func readSearchRequest(r *http.Request) (search.Entity[search.Value], error) {
 	q := r.URL.Query()
 
+	var err error
 	var req search.Entity[search.Value]
 
 	req.Name = strings.TrimSpace(q.Get("name"))
-	req.Type = search.EntityType(strings.TrimSpace(strings.ToLower(q.Get("entityType"))))
+	req.Type = search.EntityType(strings.TrimSpace(strings.ToLower(q.Get("type"))))
 	req.Source = search.SourceAPIRequest
 	req.SourceID = strings.TrimSpace(q.Get("requestID"))
 
 	switch req.Type {
-	case search.EntityPerson: // "person"
+	case search.EntityPerson:
+		req.Person = &search.Person{
+			Name:      req.Name,
+			AltNames:  q["altNames"],
+			Gender:    search.Gender(strings.TrimSpace(q.Get("gender"))),
+			BirthDate: readDate(q.Get("birthDate")),
+			DeathDate: readDate(q.Get("deathDate")),
+			Titles:    q["titles"],
+			// GovernmentIDs []GovernmentID `json:"governmentIDs"`
+		}
 
-	case search.EntityBusiness: // "business"
+	case search.EntityBusiness:
+		req.Business = &search.Business{
+			Name:      req.Name,
+			Created:   readDate(q.Get("created")),
+			Dissolved: readDate(q.Get("dissolved")),
+			// Identifier []Identifier `json:"identifier"`
+		}
 
-	case search.EntityAircraft: // "aircraft"
+	case search.EntityOrganization:
+		req.Organization = &search.Organization{
+			Name:      req.Name,
+			Created:   readDate(q.Get("created")),
+			Dissolved: readDate(q.Get("dissolved")),
+			// Identifier []Identifier `json:"identifier"`
+		}
 
-	case search.EntityVessel: // "vessel"
+	case search.EntityAircraft:
+		req.Aircraft = &search.Aircraft{
+			Name:         req.Name,
+			Type:         search.AircraftType(q.Get("aircraftType")),
+			Flag:         q.Get("flag"),
+			Built:        readDate("built"),
+			ICAOCode:     q.Get("icaoCode"),
+			Model:        q.Get("model"),
+			SerialNumber: q.Get("serialNumber"),
+		}
 
-	default:
-		return req, fmt.Errorf("unsupported entityType: %v", req.Type)
+	case search.EntityVessel:
+		req.Vessel = &search.Vessel{
+			Name:      req.Name,
+			IMONumber: q.Get("imoNumber"),
+			Type:      search.VesselType(q.Get("vesselType")),
+			Flag:      q.Get("flag"),
+			Built:     readDate("built"),
+			Model:     q.Get("model"),
+			MMSI:      q.Get("mmsi"),
+			CallSign:  q.Get("callSign"),
+			Owner:     q.Get("owner"),
+		}
+		req.Vessel.Tonnage, err = readInt(q.Get("tonnage"))
+		if err != nil {
+			return req, fmt.Errorf("reading vessel tonnage: %w", err)
+		}
+		req.Vessel.GrossRegisteredTonnage, err = readInt(q.Get("grossRegisteredTonnage"))
+		if err != nil {
+			return req, fmt.Errorf("reading vessel GrossRegisteredTonnage: %w", err)
+		}
 	}
 
-	// Person       *Person       `json:"person"`
-	// Business     *Business     `json:"business"`
-	// Organization *Organization `json:"organization"`
-	// Aircraft     *Aircraft     `json:"aircraft"`
-	// Vessel       *Vessel       `json:"vessel"`
+	req.CryptoAddresses = readCryptoCurrencyAddresses(q["cryptoAddress"])
+	req.Addresses = readAddresses(q["address"])
 
-	// CryptoAddresses []CryptoAddress `json:"cryptoAddresses"`
-	// TODO(adam): support multiple values? How does Go handle that?
-
-	// Addresses []Address `json:"addresses"`
-
+	// TODO(adam):
 	// Affiliations   []Affiliation    `json:"affiliations"`
 	// SanctionsInfo  *SanctionsInfo   `json:"sanctionsInfo"`
 	// HistoricalInfo []HistoricalInfo `json:"historicalInfo"`
-	// Titles         []string         `json:"titles"`
 
 	return req, nil
+}
+
+var (
+	allowedDateFormats = []string{"2006-01-02", "2006-01", "2006"}
+)
+
+func readDate(input string) *time.Time {
+	if input == "" {
+		return nil
+	}
+
+	for _, format := range allowedDateFormats {
+		tt, err := time.Parse(format, input)
+		if err == nil {
+			return &tt
+		}
+	}
+	return nil
+}
+
+func readInt(input string) (int, error) {
+	n, err := strconv.ParseInt(input, 10, 32)
+	return int(n), err
+}
+
+func readCryptoCurrencyAddresses(inputs []string) []search.CryptoAddress {
+	var out []search.CryptoAddress
+	for _, input := range inputs {
+		// Query param looks like: cryptoAddress=XBT:x123456
+		parts := strings.Split(input, ":")
+		if len(parts) == 2 {
+			out = append(out, search.CryptoAddress{
+				Currency: parts[0],
+				Address:  parts[1],
+			})
+		}
+	}
+	return out
+}
+
+func readAddresses(inputs []string) []search.Address {
+	var out []search.Address
+	for _, input := range inputs {
+		out = append(out, address.ParseAddress(input))
+	}
+	return out
 }
