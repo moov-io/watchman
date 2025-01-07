@@ -49,6 +49,10 @@ func Read(files map[string]io.ReadCloser) (*Results, error) {
 			return nil, fmt.Errorf("error: file %s does not have a handler for processing", filename)
 		}
 	}
+
+	// Merge extended comments into SDN
+	res.SDNs = mergeSpilloverRecords(res.SDNs, res.SDNComments)
+
 	return res, nil
 }
 
@@ -374,4 +378,15 @@ func readDigitalCurrencyAddresses(remarks string) []DigitalCurrencyAddress {
 	}
 
 	return out
+}
+
+func mergeSpilloverRecords(sdns []*SDN, comments []*SDNComments) []*SDN {
+	for i := range sdns {
+		for j := range comments {
+			if sdns[i].EntityID == comments[j].EntityID {
+				sdns[i].Remarks += comments[j].RemarksExtended
+			}
+		}
+	}
+	return sdns
 }

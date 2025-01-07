@@ -167,20 +167,7 @@ func ofacRecords(logger log.Logger, initialDir string) (*ofac.Results, error) {
 		return nil, err
 	}
 
-	// Merge comments into SDNs
-	res.SDNs = mergeSpilloverRecords(res.SDNs, res.SDNComments)
 	return res, nil
-}
-
-func mergeSpilloverRecords(sdns []*ofac.SDN, comments []*ofac.SDNComments) []*ofac.SDN {
-	for i := range sdns {
-		for j := range comments {
-			if sdns[i].EntityID == comments[j].EntityID {
-				sdns[i].Remarks += comments[j].RemarksExtended
-			}
-		}
-	}
-	return sdns
 }
 
 func dplRecords(logger log.Logger, initialDir string) ([]*dpl.DPL, error) {
