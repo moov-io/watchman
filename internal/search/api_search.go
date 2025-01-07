@@ -66,7 +66,12 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	entities, err := c.service.Search(r.Context(), req)
+	opts := SearchOpts{
+		Limit:    extractSearchLimit(r),
+		MinMatch: extractSearchMinMatch(r),
+	}
+
+	entities, err := c.service.Search(r.Context(), req, opts)
 	if err != nil {
 		c.logger.Error().LogErrorf("problem with v2 search: %v", err)
 
@@ -78,6 +83,32 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(searchResponse{
 		Entities: entities,
 	})
+}
+
+var (
+	softResultsLimit, hardResultsLimit = 10, 100
+)
+
+func extractSearchLimit(r *http.Request) int {
+	limit := softResultsLimit
+	if v := r.URL.Query().Get("limit"); v != "" {
+		n, _ := strconv.Atoi(v)
+		if n > 0 {
+			limit = n
+		}
+	}
+	if limit > hardResultsLimit {
+		limit = hardResultsLimit
+	}
+	return limit
+}
+
+func extractSearchMinMatch(r *http.Request) float64 {
+	if v := r.URL.Query().Get("minMatch"); v != "" {
+		n, _ := strconv.ParseFloat(v, 64)
+		return n
+	}
+	return 0.00
 }
 
 func readSearchRequest(r *http.Request) (search.Entity[search.Value], error) {

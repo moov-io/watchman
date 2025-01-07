@@ -122,6 +122,17 @@ func extractCountry(remark string) string {
 	return ""
 }
 
+func ToEntities(sdns []SDN, addresses []Address, comments []SDNComments, altIds []AlternateIdentity) []search.Entity[search.Value] {
+	// TODO(adam): replace generalizeOFACSDNs with this
+	// TODO(adam): include []Address, []SDNComments, []AlternateIdentity
+
+	out := make([]search.Entity[search.Value], len(sdns))
+	for i := range sdns {
+		out[i] = ToEntity(sdns[i], nil, nil, nil) // TODO(adam): fill out
+	}
+	return out
+}
+
 func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []AlternateIdentity) search.Entity[search.Value] {
 	out := search.Entity[search.Value]{
 		Name:       sdn.SDNName,
