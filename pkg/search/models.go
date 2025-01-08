@@ -7,10 +7,12 @@ import (
 type Value interface{}
 
 type Entity[T Value] struct {
-	Name     string     `json:"name"`
-	Type     EntityType `json:"entityType"`
-	Source   SourceList `json:"sourceList"`
-	SourceID string     `json:"sourceID"` // TODO(adam):
+	Name   string     `json:"name"`
+	Type   EntityType `json:"entityType"`
+	Source SourceList `json:"sourceList"`
+
+	// SourceID is the source data's identifier.
+	SourceID string `json:"sourceID"`
 
 	// TODO(adam): What has opensanctions done to normalize and join this data
 	// Review https://www.opensanctions.org/reference/
@@ -37,12 +39,11 @@ type Entity[T Value] struct {
 type EntityType string
 
 var (
-	EntityPerson        EntityType = "person"
-	EntityBusiness      EntityType = "business"
-	EntityOrganization  EntityType = "organization"
-	EntityAircraft      EntityType = "aircraft"
-	EntityVessel        EntityType = "vessel"
-	EntityCryptoAddress EntityType = "crypto-address" // TODO(adam): Does this make sense?
+	EntityPerson       EntityType = "person"
+	EntityBusiness     EntityType = "business"
+	EntityOrganization EntityType = "organization"
+	EntityAircraft     EntityType = "aircraft"
+	EntityVessel       EntityType = "vessel"
 )
 
 type SourceList string

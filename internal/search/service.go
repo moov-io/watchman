@@ -3,6 +3,7 @@ package search
 import (
 	"context"
 	"fmt"
+	"slices"
 	"sync"
 
 	"github.com/moov-io/watchman/internal/largest"
@@ -13,7 +14,7 @@ import (
 )
 
 type Service interface {
-	Search(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]SearchedEntity[search.Value], error)
+	Search(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error)
 }
 
 func NewService(logger log.Logger, entities []search.Entity[search.Value]) Service {
@@ -36,7 +37,7 @@ type service struct {
 	*syncutil.Gate // limits concurrent processing
 }
 
-func (s *service) Search(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]SearchedEntity[search.Value], error) {
+func (s *service) Search(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error) {
 	// Grab a read-lock over our data
 	s.RLock()
 	defer s.RUnlock()
@@ -55,9 +56,12 @@ func (s *service) Search(ctx context.Context, query search.Entity[search.Value],
 type SearchOpts struct {
 	Limit    int
 	MinMatch float64
+
+	RequestID      string
+	DebugSourceIDs []string
 }
 
-func (s *service) performSearch(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]SearchedEntity[search.Value], error) {
+func (s *service) performSearch(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error) {
 	items := largest.NewItems(opts.Limit, opts.MinMatch)
 
 	indices := makeIndices(len(s.entities), opts.Limit/3) // limit goroutines
@@ -79,13 +83,13 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 		go func() {
 			defer wg.Done()
 
-			performSubSearch(items, query, s.entities[indices[start]:end])
+			performSubSearch(items, query, s.entities[indices[start]:end], opts)
 		}()
 	}
 	wg.Wait()
 
 	results := items.Items()
-	var out []SearchedEntity[search.Value]
+	var out []search.SearchedEntity[search.Value]
 
 	for _, entity := range results {
 		if entity == nil || entity.Value == nil {
@@ -96,8 +100,8 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 			continue
 		}
 
-		out = append(out, SearchedEntity[search.Value]{
-			Entity: entity.Value.(search.Entity[search.Value]),
+		out = append(out, search.SearchedEntity[search.Value]{
+			Entity: entity.Value.(search.Entity[search.Value]), // TODO(adam):
 			Match:  entity.Weight,
 		})
 	}
@@ -105,11 +109,11 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	return out, nil
 }
 
-func performSubSearch(items *largest.Items, query search.Entity[search.Value], entities []search.Entity[search.Value]) {
+func performSubSearch(items *largest.Items, query search.Entity[search.Value], entities []search.Entity[search.Value], opts SearchOpts) {
 	for _, entity := range entities {
 		score := search.DebugSimilarity(nil, query, entity)
 
-		if entity.Name == "HYDRA MARKET" {
+		if slices.Contains(opts.DebugSourceIDs, entity.SourceID) {
 			fmt.Printf("%#v\n", entity)
 			fmt.Println("")
 			fmt.Printf("%#v\n", entity.SourceData)

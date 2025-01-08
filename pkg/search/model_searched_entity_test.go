@@ -5,8 +5,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/moov-io/watchman/pkg/search"
-
 	"github.com/stretchr/testify/require"
 )
 
@@ -16,7 +14,7 @@ func TestSearchedEntityJSON(t *testing.T) {
 	}
 
 	bs, err := json.MarshalIndent(SearchedEntity[SDN]{
-		Entity: search.Entity[SDN]{
+		Entity: Entity[SDN]{
 			SourceData: SDN{
 				EntityID: "12345",
 			},

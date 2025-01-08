@@ -63,6 +63,9 @@ func TestService_Search(t *testing.T) {
 		t.Logf("got %d results", len(results))
 		t.Logf("")
 		t.Logf("%#v", results[0])
+
+		res := results[0]
+		require.InDelta(t, 1.00, res.Match, 0.001)
 	})
 }
 

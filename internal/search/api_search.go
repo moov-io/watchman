@@ -44,7 +44,7 @@ func (c *controller) AppendRoutes(router *mux.Router) *mux.Router {
 }
 
 type searchResponse struct {
-	Entities []SearchedEntity[search.Value] `json:"entities"`
+	Entities []search.SearchedEntity[search.Value] `json:"entities"`
 }
 
 type errorResponse struct {
@@ -66,9 +66,12 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	q := r.URL.Query()
 	opts := SearchOpts{
-		Limit:    extractSearchLimit(r),
-		MinMatch: extractSearchMinMatch(r),
+		Limit:          extractSearchLimit(r),
+		MinMatch:       extractSearchMinMatch(r),
+		RequestID:      q.Get("requestID"),
+		DebugSourceIDs: strings.Split(q.Get("debugSourceIDs"), ","),
 	}
 
 	entities, err := c.service.Search(r.Context(), req, opts)
@@ -120,7 +123,6 @@ func readSearchRequest(r *http.Request) (search.Entity[search.Value], error) {
 	req.Name = strings.TrimSpace(q.Get("name"))
 	req.Type = search.EntityType(strings.TrimSpace(strings.ToLower(q.Get("type"))))
 	req.Source = search.SourceAPIRequest
-	req.SourceID = strings.TrimSpace(q.Get("requestID"))
 
 	switch req.Type {
 	case search.EntityPerson:
