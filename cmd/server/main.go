@@ -187,8 +187,8 @@ func main() {
 
 	var genericEntities []pubsearch.Entity[pubsearch.Value]
 
-	genericSDNs := generalizeOFACSDNs(searcher.SDNs, searcher.Addresses)
-	genericEntities = append(genericEntities, genericSDNs...)
+	genericOFACEntities := groupOFACRecords(searcher)
+	genericEntities = append(genericEntities, genericOFACEntities...)
 
 	v2SearchService := searchv2.NewService(logger, genericEntities)
 	addSearchV2Routes(logger, router, v2SearchService)
@@ -275,34 +275,42 @@ func handleDownloadStats(updates chan *DownloadStats, handle func(stats *Downloa
 	}
 }
 
-func generalizeOFACSDNs(input []*SDN, ofacAddresses []*Address) []pubsearch.Entity[pubsearch.Value] {
-	var out []pubsearch.Entity[pubsearch.Value]
-	for _, sdn := range input {
-		if sdn.SDN == nil {
-			continue
-		}
-
-		var addresses []ofac.Address
-		for _, ofacAddr := range ofacAddresses {
-			if ofacAddr.Address == nil {
-				continue
-			}
-
-			if sdn.EntityID == ofacAddr.Address.EntityID {
-				addresses = append(addresses, *ofacAddr.Address)
-			}
-		}
-
-		entity := ofac.ToEntity(*sdn.SDN, addresses, nil, nil)
-		if len(entity.Addresses) > 0 && entity.Addresses[0].Line1 != "" {
-			out = append(out, entity)
-		}
-	}
-	return out
-}
-
 func addSearchV2Routes(logger log.Logger, r *mux.Router, service searchv2.Service) {
 	searchv2.NewController(logger, service).AppendRoutes(r)
+}
+
+func groupOFACRecords(searcher *searcher) []pubsearch.Entity[pubsearch.Value] { // TODO(adam): remove (refactor)
+	var sdns []ofac.SDN
+	var addrs []ofac.Address
+	var alts []ofac.AlternateIdentity
+	var comments []ofac.SDNComments
+
+	for _, sdn := range searcher.SDNs {
+		if sdn == nil || sdn.SDN == nil {
+			continue
+		}
+		sdns = append(sdns, *sdn.SDN)
+	}
+	for _, addr := range searcher.Addresses {
+		if addr == nil || addr.Address == nil {
+			continue
+		}
+		addrs = append(addrs, *addr.Address)
+	}
+	for _, alt := range searcher.Alts {
+		if alt == nil || alt.AlternateIdentity == nil {
+			continue
+		}
+		alts = append(alts, *alt.AlternateIdentity)
+	}
+	for _, comment := range searcher.SDNComments {
+		if comment == nil {
+			continue
+		}
+		comments = append(comments, *comment)
+	}
+
+	return ofac.GroupIntoEntities(sdns, addrs, comments, alts)
 }
 
 func readInt(override string, value int) int {

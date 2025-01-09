@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 
@@ -23,7 +24,9 @@ func SearchContainer(env Environment) fyne.CanvasObject {
 	results.Hide()
 
 	form := searchForm(env, warning, results)
+
 	wrapper.Add(form)
+	wrapper.Add(warning)
 	wrapper.Add(results)
 
 	return wrapper
@@ -35,7 +38,7 @@ func searchForm(env Environment, warning *fyne.Container, results *fyne.Containe
 	blankSpace := widget.NewLabel(" ")
 
 	items := []*widget.FormItem{
-		{Text: "Name", Widget: newInput()},
+		{Text: searchName, Widget: newInput()},
 		{Text: "EntityType", Widget: newSelect("EntityType")},
 		{
 			Text:     "SourceList",
@@ -62,13 +65,26 @@ func searchForm(env Environment, warning *fyne.Container, results *fyne.Containe
 	form := &widget.Form{
 		Items: items,
 		OnSubmit: func() {
-			populatedItems := collectPopulatedItems(items)
-			fmt.Printf("%#v\n", populatedItems)
+			warning.Hide()
+			results.Hide()
 
-			var entities []search.SearchedEntity[search.Value]
-			err := showResults(env, results, entities)
+			populatedItems := collectPopulatedItems(items)
+			fmt.Printf("searching with %d fields\n", len(populatedItems))
+
+			ctx := context.Background() // TODO(adam):
+			query := buildQueryEntity(populatedItems)
+			resp, err := env.Client.SearchByEntity(ctx, query)
 			if err != nil {
+				fmt.Printf("ERROR performing search: %v\n", err)
 				showWarning(env, warning, err)
+				return
+			}
+
+			err = showResults(env, results, resp.Entities)
+			if err != nil {
+				fmt.Printf("ERROR showing results: %v\n", err)
+				showWarning(env, warning, err)
+				return
 			}
 		},
 	}
