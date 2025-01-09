@@ -17,8 +17,27 @@ package main
 // 	"github.com/moov-io/base/log"
 // 	"github.com/moov-io/watchman/pkg/ofac"
 
-// 	"github.com/stretchr/testify/require"
-// )
+import (
+	"testing"
+	"time"
+
+	"github.com/moov-io/watchman/internal/download"
+
+	"github.com/stretchr/testify/require"
+)
+
+func TestGetRefreshInterval(t *testing.T) {
+	conf := download.Config{
+		RefreshInterval: 2 * time.Minute,
+	}
+	got := getRefreshInterval(conf)
+	require.Equal(t, 2*time.Minute, got)
+
+	t.Setenv("DATA_REFRESH_INTERVAL", "1h")
+
+	got = getRefreshInterval(conf)
+	require.Equal(t, 1*time.Hour, got)
+}
 
 // func TestDownloadStats(t *testing.T) {
 // 	when := time.Date(2022, time.May, 21, 9, 4, 0, 0, time.UTC)
