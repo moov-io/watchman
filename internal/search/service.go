@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"slices"
 	"sync"
+	"time"
 
 	"github.com/moov-io/watchman/internal/largest"
 	"github.com/moov-io/watchman/pkg/search"
@@ -14,18 +15,17 @@ import (
 )
 
 type Service interface {
+	UpdateEntities(entities []search.Entity[search.Value])
+
 	Search(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error)
 }
 
-func NewService(logger log.Logger, entities []search.Entity[search.Value]) Service {
-	fmt.Printf("v2search NewService(%d entity types)\n", len(entities)) //nolint:forbidigo
-
+func NewService(logger log.Logger) Service {
 	gate := syncutil.NewGate(100) // TODO(adam):
 
 	return &service{
-		logger:   logger,
-		entities: entities,
-		Gate:     gate,
+		logger: logger,
+		Gate:   gate,
 	}
 }
 
@@ -35,6 +35,13 @@ type service struct {
 
 	sync.RWMutex   // protects entities
 	*syncutil.Gate // limits concurrent processing
+}
+
+func (s *service) UpdateEntities(entities []search.Entity[search.Value]) {
+	s.Lock()
+	defer s.Unlock()
+
+	s.entities = entities
 }
 
 func (s *service) Search(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error) {
@@ -69,6 +76,9 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	var wg sync.WaitGroup
 	wg.Add(len(indices))
 
+	fmt.Printf("indices: %#v ", indices)
+
+	start := time.Now()
 	for idx := range indices {
 		start := idx
 		var end int
@@ -79,6 +89,7 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 		} else {
 			end = indices[start+1]
 		}
+		fmt.Printf("start=%d  end=%v\n", start, end)
 
 		go func() {
 			defer wg.Done()
@@ -87,6 +98,9 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 		}()
 	}
 	wg.Wait()
+
+	fmt.Printf("concurrent search took: %v\n", time.Since(start))
+	start = time.Now()
 
 	results := items.Items()
 	var out []search.SearchedEntity[search.Value]
@@ -105,6 +119,8 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 			Match:  entity.Weight,
 		})
 	}
+
+	fmt.Printf("result mapping took: %v\n", time.Since(start))
 
 	return out, nil
 }

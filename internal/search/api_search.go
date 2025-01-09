@@ -66,6 +66,8 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Printf("req: %#v\n", req)
+
 	q := r.URL.Query()
 	opts := SearchOpts{
 		Limit:          extractSearchLimit(r),
@@ -73,6 +75,7 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 		RequestID:      q.Get("requestID"),
 		DebugSourceIDs: strings.Split(q.Get("debugSourceIDs"), ","),
 	}
+	fmt.Printf("opts: %#v\n", opts)
 
 	entities, err := c.service.Search(r.Context(), req, opts)
 	if err != nil {
@@ -81,11 +84,13 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	fmt.Printf("found %d entities\n", len(entities))
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(searchResponse{
 		Entities: entities,
 	})
+	// TODO(adam): why isn't this returning results???
 }
 
 var (

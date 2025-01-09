@@ -7,25 +7,12 @@ package prepare
 import (
 	"testing"
 
-	"github.com/moov-io/watchman/pkg/ofac"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPipeline__companyNameCleanupStep(t *testing.T) {
-	nn := &Name{
-		Processed: "SAI ADVISORS INC.",
-		sdn: &ofac.SDN{
-			SDNType: "",
-		},
-	}
-
-	step := &companyNameCleanupStep{}
-	if err := step.apply(nn); err != nil {
-		t.Fatal(err)
-	}
-
-	if nn.Processed != "SAI ADVISORS" {
-		t.Errorf("nn.Processed=%s", nn.Processed)
-	}
+	out := RemoveCompanyTitles("SAI ADVISORS INC.")
+	require.Equal(t, "SAI ADVISORS", out)
 }
 
 func TestRemoveCompanyTitles(t *testing.T) {
@@ -61,8 +48,7 @@ func TestRemoveCompanyTitles(t *testing.T) {
 		{"PETRO ROYAL FZE", "PETRO ROYAL FZE"},                                     // SDN 16136
 	}
 	for i := range cases {
-		if ans := removeCompanyTitles(cases[i].input); cases[i].expected != ans {
-			t.Errorf("#%d input=%q expected=%q got=%q", i, cases[i].input, cases[i].expected, ans)
-		}
+		got := RemoveCompanyTitles(cases[i].input)
+		require.Equal(t, cases[i].expected, got)
 	}
 }

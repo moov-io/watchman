@@ -158,7 +158,7 @@ var (
 func newSelect(modelName string) *widget.Select {
 	values, err := ast.ExtractVariablesOfType(modelsPath, modelName)
 	if err != nil {
-		panic(fmt.Sprintf("reading %s values: %w", modelName, err)) //nolint:forbidigo
+		panic(fmt.Sprintf("reading %s values: %v", modelName, err)) //nolint:forbidigo
 	}
 
 	selectWidget := widget.NewSelect(values, func(_ string) {})

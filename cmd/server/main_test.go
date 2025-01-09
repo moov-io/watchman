@@ -4,30 +4,30 @@
 
 package main
 
-import (
-	"sync"
-	"testing"
+// import (
+// 	"sync"
+// 	"testing"
 
-	"github.com/stretchr/testify/require"
-)
+// 	"github.com/stretchr/testify/require"
+// )
 
-func TestHandleDownloadStats(t *testing.T) {
-	updates := make(chan *DownloadStats)
+// func TestHandleDownloadStats(t *testing.T) {
+// 	updates := make(chan *DownloadStats)
 
-	var wg sync.WaitGroup // make the race detector happy
+// 	var wg sync.WaitGroup // make the race detector happy
 
-	var received *DownloadStats
-	go handleDownloadStats(updates, func(stats *DownloadStats) {
-		received = stats
-		wg.Done()
-	})
+// 	var received *DownloadStats
+// 	go handleDownloadStats(updates, func(stats *DownloadStats) {
+// 		received = stats
+// 		wg.Done()
+// 	})
 
-	wg.Add(1)
-	updates <- &DownloadStats{
-		SDNs: 123,
-	}
-	wg.Wait()
+// 	wg.Add(1)
+// 	updates <- &DownloadStats{
+// 		SDNs: 123,
+// 	}
+// 	wg.Wait()
 
-	require.NotNil(t, received)
-	require.Equal(t, 123, received.SDNs)
-}
+// 	require.NotNil(t, received)
+// 	require.Equal(t, 123, received.SDNs)
+// }

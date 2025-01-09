@@ -5,6 +5,7 @@
 package ofac
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -29,7 +30,7 @@ var (
 	}()
 )
 
-func Download(logger log.Logger, initialDir string) (map[string]io.ReadCloser, error) {
+func Download(ctx context.Context, logger log.Logger, initialDir string) (map[string]io.ReadCloser, error) {
 	dl := download.New(logger, download.HTTPClient)
 
 	addrs := make(map[string]string)
@@ -37,5 +38,5 @@ func Download(logger log.Logger, initialDir string) (map[string]io.ReadCloser, e
 		addrs[ofacFilenames[i]] = fmt.Sprintf(ofacURLTemplate, ofacFilenames[i])
 	}
 
-	return dl.GetFiles(initialDir, addrs)
+	return dl.GetFiles(ctx, initialDir, addrs)
 }

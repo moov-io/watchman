@@ -7,25 +7,12 @@ package prepare
 import (
 	"testing"
 
-	"github.com/moov-io/watchman/pkg/ofac"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPipeline__reorderSDNStep(t *testing.T) {
-	nn := &Name{
-		Processed: "Last, First Middle",
-		sdn: &ofac.SDN{
-			SDNType: "individual",
-		},
-	}
-
-	step := &reorderSDNStep{}
-	if err := step.apply(nn); err != nil {
-		t.Fatal(err)
-	}
-
-	if nn.Processed != "First Middle Last" {
-		t.Errorf("nn.Processed=%v", nn.Processed)
-	}
+	got := ReorderSDNName("Last, First Middle", "individual")
+	require.Equal(t, "First Middle Last", got)
 }
 
 func TestReorderSDNName(t *testing.T) {
@@ -44,10 +31,8 @@ func TestReorderSDNName(t *testing.T) {
 		{"RIZO MORENO, Jorge Luis", "Jorge Luis RIZO MORENO"},
 	}
 	for i := range cases {
-		guess := reorderSDNName(cases[i].input, "individual")
-		if guess != cases[i].expected {
-			t.Errorf("reorderSDNName(%q)=%q expected %q", cases[i].input, guess, cases[i].expected)
-		}
+		got := ReorderSDNName(cases[i].input, "individual")
+		require.Equal(t, cases[i].expected, got)
 	}
 
 	// Entities
@@ -59,9 +44,7 @@ func TestReorderSDNName(t *testing.T) {
 		{"11,420.2-1 CORP.", "11,420.2-1 CORP."},
 	}
 	for i := range cases {
-		guess := reorderSDNName(cases[i].input, "") // blank refers to a company
-		if guess != cases[i].expected {
-			t.Errorf("reorderSDNName(%q)=%q expected %q", cases[i].input, guess, cases[i].expected)
-		}
+		got := ReorderSDNName(cases[i].input, "") // blank refers to a company
+		require.Equal(t, cases[i].expected, got)
 	}
 }

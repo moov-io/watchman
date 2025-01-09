@@ -5,6 +5,7 @@
 package csl_uk
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -21,7 +22,7 @@ func TestCSLDownload(t *testing.T) {
 		return
 	}
 
-	file, err := DownloadCSL(log.NewNopLogger(), "")
+	file, err := DownloadCSL(context.Background(), log.NewNopLogger(), "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +55,7 @@ func TestCSLDownload_initialDir(t *testing.T) {
 	// create each file
 	mk(t, "ConList.csv", "file=ConList.csv")
 
-	file, err := DownloadCSL(log.NewNopLogger(), dir)
+	file, err := DownloadCSL(context.Background(), log.NewNopLogger(), dir)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -83,7 +84,7 @@ func TestUKSanctionsListIndex(t *testing.T) {
 	}
 
 	logger := log.NewTestLogger()
-	foundURL, err := fetchLatestUKSanctionsListURL(logger, "")
+	foundURL, err := fetchLatestUKSanctionsListURL(context.Background(), logger, "")
 	require.NoError(t, err)
 
 	require.Contains(t, foundURL, "UK_Sanctions_List.ods")
@@ -95,7 +96,7 @@ func TestUKSanctionsListDownload(t *testing.T) {
 	}
 
 	logger := log.NewTestLogger()
-	file, err := DownloadSanctionsList(logger, "")
+	file, err := DownloadSanctionsList(context.Background(), logger, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -128,7 +129,7 @@ func TestUKSanctionsListDownload_initialDir(t *testing.T) {
 	// create each file
 	mk(t, "UK_Sanctions_List.ods", "file=UK_Sanctions_List.ods")
 
-	file, err := DownloadSanctionsList(log.NewNopLogger(), dir)
+	file, err := DownloadSanctionsList(context.Background(), log.NewNopLogger(), dir)
 	if err != nil {
 		t.Fatal(err)
 	}

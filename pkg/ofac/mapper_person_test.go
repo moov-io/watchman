@@ -17,7 +17,7 @@ func TestMapper__Person(t *testing.T) {
 	var sdn *SDN
 	for i := range res.SDNs {
 		if res.SDNs[i].EntityID == "15102" {
-			sdn = res.SDNs[i]
+			sdn = &res.SDNs[i]
 		}
 	}
 	require.NotNil(t, sdn)

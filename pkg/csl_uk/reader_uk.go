@@ -15,7 +15,7 @@ import (
 	"github.com/knieriem/odf/ods"
 )
 
-func ReadCSLFile(fd io.ReadCloser) ([]*CSLRecord, CSL, error) {
+func ReadCSLFile(fd io.ReadCloser) ([]CSLRecord, CSL, error) {
 	if fd == nil {
 		return nil, nil, errors.New("uk CSL file is empty or missing")
 	}
@@ -29,7 +29,7 @@ func ReadCSLFile(fd io.ReadCloser) ([]*CSLRecord, CSL, error) {
 	return rows, rowsMap, nil
 }
 
-func ParseCSL(r io.Reader) ([]*CSLRecord, CSL, error) {
+func ParseCSL(r io.Reader) ([]CSLRecord, CSL, error) {
 	reader := csv.NewReader(r)
 	reader.FieldsPerRecord = 36
 
@@ -79,9 +79,9 @@ func ParseCSL(r io.Reader) ([]*CSLRecord, CSL, error) {
 		}
 
 	}
-	totalReport := make([]*CSLRecord, 0, len(report))
+	totalReport := make([]CSLRecord, 0, len(report))
 	for _, row := range report {
-		totalReport = append(totalReport, row)
+		totalReport = append(totalReport, *row)
 	}
 	return totalReport, report, nil
 }
@@ -199,7 +199,7 @@ func unmarshalCSLRecord(csvRecord []string, ukCSLRecord *CSLRecord) {
 	}
 }
 
-func ReadSanctionsListFile(f io.ReadCloser) ([]*SanctionsListRecord, SanctionsListMap, error) {
+func ReadSanctionsListFile(f io.ReadCloser) ([]SanctionsListRecord, SanctionsListMap, error) {
 	if f == nil {
 		return nil, nil, errors.New("uk sanctions list file is empty or missing")
 	}
@@ -228,9 +228,9 @@ func ReadSanctionsListFile(f io.ReadCloser) ([]*SanctionsListRecord, SanctionsLi
 	return rows, rowsMap, nil
 }
 
-func parseSanctionsList(doc *ods.Doc) ([]*SanctionsListRecord, SanctionsListMap, error) {
+func parseSanctionsList(doc *ods.Doc) ([]SanctionsListRecord, SanctionsListMap, error) {
 	// read from the ods document
-	var totalReport []*SanctionsListRecord
+	var totalReport []SanctionsListRecord
 	report := SanctionsListMap{}
 
 	// unmarshal each row into a uk sanctions list record
@@ -260,7 +260,7 @@ func parseSanctionsList(doc *ods.Doc) ([]*SanctionsListRecord, SanctionsListMap,
 	}
 
 	for _, row := range report {
-		totalReport = append(totalReport, row)
+		totalReport = append(totalReport, *row)
 	}
 	return totalReport, report, nil
 }

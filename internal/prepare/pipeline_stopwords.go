@@ -31,27 +31,24 @@ var (
 	}(os.Getenv("KEEP_STOPWORDS"))
 )
 
-type stopwordsStep struct{}
-
-func (s *stopwordsStep) apply(in *Name) error {
-	if in == nil {
-		return nil
-	}
-
-	switch {
-	case in.sdn != nil && !strings.EqualFold(in.sdn.SDNType, "individual"):
-		in.Processed = removeStopwords(in.Processed, detectLanguage(in.Processed, in.addrs))
-	case in.ssi != nil && !strings.EqualFold(in.ssi.Type, "individual"):
-		in.Processed = removeStopwords(in.Processed, detectLanguage(in.Processed, nil))
-	case in.alt != nil:
-		in.Processed = removeStopwords(in.Processed, detectLanguage(in.Processed, nil))
-	}
-	return nil
-}
+// switch {
+// case in.sdn != nil && !strings.EqualFold(in.sdn.SDNType, "individual"):
+// 	in.Processed = removeStopwords(in.Processed, detectLanguage(in.Processed, in.addrs))
+// case in.ssi != nil && !strings.EqualFold(in.ssi.Type, "individual"):
+// 	in.Processed = removeStopwords(in.Processed, detectLanguage(in.Processed, nil))
+// case in.alt != nil:
+// 	in.Processed = removeStopwords(in.Processed, detectLanguage(in.Processed, nil))
+// }
 
 var (
 	numberRegex = regexp.MustCompile(`([\d\.\,\-]{1,}[\d]{1,})`)
 )
+
+func RemoveStopwords(in string, addrs []ofac.Address) string {
+	lang := detectLanguage(in, addrs)
+
+	return removeStopwords(in, lang)
+}
 
 func removeStopwords(in string, lang whatlanggo.Lang) string {
 	if keepStopwords {
@@ -76,7 +73,7 @@ func removeStopwords(in string, lang whatlanggo.Lang) string {
 
 // detectLanguage will return a guess as to the appropriate language a given SDN's name
 // is written in. The addresses must be linked to the SDN whose name is detected.
-func detectLanguage(in string, addrs []*ofac.Address) whatlanggo.Lang {
+func detectLanguage(in string, addrs []ofac.Address) whatlanggo.Lang {
 	info := whatlanggo.Detect(in)
 	if info.IsReliable() {
 		// Return the detected language if whatlanggo is confident enough

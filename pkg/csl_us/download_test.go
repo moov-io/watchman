@@ -5,6 +5,7 @@
 package csl_us
 
 import (
+	"context"
 	"io"
 	"os"
 	"path/filepath"
@@ -19,7 +20,7 @@ func TestDownload(t *testing.T) {
 		return
 	}
 
-	file, err := Download(log.NewNopLogger(), "")
+	file, err := Download(context.Background(), log.NewNopLogger(), "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +54,7 @@ func TestDownload_initialDir(t *testing.T) {
 	mk(t, "csl.csv", "file=csl.csv")
 	mk(t, "csl.csv", "file=csl.csv")
 
-	file, err := Download(log.NewNopLogger(), dir)
+	file, err := Download(context.Background(), log.NewNopLogger(), dir)
 	if err != nil {
 		t.Fatal(err)
 	}

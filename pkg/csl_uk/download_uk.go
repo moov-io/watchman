@@ -5,6 +5,7 @@
 package csl_uk
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -23,21 +24,21 @@ var (
 	ukCSLDownloadURL     = strx.Or(os.Getenv("UK_CSL_DOWNLOAD_URL"), publicCSLDownloadURL)
 )
 
-func DownloadCSL(logger log.Logger, initialDir string) (map[string]io.ReadCloser, error) {
+func DownloadCSL(ctx context.Context, logger log.Logger, initialDir string) (map[string]io.ReadCloser, error) {
 	dl := download.New(logger, download.HTTPClient)
 
 	ukCSLNameAndSource := make(map[string]string)
 	ukCSLNameAndSource["ConList.csv"] = ukCSLDownloadURL
 
-	return dl.GetFiles(initialDir, ukCSLNameAndSource)
+	return dl.GetFiles(ctx, initialDir, ukCSLNameAndSource)
 }
 
-func DownloadSanctionsList(logger log.Logger, initialDir string) (map[string]io.ReadCloser, error) {
+func DownloadSanctionsList(ctx context.Context, logger log.Logger, initialDir string) (map[string]io.ReadCloser, error) {
 	dl := download.New(logger, download.HTTPClient)
 
 	ukSanctionsNameAndSource := make(map[string]string)
 
-	latestURL, err := fetchLatestUKSanctionsListURL(logger, initialDir)
+	latestURL, err := fetchLatestUKSanctionsListURL(ctx, logger, initialDir)
 	if err != nil {
 		return nil, err
 	}
@@ -45,14 +46,14 @@ func DownloadSanctionsList(logger log.Logger, initialDir string) (map[string]io.
 
 	ukSanctionsNameAndSource["UK_Sanctions_List.ods"] = latestURL
 
-	return dl.GetFiles(initialDir, ukSanctionsNameAndSource)
+	return dl.GetFiles(ctx, initialDir, ukSanctionsNameAndSource)
 }
 
 var (
 	defaultUKSanctionsListHTML = strx.Or(os.Getenv("UK_CSL_HTML_INDEX_URL"), "https://www.gov.uk/government/publications/the-uk-sanctions-list")
 )
 
-func fetchLatestUKSanctionsListURL(logger log.Logger, initialDir string) (string, error) {
+func fetchLatestUKSanctionsListURL(ctx context.Context, logger log.Logger, initialDir string) (string, error) {
 	fromEnv := strings.TrimSpace(os.Getenv("UK_SANCTIONS_LIST_URL"))
 	if fromEnv != "" {
 		return fromEnv, nil
@@ -64,7 +65,7 @@ func fetchLatestUKSanctionsListURL(logger log.Logger, initialDir string) (string
 
 	dl := download.New(logger, download.HTTPClient)
 
-	pages, err := dl.GetFiles(initialDir, ukSanctionsNameAndSource)
+	pages, err := dl.GetFiles(ctx, initialDir, ukSanctionsNameAndSource)
 	if err != nil {
 		return "", fmt.Errorf("getting UK Sanctions html index: %w", err)
 	}

@@ -6,17 +6,17 @@ package csl_us
 
 // CSL contains each record from the Consolidate Screening List, broken down by the record's original source
 type CSL struct {
-	ELs     []*EL     // Entity List – Bureau of Industry and Security
-	MEUs    []*MEU    // Military End User List
-	SSIs    []*SSI    // Sectoral Sanctions Identifications List (SSI) - Treasury Department
-	UVLs    []*UVL    // Unverified List – Bureau of Industry and Security
-	FSEs    []*FSE    // Foreign Sanctions Evaders (FSE) - Treasury Department
-	ISNs    []*ISN    // Nonproliferation Sanctions (ISN) - State Department
-	PLCs    []*PLC    // Palestinian Legislative Council List (PLC) - Treasury Department
-	CAPs    []*CAP    // CAPTA (formerly Foreign Financial Institutions Subject to Part 561 - Treasury Department)
-	DTCs    []*DTC    // ITAR Debarred (DTC) - State Department
-	CMICs   []*CMIC   // Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department
-	NS_MBSs []*NS_MBS // Non-SDN Menu-Based Sanctions List (NS-MBS List) - Treasury Department
+	ELs     []EL     // Entity List – Bureau of Industry and Security
+	MEUs    []MEU    // Military End User List
+	SSIs    []SSI    // Sectoral Sanctions Identifications List (SSI) - Treasury Department
+	UVLs    []UVL    // Unverified List – Bureau of Industry and Security
+	FSEs    []FSE    // Foreign Sanctions Evaders (FSE) - Treasury Department
+	ISNs    []ISN    // Nonproliferation Sanctions (ISN) - State Department
+	PLCs    []PLC    // Palestinian Legislative Council List (PLC) - Treasury Department
+	CAPs    []CAP    // CAPTA (formerly Foreign Financial Institutions Subject to Part 561 - Treasury Department)
+	DTCs    []DTC    // ITAR Debarred (DTC) - State Department
+	CMICs   []CMIC   // Non-SDN Chinese Military-Industrial Complex Companies List (CMIC) - Treasury Department
+	NS_MBSs []NS_MBS // Non-SDN Menu-Based Sanctions List (NS-MBS List) - Treasury Department
 }
 
 // This is the order of the columns in the CSL

@@ -5,6 +5,7 @@
 package csl_eu
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -20,7 +21,7 @@ func TestEUDownload(t *testing.T) {
 		return
 	}
 
-	file, err := DownloadEU(log.NewNopLogger(), "")
+	file, err := DownloadEU(context.Background(), log.NewNopLogger(), "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +54,7 @@ func TestEUDownload_initialDir(t *testing.T) {
 	// create each file
 	mk(t, "eu_csl.csv", "file=eu_csl.csv")
 
-	file, err := DownloadEU(log.NewNopLogger(), dir)
+	file, err := DownloadEU(context.Background(), log.NewNopLogger(), dir)
 	if err != nil {
 		t.Fatal(err)
 	}
