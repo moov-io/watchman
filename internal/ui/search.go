@@ -102,8 +102,8 @@ func showResults(env Environment, results *fyne.Container, entities []search.Sea
 	results.Add(header)
 
 	var data = [][]string{
-		[]string{"top left", "top right"},
-		[]string{"bottom left", "bottom right"},
+		{"top left", "top right"},
+		{"bottom left", "bottom right"},
 	}
 
 	for _, row := range data {
