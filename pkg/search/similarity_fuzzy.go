@@ -143,6 +143,8 @@ func filterSignificantTerms(terms []string) []string {
 		}
 
 		// Skip common noise terms (expand this list as needed)
+		term = strings.TrimSpace(strings.ToLower(term))
+
 		switch term {
 		case "the", "and", "or", "of", "in", "at", "by":
 			continue
