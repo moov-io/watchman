@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/moov-io/watchman/internal/indices"
 	"github.com/moov-io/watchman/internal/largest"
 	"github.com/moov-io/watchman/pkg/search"
 
@@ -71,7 +72,7 @@ type SearchOpts struct {
 func (s *service) performSearch(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error) {
 	items := largest.NewItems(opts.Limit, opts.MinMatch)
 
-	indices := makeIndices(len(s.entities), opts.Limit/3) // limit goroutines
+	indices := indices.New(len(s.entities), opts.Limit/3) // limit goroutines
 
 	var wg sync.WaitGroup
 	wg.Add(len(indices))
@@ -142,22 +143,4 @@ func performSubSearch(items *largest.Items, query search.Entity[search.Value], e
 			Weight: score,
 		})
 	}
-}
-
-func makeIndices(total, groups int) []int {
-	if groups == 1 || groups >= total {
-		return []int{total}
-	}
-	xs := []int{0}
-	i := 0
-	for {
-		if i > total {
-			break
-		}
-		i += total / groups
-		if i < total {
-			xs = append(xs, i)
-		}
-	}
-	return append(xs, total)
 }

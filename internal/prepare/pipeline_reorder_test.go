@@ -26,6 +26,7 @@ func TestReorderSDNName(t *testing.T) {
 		{"MADURO MOROS, Nicolas", "Nicolas MADURO MOROS"},
 		{"IBRAHIM, Sadr", "Sadr IBRAHIM"},
 		{"AL ZAWAHIRI, Dr. Ayman", "Dr. Ayman AL ZAWAHIRI"},
+		{"AL-ZAYDI, Shibl Muhsin 'Ubayd", "Shibl Muhsin 'Ubayd AL-ZAYDI"},
 		// Issue 115
 		{"Bush, George W", "George W Bush"},
 		{"RIZO MORENO, Jorge Luis", "Jorge Luis RIZO MORENO"},

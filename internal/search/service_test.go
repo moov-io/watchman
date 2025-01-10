@@ -37,6 +37,7 @@ func TestService_Search(t *testing.T) {
 	t.Run("basic", func(t *testing.T) {
 		results, err := svc.Search(ctx, search.Entity[search.Value]{
 			Name: "SHIPPING LIMITED",
+			Type: search.EntityBusiness,
 		}, opts)
 		require.NoError(t, err)
 		require.Greater(t, len(results), 1)
@@ -63,15 +64,9 @@ func TestService_Search(t *testing.T) {
 
 		res := results[0]
 		require.InDelta(t, 1.00, res.Match, 0.001)
+
+		// 36216
 	})
-}
-
-func TestService_makeIndicies(t *testing.T) {
-	indices := makeIndices(122, 5)
-	require.Len(t, indices, 7)
-
-	expected := []int{0, 24, 48, 72, 96, 120, 122}
-	require.Equal(t, expected, indices)
 }
 
 func testInputs(tb testing.TB, paths ...string) map[string]io.ReadCloser {

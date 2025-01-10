@@ -7,7 +7,6 @@ package prepare
 import (
 	"testing"
 
-	"github.com/moov-io/watchman/pkg/ofac"
 	"github.com/stretchr/testify/require"
 
 	"github.com/abadojack/whatlanggo"
@@ -20,14 +19,6 @@ func TestStopwordsEnv(t *testing.T) {
 }
 
 func TestStopwords__detect(t *testing.T) {
-	addrs := func(country string) []ofac.Address {
-		return []ofac.Address{
-			{
-				Country: country,
-			},
-		}
-	}
-
 	cases := []struct {
 		in       string
 		country  string
@@ -45,7 +36,7 @@ func TestStopwords__detect(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		got := detectLanguage(tc.in, addrs(tc.country))
+		got := detectLanguage(tc.in, tc.country)
 		require.Equal(t, tc.expected, got)
 	}
 }
@@ -97,7 +88,7 @@ func TestStopwords__apply(t *testing.T) {
 		},
 	}
 	for _, test := range cases {
-		got := RemoveStopwords(test.in, nil)
+		got := RemoveStopwords(test.in, "")
 		require.Equal(t, test.expected, got)
 	}
 }

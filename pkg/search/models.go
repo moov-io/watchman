@@ -23,8 +23,8 @@ type Entity[T Value] struct {
 	Aircraft     *Aircraft     `json:"aircraft"`
 	Vessel       *Vessel       `json:"vessel"`
 
-	Contact   []ContactInfo `json:"contact"`
-	Addresses []Address     `json:"addresses"`
+	Contact   ContactInfo `json:"contact"`
+	Addresses []Address   `json:"addresses"`
 
 	CryptoAddresses []CryptoAddress `json:"cryptoAddresses"`
 
@@ -77,9 +77,10 @@ var (
 )
 
 type ContactInfo struct {
-	EmailAddresses []string
-	PhoneNumbers   []string
-	FaxNumbers     []string
+	EmailAddresses []string `json:"emailAddresses"`
+	PhoneNumbers   []string `json:"phoneNumbers"`
+	FaxNumbers     []string `json:"faxNumbers"`
+	Websites       []string `json:"websites"`
 }
 
 // TODO(adam):

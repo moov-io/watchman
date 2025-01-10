@@ -29,7 +29,12 @@ func TestEntityJSON(t *testing.T) {
   "organization": null,
   "aircraft": null,
   "vessel": null,
-  "contact": null,
+  "contact": {
+    "emailAddresses": null,
+    "phoneNumbers": null,
+    "faxNumbers": null,
+    "websites": null
+  },
   "addresses": null,
   "cryptoAddresses": null,
   "affiliations": null,

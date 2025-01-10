@@ -258,7 +258,7 @@ func splitPrograms(in string) []string {
 }
 
 func splitRemarks(input string) []string {
-	return strings.Split(input, ";")
+	return strings.Split(strings.TrimSuffix(input, "."), ";")
 }
 
 type remark struct {

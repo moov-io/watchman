@@ -37,10 +37,13 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 	logger := dl.logger.Info().With(log.Fields{
 		"initial_data_directory": log.String(dl.conf.InitialDataDirectory),
 	})
+	start := time.Now()
 	logger.Info().Log("starting list refresh")
 
 	g, ctx := errgroup.WithContext(ctx)
-	preparedLists := make(chan preparedList)
+	preparedLists := make(chan preparedList, 1)
+
+	fmt.Println("starting all lists")
 
 	g.Go(func() error {
 		err := loadOFACRecords(ctx, logger, dl.conf, preparedLists)
@@ -51,15 +54,21 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 	})
 
 	err := g.Wait()
+	close(preparedLists)
+	fmt.Printf("finished all lists: %v\n", time.Since(start))
+	start = time.Now()
+
 	if err != nil {
 		return stats, fmt.Errorf("problem loading lists: %v", err)
 	}
 
 	// accumulate the lists
+	fmt.Println("starting to accumulate preparedLists")
 	for list := range preparedLists {
 		stats.Lists[string(list.ListName)] = len(list.Entities)
 		stats.Entities = append(stats.Entities, list.Entities...)
 	}
+	fmt.Printf("finished accumulating preparedLists: %v\n", time.Since(start))
 
 	stats.EndedAt = time.Now().In(time.UTC)
 
@@ -72,7 +81,11 @@ type preparedList struct {
 }
 
 func loadOFACRecords(ctx context.Context, logger log.Logger, conf Config, responseCh chan preparedList) error {
+	start := time.Now()
+	fmt.Println("starting OFAC download")
 	files, err := ofac.Download(ctx, logger, conf.InitialDataDirectory)
+	fmt.Printf("finished OFAC download: %v\n", time.Since(start))
+	start = time.Now()
 	if err != nil {
 		return fmt.Errorf("download: %v", err)
 	}
@@ -80,17 +93,25 @@ func loadOFACRecords(ctx context.Context, logger log.Logger, conf Config, respon
 		return fmt.Errorf("unexpected %d OFAC files found", len(files))
 	}
 
+	fmt.Println("starting OFAC parse")
 	res, err := ofac.Read(files)
+	fmt.Printf("finished OFAC parse: %v\n", time.Since(start))
+	start = time.Now()
 	if err != nil {
 		return err
 	}
 
+	fmt.Println("starting OFAC grouping")
 	entities := ofac.GroupIntoEntities(res.SDNs, res.Addresses, res.SDNComments, res.AlternateIdentities)
+	fmt.Printf("finished OFAC grouping: %v\n", time.Since(start))
+	start = time.Now()
 
+	fmt.Println("sending OFAC preparedList")
 	responseCh <- preparedList{
 		ListName: search.SourceUSOFAC,
 		Entities: entities,
 	}
+	fmt.Printf("finished sending OFAC preparedList: %v\n", time.Since(start))
 
 	return nil
 }

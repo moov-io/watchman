@@ -10,24 +10,52 @@ import (
 	"strings"
 )
 
+// This pattern looks for:
+//
+//	a comma, optional whitespace, then
+//	1+ Unicode letters and diacritics (\p{L}\p{M}), plus allowed punctuation/apostrophes/hyphens/spaces
+//	until the end of the string.
+//
+// Examples that should match (and reorder):
+//
+//	"AL-ZAYDI, Shibl Muhsin 'Ubayd" --> "Shibl Muhsin 'Ubayd AL-ZAYDI"
+//	"MADURO MOROS, Nicolas"         --> "Nicolas MADURO MOROS"
 var (
-	surnamePrecedes = regexp.MustCompile(`(,?[\s?a-zA-Z\.]{1,})$`)
+	surnamePrecedes = regexp.MustCompile(`,(?:\s+)?([\p{L}\p{M}'’\-\.\s]+)$`)
 )
 
-// ReorderSDNName will take a given SDN name and if it matches a specific pattern where
-// the first name is placed after the last name (surname) to return a string where the first name
-// preceedes the last.
-//
-// Example:
-// SDN EntityID: 19147 has 'FELIX B. MADURO S.A.'
-// SDN EntityID: 22790 has 'MADURO MOROS, Nicolas'
-func ReorderSDNName(name string, tpe string) string {
-	if !strings.EqualFold(tpe, "individual") {
-		return name // only reorder individual names
+func ReorderSDNNames(names []string, sdnType string) []string {
+	out := make([]string, len(names))
+	for idx := range names {
+		out[idx] = ReorderSDNName(names[idx], sdnType)
 	}
-	v := surnamePrecedes.FindString(name)
-	if v == "" {
-		return name // no match on 'Doe, John'
+	return out
+}
+
+// ReorderSDNName will take a given SDN name and, if it matches "Surname, FirstName(s)",
+// reorder it to "FirstName(s) Surname" (only for type == "individual").
+func ReorderSDNName(name, sdnType string) string {
+	// Only reorder for individuals
+	if !strings.EqualFold(sdnType, "individual") {
+		return name
 	}
-	return strings.TrimSpace(fmt.Sprintf("%s %s", strings.TrimPrefix(v, ","), strings.TrimSuffix(name, v)))
+
+	// Try matching the pattern
+	match := surnamePrecedes.FindStringSubmatch(name)
+	if len(match) < 2 {
+		// No match => no reordering
+		return name
+	}
+
+	// match[1] is the part after the comma (the "first/given names" portion).
+	givenNames := strings.TrimSpace(match[1])
+
+	// match[0] is the entire substring matching the pattern, including the comma;
+	// remove it from the original to isolate the "surname" part.
+	surname := strings.TrimSuffix(name, match[0])
+	surname = strings.TrimSpace(surname)
+
+	// Rebuild as "GivenName(s) Surname"
+	out := fmt.Sprintf("%s %s", givenNames, surname)
+	return strings.TrimSpace(out)
 }

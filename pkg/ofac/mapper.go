@@ -8,10 +8,13 @@ import (
 	"cmp"
 	"fmt"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/moov-io/watchman/internal/indices"
+	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/pkg/address"
 	"github.com/moov-io/watchman/pkg/search"
 )
@@ -24,11 +27,15 @@ var (
 	// Matches both "POB Baghdad, Iraq" and "Alt. POB: Keren Eritrea"
 	pobRegex = regexp.MustCompile(`(?i)(?:Alt\.)?\s*POB:?\s+([^;]+)`)
 	// Contact information patterns
-	emailRegex = regexp.MustCompile(`(?i)(?:Email|EMAIL)[:\s]+([^;]+)`)
-	phoneRegex = regexp.MustCompile(`(?i)(?:Telephone|Phone|PHONE)[:\s]+([^;]+)`)
-	faxRegex   = regexp.MustCompile(`(?i)Fax[:\s]+([^;]+)`)
+	emailRegex = regexp.MustCompile(`(?i)(?:Email|EMAIL)[:\s](Address)?[:\s]+([^;]+)`)
+	phoneRegex = regexp.MustCompile(`(?i)(?:Telephone|Phone|PHONE)[:\s](No.?)?[:\s]+([^;]+)`)
+	faxRegex   = regexp.MustCompile(`(?i)Fax[:\s](No.?)?[:\s]+([^;]+)`)
 	// Website patterns
 	websiteRegex = regexp.MustCompile(`(?i)(?:Website|http)[:\s]+([^;\s]+)`)
+
+	// Identifier Regex
+	identifierRegex = regexp.MustCompile(`(?i)%s[\s.:]+([^\s](?:[^;()]*[^\s;()])?)(?:\s*\(([^)]+)\))?`)
+
 	// Country extraction pattern
 	countryParenRegex = regexp.MustCompile(`\(([\w\s]+)\)`)
 )
@@ -40,6 +47,15 @@ var (
 		"2006",        // 1928
 	}
 )
+
+// Company Number 05527424 (United Kingdom)
+// Company Number IMO 1991835.
+// Commercial Registry Number 0411518776478 (Iran)
+// Enterprise Number 0430.033.662 (Belgium).
+// Tax ID No. 230810605961 (Russia).
+// Trade License No. 04110179 (United Kingdom).
+// UK Company Number 01019769 (United Kingdom)
+// US FEIN 000920912 (United States).
 
 func makeIdentifiers(remarks []string, needles []string) []search.Identifier {
 	seen := make(map[string]bool)
@@ -61,11 +77,18 @@ func makeIdentifiers(remarks []string, needles []string) []search.Identifier {
 func makeIdentifier(remarks []string, suffix string) *search.Identifier {
 	found := findMatchingRemarks(remarks, suffix)
 	if len(found) == 0 {
+		for _, rmk := range remarks {
+			if matches := identifierRegex.FindStringSubmatch(rmk); len(matches) > 1 {
+				found = append(found, remark{fullName: suffix, value: matches[1]})
+				break
+			}
+		}
+	}
+	if len(found) == 0 {
 		return nil
 	}
 
 	// Often the country is in parenthesis at the end, so let's look for that
-	// Example: Business Number 51566843 (Hong Kong)
 	country := ""
 	value := found[0].value
 
@@ -123,11 +146,7 @@ func extractCountry(remark string) string {
 }
 
 func GroupIntoEntities(sdns []SDN, addresses []Address, comments []SDNComments, altIds []AlternateIdentity) []search.Entity[search.Value] {
-	out := make([]search.Entity[search.Value], len(sdns))
-
-	for idx, sdn := range sdns {
-		// find addresses, comments, and altIDs which match
-
+	fn := func(sdn SDN) search.Entity[search.Value] {
 		var addrs []Address
 		for _, addr := range addresses {
 			if sdn.EntityID == addr.EntityID {
@@ -149,17 +168,20 @@ func GroupIntoEntities(sdns []SDN, addresses []Address, comments []SDNComments, 
 			}
 		}
 
-		out[idx] = ToEntity(sdn, addrs, cmts, alts)
+		return ToEntity(sdn, addrs, cmts, alts)
 	}
 
-	return out
+	groups := runtime.NumCPU() // arbitrary group size // TODO(adam):
+
+	return indices.ProcessSlice(sdns, groups, fn)
 }
 
 func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []AlternateIdentity) search.Entity[search.Value] {
 	out := search.Entity[search.Value]{
-		Name:       sdn.SDNName,
+		Name:       prepare.ReorderSDNName(sdn.SDNName, sdn.SDNType),
 		Source:     search.SourceUSOFAC,
 		SourceData: sdn,
+		SourceID:   sdn.EntityID,
 	}
 
 	remarks := splitRemarks(sdn.Remarks)
@@ -172,6 +194,7 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []Alt
 	out.CryptoAddresses = parseCryptoAddresses(remarks)
 
 	// Extract common fields regardless of entity type
+	out.Contact = parseContactInfo(remarks)
 	out.Addresses = parseAddresses(addresses)
 
 	// Get all alternate names from both remarks and AlternateIdentity entries
@@ -179,12 +202,13 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []Alt
 	altNames = append(altNames, parseAltNames(remarks)...)
 	altNames = append(altNames, parseAltIdentities(altIds)...)
 	altNames = deduplicateStrings(altNames)
+	altNames = prepare.ReorderSDNNames(altNames, sdn.SDNType)
 
 	switch strings.ToLower(strings.TrimSpace(sdn.SDNType)) {
 	case "-0-", "":
 		out.Type = search.EntityBusiness
 		out.Business = &search.Business{
-			Name:     sdn.SDNName,
+			Name:     prepare.RemoveCompanyTitles(sdn.SDNName),
 			AltNames: altNames,
 		}
 		out.Business.Created = findDateStamp(findMatchingRemarks(remarks, "Organization Established Date"))
@@ -198,18 +222,33 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []Alt
 			"Certificate of Incorporation Number",
 			"Chamber of Commerce Number",
 			"Chinese Commercial Code",
-			"Registered Charity No.",
 			"Commercial Registry Number",
 			"Company Number",
+			"Company ID",                              // new: e.g., "Company ID: No. 59 531..."
+			"D-U-N-S Number",                          // new: e.g., "D-U-N-S Number 33-843-5672"
+			"Dubai Chamber of Commerce Membership No", // new
 			"Enterprise Number",
+			"Fiscal Code",        // new: business tax identifiers
+			"Folio Mercantil No", // new: Mexican business registration
 			"Legal Entity Number",
+			"Matricula Mercantil No",     // new: Colombian business registration
+			"Public Registration Number", // new
 			"Registration Number",
+			"RIF",                                   // new: Venezuelan tax ID
+			"RUC",                                   // new: Panama business registration
+			"Romanian C.R",                          // new: Romanian Commercial Registry
+			"Tax ID No.",                            // new: Important business identifier
+			"Trade License No",                      // new
+			"UK Company Number",                     // new: Specific UK format
+			"US FEIN",                               // new: US Federal Employer ID Number
+			"United Social Credit Code Certificate", // new: Chinese business ID
+			"V.A.T. Number",                         // new: VAT registration numbers
 		})
 
 	case "individual":
 		out.Type = search.EntityPerson
 		out.Person = &search.Person{
-			Name:     sdn.SDNName,
+			Name:     out.Name,
 			AltNames: altNames,
 			Gender:   search.Gender(strings.ToLower(firstValue(findMatchingRemarks(remarks, "Gender")))),
 		}
@@ -271,11 +310,13 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []Alt
 }
 
 func parseAddresses(inputs []Address) []search.Address {
-	out := make([]search.Address, len(inputs))
+	var out []search.Address
 	for i := range inputs {
-		addr := fmt.Sprintf("%s %s %s", inputs[i].Address, inputs[i].CityStateProvincePostalCode, inputs[i].Country)
-
-		out[i] = address.ParseAddress(addr)
+		input := fmt.Sprintf("%s %s %s", inputs[i].Address, inputs[i].CityStateProvincePostalCode, inputs[i].Country)
+		addr := address.ParseAddress(input)
+		if addr.Line1 != "" {
+			out = append(out, addr)
+		}
 	}
 	return out
 }
@@ -609,6 +650,49 @@ func deduplicateTitles(titles []string) []string {
 		}
 	}
 	return result
+}
+
+func parseContactInfo(remarks []string) search.ContactInfo {
+	var out search.ContactInfo
+
+	// Look for emails, phone numbers, fax numbers, websites, etc..
+	for _, remark := range remarks {
+		remark = strings.TrimSuffix(remark, ".")
+
+		// Emails
+		matches := emailRegex.FindAllStringSubmatch(remark, -1)
+		for _, m := range matches {
+			if len(m) > 1 {
+				out.EmailAddresses = append(out.EmailAddresses, m[len(m)-1])
+			}
+		}
+
+		// Phone Numbers
+		matches = phoneRegex.FindAllStringSubmatch(remark, -1)
+		for _, m := range matches {
+			if len(m) > 1 {
+				out.PhoneNumbers = append(out.PhoneNumbers, m[len(m)-1])
+			}
+		}
+
+		// Fax Numbers
+		matches = faxRegex.FindAllStringSubmatch(remark, -1)
+		for _, m := range matches {
+			if len(m) > 1 {
+				out.FaxNumbers = append(out.FaxNumbers, m[len(m)-1])
+			}
+		}
+
+		// Websites
+		matches = websiteRegex.FindAllStringSubmatch(remark, -1)
+		for _, m := range matches {
+			if len(m) > 1 {
+				out.Websites = append(out.Websites, m[len(m)-1])
+			}
+		}
+	}
+
+	return out
 }
 
 func parseCryptoAddresses(remarks []string) []search.CryptoAddress {
