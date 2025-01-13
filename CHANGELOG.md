@@ -1,3 +1,9 @@
+## v0.31.3 (Released 2025-01-13)
+
+IMPROVEMENTS
+
+- cmd/server: prevent NaN from escaping bestPairsJaroWinkler
+
 ## v0.31.2 (Released 2025-01-13)
 
 IMPROVEMENTS
