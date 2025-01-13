@@ -48,6 +48,10 @@ func TestDownloader_setupPeriodicRefreshing(t *testing.T) {
 		cancelFunc()
 	}()
 
-	err = setupPeriodicRefreshing(ctx, logger, conf, dl, searchService)
+	errs := make(chan error, 1)
+	err = setupPeriodicRefreshing(ctx, logger, errs, conf, dl, searchService)
 	require.NoError(t, err)
+
+	cancelFunc()
+	require.NoError(t, <-errs)
 }
