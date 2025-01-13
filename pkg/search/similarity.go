@@ -25,20 +25,6 @@ func Similarity[Q any, I any](query Entity[Q], index Entity[I]) float64 {
 
 // DebugSimilarity does the same as Similarity, but logs debug info to w.
 func DebugSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]) float64 {
-	if w == nil {
-		w = io.Discard // TODO(adam): remove
-	}
-	fmt.Fprintf(w, "\n=== Starting Similarity Comparison ===\n")
-
-	// Log the business data we're comparing
-	if query.Business != nil && index.Business != nil {
-		fmt.Fprintf(w, "\nBusiness Details:\n")
-		fmt.Fprintf(w, "Query Name: %q\n", query.Business.Name)
-		fmt.Fprintf(w, "Index Name: %q\n", index.Business.Name)
-		fmt.Fprintf(w, "Query Identifiers: %+v\n", query.Business.Identifier)
-		fmt.Fprintf(w, "Index Identifiers: %+v\n", index.Business.Identifier)
-	}
-
 	var pieces []scorePiece
 
 	// Critical identifiers (highest weight)
@@ -64,19 +50,24 @@ func DebugSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]
 		return exactGovernmentIDs.score
 	}
 	pieces = append(pieces, exactIdentifiers, exactCryptoAddresses, exactGovernmentIDs)
-	fmt.Println("Critical pieces")
-	fmt.Printf("exact identifiers: %#v\n", pieces[0])
-	fmt.Printf("crypto addresses: %#v\n", pieces[1])
-	fmt.Printf("gov IDs: %#v\n", pieces[2])
+
+	if w != nil {
+		debug(w, "Critical pieces")
+		debug(w, "exact identifiers: %#v\n", pieces[0])
+		debug(w, "crypto addresses: %#v\n", pieces[1])
+		debug(w, "gov IDs: %#v\n", pieces[2])
+	}
 
 	// Name comparison (second highest weight)
 	pieces = append(pieces,
 		compareName(w, query, index, nameWeight),
 		compareEntityTitlesFuzzy(w, query, index, nameWeight),
 	)
-	fmt.Println("name comparison")
-	fmt.Printf("name: %#v\n", pieces[3])
-	fmt.Printf("titles: %#v\n", pieces[4])
+	if w != nil {
+		debug(w, "name comparison")
+		debug(w, "name: %#v\n", pieces[3])
+		debug(w, "titles: %#v\n", pieces[4])
+	}
 
 	// Supporting information (lower weight)
 	pieces = append(pieces,
@@ -84,15 +75,19 @@ func DebugSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]
 		compareAddresses(w, query, index, supportingInfoWeight),
 		compareSupportingInfo(w, query, index, supportingInfoWeight),
 	)
-	fmt.Println("supporting info")
-	fmt.Printf("dates: %#v\n", pieces[5])
-	fmt.Printf("addresses: %#v\n", pieces[6])
-	fmt.Printf("supporting into: %#v\n", pieces[7])
+	if w != nil {
+		debug(w, "supporting info")
+		debug(w, "dates: %#v\n", pieces[5])
+		debug(w, "addresses: %#v\n", pieces[6])
+		debug(w, "supporting into: %#v\n", pieces[7])
+	}
 
 	finalScore := calculateFinalScore(w, pieces, query, index)
-	fmt.Printf("final score: %.2f\n", finalScore)
 	if math.IsNaN(finalScore) {
 		return 0.0
+	}
+	if w != nil {
+		debug(w, "finalScore=%.2f", finalScore)
 	}
 	return finalScore
 }
@@ -166,15 +161,18 @@ func calculateFinalScore[Q any, I any](w io.Writer, pieces []scorePiece, query E
 	// Get field counts and critical field information
 	fields := countFieldsByImportance(pieces)
 	coverage := calculateCoverage(pieces, index)
-	fmt.Printf("calculateFinalScore: fields=%#v  coverage=%#v ", fields, coverage)
 
 	// Calculate base score with weighted importance
 	baseScore := calculateBaseScore(pieces, fields)
-	fmt.Printf(" baseScore=%v ", baseScore)
 
 	// Apply coverage penalties
 	finalScore := applyPenaltiesAndBonuses(baseScore, coverage, fields, query.Type == index.Type)
-	fmt.Printf(" finalScore=%.2f\n", finalScore)
+
+	if w != nil {
+		debug(w, "calculateFinalScore: fields=%#v  coverage=%#v ", fields, coverage)
+		debug(w, " baseScore=%v ", baseScore)
+		debug(w, " finalScore=%.2f\n", finalScore)
+	}
 
 	return finalScore
 }
@@ -248,9 +246,6 @@ func calculateCoverage[I any](pieces []scorePiece, index Entity[I]) coverage {
 		}
 	}
 
-	fmt.Printf("calculateCoverage: fieldsCompared=%v  indexFields=%v  criticalFieldsCompared=%v  criticalTotal=%v\n",
-		fieldsCompared, indexFields, criticalFieldsCompared, criticalTotal)
-
 	return coverage{
 		ratio:         float64(fieldsCompared) / float64(indexFields),
 		criticalRatio: float64(criticalFieldsCompared) / float64(criticalTotal),
@@ -264,8 +259,6 @@ type coverage struct {
 
 func applyPenaltiesAndBonuses(baseScore float64, cov coverage, fields entityFields, sameType bool) float64 {
 	score := baseScore
-
-	fmt.Printf("cov: %#v\n", cov)
 
 	// Apply coverage penalties
 	if cov.ratio < minCoverageThreshold {
