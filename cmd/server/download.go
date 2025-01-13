@@ -5,6 +5,7 @@
 package main
 
 import (
+	"cmp"
 	"context"
 	"os"
 	"strings"
@@ -45,6 +46,10 @@ func setupPeriodicRefreshing(ctx context.Context, logger log.Logger, conf downlo
 	return <-errs
 }
 
+const (
+	defaultRefreshInterval = 12 * time.Hour
+)
+
 func getRefreshInterval(conf download.Config) time.Duration {
 	override := strings.TrimSpace(os.Getenv("DATA_REFRESH_INTERVAL"))
 	if override != "" {
@@ -53,7 +58,7 @@ func getRefreshInterval(conf download.Config) time.Duration {
 			return dur
 		}
 	}
-	return conf.RefreshInterval
+	return cmp.Or(conf.RefreshInterval, defaultRefreshInterval)
 }
 
 func refreshAllSources(ctx context.Context, logger log.Logger, downloader download.Downloader, searchService search.Service) error {

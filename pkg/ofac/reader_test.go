@@ -5,12 +5,14 @@
 package ofac
 
 import (
+	"context"
 	"io"
 	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
 
+	"github.com/moov-io/base/log"
 	"github.com/stretchr/testify/require"
 )
 
@@ -186,4 +188,28 @@ func TestSDNComments_CryptoCurrencies(t *testing.T) {
 		{Currency: "XBT", Address: "16ti2EXaae5izfkUZ1Zc59HMcsdnHpP5QJ"},
 	}
 	require.ElementsMatch(t, expected, addresses)
+}
+
+func TestDownload__OFAC_Spillover(t *testing.T) {
+	ctx := context.Background()
+	logger := log.NewTestLogger()
+	initialDir := filepath.Join("..", "..", "test", "testdata", "static")
+
+	files, err := Download(ctx, logger, initialDir)
+	require.NoError(t, err)
+
+	res, err := Read(files)
+	require.NoError(t, err)
+
+	var found *SDN
+	for _, sdn := range res.SDNs {
+		if sdn.EntityID == "12300" {
+			found = &sdn
+			break
+		}
+	}
+	require.NotNil(t, found)
+
+	expected := `DOB 13 May 1965; alt. DOB 13 Apr 1968; alt. DOB 07 Jul 1964; POB Medellin, Colombia; alt. POB Marinilla, Antioquia, Colombia; alt. POB Ciudad Victoria, Tamaulipas, Mexico; Cedula No. 7548733 (Colombia); alt. Cedula No. 70163752 (Colombia); alt. Cedula No. 172489729-1 (Ecuador); Passport AL720622 (Colombia); R.F.C. CIVJ650513LJA (Mexico); alt. R.F.C. OUSV-640707 (Mexico); C.U.R.P. CIVJ650513HNEFLR06 (Mexico); alt. C.U.R.P. OUVS640707HTSSLR07 (Mexico); Matricula Mercantil No 181301-1 Cali (Colombia); alt. Matricula Mercantil No 405885 Bogota (Colombia); Linked To: BIO FORESTAL S.A.S.; Linked To: CUBI CAFE CLICK CUBE MEXICO, S.A. DE C.V.; Linked To: DOLPHIN DIVE SCHOOL S.A.; Linked To: GANADERIA LA SORGUITA S.A.S.; Linked To: GESTORES DEL ECUADOR GESTORUM S.A.; Linked To: INVERPUNTO DEL VALLE S.A.; Linked To: INVERSIONES CIFUENTES Y CIA. S. EN C.; Linked To: LE CLAUDE, S.A. DE C.V.; Linked To: OPERADORA NUEVA GRANADA, S.A. DE C.V.; Linked To: PARQUES TEMATICOS S.A.S.; Linked To: PROMO RAIZ S.A.S.; Linked To: RED MUNDIAL INMOBILIARIA, S.A. DE C.V.; Linked To: FUNDACION PARA EL BIENESTAR Y EL PORVENIR; Linked To: C.I. METALURGIA EXTRACTIVA DE COLOMBIA S.A.S.; Linked To: GRUPO MUNDO MARINO, S.A.; Linked To: C.I. DISERCOM S.A.S.; Linked To: C.I. OKCOFFEE COLOMBIA S.A.S.; Linked To: C.I. OKCOFFEE INTERNATIONAL S.A.S.; Linked To: FUNDACION OKCOFFEE COLOMBIA; Linked To: CUBICAFE S.A.S.; Linked To: HOTELES Y BIENES S.A.; Linked To: FUNDACION SALVA LA SELVA; Linked To: LINEA AEREA PUEBLOS AMAZONICOS S.A.S.; Linked To: DESARROLLO MINERO RESPONSABLE C.I. S.A.S.; Linked To: R D I S.A.`
+	require.Equal(t, expected, found.Remarks)
 }
