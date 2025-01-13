@@ -56,3 +56,9 @@ func (xs *largest) add(it *item) {
 		xs.items = xs.items[:xs.capacity]
 	}
 }
+
+func (xs *largest) getItems() []*item {
+	out := make([]*item, len(xs.items))
+	copy(out, xs.items)
+	return out
+}

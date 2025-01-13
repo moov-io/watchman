@@ -215,17 +215,20 @@ func TopAddressesFn(limit int, minMatch float64, addresses []*Address, compare f
 }
 
 func largestToAddresses(xs *largest) []Address {
+	items := xs.getItems()
 	out := make([]Address, 0, xs.capacity)
-	for i := range xs.items {
-		if v := xs.items[i]; v != nil {
-			aa, ok := v.value.(*Address)
-			if !ok {
-				continue
-			}
-			address := *aa
-			address.match = v.weight
-			out = append(out, address)
+	for _, item := range items {
+		if item == nil {
+			continue
 		}
+
+		aa, ok := item.value.(*Address)
+		if !ok {
+			continue
+		}
+		address := *aa
+		address.match = item.weight
+		out = append(out, address)
 	}
 	return out
 }
@@ -275,18 +278,21 @@ func (s *searcher) TopAltNames(limit int, minMatch float64, alt string) []Alt {
 	}
 	wg.Wait()
 
+	items := xs.getItems()
 	out := make([]Alt, 0, limit)
-	for i := range xs.items {
-		if v := xs.items[i]; v != nil {
-			aa, ok := v.value.(*Alt)
-			if !ok {
-				continue
-			}
-			alt := *aa
-			alt.match = v.weight
-			alt.matchedName = v.matched
-			out = append(out, alt)
+	for _, item := range items {
+		if item == nil {
+			continue
 		}
+
+		aa, ok := item.value.(*Alt)
+		if !ok {
+			continue
+		}
+		alt := *aa
+		alt.match = item.weight
+		alt.matchedName = item.matched
+		out = append(out, alt)
 	}
 	return out
 }
@@ -401,18 +407,21 @@ func (s *searcher) TopSDNs(limit int, minMatch float64, name string, keepSDN fun
 	}
 	wg.Wait()
 
+	items := xs.getItems()
 	out := make([]*SDN, 0, limit)
-	for i := range xs.items {
-		if v := xs.items[i]; v != nil {
-			ss, ok := v.value.(*SDN)
-			if !ok {
-				continue
-			}
-			sdn := *ss // deref for a copy
-			sdn.match = v.weight
-			sdn.matchedName = v.matched
-			out = append(out, &sdn)
+	for _, item := range items {
+		if item == nil {
+			continue
 		}
+
+		ss, ok := item.value.(*SDN)
+		if !ok {
+			continue
+		}
+		sdn := *ss
+		sdn.match = item.weight
+		sdn.matchedName = item.matched
+		out = append(out, &sdn)
 	}
 	return out
 }
@@ -446,18 +455,21 @@ func (s *searcher) TopDPs(limit int, minMatch float64, name string) []DP {
 	}
 	wg.Wait()
 
+	items := xs.getItems()
 	out := make([]DP, 0, limit)
-	for _, thisItem := range xs.items {
-		if v := thisItem; v != nil {
-			ss, ok := v.value.(*DP)
-			if !ok {
-				continue
-			}
-			dp := *ss
-			dp.match = v.weight
-			dp.matchedName = v.matched
-			out = append(out, dp)
+	for _, item := range items {
+		if item == nil {
+			continue
 		}
+
+		ss, ok := item.value.(*DP)
+		if !ok {
+			continue
+		}
+		dp := *ss
+		dp.match = item.weight
+		dp.matchedName = item.matched
+		out = append(out, dp)
 	}
 	return out
 }

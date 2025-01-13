@@ -90,22 +90,25 @@ func topResults[T any](limit int, minMatch float64, name string, data []*Result[
 	}
 	wg.Wait()
 
+	items := xs.getItems()
 	out := make([]*Result[T], 0)
-	for _, thisItem := range xs.items {
-		if v := thisItem; v != nil {
-			vv, ok := v.value.(*Result[T])
-			if !ok {
-				continue
-			}
-			res := &Result[T]{
-				Data:            vv.Data,
-				match:           v.weight,
-				matchedName:     v.matched,
-				precomputedName: vv.precomputedName,
-				precomputedAlts: vv.precomputedAlts,
-			}
-			out = append(out, res)
+	for _, item := range items {
+		if item == nil {
+			continue
 		}
+
+		vv, ok := item.value.(*Result[T])
+		if !ok {
+			continue
+		}
+		res := &Result[T]{
+			Data:            vv.Data,
+			match:           item.weight,
+			matchedName:     item.matched,
+			precomputedName: vv.precomputedName,
+			precomputedAlts: vv.precomputedAlts,
+		}
+		out = append(out, res)
 	}
 	return out
 }
