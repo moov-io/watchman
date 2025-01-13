@@ -8,14 +8,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/pkg/address"
 	"github.com/moov-io/watchman/pkg/search"
 
 	"github.com/gorilla/mux"
+	"github.com/moov-io/base/log"
+	"github.com/moov-io/base/strx"
 )
-
-// GET /v2/search
 
 type Controller interface {
 	AppendRoutes(router *mux.Router) *mux.Router
@@ -52,6 +51,8 @@ type errorResponse struct {
 }
 
 func (c *controller) search(w http.ResponseWriter, r *http.Request) {
+	debug := strx.Yes(r.URL.Query().Get("debug"))
+
 	req, err := readSearchRequest(r)
 	if err != nil {
 		err = fmt.Errorf("problem reading v2 search request: %w", err)
@@ -65,8 +66,9 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-
-	fmt.Printf("req: %#v\n", req)
+	if debug {
+		c.logger.Debug().Logf("request: %#v", req)
+	}
 
 	q := r.URL.Query()
 	opts := SearchOpts{
@@ -75,7 +77,9 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 		RequestID:      q.Get("requestID"),
 		DebugSourceIDs: strings.Split(q.Get("debugSourceIDs"), ","),
 	}
-	fmt.Printf("opts: %#v\n", opts)
+	if debug {
+		c.logger.Debug().Logf("opts: %#v", opts)
+	}
 
 	entities, err := c.service.Search(r.Context(), req, opts)
 	if err != nil {
@@ -84,7 +88,9 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	fmt.Printf("found %d entities\n", len(entities))
+	if debug {
+		c.logger.Debug().Logf("found %d entities\n", len(entities))
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(searchResponse{
