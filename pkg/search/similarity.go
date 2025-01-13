@@ -44,14 +44,23 @@ func DebugSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]
 	// Critical identifiers (highest weight)
 	exactIdentifiers := compareExactIdentifiers(w, query, index, criticalIdWeight)
 	if exactIdentifiers.matched && exactIdentifiers.fieldsCompared > 0 {
+		if math.IsNaN(exactIdentifiers.score) {
+			return 0.0
+		}
 		return exactIdentifiers.score
 	}
 	exactCryptoAddresses := compareExactCryptoAddresses(w, query, index, criticalIdWeight)
 	if exactCryptoAddresses.matched && exactCryptoAddresses.fieldsCompared > 0 {
+		if math.IsNaN(exactCryptoAddresses.score) {
+			return 0.0
+		}
 		return exactCryptoAddresses.score
 	}
 	exactGovernmentIDs := compareExactGovernmentIDs(w, query, index, criticalIdWeight)
 	if exactGovernmentIDs.matched && exactGovernmentIDs.fieldsCompared > 0 {
+		if math.IsNaN(exactGovernmentIDs.score) {
+			return 0.0
+		}
 		return exactGovernmentIDs.score
 	}
 	pieces = append(pieces, exactIdentifiers, exactCryptoAddresses, exactGovernmentIDs)
@@ -82,6 +91,9 @@ func DebugSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]
 
 	finalScore := calculateFinalScore(w, pieces, query, index)
 	fmt.Printf("final score: %.2f\n", finalScore)
+	if math.IsNaN(finalScore) {
+		return 0.0
+	}
 	return finalScore
 }
 
