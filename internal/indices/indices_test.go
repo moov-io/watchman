@@ -27,12 +27,12 @@ func TestProcessSlice(t *testing.T) {
 	}
 	expected := []string{"5", "10", "15", "20", "25", "30", "35", "40", "45", "50"}
 
-	require.Equal(t, expected, ProcessSlice(input, 3, fn))
+	require.ElementsMatch(t, expected, ProcessSlice(input, 3, fn))
 	require.Equal(t, originalInput, input) // input is unchanged
 
-	require.Equal(t, expected, ProcessSlice(input, 7, fn))
+	require.ElementsMatch(t, expected, ProcessSlice(input, 7, fn))
 	require.Equal(t, originalInput, input) // input is unchanged
 
-	require.Equal(t, expected, ProcessSlice(input, 10, fn))
+	require.ElementsMatch(t, expected, ProcessSlice(input, 10, fn))
 	require.Equal(t, originalInput, input) // input is unchanged
 }

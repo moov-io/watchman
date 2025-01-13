@@ -90,7 +90,6 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(searchResponse{
 		Entities: entities,
 	})
-	// TODO(adam): why isn't this returning results???
 }
 
 var (

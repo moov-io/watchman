@@ -1,7 +1,6 @@
 package indices
 
 import (
-	"fmt"
 	"sync"
 )
 
@@ -35,15 +34,22 @@ func New(total, groups int) []int {
 
 // ProcessSlice processes input slice concurrently using the provided function
 func ProcessSlice[T any, F any](in []T, groups int, f func(T) F) []F {
+	out := make([]F, 0, len(in)) // set capacity on creation
+	ProcessSliceFn[T](in, groups, func(v T) {
+		out = append(out, f(v))
+	})
+	return out
+}
+
+func ProcessSliceFn[T any](in []T, groups int, f func(T)) {
 	if len(in) == 0 {
-		return []F{}
+		return
 	}
 
 	indices := New(len(in), groups)
 	numGroups := len(indices) - 1 // Number of actual chunks
 
-	// Pre-allocate output slice
-	out := make([]F, len(in))
+	//	fmt.Printf("in=%d  groups=%v  indices=%v  numGroups=%v\n", len(in), groups, indices, numGroups)
 
 	// Use WaitGroup for synchronization
 	var wg sync.WaitGroup
@@ -58,20 +64,12 @@ func ProcessSlice[T any, F any](in []T, groups int, f func(T) F) []F {
 			defer wg.Done()
 
 			// Process chunk and write directly to pre-allocated output slice
-			for idx, v := range in[start:end] {
-				out[start+idx] = f(v)
-			}
-
-			if debug {
-				fmt.Printf("Processed chunk [%d:%d]\n", start, end)
+			for _, v := range in[start:end] {
+				f(v)
 			}
 		}(start, end)
 	}
 
 	// Wait for all goroutines to complete
 	wg.Wait()
-	return out
 }
-
-// Enable/disable debug output
-const debug = false

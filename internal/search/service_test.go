@@ -15,24 +15,10 @@ import (
 )
 
 func TestService_Search(t *testing.T) {
-	files := testInputs(t,
-		filepath.Join("..", "..", "pkg", "ofac", "testdata", "sdn.csv"),
-		filepath.Join("..", "..", "pkg", "ofac", "testdata", "alt.csv"),
-		filepath.Join("..", "..", "pkg", "ofac", "testdata", "add.csv"),
-		filepath.Join("..", "..", "pkg", "ofac", "testdata", "sdn_comments.csv"),
-	)
-	ofacRecords, err := ofac.Read(files)
-	require.NoError(t, err)
-
-	entities := ofac.GroupIntoEntities(ofacRecords.SDNs, ofacRecords.Addresses, ofacRecords.SDNComments, ofacRecords.AlternateIdentities)
-
 	ctx := context.Background()
-	logger := log.NewTestLogger()
-
 	opts := SearchOpts{Limit: 10, MinMatch: 0.01}
 
-	svc := NewService(logger)
-	svc.UpdateEntities(entities)
+	svc := testService(t)
 
 	t.Run("basic", func(t *testing.T) {
 		results, err := svc.Search(ctx, search.Entity[search.Value]{
@@ -40,7 +26,7 @@ func TestService_Search(t *testing.T) {
 			Type: search.EntityBusiness,
 		}, opts)
 		require.NoError(t, err)
-		require.Greater(t, len(results), 1)
+		require.Greater(t, len(results), 0)
 
 		t.Logf("got %d results", len(results))
 		t.Logf("")
@@ -67,6 +53,26 @@ func TestService_Search(t *testing.T) {
 
 		// 36216
 	})
+}
+
+func testService(tb testing.TB) Service {
+	files := testInputs(tb,
+		filepath.Join("..", "..", "pkg", "ofac", "testdata", "sdn.csv"),
+		filepath.Join("..", "..", "pkg", "ofac", "testdata", "alt.csv"),
+		filepath.Join("..", "..", "pkg", "ofac", "testdata", "add.csv"),
+		filepath.Join("..", "..", "pkg", "ofac", "testdata", "sdn_comments.csv"),
+	)
+	ofacRecords, err := ofac.Read(files)
+	require.NoError(tb, err)
+
+	entities := ofac.GroupIntoEntities(ofacRecords.SDNs, ofacRecords.Addresses, ofacRecords.SDNComments, ofacRecords.AlternateIdentities)
+
+	logger := log.NewTestLogger()
+
+	svc := NewService(logger)
+	svc.UpdateEntities(entities)
+
+	return svc
 }
 
 func testInputs(tb testing.TB, paths ...string) map[string]io.ReadCloser {

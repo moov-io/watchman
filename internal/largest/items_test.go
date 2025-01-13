@@ -2,138 +2,102 @@
 // Use of this source code is governed by an Apache License
 // license that can be found in the LICENSE file.
 
-package largest
+package largest_test
 
 import (
-	"crypto/rand"
-	"fmt"
-	"math"
-	"math/big"
 	"testing"
 
-	"github.com/moov-io/watchman/pkg/ofac"
+	"github.com/moov-io/watchman/internal/largest"
+	"github.com/moov-io/watchman/pkg/search"
 
 	"github.com/stretchr/testify/require"
-	"golang.org/x/sync/errgroup"
 )
 
-func randomWeight() float64 {
-	n, _ := rand.Int(rand.Reader, big.NewInt(1000))
-	return float64(n.Int64()) / 100.0
-}
-
-func TestLargest(t *testing.T) {
-	xs := NewItems(10, 0.0)
-
-	min := 10000.0
-	for i := 0; i < 1000; i++ {
-		it := &Item{
-			Value:  i,
-			Weight: randomWeight(),
-		}
-		xs.Add(it)
-		min = math.Min(min, it.Weight)
-	}
-
-	// Check we didn't overflow
-	items := xs.Items()
-	require.Equal(t, len(items), 10)
-
-	for i := range items {
-		if i+1 > len(items)-1 {
-			continue // don't hit index out of bounds
-		}
-		if items[i].Weight < 0.0001 {
-			t.Fatalf("weight of %.2f is too low", items[i].Weight)
-		}
-		if items[i].Weight < items[i+1].Weight {
-			t.Errorf("items[%d].Weight=%.2f < items[%d].Weight=%.2f", i, items[i].Weight, i+1, items[i+1].Weight)
-		}
+// Helper to create a largest.Item with a given name and weight.
+// The Value is a search.Entity[search.Value] with just a Name for illustration.
+func makeItem(name string, w float64) largest.Item {
+	return largest.Item{
+		Value: search.Entity[search.Value]{
+			Name: name,
+			// Type: could be set if needed, but not required for this test
+		},
+		Weight: w,
 	}
 }
 
-// TestLargest_MaxOrdering will test the ordering of 1.0 values to see
-// if they hold their insert ordering.
-func TestLargest_MaxOrdering(t *testing.T) {
-	xs := NewItems(10, 0.0)
+func TestItems_Basic(t *testing.T) {
+	// We’ll track the top 3 items (capacity=3). Items below weight=2.0 are ignored (minMatch=2.0)
+	xs := largest.NewItems(3, 2.0)
 
-	xs.Add(&Item{Value: "A", Weight: 0.99})
-	xs.Add(&Item{Value: "B", Weight: 1.0})
-	xs.Add(&Item{Value: "C", Weight: 1.0})
-	xs.Add(&Item{Value: "D", Weight: 1.0})
-	xs.Add(&Item{Value: "E", Weight: 0.97})
+	// Initially, it should be empty
+	require.Empty(t, xs.Items(), "expected no items at start")
 
-	if n := len(xs.items); n != 10 {
-		t.Fatalf("found %d items: %#v", n, xs.items)
-	}
+	// 1) Below minMatch => should be ignored
+	xs.Add(makeItem("A", 1.5))
+	require.Empty(t, xs.Items(), "items below minMatch are ignored")
 
-	if s, ok := xs.items[0].Value.(string); !ok || s != "B" {
-		t.Errorf("xs.items[0]=%#v", xs.items[0])
-	}
-	if s, ok := xs.items[1].Value.(string); !ok || s != "C" {
-		t.Errorf("xs.items[1]=%#v", xs.items[1])
-	}
-	if s, ok := xs.items[2].Value.(string); !ok || s != "D" {
-		t.Errorf("xs.items[2]=%#v", xs.items[2])
-	}
-	if s, ok := xs.items[3].Value.(string); !ok || s != "A" {
-		t.Errorf("xs.items[3]=%#v", xs.items[3])
-	}
-	if s, ok := xs.items[4].Value.(string); !ok || s != "E" {
-		t.Errorf("xs.items[4]=%#v", xs.items[4])
-	}
-	for i := 5; i < 10; i++ {
-		if xs.items[i] != nil {
-			t.Errorf("#%d was non-nil: %#v", i, xs.items[i])
-		}
-	}
+	// 2) Exactly minMatch => should be included
+	xs.Add(makeItem("B", 2.0))
+	got := xs.Items()
+	require.Len(t, got, 1)
+	require.Equal(t, "B", got[0].Value.Name)
+
+	// 3) Insert item with weight=3 => should be included
+	xs.Add(makeItem("C", 3.0))
+	got = xs.Items()
+	require.Len(t, got, 2)
+	// Should be sorted descending: C(3.0), B(2.0)
+	require.Equal(t, "C", got[0].Value.Name)
+	require.Equal(t, "B", got[1].Value.Name)
+
+	// 4) Insert item with weight=4 => included, still under capacity=3
+	xs.Add(makeItem("D", 4.0))
+	got = xs.Items()
+	require.Len(t, got, 3)
+	// Expect descending: D(4.0), C(3.0), B(2.0)
+	require.Equal(t, []string{"D", "C", "B"}, []string{
+		got[0].Value.Name,
+		got[1].Value.Name,
+		got[2].Value.Name,
+	})
+
+	// 5) Insert item with weight=5 => must remove smallest (B=2.0)
+	xs.Add(makeItem("E", 5.0))
+	got = xs.Items()
+	require.Len(t, got, 3)
+	// Expect descending: E(5.0), D(4.0), C(3.0)
+	require.Equal(t, []string{"E", "D", "C"}, []string{
+		got[0].Value.Name,
+		got[1].Value.Name,
+		got[2].Value.Name,
+	})
+
+	// 6) Insert something small but above minMatch => compare to smallest
+	// Currently, smallest is C(3.0). We'll try F(2.5), which is less than 3.0 => ignore
+	xs.Add(makeItem("F", 2.5))
+	got = xs.Items()
+	require.Len(t, got, 3, "should still have three items")
+	require.Equal(t, []string{"E", "D", "C"}, []string{
+		got[0].Value.Name,
+		got[1].Value.Name,
+		got[2].Value.Name,
+	})
 }
 
-func TestLargest__MinMatch(t *testing.T) {
-	xs := NewItems(2, 0.96)
+func TestItems_MinMatch(t *testing.T) {
+	// Another quick test: if minMatch is 10.0, even high items below 10.0 get ignored
+	xs := largest.NewItems(2, 10.0)
 
-	xs.Add(&Item{Value: "A", Weight: 0.94})
-	xs.Add(&Item{Value: "B", Weight: 1.0})
-	xs.Add(&Item{Value: "C", Weight: 0.95})
-	xs.Add(&Item{Value: "D", Weight: 0.09})
+	xs.Add(makeItem("X", 9.9))
+	xs.Add(makeItem("Y", 10.0))
+	xs.Add(makeItem("Z", 12.0))
 
-	require.Equal(t, "B", xs.items[0].Value)
-	require.Nil(t, xs.items[1])
-}
-
-func BenchmarkLargest(b *testing.B) {
-	size := b.N * 500_000
-
-	scores := make([]float64, size)
-	for i := 0; i < b.N; i++ {
-		n, err := rand.Int(rand.Reader, big.NewInt(100))
-		if err != nil {
-			b.Fatal(err)
-		}
-		scores[i] = float64(n.Int64()) / 100.0
-	}
-
-	limit := 20
-	matches := []float64{0.1, 0.25, 0.5, 0.75, 0.9, 0.99}
-	for i := range matches {
-		b.Run(fmt.Sprintf("%.2f%%", matches[i]*100), func(b *testing.B) {
-			// accumulate scores
-			xs := NewItems(limit, matches[i])
-
-			g := &errgroup.Group{}
-			for i := range scores {
-				score := scores[i]
-				g.Go(func() error {
-					xs.Add(&Item{
-						Value:  ofac.SDN{},
-						Weight: score,
-					})
-					return nil
-				})
-			}
-			require.NoError(b, g.Wait())
-			require.Len(b, xs.items, limit)
-			require.Equal(b, limit, cap(xs.items))
-		})
-	}
+	// Expect only Y(10.0) and Z(12.0), ignoring X(9.9)
+	got := xs.Items()
+	require.Len(t, got, 2)
+	// Descending: Z(12.0), Y(10.0)
+	require.Equal(t, []string{"Z", "Y"}, []string{
+		got[0].Value.Name,
+		got[1].Value.Name,
+	})
 }
