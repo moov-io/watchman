@@ -318,8 +318,7 @@ func withFirstF[T any](values []remark, f func(remark) T) T {
 
 func withFirstP[T any](values []remark, f func(remark) *T) *T {
 	if len(values) == 0 {
-		var zero T
-		return &zero
+		return nil
 	}
 	return f(values[0])
 }

@@ -58,6 +58,14 @@ func TestParseTime(t *testing.T) {
 		tt, _ = parseTime(dobPatterns, "circa 1979-1982")
 		require.Equal(t, "1979-01-01", tt.Format(time.DateOnly))
 	})
+
+	t.Run("invalidDate", func(t *testing.T) {
+		when := time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)
+		require.True(t, invalidDate(when))
+
+		when = time.Now()
+		require.False(t, invalidDate(when))
+	})
 }
 
 func TestParseGovernmentIDs(t *testing.T) {

@@ -108,7 +108,7 @@ func makeIdentifier(remarks []string, suffix string) *search.Identifier {
 func findDateStamp(matchingRemarks []remark) *time.Time {
 	return withFirstP(matchingRemarks, func(in remark) *time.Time {
 		t, err := parseTime(dobPatterns, in.value)
-		if t.IsZero() || err != nil {
+		if err != nil {
 			return nil
 		}
 		return &t
@@ -130,7 +130,7 @@ func parseTime(acceptedLayouts []string, value string) (time.Time, error) {
 
 	for i := range acceptedLayouts {
 		tt, err := time.Parse(acceptedLayouts[i], value)
-		if !tt.IsZero() && err == nil {
+		if !invalidDate(tt) && err == nil {
 			return tt, nil
 		}
 	}
@@ -262,7 +262,7 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []Alt
 		// Handle birth date
 		out.Person.BirthDate = withFirstP(findMatchingRemarks(remarks, "DOB"), func(in remark) *time.Time {
 			t, err := parseTime(dobPatterns, in.value)
-			if t.IsZero() || err != nil {
+			if err != nil {
 				return nil
 			}
 			return &t
@@ -295,7 +295,7 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []Alt
 			Flag:     normalizeCountryCode(firstValue(findMatchingRemarks(remarks, "Flag"))),
 			Built: withFirstP(findMatchingRemarks(remarks, "Manufacture Date"), func(in remark) *time.Time {
 				t, err := parseTime(dobPatterns, in.value)
-				if t.IsZero() || err != nil {
+				if err != nil {
 					return nil
 				}
 				return &t
@@ -723,6 +723,14 @@ func parseCryptoAddresses(remarks []string) []search.CryptoAddress {
 	}
 
 	return unique
+}
+
+var (
+	oldestAllowedDate = time.Date(1900, time.January, 1, 0, 0, 0, 0, time.UTC)
+)
+
+func invalidDate(when time.Time) bool {
+	return when.Before(oldestAllowedDate)
 }
 
 // ContactInfo
