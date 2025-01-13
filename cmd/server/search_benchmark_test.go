@@ -5,8 +5,13 @@
 package main
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
+	"github.com/moov-io/base/log"
+
+	"github.com/gorilla/mux"
 	"github.com/jaswdr/faker"
 	"github.com/stretchr/testify/require"
 )
@@ -26,7 +31,26 @@ func BenchmarkSearch__All(b *testing.B) {
 		name := fake.Person().Name()
 		b.StartTimer()
 
-		buildFullSearchResponse(searcher, filters, 10, 0.0, name)
+		resp := buildFullSearchResponse(searcher, filters, 10, 0.0, name)
+		require.NotNil(b, resp)
+	}
+}
+
+func BenchmarkSearch_APIQ(b *testing.B) {
+	searcher := createBenchmarkSearcher(b)
+	router := mux.NewRouter()
+	addSearchRoutes(log.NewNopLogger(), router, searcher)
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/search?address=ibex+house+minories&limit=10&minMatch=0.9", nil)
+
+		router.ServeHTTP(w, req)
+		w.Flush()
+
+		require.Equal(b, http.StatusOK, w.Code)
+		require.Contains(b, w.Body.String(), `"SDNs":null`)
 	}
 }
 
