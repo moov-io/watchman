@@ -18,22 +18,13 @@ import (
 
 func TestRead(t *testing.T) {
 	fd, err := os.Open(filepath.Join("..", "..", "test", "testdata", "csl.csv"))
-	if err != nil {
-		t.Error(err)
-	}
+	require.NoError(t, err)
+
 	csl, err := ReadFile(fd)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if csl == nil {
-		t.Fatal("failed to parse csl.csv")
-	}
-	if len(csl.SSIs) != 26 { // test CSL csv file has 26 SSI entries
-		t.Errorf("len(SSIs)=%d", len(csl.SSIs))
-	}
-	if len(csl.ELs) != 22 {
-		t.Errorf("len(ELs)=%d", len(csl.ELs))
-	}
+	require.NoError(t, err)
+
+	require.Len(t, csl.SSIs, 26) // test CSL csv file has 26 SSI entries
+	require.Len(t, csl.ELs, 22)
 }
 
 func TestRead__Large(t *testing.T) {
@@ -70,30 +61,20 @@ func TestRead_missingRow(t *testing.T) {
 }
 
 func TestRead_invalidRow(t *testing.T) {
-
 	fd, err := os.Open(filepath.Join("..", "..", "test", "testdata", "invalidFiles", "csl.csv"))
-	if err != nil {
-		t.Error(err)
-	}
+	require.NoError(t, err)
+
 	csl, err := ReadFile(fd)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if csl == nil {
-		t.Fatal("failed to parse csl.csv")
-	}
-	if len(csl.SSIs) != 1 {
-		t.Errorf("len(SSIs)=%d", len(csl.SSIs))
-	}
-	if len(csl.ELs) != 1 {
-		t.Errorf("len(ELs)=%d", len(csl.ELs))
-	}
+	require.NoError(t, err)
+
+	require.Len(t, csl.SSIs, 1)
+	require.Len(t, csl.ELs, 1)
 }
 
 func Test_unmarshalEL(t *testing.T) {
 	record := []string{"Entity List (EL) - Bureau of Industry and Security", "", "", "", "GBNTT", "", "No. 34 Mansour Street, Tehran, IR", "73 FR 54506", "2008-09-22", "", "",
 		"For all items subject to the EAR (See §744.11 of the EAR)", "Presumption of denial", "", "", "", "", "", "", "", "http://bit.ly/1L47xrV", "", "", "", "", "", "http://bit.ly/1L47xrV", ""}
-	expectedEL := &EL{
+	expectedEL := EL{
 		Name:               "GBNTT",
 		AlternateNames:     nil,
 		Addresses:          []string{"No. 34 Mansour Street, Tehran, IR"},
@@ -122,7 +103,7 @@ d54346ef81802673c1b1daeb2ca8bd5d13755abd,Military End User (MEU) List - Bureau o
 	require.NoError(t, err)
 	require.Len(t, report.MEUs, 3)
 
-	require.Equal(t, &MEU{
+	require.Equal(t, MEU{
 		EntityID:  "26744194bd9b5cbec49db6ee29a4b53c697c7420",
 		Name:      "AECC Aviation Power Co. Ltd.",
 		Addresses: "Xiujia Bay, Weiyong Dt, Xian, 710021, CN",
@@ -131,7 +112,7 @@ d54346ef81802673c1b1daeb2ca8bd5d13755abd,Military End User (MEU) List - Bureau o
 		EndDate:   "",
 	}, report.MEUs[0])
 
-	require.Equal(t, &MEU{
+	require.Equal(t, MEU{
 		EntityID:  "d54346ef81802673c1b1daeb2ca8bd5d13755abd",
 		Name:      "AECC China Gas Turbine Establishment",
 		Addresses: "No. 1 Hangkong Road, Mianyang, Sichuan, CN",
@@ -149,7 +130,7 @@ func Test_unmarshalSSI(t *testing.T) {
 		"OAO AK TRANSNEFT; AKTSIONERNAYA KOMPANIYA PO TRANSPORTUNEFTI TRANSNEFT OAO; OIL TRANSPORTING JOINT-STOCK COMPANY TRANSNEFT; TRANSNEFT, JSC; TRANSNEFT OJSC; TRANSNEFT",
 		"", "", "", "", "http://bit.ly/1MLgou0", "1027700049486, Registration ID; 00044463, Government Gazette Number; 7706061801, Tax ID No.; transneft@ak.transneft.ru, Email Address; www.transneft.ru, Website; Subject to Directive 2, Executive Order 13662 Directive Determination -",
 	}
-	expectedSSI := &SSI{
+	expectedSSI := SSI{
 		EntityID:       "17254",
 		Type:           "Entity",
 		Programs:       []string{"UKRAINE-EO13662", "SYRIA"},
@@ -175,7 +156,7 @@ func Test_unmarshalUVL(t *testing.T) {
 		"Atlas Sanatgaran", "", "Komitas 26/114, Yerevan, Armenia, AM", "", "", "", "", "", "", "", "", "", "", "", "", "", "http://bit.ly/1iwwTSJ", "", "", "", "", "",
 		"http://bit.ly/1Qi4R7Z", "",
 	}
-	expectedUVL := &UVL{
+	expectedUVL := UVL{
 		EntityID:      "f15fa805ff4ac5e09026f5e78011a1bb6b26dec2",
 		Name:          "Atlas Sanatgaran",
 		Addresses:     []string{"Komitas 26/114, Yerevan, Armenia, AM"},
@@ -196,7 +177,7 @@ func Test_unmarshalISN(t *testing.T) {
 		"E.O. 13382; Export-Import Bank Act; Nuclear Proliferation Prevention Act", "Abdul Qadeer Khan", "", "", "Vol. 74, No. 11, 01/16/09", "2009-01-09",
 		"", "", "", "", "", "", "", "", "", "", "Associated with the A.Q. Khan Network", "http://bit.ly/1NuVFxV", "ZAMAN; Haydar", "", "", "", "", "http://bit.ly/1NuVFxV", "",
 	}
-	expectedISN := &ISN{
+	expectedISN := ISN{
 		EntityID:              "2d2db09c686e4829d0ef1b0b04145eec3d42cd88",
 		Programs:              []string{"E.O. 13382", "Export-Import Bank Act", "Nuclear Proliferation Prevention Act"},
 		Name:                  "Abdul Qadeer Khan",
@@ -221,7 +202,7 @@ func Test_unmarshalFSE(t *testing.T) {
 		"BEKTAS, Halis", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "https://bit.ly/1QWTIfE", "", "CH", "1966-02-13", "", "",
 		"http://bit.ly/1N1docf", "CH, X0906223, Passport",
 	}
-	expectedFSE := &FSE{
+	expectedFSE := FSE{
 		EntityID:      "17526",
 		EntityNumber:  "17526",
 		Type:          "Individual",
@@ -249,7 +230,7 @@ func Test_unmarshalPLC(t *testing.T) {
 		"", "", "http://bit.ly/2tjOLpx", "",
 	}
 
-	expectedPLC := &PLC{
+	expectedPLC := PLC{
 		EntityID:       "9702",
 		EntityNumber:   "9702",
 		Type:           "Individual",
@@ -280,7 +261,7 @@ func Test_unmarshalCAP(t *testing.T) {
 		"", "", "", "", "http://bit.ly/2PqohAD", "RU, 1027700159497, Registration Number; RU, 29292940, Government Gazette Number; MOSWRUMM, SWIFT/BIC; www.bm.ru, Website; Subject to Directive 1, Executive Order 13662 Directive Determination -; 044525219, BIK (RU); Financial Institution, Target Type",
 	}
 
-	expectedCAP := &CAP{
+	expectedCAP := CAP{
 		EntityID:      "20002",
 		EntityNumber:  "20002",
 		Type:          "Entity",
@@ -317,7 +298,7 @@ func Test_unmarshalDTC(t *testing.T) {
 		"http://bit.ly/307FuRQ", "Yasmin Tariq; Fatimah Mohammad", "", "", "", "", "http://bit.ly/307FuRQ",
 	}
 
-	expectedDTC := &DTC{
+	expectedDTC := DTC{
 		EntityID:              "d44d88d0265d93927b9ff1c13bbbb7c7db64142c",
 		Name:                  "Yasmin Ahmed",
 		FederalRegisterNotice: "69 FR 17468",
@@ -342,7 +323,7 @@ func Test_unmarshalCMIC(t *testing.T) {
 		"Proven Honour Capital Ltd, Issuer Name; Proven Honour Capital Limited, Issuer Name; XS1233275194, ISIN; HK0000216777, ISIN; Private Company, Target Type; XS1401816761, ISIN; HK0000111952, ISIN; 03 Jun 2021, Listing Date (CMIC); 02 Aug 2021, Effective Date (CMIC); 03 Jun 2022, Purchase/Sales For Divestment Date (CMIC)",
 	}
 
-	expectedCMIC := &CMIC{
+	expectedCMIC := CMIC{
 		EntityID:       "32091",
 		EntityNumber:   "32091",
 		Type:           "Entity",
@@ -374,7 +355,7 @@ func Test_unmarshalNS_MBS(t *testing.T) {
 		"RU, 1027700167110, Registration Number; RU, 09807684, Government Gazette Number; RU, 7744001497, Tax ID No.; www.gazprombank.ru, Website; GAZPRUMM, SWIFT/BIC; Subject to Directive 1, Executive Order 13662 Directive Determination -; Subject to Directive 3 - All transactions in, provision of financing for, and other dealings in new debt of longer than 14 days maturity or new equity where such new debt or new equity is issued on or after the 'Effective Date (EO 14024 Directive)' associated with this name are prohibited., Executive Order 14024 Directive Information; 31 Jul 1990, Organization Established Date; 24 Feb 2022, Listing Date (EO 14024 Directive 3):; 26 Mar 2022, Effective Date (EO 14024 Directive 3):; For more information on directives, please visit the following link: https://home.treasury.gov/policy-issues/financial-sanctions/sanctions-programs-and-country-information/russian-harmful-foreign-activities-sanctions#directives, Executive Order 14024 Directive Information -",
 	}
 
-	expectedNS_MBS := &NS_MBS{
+	expectedNS_MBS := NS_MBS{
 		EntityID:       "17016",
 		EntityNumber:   "17016",
 		Type:           "Entity",

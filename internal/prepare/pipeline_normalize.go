@@ -18,13 +18,6 @@ var (
 	punctuationReplacer = strings.NewReplacer(".", "", ",", "", "-", " ", "  ", " ")
 )
 
-type normalizeStep struct{}
-
-func (s *normalizeStep) apply(in *Name) error {
-	in.Processed = LowerAndRemovePunctuation(in.Processed)
-	return nil
-}
-
 // LowerAndRemovePunctuation will lowercase each substring and remove punctuation
 //
 // This function is called on every record from the flat files and all

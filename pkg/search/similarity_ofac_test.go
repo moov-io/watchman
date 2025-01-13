@@ -2,250 +2,33 @@ package search_test
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
+	"path/filepath"
 	"testing"
 	"time"
 
+	"github.com/moov-io/watchman/internal/download"
 	"github.com/moov-io/watchman/pkg/ofac"
 	"github.com/moov-io/watchman/pkg/search"
 
+	"github.com/moov-io/base/log"
 	"github.com/stretchr/testify/require"
 )
 
-func TestSimilarity_OFAC_SDN_Vessel(t *testing.T) {
-	baseSDN := ofac.SDN{
-		EntityID:               "123",
-		SDNName:                "BLUE TANKER",
-		SDNType:                "vessel",
-		Programs:               []string{"SDGT", "IRGC"},
-		CallSign:               "BTANK123",
-		VesselType:             "Cargo",
-		Tonnage:                "15000",
-		GrossRegisteredTonnage: "18000",
-		VesselFlag:             "PA",
-		VesselOwner:            "GLOBAL SHIPPING CORP",
-		Remarks:                "Known aliases: Sea Transporter, Ocean Carrier",
-	}
-
-	// Create the base entity to match against
-	indexEntity := ofac.ToEntity(baseSDN,
-		[]ofac.Address{
-			{
-				AddressID:                   "addr1",
-				Address:                     "123 Harbor Drive",
-				CityStateProvincePostalCode: "Panama City 12345",
-				Country:                     "PA",
-			},
-		},
-		[]ofac.SDNComments{},
-		[]ofac.AlternateIdentity{
-			{
-				AlternateID:   "alt1",
-				AlternateType: "Vessel Registration",
-				AlternateName: "REG123456",
-			},
-		},
-	)
-
-	testCases := []struct {
-		name     string
-		query    search.Entity[any]
-		expected float64
-	}{
-		{
-			name: "Exact match - All fields",
-			query: search.Entity[any]{
-				Name: "BLUE TANKER",
-				Type: search.EntityVessel,
-				Vessel: &search.Vessel{
-					Name:                   "BLUE TANKER",
-					Type:                   search.VesselTypeCargo,
-					Flag:                   "PA",
-					Tonnage:                15000,
-					CallSign:               "BTANK123",
-					GrossRegisteredTonnage: 18000,
-					Owner:                  "GLOBAL SHIPPING CORP",
-					IMONumber:              "IMO123456",
-				},
-				Addresses: []search.Address{
-					{
-						Line1:      "123 Harbor Drive",
-						City:       "Panama City",
-						Country:    "PA",
-						PostalCode: "12345",
-					},
-				},
-			},
-			expected: 1.0,
-		},
-		{
-			name: "High confidence - Key fields match",
-			query: search.Entity[any]{
-				Name: "BLUE TANKER",
-				Type: search.EntityVessel,
-				Vessel: &search.Vessel{
-					Name:      "BLUE TANKER",
-					Type:      search.VesselTypeCargo,
-					IMONumber: "IMO123456",
-					CallSign:  "BTANK123",
-				},
-			},
-			expected: 1.0,
-		},
-		{
-			name: "Similar name with matching identifiers",
-			query: search.Entity[any]{
-				Name: "Blue Tanker II", // Similar but not exact
-				Type: search.EntityVessel,
-				Vessel: &search.Vessel{
-					Name:      "Blue Tanker II",
-					CallSign:  "BTANK123", // Exact match
-					IMONumber: "IMO123456",
-					Type:      search.VesselTypeCargo,
-					Flag:      "PA",
-				},
-			},
-			expected: 1.0,
-		},
-		{
-			name: "Matching identifiers with different name",
-			query: search.Entity[any]{
-				Name: "Sea Transporter", // Known alias
-				Type: search.EntityVessel,
-				Vessel: &search.Vessel{
-					Name:     "Sea Transporter",
-					CallSign: "BTANK123",
-					Type:     search.VesselTypeCargo,
-				},
-			},
-			expected: 0.814,
-		},
-		{
-			name: "Similar vessel details but key mismatch",
-			query: search.Entity[any]{
-				Name: "BLUE TANKER",
-				Type: search.EntityVessel,
-				Vessel: &search.Vessel{
-					Name:     "BLUE TANKER",
-					Type:     search.VesselTypeCargo,
-					Flag:     "PA",
-					CallSign: "BTANK124", // One digit off
-					Tonnage:  14800,      // Close but not exact
-				},
-			},
-			expected: 0.431,
-		},
-		{
-			name: "Partial info with some matches",
-			query: search.Entity[any]{
-				Name: "BLUE TANKER",
-				Type: search.EntityVessel,
-				Vessel: &search.Vessel{
-					Name:  "BLUE TANKER",
-					Flag:  "PA",
-					Owner: "GLOBAL SHIPPING CORP",
-				},
-			},
-			expected: 1.0,
-		},
-		{
-			name: "Different vessel with similar name",
-			query: search.Entity[any]{
-				Name: "BLUE TANKER STAR",
-				Type: search.EntityVessel,
-				Vessel: &search.Vessel{
-					Name:     "BLUE TANKER STAR",
-					Type:     search.VesselTypeCargo,
-					Flag:     "SG", // Different flag
-					CallSign: "BSTAR789",
-					Owner:    "STAR SHIPPING LTD",
-				},
-			},
-			expected: 0.36,
-		},
-		{
-			name: "Complete mismatch",
-			query: search.Entity[any]{
-				Name: "GOLDEN FREIGHTER",
-				Type: search.EntityVessel,
-				Vessel: &search.Vessel{
-					Name:     "GOLDEN FREIGHTER",
-					Type:     search.VesselTypeCargo,
-					Flag:     "LR",
-					CallSign: "GOLD999",
-				},
-			},
-			expected: 0.154,
-		},
-		{
-			name: "Wrong entity type",
-			query: search.Entity[any]{
-				Name: "BLUE TANKER",
-				Type: search.EntityBusiness,
-				Business: &search.Business{
-					Name: "BLUE TANKER",
-				},
-			},
-			expected: 0.667,
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			score := search.DebugSimilarity(debug(t), tc.query, indexEntity)
-			require.InDelta(t, tc.expected, score, 0.02)
-
-			// Additional assertions for specific score thresholds
-			if tc.expected >= 0.95 {
-				require.GreaterOrEqual(t, score, 0.95, "High confidence matches should score >= 0.95")
-			}
-			if tc.expected <= 0.40 {
-				require.LessOrEqual(t, score, 0.40, "Clear mismatches should score <= 0.40")
-			}
-		})
-	}
-}
-
 func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
-	// Create a base SDN that represents a Person
-	baseSDN := ofac.SDN{
-		EntityID: "999",
-		SDNName:  "JOHN SMITH",
-		SDNType:  "individual", // or "person", depending on your data
-		Title:    "MR",
-		Remarks:  "Some remarks about JOHN SMITH; Gender Male; DOB 05 Jan 1959",
-	}
+	indexEntity := findOFACEntity(t, "48603")
 
-	// For demonstration, we can embed a "DOB" note in Remarks or store it in an address,
-	// but your actual logic might parse or store it differently. We'll keep it simple.
-	sdnAddress := ofac.Address{
-		EntityID:                    "999",
-		AddressID:                   "addr-person-1",
-		Address:                     "1234 MAIN ST",
-		CityStateProvincePostalCode: "LOS ANGELES CA 90001",
-		Country:                     "UNITED STATES",
-		AddressRemarks:              "", // Example way to store
-	}
-
-	// Alternate identity or name
-	altIdentity := ofac.AlternateIdentity{
-		EntityID:         "999",
-		AlternateID:      "alt-person-1",
-		AlternateType:    "fka",
-		AlternateName:    "JONATHAN SMITH",
-		AlternateRemarks: "Formerly known as Jonathan",
-	}
-
-	// Convert this SDN into your internal Entity
-	indexEntity := ofac.ToEntity(baseSDN, []ofac.Address{sdnAddress}, []ofac.SDNComments{}, []ofac.AlternateIdentity{altIdentity})
-
-	// For the Person-specific comparison logic to work (compare birth date, gender, titles, etc.),
-	// we’ll fill out the Person struct in the query. The watchman code’s Person comparison
-	// checks for exact birth date matches, gender, titles, etc.
+	// 48603,"KHOROSHEV, Dmitry Yuryevich","individual","CYBER2",-0- ,-0- ,-0- ,-0- ,-0- ,-0- ,-0- ,
+	// "DOB 17 Apr 1993; POB Russian Federation; nationality Russia; citizen Russia; Email Address khoroshev1@icloud.com;
+	// alt. Email Address sitedev5@yandex.ru; Gender Male; Digital Currency Address - XBT bc1qvhnfknw852ephxyc5hm4q520zmvf9maphetc9z;
+	// Secondary sanctions risk: Ukraine-/Russia-Related Sanctions Regulations, 31 CFR 589.201; Passport 2018278055 (Russia);
+	// alt. Passport 2006801524 (Russia); Tax ID No. 366110340670 (Russia); a.k.a. 'LOCKBITSUPP'."
 
 	// Let's define a sample time to represent the person's birthday
-	dob := time.Date(1959, time.January, 5, 10, 32, 0, 0, time.UTC)
+	birthDate := time.Date(1993, time.April, 17, 0, 0, 0, 0, time.UTC)
+	laterBirthDate := birthDate.Add(30 * 24 * time.Hour)
 
 	testCases := []struct {
 		name     string
@@ -255,58 +38,60 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 		{
 			name: "Exact match - Person with all fields",
 			query: search.Entity[any]{
-				Name: "JOHN SMITH",
+				Name: "Dmitry Yuryevich KHOROSHEV",
 				Type: search.EntityPerson,
 				Person: &search.Person{
-					BirthDate: &dob,
-					Gender:    "male",
-					Titles:    []string{"MR"},
+					Name:      "Dmitry Yuryevich KHOROSHEV",
+					BirthDate: &birthDate,
+					Gender:    search.GenderMale,
+				},
+				Contact: search.ContactInfo{
+					EmailAddresses: []string{"khoroshev1@icloud.com"},
 				},
 			},
-			expected: 1.0,
+			expected: 1.00,
 		},
 		{
 			name: "Partial match - Missing birthdate",
 			query: search.Entity[any]{
-				Name: "JOHN SMITH",
+				Name: "Dmitry Yuryevich KHOROSHEV",
 				Type: search.EntityPerson,
 				Person: &search.Person{
-					// No BirthDate provided
-					Gender: "male",
-					Titles: []string{"MR"},
+					Name: "Dmitry Yuryevich KHOROSHEV",
+				},
+				Contact: search.ContactInfo{
+					EmailAddresses: []string{"khoroshev1@icloud.com"},
 				},
 			},
-			expected: 1.0,
+			expected: 0.98,
+		},
+		{
+			name: "Name match only",
+			query: search.Entity[any]{
+				Name: "Dmitry Yuryevich KHOROSHEV",
+				Type: search.EntityPerson,
+			},
+			expected: 0.98, // TODO(adam): should be lower?
 		},
 		{
 			name: "Fuzzy name match - Alternate identity",
 			query: search.Entity[any]{
-				Name: "Jonathan Smith",
+				Name: "Dmitri Yuryevich",
 				Type: search.EntityPerson,
-				Person: &search.Person{
-					Titles: []string{"MR"},
-				},
 			},
-			// Expect a high score, but maybe slightly less than perfect
-			// if "Jonathan" vs. "John" is considered a close fuzzy match or if alt name is recognized.
-			expected: 0.667,
+			expected: 0.95,
 		},
 		{
 			name: "Close name but different person details",
 			query: search.Entity[any]{
-				Name: "JOHN SMYTH", // Slightly different spelling
+				Name: "Dmitri Yuryvich",
 				Type: search.EntityPerson,
 				Person: &search.Person{
-					// Different birth date
-					BirthDate: func() *time.Time {
-						d := time.Date(1975, 1, 1, 0, 0, 0, 0, time.UTC)
-						return &d
-					}(),
-					Gender: "male",
-					Titles: []string{"MR"},
+					BirthDate: &laterBirthDate,
+					Gender:    search.GenderMale,
 				},
 			},
-			expected: 0.7938,
+			expected: 0.862,
 		},
 		{
 			name: "Mismatch - Wrong name and no matching details",
@@ -317,7 +102,7 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 					Gender: "F",
 				},
 			},
-			expected: 0.4559,
+			expected: 0.3110,
 		},
 		{
 			name: "Wrong entity type",
@@ -325,7 +110,7 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 				Name: "JOHN SMITH",
 				Type: search.EntityVessel, // intentionally vessel to mismatch
 			},
-			expected: 0.667,
+			expected: 0.0,
 		},
 	}
 
@@ -338,53 +123,14 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 }
 
 func TestSimilarity_OFAC_SDN_Business(t *testing.T) {
-	// Create an OFAC SDN that represents a Business
-	baseSDN := ofac.SDN{
-		EntityID: "B-101",
-		SDNName:  "ACME Corporation",
-		SDNType:  "",
-		Remarks:  "Organization Established Date 15 Feb 2010; Registration Number 12345;",
-		// (Optionally add more fields, e.g. Programs, etc.)
-	}
+	indexEntity := findOFACEntity(t, "50544")
 
-	// We'll define an Address or AlternateIdentity if needed
-	sdnAddr := ofac.Address{
-		EntityID:  "B-101",
-		AddressID: "addr-bus-1",
-		Address:   "1000 Industrial Way",
-		Country:   "US",
-		// ...
-	}
+	// 50544,"AUTONOMOUS NON-PROFIT ORGANIZATION DIALOG REGIONS",-0- ,"RUSSIA-EO14024",-0- ,-0- ,-0- ,-0- ,-0- ,-0- ,-0- ,
+	// "Website www.dialog.info; alt. Website www.dialog-regions.ru; Secondary sanctions risk: See Section 11 of Executive Order 14024.;
+	// Organization Established Date 21 Jul 2020; Tax ID No. 9709063550 (Russia); Business Registration Number 1207700248030 (Russia);
+	// a.k.a. 'DIALOGUE REGIONS'; a.k.a. 'DIALOG REGIONY'; a.k.a. 'DIALOGUE'; Linked To: AUTONOMOUS NON-PROFIT ORGANIZATION DIALOG."
 
-	// For demonstration, a single AlternateIdentity for the business (like a DBA name)
-	altID := ofac.AlternateIdentity{
-		EntityID:      "B-101",
-		AlternateID:   "alt-bus-1",
-		AlternateType: "DBA",
-		AlternateName: "ACME Co",
-	}
-
-	// Convert this SDN into your internal Entity (which should set Type=Business,
-	// and fill out Business{Name, AltNames, etc.})
-	// The details here depend on your ofac.ToEntity(...) implementation.
-	indexEntity := ofac.ToEntity(baseSDN, []ofac.Address{sdnAddr}, nil, []ofac.AlternateIdentity{altID})
-
-	// For this example, let's assume your ofac.ToEntity() sets:
-	//   indexEntity.Type = search.EntityBusiness
-	//   indexEntity.Business = &search.Business{
-	//       Name:       "ACME Corporation",
-	//       AltNames:   []string{"ACME Co"},
-	//       Created:    &time.Date(2010, time.February, 15, ...),
-	//       Dissolved:  nil,
-	//       Identifier: []search.Identifier{
-	//           { Name: "Registration", Identifier: "12345", Country: "US" },
-	//       },
-	//   }
-	//
-	// Adjust your actual mapping logic accordingly.
-
-	// We'll define a Created date to match the "Organization Established Date" data
-	businessCreatedAt := time.Date(2010, time.February, 15, 0, 0, 0, 0, time.UTC)
+	businessCreatedAt := time.Date(2020, time.July, 21, 12, 0, 0, 0, time.UTC)
 
 	testCases := []struct {
 		name     string
@@ -394,56 +140,50 @@ func TestSimilarity_OFAC_SDN_Business(t *testing.T) {
 		{
 			name: "Exact match - All fields",
 			query: search.Entity[any]{
-				Name: "ACME Corporation",
+				Name: "AUTONOMOUS NON-PROFIT ORGANIZATION DIALOG REGIONS",
 				Type: search.EntityBusiness,
 				Business: &search.Business{
-					Name:     "ACME Corporation",
-					AltNames: []string{"ACME Co"},
-					Created:  &businessCreatedAt,
+					Name:    "AUTONOMOUS NON-PROFIT ORGANIZATION DIALOG REGIONS",
+					Created: &businessCreatedAt,
 					Identifier: []search.Identifier{
 						{
-							Name:       "Registration",
-							Country:    "US",
-							Identifier: "12345",
+							Name:       "Business Registration Number",
+							Country:    "Russia",
+							Identifier: "1207700248030",
 						},
 					},
 				},
 			},
-			// If everything lines up exactly, we expect near 1.0
 			expected: 1.0,
 		},
 		{
 			name: "Partial match - Fuzzy name, same identifier",
 			query: search.Entity[any]{
-				Name: "ACME Corp",
+				Name: "AUTO NON-PROFIT ORGANIZATION",
 				Type: search.EntityBusiness,
 				Business: &search.Business{
-					Name: "ACME Corp", // Fuzzy match to "ACME Corporation"
+					Name: "AUTO NON-PROFIT ORGANIZATION",
 					Identifier: []search.Identifier{
 						{
-							Name:       "Registration Number",
-							Identifier: "12345", // exact ID match
+							Name:       "Tax ID No.",
+							Country:    "Russia",
+							Identifier: "9709063550",
 						},
 					},
 				},
 			},
-			// If your fuzzy logic sees "ACME Inc." ~ "ACME Corporation" ~0.8 or so,
-			// plus an exact ID match, you might get something ~0.9 or 0.95
-			expected: 0.8438,
+			expected: 0.9647,
 		},
 		{
 			name: "Alt name only + missing ID",
 			query: search.Entity[any]{
-				Name: "ACME Co", // matches alt name
+				Name: "DIALOGUE REGIONS",
 				Type: search.EntityBusiness,
 				Business: &search.Business{
-					Name: "ACME Co",
-					// No identifier
+					Name: "DIALOGUE REGIONS",
 				},
 			},
-			// Expect a moderate score (fuzzy match or alt name success),
-			// but not 1.0 since the ID is missing, or other fields not matched.
-			expected: 0.7,
+			expected: 0.9555,
 		},
 		{
 			name: "Different name, different ID",
@@ -457,8 +197,7 @@ func TestSimilarity_OFAC_SDN_Business(t *testing.T) {
 					},
 				},
 			},
-			// Expect a low score for mismatch
-			expected: 0.3347,
+			expected: 0.0954,
 		},
 		{
 			name: "Wrong entity type",
@@ -466,8 +205,7 @@ func TestSimilarity_OFAC_SDN_Business(t *testing.T) {
 				Name: "ACME Corporation",
 				Type: search.EntityVessel,
 			},
-			// Mismatched types typically yield a near-zero or a partial coverage score
-			expected: 0.6,
+			expected: 0.0,
 		},
 	}
 
@@ -477,6 +215,118 @@ func TestSimilarity_OFAC_SDN_Business(t *testing.T) {
 			require.InDelta(t, tc.expected, score, 0.05)
 		})
 	}
+}
+
+func TestSimilarity_OFAC_SDN_Vessel(t *testing.T) {
+	t.Run("47371", func(t *testing.T) {
+		indexEntity := findOFACEntity(t, "47371")
+
+		// 47371,"NS LEADER","vessel","RUSSIA-EO14024",-0- ,"A8LU7","Crude Oil Tanker",-0- ,-0- ,"Gabon",-0- ,
+		// "Secondary sanctions risk: See Section 11 of Executive Order 14024.; Identification Number IMO 9339301;
+		// MMSI 636013272; Linked To: NS LEADER SHIPPING INCORPORATED."
+
+		testCases := []struct {
+			name     string
+			query    search.Entity[any]
+			expected float64
+		}{
+			{
+				name: "Exact match - All fields",
+				query: search.Entity[any]{
+					Name: "NS LEADER",
+					Type: search.EntityVessel,
+					Vessel: &search.Vessel{
+						CallSign:  "A8LU7",
+						MMSI:      "636013272",
+						IMONumber: "9339301",
+					},
+				},
+				expected: 1.0,
+			},
+			{
+				name: "High confidence - Key fields match",
+				query: search.Entity[any]{
+					Name: "NS LEADER",
+					Type: search.EntityVessel,
+					Vessel: &search.Vessel{
+						CallSign: "A8LU7",
+					},
+				},
+				expected: 1.0,
+			},
+			{
+				name: "Similar name with matching identifiers",
+				query: search.Entity[any]{
+					Name: "NS LEADER II", // Similar but not exact
+					Type: search.EntityVessel,
+					Vessel: &search.Vessel{
+						MMSI: "636013272",
+					},
+				},
+				expected: 1.0,
+			},
+			{
+				name: "Matching identifiers with different name",
+				query: search.Entity[any]{
+					Name: "Sea Transporter",
+					Type: search.EntityVessel,
+					Vessel: &search.Vessel{
+						IMONumber: "9339301",
+					},
+				},
+				expected: 1.0,
+			},
+			{
+				name: "Similar vessel details but key mismatch",
+				query: search.Entity[any]{
+					Name: "NS LEADER",
+					Type: search.EntityVessel,
+					Vessel: &search.Vessel{
+						Flag:     "Iran",     // wrong
+						CallSign: "BTANK124", // other callsign
+					},
+				},
+				expected: 0.431,
+			},
+			{
+				name: "Complete mismatch",
+				query: search.Entity[any]{
+					Name: "GOLDEN FREIGHTER",
+					Type: search.EntityVessel,
+					Vessel: &search.Vessel{
+						Name:     "GOLDEN FREIGHTER",
+						Type:     search.VesselTypeCargo,
+						Flag:     "LR",
+						CallSign: "GOLD999",
+					},
+				},
+				expected: 0.2104,
+			},
+			{
+				name: "Wrong entity type",
+				query: search.Entity[any]{
+					Name: "BLUE TANKER",
+					Type: search.EntityBusiness,
+				},
+				expected: 0.0,
+			},
+		}
+
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				score := search.DebugSimilarity(debug(t), tc.query, indexEntity)
+				require.InDelta(t, tc.expected, score, 0.02)
+
+				// Additional assertions for specific score thresholds
+				if tc.expected >= 0.95 {
+					require.GreaterOrEqual(t, score, 0.95, "High confidence matches should score >= 0.95")
+				}
+				if tc.expected <= 0.40 {
+					require.LessOrEqual(t, score, 0.40, "Clear mismatches should score <= 0.40")
+				}
+			})
+		}
+	})
 }
 
 func TestSimilarity_Edge_Cases(t *testing.T) {
@@ -501,8 +351,9 @@ func TestSimilarity_Edge_Cases(t *testing.T) {
 			name: "Name only",
 			query: search.Entity[any]{
 				Name: "TEST ENTITY",
+				Type: search.EntityVessel,
 			},
-			expected: 0.667,
+			expected: 1.0,
 		},
 		{
 			name: "Mismatched types",
@@ -510,7 +361,7 @@ func TestSimilarity_Edge_Cases(t *testing.T) {
 				Name: "TEST ENTITY",
 				Type: search.EntityBusiness,
 			},
-			expected: 0.667,
+			expected: 0.0,
 		},
 	}
 
@@ -520,6 +371,30 @@ func TestSimilarity_Edge_Cases(t *testing.T) {
 			require.InDelta(t, tc.expected, score, 0.02)
 		})
 	}
+}
+
+func findOFACEntity(tb testing.TB, entityID string) search.Entity[search.Value] {
+	tb.Helper()
+
+	logger := log.NewTestLogger()
+	conf := download.Config{
+		InitialDataDirectory: filepath.Join("..", "ofac", "testdata"),
+	}
+	dl, err := download.NewDownloader(logger, conf)
+	require.NoError(tb, err)
+
+	stats, err := dl.RefreshAll(context.Background())
+	require.NoError(tb, err)
+
+	for _, entity := range stats.Entities {
+		if entityID == entity.SourceID {
+			return entity
+		}
+	}
+
+	tb.Fatalf("OFAC entity %s not found", entityID)
+
+	return search.Entity[search.Value]{}
 }
 
 func debug(t *testing.T) io.Writer {

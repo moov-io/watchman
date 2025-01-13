@@ -7,8 +7,7 @@ package prepare
 import (
 	"testing"
 
-	"github.com/moov-io/watchman/pkg/csl_us"
-	"github.com/moov-io/watchman/pkg/ofac"
+	"github.com/stretchr/testify/require"
 
 	"github.com/abadojack/whatlanggo"
 )
@@ -20,14 +19,6 @@ func TestStopwordsEnv(t *testing.T) {
 }
 
 func TestStopwords__detect(t *testing.T) {
-	addrs := func(country string) []*ofac.Address {
-		return []*ofac.Address{
-			{
-				Country: country,
-			},
-		}
-	}
-
 	cases := []struct {
 		in       string
 		country  string
@@ -44,10 +35,9 @@ func TestStopwords__detect(t *testing.T) {
 		{"INTERCONTINENTAL BAUMASCHINEN UND NUTZFAHRZEUGE HANDELS GMBH", "Germany", whatlanggo.Deu},
 	}
 
-	for i := range cases {
-		if lang := detectLanguage(cases[i].in, addrs(cases[i].country)); lang != cases[i].expected {
-			t.Errorf("#%d in=%q country=%s lang=%v", i, cases[i].in, cases[i].country, lang)
-		}
+	for _, tc := range cases {
+		got := detectLanguage(tc.in, tc.country)
+		require.Equal(t, tc.expected, got)
 	}
 }
 
@@ -71,76 +61,34 @@ func TestStopwords__clean(t *testing.T) {
 
 	for i := range cases {
 		result := removeStopwords(cases[i].in, cases[i].lang)
-		if result != cases[i].expected {
-			t.Errorf("\n#%d in=%q  lang=%v\n  got=%q\n  exp=%q", i, cases[i].in, cases[i].lang, result, cases[i].expected)
-		}
+		require.Equal(t, cases[i].expected, result)
 	}
 }
 
 func TestStopwords__apply(t *testing.T) {
 	cases := []struct {
-		testName string
-		in       *Name
+		in       string
 		expected string
 	}{
 		{
-			testName: "type missing",
-			in:       &Name{Processed: "Trees and Trucks"},
-			expected: "Trees and Trucks",
-		},
-		{
-			testName: "alt name",
-			in:       &Name{Processed: "Trees and Trucks", alt: &ofac.AlternateIdentity{}},
+			in:       "Trees and Trucks",
 			expected: "trees trucks",
 		},
 		{
-			testName: "sdn individual",
-			in:       &Name{Processed: "Trees and Trucks", sdn: &ofac.SDN{SDNType: "individual"}},
-			expected: "Trees and Trucks",
-		},
-		{
-			testName: "sdn business",
-			in:       &Name{Processed: "Trees and Trucks", sdn: &ofac.SDN{SDNType: "business"}},
-			expected: "trees trucks",
-		},
-		{
-			testName: "ssi individual",
-			in:       &Name{Processed: "Trees and Trucks", ssi: &csl_us.SSI{Type: "individual"}},
-			expected: "Trees and Trucks",
-		},
-		{
-			testName: "ssi business",
-			in:       &Name{Processed: "Trees and Trucks", ssi: &csl_us.SSI{Type: "business"}},
-			expected: "trees trucks",
-		},
-		{
-			testName: "Issue 483 #1",
-			in:       &Name{Processed: "11420 CORP.", sdn: &ofac.SDN{SDNType: "business"}},
+			in:       "11420 CORP.", // Issue 483 #1
 			expected: "11420 corp",
 		},
 		{
-			testName: "Issue 483 #2",
-			in:       &Name{Processed: "11,420.2-1 CORP.", sdn: &ofac.SDN{SDNType: "business"}},
+			in:       "11,420.2-1 CORP.", // Issue 483 #2
 			expected: "11,420.2-1 corp",
 		},
 		{
-			testName: "Issue 483 #3",
-			in:       &Name{Processed: "11AA420 CORP.", sdn: &ofac.SDN{SDNType: "business"}},
+			in:       "11AA420 CORP.", // Issue 483 #3
 			expected: "11aa420 corp",
 		},
 	}
-
 	for _, test := range cases {
-		t.Run(test.testName, func(t *testing.T) {
-			stopwords := stopwordsStep{}
-			err := stopwords.apply(test.in)
-			if err != nil {
-				t.Errorf("\n#%v in=%v err=%v", test.testName, test.in, err)
-			}
-
-			if test.in.Processed != test.expected {
-				t.Errorf("\n#%v expected=%v got=%v", test.testName, test.expected, test.in.Processed)
-			}
-		})
+		got := RemoveStopwords(test.in, "")
+		require.Equal(t, test.expected, got)
 	}
 }

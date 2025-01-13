@@ -24,22 +24,20 @@ func TestService_Search(t *testing.T) {
 	ofacRecords, err := ofac.Read(files)
 	require.NoError(t, err)
 
-	sdns := depointer(ofacRecords.SDNs)
-	addrs := depointer(ofacRecords.Addresses)
-	comments := depointer(ofacRecords.SDNComments)
-	alts := depointer(ofacRecords.AlternateIdentities)
-	entities := ofac.ToEntities(sdns, addrs, comments, alts)
+	entities := ofac.GroupIntoEntities(ofacRecords.SDNs, ofacRecords.Addresses, ofacRecords.SDNComments, ofacRecords.AlternateIdentities)
 
 	ctx := context.Background()
 	logger := log.NewTestLogger()
 
 	opts := SearchOpts{Limit: 10, MinMatch: 0.01}
 
-	svc := NewService(logger, entities)
+	svc := NewService(logger)
+	svc.UpdateEntities(entities)
 
 	t.Run("basic", func(t *testing.T) {
 		results, err := svc.Search(ctx, search.Entity[search.Value]{
 			Name: "SHIPPING LIMITED",
+			Type: search.EntityBusiness,
 		}, opts)
 		require.NoError(t, err)
 		require.Greater(t, len(results), 1)
@@ -63,15 +61,12 @@ func TestService_Search(t *testing.T) {
 		t.Logf("got %d results", len(results))
 		t.Logf("")
 		t.Logf("%#v", results[0])
+
+		res := results[0]
+		require.InDelta(t, 1.00, res.Match, 0.001)
+
+		// 36216
 	})
-}
-
-func TestService_makeIndicies(t *testing.T) {
-	indices := makeIndices(122, 5)
-	require.Len(t, indices, 7)
-
-	expected := []int{0, 24, 48, 72, 96, 120, 122}
-	require.Equal(t, expected, indices)
 }
 
 func testInputs(tb testing.TB, paths ...string) map[string]io.ReadCloser {
@@ -87,14 +82,4 @@ func testInputs(tb testing.TB, paths ...string) map[string]io.ReadCloser {
 		input[filename] = fd
 	}
 	return input
-}
-
-func depointer[T any](input []*T) []T {
-	out := make([]T, len(input))
-	for i := range input {
-		if input[i] != nil {
-			out[i] = *input[i]
-		}
-	}
-	return out
 }

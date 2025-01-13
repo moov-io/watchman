@@ -58,16 +58,16 @@ func Read(files map[string]io.ReadCloser) (*Results, error) {
 
 type Results struct {
 	// Addresses returns an array of OFAC Specially Designated National Addresses
-	Addresses []*Address `json:"address"`
+	Addresses []Address `json:"address"`
 
 	// AlternateIdentities returns an array of OFAC Specially Designated National Alternate Identity
-	AlternateIdentities []*AlternateIdentity `json:"alternateIdentity"`
+	AlternateIdentities []AlternateIdentity `json:"alternateIdentity"`
 
 	// SDNs returns an array of OFAC Specially Designated Nationals
-	SDNs []*SDN `json:"sdn"`
+	SDNs []SDN `json:"sdn"`
 
 	// SDNComments returns an array of OFAC Specially Designated National Comments
-	SDNComments []*SDNComments `json:"sdnComments"`
+	SDNComments []SDNComments `json:"sdnComments"`
 }
 
 func (r *Results) append(rr *Results, err error) error {
@@ -83,7 +83,7 @@ func (r *Results) append(rr *Results, err error) error {
 
 func csvAddressFile(f io.ReadCloser) (*Results, error) {
 	defer f.Close()
-	var out []*Address
+	var out []Address
 
 	// Read File into a Variable
 	reader := csv.NewReader(f)
@@ -107,7 +107,7 @@ func csvAddressFile(f io.ReadCloser) (*Results, error) {
 		}
 
 		record = replaceNull(record)
-		out = append(out, &Address{
+		out = append(out, Address{
 			EntityID:                    record[0],
 			AddressID:                   record[1],
 			Address:                     record[2],
@@ -121,7 +121,7 @@ func csvAddressFile(f io.ReadCloser) (*Results, error) {
 
 func csvAlternateIdentityFile(f io.ReadCloser) (*Results, error) {
 	defer f.Close()
-	var out []*AlternateIdentity
+	var out []AlternateIdentity
 
 	// Read File into a Variable
 	reader := csv.NewReader(f)
@@ -144,7 +144,7 @@ func csvAlternateIdentityFile(f io.ReadCloser) (*Results, error) {
 			continue
 		}
 		record = replaceNull(record)
-		out = append(out, &AlternateIdentity{
+		out = append(out, AlternateIdentity{
 			EntityID:         record[0],
 			AlternateID:      record[1],
 			AlternateType:    record[2],
@@ -157,7 +157,7 @@ func csvAlternateIdentityFile(f io.ReadCloser) (*Results, error) {
 
 func csvSDNFile(f io.ReadCloser) (*Results, error) {
 	defer f.Close()
-	var out []*SDN
+	var out []SDN
 
 	// Read File into a Variable
 	reader := csv.NewReader(f)
@@ -180,7 +180,7 @@ func csvSDNFile(f io.ReadCloser) (*Results, error) {
 			continue
 		}
 		record = replaceNull(record)
-		out = append(out, &SDN{
+		out = append(out, SDN{
 			EntityID:               record[0],
 			SDNName:                record[1],
 			SDNType:                record[2],
@@ -205,7 +205,7 @@ func csvSDNCommentsFile(f io.ReadCloser) (*Results, error) {
 	r.LazyQuotes = true
 
 	// Loop through lines & turn into object
-	var out []*SDNComments
+	var out []SDNComments
 	for {
 		line, err := r.Read()
 		if err != nil {
@@ -225,7 +225,7 @@ func csvSDNCommentsFile(f io.ReadCloser) (*Results, error) {
 			continue
 		}
 		line = replaceNull(line)
-		out = append(out, &SDNComments{
+		out = append(out, SDNComments{
 			EntityID:                 line[0],
 			RemarksExtended:          line[1],
 			DigitalCurrencyAddresses: readDigitalCurrencyAddresses(line[1]),
@@ -258,7 +258,7 @@ func splitPrograms(in string) []string {
 }
 
 func splitRemarks(input string) []string {
-	return strings.Split(input, ";")
+	return strings.Split(strings.TrimSuffix(input, "."), ";")
 }
 
 type remark struct {
@@ -380,7 +380,7 @@ func readDigitalCurrencyAddresses(remarks string) []DigitalCurrencyAddress {
 	return out
 }
 
-func mergeSpilloverRecords(sdns []*SDN, comments []*SDNComments) []*SDN {
+func mergeSpilloverRecords(sdns []SDN, comments []SDNComments) []SDN {
 	for i := range sdns {
 		for j := range comments {
 			if sdns[i].EntityID == comments[j].EntityID {

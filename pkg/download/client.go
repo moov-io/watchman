@@ -5,6 +5,7 @@
 package download
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -48,7 +49,7 @@ type Downloader struct {
 // initialDir is an optional filepath to look for files in before attempting to download.
 //
 // Callers are expected to call the io.Closer interface method when they are done with the file
-func (dl *Downloader) GetFiles(dir string, namesAndSources map[string]string) (map[string]io.ReadCloser, error) {
+func (dl *Downloader) GetFiles(ctx context.Context, dir string, namesAndSources map[string]string) (map[string]io.ReadCloser, error) {
 	if dl == nil {
 		return nil, errors.New("nil Downloader")
 	}
@@ -96,7 +97,7 @@ findfiles:
 			logger := dl.createLogger(filename, downloadURL)
 
 			startTime := time.Now().In(time.UTC)
-			content, err := dl.retryDownload(downloadURL)
+			content, err := dl.retryDownload(ctx, downloadURL)
 			dur := time.Now().In(time.UTC).Sub(startTime)
 
 			if err != nil {
@@ -127,10 +128,10 @@ func (dl *Downloader) createLogger(filename, downloadURL string) log.Logger {
 	})
 }
 
-func (dl *Downloader) retryDownload(downloadURL string) (io.ReadCloser, error) {
+func (dl *Downloader) retryDownload(ctx context.Context, downloadURL string) (io.ReadCloser, error) {
 	// Allow a couple retries for various sources (some are flakey)
 	for i := 0; i < 3; i++ {
-		req, err := http.NewRequest(http.MethodGet, downloadURL, nil)
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, nil)
 		if err != nil {
 			return nil, dl.Logger.Error().LogErrorf("error building HTTP request: %v", err).Err()
 		}

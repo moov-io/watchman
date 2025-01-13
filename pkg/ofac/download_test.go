@@ -5,6 +5,7 @@
 package ofac
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,7 +20,7 @@ func TestDownloader(t *testing.T) {
 		return
 	}
 
-	files, err := Download(log.NewNopLogger(), "")
+	files, err := Download(context.Background(), log.NewNopLogger(), "")
 	require.NoError(t, err)
 	require.Len(t, files, 4)
 
@@ -52,7 +53,7 @@ func TestDownloader__initialDir(t *testing.T) {
 	mk(t, "sdn.csv", "file=sdn.csv")
 	mk(t, "dpl.txt", "file=dpl.txt")
 
-	files, err := Download(log.NewNopLogger(), dir)
+	files, err := Download(context.Background(), log.NewNopLogger(), dir)
 	if err != nil {
 		t.Fatal(err)
 	}

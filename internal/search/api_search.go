@@ -44,7 +44,7 @@ func (c *controller) AppendRoutes(router *mux.Router) *mux.Router {
 }
 
 type searchResponse struct {
-	Entities []SearchedEntity[search.Value] `json:"entities"`
+	Entities []search.SearchedEntity[search.Value] `json:"entities"`
 }
 
 type errorResponse struct {
@@ -66,10 +66,16 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Printf("req: %#v\n", req)
+
+	q := r.URL.Query()
 	opts := SearchOpts{
-		Limit:    extractSearchLimit(r),
-		MinMatch: extractSearchMinMatch(r),
+		Limit:          extractSearchLimit(r),
+		MinMatch:       extractSearchMinMatch(r),
+		RequestID:      q.Get("requestID"),
+		DebugSourceIDs: strings.Split(q.Get("debugSourceIDs"), ","),
 	}
+	fmt.Printf("opts: %#v\n", opts)
 
 	entities, err := c.service.Search(r.Context(), req, opts)
 	if err != nil {
@@ -78,11 +84,13 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	fmt.Printf("found %d entities\n", len(entities))
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(searchResponse{
 		Entities: entities,
 	})
+	// TODO(adam): why isn't this returning results???
 }
 
 var (
@@ -120,7 +128,6 @@ func readSearchRequest(r *http.Request) (search.Entity[search.Value], error) {
 	req.Name = strings.TrimSpace(q.Get("name"))
 	req.Type = search.EntityType(strings.TrimSpace(strings.ToLower(q.Get("type"))))
 	req.Source = search.SourceAPIRequest
-	req.SourceID = strings.TrimSpace(q.Get("requestID"))
 
 	switch req.Type {
 	case search.EntityPerson:

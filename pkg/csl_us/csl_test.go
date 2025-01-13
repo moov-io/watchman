@@ -5,6 +5,7 @@
 package csl_us
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -14,7 +15,6 @@ import (
 )
 
 func TestCSL(t *testing.T) {
-
 	if testing.Short() {
 		t.Skip("ignorning network test")
 	}
@@ -23,7 +23,7 @@ func TestCSL(t *testing.T) {
 	dir, err := os.MkdirTemp("", "csl")
 	require.NoError(t, err)
 
-	file, err := Download(logger, dir)
+	file, err := Download(context.Background(), logger, dir)
 	require.NoError(t, err)
 
 	cslRecords, err := ReadFile(file["csl.csv"])

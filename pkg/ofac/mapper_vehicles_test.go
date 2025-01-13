@@ -17,7 +17,7 @@ func TestMapper__Vessel(t *testing.T) {
 	var sdn *SDN
 	for i := range res.SDNs {
 		if res.SDNs[i].EntityID == "15036" {
-			sdn = res.SDNs[i]
+			sdn = &res.SDNs[i]
 		}
 	}
 	require.NotNil(t, sdn)
@@ -50,7 +50,7 @@ func TestMapper__Aircraft(t *testing.T) {
 	var sdn *SDN
 	for i := range res.SDNs {
 		if res.SDNs[i].EntityID == "18158" {
-			sdn = res.SDNs[i]
+			sdn = &res.SDNs[i]
 		}
 	}
 	require.NotNil(t, sdn)

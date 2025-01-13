@@ -6,19 +6,13 @@ package prepare
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestPipeline__normalizeStep(t *testing.T) {
-	nn := &Name{Processed: "Nicolás Maduro"}
-
-	step := &normalizeStep{}
-	if err := step.apply(nn); err != nil {
-		t.Fatal(err)
-	}
-
-	if nn.Processed != "nicolas maduro" {
-		t.Errorf("nn.Processed=%v", nn.Processed)
-	}
+	got := LowerAndRemovePunctuation("Nicolás Maduro")
+	require.Equal(t, "nicolas maduro", got)
 }
 
 // TestLowerAndRemovePunctuation ensures we are trimming and UTF-8 normalizing strings
@@ -35,10 +29,8 @@ func TestLowerAndRemovePunctuation(t *testing.T) {
 		{"issue 483 #1", "11420 CORP.", "11420 corp"},
 		{"issue 483 #2", "11,420.2-1 CORP.", "114202 1 corp"},
 	}
-	for i, tc := range tests {
+	for _, tc := range tests {
 		guess := LowerAndRemovePunctuation(tc.input)
-		if guess != tc.expected {
-			t.Errorf("case: %d name: %s LowerAndRemovePunctuation(%q)=%q expected %q", i, tc.name, tc.input, guess, tc.expected)
-		}
+		require.Equal(t, tc.expected, guess)
 	}
 }

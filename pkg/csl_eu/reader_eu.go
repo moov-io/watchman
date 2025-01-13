@@ -12,7 +12,7 @@ import (
 	"strconv"
 )
 
-func ParseEU(r io.ReadCloser) ([]*CSLRecord, CSL, error) {
+func ParseEU(r io.ReadCloser) ([]CSLRecord, CSL, error) {
 	if r == nil {
 		return nil, nil, errors.New("EU CSL file is empty or missing")
 	}
@@ -65,9 +65,9 @@ func ParseEU(r io.ReadCloser) ([]*CSLRecord, CSL, error) {
 		}
 
 	}
-	totalReport := make([]*CSLRecord, 0, len(report))
+	totalReport := make([]CSLRecord, 0, len(report))
 	for _, row := range report {
-		totalReport = append(totalReport, row)
+		totalReport = append(totalReport, *row)
 	}
 	return totalReport, report, nil
 }

@@ -5,6 +5,7 @@
 package csl_eu
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -23,12 +24,12 @@ var (
 	euDownloadURL = strx.Or(os.Getenv("EU_CSL_DOWNLOAD_URL"), publicEUDownloadURL)
 )
 
-func DownloadEU(logger log.Logger, initialDir string) (map[string]io.ReadCloser, error) {
+func DownloadEU(ctx context.Context, logger log.Logger, initialDir string) (map[string]io.ReadCloser, error) {
 	dl := download.New(logger, download.HTTPClient)
 
 	euCSLNameAndSource := make(map[string]string)
 	euCSLNameAndSource["eu_csl.csv"] = euDownloadURL
 
-	return dl.GetFiles(initialDir, euCSLNameAndSource)
+	return dl.GetFiles(ctx, initialDir, euCSLNameAndSource)
 
 }

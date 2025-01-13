@@ -11,15 +11,15 @@ import (
 	"strings"
 )
 
-func ReadFile(fd io.ReadCloser) (*CSL, error) {
+func ReadFile(fd io.ReadCloser) (CSL, error) {
 	if fd == nil {
-		return nil, errors.New("CSL file is empty or missing")
+		return CSL{}, errors.New("CSL file is empty or missing")
 	}
 	defer fd.Close()
 	return Parse(fd)
 }
 
-func Parse(r io.Reader) (*CSL, error) {
+func Parse(r io.Reader) (CSL, error) {
 	reader := csv.NewReader(r)
 
 	var report CSL
@@ -36,7 +36,7 @@ func Parse(r io.Reader) (*CSL, error) {
 				errors.Is(err, csv.ErrQuote) {
 				continue
 			}
-			return nil, err
+			return report, err
 		}
 
 		if len(record) <= 1 {
@@ -96,15 +96,15 @@ func Parse(r io.Reader) (*CSL, error) {
 			}
 		}
 	}
-	return &report, nil
+	return report, nil
 }
 
-func unmarshalEL(row []string, offset int) *EL {
+func unmarshalEL(row []string, offset int) EL {
 	id := ""
 	if offset == 1 {
 		id = row[0] // set the ID from the newer CSV format
 	}
-	return &EL{
+	return EL{
 		ID:                 id,
 		Name:               row[NameIdx+offset],
 		Addresses:          expandField(row[AddressesIdx+offset]),
@@ -118,8 +118,8 @@ func unmarshalEL(row []string, offset int) *EL {
 	}
 }
 
-func unmarshalMEU(record []string, offset int) *MEU {
-	return &MEU{
+func unmarshalMEU(record []string, offset int) MEU {
+	return MEU{
 		EntityID:  record[0],
 		Name:      record[NameIdx+offset],
 		Addresses: record[AddressesIdx+offset],
@@ -129,8 +129,8 @@ func unmarshalMEU(record []string, offset int) *MEU {
 	}
 }
 
-func unmarshalSSI(record []string, offset int) *SSI {
-	return &SSI{
+func unmarshalSSI(record []string, offset int) SSI {
+	return SSI{
 		EntityID:       record[EntityNumberIdx+offset],
 		Type:           record[TypeIdx+offset],
 		Programs:       expandProgramsList(record[ProgramsIdx+offset]),
@@ -144,8 +144,8 @@ func unmarshalSSI(record []string, offset int) *SSI {
 	}
 }
 
-func unmarshalUVL(record []string, offset int) *UVL {
-	return &UVL{
+func unmarshalUVL(record []string, offset int) UVL {
+	return UVL{
 		EntityID:      record[0],
 		Name:          record[NameIdx+offset],
 		Addresses:     expandField(record[AddressesIdx+offset]),
@@ -154,8 +154,8 @@ func unmarshalUVL(record []string, offset int) *UVL {
 	}
 }
 
-func unmarshalISN(record []string, offset int) *ISN {
-	return &ISN{
+func unmarshalISN(record []string, offset int) ISN {
+	return ISN{
 		EntityID:              record[0],
 		Programs:              expandProgramsList(record[ProgramsIdx+offset]),
 		Name:                  record[NameIdx+offset],
@@ -168,8 +168,8 @@ func unmarshalISN(record []string, offset int) *ISN {
 	}
 }
 
-func unmarshalFSE(record []string, offset int) *FSE {
-	return &FSE{
+func unmarshalFSE(record []string, offset int) FSE {
+	return FSE{
 		EntityID:      record[0],
 		EntityNumber:  record[EntityNumberIdx+offset],
 		Type:          record[TypeIdx+offset],
@@ -184,8 +184,8 @@ func unmarshalFSE(record []string, offset int) *FSE {
 	}
 }
 
-func unmarshalPLC(record []string, offset int) *PLC {
-	return &PLC{
+func unmarshalPLC(record []string, offset int) PLC {
+	return PLC{
 		EntityID:       record[0],
 		EntityNumber:   record[EntityNumberIdx+offset],
 		Type:           record[TypeIdx+offset],
@@ -201,8 +201,8 @@ func unmarshalPLC(record []string, offset int) *PLC {
 	}
 }
 
-func unmarshalCAP(record []string, offset int) *CAP {
-	return &CAP{
+func unmarshalCAP(record []string, offset int) CAP {
+	return CAP{
 		EntityID:       record[0],
 		EntityNumber:   record[EntityNumberIdx+offset],
 		Type:           record[TypeIdx+offset],
@@ -217,8 +217,8 @@ func unmarshalCAP(record []string, offset int) *CAP {
 	}
 }
 
-func unmarshalNS_MBS(record []string, offset int) *NS_MBS {
-	return &NS_MBS{
+func unmarshalNS_MBS(record []string, offset int) NS_MBS {
+	return NS_MBS{
 		EntityID:       record[0],
 		EntityNumber:   record[EntityNumberIdx+offset],
 		Type:           record[TypeIdx+offset],
@@ -232,8 +232,8 @@ func unmarshalNS_MBS(record []string, offset int) *NS_MBS {
 	}
 }
 
-func unmarshalCMIC(record []string, offset int) *CMIC {
-	return &CMIC{
+func unmarshalCMIC(record []string, offset int) CMIC {
+	return CMIC{
 		EntityID:       record[0],
 		EntityNumber:   record[EntityNumberIdx+offset],
 		Type:           record[TypeIdx+offset],
@@ -248,8 +248,8 @@ func unmarshalCMIC(record []string, offset int) *CMIC {
 	}
 }
 
-func unmarshalDTC(record []string, offset int) *DTC {
-	return &DTC{
+func unmarshalDTC(record []string, offset int) DTC {
+	return DTC{
 		EntityID:              record[0],
 		Name:                  record[NameIdx+offset],
 		FederalRegisterNotice: record[FRNoticeIdx+offset],
