@@ -17,7 +17,7 @@ import (
 	"github.com/moov-io/base/log"
 )
 
-func setupPeriodicRefreshing(ctx context.Context, logger log.Logger, conf download.Config, downloader download.Downloader, searchService search.Service) error {
+func setupPeriodicRefreshing(ctx context.Context, logger log.Logger, errs chan error, conf download.Config, downloader download.Downloader, searchService search.Service) error {
 	err := refreshAllSources(ctx, logger, downloader, searchService)
 	if err != nil {
 		return err
@@ -27,7 +27,6 @@ func setupPeriodicRefreshing(ctx context.Context, logger log.Logger, conf downlo
 	ticker := time.NewTicker(getRefreshInterval(conf))
 	defer ticker.Stop()
 
-	errs := make(chan error, 1)
 	go func() {
 		for {
 			select {
@@ -43,7 +42,8 @@ func setupPeriodicRefreshing(ctx context.Context, logger log.Logger, conf downlo
 			}
 		}
 	}()
-	return <-errs
+
+	return nil
 }
 
 const (

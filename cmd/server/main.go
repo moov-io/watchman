@@ -51,9 +51,12 @@ func main() {
 	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
+	// Listen for errors
+	errs := make(chan error, 1)
+
 	// Setup search service and endpoints
 	searchService := search.NewService(logger)
-	err = setupPeriodicRefreshing(ctx, logger, config.Download, downloader, searchService)
+	err = setupPeriodicRefreshing(ctx, logger, errs, config.Download, downloader, searchService)
 	if err != nil {
 		logger.Fatal().LogErrorf("problem during initial download: %v", err)
 		os.Exit(1)
@@ -65,25 +68,31 @@ func main() {
 	searchController := search.NewController(logger, searchService)
 	searchController.AppendRoutes(router)
 
-	// Listen for errors
-	errs := make(chan error)
-
 	// Start Admin server (with Prometheus metrics)
 	adminServer, err := admin.New(admin.Opts{
 		Addr: config.Servers.AdminAddress,
 	})
 	if err != nil {
 		errs <- fmt.Errorf("problem starting admin server: %v", err)
+	} else {
+		adminServer.AddVersionHandler(watchman.Version) // Setup 'GET /version'
 	}
-	adminServer.AddVersionHandler(watchman.Version) // Setup 'GET /version'
 	go func() {
+		if adminServer == nil {
+			return
+		}
+
 		logger.Logf("listening on %s", adminServer.BindAddr())
 
 		if err := adminServer.Listen(); err != nil {
 			errs <- logger.Error().LogErrorf("admin server shutdown: %v", err).Err()
 		}
 	}()
-	defer adminServer.Shutdown()
+	defer func() {
+		if adminServer != nil {
+			adminServer.Shutdown()
+		}
+	}()
 
 	// Setup HTTP server
 	defaultTimeout := 20 * time.Second
@@ -101,7 +110,9 @@ func main() {
 		IdleTimeout:       defaultTimeout,
 	}
 	shutdownServer := func() {
-		serve.Shutdown(context.TODO())
+		if serve != nil {
+			serve.Shutdown(context.TODO())
+		}
 	}
 
 	// Start business logic HTTP server

@@ -1,7 +1,7 @@
 Watchman:
   Servers:
     BindAddress: ":8084"
-    AdminAddress: "9094"
+    AdminAddress: ":9094"
 
   Download:
     RefreshInterval: "12h"
