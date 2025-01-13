@@ -1,3 +1,21 @@
+## v0.31.3 (Released 2025-01-13)
+
+IMPROVEMENTS
+
+- cmd/server: prevent NaN from escaping bestPairsJaroWinkler
+
+## v0.31.2 (Released 2025-01-13)
+
+IMPROVEMENTS
+
+- cmd/server: add more configuration for disabling default lists
+- cmd/server: copy from largest results
+- fix: fetch UK sanctions .ods from HTML
+
+BUILD
+
+- build: update golang.org/x/net
+
 ## v0.31.0 (Released 2024-11-21)
 
 IMPROVEMENTS
