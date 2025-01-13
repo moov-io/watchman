@@ -14,7 +14,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func SearchContainer(env Environment) fyne.CanvasObject {
+func SearchContainer(ctx context.Context, env Environment) fyne.CanvasObject {
 	wrapper := fyne.NewContainerWithLayout(layout.NewVBoxLayout())
 
 	warning := container.NewVBox()
@@ -23,7 +23,7 @@ func SearchContainer(env Environment) fyne.CanvasObject {
 	results := container.NewVBox()
 	results.Hide()
 
-	form := searchForm(env, warning, results)
+	form := searchForm(ctx, env, warning, results)
 
 	wrapper.Add(form)
 	wrapper.Add(warning)
@@ -32,7 +32,7 @@ func SearchContainer(env Environment) fyne.CanvasObject {
 	return wrapper
 }
 
-func searchForm(env Environment, warning *fyne.Container, results *fyne.Container) *widget.Form {
+func searchForm(ctx context.Context, env Environment, warning *fyne.Container, results *fyne.Container) *widget.Form {
 	warning.Hide()
 
 	blankSpace := widget.NewLabel(" ")
@@ -71,7 +71,6 @@ func searchForm(env Environment, warning *fyne.Container, results *fyne.Containe
 			populatedItems := collectPopulatedItems(items)
 			fmt.Printf("searching with %d fields\n", len(populatedItems))
 
-			ctx := context.Background() // TODO(adam):
 			query := buildQueryEntity(populatedItems)
 			resp, err := env.Client.SearchByEntity(ctx, query)
 			if err != nil {
@@ -152,7 +151,7 @@ func newMultilineInput(visibleRows int) *widget.Entry {
 }
 
 var (
-	modelsPath = filepath.Join("pkg", "search", "models.go") // TODO(adam): relative to Watchman root dir
+	modelsPath = filepath.Join("pkg", "search", "models.go")
 )
 
 func newSelect(modelName string) *widget.Select {

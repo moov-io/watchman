@@ -2,6 +2,7 @@ package main
 
 import (
 	"cmp"
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -26,6 +27,8 @@ var (
 )
 
 func main() {
+	ctx := context.Background()
+
 	app := &cli.App{
 		Name: "watchman-ui",
 		// UsageText:   "watchman-ui [global options] command [command options]",
@@ -40,9 +43,9 @@ func main() {
 		Commands: []*cli.Command{
 			// commandFind,
 		},
-		Action: func(ctx *cli.Context) error {
+		Action: func(cliContext *cli.Context) error {
 			env := ui.Environment{
-				Client: createWatchmanClient(ctx.String(flagBaseAddress.Name)),
+				Client: createWatchmanClient(cliContext.String(flagBaseAddress.Name)),
 			}
 
 			// cli.ShowAppHelp(ctx)
@@ -57,8 +60,8 @@ func main() {
 	}
 }
 
-func showUI(ctx *cli.Context, env ui.Environment) error {
-	app := ui.New(env)
+func showUI(ctx context.Context, env ui.Environment) error {
+	app := ui.New(ctx, env)
 	app.Run()
 
 	return nil

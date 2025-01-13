@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/moov-io/watchman/pkg/search"
@@ -17,7 +18,7 @@ type Environment struct {
 	Width, Height float32
 }
 
-func New(env Environment) fyne.App {
+func New(ctx context.Context, env Environment) fyne.App {
 	a := app.New()
 
 	device := fyne.CurrentDevice()
@@ -40,7 +41,7 @@ func New(env Environment) fyne.App {
 
 	// Set app tabs along the top
 	tabs := container.NewAppTabs(
-		container.NewTabItem("Search", SearchContainer(env)),
+		container.NewTabItem("Search", SearchContainer(ctx, env)),
 		container.NewTabItem("Admin", widget.NewLabel("TODO - admin operations")),
 	)
 	tabs.SetTabLocation(container.TabLocationTop)
