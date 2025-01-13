@@ -1,3 +1,11 @@
+## v0.31.1 (Released 2025-01-13)
+
+IMPROVEMENTS
+
+- cmd/server: add more configuration for disabling default lists
+- cmd/server: copy from largest results
+- fix: fetch UK sanctions .ods from HTML
+
 ## v0.31.0 (Released 2024-11-21)
 
 IMPROVEMENTS
