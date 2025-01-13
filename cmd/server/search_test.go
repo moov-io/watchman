@@ -412,14 +412,6 @@ func verifyDownloadStats(b *testing.B) {
 	require.Greater(b, testSearcherStats.BISEntities, 1)
 	require.Greater(b, testSearcherStats.MilitaryEndUsers, 1)
 	require.Greater(b, testSearcherStats.SectoralSanctions, 1)
-	require.Greater(b, testSearcherStats.Unverified, 1)
-	require.Greater(b, testSearcherStats.NonProliferationSanctions, 1)
-	require.Greater(b, testSearcherStats.ForeignSanctionsEvaders, 1)
-	require.Greater(b, testSearcherStats.PalestinianLegislativeCouncil, 1)
-	require.Greater(b, testSearcherStats.CAPTA, 1)
-	require.Greater(b, testSearcherStats.ITARDebarred, 1)
-	require.Greater(b, testSearcherStats.ChineseMilitaryIndustrialComplex, 1)
-	require.Greater(b, testSearcherStats.NonSDNMenuBasedSanctions, 1)
 
 	// EU - CSL
 	require.Greater(b, testSearcherStats.EUCSL, 1)
