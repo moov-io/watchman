@@ -426,6 +426,9 @@ func TestJaroWinkler(t *testing.T) {
 		indexed, search string
 		match           float64
 	}{
+		// edge cases
+		{"", "john doe", 0.00},
+
 		// examples
 		{"wei, zhao", "wei, Zhao", 0.875},
 		{"WEI, Zhao", "WEI, Zhao", 1.0},

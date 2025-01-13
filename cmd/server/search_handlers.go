@@ -93,7 +93,7 @@ func search(logger log.Logger, searcher *searcher) http.HandlerFunc {
 
 		// Search over all fields
 		if q := strings.TrimSpace(r.URL.Query().Get("q")); q != "" {
-			searchViaQ(searcher, q)(w, r)
+			searchViaQ(logger, searcher, q)(w, r)
 			return
 		}
 
@@ -223,7 +223,7 @@ func searchByAddress(searcher *searcher, req addressSearchRequest) http.HandlerF
 	}
 }
 
-func searchViaQ(searcher *searcher, name string) http.HandlerFunc {
+func searchViaQ(logger log.Logger, searcher *searcher, name string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name = strings.TrimSpace(name)
 		if name == "" {
@@ -246,7 +246,11 @@ func searchViaQ(searcher *searcher, name string) http.HandlerFunc {
 		// Build our big response object
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(resp)
+
+		err := json.NewEncoder(w).Encode(resp)
+		if err != nil {
+			logger.Error().LogErrorf("marshaling Q response: %v", err)
+		}
 	}
 }
 

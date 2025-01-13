@@ -371,7 +371,12 @@ func bestPairsJaroWinkler(searchTokens []string, indexed string) float64 {
 		}
 	}
 	matchedFraction := float64(matchedIndexLength) / float64(indexTokensLength)
-	return lengthWeightedAverageScore * scalingFactor(matchedFraction, unmatchedIndexPenaltyWeight)
+
+	finalScore := lengthWeightedAverageScore * scalingFactor(matchedFraction, unmatchedIndexPenaltyWeight)
+	if math.IsNaN(finalScore) {
+		return 0.0
+	}
+	return finalScore
 }
 
 func customJaroWinkler(s1 string, s2 string) float64 {
