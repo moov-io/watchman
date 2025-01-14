@@ -38,7 +38,7 @@ func TestMapperBusiness__FromSource(t *testing.T) {
 			{Name: "Company Number", Country: "Czech Republic", Identifier: "07486049"},
 			{Name: "Legal Entity Number", Country: "Czech Republic", Identifier: "5299007NTWCC3U23WM81"},
 		}
-		require.ElementsMatch(t, expectedIdentifiers, business.Identifier)
+		require.ElementsMatch(t, expectedIdentifiers, business.Identifiers)
 
 		expectedContact := search.ContactInfo{
 			Websites: []string{"suex.io"},
@@ -133,7 +133,7 @@ func TestMapperBusiness__FromSource(t *testing.T) {
 			{Name: "Business Registration Number", Country: "Russia", Identifier: "1207700248030"},
 			{Name: "Tax ID No.", Country: "Russia", Identifier: "9709063550"},
 		}
-		require.ElementsMatch(t, expectedIdentifiers, business.Identifier)
+		require.ElementsMatch(t, expectedIdentifiers, business.Identifiers)
 
 		expectedContact := search.ContactInfo{
 			Websites: []string{"www.dialog.info", "www.dialog-regions.ru"},
@@ -173,10 +173,10 @@ func TestMapper__CompleteBusiness(t *testing.T) {
 
 	require.NotNil(t, e.Business)
 	require.Equal(t, "ACME CORPORATION", e.Business.Name)
-	require.Len(t, e.Business.Identifier, 3)
+	require.Len(t, e.Business.Identifiers, 3)
 
 	// Sort the identifiers to ensure consistent ordering for tests
-	identifiers := e.Business.Identifier
+	identifiers := e.Business.Identifiers
 	sort.Slice(identifiers, func(i, j int) bool {
 		return identifiers[i].Country < identifiers[j].Country
 	})

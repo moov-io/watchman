@@ -119,11 +119,11 @@ var (
 )
 
 type Business struct {
-	Name       string       `json:"name"`
-	AltNames   []string     `json:"altNames"`
-	Created    *time.Time   `json:"created"`
-	Dissolved  *time.Time   `json:"dissolved"`
-	Identifier []Identifier `json:"identifier"`
+	Name        string       `json:"name"`
+	AltNames    []string     `json:"altNames"`
+	Created     *time.Time   `json:"created"`
+	Dissolved   *time.Time   `json:"dissolved"`
+	Identifiers []Identifier `json:"identifiers"`
 }
 
 // Identifier
@@ -140,11 +140,11 @@ type Identifier struct {
 //
 // TODO(adam): https://www.opensanctions.org/reference/#schema.Organization
 type Organization struct {
-	Name       string       `json:"name"`
-	AltNames   []string     `json:"altNames"`
-	Created    *time.Time   `json:"created"`
-	Dissolved  *time.Time   `json:"dissolved"`
-	Identifier []Identifier `json:"identifier"`
+	Name        string       `json:"name"`
+	AltNames    []string     `json:"altNames"`
+	Created     *time.Time   `json:"created"`
+	Dissolved   *time.Time   `json:"dissolved"`
+	Identifiers []Identifier `json:"identifier"`
 }
 
 type Aircraft struct {

@@ -142,7 +142,7 @@ func TestSimilarity_OFAC_SDN_Business(t *testing.T) {
 				Business: &search.Business{
 					Name:    "AUTONOMOUS NON-PROFIT ORGANIZATION DIALOG REGIONS",
 					Created: &businessCreatedAt,
-					Identifier: []search.Identifier{
+					Identifiers: []search.Identifier{
 						{
 							Name:       "Business Registration Number",
 							Country:    "Russia",
@@ -160,7 +160,7 @@ func TestSimilarity_OFAC_SDN_Business(t *testing.T) {
 				Type: search.EntityBusiness,
 				Business: &search.Business{
 					Name: "AUTO NON-PROFIT ORGANIZATION",
-					Identifier: []search.Identifier{
+					Identifiers: []search.Identifier{
 						{
 							Name:       "Tax ID No.",
 							Country:    "Russia",
@@ -189,7 +189,7 @@ func TestSimilarity_OFAC_SDN_Business(t *testing.T) {
 				Type: search.EntityBusiness,
 				Business: &search.Business{
 					Name: "BETA Solutions",
-					Identifier: []search.Identifier{
+					Identifiers: []search.Identifier{
 						{Name: "Registration", Country: "US", Identifier: "99999"},
 					},
 				},

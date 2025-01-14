@@ -213,7 +213,7 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []Alt
 		out.Business.Created = findDateStamp(findMatchingRemarks(remarks, "Organization Established Date"))
 		// out.Business.Dissolved = findDateStamp(findMatchingRemarks(remarks, "TODO(adam)"))
 
-		out.Business.Identifier = makeIdentifiers(remarks, []string{
+		out.Business.Identifiers = makeIdentifiers(remarks, []string{
 			"Branch Unit Number",
 			"Business Number",
 			"Business Registration Document",

@@ -200,7 +200,7 @@ func mapBusiness(src ENHANCED_XML.EntitiesEntity) *search.Business {
 
 	// Map business identifiers
 	if src.IdentityDocuments != nil {
-		business.Identifier = mapIdentifiers(src.IdentityDocuments)
+		business.Identifiers = mapIdentifiers(src.IdentityDocuments)
 	}
 
 	return business
@@ -230,7 +230,7 @@ func mapOrganization(src ENHANCED_XML.EntitiesEntity) *search.Organization {
 
 	// Map organization identifiers
 	if src.IdentityDocuments != nil {
-		org.Identifier = mapIdentifiers(src.IdentityDocuments)
+		org.Identifiers = mapIdentifiers(src.IdentityDocuments)
 	}
 
 	return org

@@ -372,7 +372,7 @@ func countBusinessFields(b *Business) int {
 	if b.Created != nil {
 		count++
 	}
-	if len(b.Identifier) > 0 {
+	if len(b.Identifiers) > 0 {
 		count++
 	}
 
@@ -394,7 +394,7 @@ func countOrganizationFields(o *Organization) int {
 	if o.Created != nil {
 		count++
 	}
-	if len(o.Identifier) > 0 {
+	if len(o.Identifiers) > 0 {
 		count++
 	}
 
