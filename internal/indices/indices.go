@@ -34,10 +34,28 @@ func New(total, groups int) []int {
 
 // ProcessSlice processes input slice concurrently using the provided function
 func ProcessSlice[T any, F any](in []T, groups int, f func(T) F) []F {
-	out := make([]F, 0, len(in)) // set capacity on creation
-	ProcessSliceFn[T](in, groups, func(v T) {
-		out = append(out, f(v))
-	})
+	results := make(chan F, len(in))
+
+	var wg sync.WaitGroup
+	wg.Add(len(in))
+
+	for _, elm := range in {
+		go func(v T) {
+			defer wg.Done()
+			results <- f(v)
+		}(elm)
+	}
+
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	out := make([]F, 0, len(in))
+	for result := range results {
+		out = append(out, result)
+	}
+
 	return out
 }
 
