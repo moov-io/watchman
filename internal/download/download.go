@@ -50,6 +50,8 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 	go func() {
 		defer close(resultsDone)
 		for list := range preparedLists {
+			logger.Info().Logf("adding %d entities from %v", len(list.Entities), list.ListName)
+
 			stats.Lists[string(list.ListName)] = len(list.Entities)
 			stats.Entities = append(stats.Entities, list.Entities...)
 		}
