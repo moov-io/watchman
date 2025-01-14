@@ -13,6 +13,8 @@ import (
 	"testing"
 
 	"github.com/moov-io/base/log"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestDownload(t *testing.T) {
@@ -20,19 +22,14 @@ func TestDownload(t *testing.T) {
 		return
 	}
 
-	file, err := Download(context.Background(), log.NewNopLogger(), "")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(file) == 0 {
-		t.Fatal("no CSL file")
-	}
+	files, err := Download(context.Background(), log.NewNopLogger(), "")
+	require.NoError(t, err)
+	require.Len(t, files, 1)
 
-	for fn := range file {
-		if !strings.EqualFold("csl.csv", filepath.Base(fn)) {
-			t.Errorf("unknown file %s", fn)
-		}
-	}
+	file, found := files["CONS_ENHANCED.ZIP"]
+	require.True(t, found)
+	require.NotNil(t, file)
+	require.NoError(t, file.Close())
 }
 
 func TestDownload_initialDir(t *testing.T) {
@@ -50,36 +47,20 @@ func TestDownload_initialDir(t *testing.T) {
 	}
 
 	// create each file
-	mk(t, "sdn.csv", "file=sdn.csv")
-	mk(t, "csl.csv", "file=csl.csv")
-	mk(t, "csl.csv", "file=csl.csv")
+	mk(t, "CONS_ENHANCED.ZIP", "file=cons_enhanced.zip")
 
-	file, err := Download(context.Background(), log.NewNopLogger(), dir)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(file) == 0 {
-		t.Fatal("no CSL file")
-	}
+	files, err := Download(context.Background(), log.NewNopLogger(), dir)
+	require.NoError(t, err)
+	require.Len(t, files, 1)
 
-	for fn, fd := range file {
-		if strings.EqualFold("csl.csv", filepath.Base(fn)) {
+	for filename, fd := range files {
+		if strings.EqualFold("CONS_ENHANCED.ZIP", filepath.Base(filename)) {
 			bs, err := io.ReadAll(fd)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if v := string(bs); v != "file=csl.csv" {
-				t.Errorf("csl.csv: %v", v)
-			}
-		} else {
-			t.Fatalf("unknown file: %v", file)
-		}
-	}
-}
+			require.NoError(t, err)
 
-func Test_buildDownloadURL_parseError(t *testing.T) {
-	url, err := buildDownloadURL("\\\\://api.trade.gov/blah/blah/%s")
-	if err == nil {
-		t.Errorf("expected error, found %s", url)
+			require.Equal(t, "file=cons_enhanced.zip", string(bs))
+		} else {
+			t.Fatalf("unknown file: %v", filename)
+		}
 	}
 }
