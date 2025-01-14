@@ -6,7 +6,6 @@ package csl_eu
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -14,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/moov-io/base/log"
+	"github.com/stretchr/testify/require"
 )
 
 func TestEUDownload(t *testing.T) {
@@ -21,18 +21,13 @@ func TestEUDownload(t *testing.T) {
 		return
 	}
 
-	file, err := DownloadEU(context.Background(), log.NewNopLogger(), "")
-	if err != nil {
-		t.Fatal(err)
-	}
-	fmt.Println("file in test: ", file)
-	if len(file) == 0 {
-		t.Fatal("no EU CSL file")
-	}
+	files, err := DownloadEU(context.Background(), log.NewNopLogger(), "")
+	require.NoError(t, err)
+	require.Len(t, files, 1)
 
-	for fn := range file {
-		if !strings.EqualFold("eu_csl.csv", filepath.Base(fn)) {
-			t.Errorf("unknown file %s", file)
+	for filename := range files {
+		if !strings.EqualFold("eu_csl.csv", filepath.Base(filename)) {
+			t.Errorf("unknown file %s", filename)
 		}
 	}
 }

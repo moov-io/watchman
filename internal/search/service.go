@@ -84,24 +84,17 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 
 	results := items.Items()
 	var out []search.SearchedEntity[search.Value]
-	// fmt.Printf("results=%d ", len(results))
 
 	for _, res := range results {
 		if res.Value.SourceID == "" || res.Weight <= 0.001 {
 			continue
 		}
 
-		// fmt.Printf("res: %#v\n", res)
-
-		// fmt.Println("append")
 		out = append(out, search.SearchedEntity[search.Value]{
 			Entity: res.Value,
 			Match:  res.Weight,
 		})
 	}
-	// fmt.Printf("out: %d\n", len(out))
-
-	// fmt.Printf("result mapping took: %v\n", time.Since(start))
 
 	return out, nil
 }

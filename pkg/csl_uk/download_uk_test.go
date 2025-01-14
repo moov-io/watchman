@@ -6,7 +6,6 @@ package csl_uk
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -22,18 +21,13 @@ func TestCSLDownload(t *testing.T) {
 		return
 	}
 
-	file, err := DownloadCSL(context.Background(), log.NewNopLogger(), "")
-	if err != nil {
-		t.Fatal(err)
-	}
-	fmt.Println("file in test: ", file)
-	if len(file) == 0 {
-		t.Fatal("no UK CSL file")
-	}
+	files, err := DownloadCSL(context.Background(), log.NewNopLogger(), "")
+	require.NoError(t, err)
+	require.Len(t, files, 1)
 
-	for fn := range file {
-		if !strings.EqualFold("ConList.csv", filepath.Base(fn)) {
-			t.Errorf("unknown file %s", file)
+	for filename := range files {
+		if !strings.EqualFold("ConList.csv", filepath.Base(filename)) {
+			t.Errorf("unknown file %s", filename)
 		}
 	}
 }
@@ -96,18 +90,13 @@ func TestUKSanctionsListDownload(t *testing.T) {
 	}
 
 	logger := log.NewTestLogger()
-	file, err := DownloadSanctionsList(context.Background(), logger, "")
-	if err != nil {
-		t.Fatal(err)
-	}
-	fmt.Println("file in test: ", file)
-	if len(file) == 0 {
-		t.Fatal("no UK Sanctions List file")
-	}
+	files, err := DownloadSanctionsList(context.Background(), logger, "")
+	require.NoError(t, err)
+	require.Len(t, files, 1)
 
-	for fn := range file {
-		if !strings.EqualFold("UK_Sanctions_List.ods", filepath.Base(fn)) {
-			t.Errorf("unknown file %s", file)
+	for filename := range files {
+		if !strings.EqualFold("UK_Sanctions_List.ods", filepath.Base(filename)) {
+			t.Errorf("unknown file %s", filename)
 		}
 	}
 }

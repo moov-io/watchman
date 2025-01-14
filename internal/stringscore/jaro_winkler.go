@@ -212,7 +212,6 @@ func JaroWinklerWithFavoritism(indexedTerm, query string, favoritism float64) fl
 	var scores []float64
 	for i := range indexedWords {
 		max, term := maxMatch(indexedWords[i], i, queryWords)
-		//fmt.Printf("%s maxMatch %s %f\n", indexedWords[i], term, max)
 		if max >= 1.0 {
 			// If the query is longer than our indexed term (and EITHER are longer than most names)
 			// we want to reduce the maximum weight proportionally by the term difference, which

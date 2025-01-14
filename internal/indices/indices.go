@@ -67,8 +67,6 @@ func ProcessSliceFn[T any](in []T, groups int, f func(T)) {
 	indices := New(len(in), groups)
 	numGroups := len(indices) - 1 // Number of actual chunks
 
-	//	fmt.Printf("in=%d  groups=%v  indices=%v  numGroups=%v\n", len(in), groups, indices, numGroups)
-
 	// Use WaitGroup for synchronization
 	var wg sync.WaitGroup
 	wg.Add(numGroups)
