@@ -1,7 +1,24 @@
 PLATFORM=$(shell uname -s | tr '[:upper:]' '[:lower:]')
+PWD := $(shell pwd)
 
 ifndef VERSION
-	VERSION := $(shell git describe --tags --abbrev=0)
+	ifndef RELEASE
+	# If we're not publishing a release, set the dev commit hash
+		ifndef DEV_TAG_SHA
+			COMMIT_HASH :=$(shell git rev-parse --short=7 HEAD)
+		else
+			COMMIT_HASH :=$(shell echo ${DEV_TAG_SHA} | cut -c 1-7)
+		endif
+		VERSION := dev-${COMMIT_HASH}
+	else
+		VERSION := $(shell git describe --tags --abbrev=0)
+	endif
+endif
+
+# If arch is define create a new env variable with the path slash for docker.
+ifdef ARCH
+	ARCH_SUFFIX := .${ARCH}
+	ARCH_PATH := ${ARCH}/
 endif
 
 .PHONY: run build build-server docker release check test
@@ -88,6 +105,7 @@ us-csl-models:
 
 .PHONY: models models-setup us-csl-models
 
+.PHONY: build
 build:
 	go build ${GOTAGS} -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/server github.com/moov-io/watchman/cmd/server
 
@@ -114,32 +132,27 @@ dist: clean build
 ifeq ($(OS),Windows_NT)
 	GOOS=windows go build -o bin/watchman.exe github.com/moov-io/watchman/cmd/server
 else
-	GOOS=$(PLATFORM) go build -o bin/watchman-$(PLATFORM)-amd64 github.com/moov-io/watchman/cmd/server
+	GOOS=${PLATFORM} go build -o bin/watchman-${PLATFORM}-amd64 github.com/moov-io/watchman/cmd/server
 endif
 
 docker: clean docker-hub docker-openshift docker-static
 
 docker-hub:
-	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman:$(VERSION) -f Dockerfile .
-	docker tag moov/watchman:$(VERSION) moov/watchman:latest
+	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman:${VERSION} -f Dockerfile .
+	docker tag moov/watchman:${VERSION} moov/watchman:latest
 
 docker-openshift:
-	docker build --pull --build-arg VERSION=${VERSION} -t quay.io/moov/watchman:$(VERSION) -f Dockerfile-openshift --build-arg VERSION=$(VERSION) .
-	docker tag quay.io/moov/watchman:$(VERSION) quay.io/moov/watchman:latest
+	docker build --pull --build-arg VERSION=${VERSION} -t quay.io/moov/watchman:${VERSION} -f Dockerfile-openshift --build-arg VERSION=${VERSION} .
+	docker tag quay.io/moov/watchman:${VERSION} quay.io/moov/watchman:latest
 
 docker-static:
-	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman:static -f Dockerfile-static .
-
-release: docker AUTHORS
-	go vet ./...
-	go test -coverprofile=cover-$(VERSION).out ./...
-	git tag -f $(VERSION)
+	docker build --pull -t moov/watchman:static -f Dockerfile-static .
 
 release-push:
-	docker push moov/watchman:$(VERSION)
+	docker push moov/watchman:${VERSION}
 	docker push moov/watchman:latest
 	docker push moov/watchman:static
 
 quay-push:
-	docker push quay.io/moov/watchman:$(VERSION)
+	docker push quay.io/moov/watchman:${VERSION}
 	docker push quay.io/moov/watchman:latest
