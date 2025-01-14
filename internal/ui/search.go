@@ -69,19 +69,19 @@ func searchForm(ctx context.Context, env Environment, warning *fyne.Container, r
 			results.Hide()
 
 			populatedItems := collectPopulatedItems(items)
-			fmt.Printf("searching with %d fields\n", len(populatedItems))
+			env.Logger.Info().Logf("searching with %d fields", len(populatedItems))
 
 			query := buildQueryEntity(populatedItems)
 			resp, err := env.Client.SearchByEntity(ctx, query)
 			if err != nil {
-				fmt.Printf("ERROR performing search: %v\n", err)
+				env.Logger.Error().LogErrorf("ERROR performing search: %v", err)
 				showWarning(env, warning, err)
 				return
 			}
 
 			err = showResults(env, results, resp.Entities)
 			if err != nil {
-				fmt.Printf("ERROR showing results: %v\n", err)
+				env.Logger.Error().LogErrorf("ERROR showing results: %v", err)
 				showWarning(env, warning, err)
 				return
 			}
@@ -184,9 +184,6 @@ func collectPopulatedItems(formItems []*widget.FormItem) []item {
 
 		case *widget.Label:
 			// ignore
-
-		default:
-			fmt.Printf("%T\n", w)
 		}
 	}
 	return out

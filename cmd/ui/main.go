@@ -7,9 +7,11 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/moov-io/watchman"
 	"github.com/moov-io/watchman/internal/ui"
 	"github.com/moov-io/watchman/pkg/search"
 
+	"github.com/moov-io/base/log"
 	"github.com/urfave/cli/v2"
 )
 
@@ -27,6 +29,12 @@ var (
 )
 
 func main() {
+	logger := log.NewDefaultLogger().With(log.Fields{
+		"app":     log.String("watchman"),
+		"version": log.String(watchman.Version),
+	})
+	logger.Log("Starting watchman UI")
+
 	ctx := context.Background()
 
 	app := &cli.App{

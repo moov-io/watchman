@@ -2,8 +2,8 @@ package ui
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/pkg/search"
 
 	"fyne.io/fyne/v2"
@@ -13,6 +13,8 @@ import (
 )
 
 type Environment struct {
+	Logger log.Logger
+
 	Client search.Client
 
 	Width, Height float32
@@ -22,7 +24,7 @@ func New(ctx context.Context, env Environment) fyne.App {
 	a := app.New()
 
 	device := fyne.CurrentDevice()
-	fmt.Printf("mobile=%v  browser=%v  keyboard=%v\n",
+	env.Logger.Debug().Logf("device: mobile=%v browser=%v keyboard=%v",
 		device.IsMobile(), device.IsBrowser(), device.HasKeyboard())
 
 	w := a.NewWindow("Hello World")
