@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/moov-io/watchman/internal/ofactest"
 	"github.com/moov-io/watchman/pkg/ofac"
 	"github.com/moov-io/watchman/pkg/search"
 
@@ -12,7 +13,7 @@ import (
 
 func TestMapperPerson__FromSource(t *testing.T) {
 	t.Run("48603", func(t *testing.T) {
-		found := findOFACEntity(t, "48603")
+		found := ofactest.FindEntity(t, "48603")
 
 		require.Equal(t, "Dmitry Yuryevich KHOROSHEV", found.Name)
 		require.Equal(t, search.EntityPerson, found.Type)
@@ -90,7 +91,7 @@ func TestMapperPerson__FromSource(t *testing.T) {
 }
 
 func TestMapper__Person(t *testing.T) {
-	e := findOFACEntity(t, "15102")
+	e := ofactest.FindEntity(t, "15102")
 
 	require.Equal(t, "Daniel MORENO", e.Name)
 	require.Equal(t, search.EntityPerson, e.Type)

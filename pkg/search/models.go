@@ -1,6 +1,7 @@
 package search
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -215,6 +216,10 @@ type Address struct {
 
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
+}
+
+func (a Address) Format() string {
+	return fmt.Sprintf("%s %s %s %s %s %s", a.Line1, a.Line2, a.City, a.PostalCode, a.State, a.Country)
 }
 
 type Affiliation struct {

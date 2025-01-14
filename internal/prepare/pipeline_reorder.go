@@ -25,6 +25,10 @@ var (
 )
 
 func ReorderSDNNames(names []string, sdnType string) []string {
+	if len(names) == 0 {
+		return nil
+	}
+
 	out := make([]string, len(names))
 	for idx := range names {
 		out[idx] = ReorderSDNName(names[idx], sdnType)

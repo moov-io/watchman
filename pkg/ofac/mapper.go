@@ -198,7 +198,7 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []Alt
 	out.Addresses = parseAddresses(addresses)
 
 	// Get all alternate names from both remarks and AlternateIdentity entries
-	altNames := make([]string, 0)
+	var altNames []string
 	altNames = append(altNames, parseAltNames(remarks)...)
 	altNames = append(altNames, parseAltIdentities(altIds)...)
 	altNames = deduplicateStrings(altNames)
@@ -687,7 +687,11 @@ func parseContactInfo(remarks []string) search.ContactInfo {
 		matches = websiteRegex.FindAllStringSubmatch(remark, -1)
 		for _, m := range matches {
 			if len(m) > 1 {
-				out.Websites = append(out.Websites, m[len(m)-1])
+				website := m[len(m)-1]
+				if strings.Contains(website, "//www.treasury.gov") {
+					continue
+				}
+				out.Websites = append(out.Websites, website)
 			}
 		}
 	}

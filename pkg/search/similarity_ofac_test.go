@@ -2,23 +2,20 @@ package search_test
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
-	"path/filepath"
 	"testing"
 	"time"
 
-	"github.com/moov-io/watchman/internal/download"
+	"github.com/moov-io/watchman/internal/ofactest"
 	"github.com/moov-io/watchman/pkg/ofac"
 	"github.com/moov-io/watchman/pkg/search"
 
-	"github.com/moov-io/base/log"
 	"github.com/stretchr/testify/require"
 )
 
 func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
-	indexEntity := findOFACEntity(t, "48603")
+	indexEntity := ofactest.FindEntity(t, "48603")
 
 	// 48603,"KHOROSHEV, Dmitry Yuryevich","individual","CYBER2",-0- ,-0- ,-0- ,-0- ,-0- ,-0- ,-0- ,
 	// "DOB 17 Apr 1993; POB Russian Federation; nationality Russia; citizen Russia; Email Address khoroshev1@icloud.com;
@@ -123,7 +120,7 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 }
 
 func TestSimilarity_OFAC_SDN_Business(t *testing.T) {
-	indexEntity := findOFACEntity(t, "50544")
+	indexEntity := ofactest.FindEntity(t, "50544")
 
 	// 50544,"AUTONOMOUS NON-PROFIT ORGANIZATION DIALOG REGIONS",-0- ,"RUSSIA-EO14024",-0- ,-0- ,-0- ,-0- ,-0- ,-0- ,-0- ,
 	// "Website www.dialog.info; alt. Website www.dialog-regions.ru; Secondary sanctions risk: See Section 11 of Executive Order 14024.;
@@ -219,7 +216,7 @@ func TestSimilarity_OFAC_SDN_Business(t *testing.T) {
 
 func TestSimilarity_OFAC_SDN_Vessel(t *testing.T) {
 	t.Run("47371", func(t *testing.T) {
-		indexEntity := findOFACEntity(t, "47371")
+		indexEntity := ofactest.FindEntity(t, "47371")
 
 		// 47371,"NS LEADER","vessel","RUSSIA-EO14024",-0- ,"A8LU7","Crude Oil Tanker",-0- ,-0- ,"Gabon",-0- ,
 		// "Secondary sanctions risk: See Section 11 of Executive Order 14024.; Identification Number IMO 9339301;
@@ -371,30 +368,6 @@ func TestSimilarity_Edge_Cases(t *testing.T) {
 			require.InDelta(t, tc.expected, score, 0.02)
 		})
 	}
-}
-
-func findOFACEntity(tb testing.TB, entityID string) search.Entity[search.Value] {
-	tb.Helper()
-
-	logger := log.NewTestLogger()
-	conf := download.Config{
-		InitialDataDirectory: filepath.Join("..", "ofac", "testdata"),
-	}
-	dl, err := download.NewDownloader(logger, conf)
-	require.NoError(tb, err)
-
-	stats, err := dl.RefreshAll(context.Background())
-	require.NoError(tb, err)
-
-	for _, entity := range stats.Entities {
-		if entityID == entity.SourceID {
-			return entity
-		}
-	}
-
-	tb.Fatalf("OFAC entity %s not found", entityID)
-
-	return search.Entity[search.Value]{}
 }
 
 func debug(t *testing.T) io.Writer {

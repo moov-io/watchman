@@ -1,23 +1,20 @@
 package ofac_test
 
 import (
-	"context"
-	"path/filepath"
 	"sort"
 	"testing"
 	"time"
 
-	"github.com/moov-io/watchman/internal/download"
+	"github.com/moov-io/watchman/internal/ofactest"
 	"github.com/moov-io/watchman/pkg/ofac"
 	"github.com/moov-io/watchman/pkg/search"
 
-	"github.com/moov-io/base/log"
 	"github.com/stretchr/testify/require"
 )
 
 func TestMapperBusiness__FromSource(t *testing.T) {
 	t.Run("33151 - crypto addresses", func(t *testing.T) {
-		found := findOFACEntity(t, "33151")
+		found := ofactest.FindEntity(t, "33151")
 		require.Equal(t, "SUEX OTC, S.R.O.", found.Name)
 		require.Equal(t, search.EntityBusiness, found.Type)
 		require.Equal(t, search.SourceUSOFAC, found.Source)
@@ -90,7 +87,7 @@ func TestMapperBusiness__FromSource(t *testing.T) {
 	})
 
 	t.Run("12685", func(t *testing.T) {
-		found := findOFACEntity(t, "12685")
+		found := ofactest.FindEntity(t, "12685")
 		require.Equal(t, "GADDAFI INTERNATIONAL CHARITY AND DEVELOPMENT FOUNDATION", found.Name)
 
 		expectedContact := search.ContactInfo{
@@ -103,7 +100,7 @@ func TestMapperBusiness__FromSource(t *testing.T) {
 	})
 
 	t.Run("50544", func(t *testing.T) {
-		found := findOFACEntity(t, "50544")
+		found := ofactest.FindEntity(t, "50544")
 
 		require.Equal(t, "AUTONOMOUS NON-PROFIT ORGANIZATION DIALOG REGIONS", found.Name)
 		require.Equal(t, search.EntityBusiness, found.Type)
@@ -229,28 +226,4 @@ func TestMapper__CompleteBusinessWithRemarks(t *testing.T) {
 	require.Len(t, e.HistoricalInfo, 1)
 	require.Equal(t, "Former Name", e.HistoricalInfo[0].Type)
 	require.Equal(t, "OLD ACME LTD", e.HistoricalInfo[0].Value)
-}
-
-func findOFACEntity(tb testing.TB, entityID string) search.Entity[search.Value] {
-	tb.Helper()
-
-	logger := log.NewTestLogger()
-	conf := download.Config{
-		InitialDataDirectory: filepath.Join("..", "ofac", "testdata"),
-	}
-	dl, err := download.NewDownloader(logger, conf)
-	require.NoError(tb, err)
-
-	stats, err := dl.RefreshAll(context.Background())
-	require.NoError(tb, err)
-
-	for _, entity := range stats.Entities {
-		if entityID == entity.SourceID {
-			return entity
-		}
-	}
-
-	tb.Fatalf("OFAC entity %s not found", entityID)
-
-	return search.Entity[search.Value]{}
 }
