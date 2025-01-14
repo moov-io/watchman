@@ -3,8 +3,11 @@ package download
 import (
 	"context"
 	"fmt"
+	"slices"
+	"sync"
 	"time"
 
+	"github.com/moov-io/watchman/pkg/csl_us"
 	"github.com/moov-io/watchman/pkg/ofac"
 	"github.com/moov-io/watchman/pkg/search"
 
@@ -33,42 +36,71 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 		Lists:     make(map[string]int),
 		StartedAt: time.Now().In(time.UTC),
 	}
-
 	logger := dl.logger.Info().With(log.Fields{
 		"initial_data_directory": log.String(dl.conf.InitialDataDirectory),
 	})
-
 	start := time.Now()
 	logger.Info().Log("starting list refresh")
 
 	g, ctx := errgroup.WithContext(ctx)
-	preparedLists := make(chan preparedList, 1)
+	preparedLists := make(chan preparedList, 10)
 
-	g.Go(func() error {
-		err := loadOFACRecords(ctx, logger, dl.conf, preparedLists)
-		if err != nil {
-			return fmt.Errorf("loading OFAC records: %w", err)
+	// Start a goroutine to accumulate results
+	resultsDone := make(chan struct{})
+	go func() {
+		defer close(resultsDone)
+		for list := range preparedLists {
+			stats.Lists[string(list.ListName)] = len(list.Entities)
+			stats.Entities = append(stats.Entities, list.Entities...)
 		}
+	}()
+
+	// Create a WaitGroup to track all producers
+	var producerWg sync.WaitGroup
+
+	// OFAC Records
+	if slices.Contains(dl.conf.IncludedLists, search.SourceUSOFAC) {
+		producerWg.Add(1)
+		g.Go(func() error {
+			defer producerWg.Done()
+			err := loadOFACRecords(ctx, logger, dl.conf, preparedLists)
+			if err != nil {
+				return fmt.Errorf("loading OFAC records: %w", err)
+			}
+			return nil
+		})
+	}
+
+	// CSL Records
+	if slices.Contains(dl.conf.IncludedLists, search.SourceUSCSL) {
+		producerWg.Add(1)
+		g.Go(func() error {
+			defer producerWg.Done()
+			err := loadCSLUSRecords(ctx, logger, dl.conf, preparedLists)
+			if err != nil {
+				return fmt.Errorf("loading US CSL records: %w", err)
+			}
+			return nil
+		})
+	}
+
+	// Add a goroutine to close the channel when all producers are done
+	g.Go(func() error {
+		producerWg.Wait()
+		close(preparedLists)
 		return nil
 	})
 
+	// Wait for both producers and consumer to finish
 	err := g.Wait()
-	close(preparedLists)
+	<-resultsDone
 
 	if err != nil {
 		return stats, fmt.Errorf("problem loading lists: %v", err)
 	}
 
-	// accumulate the lists
-	for list := range preparedLists {
-		stats.Lists[string(list.ListName)] = len(list.Entities)
-		stats.Entities = append(stats.Entities, list.Entities...)
-	}
-
 	logger.Info().Logf("finished all lists: %v", time.Since(start))
-
 	stats.EndedAt = time.Now().In(time.UTC)
-
 	return stats, nil
 }
 
@@ -81,7 +113,7 @@ func loadOFACRecords(ctx context.Context, logger log.Logger, conf Config, respon
 	start := time.Now()
 	files, err := ofac.Download(ctx, logger, conf.InitialDataDirectory)
 	if err != nil {
-		return fmt.Errorf("download: %v", err)
+		return fmt.Errorf("OFAC download: %v", err)
 	}
 	if len(files) == 0 {
 		return fmt.Errorf("unexpected %d OFAC files found", len(files))
@@ -92,7 +124,7 @@ func loadOFACRecords(ctx context.Context, logger log.Logger, conf Config, respon
 
 	res, err := ofac.Read(files)
 	if err != nil {
-		return err
+		return fmt.Errorf("parsing OFAC: %w", err)
 	}
 
 	entities := ofac.GroupIntoEntities(res.SDNs, res.Addresses, res.SDNComments, res.AlternateIdentities)
@@ -102,110 +134,34 @@ func loadOFACRecords(ctx context.Context, logger log.Logger, conf Config, respon
 		ListName: search.SourceUSOFAC,
 		Entities: entities,
 	}
-
 	return nil
 }
 
-// 	"github.com/moov-io/watchman/pkg/csl_eu"
-// 	"github.com/moov-io/watchman/pkg/csl_uk"
-// 	"github.com/moov-io/watchman/pkg/csl_us"
+func loadCSLUSRecords(ctx context.Context, logger log.Logger, conf Config, responseCh chan preparedList) error {
+	start := time.Now()
+	files, err := csl_us.Download(ctx, logger, conf.InitialDataDirectory)
+	if err != nil {
+		return fmt.Errorf("US CSL download: %w", err)
+	}
+	if len(files) == 0 {
+		return fmt.Errorf("unexpected %d US CSL files found", len(files))
+	}
 
-// func cslUSRecords(logger log.Logger, initialDir string) (csl_us.CSL, error) {
-// 	file, err := csl_us.Download(logger, initialDir)
-// 	if err != nil {
-// 		logger.Warn().Logf("skipping CSL US download: %v", err)
-// 		return csl_us.CSL{}, nil
-// 	}
-// 	cslRecords, err := csl_us.ReadFile(file["csl.csv"])
-// 	if err != nil {
-// 		return csl_us.CSL{}, fmt.Errorf("reading CSL US: %w", err)
-// 	}
-// 	return cslRecords, nil
-// }
+	logger.Debug().Logf("finished US CSL download: %v", time.Since(start))
+	start = time.Now()
 
-// func euCSLRecords(logger log.Logger, initialDir string) ([]csl_eu.CSLRecord, error) {
-// 	file, err := csl_eu.DownloadEU(logger, initialDir)
-// 	if err != nil {
-// 		logger.Warn().Logf("skipping EU CSL download: %v", err)
-// 		// no error to return because we skip the download
-// 		return nil, nil
-// 	}
+	res, err := csl_us.Read(files)
+	if err != nil {
+		return fmt.Errorf("parsing US CSL: %w", err)
+	}
 
-// 	cslRecords, _, err := csl_eu.ParseEU(file["eu_csl.csv"])
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return cslRecords, err
+	entities := csl_us.ConvertSanctionsData(res)
+	logger.Debug().Logf("finished US CSL preperation: %v", time.Since(start))
 
-// }
+	responseCh <- preparedList{
+		ListName: search.SourceUSCSL,
+		Entities: entities,
+	}
 
-// func ukCSLRecords(logger log.Logger, initialDir string) ([]csl_uk.CSLRecord, error) {
-// 	file, err := csl_uk.DownloadCSL(logger, initialDir)
-// 	if err != nil {
-// 		logger.Warn().Logf("skipping UK CSL download: %v", err)
-// 		// no error to return because we skip the download
-// 		return nil, nil
-// 	}
-// 	cslRecords, _, err := csl_uk.ReadCSLFile(file["ConList.csv"])
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return cslRecords, err
-// }
-
-// func ukSanctionsListRecords(logger log.Logger, initialDir string) ([]csl_uk.SanctionsListRecord, error) {
-// 	file, err := csl_uk.DownloadSanctionsList(logger, initialDir)
-// 	if file == nil || err != nil {
-// 		logger.Warn().Logf("skipping UK Sanctions List download: %v", err)
-// 		// no error to return because we skip the download
-// 		return nil, nil
-// 	}
-
-// 	records, _, err := csl_uk.ReadSanctionsListFile(file["UK_Sanctions_List.ods"])
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return records, err
-// }
-
-// 	var euCSLs []Result[csl_eu.CSLRecord]
-// 	withEUScreeningList := cmp.Or(os.Getenv("WITH_EU_SCREENING_LIST"), "true")
-// 	if strx.Yes(withEUScreeningList) {
-// 		euConsolidatedList, err := euCSLRecords(s.logger, initialDir)
-// 		if err != nil {
-// 			stats.Errors = append(stats.Errors, fmt.Errorf("EUCSL: %v", err))
-// 		}
-// 		euCSLs = precomputeCSLEntities[csl_eu.CSLRecord](euConsolidatedList, s.pipe)
-// 	}
-
-// 	var ukCSLs []Result[csl_uk.CSLRecord]
-// 	withUKCSLSanctionsList := cmp.Or(os.Getenv("WITH_UK_CSL_SANCTIONS_LIST"), "true")
-// 	if strx.Yes(withUKCSLSanctionsList) {
-// 		ukConsolidatedList, err := ukCSLRecords(s.logger, initialDir)
-// 		if err != nil {
-// 			stats.Errors = append(stats.Errors, fmt.Errorf("UKCSL: %v", err))
-// 		}
-// 		ukCSLs = precomputeCSLEntities[csl_uk.CSLRecord](ukConsolidatedList, s.pipe)
-// 	}
-
-// 	var ukSLs []Result[csl_uk.SanctionsListRecord]
-// 	withUKSanctionsList := os.Getenv("WITH_UK_SANCTIONS_LIST")
-// 	if strings.ToLower(withUKSanctionsList) == "true" {
-// 		ukSanctionsList, err := ukSanctionsListRecords(s.logger, initialDir)
-// 		if err != nil {
-// 			stats.Errors = append(stats.Errors, fmt.Errorf("UKSanctionsList: %v", err))
-// 		}
-// 		ukSLs = precomputeCSLEntities[csl_uk.SanctionsListRecord](ukSanctionsList, s.pipe)
-
-// 		stats.UKSanctionsList = len(ukSLs)
-// 	}
-
-// 	// csl records from US downloaded here
-// 	var usConsolidatedLists csl_us.CSL
-// 	withUSConsolidatedLists := cmp.Or(os.Getenv("WITH_US_CSL_SANCTIONS_LIST"), "true")
-// 	if strx.Yes(withUSConsolidatedLists) {
-// 		usConsolidatedLists, err = cslUSRecords(s.logger, initialDir)
-// 		if err != nil {
-// 			stats.Errors = append(stats.Errors, fmt.Errorf("US CSL: %v", err))
-// 		}
-// 	}
+	return nil
+}

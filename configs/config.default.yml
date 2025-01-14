@@ -6,4 +6,6 @@ Watchman:
   Download:
     RefreshInterval: "12h"
     InitialDataDirectory: ""
-    DisabledLists: [] # us_ofac, eu_csl, etc...
+    IncludedLists:
+      - "us_csl"
+      - "us_ofac"

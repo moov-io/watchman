@@ -19,5 +19,5 @@ type Config struct {
 	RefreshInterval      time.Duration
 	InitialDataDirectory string
 
-	DisabledLists []string // us_ofac, eu_csl, etc... // TODO(adam): check when we pull in other lists
+	IncludedLists []search.SourceList // us_ofac, eu_csl, etc...
 }
