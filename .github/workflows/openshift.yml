@@ -15,20 +15,13 @@ jobs:
         os: [ ubuntu-latest ]
     steps:
     - name: Set up Go 1.x
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       with:
         go-version: stable
       id: go
-
-    - name: Setup Node / NPM
-      if: runner.os == 'Linux'
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v3
 
     - name: Docker Build
-      if: runner.os == 'Linux'
       run: make docker-openshift

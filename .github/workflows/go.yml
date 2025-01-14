@@ -18,51 +18,31 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v3
 
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v4
-      with:
-        go-version: stable
-      id: go
-
-    - name: Run Tests (Linux)
+    - name: Setup Linux Dependencies
       if: runner.os == 'Linux'
-      run: make check
+      run: |
+        apt-get install -y libgl1-mesa-dev and xorg-dev
 
-    - name: Run Short Tests (Non-Linux)
-      if: runner.os != 'Linux'
-      run: make check
-
-    - name: Upload Code Coverage
-      if: runner.os == 'Linux'
-      run: bash <(curl -s https://codecov.io/bash)
-
-  winbuild:
-    name: Build (Windows)
-    runs-on: [ windows-latest ]
-    steps:
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v3
-
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v4
-      with:
-        go-version: stable
-      id: go
-
-    - name: Install make (Windows)
+    - name: Setup Windows Dependencies
+      if: runner.os == 'Windows'
       run: |
         choco install -y make mingw
 
-    - name: Run Short Tests (Non-Linux)
-      run: |
-        go test ./... -short
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v5
+      with:
+        go-version: stable
+      id: go
+
+    - name: Run Tests
+      run: make check
 
   docker:
     name: Docker build
     runs-on: [ ubuntu-latest ]
     steps:
     - name: Set up Go 1.x
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       with:
         go-version: stable
       id: go
@@ -75,18 +55,6 @@ jobs:
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v3
-
-    # disable and stop mono-xsp4.service
-    # Details: https://github.com/actions/virtual-environments/issues/2821
-    - name: Ubuntu 20.04 Cleanup
-      if: runner.os == 'Linux'
-      run: |
-        sudo systemctl disable mono-xsp4.service || true
-        sudo systemctl stop mono-xsp4.service || true
-        sudo killall mono || true
-
-    - name: Build Frontend
-      run: make build
 
     - name: Docker Build
       if: runner.os == 'Linux'
