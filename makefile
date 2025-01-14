@@ -21,7 +21,7 @@ ifdef ARCH
 	ARCH_PATH := ${ARCH}/
 endif
 
-.PHONY: run build build-server docker release check test
+.PHONY: run build docker release check test
 
 run:
 	go run github.com/moov-io/watchman/cmd/server
@@ -105,8 +105,10 @@ us-csl-models:
 
 .PHONY: models models-setup us-csl-models
 
-.PHONY: build
-build:
+.PHONY: build build-server
+build: build-server
+
+build-server:
 	go build ${GOTAGS} -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/server github.com/moov-io/watchman/cmd/server
 
 .PHONY: check

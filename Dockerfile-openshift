@@ -1,5 +1,5 @@
 # Stage 1: Install dependencies with root privileges
-FROM registry.access.redhat.com/ubi9/go-toolset as builder-deps
+FROM registry.access.redhat.com/ubi9/go-toolset AS builder-deps
 USER root
 
 # Install system dependencies first - rarely changes
