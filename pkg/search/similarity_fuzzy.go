@@ -250,13 +250,13 @@ var (
 )
 
 func compareEntityTitlesFuzzy[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) scorePiece {
-	if len(query.Titles) == 0 {
+	if query.Person == nil || index.Person == nil {
 		return scorePiece{score: 0, weight: 0, fieldsCompared: 0, pieceType: "titles"}
 	}
 
 	// Prepare normalized index titles once
-	normalizedIndexTitles := make([]string, 0, len(index.Titles))
-	for _, title := range index.Titles {
+	normalizedIndexTitles := make([]string, 0, len(index.Person.Titles))
+	for _, title := range index.Person.Titles {
 		if normalized := normalizeTitle(title); normalized != "" {
 			normalizedIndexTitles = append(normalizedIndexTitles, normalized)
 		}
@@ -270,7 +270,7 @@ func compareEntityTitlesFuzzy[Q any, I any](w io.Writer, query Entity[Q], index 
 	matches := 0
 	total := 0
 
-	for _, qTitle := range query.Titles {
+	for _, qTitle := range query.Person.Titles {
 		normalizedQuery := normalizeTitle(qTitle)
 		if normalizedQuery == "" {
 			continue

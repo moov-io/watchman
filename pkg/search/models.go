@@ -32,7 +32,6 @@ type Entity[T Value] struct {
 	Affiliations   []Affiliation    `json:"affiliations"`
 	SanctionsInfo  *SanctionsInfo   `json:"sanctionsInfo"`
 	HistoricalInfo []HistoricalInfo `json:"historicalInfo"`
-	Titles         []string         `json:"titles"`
 
 	SourceData T `json:"sourceData"` // Contains all original list data with source list naming
 }

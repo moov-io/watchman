@@ -81,7 +81,6 @@ func TestMapperPerson__FromSource(t *testing.T) {
 		require.Empty(t, found.Affiliations)
 		require.Nil(t, found.SanctionsInfo)
 		require.Empty(t, found.HistoricalInfo)
-		require.Empty(t, found.Titles)
 
 		sdn, ok := found.SourceData.(ofac.SDN)
 		require.True(t, ok)
@@ -194,7 +193,7 @@ func TestMapper__CompletePersonWithRemarks(t *testing.T) {
 	require.Equal(t, "AL-ZAYDI, Muhammad", e.HistoricalInfo[0].Value)
 
 	// Test titles
-	require.Equal(t, []string{"Commander"}, e.Titles)
+	require.Equal(t, []string{"Commander"}, e.Person.Titles)
 }
 
 func TestMapper__PersonWithTitle(t *testing.T) {
@@ -211,6 +210,6 @@ func TestMapper__PersonWithTitle(t *testing.T) {
 	require.Equal(t, search.EntityPerson, e.Type)
 
 	// Should have both titles - from SDN field and remarks
-	require.Contains(t, e.Titles, "Chief Financial Officer")
-	require.Contains(t, e.Titles, "Regional Director")
+	require.Contains(t, e.Person.Titles, "Chief Financial Officer")
+	require.Contains(t, e.Person.Titles, "Regional Director")
 }

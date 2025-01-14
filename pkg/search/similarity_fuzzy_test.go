@@ -183,10 +183,14 @@ func TestCompareEntityTitlesFuzzy(t *testing.T) {
 		{
 			name: "exact title match",
 			query: Entity[any]{
-				Titles: []string{"Chief Executive Officer"},
+				Person: &Person{
+					Titles: []string{"Chief Executive Officer"},
+				},
 			},
 			index: Entity[any]{
-				Titles: []string{"Chief Executive Officer"},
+				Person: &Person{
+					Titles: []string{"Chief Executive Officer"},
+				},
 			},
 			expectedScore: 1.0,
 			shouldMatch:   true,
@@ -195,10 +199,14 @@ func TestCompareEntityTitlesFuzzy(t *testing.T) {
 		{
 			name: "abbreviated title match",
 			query: Entity[any]{
-				Titles: []string{"CEO"},
+				Person: &Person{
+					Titles: []string{"CEO"},
+				},
 			},
 			index: Entity[any]{
-				Titles: []string{"Chief Executive Officer"},
+				Person: &Person{
+					Titles: []string{"Chief Executive Officer"},
+				},
 			},
 			expectedScore: 0.0, // TODO(adam): needs fixed
 			shouldMatch:   false,
@@ -207,10 +215,14 @@ func TestCompareEntityTitlesFuzzy(t *testing.T) {
 		{
 			name: "multiple titles with partial matches",
 			query: Entity[any]{
-				Titles: []string{"CEO", "Director of Operations"},
+				Person: &Person{
+					Titles: []string{"CEO", "Director of Operations"},
+				},
 			},
 			index: Entity[any]{
-				Titles: []string{"Chief Executive Officer", "Operations Director"},
+				Person: &Person{
+					Titles: []string{"Chief Executive Officer", "Operations Director"},
+				},
 			},
 			expectedScore: 0.50,
 			shouldMatch:   false,
@@ -219,10 +231,14 @@ func TestCompareEntityTitlesFuzzy(t *testing.T) {
 		{
 			name: "similar but not exact titles",
 			query: Entity[any]{
-				Titles: []string{"Senior Technical Manager"},
+				Person: &Person{
+					Titles: []string{"Senior Technical Manager"},
+				},
 			},
 			index: Entity[any]{
-				Titles: []string{"Technical Manager"},
+				Person: &Person{
+					Titles: []string{"Technical Manager"},
+				},
 			},
 			expectedScore: 0.0, // TODO(adam): needs fixed
 			shouldMatch:   false,
@@ -231,10 +247,14 @@ func TestCompareEntityTitlesFuzzy(t *testing.T) {
 		{
 			name: "no matching titles",
 			query: Entity[any]{
-				Titles: []string{"Chief Financial Officer"},
+				Person: &Person{
+					Titles: []string{"Chief Financial Officer"},
+				},
 			},
 			index: Entity[any]{
-				Titles: []string{"Sales Director", "Regional Manager"},
+				Person: &Person{
+					Titles: []string{"Sales Director", "Regional Manager"},
+				},
 			},
 			expectedScore: 0.0,
 			shouldMatch:   false,

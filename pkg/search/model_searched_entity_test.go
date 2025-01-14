@@ -44,7 +44,6 @@ func TestSearchedEntityJSON(t *testing.T) {
   "affiliations": null,
   "sanctionsInfo": null,
   "historicalInfo": null,
-  "titles": null,
   "sourceData": {
     "entityID": "12345"
   },

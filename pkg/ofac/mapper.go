@@ -190,7 +190,6 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []Alt
 	out.Affiliations = affiliations
 	out.SanctionsInfo = sanctionsInfo
 	out.HistoricalInfo = historicalInfo
-	out.Titles = titles
 	out.CryptoAddresses = parseCryptoAddresses(remarks)
 
 	// Extract common fields regardless of entity type
@@ -257,7 +256,7 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []Alt
 		if sdn.Title != "" {
 			titles = append([]string{sdn.Title}, titles...)
 		}
-		out.Titles = titles
+		out.Person.Titles = titles
 
 		// Handle birth date
 		out.Person.BirthDate = withFirstP(findMatchingRemarks(remarks, "DOB"), func(in remark) *time.Time {

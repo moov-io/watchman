@@ -78,7 +78,6 @@ func TestMapperBusiness__FromSource(t *testing.T) {
 		require.Empty(t, found.Affiliations)
 		require.Nil(t, found.SanctionsInfo)
 		require.Empty(t, found.HistoricalInfo)
-		require.Empty(t, found.Titles)
 
 		sdn, ok := found.SourceData.(ofac.SDN)
 		require.True(t, ok)
@@ -150,7 +149,6 @@ func TestMapperBusiness__FromSource(t *testing.T) {
 
 		require.Nil(t, found.SanctionsInfo)
 		require.Empty(t, found.HistoricalInfo)
-		require.Empty(t, found.Titles)
 
 		sdn, ok := found.SourceData.(ofac.SDN)
 		require.True(t, ok)

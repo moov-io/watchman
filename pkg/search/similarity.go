@@ -328,9 +328,6 @@ func countCommonFields[I any](index Entity[I]) int {
 	if len(index.Affiliations) > 0 {
 		count++
 	}
-	if len(index.Titles) > 0 {
-		count++
-	}
 	if len(index.Addresses) > 0 {
 		count++
 	}
