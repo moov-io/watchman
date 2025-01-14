@@ -22,3 +22,5 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
+        env:
+          INITIAL_DATA_DIRECTORY: "./test/testdata/static/"
