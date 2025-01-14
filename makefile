@@ -88,15 +88,8 @@ us-csl-models:
 
 .PHONY: models models-setup us-csl-models
 
-build: build-server
-ifeq ($(OS),Windows_NT)
-	@echo "Skipping webui build on Windows."
-else
-	cd webui/ && npm install --legacy-peer-deps && npm run build && cd ../
-endif
-
-build-server:
-	go build -buildvcs=false ${GOTAGS} -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/server github.com/moov-io/watchman/cmd/server
+build:
+	go build ${GOTAGS} -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/server github.com/moov-io/watchman/cmd/server
 
 .PHONY: check
 check:

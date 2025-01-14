@@ -33,20 +33,6 @@ COPY . /src/
 WORKDIR /src
 RUN VERSION=${VERSION} GOTAGS="-tags libpostal" make build-server
 
-# Frontend build stage
-FROM node:22-bookworm as frontend
-ARG VERSION
-WORKDIR /watchman/
-
-# Copy package files first to cache dependencies
-COPY webui/package*.json webui/
-WORKDIR /watchman/webui/
-RUN npm install --legacy-peer-deps
-
-# Copy and build frontend source (frequently changes)
-COPY webui/ ./
-RUN npm run build
-
 # Final stage
 FROM debian:bookworm
 LABEL maintainer="Moov <oss@moov.io>"
@@ -67,10 +53,8 @@ RUN ldconfig
 
 # Copy application files
 COPY --from=backend /src/bin/server /bin/server
-COPY --from=frontend /watchman/webui/build/ /watchman/
 
 # Set environment variables
-ENV WEB_ROOT=/watchman/
 ENV LD_LIBRARY_PATH=/usr/local/lib
 ENV LIBPOSTAL_DATA_DIR=/usr/local/share/libpostal
 

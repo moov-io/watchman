@@ -61,18 +61,6 @@ RUN mkdir -p bin && \
 USER 1001
 RUN VERSION=${VERSION} GOTAGS="-tags libpostal" make build-server
 
-# Stage 3: Frontend build
-FROM node:21-bookworm as frontend
-WORKDIR /watchman/
-
-# Copy package files first to cache dependencies
-COPY webui/package*.json ./
-RUN npm install --legacy-peer-deps
-
-# Copy frontend source and build - frequently changes
-COPY webui/ ./
-RUN npm run build
-
 # Stage 4: Final stage
 FROM registry.access.redhat.com/ubi9/ubi-minimal:9.5-1733767867
 ARG VERSION=unknown
@@ -92,8 +80,6 @@ ENV LD_LIBRARY_PATH=/usr/local/lib
 
 # Copy application files
 COPY --from=builder /opt/app-root/src/bin/server /bin/server
-COPY --from=frontend /watchman/build/ /watchman/
-ENV WEB_ROOT=/watchman/
 
 # Set final permissions and switch to non-root user
 RUN chown -R 1001:0 /bin/server /watchman && \
