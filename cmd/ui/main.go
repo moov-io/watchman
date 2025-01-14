@@ -53,6 +53,7 @@ func main() {
 		},
 		Action: func(cliContext *cli.Context) error {
 			env := ui.Environment{
+				Logger: logger,
 				Client: createWatchmanClient(cliContext.String(flagBaseAddress.Name)),
 			}
 
