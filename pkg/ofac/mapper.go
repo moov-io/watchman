@@ -145,34 +145,12 @@ func extractCountry(remark string) string {
 	return ""
 }
 
-func GroupIntoEntities(sdns []SDN, addresses []Address, comments []SDNComments, altIds []AlternateIdentity) []search.Entity[search.Value] {
+func GroupIntoEntities(sdns []SDN, addresses map[string][]Address, comments map[string][]SDNComments, altIds map[string][]AlternateIdentity) []search.Entity[search.Value] {
 	fn := func(sdn SDN) search.Entity[search.Value] {
-		var addrs []Address
-		for _, addr := range addresses {
-			if sdn.EntityID == addr.EntityID {
-				addrs = append(addrs, addr)
-			}
-		}
-
-		var cmts []SDNComments
-		for _, comment := range comments {
-			if sdn.EntityID == comment.EntityID {
-				cmts = append(cmts, comment)
-			}
-		}
-
-		var alts []AlternateIdentity
-		for _, alt := range altIds {
-			if sdn.EntityID == alt.EntityID {
-				alts = append(alts, alt)
-			}
-		}
-
-		return ToEntity(sdn, addrs, cmts, alts)
+		return ToEntity(sdn, addresses[sdn.EntityID], comments[sdn.EntityID], altIds[sdn.EntityID])
 	}
 
-	groups := runtime.NumCPU() // arbitrary group size // TODO(adam):
-
+	groups := runtime.NumCPU()
 	return indices.ProcessSlice(sdns, groups, fn)
 }
 

@@ -17,7 +17,13 @@ import (
 //
 // For more details on the raw OFAC files see https://moov-io.github.io/watchman/file-structure.html
 func Read(files map[string]io.ReadCloser) (*Results, error) {
-	res := new(Results)
+	res := &Results{
+		SDNs:                []SDN{},
+		Addresses:           make(map[string][]Address, 0),
+		AlternateIdentities: make(map[string][]AlternateIdentity, 0),
+		SDNComments:         make(map[string][]SDNComments, 0),
+	}
+
 	for filename, file := range files {
 		switch strings.ToLower(filepath.Base(filename)) {
 		case "add.csv":
@@ -57,33 +63,56 @@ func Read(files map[string]io.ReadCloser) (*Results, error) {
 }
 
 type Results struct {
-	// Addresses returns an array of OFAC Specially Designated National Addresses
-	Addresses []Address `json:"address"`
-
-	// AlternateIdentities returns an array of OFAC Specially Designated National Alternate Identity
-	AlternateIdentities []AlternateIdentity `json:"alternateIdentity"`
-
 	// SDNs returns an array of OFAC Specially Designated Nationals
 	SDNs []SDN `json:"sdn"`
 
+	// Addresses returns an array of OFAC Specially Designated National Addresses
+	Addresses map[string][]Address `json:"address"`
+
+	// AlternateIdentities returns an array of OFAC Specially Designated National Alternate Identity
+	AlternateIdentities map[string][]AlternateIdentity `json:"alternateIdentity"`
+
 	// SDNComments returns an array of OFAC Specially Designated National Comments
-	SDNComments []SDNComments `json:"sdnComments"`
+	SDNComments map[string][]SDNComments `json:"sdnComments"`
 }
 
 func (r *Results) append(rr *Results, err error) error {
 	if err != nil {
 		return err
 	}
-	r.Addresses = append(r.Addresses, rr.Addresses...)
-	r.AlternateIdentities = append(r.AlternateIdentities, rr.AlternateIdentities...)
 	r.SDNs = append(r.SDNs, rr.SDNs...)
-	r.SDNComments = append(r.SDNComments, rr.SDNComments...)
+
+	if rr.Addresses != nil {
+		for _, addresses := range rr.Addresses {
+			for _, addr := range addresses {
+				r.Addresses[addr.EntityID] = append(r.Addresses[addr.EntityID], addr)
+			}
+		}
+	}
+
+	if rr.AlternateIdentities != nil {
+		for _, alts := range rr.AlternateIdentities {
+			for _, alt := range alts {
+				r.AlternateIdentities[alt.EntityID] = append(r.AlternateIdentities[alt.EntityID], alt)
+			}
+		}
+	}
+
+	if rr.SDNComments != nil {
+		for _, comments := range rr.SDNComments {
+			for _, comment := range comments {
+				r.SDNComments[comment.EntityID] = append(r.SDNComments[comment.EntityID], comment)
+			}
+		}
+	}
+
 	return nil
 }
 
 func csvAddressFile(f io.ReadCloser) (*Results, error) {
 	defer f.Close()
-	var out []Address
+
+	out := make(map[string][]Address, 0)
 
 	// Read File into a Variable
 	reader := csv.NewReader(f)
@@ -107,8 +136,10 @@ func csvAddressFile(f io.ReadCloser) (*Results, error) {
 		}
 
 		record = replaceNull(record)
-		out = append(out, Address{
-			EntityID:                    record[0],
+
+		entityID := record[0]
+		out[entityID] = append(out[entityID], Address{
+			EntityID:                    entityID,
 			AddressID:                   record[1],
 			Address:                     record[2],
 			CityStateProvincePostalCode: record[3],
@@ -121,7 +152,8 @@ func csvAddressFile(f io.ReadCloser) (*Results, error) {
 
 func csvAlternateIdentityFile(f io.ReadCloser) (*Results, error) {
 	defer f.Close()
-	var out []AlternateIdentity
+
+	out := make(map[string][]AlternateIdentity, 0)
 
 	// Read File into a Variable
 	reader := csv.NewReader(f)
@@ -144,7 +176,9 @@ func csvAlternateIdentityFile(f io.ReadCloser) (*Results, error) {
 			continue
 		}
 		record = replaceNull(record)
-		out = append(out, AlternateIdentity{
+
+		entityID := record[0]
+		out[entityID] = append(out[entityID], AlternateIdentity{
 			EntityID:         record[0],
 			AlternateID:      record[1],
 			AlternateType:    record[2],
@@ -157,6 +191,7 @@ func csvAlternateIdentityFile(f io.ReadCloser) (*Results, error) {
 
 func csvSDNFile(f io.ReadCloser) (*Results, error) {
 	defer f.Close()
+
 	var out []SDN
 
 	// Read File into a Variable
@@ -205,7 +240,7 @@ func csvSDNCommentsFile(f io.ReadCloser) (*Results, error) {
 	r.LazyQuotes = true
 
 	// Loop through lines & turn into object
-	var out []SDNComments
+	out := make(map[string][]SDNComments, 0)
 	for {
 		line, err := r.Read()
 		if err != nil {
@@ -225,8 +260,10 @@ func csvSDNCommentsFile(f io.ReadCloser) (*Results, error) {
 			continue
 		}
 		line = replaceNull(line)
-		out = append(out, SDNComments{
-			EntityID:                 line[0],
+
+		entityID := line[0]
+		out[entityID] = append(out[entityID], SDNComments{
+			EntityID:                 entityID,
 			RemarksExtended:          line[1],
 			DigitalCurrencyAddresses: readDigitalCurrencyAddresses(line[1]),
 		})
@@ -379,11 +416,13 @@ func readDigitalCurrencyAddresses(remarks string) []DigitalCurrencyAddress {
 	return out
 }
 
-func mergeSpilloverRecords(sdns []SDN, comments []SDNComments) []SDN {
+func mergeSpilloverRecords(sdns []SDN, allComments map[string][]SDNComments) []SDN {
 	for i := range sdns {
-		for j := range comments {
-			if sdns[i].EntityID == comments[j].EntityID {
-				sdns[i].Remarks += comments[j].RemarksExtended
+		comments := allComments[sdns[i].EntityID]
+
+		for _, comment := range comments {
+			if sdns[i].EntityID == comment.EntityID {
+				sdns[i].Remarks += comment.RemarksExtended // has to be index to update
 			}
 		}
 	}
