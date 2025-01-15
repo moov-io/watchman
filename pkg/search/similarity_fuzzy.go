@@ -610,7 +610,7 @@ func calculateTypeScore(queryType, indexType string) float64 {
 func getTypeGroup(affType string) string {
 	for group, types := range affiliationTypeGroups {
 		for _, t := range types {
-			if strings.Contains(affType, t) {
+			if strings.Contains(t, affType) {
 				return group
 			}
 		}
