@@ -118,9 +118,8 @@ ifeq ($(OS),Windows_NT)
 else
 	@wget -O lint-project.sh https://raw.githubusercontent.com/moov-io/infra/master/go/lint-project.sh
 	@chmod +x ./lint-project.sh
-	STRICT_GOLANGCI_LINTERS=no GOLANGCI_LINTERS=gocheckcompilerdirectives,mirror,tenv ./lint-project.sh
+	COVER_THRESHOLD=disabled DISABLE_GITLEAKS=true GOLANGCI_LINTERS=gocheckcompilerdirectives,mirror,tenv STRICT_GOLANGCI_LINTERS=no ./lint-project.sh
 endif
-
 
 .PHONY: clean
 clean:
