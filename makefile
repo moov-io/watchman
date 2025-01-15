@@ -21,7 +21,9 @@ ifdef ARCH
 	ARCH_PATH := ${ARCH}/
 endif
 
-.PHONY: run build docker release check test
+.PHONY: all run build docker release check test
+
+all: build
 
 run:
 	go run github.com/moov-io/watchman/cmd/server
