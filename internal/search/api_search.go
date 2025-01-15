@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/pkg/address"
 	"github.com/moov-io/watchman/pkg/search"
 
@@ -139,7 +140,7 @@ func readSearchRequest(r *http.Request) (search.Entity[search.Value], error) {
 		req.Person = &search.Person{
 			Name:      req.Name,
 			AltNames:  q["altNames"],
-			Gender:    search.Gender(strings.TrimSpace(q.Get("gender"))),
+			Gender:    prepare.NormalizeGender(q.Get("gender")),
 			BirthDate: readDate(q.Get("birthDate")),
 			DeathDate: readDate(q.Get("deathDate")),
 			Titles:    q["titles"],
