@@ -196,8 +196,14 @@ func readSearchRequest(r *http.Request) (search.Entity[search.Value], error) {
 		}
 	}
 
-	req.CryptoAddresses = readCryptoCurrencyAddresses(q["cryptoAddress"])
+	// contact info // TODO(adam): normalize
+	req.Contact.EmailAddresses = readStrings(q["email"], q["emailAddress"])
+	req.Contact.PhoneNumbers = readStrings(q["phone"], q["phoneNumber"])
+	req.Contact.FaxNumbers = readStrings(q["fax"], q["faxNumber"])
+	req.Contact.Websites = readStrings(q["website"])
+
 	req.Addresses = readAddresses(q["address"])
+	req.CryptoAddresses = readCryptoCurrencyAddresses(q["cryptoAddress"])
 
 	// TODO(adam):
 	// Affiliations   []Affiliation    `json:"affiliations"`
@@ -230,6 +236,24 @@ func readInt(input string) (int, error) {
 	return int(n), err
 }
 
+func readStrings(inputs ...[]string) []string {
+	var out []string
+	for _, items := range inputs {
+		for _, item := range items {
+			out = append(out, strings.TrimSpace(item))
+		}
+	}
+	return out
+}
+
+func readAddresses(inputs []string) []search.Address {
+	var out []search.Address
+	for _, input := range inputs {
+		out = append(out, address.ParseAddress(input))
+	}
+	return out
+}
+
 func readCryptoCurrencyAddresses(inputs []string) []search.CryptoAddress {
 	var out []search.CryptoAddress
 	for _, input := range inputs {
@@ -241,14 +265,6 @@ func readCryptoCurrencyAddresses(inputs []string) []search.CryptoAddress {
 				Address:  parts[1],
 			})
 		}
-	}
-	return out
-}
-
-func readAddresses(inputs []string) []search.Address {
-	var out []search.Address
-	for _, input := range inputs {
-		out = append(out, address.ParseAddress(input))
 	}
 	return out
 }
