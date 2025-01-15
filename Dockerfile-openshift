@@ -82,8 +82,7 @@ ENV LD_LIBRARY_PATH=/usr/local/lib
 COPY --from=builder /opt/app-root/src/bin/server /bin/server
 
 # Set final permissions and switch to non-root user
-RUN chown -R 1001:0 /bin/server /watchman && \
-    chmod -R g=u /bin/server /watchman
+RUN chown -R 1001:0 /bin/server && chmod -R g=u /bin/server
 USER 1001
 
 ENTRYPOINT ["/bin/server"]
