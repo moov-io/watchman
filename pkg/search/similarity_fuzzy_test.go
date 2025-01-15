@@ -359,7 +359,7 @@ func TestCompareAffiliationsFuzzy(t *testing.T) {
 			},
 			expectedScore: 1.0,
 			shouldMatch:   true,
-			exact:         true,
+			exact:         false,
 		},
 		{
 			name: "no matching affiliations",
@@ -611,7 +611,7 @@ func TestCalculateTypeScore(t *testing.T) {
 			name:          "with extra spaces",
 			queryType:     "  owned  by  ",
 			indexType:     "owned by",
-			expectedScore: 0.8,
+			expectedScore: 1.0,
 		},
 		{
 			name:          "unknown types",

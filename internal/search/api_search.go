@@ -140,7 +140,7 @@ func readSearchRequest(r *http.Request) (search.Entity[search.Value], error) {
 		req.Person = &search.Person{
 			Name:      req.Name,
 			AltNames:  q["altNames"],
-			Gender:    prepare.NormalizeGender(q.Get("gender")),
+			Gender:    search.Gender(prepare.NormalizeGender(q.Get("gender"))),
 			BirthDate: readDate(q.Get("birthDate")),
 			DeathDate: readDate(q.Get("deathDate")),
 			Titles:    q["titles"],

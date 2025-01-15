@@ -7,6 +7,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/internal/stringscore"
 )
 
@@ -587,8 +588,8 @@ func calculateNameScore(queryName, indexName string) float64 {
 
 // calculateTypeScore determines how well affiliation types match
 func calculateTypeScore(queryType, indexType string) float64 {
-	queryType = strings.ToLower(strings.TrimSpace(queryType))
-	indexType = strings.ToLower(strings.TrimSpace(indexType))
+	queryType = prepare.LowerAndRemovePunctuation(queryType)
+	indexType = prepare.LowerAndRemovePunctuation(indexType)
 
 	// Exact type match
 	if queryType == indexType {
@@ -610,7 +611,7 @@ func calculateTypeScore(queryType, indexType string) float64 {
 func getTypeGroup(affType string) string {
 	for group, types := range affiliationTypeGroups {
 		for _, t := range types {
-			if strings.Contains(t, affType) {
+			if strings.EqualFold(affType, t) {
 				return group
 			}
 		}

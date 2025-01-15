@@ -2,20 +2,17 @@ package prepare
 
 import (
 	"strings"
-
-	"github.com/moov-io/watchman/pkg/search"
 )
 
-func NormalizeGender(input string) search.Gender {
+func NormalizeGender(input string) string {
 	v := strings.ToLower(strings.TrimSpace(input))
 
+	// returned values need to match pkg/search.Gender values
 	switch v {
 	case "m", "male", "man", "guy":
-		return search.GenderMale
-
+		return "male"
 	case "f", "female", "woman", "gal", "girl":
-		return search.GenderFemale
+		return "female"
 	}
-
-	return search.GenderUnknown
+	return "unknown"
 }
