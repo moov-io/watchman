@@ -237,7 +237,7 @@ func readCryptoCurrencyAddresses(inputs []string) []search.CryptoAddress {
 		parts := strings.Split(input, ":")
 		if len(parts) == 2 {
 			out = append(out, search.CryptoAddress{
-				Currency: parts[0],
+				Currency: strings.ToUpper(parts[0]),
 				Address:  parts[1],
 			})
 		}
