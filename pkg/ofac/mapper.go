@@ -41,69 +41,8 @@ var (
 )
 
 var (
-	dobPatterns = []string{
-		"02 Jan 2006", // 01 Apr 1950
-		"Jan 2006",    // Sep 1958
-		"2006",        // 1928
-	}
+	dobPatterns = []string{"02 Jan 2006", "Jan 2006", "2006"}
 )
-
-// Company Number 05527424 (United Kingdom)
-// Company Number IMO 1991835.
-// Commercial Registry Number 0411518776478 (Iran)
-// Enterprise Number 0430.033.662 (Belgium).
-// Tax ID No. 230810605961 (Russia).
-// Trade License No. 04110179 (United Kingdom).
-// UK Company Number 01019769 (United Kingdom)
-// US FEIN 000920912 (United States).
-
-func makeIdentifiers(remarks []string, needles []string) []search.Identifier {
-	seen := make(map[string]bool)
-	var out []search.Identifier
-
-	for i := range needles {
-		if id := makeIdentifier(remarks, needles[i]); id != nil {
-			// Create unique key from name and country
-			key := id.Name + "|" + id.Country
-			if !seen[key] {
-				seen[key] = true
-				out = append(out, *id)
-			}
-		}
-	}
-	return out
-}
-
-func makeIdentifier(remarks []string, suffix string) *search.Identifier {
-	found := findMatchingRemarks(remarks, suffix)
-	if len(found) == 0 {
-		for _, rmk := range remarks {
-			if matches := identifierRegex.FindStringSubmatch(rmk); len(matches) > 1 {
-				found = append(found, remark{fullName: suffix, value: matches[1]})
-				break
-			}
-		}
-	}
-	if len(found) == 0 {
-		return nil
-	}
-
-	// Often the country is in parenthesis at the end, so let's look for that
-	country := ""
-	value := found[0].value
-
-	if matches := countryParenRegex.FindStringSubmatch(value); len(matches) > 1 {
-		country = matches[1]
-		// Remove the country part from the value
-		value = strings.TrimSpace(countryParenRegex.ReplaceAllString(value, ""))
-	}
-
-	return &search.Identifier{
-		Name:       strings.TrimSpace(found[0].fullName),
-		Country:    country,
-		Identifier: value,
-	}
-}
 
 func findDateStamp(matchingRemarks []remark) *time.Time {
 	return withFirstP(matchingRemarks, func(in remark) *time.Time {
@@ -191,36 +130,38 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []Alt
 		out.Business.Created = findDateStamp(findMatchingRemarks(remarks, "Organization Established Date"))
 		// out.Business.Dissolved = findDateStamp(findMatchingRemarks(remarks, "TODO(adam)"))
 
-		out.Business.Identifiers = makeIdentifiers(remarks, []string{
-			"Branch Unit Number",
-			"Business Number",
-			"Business Registration Document",
-			"Business Registration Number",
-			"Certificate of Incorporation Number",
-			"Chamber of Commerce Number",
-			"Chinese Commercial Code",
-			"Commercial Registry Number",
-			"Company Number",
-			"Company ID",                              // new: e.g., "Company ID: No. 59 531..."
-			"D-U-N-S Number",                          // new: e.g., "D-U-N-S Number 33-843-5672"
-			"Dubai Chamber of Commerce Membership No", // new
-			"Enterprise Number",
-			"Fiscal Code",        // new: business tax identifiers
-			"Folio Mercantil No", // new: Mexican business registration
-			"Legal Entity Number",
-			"Matricula Mercantil No",     // new: Colombian business registration
-			"Public Registration Number", // new
-			"Registration Number",
-			"RIF",                                   // new: Venezuelan tax ID
-			"RUC",                                   // new: Panama business registration
-			"Romanian C.R",                          // new: Romanian Commercial Registry
-			"Tax ID No.",                            // new: Important business identifier
-			"Trade License No",                      // new
-			"UK Company Number",                     // new: Specific UK format
-			"US FEIN",                               // new: US Federal Employer ID Number
-			"United Social Credit Code Certificate", // new: Chinese business ID
-			"V.A.T. Number",                         // new: VAT registration numbers
-		})
+		out.Business.GovernmentIDs = parseGovernmentIDs(remarks)
+
+		// out.Business.Identifiers = makeIdentifiers(remarks, []string{
+		// 	"Branch Unit Number",
+		// 	"Business Number",
+		// 	"Business Registration Document",
+		// 	"Business Registration Number",
+		// 	"Certificate of Incorporation Number",
+		// 	"Chamber of Commerce Number",
+		// 	"Chinese Commercial Code",
+		// 	"Commercial Registry Number",
+		// 	"Company Number",
+		// 	"Company ID",                              // new: e.g., "Company ID: No. 59 531..."
+		// 	"D-U-N-S Number",                          // new: e.g., "D-U-N-S Number 33-843-5672"
+		// 	"Dubai Chamber of Commerce Membership No", // new
+		// 	"Enterprise Number",
+		// 	"Fiscal Code",        // new: business tax identifiers
+		// 	"Folio Mercantil No", // new: Mexican business registration
+		// 	"Legal Entity Number",
+		// 	"Matricula Mercantil No",     // new: Colombian business registration
+		// 	"Public Registration Number", // new
+		// 	"Registration Number",
+		// 	"RIF",                                   // new: Venezuelan tax ID
+		// 	"RUC",                                   // new: Panama business registration
+		// 	"Romanian C.R",                          // new: Romanian Commercial Registry
+		// 	"Tax ID No.",                            // new: Important business identifier
+		// 	"Trade License No",                      // new
+		// 	"UK Company Number",                     // new: Specific UK format
+		// 	"US FEIN",                               // new: US Federal Employer ID Number
+		// 	"United Social Credit Code Certificate", // new: Chinese business ID
+		// 	"V.A.T. Number",                         // new: VAT registration numbers
+		// })
 
 	case "individual":
 		out.Type = search.EntityPerson
@@ -364,7 +305,9 @@ var (
 	governmentIDElectoralRegex = regexp.MustCompile(`(?i)Electoral\s+Registry\s+(?:No\.|Number)?\s*([A-Z0-9-]+)`)
 
 	// Business Registration
-	governmentIDBusinessRegistrationRegex = regexp.MustCompile(`(?i)Business\s+Registration\s+(?:No\.|Number|Document)?\s*([A-Z0-9-]+)`)
+	governmentIDBusinessRegistrationRegex = regexp.MustCompile(`(?i)Business\s+Registration\s+(?:No\.|Number|Document)?\s*([A-Z0-9-\.]+)`)
+	governmentIDCompanyNumberRegex        = regexp.MustCompile(`(?i)Company\s+Number\s+([0-9]+)`)
+	governmentIDLegalEntityNumberRegex    = regexp.MustCompile(`(?i)Legal\s+Entity\s+Number\s+([A-Za-z0-9\-\.]+)`)
 	governmentIDCommercialRegistryRegex   = regexp.MustCompile(`(?i)Commercial\s+Registry\s+(?:No\.|Number)?\s*([A-Z0-9-./]+)`)
 
 	// Birth Certificates
@@ -393,6 +336,8 @@ func parseGovernmentIDs(remarks []string) []search.GovernmentID {
 		governmentIDCURPRegex:                 search.GovernmentIDCURP,
 		governmentIDElectoralRegex:            search.GovernmentIDElectoral,
 		governmentIDBusinessRegistrationRegex: search.GovernmentIDBusinessRegisration,
+		governmentIDCompanyNumberRegex:        search.GovernmentIDBusinessRegisration,
+		governmentIDLegalEntityNumberRegex:    search.GovernmentIDBusinessRegisration,
 		governmentIDCommercialRegistryRegex:   search.GovernmentIDCommercialRegistry,
 		governmentIDBirthCertRegex:            search.GovernmentIDBirthCert,
 		governmentIDRefugeeRegex:              search.GovernmentIDRefugee,

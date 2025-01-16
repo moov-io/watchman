@@ -119,32 +119,22 @@ var (
 )
 
 type Business struct {
-	Name        string       `json:"name"`
-	AltNames    []string     `json:"altNames"`
-	Created     *time.Time   `json:"created"`
-	Dissolved   *time.Time   `json:"dissolved"`
-	Identifiers []Identifier `json:"identifiers"`
-}
-
-// Identifier
-//
-// TODO(adam): Look at OpenSanctions for tax ID codes
-// https://www.opensanctions.org/reference/#schema.Company
-type Identifier struct {
-	Name       string `json:"string"`
-	Country    string `json:"country"` // ISO-3166 // TODO(adam):
-	Identifier string `json:"value"`
+	Name          string         `json:"name"`
+	AltNames      []string       `json:"altNames"`
+	Created       *time.Time     `json:"created"`
+	Dissolved     *time.Time     `json:"dissolved"`
+	GovernmentIDs []GovernmentID `json:"governmentIDs"`
 }
 
 // Organization
 //
 // TODO(adam): https://www.opensanctions.org/reference/#schema.Organization
 type Organization struct {
-	Name        string       `json:"name"`
-	AltNames    []string     `json:"altNames"`
-	Created     *time.Time   `json:"created"`
-	Dissolved   *time.Time   `json:"dissolved"`
-	Identifiers []Identifier `json:"identifier"`
+	Name          string         `json:"name"`
+	AltNames      []string       `json:"altNames"`
+	Created       *time.Time     `json:"created"`
+	Dissolved     *time.Time     `json:"dissolved"`
+	GovernmentIDs []GovernmentID `json:"governmentIDs"`
 }
 
 type Aircraft struct {

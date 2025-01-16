@@ -28,7 +28,7 @@ func TestIntegrity_OFAC_US_CSL(t *testing.T) {
 		require.ElementsMatch(t, ofacEntity.Business.AltNames, cslUSEntity.Business.AltNames)
 		require.Equal(t, ofacEntity.Business.Created, cslUSEntity.Business.Created)
 		require.Equal(t, ofacEntity.Business.Dissolved, cslUSEntity.Business.Dissolved)
-		require.ElementsMatch(t, ofacEntity.Business.Identifiers, cslUSEntity.Business.Identifiers)
+		require.ElementsMatch(t, ofacEntity.Business.GovernmentIDs, cslUSEntity.Business.GovernmentIDs)
 
 		// Common Fields
 		require.Equal(t, ofacEntity.Contact, cslUSEntity.Contact)

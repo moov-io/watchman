@@ -95,13 +95,13 @@ func compareBusinessExactIDs(w io.Writer, query *Business, index *Business, weig
 	hasMatch := false
 
 	// Business Registration/Tax IDs
-	if len(query.Identifiers) > 0 && len(index.Identifiers) > 0 {
+	if len(query.GovernmentIDs) > 0 && len(index.GovernmentIDs) > 0 {
 		fieldsCompared++
 		totalWeight += 15.0
-		for _, qID := range query.Identifiers {
-			for _, iID := range index.Identifiers {
+		for _, qID := range query.GovernmentIDs {
+			for _, iID := range index.GovernmentIDs {
 				// Exact match on all identifier fields
-				if strings.EqualFold(qID.Name, iID.Name) &&
+				if strings.EqualFold(string(qID.Type), string(iID.Type)) &&
 					strings.EqualFold(qID.Country, iID.Country) &&
 					strings.EqualFold(qID.Identifier, iID.Identifier) {
 					score += 15.0
@@ -141,13 +141,13 @@ func compareOrgExactIDs(w io.Writer, query *Organization, index *Organization, w
 	hasMatch := false
 
 	// Organization Registration/Tax IDs
-	if len(query.Identifiers) > 0 && len(index.Identifiers) > 0 {
+	if len(query.GovernmentIDs) > 0 && len(index.GovernmentIDs) > 0 {
 		fieldsCompared++
 		totalWeight += 15.0
-		for _, qID := range query.Identifiers {
-			for _, iID := range index.Identifiers {
+		for _, qID := range query.GovernmentIDs {
+			for _, iID := range index.GovernmentIDs {
 				// Exact match on all identifier fields
-				if strings.EqualFold(qID.Name, iID.Name) &&
+				if strings.EqualFold(string(qID.Type), string(iID.Type)) &&
 					strings.EqualFold(qID.Country, iID.Country) &&
 					strings.EqualFold(qID.Identifier, iID.Identifier) {
 					score += 15.0
@@ -461,8 +461,8 @@ func compareBusinessGovernmentIDs(query *Business, index *Business, weight float
 		return scorePiece{score: 0, weight: weight, fieldsCompared: 0, pieceType: "gov-ids-exact"}
 	}
 
-	qIDs := query.Identifiers
-	iIDs := index.Identifiers
+	qIDs := query.GovernmentIDs
+	iIDs := index.GovernmentIDs
 
 	if len(qIDs) == 0 || len(iIDs) == 0 {
 		return scorePiece{score: 0, weight: weight, fieldsCompared: 0, pieceType: "gov-ids-exact"}
@@ -501,8 +501,8 @@ func compareOrgGovernmentIDs(query *Organization, index *Organization, weight fl
 		return scorePiece{score: 0, weight: weight, fieldsCompared: 0, pieceType: "gov-ids-exact"}
 	}
 
-	qIDs := query.Identifiers
-	iIDs := index.Identifiers
+	qIDs := query.GovernmentIDs
+	iIDs := index.GovernmentIDs
 
 	if len(qIDs) == 0 || len(iIDs) == 0 {
 		return scorePiece{score: 0, weight: weight, fieldsCompared: 0, pieceType: "gov-ids-exact"}

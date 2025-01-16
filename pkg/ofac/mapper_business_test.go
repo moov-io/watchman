@@ -34,11 +34,11 @@ func TestMapperBusiness__FromSource(t *testing.T) {
 		require.Equal(t, createdAt.Format(time.RFC3339), business.Created.Format(time.RFC3339))
 		require.Nil(t, business.Dissolved)
 
-		expectedIdentifiers := []search.Identifier{
-			{Name: "Company Number", Country: "Czech Republic", Identifier: "07486049"},
-			{Name: "Legal Entity Number", Country: "Czech Republic", Identifier: "5299007NTWCC3U23WM81"},
+		expectedGovernmentIDs := []search.GovernmentID{
+			{Type: search.GovernmentIDBusinessRegisration, Country: "Czech Republic", Identifier: "07486049"},
+			{Type: search.GovernmentIDBusinessRegisration, Country: "Czech Republic", Identifier: "5299007NTWCC3U23WM81"},
 		}
-		require.ElementsMatch(t, expectedIdentifiers, business.Identifiers)
+		require.ElementsMatch(t, expectedGovernmentIDs, business.GovernmentIDs)
 
 		expectedContact := search.ContactInfo{
 			Websites: []string{"suex.io"},
@@ -129,11 +129,11 @@ func TestMapperBusiness__FromSource(t *testing.T) {
 		require.Equal(t, createdAt.Format(time.RFC3339), business.Created.Format(time.RFC3339))
 		require.Nil(t, business.Dissolved)
 
-		expectedIdentifiers := []search.Identifier{
-			{Name: "Business Registration Number", Country: "Russia", Identifier: "1207700248030"},
-			{Name: "Tax ID No.", Country: "Russia", Identifier: "9709063550"},
+		expectedGovernmentIDs := []search.GovernmentID{
+			{Type: search.GovernmentIDBusinessRegisration, Country: "Russia", Identifier: "1207700248030"},
+			{Type: search.GovernmentIDTax, Country: "Russia", Identifier: "9709063550"},
 		}
-		require.ElementsMatch(t, expectedIdentifiers, business.Identifiers)
+		require.ElementsMatch(t, expectedGovernmentIDs, business.GovernmentIDs)
 
 		expectedContact := search.ContactInfo{
 			Websites: []string{"www.dialog.info", "www.dialog-regions.ru"},
@@ -173,26 +173,26 @@ func TestMapper__CompleteBusiness(t *testing.T) {
 
 	require.NotNil(t, e.Business)
 	require.Equal(t, "ACME CORPORATION", e.Business.Name)
-	require.Len(t, e.Business.Identifiers, 3)
+	require.Len(t, e.Business.GovernmentIDs, 3)
 
 	// Sort the identifiers to ensure consistent ordering for tests
-	identifiers := e.Business.Identifiers
-	sort.Slice(identifiers, func(i, j int) bool {
-		return identifiers[i].Country < identifiers[j].Country
+	govIDs := e.Business.GovernmentIDs
+	sort.Slice(govIDs, func(i, j int) bool {
+		return govIDs[i].Country < govIDs[j].Country
 	})
 
 	// Verify identifiers
-	require.Equal(t, "Hong Kong", identifiers[0].Country)
-	require.Equal(t, "Business Registration Number", identifiers[0].Name)
-	require.Equal(t, "51566843", identifiers[0].Identifier)
+	require.Equal(t, "Hong Kong", govIDs[0].Country)
+	require.Equal(t, search.GovernmentIDBusinessRegisration, govIDs[0].Type)
+	require.Equal(t, "51566843", govIDs[0].Identifier)
 
-	require.Equal(t, "Switzerland", identifiers[1].Country)
-	require.Equal(t, "Commercial Registry Number", identifiers[1].Name)
-	require.Equal(t, "CH-020.1.066.499-9", identifiers[1].Identifier)
+	require.Equal(t, "Switzerland", govIDs[1].Country)
+	require.Equal(t, search.GovernmentIDCommercialRegistry, govIDs[1].Type)
+	require.Equal(t, "CH-020.1.066.499-9", govIDs[1].Identifier)
 
-	require.Equal(t, "United Kingdom", identifiers[2].Country)
-	require.Equal(t, "Company Number", identifiers[2].Name)
-	require.Equal(t, "05527424", identifiers[2].Identifier)
+	require.Equal(t, "United Kingdom", govIDs[2].Country)
+	require.Equal(t, search.GovernmentIDBusinessRegisration, govIDs[2].Type)
+	require.Equal(t, "05527424", govIDs[2].Identifier)
 
 	// Verify other entity types are nil
 	require.Nil(t, e.Person)

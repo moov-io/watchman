@@ -200,7 +200,7 @@ func mapBusiness(src ENHANCED_XML.EntitiesEntity) *search.Business {
 
 	// Map business identifiers
 	if src.IdentityDocuments != nil {
-		business.Identifiers = mapIdentifiers(src.IdentityDocuments)
+		business.GovernmentIDs = mapGovernmentIDs(src.IdentityDocuments)
 	}
 
 	return business
@@ -230,7 +230,7 @@ func mapOrganization(src ENHANCED_XML.EntitiesEntity) *search.Organization {
 
 	// Map organization identifiers
 	if src.IdentityDocuments != nil {
-		org.Identifiers = mapIdentifiers(src.IdentityDocuments)
+		org.GovernmentIDs = mapGovernmentIDs(src.IdentityDocuments)
 	}
 
 	return org
@@ -467,7 +467,9 @@ func mapGovernmentIDs(docs *ENHANCED_XML.EntityIdentityDocuments) []search.Gover
 			Country:    getCountryCode(doc.IssuingCountry),
 			Identifier: doc.DocumentNumber,
 		}
-		ids = append(ids, id)
+		if string(id.Type) != "" {
+			ids = append(ids, id)
+		}
 	}
 	return ids
 }
@@ -493,7 +495,8 @@ func mapIDType(ref ENHANCED_XML.ReferenceValueReferenceType) search.GovernmentID
 		return search.GovernmentIDCUIT
 	case 1607: // Electoral Registry No.
 		return search.GovernmentIDElectoral
-	case 1581: // Business Registration Document #
+	case 1581, 1585, 91752, 91760, 91761:
+		// Business Registration Document, etc
 		return search.GovernmentIDBusinessRegisration
 	case 1619: // Commercial Registry Number
 		return search.GovernmentIDCommercialRegistry
@@ -508,23 +511,6 @@ func mapIDType(ref ENHANCED_XML.ReferenceValueReferenceType) search.GovernmentID
 	default:
 		return "" // Unknown ID type
 	}
-}
-
-func mapIdentifiers(docs *ENHANCED_XML.EntityIdentityDocuments) []search.Identifier {
-	if docs == nil {
-		return nil
-	}
-
-	var identifiers []search.Identifier
-	for _, doc := range docs.IdentityDocument {
-		identifier := search.Identifier{
-			Name:       doc.Type.Text,
-			Country:    getCountryCode(doc.IssuingCountry),
-			Identifier: doc.DocumentNumber,
-		}
-		identifiers = append(identifiers, identifier)
-	}
-	return identifiers
 }
 
 func mapAircraftType(value string) search.AircraftType {
