@@ -98,6 +98,20 @@ func TestMapperBusiness__FromSource(t *testing.T) {
 		require.Equal(t, expectedContact, found.Contact)
 	})
 
+	t.Run("44525", func(t *testing.T) {
+		found := ofactest.FindEntity(t, "44525")
+		require.Equal(t, "BEL-KAP-STEEL LLC", found.Name)
+
+		t.Logf("%#v", found.Business)
+
+		expectedGovernmentIDs := []search.GovernmentID{
+			{Type: "tax-id", Country: "United States", Identifier: "52-2083095"},
+			{Type: "business-registration", Country: "Connecticut", Identifier: "0582030"},
+			{Type: "business-registration", Country: "Florida", Identifier: "M99000000961"},
+		}
+		require.ElementsMatch(t, expectedGovernmentIDs, found.Business.GovernmentIDs)
+	})
+
 	t.Run("50544", func(t *testing.T) {
 		found := ofactest.FindEntity(t, "50544")
 

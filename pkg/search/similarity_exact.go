@@ -38,6 +38,10 @@ func compareExactIdentifiers[Q any, I any](w io.Writer, query Entity[Q], index E
 	}
 }
 
+func normalizeIdentifier(id string) string {
+	return strings.ReplaceAll(id, "-", "")
+}
+
 // comparePersonExactIDs checks exact matches for Person-specific identifiers
 func comparePersonExactIDs(w io.Writer, query *Person, index *Person, weight float64) scorePiece {
 	if query == nil || index == nil {
@@ -57,7 +61,7 @@ func comparePersonExactIDs(w io.Writer, query *Person, index *Person, weight flo
 			for _, iID := range index.GovernmentIDs {
 				if strings.EqualFold(string(qID.Type), string(iID.Type)) &&
 					strings.EqualFold(qID.Country, iID.Country) &&
-					strings.EqualFold(qID.Identifier, iID.Identifier) {
+					strings.EqualFold(normalizeIdentifier(qID.Identifier), normalizeIdentifier(iID.Identifier)) {
 					score += 15.0
 					hasMatch = true
 					goto GovIDDone // Break both loops on first match
@@ -103,7 +107,7 @@ func compareBusinessExactIDs(w io.Writer, query *Business, index *Business, weig
 				// Exact match on all identifier fields
 				if strings.EqualFold(string(qID.Type), string(iID.Type)) &&
 					strings.EqualFold(qID.Country, iID.Country) &&
-					strings.EqualFold(qID.Identifier, iID.Identifier) {
+					strings.EqualFold(normalizeIdentifier(qID.Identifier), normalizeIdentifier(iID.Identifier)) {
 					score += 15.0
 					hasMatch = true
 					goto IdentifierDone
@@ -149,7 +153,7 @@ func compareOrgExactIDs(w io.Writer, query *Organization, index *Organization, w
 				// Exact match on all identifier fields
 				if strings.EqualFold(string(qID.Type), string(iID.Type)) &&
 					strings.EqualFold(qID.Country, iID.Country) &&
-					strings.EqualFold(qID.Identifier, iID.Identifier) {
+					strings.EqualFold(normalizeIdentifier(qID.Identifier), normalizeIdentifier(iID.Identifier)) {
 					score += 15.0
 					hasMatch = true
 					goto IdentifierDone
