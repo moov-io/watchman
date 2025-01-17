@@ -5,7 +5,10 @@ import (
 )
 
 type MockClient struct {
-	Err            error
+	Err error
+
+	Searches []Entity[Value]
+
 	SearchResponse SearchResponse
 }
 
@@ -19,5 +22,8 @@ func (c *MockClient) SearchByEntity(ctx context.Context, entity Entity[Value], o
 	if c.Err != nil {
 		return SearchResponse{}, c.Err
 	}
+
+	c.Searches = append(c.Searches, entity)
+
 	return c.SearchResponse, c.Err
 }
