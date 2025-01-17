@@ -10,7 +10,7 @@ import (
 )
 
 type Client interface {
-	SearchByEntity(ctx context.Context, entity Entity[Value]) (SearchResponse, error)
+	SearchByEntity(ctx context.Context, entity Entity[Value], opts SearchOpts) (SearchResponse, error)
 }
 
 func NewClient(httpClient *http.Client, baseAddress string) Client {
@@ -33,9 +33,18 @@ type SearchResponse struct {
 	Entities []SearchedEntity[Value] `json:"entities"`
 }
 
-func (c *client) SearchByEntity(ctx context.Context, entity Entity[Value]) (SearchResponse, error) {
+type SearchOpts struct {
+	Limit    int
+	MinMatch float64
+}
+
+func (c *client) SearchByEntity(ctx context.Context, entity Entity[Value], opts SearchOpts) (SearchResponse, error) {
 	addr := c.baseAddress + "/v2/search"
 	addr += "?name=" + entity.Name // TODO(adam): escape, use proper setters
+
+	if opts.Limit > 0 {
+		addr += fmt.Sprintf("&limit=%d", opts.Limit)
+	}
 
 	var out SearchResponse
 
