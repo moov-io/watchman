@@ -72,7 +72,10 @@ func searchForm(ctx context.Context, env Environment, warning *fyne.Container, r
 			env.Logger.Info().Logf("searching with %d fields", len(populatedItems))
 
 			query := buildQueryEntity(populatedItems)
-			resp, err := env.Client.SearchByEntity(ctx, query)
+			searchOpts := search.SearchOpts{
+				Limit: 5,
+			}
+			resp, err := env.Client.SearchByEntity(ctx, query, searchOpts)
 			if err != nil {
 				env.Logger.Error().LogErrorf("ERROR performing search: %v", err)
 				showWarning(env, warning, err)
