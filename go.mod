@@ -10,6 +10,7 @@ require (
 	github.com/bbalet/stopwords v1.0.0
 	github.com/gorilla/mux v1.8.1
 	github.com/jaswdr/faker v1.19.1
+	github.com/jaswdr/faker/v2 v2.3.3
 	github.com/knieriem/odf v0.1.0
 	github.com/moov-io/base v0.48.2
 	github.com/openvenues/gopostal v0.0.0-20240426055609-4fe3a773f519
