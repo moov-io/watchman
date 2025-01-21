@@ -9,6 +9,8 @@ import (
 type MockClient struct {
 	Err error
 
+	ListInfoResponse ListInfoResponse
+
 	Index    []Entity[Value]
 	Searches []Entity[Value]
 }
@@ -17,6 +19,13 @@ var _ Client = (&MockClient{})
 
 func NewMockClient() *MockClient {
 	return &MockClient{}
+}
+
+func (c *MockClient) ListInfo(ctx context.Context) (ListInfoResponse, error) {
+	if c.Err != nil {
+		return ListInfoResponse{}, c.Err
+	}
+	return c.ListInfoResponse, nil
 }
 
 func (c *MockClient) SearchByEntity(ctx context.Context, query Entity[Value], opts SearchOpts) (SearchResponse, error) {
