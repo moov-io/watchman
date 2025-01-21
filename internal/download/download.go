@@ -106,8 +106,7 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 
 	logger.Info().Logf("finished all lists: %v", time.Since(start))
 
-	now := time.Now().In(time.UTC)
-	stats.EndedAt = &now
+	stats.EndedAt = time.Now().In(time.UTC)
 
 	return stats, nil
 }

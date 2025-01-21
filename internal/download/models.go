@@ -12,8 +12,8 @@ type Stats struct {
 	Lists      map[string]int    `json:"lists"`
 	ListHashes map[string]string `json:"listHashes"`
 
-	StartedAt time.Time  `json:"startedAt"`
-	EndedAt   *time.Time `json:"endedAt"`
+	StartedAt time.Time `json:"startedAt"`
+	EndedAt   time.Time `json:"endedAt"`
 }
 
 type Config struct {
