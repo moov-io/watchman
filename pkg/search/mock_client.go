@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"context"
 	"slices"
+	"sync"
 )
 
 type MockClient struct {
@@ -11,6 +12,7 @@ type MockClient struct {
 
 	ListInfoResponse ListInfoResponse
 
+	mu       sync.RWMutex
 	Index    []Entity[Value]
 	Searches []Entity[Value]
 }
@@ -34,7 +36,13 @@ func (c *MockClient) SearchByEntity(ctx context.Context, query Entity[Value], op
 	}
 
 	// Record the search
+	c.mu.Lock()
 	c.Searches = append(c.Searches, query)
+	c.mu.Unlock()
+
+	// Grab read lock
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	var resp SearchResponse
 	for _, index := range c.Index {
