@@ -1,14 +1,48 @@
 package search
 
 import (
+	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
+	"github.com/moov-io/base/log"
+	"github.com/moov-io/watchman/internal/download"
 	"github.com/moov-io/watchman/pkg/search"
 
+	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/require"
 )
+
+func TestAPI_ListInfo(t *testing.T) {
+	logger := log.NewTestLogger()
+	service := NewService(logger)
+
+	stats := download.Stats{
+		Lists:      make(map[string]int),
+		ListHashes: make(map[string]string),
+		StartedAt:  time.Now().In(time.UTC),
+	}
+	stats.Lists[string(search.SourceUSOFAC)] = 123
+	stats.ListHashes[string(search.SourceUSOFAC)] = "abc1234"
+	service.UpdateEntities(stats)
+
+	controller := NewController(logger, service)
+
+	router := mux.NewRouter()
+	controller.AppendRoutes(router)
+
+	req := httptest.NewRequest("GET", "/v2/listinfo", nil)
+
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	require.Equal(t, http.StatusOK, w.Code)
+
+	body := w.Body.String()
+	require.Contains(t, body, `"lists":{"us_ofac":123}`)
+	require.Contains(t, body, `"listHashes":{"us_ofac":"abc1234"}`)
+}
 
 func TestAPI_readSearchRequest(t *testing.T) {
 	t.Run("basic", func(t *testing.T) {

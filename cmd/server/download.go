@@ -71,7 +71,7 @@ func refreshAllSources(ctx context.Context, logger log.Logger, downloader downlo
 		len(stats.Entities), len(stats.Lists), stats.EndedAt.Sub(stats.StartedAt))
 
 	// Replace in-mem entities for search.Service
-	searchService.UpdateEntities(stats.Entities)
+	searchService.UpdateEntities(stats)
 
 	return nil
 }

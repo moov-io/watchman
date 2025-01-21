@@ -6,6 +6,9 @@ package csl_us
 
 import (
 	"archive/zip"
+	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -14,9 +17,15 @@ import (
 	"strings"
 
 	"github.com/moov-io/watchman/pkg/csl_us/gen/ENHANCED_XML"
+	"github.com/moov-io/watchman/pkg/download"
 )
 
-func Read(files map[string]io.ReadCloser) (*ENHANCED_XML.SanctionsData, error) {
+type ListData struct {
+	SanctionsData *ENHANCED_XML.SanctionsData
+	ListHash      string
+}
+
+func Read(files download.Files) (*ListData, error) {
 	for filename, contents := range files {
 		switch strings.ToLower(filename) {
 		case "cons_enhanced.zip":
@@ -28,8 +37,11 @@ func Read(files map[string]io.ReadCloser) (*ENHANCED_XML.SanctionsData, error) {
 	return nil, errors.New("no files provided")
 }
 
-func parseZipContents(filename string, contents io.ReadCloser) (*ENHANCED_XML.SanctionsData, error) {
-	readerAt, size, err := readCloserToReaderAt(contents)
+func parseZipContents(filename string, contents io.ReadCloser) (*ListData, error) {
+	var buf bytes.Buffer
+	buftee := io.TeeReader(contents, &buf)
+
+	readerAt, size, err := readCloserToReaderAt(io.NopCloser(buftee))
 	if err != nil {
 		return nil, fmt.Errorf("preparing %s for zip read: %w", filename, err)
 	}
@@ -66,7 +78,14 @@ func parseZipContents(filename string, contents io.ReadCloser) (*ENHANCED_XML.Sa
 		return nil, fmt.Errorf("failed to parse XML: %w", err)
 	}
 
-	return &doc, nil
+	list := &ListData{
+		SanctionsData: &doc,
+	}
+
+	listHash := sha256.Sum256(buf.Bytes())
+	list.ListHash = hex.EncodeToString(listHash[:])
+
+	return list, nil
 
 }
 

@@ -5,50 +5,65 @@
 package ofac
 
 import (
+	"bytes"
+	"crypto/sha256"
 	"encoding/csv"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
 	"path/filepath"
 	"strings"
+
+	"github.com/moov-io/watchman/pkg/download"
 )
 
 // Read will consume the file at path and attempt to parse it was a CSV OFAC file.
 //
 // For more details on the raw OFAC files see https://moov-io.github.io/watchman/file-structure.html
-func Read(files map[string]io.ReadCloser) (*Results, error) {
-	res := &Results{
+func Read(files download.Files) (*Results, error) {
+	results := &Results{
 		SDNs:                []SDN{},
 		Addresses:           make(map[string][]Address, 0),
 		AlternateIdentities: make(map[string][]AlternateIdentity, 0),
 		SDNComments:         make(map[string][]SDNComments, 0),
 	}
 
+	hashes := make([]string, 4)
+
 	for filename, file := range files {
 		switch strings.ToLower(filepath.Base(filename)) {
 		case "add.csv":
-			err := res.append(csvAddressFile(file))
+			res, hash, err := csvAddressFile(file)
 			if err != nil {
 				return nil, fmt.Errorf("add.csv: %v", err)
 			}
+			hashes[0] = hash
+			results.append(res)
 
 		case "alt.csv":
-			err := res.append(csvAlternateIdentityFile(file))
+			res, hash, err := csvAlternateIdentityFile(file)
 			if err != nil {
-				return nil, fmt.Errorf("add.csv: %v", err)
+				return nil, fmt.Errorf("alt.csv: %v", err)
 			}
+			hashes[1] = hash
+			results.append(res)
 
 		case "sdn.csv":
-			err := res.append(csvSDNFile(file))
+			res, hash, err := csvSDNFile(file)
 			if err != nil {
-				return nil, fmt.Errorf("add.csv: %v", err)
+				return nil, fmt.Errorf("sdn.csv: %v", err)
 			}
+			hashes[2] = hash
+			results.append(res)
 
 		case "sdn_comments.csv":
-			err := res.append(csvSDNCommentsFile(file))
+			res, hash, err := csvSDNCommentsFile(file)
 			if err != nil {
-				return nil, fmt.Errorf("add.csv: %v", err)
+				return nil, fmt.Errorf("sdn_comments.csv: %v", err)
 			}
+			hashes[3] = hash
+			results.append(res)
 
 		default:
 			file.Close()
@@ -56,10 +71,17 @@ func Read(files map[string]io.ReadCloser) (*Results, error) {
 		}
 	}
 
-	// Merge extended comments into SDN
-	res.SDNs = mergeSpilloverRecords(res.SDNs, res.SDNComments)
+	// Join the hashes together
+	var buf bytes.Buffer
+	for _, h := range hashes {
+		buf.WriteString(h)
+	}
+	results.ListHash = calculateHash(buf.Bytes())
 
-	return res, nil
+	// Merge extended comments into SDN
+	results.SDNs = mergeSpilloverRecords(results.SDNs, results.SDNComments)
+
+	return results, nil
 }
 
 type Results struct {
@@ -74,12 +96,11 @@ type Results struct {
 
 	// SDNComments returns an array of OFAC Specially Designated National Comments
 	SDNComments map[string][]SDNComments `json:"sdnComments"`
+
+	ListHash string
 }
 
-func (r *Results) append(rr *Results, err error) error {
-	if err != nil {
-		return err
-	}
+func (r *Results) append(rr *Results) {
 	r.SDNs = append(r.SDNs, rr.SDNs...)
 
 	if rr.Addresses != nil {
@@ -105,17 +126,28 @@ func (r *Results) append(rr *Results, err error) error {
 			}
 		}
 	}
-
-	return nil
 }
 
-func csvAddressFile(f io.ReadCloser) (*Results, error) {
+func calculateHash(input []byte) string {
+	h := sha256.Sum256(input)
+	return hex.EncodeToString(h[:])
+}
+
+func hashWriter(rc io.ReadCloser) (io.Reader, *bytes.Buffer) {
+	var buf bytes.Buffer
+	r := io.TeeReader(rc, &buf)
+	return r, &buf
+}
+
+func csvAddressFile(f io.ReadCloser) (*Results, string, error) {
 	defer f.Close()
+
+	rc, hashbuf := hashWriter(f)
 
 	out := make(map[string][]Address, 0)
 
 	// Read File into a Variable
-	reader := csv.NewReader(f)
+	reader := csv.NewReader(rc)
 	for {
 		record, err := reader.Read()
 		if err != nil {
@@ -129,7 +161,7 @@ func csvAddressFile(f io.ReadCloser) (*Results, error) {
 				errors.Is(err, csv.ErrQuote) {
 				continue
 			}
-			return nil, err
+			return nil, "", err
 		}
 		if len(record) != 6 {
 			continue
@@ -147,16 +179,21 @@ func csvAddressFile(f io.ReadCloser) (*Results, error) {
 			AddressRemarks:              record[5],
 		})
 	}
-	return &Results{Addresses: out}, nil
+
+	hash := calculateHash(hashbuf.Bytes())
+
+	return &Results{Addresses: out}, hash, nil
 }
 
-func csvAlternateIdentityFile(f io.ReadCloser) (*Results, error) {
+func csvAlternateIdentityFile(f io.ReadCloser) (*Results, string, error) {
 	defer f.Close()
+
+	rc, hashbuf := hashWriter(f)
 
 	out := make(map[string][]AlternateIdentity, 0)
 
 	// Read File into a Variable
-	reader := csv.NewReader(f)
+	reader := csv.NewReader(rc)
 	for {
 		record, err := reader.Read()
 		if err != nil {
@@ -170,7 +207,7 @@ func csvAlternateIdentityFile(f io.ReadCloser) (*Results, error) {
 				errors.Is(err, csv.ErrQuote) {
 				continue
 			}
-			return nil, err
+			return nil, "", err
 		}
 		if len(record) != 5 {
 			continue
@@ -186,16 +223,21 @@ func csvAlternateIdentityFile(f io.ReadCloser) (*Results, error) {
 			AlternateRemarks: record[4],
 		})
 	}
-	return &Results{AlternateIdentities: out}, nil
+
+	hash := calculateHash(hashbuf.Bytes())
+
+	return &Results{AlternateIdentities: out}, hash, nil
 }
 
-func csvSDNFile(f io.ReadCloser) (*Results, error) {
+func csvSDNFile(f io.ReadCloser) (*Results, string, error) {
 	defer f.Close()
+
+	rc, hashbuf := hashWriter(f)
 
 	var out []SDN
 
 	// Read File into a Variable
-	reader := csv.NewReader(f)
+	reader := csv.NewReader(rc)
 	for {
 		record, err := reader.Read()
 		if err != nil {
@@ -209,7 +251,7 @@ func csvSDNFile(f io.ReadCloser) (*Results, error) {
 				errors.Is(err, csv.ErrQuote) {
 				continue
 			}
-			return nil, err
+			return nil, "", err
 		}
 		if len(record) != 12 {
 			continue
@@ -230,13 +272,19 @@ func csvSDNFile(f io.ReadCloser) (*Results, error) {
 			Remarks:                record[11],
 		})
 	}
-	return &Results{SDNs: out}, nil
+
+	hash := calculateHash(hashbuf.Bytes())
+
+	return &Results{SDNs: out}, hash, nil
 }
 
-func csvSDNCommentsFile(f io.ReadCloser) (*Results, error) {
+func csvSDNCommentsFile(f io.ReadCloser) (*Results, string, error) {
 	defer f.Close()
+
+	rc, hashbuf := hashWriter(f)
+
 	// Read File into a Variable
-	r := csv.NewReader(f)
+	r := csv.NewReader(rc)
 	r.LazyQuotes = true
 
 	// Loop through lines & turn into object
@@ -254,7 +302,7 @@ func csvSDNCommentsFile(f io.ReadCloser) (*Results, error) {
 				errors.Is(err, csv.ErrQuote) {
 				continue
 			}
-			return nil, err
+			return nil, "", err
 		}
 		if len(line) != 2 {
 			continue
@@ -268,7 +316,10 @@ func csvSDNCommentsFile(f io.ReadCloser) (*Results, error) {
 			DigitalCurrencyAddresses: readDigitalCurrencyAddresses(line[1]),
 		})
 	}
-	return &Results{SDNComments: out}, nil
+
+	hash := calculateHash(hashbuf.Bytes())
+
+	return &Results{SDNComments: out}, hash, nil
 }
 
 // replaceNull replaces a CSV field that contain -0- with "".  Null values for all four formats consist of "-0-"

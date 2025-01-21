@@ -33,8 +33,9 @@ type downloader struct {
 
 func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 	stats := Stats{
-		Lists:     make(map[string]int),
-		StartedAt: time.Now().In(time.UTC),
+		Lists:      make(map[string]int),
+		ListHashes: make(map[string]string),
+		StartedAt:  time.Now().In(time.UTC),
 	}
 	logger := dl.logger.Info().With(log.Fields{
 		"initial_data_directory": log.String(dl.conf.InitialDataDirectory),
@@ -53,6 +54,8 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 			logger.Info().Logf("adding %d entities from %v", len(list.Entities), list.ListName)
 
 			stats.Lists[string(list.ListName)] = len(list.Entities)
+			stats.ListHashes[string(list.ListName)] = list.Hash
+
 			stats.Entities = append(stats.Entities, list.Entities...)
 		}
 	}()
@@ -102,13 +105,18 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 	}
 
 	logger.Info().Logf("finished all lists: %v", time.Since(start))
-	stats.EndedAt = time.Now().In(time.UTC)
+
+	now := time.Now().In(time.UTC)
+	stats.EndedAt = &now
+
 	return stats, nil
 }
 
 type preparedList struct {
 	ListName search.SourceList
 	Entities []search.Entity[search.Value]
+
+	Hash string
 }
 
 func loadOFACRecords(ctx context.Context, logger log.Logger, conf Config, responseCh chan preparedList) error {
@@ -117,6 +125,8 @@ func loadOFACRecords(ctx context.Context, logger log.Logger, conf Config, respon
 	if err != nil {
 		return fmt.Errorf("OFAC download: %v", err)
 	}
+	defer files.Close()
+
 	if len(files) == 0 {
 		return fmt.Errorf("unexpected %d OFAC files found", len(files))
 	}
@@ -135,6 +145,7 @@ func loadOFACRecords(ctx context.Context, logger log.Logger, conf Config, respon
 	responseCh <- preparedList{
 		ListName: search.SourceUSOFAC,
 		Entities: entities,
+		Hash:     res.ListHash,
 	}
 	return nil
 }
@@ -145,6 +156,8 @@ func loadCSLUSRecords(ctx context.Context, logger log.Logger, conf Config, respo
 	if err != nil {
 		return fmt.Errorf("US CSL download: %w", err)
 	}
+	defer files.Close()
+
 	if len(files) == 0 {
 		return fmt.Errorf("unexpected %d US CSL files found", len(files))
 	}
@@ -157,12 +170,13 @@ func loadCSLUSRecords(ctx context.Context, logger log.Logger, conf Config, respo
 		return fmt.Errorf("parsing US CSL: %w", err)
 	}
 
-	entities := csl_us.ConvertSanctionsData(res)
+	entities := csl_us.ConvertSanctionsData(res.SanctionsData)
 	logger.Debug().Logf("finished US CSL preperation: %v", time.Since(start))
 
 	responseCh <- preparedList{
 		ListName: search.SourceUSCSL,
 		Entities: entities,
+		Hash:     res.ListHash,
 	}
 
 	return nil

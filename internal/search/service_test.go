@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/moov-io/watchman/internal/download"
 	"github.com/moov-io/watchman/pkg/ofac"
 	"github.com/moov-io/watchman/pkg/search"
 
@@ -70,7 +71,9 @@ func testService(tb testing.TB) Service {
 	logger := log.NewTestLogger()
 
 	svc := NewService(logger)
-	svc.UpdateEntities(entities)
+	svc.UpdateEntities(download.Stats{
+		Entities: entities,
+	})
 
 	return svc
 }

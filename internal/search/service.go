@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/moov-io/watchman/internal/download"
 	"github.com/moov-io/watchman/internal/indices"
 	"github.com/moov-io/watchman/internal/largest"
 	"github.com/moov-io/watchman/pkg/search"
@@ -17,7 +18,8 @@ import (
 )
 
 type Service interface {
-	UpdateEntities(entities []search.Entity[search.Value])
+	LatestStats() download.Stats
+	UpdateEntities(stats download.Stats)
 
 	Search(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error)
 }
@@ -29,17 +31,32 @@ func NewService(logger log.Logger) Service {
 }
 
 type service struct {
-	logger   log.Logger
-	entities []search.Entity[search.Value]
+	logger log.Logger
 
-	sync.RWMutex // protects entities
+	latestStats  download.Stats
+	sync.RWMutex // protects latestStats (which has entities and list hashes)
 }
 
-func (s *service) UpdateEntities(entities []search.Entity[search.Value]) {
+func (s *service) LatestStats() download.Stats {
+	// Grab a read-lock over our data
+	s.RLock()
+	defer s.RUnlock()
+
+	// Only bring over what fields we need
+	out := download.Stats{
+		Lists:      s.latestStats.Lists,
+		ListHashes: s.latestStats.ListHashes,
+		StartedAt:  s.latestStats.StartedAt,
+		EndedAt:    s.latestStats.EndedAt,
+	}
+	return out
+}
+
+func (s *service) UpdateEntities(stats download.Stats) {
 	s.Lock()
 	defer s.Unlock()
 
-	s.entities = entities
+	s.latestStats = stats
 }
 
 func (s *service) Search(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error) {
@@ -65,7 +82,7 @@ type SearchOpts struct {
 func (s *service) performSearch(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error) {
 	items := largest.NewItems(opts.Limit, opts.MinMatch)
 
-	indices.ProcessSliceFn(s.entities, getGroupCount(opts), func(index search.Entity[search.Value]) {
+	indices.ProcessSliceFn(s.latestStats.Entities, getGroupCount(opts), func(index search.Entity[search.Value]) {
 		score := search.DebugSimilarity(nil, query, index) // TODO(adam): add proper debug functionality?
 
 		if slices.Contains(opts.DebugSourceIDs, index.SourceID) {

@@ -44,12 +44,31 @@ type Downloader struct {
 	Logger log.Logger
 }
 
+const (
+	HashKey = "hash:sha256"
+)
+
+type Files map[string]io.ReadCloser
+
+func (fs Files) Close() error {
+	if fs == nil {
+		return nil
+	}
+
+	for filename, rc := range fs {
+		if err := rc.Close(); err != nil {
+			return fmt.Errorf("closing %s failed: %w", filename, err)
+		}
+	}
+	return nil
+}
+
 // GetFiles will initiate download of all provided files, return an io.ReadCloser to their content
 //
 // initialDir is an optional filepath to look for files in before attempting to download.
 //
 // Callers are expected to call the io.Closer interface method when they are done with the file
-func (dl *Downloader) GetFiles(ctx context.Context, dir string, namesAndSources map[string]string) (map[string]io.ReadCloser, error) {
+func (dl *Downloader) GetFiles(ctx context.Context, dir string, namesAndSources map[string]string) (Files, error) {
 	if dl == nil {
 		return nil, errors.New("nil Downloader")
 	}
@@ -65,7 +84,7 @@ func (dl *Downloader) GetFiles(ctx context.Context, dir string, namesAndSources 
 	localFiles, _ := os.ReadDir(dir)
 
 	var mu sync.Mutex
-	out := make(map[string]io.ReadCloser)
+	out := make(Files)
 	var wg sync.WaitGroup
 	wg.Add(len(namesAndSources))
 
@@ -106,6 +125,7 @@ findfiles:
 			}
 
 			logger.Info().Logf("successful download after %v", dur)
+
 			mu.Lock()
 			out[filename] = content
 			mu.Unlock()

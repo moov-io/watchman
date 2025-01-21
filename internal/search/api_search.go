@@ -40,7 +40,20 @@ func (c *controller) AppendRoutes(router *mux.Router) *mux.Router {
 		Path("/v2/search").
 		HandlerFunc(c.search)
 
+	router.
+		Name("ListInfo.v2").
+		Methods("GET").
+		Path("/v2/listinfo").
+		HandlerFunc(c.listinfo)
+
 	return router
+}
+
+func (c *controller) listinfo(w http.ResponseWriter, r *http.Request) {
+	stats := c.service.LatestStats()
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(stats)
 }
 
 type searchResponse struct {

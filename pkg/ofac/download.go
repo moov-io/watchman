@@ -7,7 +7,6 @@ package ofac
 import (
 	"context"
 	"fmt"
-	"io"
 	"os"
 
 	"github.com/moov-io/base/log"
@@ -30,7 +29,7 @@ var (
 	}()
 )
 
-func Download(ctx context.Context, logger log.Logger, initialDir string) (map[string]io.ReadCloser, error) {
+func Download(ctx context.Context, logger log.Logger, initialDir string) (download.Files, error) {
 	dl := download.New(logger, download.HTTPClient)
 
 	addrs := make(map[string]string)

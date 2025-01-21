@@ -112,8 +112,9 @@ func TestSDNComments(t *testing.T) {
 	fd.Seek(0, 0)
 
 	// read with lazy quotes enabled
-	res, err := csvSDNCommentsFile(fd)
+	res, hash, err := csvSDNCommentsFile(fd)
 	require.NoError(t, err)
+	require.NotEmpty(t, hash)
 	require.Len(t, res.SDNComments, 1)
 
 	comments, found := res.SDNComments["28264"]
@@ -177,8 +178,9 @@ func TestSDNComments_CryptoCurrencies(t *testing.T) {
 	require.NoError(t, err)
 	fd.Seek(0, 0)
 
-	sdn, err := csvSDNCommentsFile(fd)
+	sdn, hash, err := csvSDNCommentsFile(fd)
 	require.NoError(t, err)
+	require.NotEmpty(t, hash)
 	require.Len(t, sdn.SDNComments, 1)
 
 	comments, found := sdn.SDNComments["42496"]

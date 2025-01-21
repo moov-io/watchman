@@ -23,8 +23,9 @@ func TestReader(t *testing.T) {
 
 	data, err := Read(files)
 	require.NoError(t, err)
+	require.NotEmpty(t, data.ListHash)
 
-	entities := data.Entities.Entity
+	entities := data.SanctionsData.Entities.Entity
 	require.Len(t, entities, 443)
 }
 

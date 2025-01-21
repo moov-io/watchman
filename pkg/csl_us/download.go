@@ -7,7 +7,6 @@ package csl_us
 import (
 	"context"
 	"fmt"
-	"io"
 	"net/url"
 	"os"
 
@@ -21,7 +20,7 @@ var (
 	usDownloadURL       = strx.Or(os.Getenv("US_CSL_DOWNLOAD_TEMPLATE"), os.Getenv("US_CSL_DOWNLOAD_URL"), publicUSDownloadURL)
 )
 
-func Download(ctx context.Context, logger log.Logger, initialDir string) (map[string]io.ReadCloser, error) {
+func Download(ctx context.Context, logger log.Logger, initialDir string) (download.Files, error) {
 	dl := download.New(logger, download.HTTPClient)
 
 	cslURL, err := buildDownloadURL(usDownloadURL)
