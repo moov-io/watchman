@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strconv"
 	"time"
 )
 
@@ -72,16 +74,28 @@ type SearchOpts struct {
 }
 
 func (c *client) SearchByEntity(ctx context.Context, entity Entity[Value], opts SearchOpts) (SearchResponse, error) {
-	addr := c.baseAddress + "/v2/search"
-	addr += "?name=" + entity.Name // TODO(adam): escape, use proper setters
-
-	if opts.Limit > 0 {
-		addr += fmt.Sprintf("&limit=%d", opts.Limit)
-	}
-
 	var out SearchResponse
 
-	req, err := http.NewRequest("GET", addr, nil)
+	// Build the URL
+	addr, err := url.Parse(c.baseAddress + "/v2/search")
+	if err != nil {
+		return out, fmt.Errorf("problem creating baseAddress: %w", err)
+	}
+
+	// Set query parameters
+	q := addr.Query()
+	q.Set("type", string(entity.Type))
+
+	if entity.Name != "" {
+		q.Set("name", entity.Name)
+	}
+	if opts.Limit > 0 {
+		q.Set("limit", strconv.Itoa(opts.Limit))
+	}
+	addr.RawQuery = q.Encode()
+
+	// Make the request
+	req, err := http.NewRequest("GET", addr.String(), nil)
 	if err != nil {
 		return out, fmt.Errorf("creating search request: %w", err)
 	}

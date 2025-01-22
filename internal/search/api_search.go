@@ -56,10 +56,6 @@ func (c *controller) listinfo(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(stats)
 }
 
-type searchResponse struct {
-	Entities []search.SearchedEntity[search.Value] `json:"entities"`
-}
-
 type errorResponse struct {
 	Error string `json:"error"`
 }
@@ -107,7 +103,7 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(searchResponse{
+	json.NewEncoder(w).Encode(search.SearchResponse{
 		Entities: entities,
 	})
 }
