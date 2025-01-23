@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/moov-io/iso3166"
 )
 
 // Address represents a standardized address
@@ -260,6 +262,13 @@ func parseCityStateZip(line string, addr *Address) {
 	case "US", "USA", "UNITED STATES":
 		addr.Country = "UNITED STATES"
 		components = components[:len(components)-1]
+
+	default:
+		// If we can find a valid iso3166 code treat maybeCountry as a country
+		if iso3166.LookupCode(maybeCountry) != "" {
+			addr.Country = maybeCountry
+			components = components[:len(components)-1]
+		}
 	}
 
 	zipCode := strings.TrimSpace(components[len(components)-1])
