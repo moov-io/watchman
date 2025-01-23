@@ -211,13 +211,13 @@ func readSearchRequest(r *http.Request) (search.Entity[search.Value], error) {
 	}
 
 	// contact info // TODO(adam): normalize
-	req.Contact.EmailAddresses = readStrings(q["email"], q["emailAddress"])
-	req.Contact.PhoneNumbers = readStrings(q["phone"], q["phoneNumber"])
-	req.Contact.FaxNumbers = readStrings(q["fax"], q["faxNumber"])
-	req.Contact.Websites = readStrings(q["website"])
+	req.Contact.EmailAddresses = readStrings(q["email"], q["emailAddress"], q["emailAddresses"])
+	req.Contact.PhoneNumbers = readStrings(q["phone"], q["phoneNumber"], q["phoneNumbers"])
+	req.Contact.FaxNumbers = readStrings(q["fax"], q["faxNumber"], q["faxNumbers"])
+	req.Contact.Websites = readStrings(q["website"], q["websites"])
 
-	req.Addresses = readAddresses(q["address"])
-	req.CryptoAddresses = readCryptoCurrencyAddresses(q["cryptoAddress"])
+	req.Addresses = readAddresses(readStrings(q["address"], q["addresses"]))
+	req.CryptoAddresses = readCryptoCurrencyAddresses(readStrings(q["cryptoAddress"], q["cryptoAddresses"]))
 
 	// TODO(adam):
 	// Affiliations   []Affiliation    `json:"affiliations"`

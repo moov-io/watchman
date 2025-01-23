@@ -136,6 +136,11 @@ func buildQueryParameters(q url.Values, entity Entity[Value], opts SearchOpts) u
 		setVesselParameters(q, entity)
 	}
 
+	// ContactInfo, Addresses, CryptoAddresses, etc
+	setContactInfo(q, entity.Contact)
+	setAddresses(q, entity.Addresses)
+	setCryptoAddresses(q, entity.CryptoAddresses)
+
 	return q
 }
 
@@ -272,5 +277,32 @@ func setVesselParameters(q url.Values, entity Entity[Value]) {
 	// TODO(adam): GrossRegisteredTonnage
 	if entity.Vessel.Owner != "" {
 		q.Set("owner", entity.Vessel.Owner)
+	}
+}
+
+func setContactInfo(q url.Values, info ContactInfo) {
+	for _, email := range info.EmailAddresses {
+		q.Add("emailAddress", email)
+	}
+	for _, phone := range info.PhoneNumbers {
+		q.Add("phoneNumber", phone)
+	}
+	for _, fax := range info.FaxNumbers {
+		q.Add("faxNumber", fax)
+	}
+	for _, website := range info.Websites {
+		q.Add("website", website)
+	}
+}
+
+func setAddresses(q url.Values, addresses []Address) {
+	for _, addr := range addresses {
+		q.Add("address", addr.Format())
+	}
+}
+
+func setCryptoAddresses(q url.Values, cryptoAddresses []CryptoAddress) {
+	for _, addr := range cryptoAddresses {
+		q.Add("cryptoAddress", fmt.Sprintf("%s:%s", addr.Currency, addr.Address))
 	}
 }

@@ -2,6 +2,7 @@ package search
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -208,7 +209,8 @@ type Address struct {
 }
 
 func (a Address) Format() string {
-	return fmt.Sprintf("%s %s %s %s %s %s", a.Line1, a.Line2, a.City, a.PostalCode, a.State, a.Country)
+	out := fmt.Sprintf("%s %s %s %s %s %s", a.Line1, a.Line2, a.City, a.PostalCode, a.State, a.Country)
+	return strings.ReplaceAll(out, "  ", " ")
 }
 
 type Affiliation struct {

@@ -97,4 +97,23 @@ func TestAPI_readSearchRequest(t *testing.T) {
 		}
 		require.ElementsMatch(t, expected, query.CryptoAddresses)
 	})
+
+	t.Run("address", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?type=person&name=Jane&address=123+Acme+St+Acmetown+KY+54321+US", nil)
+		query, err := readSearchRequest(req)
+		require.NoError(t, err)
+
+		require.Equal(t, "Jane", query.Name)
+		require.Equal(t, search.EntityPerson, query.Type)
+
+		expected := search.Address{
+			Line1:      "123 ACME ST",
+			City:       "ACMETOWN",
+			PostalCode: "54321",
+			State:      "KY",
+			Country:    "UNITED STATES",
+		}
+		require.Len(t, query.Addresses, 1)
+		require.Equal(t, expected, query.Addresses[0])
+	})
 }
