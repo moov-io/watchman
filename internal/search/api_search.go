@@ -153,12 +153,13 @@ func readSearchRequest(r *http.Request) (search.Entity[search.Value], error) {
 			BirthDate: readDate(q.Get("birthDate")),
 			DeathDate: readDate(q.Get("deathDate")),
 			Titles:    q["titles"],
-			// GovernmentIDs []GovernmentID `json:"governmentIDs"`
+			// GovernmentIDs []GovernmentID `json:"governmentIDs"` // TODO(adam):
 		}
 
 	case search.EntityBusiness:
 		req.Business = &search.Business{
 			Name:      req.Name,
+			AltNames:  q["altNames"],
 			Created:   readDate(q.Get("created")),
 			Dissolved: readDate(q.Get("dissolved")),
 			// Identifier []Identifier `json:"identifier"`
@@ -167,6 +168,7 @@ func readSearchRequest(r *http.Request) (search.Entity[search.Value], error) {
 	case search.EntityOrganization:
 		req.Organization = &search.Organization{
 			Name:      req.Name,
+			AltNames:  q["altNames"],
 			Created:   readDate(q.Get("created")),
 			Dissolved: readDate(q.Get("dissolved")),
 			// Identifier []Identifier `json:"identifier"`
@@ -175,6 +177,7 @@ func readSearchRequest(r *http.Request) (search.Entity[search.Value], error) {
 	case search.EntityAircraft:
 		req.Aircraft = &search.Aircraft{
 			Name:         req.Name,
+			AltNames:     q["altNames"],
 			Type:         search.AircraftType(q.Get("aircraftType")),
 			Flag:         q.Get("flag"),
 			Built:        readDate("built"),
@@ -186,14 +189,16 @@ func readSearchRequest(r *http.Request) (search.Entity[search.Value], error) {
 	case search.EntityVessel:
 		req.Vessel = &search.Vessel{
 			Name:      req.Name,
+			AltNames:  q["altNames"],
 			IMONumber: q.Get("imoNumber"),
 			Type:      search.VesselType(q.Get("vesselType")),
 			Flag:      q.Get("flag"),
 			Built:     readDate("built"),
 			Model:     q.Get("model"),
-			MMSI:      q.Get("mmsi"),
-			CallSign:  q.Get("callSign"),
-			Owner:     q.Get("owner"),
+			// Tonnage:  // TODO(adam):
+			MMSI:     q.Get("mmsi"),
+			CallSign: q.Get("callSign"),
+			Owner:    q.Get("owner"),
 		}
 		req.Vessel.Tonnage, err = readInt(q.Get("tonnage"))
 		if err != nil {
