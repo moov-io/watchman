@@ -1,6 +1,8 @@
 module github.com/moov-io/watchman
 
-go 1.23.4
+go 1.22.9
+
+toolchain go1.23.4
 
 require (
 	fyne.io/fyne/v2 v2.5.3
@@ -11,7 +13,7 @@ require (
 	github.com/jaswdr/faker v1.19.1
 	github.com/knieriem/odf v0.1.0
 	github.com/moov-io/base v0.48.2
-	github.com/moov-io/iso3166 v0.1.0
+	github.com/moov-io/iso3166 v0.1.1
 	github.com/openvenues/gopostal v0.0.0-20240426055609-4fe3a773f519
 	github.com/pariz/gountries v0.1.6
 	github.com/stretchr/testify v1.10.0

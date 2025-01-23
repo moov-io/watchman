@@ -282,8 +282,8 @@ github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742/go.mod h1:bx2lN
 github.com/modern-go/reflect2 v1.0.1/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
 github.com/moov-io/base v0.48.2 h1:BPSNgmwokOVaVzAMJg71L48LCrDYelMfVXJEiZb2zOY=
 github.com/moov-io/base v0.48.2/go.mod h1:u1/WC3quR6otC9NrM1TtXSwNti1A/m7MR49RIXY1ee4=
-github.com/moov-io/iso3166 v0.1.0 h1:ftRiXs7pFGoAzwZjYLyjE2Mmjzto0NCDwNpQNnEG0YU=
-github.com/moov-io/iso3166 v0.1.0/go.mod h1:0IQVEcoMJC4JxACr6ip+vXtbQ1UyndW6jMNZNsHS7lc=
+github.com/moov-io/iso3166 v0.1.1 h1:0TlEc8FCN3mz2YrjoiJUPATN9tIEh2Aab+4CrtWxpx8=
+github.com/moov-io/iso3166 v0.1.1/go.mod h1:2fyJk2mvovjij1ya1/9gSuB2li1ZIm9jB2O/YusZQHQ=
 github.com/neelance/astrewrite v0.0.0-20160511093645-99348263ae86/go.mod h1:kHJEU3ofeGjhHklVoIGuVj85JJwZ6kWPaJwCIxgnFmo=
 github.com/neelance/sourcemap v0.0.0-20200213170602-2833bce08e4c/go.mod h1:Qr6/a/Q4r9LP1IltGz7tA7iOK1WonHEYhu1HRBA7ZiM=
 github.com/nicksnyder/go-i18n/v2 v2.4.0 h1:3IcvPOAvnCKwNm0TB0dLDTuawWEj+ax/RERNC+diLMM=
