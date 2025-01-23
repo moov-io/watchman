@@ -24,6 +24,22 @@ func TestStandardizeAddress_Example(t *testing.T) {
 	require.Equal(t, "", standardizedAddress.POBox)
 }
 
+func TestStandardizeAddress_SingleLine(t *testing.T) {
+	got := StandardizeAddress("123 Acme St Acmetown KY 54321 US")
+
+	expected := Address{
+		PrimaryNumber: "123",
+		StreetName:    "ACME",
+		StreetSuffix:  "ST",
+		City:          "ACMETOWN",
+		State:         "KY",
+		ZIPCode:       "54321",
+		Country:       "UNITED STATES",
+	}
+
+	require.Equal(t, expected, got)
+}
+
 func TestStandardizeAddress(t *testing.T) {
 	testCases := []struct {
 		name     string

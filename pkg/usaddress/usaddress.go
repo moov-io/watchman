@@ -22,6 +22,7 @@ type Address struct {
 	POBox           string // For PO Box addresses
 	RuralRoute      string // For rural route addresses
 	HighwayContract string // For highway contract route addresses
+	Country         string
 }
 
 // String formats the Address into a standardized string representation.
@@ -190,13 +191,41 @@ func StandardizeAddress(addressStr string) Address {
 			}
 		}
 	} else if len(lines) == 1 {
-		// Try to split into delivery line and last line
-		parts := strings.SplitN(lines[0], ",", 2)
+		// Single-line format
+		line := lines[0]
+
+		// First try comma split
+		parts := strings.SplitN(line, ",", 2)
 		if len(parts) == 2 {
 			deliveryLines = append(deliveryLines, strings.TrimSpace(parts[0]))
 			lastLine = strings.TrimSpace(parts[1])
 		} else {
-			deliveryLines = append(deliveryLines, lines[0])
+			// No comma found, try to split based on state pattern
+			words := strings.Fields(line)
+			stateIndex := -1
+
+			// Look for state pattern from end
+			for i := len(words) - 1; i >= 0; i-- {
+				// Check if current word could be a state
+				if abbr := standardizeState(words[i]); abbr != "" {
+					// Verify next word (if exists) is a ZIP code
+					if i+1 < len(words) && isZipCode(words[i+1]) {
+						stateIndex = i
+						break
+					}
+				}
+			}
+
+			if stateIndex >= 0 {
+				// Found state pattern, split accordingly
+				deliveryLine := strings.Join(words[:stateIndex-1], " ") // Everything before city
+				lastLine = strings.Join(words[stateIndex-1:], " ")      // City and onwards
+				deliveryLines = append(deliveryLines, strings.TrimSpace(deliveryLine))
+				lastLine = strings.TrimSpace(lastLine)
+			} else {
+				// No clear split point found, treat as delivery line
+				deliveryLines = append(deliveryLines, line)
+			}
 		}
 	}
 
@@ -225,7 +254,14 @@ func parseCityStateZip(line string, addr *Address) {
 		return
 	}
 
-	// Assume ZIP code is the last element
+	// Check for country at end first
+	maybeCountry := components[len(components)-1]
+	switch strings.ToUpper(maybeCountry) {
+	case "US", "USA", "UNITED STATES":
+		addr.Country = "UNITED STATES"
+		components = components[:len(components)-1]
+	}
+
 	zipCode := strings.TrimSpace(components[len(components)-1])
 	if isZipCode(zipCode) {
 		addr.ZIPCode = zipCode
