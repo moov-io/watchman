@@ -46,7 +46,7 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 					EmailAddresses: []string{"khoroshev1@icloud.com"},
 				},
 			},
-			expected: 1.00,
+			expected: 1.0,
 		},
 		{
 			name: "Partial match - Missing birthdate",

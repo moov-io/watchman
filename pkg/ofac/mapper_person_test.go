@@ -71,7 +71,9 @@ func TestMapperPerson__FromSource(t *testing.T) {
 			EmailAddresses: []string{"khoroshev1@icloud.com", "sitedev5@yandex.ru"},
 		}
 		require.Equal(t, expectedContact, found.Contact)
-		require.Empty(t, found.Addresses)
+
+		var expectedAddresses []search.Address
+		require.ElementsMatch(t, expectedAddresses, found.Addresses)
 
 		expectedCryptoAddresses := []search.CryptoAddress{
 			{Currency: "XBT", Address: "bc1qvhnfknw852ephxyc5hm4q520zmvf9maphetc9z"},

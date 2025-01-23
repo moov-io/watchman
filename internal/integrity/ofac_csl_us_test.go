@@ -33,7 +33,6 @@ func TestIntegrity_OFAC_US_CSL(t *testing.T) {
 		// Common Fields
 		require.Equal(t, ofacEntity.Contact, cslUSEntity.Contact)
 		require.ElementsMatch(t, ofacEntity.Addresses, cslUSEntity.Addresses)
-
 		require.ElementsMatch(t, ofacEntity.CryptoAddresses, cslUSEntity.CryptoAddresses)
 
 		// require.ElementsMatch(t, ofacEntity.Affiliations, cslUSEntity.Affiliations) // TODO(adam):

@@ -6,7 +6,6 @@ package ofac
 
 import (
 	"cmp"
-	"fmt"
 	"regexp"
 	"runtime"
 	"strconv"
@@ -15,7 +14,6 @@ import (
 
 	"github.com/moov-io/watchman/internal/indices"
 	"github.com/moov-io/watchman/internal/prepare"
-	"github.com/moov-io/watchman/pkg/address"
 	"github.com/moov-io/watchman/pkg/search"
 )
 
@@ -230,8 +228,22 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []Alt
 func parseAddresses(inputs []Address) []search.Address {
 	var out []search.Address
 	for i := range inputs {
-		input := fmt.Sprintf("%s %s %s", inputs[i].Address, inputs[i].CityStateProvincePostalCode, inputs[i].Country)
-		addr := address.ParseAddress(input)
+		// example, assume CityStateProvincePostalCode can be split into "<stuff> <stuff> <zip>"
+		// {... Address:"place du Lac 2", CityStateProvincePostalCode:"Geneve 1204", Country:"Switzerland", AddressRemarks:""}
+		var addr search.Address
+		addr.Line1 = inputs[i].Address
+		addr.Country = inputs[i].Country
+
+		parts := strings.Fields(inputs[i].CityStateProvincePostalCode)
+		if len(parts) == 1 {
+			addr.City = parts[0]
+		} else {
+			if len(parts) > 0 {
+				addr.City = strings.Join(parts[:len(parts)-1], " ")
+				addr.PostalCode = parts[len(parts)-1]
+			}
+		}
+
 		if addr.Line1 != "" {
 			out = append(out, addr)
 		}

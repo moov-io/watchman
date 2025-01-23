@@ -5,13 +5,13 @@
 package csl_us
 
 import (
+	"cmp"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/moov-io/watchman/internal/prepare"
-	"github.com/moov-io/watchman/pkg/address"
 	"github.com/moov-io/watchman/pkg/csl_us/gen/ENHANCED_XML"
 	"github.com/moov-io/watchman/pkg/search"
 )
@@ -348,22 +348,25 @@ func mapAddresses(addresses *ENHANCED_XML.EntityAddresses) []search.Address {
 					mappedAddr.Line1 = part.Value
 				case 1452: // ADDRESS2
 					mappedAddr.Line2 = part.Value
+				case 1453: // ADDRESS3
+					mappedAddr.Line2 += part.Value
 				case 1454: // CITY
 					mappedAddr.City = part.Value
 				case 1456: // POSTAL CODE
 					mappedAddr.PostalCode = part.Value
 				case 1455: // STATE/PROVINCE
 					mappedAddr.State = part.Value
+				case 1450: // REGION
+					mappedAddr.Country = part.Value
 				}
 			}
 		}
 		if addr.Country != nil {
-			mappedAddr.Country = addr.Country.Text
+			mappedAddr.Country = cmp.Or(mappedAddr.Country, addr.Country.Text)
 		}
 
-		res := address.ParseAddress(mappedAddr.Format())
-		if res.Line1 != "" && res.Country != "" {
-			result = append(result, res)
+		if mappedAddr.Line1 != "" && mappedAddr.Country != "" {
+			result = append(result, mappedAddr)
 		}
 	}
 

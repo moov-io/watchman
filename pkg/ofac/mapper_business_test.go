@@ -44,7 +44,22 @@ func TestMapperBusiness__FromSource(t *testing.T) {
 			Websites: []string{"suex.io"},
 		}
 		require.Equal(t, expectedContact, found.Contact)
-		require.Empty(t, found.Addresses)
+
+		expectedAddresses := []search.Address{
+			{
+				Line1:      "Presnenskaya Embankment, 12, Federation East Tower, Floor 31, Suite Q",
+				City:       "Moscow",
+				PostalCode: "123317",
+				Country:    "Russia",
+			},
+			{
+				Line1:      "Skorepka 1058/8 Stare Mesto",
+				City:       "Prague 110",
+				PostalCode: "00",
+				Country:    "Czech Republic",
+			},
+		}
+		require.ElementsMatch(t, expectedAddresses, found.Addresses)
 
 		expectedCryptoAddresses := []search.CryptoAddress{
 			{Currency: "XBT", Address: "12HQDsicffSBaYdJ6BhnE22sfjTESmmzKx"},
@@ -153,7 +168,17 @@ func TestMapperBusiness__FromSource(t *testing.T) {
 			Websites: []string{"www.dialog.info", "www.dialog-regions.ru"},
 		}
 		require.Equal(t, expectedContact, found.Contact)
-		require.Empty(t, found.Addresses)
+
+		expectedAddresses := []search.Address{
+			{
+				Line1:      "Ul. Timura Frunze, D. 11, Str. 1, Floor 1, Pomeshch. I, Kom. 2",
+				City:       "Moscow",
+				PostalCode: "119021",
+				Country:    "Russia",
+			},
+		}
+		require.ElementsMatch(t, expectedAddresses, found.Addresses)
+
 		require.Empty(t, found.CryptoAddresses)
 
 		expectedAffiliations := []search.Affiliation{
