@@ -218,7 +218,7 @@ func StandardizeAddress(addressStr string) Address {
 				}
 			}
 
-			if stateIndex >= 0 {
+			if stateIndex > 0 {
 				// Found state pattern, split accordingly
 				deliveryLine := strings.Join(words[:stateIndex-1], " ") // Everything before city
 				lastLine = strings.Join(words[stateIndex-1:], " ")      // City and onwards

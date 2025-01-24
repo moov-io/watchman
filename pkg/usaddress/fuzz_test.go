@@ -23,6 +23,7 @@ func FuzzStandardizeAddress(f *testing.F) {
 		"   \n  \t",
 		"!@#$%^&*()_+",
 		"C/O Jane Smith\n123 Unknown Rd\nMystery, ZZ 99999",
+		"TX 00000",
 	}
 
 	// Add the corpus entries to the fuzzer
