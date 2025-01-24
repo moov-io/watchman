@@ -270,11 +270,17 @@ func parseCityStateZip(line string, addr *Address) {
 			components = components[:len(components)-1]
 		}
 	}
+	if len(components) == 0 {
+		return
+	}
 
 	zipCode := strings.TrimSpace(components[len(components)-1])
 	if isZipCode(zipCode) {
 		addr.ZIPCode = zipCode
 		components = components[:len(components)-1]
+	}
+	if len(components) == 0 {
+		return
 	}
 
 	// Handle Plus4
