@@ -25,6 +25,7 @@ func NewClient(httpClient *http.Client, baseAddress string) Client {
 
 	retryableclient := retryablehttp.NewClient()
 	retryableclient.HTTPClient = httpClient
+	retryableclient.Logger = nil // disable logging
 
 	return &client{
 		client:      retryableclient,
