@@ -9,6 +9,8 @@ import (
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/hashicorp/go-retryablehttp"
 )
 
 type Client interface {
@@ -18,17 +20,20 @@ type Client interface {
 
 func NewClient(httpClient *http.Client, baseAddress string) Client {
 	httpClient = cmp.Or(httpClient, &http.Client{
-		Timeout: 5 * time.Second,
+		Timeout: 20 * time.Second,
 	})
 
+	retryableclient := retryablehttp.NewClient()
+	retryableclient.HTTPClient = httpClient
+
 	return &client{
-		httpClient:  httpClient,
+		client:      retryableclient,
 		baseAddress: baseAddress,
 	}
 }
 
 type client struct {
-	httpClient  *http.Client
+	client      *retryablehttp.Client
 	baseAddress string
 }
 
@@ -44,12 +49,12 @@ func (c *client) ListInfo(ctx context.Context) (ListInfoResponse, error) {
 	addr := c.baseAddress + "/v2/listinfo"
 
 	var out ListInfoResponse
-	req, err := http.NewRequest("GET", addr, nil)
+	req, err := retryablehttp.NewRequest("GET", addr, nil)
 	if err != nil {
 		return out, fmt.Errorf("creating listinfo request: %w", err)
 	}
 
-	resp, err := c.httpClient.Do(req)
+	resp, err := c.client.Do(req)
 	if err != nil {
 		return out, fmt.Errorf("listinfo GET: %w", err)
 	}
@@ -86,12 +91,12 @@ func (c *client) SearchByEntity(ctx context.Context, entity Entity[Value], opts 
 	addr.RawQuery = buildQueryParameters(addr.Query(), entity, opts).Encode()
 
 	// Make the request
-	req, err := http.NewRequest("GET", addr.String(), nil)
+	req, err := retryablehttp.NewRequest("GET", addr.String(), nil)
 	if err != nil {
 		return out, fmt.Errorf("creating search request: %w", err)
 	}
 
-	resp, err := c.httpClient.Do(req)
+	resp, err := c.client.Do(req)
 	if err != nil {
 		return out, fmt.Errorf("search by entity: %w", err)
 	}

@@ -10,6 +10,7 @@ require (
 	github.com/antchfx/htmlquery v1.3.3
 	github.com/bbalet/stopwords v1.0.0
 	github.com/gorilla/mux v1.8.1
+	github.com/hashicorp/go-retryablehttp v0.7.7
 	github.com/jaswdr/faker v1.19.1
 	github.com/knieriem/odf v0.1.0
 	github.com/moov-io/base v0.48.2
@@ -46,6 +47,7 @@ require (
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
+	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jeandeaual/go-locale v0.0.0-20240223122105-ce5225dcaa49 // indirect
 	github.com/jsummers/gobmp v0.0.0-20151104160322-e2ba15ffa76e // indirect
