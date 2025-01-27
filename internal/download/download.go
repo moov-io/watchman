@@ -2,6 +2,7 @@ package download
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"slices"
 	"sync"
@@ -50,6 +51,7 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 	resultsDone := make(chan struct{})
 	go func() {
 		defer close(resultsDone)
+
 		for list := range preparedLists {
 			logger.Info().Logf("adding %d entities from %v", len(list.Entities), list.ListName)
 
@@ -141,6 +143,10 @@ func loadOFACRecords(ctx context.Context, logger log.Logger, conf Config, respon
 	entities := ofac.GroupIntoEntities(res.SDNs, res.Addresses, res.SDNComments, res.AlternateIdentities)
 	logger.Debug().Logf("finished OFAC preperation: %v", time.Since(start))
 
+	if len(entities) == 0 && conf.ErrorOnEmptyList {
+		return errors.New("no entities parsed from US OFAC")
+	}
+
 	responseCh <- preparedList{
 		ListName: search.SourceUSOFAC,
 		Entities: entities,
@@ -171,6 +177,10 @@ func loadCSLUSRecords(ctx context.Context, logger log.Logger, conf Config, respo
 
 	entities := csl_us.ConvertSanctionsData(res.SanctionsData)
 	logger.Debug().Logf("finished US CSL preperation: %v", time.Since(start))
+
+	if len(entities) == 0 && conf.ErrorOnEmptyList {
+		return errors.New("no entities parsed from US CSL")
+	}
 
 	responseCh <- preparedList{
 		ListName: search.SourceUSCSL,
