@@ -1,6 +1,7 @@
 package search
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -27,7 +28,7 @@ func TestAPI_ListInfo(t *testing.T) {
 	stats.ListHashes[string(search.SourceUSOFAC)] = "abc1234"
 	service.UpdateEntities(stats)
 
-	controller := NewController(logger, service)
+	controller := NewController(logger, service, nil)
 
 	router := mux.NewRouter()
 	controller.AppendRoutes(router)
@@ -45,10 +46,12 @@ func TestAPI_ListInfo(t *testing.T) {
 }
 
 func TestAPI_readSearchRequest(t *testing.T) {
+	ctx := context.Background()
+
 	t.Run("basic", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/v2/search?name=adam&type=person&birthDate=2025-01-02", nil)
 
-		query, err := readSearchRequest(req)
+		query, err := readSearchRequest(ctx, nil, req)
 		require.NoError(t, err)
 
 		require.Equal(t, "adam", query.Name)
@@ -66,7 +69,7 @@ func TestAPI_readSearchRequest(t *testing.T) {
 
 		req := httptest.NewRequest("GET", address, nil)
 
-		query, err := readSearchRequest(req)
+		query, err := readSearchRequest(ctx, nil, req)
 		require.NoError(t, err)
 		require.Empty(t, query.Name)
 
@@ -85,7 +88,7 @@ func TestAPI_readSearchRequest(t *testing.T) {
 	t.Run("crypto addresses", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/v2/search?type=person&cryptoAddress=xbt:12345&cryptoAddress=eth:54321", nil)
 
-		query, err := readSearchRequest(req)
+		query, err := readSearchRequest(ctx, nil, req)
 		require.NoError(t, err)
 		require.Empty(t, query.Name)
 
@@ -100,7 +103,7 @@ func TestAPI_readSearchRequest(t *testing.T) {
 
 	t.Run("address", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/v2/search?type=person&name=Jane&address=123+Acme+St+Acmetown+KY+54321+US", nil)
-		query, err := readSearchRequest(req)
+		query, err := readSearchRequest(ctx, nil, req)
 		require.NoError(t, err)
 
 		require.Equal(t, "Jane", query.Name)

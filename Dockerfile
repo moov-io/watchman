@@ -31,7 +31,7 @@ RUN go mod download
 # Now copy the rest of the source code (frequently changes)
 COPY . /src/
 WORKDIR /src
-RUN VERSION=${VERSION} GOTAGS="-tags libpostal" make build-server
+RUN VERSION=${VERSION} GOTAGS="-tags libpostal" make build-server postal-server
 
 # Final stage
 FROM debian:bookworm
@@ -53,6 +53,8 @@ RUN ldconfig
 
 # Copy application files
 COPY --from=backend /src/bin/server /bin/server
+COPY --from=backend /src/bin/postal-server /bin/postal-server
+ENV POSTAL_SERVER_BIN_PATH=/bin/postal-server
 
 # Set environment variables
 ENV LD_LIBRARY_PATH=/usr/local/lib

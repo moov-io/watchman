@@ -1,10 +1,10 @@
 Watchman:
-  Telemetry:
-    ServiceName: "watchman"
-
   Servers:
     BindAddress: ":8084"
     AdminAddress: ":9094"
+
+  Telemetry:
+    ServiceName: "watchman"
 
   Download:
     RefreshInterval: "12h"
@@ -12,3 +12,10 @@ Watchman:
     IncludedLists:
       - "us_csl"
       - "us_ofac"
+
+  PostalPool:
+    Enabled: false
+    Instances: 10
+    StartingPort: 10000
+    StartupTimeout: "60s"
+    BinaryPath: "" # POSTAL_SERVER_BIN_PATH is set in Dockerfile

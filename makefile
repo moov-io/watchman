@@ -107,11 +107,14 @@ us-csl-models:
 
 .PHONY: models models-setup us-csl-models
 
-.PHONY: build build-server
-build: build-server
+.PHONY: build build-server postal-server
+build: build-server postal-server
 
 build-server:
 	go build ${GOTAGS} -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/server github.com/moov-io/watchman/cmd/server
+
+postal-server:
+	go build ${GOTAGS} -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/postal-server github.com/moov-io/watchman/cmd/postal-server
 
 .PHONY: check
 check:

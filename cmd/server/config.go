@@ -7,6 +7,7 @@ package main
 import (
 	watchman "github.com/moov-io/watchman"
 	"github.com/moov-io/watchman/internal/download"
+	"github.com/moov-io/watchman/internal/postalpool"
 
 	"github.com/moov-io/base/config"
 	"github.com/moov-io/base/log"
@@ -18,11 +19,11 @@ type GlobalConfig struct {
 }
 
 type Config struct {
+	Servers   ServerConfig
 	Telemetry telemetry.Config
 
-	Download download.Config
-
-	Servers ServerConfig
+	Download   download.Config
+	PostalPool postalpool.Config
 }
 
 type ServerConfig struct {

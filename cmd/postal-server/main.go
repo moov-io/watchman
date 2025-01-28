@@ -1,0 +1,64 @@
+package main
+
+import (
+	"context"
+	"crypto/tls"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"os"
+	"strings"
+	"time"
+
+	"github.com/moov-io/watchman/pkg/address"
+
+	"github.com/gorilla/mux"
+)
+
+func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		fmt.Println("No PORT provided")
+		os.Exit(1)
+	}
+
+	router := mux.NewRouter()
+	router.Methods("GET").Path("/parse").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		addr := address.ParseAddress(strings.TrimSpace(r.URL.Query().Get("address")))
+		json.NewEncoder(w).Encode(addr)
+	})
+
+	// Setup HTTP server
+	defaultTimeout := 30 * time.Second
+	serve := &http.Server{
+		Addr:    ":" + port,
+		Handler: router,
+		TLSConfig: &tls.Config{
+			InsecureSkipVerify:       false,
+			PreferServerCipherSuites: true,
+			MinVersion:               tls.VersionTLS12,
+		},
+		ReadTimeout:       defaultTimeout,
+		ReadHeaderTimeout: defaultTimeout,
+		WriteTimeout:      defaultTimeout,
+		IdleTimeout:       defaultTimeout,
+	}
+	shutdownServer := func() {
+		if serve != nil {
+			serve.Shutdown(context.TODO())
+		}
+	}
+
+	// Listen for errors
+	errs := make(chan error, 1)
+
+	// Start business logic HTTP server
+	go func() {
+		errs <- serve.ListenAndServe()
+	}()
+
+	// Block/Wait for an error
+	if err := <-errs; err != nil {
+		shutdownServer()
+	}
+}

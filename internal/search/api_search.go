@@ -1,6 +1,7 @@
 package search
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/base/strx"
 	"github.com/moov-io/base/telemetry"
+	"github.com/moov-io/watchman/internal/postalpool"
 	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/pkg/address"
 	"github.com/moov-io/watchman/pkg/search"
@@ -23,16 +25,18 @@ type Controller interface {
 	AppendRoutes(router *mux.Router) *mux.Router
 }
 
-func NewController(logger log.Logger, service Service) Controller {
+func NewController(logger log.Logger, service Service, addressParsingPool *postalpool.Service) Controller {
 	return &controller{
-		logger:  logger,
-		service: service,
+		logger:             logger,
+		service:            service,
+		addressParsingPool: addressParsingPool,
 	}
 }
 
 type controller struct {
-	logger  log.Logger
-	service Service
+	logger             log.Logger
+	service            Service
+	addressParsingPool *postalpool.Service
 }
 
 func (c *controller) AppendRoutes(router *mux.Router) *mux.Router {
@@ -68,7 +72,7 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 
 	debug := strx.Yes(r.URL.Query().Get("debug"))
 
-	req, err := readSearchRequest(r)
+	req, err := readSearchRequest(ctx, c.addressParsingPool, r)
 	if err != nil {
 		err = fmt.Errorf("problem reading v2 search request: %w", err)
 		c.logger.Error().LogError(err)
@@ -144,7 +148,7 @@ func extractSearchMinMatch(r *http.Request) float64 {
 	return 0.00
 }
 
-func readSearchRequest(r *http.Request) (search.Entity[search.Value], error) {
+func readSearchRequest(ctx context.Context, addressParsingPool *postalpool.Service, r *http.Request) (search.Entity[search.Value], error) {
 	q := r.URL.Query()
 
 	var err error
@@ -226,8 +230,11 @@ func readSearchRequest(r *http.Request) (search.Entity[search.Value], error) {
 	req.Contact.FaxNumbers = readStrings(q["fax"], q["faxNumber"], q["faxNumbers"])
 	req.Contact.Websites = readStrings(q["website"], q["websites"])
 
-	req.Addresses = readAddresses(readStrings(q["address"], q["addresses"]))
-	req.CryptoAddresses = readCryptoCurrencyAddresses(readStrings(q["cryptoAddress"], q["cryptoAddresses"]))
+	addresses := readStrings(q["address"], q["addresses"])
+	req.Addresses = readAddresses(ctx, addressParsingPool, addresses)
+
+	cryptoAddresses := readStrings(q["cryptoAddress"], q["cryptoAddresses"])
+	req.CryptoAddresses = readCryptoCurrencyAddresses(cryptoAddresses)
 
 	// TODO(adam):
 	// Affiliations   []Affiliation    `json:"affiliations"`
@@ -270,11 +277,23 @@ func readStrings(inputs ...[]string) []string {
 	return out
 }
 
-func readAddresses(inputs []string) []search.Address {
-	var out []search.Address
-	for _, input := range inputs {
-		out = append(out, address.ParseAddress(input))
+func readAddresses(ctx context.Context, addressParsingPool *postalpool.Service, inputs []string) []search.Address {
+	out := make([]search.Address, len(inputs))
+
+	for idx, input := range inputs {
+		// Prefer the pool if it's defined
+		if addressParsingPool != nil {
+			addr, err := addressParsingPool.ParseAddress(ctx, input)
+			if err == nil {
+				out[idx] = addr
+				continue
+			}
+		}
+
+		// Fallback to standard parsing
+		out[idx] = address.ParseAddress(input)
 	}
+
 	return out
 }
 

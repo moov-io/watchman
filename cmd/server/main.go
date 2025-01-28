@@ -20,6 +20,7 @@ import (
 	"github.com/moov-io/base/telemetry"
 	"github.com/moov-io/watchman"
 	"github.com/moov-io/watchman/internal/download"
+	"github.com/moov-io/watchman/internal/postalpool"
 	"github.com/moov-io/watchman/internal/search"
 
 	"github.com/gorilla/mux"
@@ -74,7 +75,12 @@ func main() {
 	router := mux.NewRouter()
 	addPingRoute(router)
 
-	searchController := search.NewController(logger, searchService)
+	addressParsingPool, err := postalpool.NewService(logger, config.PostalPool)
+	if err != nil {
+		logger.Fatal().LogErrorf("problem setting up address parsing pool: %v", err)
+		os.Exit(1)
+	}
+	searchController := search.NewController(logger, searchService, addressParsingPool)
 	searchController.AppendRoutes(router)
 
 	// Start Admin server (with Prometheus metrics)
