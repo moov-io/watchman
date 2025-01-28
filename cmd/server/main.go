@@ -15,13 +15,14 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/moov-io/base/admin"
+	"github.com/moov-io/base/log"
+	"github.com/moov-io/base/telemetry"
 	"github.com/moov-io/watchman"
 	"github.com/moov-io/watchman/internal/download"
 	"github.com/moov-io/watchman/internal/search"
 
 	"github.com/gorilla/mux"
-	"github.com/moov-io/base/admin"
-	"github.com/moov-io/base/log"
 )
 
 func main() {
@@ -36,6 +37,14 @@ func main() {
 		logger.Fatal().LogErrorf("problem loading config: %v", err)
 		os.Exit(1)
 	}
+
+	// Setup telemetry
+	telemetryShutdownFunc, err := telemetry.SetupTelemetry(context.Background(), config.Telemetry, watchman.Version)
+	if err != nil {
+		logger.Fatal().LogErrorf("setting up telemetry failed: %w", err)
+		os.Exit(1)
+	}
+	defer telemetryShutdownFunc()
 
 	downloader, err := download.NewDownloader(logger, config.Download)
 	if err != nil {

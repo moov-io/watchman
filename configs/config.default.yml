@@ -1,4 +1,7 @@
 Watchman:
+  Telemetry:
+    ServiceName: "watchman"
+
   Servers:
     BindAddress: ":8084"
     AdminAddress: ":9094"

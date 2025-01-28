@@ -11,14 +11,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/moov-io/base/log"
+	"github.com/moov-io/base/telemetry"
 	"github.com/moov-io/watchman/internal/download"
 	"github.com/moov-io/watchman/internal/search"
-
-	"github.com/moov-io/base/log"
 )
 
 func setupPeriodicRefreshing(ctx context.Context, logger log.Logger, errs chan error, conf download.Config, downloader download.Downloader, searchService search.Service) error {
-	err := refreshAllSources(ctx, logger, downloader, searchService)
+	err := refreshAllSources(logger, downloader, searchService)
 	if err != nil {
 		return err
 	}
@@ -35,7 +35,7 @@ func setupPeriodicRefreshing(ctx context.Context, logger log.Logger, errs chan e
 				return
 
 			case <-ticker.C:
-				err := refreshAllSources(ctx, logger, downloader, searchService)
+				err := refreshAllSources(logger, downloader, searchService)
 				if err != nil {
 					errs <- err
 				}
@@ -61,8 +61,10 @@ func getRefreshInterval(conf download.Config) time.Duration {
 	return cmp.Or(conf.RefreshInterval, defaultRefreshInterval)
 }
 
-func refreshAllSources(ctx context.Context, logger log.Logger, downloader download.Downloader, searchService search.Service) error {
-	// Initial data load
+func refreshAllSources(logger log.Logger, downloader download.Downloader, searchService search.Service) error {
+	ctx, span := telemetry.StartSpan(context.Background(), "refresh-all-sources")
+	defer span.End()
+
 	stats, err := downloader.RefreshAll(ctx)
 	if err != nil {
 		return err

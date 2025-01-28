@@ -8,13 +8,18 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/moov-io/watchman/internal/download"
 	"github.com/moov-io/watchman/internal/indices"
 	"github.com/moov-io/watchman/internal/largest"
+	"github.com/moov-io/watchman/internal/minmaxmed"
 	"github.com/moov-io/watchman/pkg/search"
 
 	"github.com/moov-io/base/log"
+	"github.com/moov-io/base/telemetry"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type Service interface {
@@ -60,6 +65,11 @@ func (s *service) UpdateEntities(stats download.Stats) {
 }
 
 func (s *service) Search(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error) {
+	ctx, span := telemetry.StartSpan(ctx, "search", trace.WithAttributes(
+		attribute.String("entity.type", string(query.Type)),
+	))
+	defer span.End()
+
 	// Grab a read-lock over our data
 	s.RLock()
 	defer s.RUnlock()
@@ -80,10 +90,19 @@ type SearchOpts struct {
 }
 
 func (s *service) performSearch(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error) {
+	ctx, span := telemetry.StartSpan(ctx, "perform-search", trace.WithAttributes(
+		attribute.Int("opts.limit", opts.Limit),
+		attribute.Float64("opts.min_match", opts.MinMatch),
+	))
+	defer span.End()
+
+	stats := minmaxmed.New(10) // window size
 	items := largest.NewItems(opts.Limit, opts.MinMatch)
 
 	indices.ProcessSliceFn(s.latestStats.Entities, getGroupCount(opts), func(index search.Entity[search.Value]) {
+		start := time.Now()
 		score := search.DebugSimilarity(nil, query, index) // TODO(adam): add proper debug functionality?
+		stats.AddDuration(time.Since(start))
 
 		if slices.Contains(opts.DebugSourceIDs, index.SourceID) {
 			// fmt.Printf("%#v\n", index)
@@ -98,6 +117,9 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 			Weight: score,
 		})
 	})
+
+	// After processing the list add stats to the span
+	stats.AddEvent(span)
 
 	results := items.Items()
 	var out []search.SearchedEntity[search.Value]

@@ -8,13 +8,15 @@ import (
 	"strings"
 	"time"
 
+	"github.com/moov-io/base/log"
+	"github.com/moov-io/base/strx"
+	"github.com/moov-io/base/telemetry"
 	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/pkg/address"
 	"github.com/moov-io/watchman/pkg/search"
 
 	"github.com/gorilla/mux"
-	"github.com/moov-io/base/log"
-	"github.com/moov-io/base/strx"
+	"go.opentelemetry.io/otel/attribute"
 )
 
 type Controller interface {
@@ -61,6 +63,9 @@ type errorResponse struct {
 }
 
 func (c *controller) search(w http.ResponseWriter, r *http.Request) {
+	ctx, span := telemetry.StartSpan(r.Context(), "api-search")
+	defer span.End()
+
 	debug := strx.Yes(r.URL.Query().Get("debug"))
 
 	req, err := readSearchRequest(r)
@@ -91,7 +96,12 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 		c.logger.Debug().Logf("opts: %#v", opts)
 	}
 
-	entities, err := c.service.Search(r.Context(), req, opts)
+	span.SetAttributes(
+		attribute.String("request_id", opts.RequestID),
+		attribute.String("entity.type", string(req.Type)),
+	)
+
+	entities, err := c.service.Search(ctx, req, opts)
 	if err != nil {
 		c.logger.Error().LogErrorf("problem with v2 search: %v", err)
 

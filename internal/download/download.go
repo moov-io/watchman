@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/moov-io/base/telemetry"
 	"github.com/moov-io/watchman/pkg/csl_us"
 	"github.com/moov-io/watchman/pkg/ofac"
 	"github.com/moov-io/watchman/pkg/search"
@@ -33,6 +34,9 @@ type downloader struct {
 }
 
 func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
+	ctx, span := telemetry.StartSpan(ctx, "refresh-all")
+	defer span.End()
+
 	stats := Stats{
 		Lists:      make(map[string]int),
 		ListHashes: make(map[string]string),
@@ -121,12 +125,17 @@ type preparedList struct {
 }
 
 func loadOFACRecords(ctx context.Context, logger log.Logger, conf Config, responseCh chan preparedList) error {
+	ctx, span := telemetry.StartSpan(ctx, "load-ofac-records")
+	defer span.End()
+
 	start := time.Now()
 	files, err := ofac.Download(ctx, logger, conf.InitialDataDirectory)
 	if err != nil {
 		return fmt.Errorf("OFAC download: %v", err)
 	}
 	defer files.Close()
+
+	span.AddEvent("finished downloading")
 
 	if len(files) == 0 {
 		return fmt.Errorf("unexpected %d OFAC files found", len(files))
@@ -139,9 +148,13 @@ func loadOFACRecords(ctx context.Context, logger log.Logger, conf Config, respon
 	if err != nil {
 		return fmt.Errorf("parsing OFAC: %w", err)
 	}
+	span.AddEvent(fmt.Sprintf("finished parsing after %v", time.Since(start)))
 
 	entities := ofac.GroupIntoEntities(res.SDNs, res.Addresses, res.SDNComments, res.AlternateIdentities)
-	logger.Debug().Logf("finished OFAC preperation: %v", time.Since(start))
+
+	msg := fmt.Sprintf("finished OFAC preperation: %v", time.Since(start))
+	logger.Debug().Log(msg)
+	span.AddEvent(msg)
 
 	if len(entities) == 0 && conf.ErrorOnEmptyList {
 		return errors.New("no entities parsed from US OFAC")
@@ -156,12 +169,17 @@ func loadOFACRecords(ctx context.Context, logger log.Logger, conf Config, respon
 }
 
 func loadCSLUSRecords(ctx context.Context, logger log.Logger, conf Config, responseCh chan preparedList) error {
+	ctx, span := telemetry.StartSpan(ctx, "load-us-csl-records")
+	defer span.End()
+
 	start := time.Now()
 	files, err := csl_us.Download(ctx, logger, conf.InitialDataDirectory)
 	if err != nil {
 		return fmt.Errorf("US CSL download: %w", err)
 	}
 	defer files.Close()
+
+	span.AddEvent("finished downloading")
 
 	if len(files) == 0 {
 		return fmt.Errorf("unexpected %d US CSL files found", len(files))
@@ -174,9 +192,13 @@ func loadCSLUSRecords(ctx context.Context, logger log.Logger, conf Config, respo
 	if err != nil {
 		return fmt.Errorf("parsing US CSL: %w", err)
 	}
+	span.AddEvent(fmt.Sprintf("finished parsing after %v", time.Since(start)))
 
 	entities := csl_us.ConvertSanctionsData(res.SanctionsData)
-	logger.Debug().Logf("finished US CSL preperation: %v", time.Since(start))
+
+	msg := fmt.Sprintf("finished US CSL preperation: %v", time.Since(start))
+	logger.Debug().Log(msg)
+	span.AddEvent(msg)
 
 	if len(entities) == 0 && conf.ErrorOnEmptyList {
 		return errors.New("no entities parsed from US CSL")
