@@ -16,6 +16,13 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// Service spawns a pool of libpostal process instances. It handles running and
+// graceful shutdown of worker processes. Each worker process has its own isolated
+// copy of libpostal's global state, allowing for concurrent processing without contention.
+//
+// A Service should be created via NewService() and stopped using the Shutdown() method
+// when no longer needed. The Service ensures all worker processes are properly
+// terminated on shutdown.
 type Service struct {
 	processes []*exec.Cmd
 	client    *Client

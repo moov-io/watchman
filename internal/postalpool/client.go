@@ -15,6 +15,15 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 )
 
+// Client provides thread-safe access to a pool of libpostal processes,
+// distributing requests across them in a round-robin fashion. Each request
+// is automatically routed to the next available worker process.
+//
+// Requests will be queued up on workers and start to block if every worker
+// has an active request. libpostal is single threaded.
+//
+// Client maintains an address pool to the worker processes. It provides a
+// simple API that hides the complexity of working with multiple postal processes.
 type Client struct {
 	conf      Config
 	endpoints []string
