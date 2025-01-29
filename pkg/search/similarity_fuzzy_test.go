@@ -632,38 +632,38 @@ func TestCalculateTypeScore(t *testing.T) {
 func TestFilterSignificantTerms(t *testing.T) {
 	tests := []struct {
 		name     string
-		input    []string
+		input    string
 		expected []string
 	}{
 		{
 			name:     "all significant terms",
-			input:    []string{"banco", "nacional", "cuba"},
+			input:    "banco nacional cuba",
 			expected: []string{"banco", "nacional", "cuba"},
 		},
 		{
 			name:     "with noise terms",
-			input:    []string{"the", "banco", "of", "nacional", "and", "cuba"},
+			input:    "the banco of nacional and cuba",
 			expected: []string{"banco", "nacional", "cuba"},
 		},
 		{
 			name:     "with short terms",
-			input:    []string{"al", "banco", "de", "nacional"},
+			input:    "al banco de nacional",
 			expected: []string{"banco", "nacional"},
 		},
 		{
 			name:     "only noise terms",
-			input:    []string{"the", "of", "and", "in", "at"},
-			expected: []string{},
+			input:    "the of and in at",
+			expected: nil,
 		},
 		{
 			name:     "empty input",
-			input:    []string{},
-			expected: []string{},
+			input:    "",
+			expected: nil,
 		},
 		{
 			name:     "mixed case terms",
-			input:    []string{"THE", "Banco", "OF", "Nacional"},
-			expected: []string{"banco", "nacional"},
+			input:    "THE Banco OF Nacional",
+			expected: []string{"Banco", "Nacional"},
 		},
 	}
 

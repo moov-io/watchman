@@ -5,10 +5,13 @@ import (
 	"math"
 	"regexp"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/internal/stringscore"
+
+	"github.com/karlseguin/ccache/v3"
 )
 
 const (
@@ -55,7 +58,7 @@ func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], we
 	}
 
 	// Get query terms and filter out insignificant ones
-	qTerms := filterSignificantTerms(strings.Fields(qName))
+	qTerms := filterSignificantTerms(qName)
 	if len(qTerms) == 0 {
 		return scorePiece{score: 0, weight: 0, fieldsCompared: 0, pieceType: "name"}
 	}
@@ -99,8 +102,20 @@ func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], we
 	}
 }
 
+var (
+	normalizedNameCache = ccache.New(ccache.Configure[string]().MaxSize(50000).ItemsToPrune(1000))
+	defaultCacheTTL     = 48 * time.Hour
+)
+
 // normalizeName performs thorough name normalization
 func normalizeName(name string) string {
+	item, _ := normalizedNameCache.Fetch(name, defaultCacheTTL, func() (string, error) {
+		return actuallyNormalize(name), nil
+	})
+	return item.Value()
+}
+
+func actuallyNormalize(name string) string {
 	// Convert to lowercase and trim spaces
 	name = strings.ToLower(strings.TrimSpace(name))
 
@@ -134,31 +149,69 @@ func normalizeName(name string) string {
 	return strings.TrimSpace(normalized.String())
 }
 
-// filterSignificantTerms removes common noise and insignificant terms
-func filterSignificantTerms(terms []string) []string {
-	filtered := make([]string, 0, len(terms))
-	for _, term := range terms {
-		// Skip terms that are too short
-		if len(term) < minTermLength {
-			continue
-		}
+var (
+	noiseTerms = []string{"the", "and", "or", "of", "in", "at", "by"}
 
-		// Skip common noise terms (expand this list as needed)
-		term = strings.TrimSpace(strings.ToLower(term))
+	filterSignificantTermsCache = ccache.New(ccache.Configure[[]string]().MaxSize(50000).ItemsToPrune(1000))
+)
 
-		switch term {
-		case "the", "and", "or", "of", "in", "at", "by":
-			continue
-		}
+func filterSignificantTerms(s string) []string {
+	item, _ := filterSignificantTermsCache.Fetch(s, defaultCacheTTL, func() ([]string, error) {
+		return actuallyFilterSignificantTerms(s), nil
+	})
+	return item.Value()
+}
 
-		filtered = append(filtered, term)
+func actuallyFilterSignificantTerms(s string) []string {
+	if s == "" {
+		return nil
 	}
-	return filtered
+
+	var terms []string
+	start := -1
+
+	for i, r := range s {
+		if unicode.IsSpace(r) {
+			if start != -1 {
+				if term := checkAndGetTerm(s[start:i]); term != "" {
+					terms = append(terms, term)
+				}
+				start = -1
+			}
+		} else if start == -1 {
+			start = i
+		}
+	}
+
+	if start != -1 {
+		if term := checkAndGetTerm(s[start:]); term != "" {
+			terms = append(terms, term)
+		}
+	}
+
+	if len(terms) == 0 {
+		return nil
+	}
+	return terms
+}
+
+func checkAndGetTerm(term string) string {
+	if len(term) < minTermLength {
+		return ""
+	}
+
+	for _, noise := range noiseTerms {
+		if strings.EqualFold(term, noise) {
+			return ""
+		}
+	}
+
+	return term
 }
 
 // compareNameTerms performs detailed term-by-term comparison
 func compareNameTerms(queryTerms []string, indexName string) nameMatch {
-	indexTerms := filterSignificantTerms(strings.Fields(indexName))
+	indexTerms := filterSignificantTerms(indexName)
 	if len(indexTerms) == 0 {
 		return nameMatch{score: 0}
 	}

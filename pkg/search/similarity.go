@@ -25,7 +25,7 @@ func Similarity[Q any, I any](query Entity[Q], index Entity[I]) float64 {
 
 // DebugSimilarity does the same as Similarity, but logs debug info to w.
 func DebugSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]) float64 {
-	var pieces []scorePiece
+	pieces := make([]scorePiece, 0, 8)
 
 	// Critical identifiers (highest weight)
 	exactIdentifiers := compareExactIdentifiers(w, query, index, criticalIdWeight)
