@@ -13,6 +13,7 @@ import (
 	"github.com/moov-io/base/telemetry"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
+	"golang.org/x/sync/errgroup"
 )
 
 type Service struct {
@@ -38,28 +39,38 @@ func NewService(logger log.Logger, conf Config) (*Service, error) {
 		processes: make([]*exec.Cmd, conf.Instances),
 	}
 
+	var g errgroup.Group
 	endpoints := make([]string, conf.Instances)
 	for i := 0; i < conf.Instances; i++ {
-		port := conf.StartingPort + i
+		idx := i
 
-		cmd := exec.Command(binPath)
-		cmd.Env = append(cmd.Env, fmt.Sprintf("PORT=%d", port))
+		port := conf.StartingPort + idx
+		endpoints[idx] = fmt.Sprintf("http://localhost:%d", port)
 
-		err := cmd.Start()
-		if err != nil {
-			ps.Shutdown()
+		g.Go(func() error {
+			cmd := exec.Command(binPath)
+			cmd.Env = append(cmd.Env, fmt.Sprintf("PORT=%d", port))
 
-			return nil, fmt.Errorf("failed to start postal instance %d: %w", i, err)
-		}
+			err := cmd.Start()
+			if err != nil {
+				ps.Shutdown()
 
-		ps.processes[i] = cmd
+				return fmt.Errorf("failed to start postal instance %d: %w", i, err)
+			}
 
-		endpoints[i] = fmt.Sprintf("http://localhost:%d", port)
+			ps.processes[idx] = cmd
+
+			return nil
+		})
+	}
+	err := g.Wait()
+	if err != nil {
+		return nil, fmt.Errorf("problem starting postalpool workers: %w", err)
 	}
 
 	ps.client = NewClient(conf, endpoints)
 
-	err := ps.client.healthcheck(ctx)
+	err = ps.client.healthcheck(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("problem with postalpool healthcheck: %w", err)
 	}
