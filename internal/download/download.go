@@ -148,13 +148,12 @@ func loadOFACRecords(ctx context.Context, logger log.Logger, conf Config, respon
 	if err != nil {
 		return fmt.Errorf("parsing OFAC: %w", err)
 	}
-	span.AddEvent(fmt.Sprintf("finished parsing after %v", time.Since(start)))
+	span.AddEvent("finished parsing")
 
 	entities := ofac.GroupIntoEntities(res.SDNs, res.Addresses, res.SDNComments, res.AlternateIdentities)
 
-	msg := fmt.Sprintf("finished OFAC preperation: %v", time.Since(start))
-	logger.Debug().Log(msg)
-	span.AddEvent(msg)
+	logger.Debug().Logf("finished OFAC preperation: %v", time.Since(start))
+	span.AddEvent("finished OFAC preperation")
 
 	if len(entities) == 0 && conf.ErrorOnEmptyList {
 		return errors.New("no entities parsed from US OFAC")
@@ -192,13 +191,12 @@ func loadCSLUSRecords(ctx context.Context, logger log.Logger, conf Config, respo
 	if err != nil {
 		return fmt.Errorf("parsing US CSL: %w", err)
 	}
-	span.AddEvent(fmt.Sprintf("finished parsing after %v", time.Since(start)))
+	span.AddEvent("finished parsing")
 
 	entities := csl_us.ConvertSanctionsData(res.SanctionsData)
 
-	msg := fmt.Sprintf("finished US CSL preperation: %v", time.Since(start))
-	logger.Debug().Log(msg)
-	span.AddEvent(msg)
+	logger.Debug().Logf("finished US CSL preperation: %v", time.Since(start))
+	span.AddEvent("finished US CSL preperation")
 
 	if len(entities) == 0 && conf.ErrorOnEmptyList {
 		return errors.New("no entities parsed from US CSL")
