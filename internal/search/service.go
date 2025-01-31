@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"slices"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/moov-io/watchman/internal/download"
+	"github.com/moov-io/watchman/internal/groupsize"
 	"github.com/moov-io/watchman/internal/indices"
 	"github.com/moov-io/watchman/internal/largest"
 	"github.com/moov-io/watchman/internal/minmaxmed"
@@ -30,8 +30,13 @@ type Service interface {
 }
 
 func NewService(logger log.Logger) Service {
+	cm, err := groupsize.NewConcurrencyManager(defaultGroupSize, 1, 100)
+	if err != nil {
+		panic(err)
+	}
 	return &service{
 		logger: logger,
+		cm:     cm,
 	}
 }
 
@@ -40,6 +45,8 @@ type service struct {
 
 	latestStats  download.Stats
 	sync.RWMutex // protects latestStats (which has entities and list hashes)
+
+	cm *groupsize.ConcurrencyManager
 }
 
 func (s *service) LatestStats() download.Stats {
@@ -99,24 +106,27 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	stats := minmaxmed.New(10) // window size
 	items := largest.NewItems(opts.Limit, opts.MinMatch)
 
-	indices.ProcessSliceFn(s.latestStats.Entities, getGroupCount(opts), func(index search.Entity[search.Value]) {
+	groupSize := getGroupSize(s.cm)
+	start := time.Now()
+
+	indices.ProcessSliceFn(s.latestStats.Entities, groupSize, func(index search.Entity[search.Value]) {
 		start := time.Now()
 		score := search.DebugSimilarity(nil, query, index) // TODO(adam): add proper debug functionality?
 		stats.AddDuration(time.Since(start))
-
-		if slices.Contains(opts.DebugSourceIDs, index.SourceID) {
-			// fmt.Printf("%#v\n", index)
-			// fmt.Println("")
-			// fmt.Printf("%#v\n", index.SourceData)
-			// fmt.Println("")
-			// fmt.Printf("%#v\n", index.Business)
-		}
 
 		items.Add(largest.Item{
 			Value:  index,
 			Weight: score,
 		})
 	})
+
+	diff := time.Since(start)
+	s.cm.RecordDuration(groupSize, diff)
+
+	span.SetAttributes(
+		attribute.Int("search.group_size", groupSize),
+		attribute.Int64("search.duration", diff.Milliseconds()),
+	)
 
 	// After processing the list add stats to the span
 	stats.AddEvent(span)
@@ -139,17 +149,25 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 }
 
 const (
-	defaultGroupCount = 20 // rough estimate from local testing // TODO(adam): more benchmarks
+	defaultGroupSize = 20 // rough estimate from local testing
 )
 
-func getGroupCount(opts SearchOpts) int {
-	fromEnv := strings.TrimSpace(os.Getenv("SEARCH_GROUP_COUNT")) // not exported, used for initial testing
+func getGroupSize(cm *groupsize.ConcurrencyManager) int {
+	// After local benchmarking this is a tradeoff between the fastest / most efficient group size picking
+	// and offering configurability to users.
+	//
+	// Using an atomic cache to store ParseUint's result is ~75% slower than just calling strconv.ParseUint every time.
+	// This may be an inaccurate result on other hardware/platforms.
+	//
+	// Using groupsize.ConcurrencyManager provides the quickest searches while using an insignificant amount of memory
+	// compared to what similarity scoring uses.
+	fromEnv := strings.TrimSpace(os.Getenv("SEARCH_GROUP_COUNT"))
 	if fromEnv != "" {
 		n, err := strconv.ParseUint(fromEnv, 10, 8)
 		if err != nil {
-			panic(fmt.Sprintf("ERROR: parsing SEARCH_GROUP_COUNT=%q failed: %v", fromEnv, err)) //nolint:forbidigo
+			panic(fmt.Sprintf("ERROR: parsing SEARCH_GROUP_COUNT=%q failed: %v", fromEnv, err)) //nolint:forbigido
 		}
 		return int(n)
 	}
-	return defaultGroupCount
+	return cm.PickConcurrency()
 }
