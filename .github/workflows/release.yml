@@ -23,6 +23,17 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Setup Linux Dependencies
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-dev and xorg-dev
+
+    - name: Setup Windows Dependencies
+      if: runner.os == 'Windows'
+      run: |
+        choco install -y make mingw
+
     - name: Short Tests
       env:
         GOTEST_FLAGS: "-short"
@@ -76,6 +87,17 @@ jobs:
       with:
         name: release_url
         path: release_url
+
+    - name: Setup Linux Dependencies
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-dev and xorg-dev
+
+    - name: Setup Windows Dependencies
+      if: runner.os == 'Windows'
+      run: |
+        choco install -y make mingw
 
     - name: Distribute
       run: make dist
