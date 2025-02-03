@@ -23,6 +23,9 @@ type rollingStats struct {
 
 // newRollingStats creates a ring buffer of a given capacity.
 func newRollingStats(capacity int) *rollingStats {
+	if capacity <= 0 {
+		capacity = 100 // Default to reasonable size
+	}
 	return &rollingStats{
 		buffer:   make([]time.Duration, capacity),
 		capacity: capacity,
@@ -128,10 +131,9 @@ func NewConcurrencyManager(initialChampion, minC, maxC int) (*ConcurrencyManager
 		stats:           make(map[int]*rollingStats),
 		trafficWeights:  make(map[int]float64),
 		randSource:      rand.New(rand.NewSource(time.Now().UnixNano())),
-		confidenceLevel: 1.96, // approximate z-score for 95% CI
-		windowSize:      100,  // how many samples in rolling window
-		minSamples:      20,   // minimum number of samples for each concurrency to compare
-		minImprovement:  0.05,
+		confidenceLevel: 1.645, // approximate z-score for 90% CI
+		minSamples:      10,
+		minImprovement:  0.02,
 		cleanupInterval: time.Hour,
 		lastCleanup:     time.Now(),
 	}
