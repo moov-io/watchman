@@ -41,7 +41,8 @@ func TestDownloader_setupPeriodicRefreshing(t *testing.T) {
 	dl, err := download.NewDownloader(logger, conf)
 	require.NoError(t, err)
 
-	searchService := search.NewService(logger)
+	searchService, err := search.NewService(logger)
+	require.NoError(t, err)
 
 	go func() {
 		time.Sleep(500 * time.Millisecond)

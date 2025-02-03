@@ -17,7 +17,8 @@ import (
 
 func TestAPI_ListInfo(t *testing.T) {
 	logger := log.NewTestLogger()
-	service := NewService(logger)
+	service, err := NewService(logger)
+	require.NoError(t, err)
 
 	stats := download.Stats{
 		Lists:      make(map[string]int),

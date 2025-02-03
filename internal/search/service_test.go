@@ -70,7 +70,9 @@ func testService(tb testing.TB) Service {
 
 	logger := log.NewTestLogger()
 
-	svc := NewService(logger)
+	svc, err := NewService(logger)
+	require.NoError(tb, err)
+
 	svc.UpdateEntities(download.Stats{
 		Entities: entities,
 	})

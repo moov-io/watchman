@@ -29,15 +29,15 @@ type Service interface {
 	Search(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error)
 }
 
-func NewService(logger log.Logger) Service {
+func NewService(logger log.Logger) (Service, error) {
 	cm, err := groupsize.NewConcurrencyManager(defaultGroupSize, 1, 100)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("creating search service: %w", err)
 	}
 	return &service{
 		logger: logger,
 		cm:     cm,
-	}
+	}, nil
 }
 
 type service struct {
@@ -106,7 +106,10 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	stats := minmaxmed.New(10) // window size
 	items := largest.NewItems(opts.Limit, opts.MinMatch)
 
-	groupSize := getGroupSize(s.cm)
+	groupSize, err := getGroupSize(s.cm)
+	if err != nil {
+		return nil, fmt.Errorf("getGroupSize: %w", err)
+	}
 	start := time.Now()
 
 	indices.ProcessSliceFn(s.latestStats.Entities, groupSize, func(index search.Entity[search.Value]) {
@@ -152,7 +155,7 @@ const (
 	defaultGroupSize = 20 // rough estimate from local testing
 )
 
-func getGroupSize(cm *groupsize.ConcurrencyManager) int {
+func getGroupSize(cm *groupsize.ConcurrencyManager) (int, error) {
 	// After local benchmarking this is a tradeoff between the fastest / most efficient group size picking
 	// and offering configurability to users.
 	//
@@ -165,9 +168,9 @@ func getGroupSize(cm *groupsize.ConcurrencyManager) int {
 	if fromEnv != "" {
 		n, err := strconv.ParseUint(fromEnv, 10, 8)
 		if err != nil {
-			panic(fmt.Sprintf("ERROR: parsing SEARCH_GROUP_COUNT=%q failed: %v", fromEnv, err)) //nolint:forbigido
+			return 0, fmt.Errorf("parsing SEARCH_GROUP_COUNT=%q failed: %v", fromEnv, err)
 		}
-		return int(n)
+		return int(n), nil
 	}
-	return cm.PickConcurrency()
+	return cm.PickConcurrency(), nil
 }

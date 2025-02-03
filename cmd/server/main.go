@@ -65,7 +65,11 @@ func main() {
 	errs := make(chan error, 1)
 
 	// Setup search service and endpoints
-	searchService := search.NewService(logger)
+	searchService, err := search.NewService(logger)
+	if err != nil {
+		logger.Fatal().LogErrorf("problem setting up search service: %v", err)
+		os.Exit(1)
+	}
 	err = setupPeriodicRefreshing(ctx, logger, errs, config.Download, downloader, searchService)
 	if err != nil {
 		logger.Fatal().LogErrorf("problem during initial download: %v", err)
