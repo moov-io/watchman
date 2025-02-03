@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"runtime"
 	"testing"
 	"time"
 
@@ -86,6 +87,10 @@ func TestMinMaxMed(t *testing.T) {
 	})
 
 	t.Run("time", func(t *testing.T) {
+		if runtime.GOOS == "windows" {
+			t.Skip("time is wonky on Windows")
+		}
+
 		ctx := context.Background()
 
 		var buf bytes.Buffer
