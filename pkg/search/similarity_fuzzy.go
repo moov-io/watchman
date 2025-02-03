@@ -216,37 +216,17 @@ func compareNameTerms(queryTerms []string, indexName string) nameMatch {
 		return nameMatch{score: 0}
 	}
 
-	// Track individual term matches
-	termScores := make([]float64, len(queryTerms))
+	score := stringscore.BestPairsJaroWinkler(queryTerms, strings.Join(indexTerms, " "))
 	matchingTerms := 0
-
-	// For each query term, find its best match in index terms
-	for i, qTerm := range queryTerms {
-		bestTermScore := 0.0
-		for _, iTerm := range indexTerms {
-			score := stringscore.JaroWinkler(qTerm, iTerm)
-			if score > bestTermScore {
-				bestTermScore = score
-				if score > termMatchThreshold {
-					matchingTerms++
-				}
-			}
-		}
-		termScores[i] = bestTermScore
+	if score > termMatchThreshold {
+		matchingTerms = len(queryTerms)
 	}
-
-	// Calculate overall score
-	var totalScore float64
-	for _, score := range termScores {
-		totalScore += score
-	}
-	avgScore := totalScore / float64(len(termScores))
 
 	return nameMatch{
-		score:         avgScore,
+		score:         score,
 		matchingTerms: matchingTerms,
 		totalTerms:    len(queryTerms),
-		isExact:       avgScore > exactMatchThreshold,
+		isExact:       score > exactMatchThreshold,
 	}
 }
 

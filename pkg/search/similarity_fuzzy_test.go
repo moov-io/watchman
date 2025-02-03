@@ -86,7 +86,7 @@ func TestCompareName(t *testing.T) {
 			index: Entity[any]{
 				Name: "AEROCARIBBEAN AIRLINES",
 			},
-			expectedScore: 0.85,
+			expectedScore: 0.686,
 			shouldMatch:   false,
 			exact:         false,
 		},
@@ -137,8 +137,8 @@ func TestCompareName(t *testing.T) {
 			index: Entity[any]{
 				Name: "PACIFIC TRADING LIMITED",
 			},
-			expectedScore: 0.8628,
-			shouldMatch:   true,
+			expectedScore: 0.575,
+			shouldMatch:   false,
 			exact:         false,
 		},
 		{
@@ -149,7 +149,7 @@ func TestCompareName(t *testing.T) {
 			index: Entity[any]{
 				Name: "BANCO NACIONAL DE CUBA",
 			},
-			expectedScore: 0.4479,
+			expectedScore: 0.0,
 			shouldMatch:   false,
 			exact:         false,
 		},

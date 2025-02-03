@@ -76,7 +76,7 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 				Name: "Dmitri Yuryevich",
 				Type: search.EntityPerson,
 			},
-			expected: 0.95,
+			expected: 0.90,
 		},
 		{
 			name: "Close name but different person details",
@@ -88,7 +88,7 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 					Gender:    search.GenderMale,
 				},
 			},
-			expected: 0.862,
+			expected: 0.677,
 		},
 		{
 			name: "Mismatch - Wrong name and no matching details",
@@ -99,7 +99,7 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 					Gender: "F",
 				},
 			},
-			expected: 0.3110,
+			expected: 0.221,
 		},
 		{
 			name: "Wrong entity type",
@@ -180,7 +180,7 @@ func TestSimilarity_OFAC_SDN_Business(t *testing.T) {
 					Name: "DIALOGUE REGIONS",
 				},
 			},
-			expected: 0.9555,
+			expected: 0.658,
 		},
 		{
 			name: "Different name, different ID",
@@ -198,7 +198,7 @@ func TestSimilarity_OFAC_SDN_Business(t *testing.T) {
 					},
 				},
 			},
-			expected: 0.0954,
+			expected: 0.0,
 		},
 		{
 			name: "Wrong entity type",
@@ -301,7 +301,7 @@ func TestSimilarity_OFAC_SDN_Vessel(t *testing.T) {
 						CallSign: "GOLD999",
 					},
 				},
-				expected: 0.2104,
+				expected: 0.0,
 			},
 			{
 				name: "Wrong entity type",
