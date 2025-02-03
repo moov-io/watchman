@@ -152,32 +152,34 @@ func (cm *ConcurrencyManager) setChampion(c int) {
 	// Clear traffic weights and stats
 	cm.trafficWeights = make(map[int]float64)
 
-	// Champion gets 80% traffic
-	cm.trafficWeights[c] = 0.8
+	// Champion gets 70% traffic (reduced from 80% to accommodate more challengers)
+	cm.trafficWeights[c] = 0.7
 	cm.ensureStats(c)
 
-	// Potential challengers
-	up := c + 1
-	down := c - 1
+	// Define step sizes - both fine and coarse adjustments
+	steps := []int{1, 5}
 
+	// Collect all valid challengers
 	var challengers []int
-	if up <= cm.maxC {
-		challengers = append(challengers, up)
-	}
-	if down >= cm.minC {
-		challengers = append(challengers, down)
+	for _, step := range steps {
+		up := c + step
+		down := c - step
+
+		if up <= cm.maxC {
+			challengers = append(challengers, up)
+		}
+		if down >= cm.minC {
+			challengers = append(challengers, down)
+		}
 	}
 
-	if len(challengers) == 1 {
-		// If only one valid challenger, give it 20% traffic
-		cm.trafficWeights[challengers[0]] = 0.2
-		cm.ensureStats(challengers[0])
-	} else if len(challengers) == 2 {
-		// If two challengers, give each 10% traffic
-		cm.trafficWeights[challengers[0]] = 0.1
-		cm.trafficWeights[challengers[1]] = 0.1
-		cm.ensureStats(challengers[0])
-		cm.ensureStats(challengers[1])
+	// Distribute remaining 30% traffic among all challengers
+	if len(challengers) > 0 {
+		weight := 0.3 / float64(len(challengers))
+		for _, challenger := range challengers {
+			cm.trafficWeights[challenger] = weight
+			cm.ensureStats(challenger)
+		}
 	}
 }
 
