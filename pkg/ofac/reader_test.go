@@ -74,17 +74,16 @@ func TestCleanPrgmsList(t *testing.T) {
 		prgms    string
 		expected string
 	}{
-		{"SDGT] ", "SDGT"},
-		{" SDGT] [IFSR", "SDGT; IFSR"},
-		{"SDNTK] [FTO] [SDGT", "SDNTK; FTO; SDGT"},
-		{"SDNTK] [FTO] [SDGT; IFSR]", "SDNTK; FTO; SDGT; IFSR"},
-		{"[IFSR] [SDNTK] [FTO] [SDGT", "IFSR; SDNTK; FTO; SDGT"},
+		{"SDGT] ", []string{"SDGT"}},
+		{" SDGT] [IFSR", []string{"SDGT", "IFSR"}},
+		{"SDNTK] [FTO] [SDGT", []string{"SDNTK", "FTO", "SDGT"}},
+		{"SDNTK] [FTO] [SDGT; IFSR]", []string{"SDNTK", "FTO", "SDGT", "IFSR"}},
+		{"[IFSR] [SDNTK] [FTO] [SDGT", []string{"IFSR", "SDNTK", "FTO", "SDGT"}},
 	}
 
-	for _, test := range tests {
-		if actual := cleanPrgmsList(test.prgms); actual != test.expected {
-			t.Errorf("Wanted %q, got %q", test.expected, actual)
-		}
+	for _, tc := range tests {
+		got := splitPrograms(tc.prgms)
+		require.Equal(t, tc.expected, got)
 	}
 }
 

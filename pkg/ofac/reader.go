@@ -18,15 +18,22 @@ import (
 	"github.com/moov-io/watchman/pkg/download"
 )
 
+const (
+	estimatedSDNs      = 15000
+	estimatedAddresses = 15000
+	estimatedAlts      = 10000
+	estimatedComments  = 100
+)
+
 // Read will consume the file at path and attempt to parse it was a CSV OFAC file.
 //
 // For more details on the raw OFAC files see https://moov-io.github.io/watchman/file-structure.html
 func Read(files download.Files) (*Results, error) {
 	results := &Results{
-		SDNs:                []SDN{},
-		Addresses:           make(map[string][]Address, 0),
-		AlternateIdentities: make(map[string][]AlternateIdentity, 0),
-		SDNComments:         make(map[string][]SDNComments, 0),
+		SDNs:                make([]SDN, 0, estimatedSDNs),
+		Addresses:           make(map[string][]Address, estimatedAddresses),
+		AlternateIdentities: make(map[string][]AlternateIdentity, estimatedAlts),
+		SDNComments:         make(map[string][]SDNComments, estimatedComments),
 	}
 
 	hashes := make([]string, 4)
@@ -34,42 +41,40 @@ func Read(files download.Files) (*Results, error) {
 	for filename, file := range files {
 		switch strings.ToLower(filepath.Base(filename)) {
 		case "add.csv":
-			res, hash, err := csvAddressFile(file)
+			hash, err := csvAddressFile(results, file)
 			if err != nil {
 				return nil, fmt.Errorf("add.csv: %v", err)
 			}
 			hashes[0] = hash
-			results.append(res)
 
 		case "alt.csv":
-			res, hash, err := csvAlternateIdentityFile(file)
+			hash, err := csvAlternateIdentityFile(results, file)
 			if err != nil {
 				return nil, fmt.Errorf("alt.csv: %v", err)
 			}
 			hashes[1] = hash
-			results.append(res)
 
 		case "sdn.csv":
-			res, hash, err := csvSDNFile(file)
+			hash, err := csvSDNFile(results, file)
 			if err != nil {
 				return nil, fmt.Errorf("sdn.csv: %v", err)
 			}
 			hashes[2] = hash
-			results.append(res)
 
 		case "sdn_comments.csv":
-			res, hash, err := csvSDNCommentsFile(file)
+			hash, err := csvSDNCommentsFile(results, file)
 			if err != nil {
 				return nil, fmt.Errorf("sdn_comments.csv: %v", err)
 			}
 			hashes[3] = hash
-			results.append(res)
 
 		default:
 			file.Close()
 			return nil, fmt.Errorf("error: file %s does not have a handler for processing", filename)
 		}
 	}
+
+	fmt.Printf("results: %d,  %d,  %d,  %d\n", len(results.SDNs), len(results.Addresses), len(results.AlternateIdentities), len(results.SDNComments))
 
 	// Join the hashes together
 	var buf bytes.Buffer
@@ -100,34 +105,6 @@ type Results struct {
 	ListHash string
 }
 
-func (r *Results) append(rr *Results) {
-	r.SDNs = append(r.SDNs, rr.SDNs...)
-
-	if rr.Addresses != nil {
-		for _, addresses := range rr.Addresses {
-			for _, addr := range addresses {
-				r.Addresses[addr.EntityID] = append(r.Addresses[addr.EntityID], addr)
-			}
-		}
-	}
-
-	if rr.AlternateIdentities != nil {
-		for _, alts := range rr.AlternateIdentities {
-			for _, alt := range alts {
-				r.AlternateIdentities[alt.EntityID] = append(r.AlternateIdentities[alt.EntityID], alt)
-			}
-		}
-	}
-
-	if rr.SDNComments != nil {
-		for _, comments := range rr.SDNComments {
-			for _, comment := range comments {
-				r.SDNComments[comment.EntityID] = append(r.SDNComments[comment.EntityID], comment)
-			}
-		}
-	}
-}
-
 func calculateHash(input []byte) string {
 	h := sha256.Sum256(input)
 	return hex.EncodeToString(h[:])
@@ -139,12 +116,12 @@ func hashWriter(rc io.ReadCloser) (io.Reader, *bytes.Buffer) {
 	return r, &buf
 }
 
-func csvAddressFile(f io.ReadCloser) (*Results, string, error) {
+func csvAddressFile(results *Results, f io.ReadCloser) (string, error) {
 	defer f.Close()
 
 	rc, hashbuf := hashWriter(f)
 
-	out := make(map[string][]Address, 0)
+	out := make(map[string][]Address, 1)
 
 	// Read File into a Variable
 	reader := csv.NewReader(rc)
@@ -161,7 +138,7 @@ func csvAddressFile(f io.ReadCloser) (*Results, string, error) {
 				errors.Is(err, csv.ErrQuote) {
 				continue
 			}
-			return nil, "", err
+			return "", err
 		}
 		if len(record) != 6 {
 			continue
@@ -182,10 +159,12 @@ func csvAddressFile(f io.ReadCloser) (*Results, string, error) {
 
 	hash := calculateHash(hashbuf.Bytes())
 
-	return &Results{Addresses: out}, hash, nil
+	results.Addresses = out
+
+	return hash, nil
 }
 
-func csvAlternateIdentityFile(f io.ReadCloser) (*Results, string, error) {
+func csvAlternateIdentityFile(results *Results, f io.ReadCloser) (string, error) {
 	defer f.Close()
 
 	rc, hashbuf := hashWriter(f)
@@ -207,7 +186,7 @@ func csvAlternateIdentityFile(f io.ReadCloser) (*Results, string, error) {
 				errors.Is(err, csv.ErrQuote) {
 				continue
 			}
-			return nil, "", err
+			return "", err
 		}
 		if len(record) != 5 {
 			continue
@@ -225,43 +204,58 @@ func csvAlternateIdentityFile(f io.ReadCloser) (*Results, string, error) {
 	}
 
 	hash := calculateHash(hashbuf.Bytes())
+	results.AlternateIdentities = out
 
-	return &Results{AlternateIdentities: out}, hash, nil
+	return hash, nil
 }
 
-func csvSDNFile(f io.ReadCloser) (*Results, string, error) {
+func csvSDNFile(results *Results, f io.ReadCloser) (string, error) {
 	defer f.Close()
 
 	rc, hashbuf := hashWriter(f)
 
-	var out []SDN
+	// Pre-allocate output slice with estimated capacity
+	out := make([]SDN, 0, estimatedSDNs)
 
-	// Read File into a Variable
+	// Create reader and enable record reuse
 	reader := csv.NewReader(rc)
+	reader.ReuseRecord = true
+
+	// Pre-allocate record slice with known field count
+	record := make([]string, 12)
+	recordCopy := make([]string, 12)
+
 	for {
-		record, err := reader.Read()
+		readRecord, err := reader.Read()
 		if err != nil {
-			// reached the last line
-			if errors.Is(err, io.EOF) {
+			if err == io.EOF {
 				break
 			}
-			// malformed row
 			if errors.Is(err, csv.ErrFieldCount) ||
 				errors.Is(err, csv.ErrBareQuote) ||
 				errors.Is(err, csv.ErrQuote) {
 				continue
 			}
-			return nil, "", err
+			return "", err
 		}
-		if len(record) != 12 {
+
+		if len(readRecord) != 12 {
 			continue
 		}
-		record = replaceNull(record)
+
+		// Make a copy since we'll store this data
+		copy(recordCopy, readRecord)
+		record = replaceNull(recordCopy)
+
+		// Pre-allocate programs slice for common case
+		programs := make([]string, 0, 2) // Most entries have 1-2 programs
+		programs = append(programs, splitPrograms(record[3])...)
+
 		out = append(out, SDN{
 			EntityID:               record[0],
 			SDNName:                record[1],
 			SDNType:                record[2],
-			Programs:               splitPrograms(record[3]),
+			Programs:               programs,
 			Title:                  record[4],
 			CallSign:               record[5],
 			VesselType:             record[6],
@@ -274,11 +268,12 @@ func csvSDNFile(f io.ReadCloser) (*Results, string, error) {
 	}
 
 	hash := calculateHash(hashbuf.Bytes())
+	results.SDNs = out
 
-	return &Results{SDNs: out}, hash, nil
+	return hash, nil
 }
 
-func csvSDNCommentsFile(f io.ReadCloser) (*Results, string, error) {
+func csvSDNCommentsFile(results *Results, f io.ReadCloser) (string, error) {
 	defer f.Close()
 
 	rc, hashbuf := hashWriter(f)
@@ -302,7 +297,7 @@ func csvSDNCommentsFile(f io.ReadCloser) (*Results, string, error) {
 				errors.Is(err, csv.ErrQuote) {
 				continue
 			}
-			return nil, "", err
+			return "", err
 		}
 		if len(line) != 2 {
 			continue
@@ -319,14 +314,34 @@ func csvSDNCommentsFile(f io.ReadCloser) (*Results, string, error) {
 
 	hash := calculateHash(hashbuf.Bytes())
 
-	return &Results{SDNComments: out}, hash, nil
+	results.SDNComments = out
+
+	return hash, nil
 }
 
 // replaceNull replaces a CSV field that contain -0- with "".  Null values for all four formats consist of "-0-"
 // (ASCII characters 45, 48, 45).
 func replaceNull(s []string) []string {
+	const null = "-0-"
 	for i := 0; i < len(s); i++ {
-		s[i] = strings.TrimSpace(strings.Replace(s[i], "-0-", "", -1))
+		// Fast path - if it doesn't contain -0-, just trim
+		if !strings.Contains(s[i], null) {
+			s[i] = strings.TrimSpace(s[i])
+			continue
+		}
+		// Handle null case in place
+		b := []byte(s[i])
+		j := 0 // write index
+		for k := 0; k < len(b); {
+			if k+3 <= len(b) && b[k] == '-' && b[k+1] == '0' && b[k+2] == '-' {
+				k += 3 // skip -0-
+				continue
+			}
+			b[j] = b[k]
+			j++
+			k++
+		}
+		s[i] = strings.TrimSpace(string(b[:j]))
 	}
 	return s
 }
@@ -336,13 +351,28 @@ func replaceNull(s []string) []string {
 // Ex: "SDGT] [IFSR" => "SDGT; IFSR", "SDNTK] [FTO] [SDGT" => "SDNTK; FTO; SDGT"
 var prgmReplacer = strings.NewReplacer("] [", "; ", "]", "", "[", "")
 
-func cleanPrgmsList(s string) string {
-	return strings.TrimSpace(prgmReplacer.Replace(s))
-}
-
 func splitPrograms(in string) []string {
-	norm := cleanPrgmsList(in)
-	return strings.Split(norm, "; ")
+	if in == "" {
+		return nil
+	}
+
+	// Fast path for common case of single program
+	if !strings.ContainsAny(in, "[];") {
+		return []string{strings.TrimSpace(in)}
+	}
+
+	// For complex cases, clean once then split
+	cleaned := prgmReplacer.Replace(in)
+	if cleaned == "" {
+		return nil
+	}
+
+	// Split and trim in place
+	parts := strings.Split(cleaned, "; ")
+	for i := range parts {
+		parts[i] = strings.TrimSpace(parts[i])
+	}
+	return parts
 }
 
 func splitRemarks(input string) []string {
