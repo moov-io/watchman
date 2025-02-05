@@ -8,6 +8,7 @@ import (
 	"cmp"
 	"context"
 	"os"
+	"runtime"
 	"strings"
 	"time"
 
@@ -69,11 +70,19 @@ func refreshAllSources(logger log.Logger, downloader download.Downloader, search
 	if err != nil {
 		return err
 	}
-	logger.Info().Logf("data refreshed - %v entities from %v lists took %v",
-		len(stats.Entities), len(stats.Lists), stats.EndedAt.Sub(stats.StartedAt))
+
+	logger.Info().Logf("data refreshed - %v entities from %v lists took %v (using %.2fGB)",
+		len(stats.Entities), len(stats.Lists), stats.EndedAt.Sub(stats.StartedAt), getCurrentMemoryUsed())
 
 	// Replace in-mem entities for search.Service
 	searchService.UpdateEntities(stats)
 
 	return nil
+}
+
+func getCurrentMemoryUsed() float64 {
+	var mem runtime.MemStats
+	runtime.ReadMemStats(&mem)
+
+	return float64(mem.Alloc) / 1024.0 / 1024.0 / 1024.0 // divide by 1GB
 }
