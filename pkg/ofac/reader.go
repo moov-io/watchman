@@ -75,8 +75,6 @@ func Read(files download.Files) (*Results, error) {
 		}
 	}
 
-	fmt.Printf("results: %d,  %d,  %d,  %d\n", len(results.SDNs), len(results.Addresses), len(results.AlternateIdentities), len(results.SDNComments))
-
 	// Join the hashes together
 	var buf bytes.Buffer
 	for _, h := range hashes {
