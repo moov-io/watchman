@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/moov-io/watchman/pkg/address"
 	"github.com/moov-io/watchman/pkg/search"
 
 	"github.com/moov-io/base/log"
@@ -44,6 +45,9 @@ func NewService(logger log.Logger, conf Config) (*Service, error) {
 
 	ps := &Service{
 		processes: make([]*exec.Cmd, conf.Instances),
+	}
+	if conf.Instances <= 0 {
+		return ps, nil
 	}
 
 	var g errgroup.Group
@@ -94,5 +98,8 @@ func (ps *Service) Shutdown() {
 }
 
 func (ps *Service) ParseAddress(ctx context.Context, input string) (search.Address, error) {
+	if ps.client == nil {
+		return address.ParseAddress(input), nil
+	}
 	return ps.client.ParseAddress(ctx, input)
 }
