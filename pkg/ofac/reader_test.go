@@ -72,7 +72,7 @@ func TestReplaceNull(t *testing.T) {
 func TestCleanPrgmsList(t *testing.T) {
 	tests := []struct {
 		prgms    string
-		expected string
+		expected []string
 	}{
 		{"SDGT] ", []string{"SDGT"}},
 		{" SDGT] [IFSR", []string{"SDGT", "IFSR"}},
@@ -111,7 +111,10 @@ func TestSDNComments(t *testing.T) {
 	fd.Seek(0, 0)
 
 	// read with lazy quotes enabled
-	res, hash, err := csvSDNCommentsFile(fd)
+	res := Results{
+		SDNComments: make(map[string][]SDNComments),
+	}
+	hash, err := csvSDNCommentsFile(&res, fd)
 	require.NoError(t, err)
 	require.NotEmpty(t, hash)
 	require.Len(t, res.SDNComments, 1)
@@ -177,12 +180,15 @@ func TestSDNComments_CryptoCurrencies(t *testing.T) {
 	require.NoError(t, err)
 	fd.Seek(0, 0)
 
-	sdn, hash, err := csvSDNCommentsFile(fd)
+	res := Results{
+		SDNComments: make(map[string][]SDNComments),
+	}
+	hash, err := csvSDNCommentsFile(&res, fd)
 	require.NoError(t, err)
 	require.NotEmpty(t, hash)
-	require.Len(t, sdn.SDNComments, 1)
+	require.Len(t, res.SDNComments, 1)
 
-	comments, found := sdn.SDNComments["42496"]
+	comments, found := res.SDNComments["42496"]
 	require.True(t, found)
 	require.Len(t, comments, 1)
 
