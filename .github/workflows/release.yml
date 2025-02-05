@@ -4,6 +4,9 @@ on:
   push:
     tags: [ "v*.*.*" ]
 
+env:
+  RELEASE: yes
+
 jobs:
   testing:
     name: Testing
