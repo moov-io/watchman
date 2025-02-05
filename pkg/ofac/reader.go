@@ -187,14 +187,18 @@ func csvAlternateIdentityFile(results *Results, f io.ReadCloser) (string, error)
 
 	// Read File into a Variable
 	reader := csv.NewReader(rc)
+	reader.ReuseRecord = true
+
+	// Pre-allocate with exact sizes needed
+	record := make([]string, 5)
+	recordCopy := make([]string, 5)
+
 	for {
-		record, err := reader.Read()
+		readRecord, err := reader.Read()
 		if err != nil {
-			// reached the last line
-			if errors.Is(err, io.EOF) {
+			if err == io.EOF {
 				break
 			}
-			// malformed row
 			if errors.Is(err, csv.ErrFieldCount) ||
 				errors.Is(err, csv.ErrBareQuote) ||
 				errors.Is(err, csv.ErrQuote) {
@@ -202,12 +206,20 @@ func csvAlternateIdentityFile(results *Results, f io.ReadCloser) (string, error)
 			}
 			return "", err
 		}
-		if len(record) != 5 {
+		if len(readRecord) != 5 {
 			continue
 		}
-		record = replaceNull(record)
+
+		// Make a copy since we'll store this data
+		copy(recordCopy, readRecord)
+		record = replaceNull(recordCopy)
 
 		entityID := record[0]
+		// Pre-allocate slice if not exists with typical capacity
+		if _, ok := results.AlternateIdentities[entityID]; !ok {
+			results.AlternateIdentities[entityID] = make([]AlternateIdentity, 0, 2)
+		}
+
 		results.AlternateIdentities[entityID] = append(results.AlternateIdentities[entityID], AlternateIdentity{
 			EntityID:         record[0],
 			AlternateID:      record[1],
@@ -218,7 +230,6 @@ func csvAlternateIdentityFile(results *Results, f io.ReadCloser) (string, error)
 	}
 
 	hash := calculateHash(hashbuf.Bytes())
-
 	return hash, nil
 }
 
