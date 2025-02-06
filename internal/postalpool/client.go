@@ -9,6 +9,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/moov-io/watchman/pkg/address"
 	"github.com/moov-io/watchman/pkg/search"
 
 	"github.com/moov-io/base/telemetry"
@@ -41,12 +42,18 @@ func (c *Client) ParseAddress(ctx context.Context, input string) (search.Address
 	ctx, span := telemetry.StartSpan(ctx, "postalpool-parse-address")
 	defer span.End()
 
+	if len(c.endpoints) == 0 {
+		span.SetAttributes(attribute.String("postalpool.method", "cgo"))
+		return address.ParseAddress(input), nil
+	}
+
 	// Simple round-robin
 	idx := int(c.next.Add(1)) % len(c.endpoints)
 	endpoint := c.endpoints[idx]
 
 	span.SetAttributes(
 		attribute.String("postalpool.endpoint", endpoint),
+		attribute.String("postalpool.method", "binary"),
 	)
 
 	var addr search.Address
