@@ -11,5 +11,7 @@ type Config struct {
 	StartingPort   int
 	StartupTimeout time.Duration
 
+	RequestTimeout time.Duration
+
 	BinaryPath string
 }

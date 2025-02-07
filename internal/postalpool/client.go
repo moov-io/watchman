@@ -1,6 +1,7 @@
 package postalpool
 
 import (
+	"cmp"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -29,12 +30,17 @@ type Client struct {
 	conf      Config
 	endpoints []string
 	next      atomic.Uint32
+
+	httpClient *http.Client
 }
 
 func NewClient(conf Config, endpoints []string) *Client {
 	return &Client{
 		conf:      conf,
 		endpoints: endpoints,
+		httpClient: &http.Client{
+			Timeout: cmp.Or(conf.RequestTimeout, 10*time.Second),
+		},
 	}
 }
 
@@ -63,7 +69,13 @@ func (c *Client) ParseAddress(ctx context.Context, input string) (search.Address
 	)
 
 	var addr search.Address
-	resp, err := http.Get(endpoint + "/parse?address=" + url.QueryEscape(input))
+
+	req, err := http.NewRequestWithContext(ctx, "GET", endpoint+"/parse?address="+url.QueryEscape(input), nil)
+	if err != nil {
+		return addr, fmt.Errorf("creating postal-server request: %w", err)
+	}
+
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return addr, fmt.Errorf("HTTP parse to postal-server: %w", err)
 	}
