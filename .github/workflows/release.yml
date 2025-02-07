@@ -148,8 +148,8 @@ jobs:
         asset_name: watchman.exe
         asset_content_type: application/octet-stream
 
-  docker:
-    name: Docker
+  docker-hub:
+    name: Docker Hub
     needs: [testing, create_release]
     runs-on: ubuntu-latest
     steps:
@@ -168,9 +168,6 @@ jobs:
     - name: Docker Hub
       run: make docker-hub
 
-    - name: Docker Openshift
-      run: make docker-openshift
-
     - name: Docker Static
       run: make docker-static
 
@@ -181,6 +178,26 @@ jobs:
       env:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+  docker-openshift:
+    name: Docker Openshift
+    needs: [testing, create_release]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v5
+      with:
+        go-version: stable
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v3
+
+    - name: Clean
+      run: make clean
+
+    - name: Docker Openshift
+      run: make docker-openshift
 
     - name: Quay.io Push
       run: |+
