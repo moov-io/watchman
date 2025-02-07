@@ -43,14 +43,20 @@ func (c *Client) ParseAddress(ctx context.Context, input string) (search.Address
 	defer span.End()
 
 	if len(c.endpoints) == 0 {
-		span.SetAttributes(attribute.String("postalpool.method", "cgo"))
+		span.SetAttributes(attribute.String("postalpool.method", "cgo-zero"))
 		return address.ParseAddress(input), nil
 	}
 
-	// Simple round-robin
-	idx := int(c.next.Add(1)) % len(c.endpoints)
-	endpoint := c.endpoints[idx]
+	// Simple round-robin including self
+	idx := int(c.next.Add(1)) % (len(c.endpoints) + 1)
 
+	// If idx equals last position, use local instance
+	if idx == len(c.endpoints) {
+		span.SetAttributes(attribute.String("postalpool.method", "cgo-self"))
+		return address.ParseAddress(input), nil
+	}
+
+	endpoint := c.endpoints[idx]
 	span.SetAttributes(
 		attribute.String("postalpool.endpoint", endpoint),
 		attribute.String("postalpool.method", "binary"),

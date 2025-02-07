@@ -22,7 +22,7 @@ func TestPostalPool(t *testing.T) {
 	t.Logf("%#v", addr)
 }
 
-func BenchmarkPostalPool(b *testing.B) {
+func Benchmark_PostalPool(b *testing.B) {
 	ctx := context.Background()
 	svc := setupPostalPool(b)
 

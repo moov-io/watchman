@@ -15,7 +15,7 @@ Watchman:
 
   PostalPool:
     Enabled: false
-    Instances: 10
+    Instances: 2
     StartingPort: 10000
     StartupTimeout: "60s"
     BinaryPath: "" # POSTAL_SERVER_BIN_PATH is set in Dockerfile
