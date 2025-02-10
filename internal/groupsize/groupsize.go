@@ -5,80 +5,20 @@ import (
 	"math"
 	"math/rand"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
 // rollingStats keeps a fixed-size ring buffer of durations, plus incremental
 // mean & variance using Welford's algorithm.
 type rollingStats struct {
-	mu       sync.Mutex
-	buffer   []time.Duration // ring buffer
+	mu       sync.RWMutex // Use RWMutex instead of Mutex for better read concurrency
+	buffer   []time.Duration
 	capacity int
-	index    int
-	count    int
-	// For incremental mean/variance
-	mean float64
-	m2   float64 // sum of squares of differences from the mean
-}
-
-// newRollingStats creates a ring buffer of a given capacity.
-func newRollingStats(capacity int) *rollingStats {
-	if capacity <= 0 {
-		capacity = 100 // Default to reasonable size
-	}
-	return &rollingStats{
-		buffer:   make([]time.Duration, capacity),
-		capacity: capacity,
-	}
-}
-
-// add inserts a new duration, updating mean and variance. Welford's method in ring form.
-func (rs *rollingStats) add(d time.Duration) {
-	rs.mu.Lock()
-	defer rs.mu.Unlock()
-
-	newVal := float64(d.Microseconds())
-	if math.IsNaN(newVal) || math.IsInf(newVal, 0) {
-		return // Skip invalid values
-	}
-
-	// If we're overwriting an old value, remove its contribution
-	old := rs.buffer[rs.index]
-	if rs.count >= rs.capacity {
-		// we have a full buffer, so subtract old from the Welford's calc
-		oldVal := float64(old.Microseconds())
-		n := float64(rs.count)
-
-		// Remove oldVal's contribution
-		delta := oldVal - rs.mean
-		rs.mean = rs.mean - delta/(n)
-		rs.m2 = rs.m2 - delta*(oldVal-rs.mean)
-	} else {
-		rs.count++
-	}
-
-	// Insert the new duration into the ring buffer
-	rs.buffer[rs.index] = d
-	rs.index = (rs.index + 1) % rs.capacity
-
-	// Add new value
-	n := float64(rs.count)
-	delta := newVal - rs.mean
-	rs.mean = rs.mean + delta/n
-	delta2 := newVal - rs.mean
-	rs.m2 = rs.m2 + delta*delta2
-}
-
-// getStats returns (mean, stddev, sampleSize) from the rolling stats
-func (rs *rollingStats) getStats() (mean float64, stddev float64, n int) {
-	rs.mu.Lock()
-	defer rs.mu.Unlock()
-	if rs.count < 2 {
-		// Not enough data for stddev
-		return rs.mean, 0, rs.count
-	}
-	variance := rs.m2 / float64(rs.count-1)
-	return rs.mean, math.Sqrt(variance), rs.count
+	index    int32 // Use atomic for index operations
+	count    int32 // Use atomic for count operations
+	mean     float64
+	m2       float64 // sum of squares of differences from the mean
 }
 
 type ConcurrencyManager struct {
@@ -109,7 +49,20 @@ type ConcurrencyManager struct {
 
 	// cleanup
 	lastCleanup     time.Time
+	lastCleanupUnix int64         // atomic timestamp for cleanup
 	cleanupInterval time.Duration // e.g., 1 hour
+	totalSamples    int32         // atomic counter
+	evaluateChan    chan struct{} // channel for async evaluation
+}
+
+type interval struct {
+	low, high float64
+}
+
+type evaluationResult struct {
+	concurrency int
+	mean        float64
+	ci          interval
 }
 
 // NewConcurrencyManager sets up with a chosen champion concurrency and typical config
@@ -136,25 +89,95 @@ func NewConcurrencyManager(initialChampion, minC, maxC int) (*ConcurrencyManager
 		minImprovement:  0.02,
 		cleanupInterval: time.Hour,
 		lastCleanup:     time.Now(),
+		lastCleanupUnix: time.Now().Unix(),
+		evaluateChan:    make(chan struct{}, 1), // buffered channel to prevent blocking
 	}
+
 	cm.setChampion(initialChampion)
+
+	// Start evaluation goroutine
+	go cm.evaluationLoop()
+
 	return cm, nil
 }
 
-// setChampion updates the champion and sets up challengers (champ+1 and champ-1) if in range.
+// newRollingStats creates a ring buffer of a given capacity.
+func newRollingStats(capacity int) *rollingStats {
+	if capacity <= 0 {
+		capacity = 100 // Default to reasonable size
+	}
+	return &rollingStats{
+		buffer:   make([]time.Duration, capacity),
+		capacity: capacity,
+	}
+}
+
+// add inserts a new duration, updating mean and variance. Welford's method in ring form.
+func (rs *rollingStats) add(d time.Duration) {
+	rs.mu.Lock()
+	defer rs.mu.Unlock()
+
+	newVal := float64(d.Microseconds())
+	if math.IsNaN(newVal) || math.IsInf(newVal, 0) {
+		return // Skip invalid values
+	}
+
+	// If we're overwriting an old value, remove its contribution
+	old := rs.buffer[atomic.LoadInt32(&rs.index)]
+	if atomic.LoadInt32(&rs.count) >= int32(rs.capacity) {
+		// we have a full buffer, so subtract old from the Welford's calc
+		oldVal := float64(old.Microseconds())
+		n := float64(atomic.LoadInt32(&rs.count))
+
+		// Remove oldVal's contribution
+		delta := oldVal - rs.mean
+		rs.mean = rs.mean - delta/n
+		rs.m2 = rs.m2 - delta*(oldVal-rs.mean)
+	} else {
+		atomic.AddInt32(&rs.count, 1)
+	}
+
+	// Insert the new duration into the ring buffer
+	rs.buffer[rs.index] = d
+	atomic.StoreInt32(&rs.index, (atomic.LoadInt32(&rs.index)+1)%int32(rs.capacity))
+
+	// Add new value
+	n := float64(atomic.LoadInt32(&rs.count))
+	delta := newVal - rs.mean
+	rs.mean = rs.mean + delta/n
+	delta2 := newVal - rs.mean
+	rs.m2 = rs.m2 + delta*delta2
+}
+
+// getStats returns (mean, stddev, sampleSize) from the rolling stats
+func (rs *rollingStats) getStats() (mean float64, stddev float64, n int) {
+	rs.mu.RLock()
+	defer rs.mu.RUnlock()
+
+	count := atomic.LoadInt32(&rs.count)
+	if count < 2 {
+		return rs.mean, 0, int(count)
+	}
+	variance := rs.m2 / float64(count-1)
+	return rs.mean, math.Sqrt(variance), int(count)
+}
+
 func (cm *ConcurrencyManager) setChampion(c int) {
+	cm.mu.Lock()
+	defer cm.mu.Unlock()
+
 	cm.champion = c
 
 	// Clean up old stats before setting new weights
-	if time.Since(cm.lastCleanup) > cm.cleanupInterval {
+	lastCleanup := atomic.LoadInt64(&cm.lastCleanupUnix)
+	if time.Unix(lastCleanup, 0).Add(cm.cleanupInterval).Before(time.Now()) {
 		cm.cleanupOldStats()
-		cm.lastCleanup = time.Now()
 	}
 
 	// Clear traffic weights and stats
 	cm.trafficWeights = make(map[int]float64)
 
-	// Champion gets 70% traffic (reduced from 80% to accommodate more challengers)
+	// Champion gets 70% traffic
 	cm.trafficWeights[c] = 0.7
 	cm.ensureStats(c)
 
@@ -162,7 +185,7 @@ func (cm *ConcurrencyManager) setChampion(c int) {
 	steps := []int{1, 5}
 
 	// Collect all valid challengers
-	var challengers []int
+	challengers := make([]int, 0, 4) // Pre-allocate with reasonable capacity
 	for _, step := range steps {
 		up := c + step
 		down := c - step
@@ -175,7 +198,7 @@ func (cm *ConcurrencyManager) setChampion(c int) {
 		}
 	}
 
-	// Distribute remaining 30% traffic among all challengers
+	// Distribute remaining 30% traffic among challengers
 	if len(challengers) > 0 {
 		weight := 0.3 / float64(len(challengers))
 		for _, challenger := range challengers {
@@ -185,17 +208,20 @@ func (cm *ConcurrencyManager) setChampion(c int) {
 	}
 }
 
-// ensureStats ensures a rollingStats object exists for concurrency c
 func (cm *ConcurrencyManager) ensureStats(c int) {
 	if _, ok := cm.stats[c]; !ok {
 		cm.stats[c] = newRollingStats(cm.windowSize)
 	}
 }
 
-// cleanupOldStats will remove outdated stats from the trafficWeights
+func (cm *ConcurrencyManager) getStatsNoLock(concurrency int) *rollingStats {
+	return cm.stats[concurrency]
+}
+
 func (cm *ConcurrencyManager) cleanupOldStats() {
-	cm.mu.Lock()
-	defer cm.mu.Unlock()
+	if !time.Unix(atomic.LoadInt64(&cm.lastCleanupUnix), 0).Add(cm.cleanupInterval).Before(time.Now()) {
+		return // Another goroutine already cleaned up
+	}
 
 	active := make(map[int]bool)
 	for c := range cm.trafficWeights {
@@ -207,10 +233,11 @@ func (cm *ConcurrencyManager) cleanupOldStats() {
 			delete(cm.stats, c)
 		}
 	}
+
 	cm.lastCleanup = time.Now()
+	atomic.StoreInt64(&cm.lastCleanupUnix, time.Now().Unix())
 }
 
-// PickConcurrency randomly chooses a concurrency among champion/challengers based on traffic weights
 func (cm *ConcurrencyManager) PickConcurrency() int {
 	cm.mu.Lock()
 	defer cm.mu.Unlock()
@@ -235,41 +262,45 @@ func (cm *ConcurrencyManager) PickConcurrency() int {
 	return cm.champion
 }
 
-// RecordDuration logs the latency for the given concurrency
 func (cm *ConcurrencyManager) RecordDuration(concurrency int, d time.Duration) {
-	// First check if cleanup is needed
-	cm.mu.Lock()
-	needsCleanup := time.Since(cm.lastCleanup) > cm.cleanupInterval
-	cm.mu.Unlock()
-
-	if needsCleanup {
+	// Fast cleanup check using atomic
+	lastCleanup := atomic.LoadInt64(&cm.lastCleanupUnix)
+	if time.Unix(lastCleanup, 0).Add(cm.cleanupInterval).Before(time.Now()) {
 		cm.cleanupOldStats()
 	}
 
-	// Then handle the stats
+	var st *rollingStats
 	cm.mu.Lock()
-	st := cm.stats[concurrency]
+	st = cm.stats[concurrency]
 	if st == nil {
 		st = newRollingStats(cm.windowSize)
 		cm.stats[concurrency] = st
 	}
 	cm.mu.Unlock()
 
-	// Add the duration with only the stats lock held
 	st.add(d)
 
-	// Finally check if we need to evaluate
-	cm.mu.Lock()
-	shouldEvaluate := cm.allHaveMinSamples()
-	cm.mu.Unlock()
-
-	if shouldEvaluate {
-		cm.evaluate()
+	// Increment sample count atomically
+	if atomic.AddInt32(&cm.totalSamples, 1) >= int32(cm.minSamples) {
+		select {
+		case cm.evaluateChan <- struct{}{}:
+		default:
+		}
 	}
 }
 
-// allHaveMinSamples checks if champion and any challengers each have enough samples
+func (cm *ConcurrencyManager) evaluationLoop() {
+	for range cm.evaluateChan {
+		if cm.allHaveMinSamples() {
+			cm.evaluate()
+		}
+	}
+}
+
 func (cm *ConcurrencyManager) allHaveMinSamples() bool {
+	cm.mu.Lock()
+	defer cm.mu.Unlock()
+
 	for c := range cm.trafficWeights {
 		_, _, n := cm.stats[c].getStats()
 		if n < cm.minSamples {
@@ -279,22 +310,25 @@ func (cm *ConcurrencyManager) allHaveMinSamples() bool {
 	return true
 }
 
-type evaluationResult struct {
-	concurrency int
-	mean        float64
-	ci          interval
-}
-
 func (cm *ConcurrencyManager) evaluate() {
 	now := time.Now()
 	if now.Sub(cm.lastSwitchTime) < cm.switchCooldown {
 		return
 	}
 
-	results := make([]evaluationResult, 0, len(cm.trafficWeights))
+	cm.mu.Lock()
+	// Gather data under lock
+	trafficWeightsCopy := make(map[int]float64, len(cm.trafficWeights))
+	for k, v := range cm.trafficWeights {
+		trafficWeightsCopy[k] = v
+	}
+	champion := cm.champion
+	cm.mu.Unlock()
+
+	results := make([]evaluationResult, 0, len(trafficWeightsCopy))
 
 	// Gather all stats first
-	for c := range cm.trafficWeights {
+	for c := range trafficWeightsCopy {
 		mean, std, count := cm.stats[c].getStats()
 		if count < cm.minSamples {
 			continue
@@ -314,7 +348,7 @@ func (cm *ConcurrencyManager) evaluate() {
 	// Find champion stats
 	var champResult evaluationResult
 	for _, r := range results {
-		if r.concurrency == cm.champion {
+		if r.concurrency == champion {
 			champResult = r
 			break
 		}
@@ -325,7 +359,7 @@ func (cm *ConcurrencyManager) evaluate() {
 	bestImprovement := 0.0
 
 	for _, r := range results {
-		if r.concurrency == cm.champion {
+		if r.concurrency == champion {
 			continue
 		}
 
@@ -340,12 +374,10 @@ func (cm *ConcurrencyManager) evaluate() {
 
 	if bestImprovement > 0 {
 		cm.setChampion(bestChallenger.concurrency)
+		cm.mu.Lock()
 		cm.lastSwitchTime = now
+		cm.mu.Unlock()
 	}
-}
-
-type interval struct {
-	low, high float64
 }
 
 // confidenceInterval returns (low, high) for the mean at a given confidence level (z).
