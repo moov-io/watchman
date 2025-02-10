@@ -1,3 +1,9 @@
+## v0.50.1 (Released 2025-02-10)
+
+IMPROVEMENTS
+
+- groupsize: better locking behavior
+
 ## v0.50.0 (Released 2025-02-07)
 
 BREAKING CHANGE
