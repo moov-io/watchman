@@ -197,11 +197,17 @@ func (cm *ConcurrencyManager) cleanupOldStats() {
 	cm.mu.Lock()
 	defer cm.mu.Unlock()
 
+	active := make(map[int]bool)
+	for c := range cm.trafficWeights {
+		active[c] = true
+	}
+
 	for c := range cm.stats {
-		if _, isActive := cm.trafficWeights[c]; !isActive {
+		if !active[c] {
 			delete(cm.stats, c)
 		}
 	}
+	cm.lastCleanup = time.Now()
 }
 
 // PickConcurrency randomly chooses a concurrency among champion/challengers based on traffic weights
@@ -231,28 +237,33 @@ func (cm *ConcurrencyManager) PickConcurrency() int {
 
 // RecordDuration logs the latency for the given concurrency
 func (cm *ConcurrencyManager) RecordDuration(concurrency int, d time.Duration) {
-	if d < 0 {
-		return // Skip negative durations (clock issues)
-	}
-
+	// First check if cleanup is needed
 	cm.mu.Lock()
-	defer cm.mu.Unlock()
+	needsCleanup := time.Since(cm.lastCleanup) > cm.cleanupInterval
+	cm.mu.Unlock()
 
-	// Check if cleanup is needed
-	if time.Since(cm.lastCleanup) > cm.cleanupInterval {
+	if needsCleanup {
 		cm.cleanupOldStats()
-		cm.lastCleanup = time.Now()
 	}
 
+	// Then handle the stats
+	cm.mu.Lock()
 	st := cm.stats[concurrency]
 	if st == nil {
 		st = newRollingStats(cm.windowSize)
 		cm.stats[concurrency] = st
 	}
+	cm.mu.Unlock()
+
+	// Add the duration with only the stats lock held
 	st.add(d)
 
-	// Check if all tested concurrencies have at least minSamples
-	if cm.allHaveMinSamples() {
+	// Finally check if we need to evaluate
+	cm.mu.Lock()
+	shouldEvaluate := cm.allHaveMinSamples()
+	cm.mu.Unlock()
+
+	if shouldEvaluate {
 		cm.evaluate()
 	}
 }

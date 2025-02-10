@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/binary"
+	"sync"
 	"testing"
 	"time"
 
@@ -42,6 +43,95 @@ func TestConcurrencyManager(t *testing.T) {
 
 		require.Less(t, diff, 5*time.Millisecond)
 	})
+}
+
+func BenchmarkConcurrentConcurrencyManager(b *testing.B) {
+	cm, err := NewConcurrencyManager(25, 1, 100)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	data := make([]byte, 32)
+	_, err = rand.Read(data)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	// Test with different concurrency levels
+	for _, numGoroutines := range []int{1, 4, 8, 16, 32} {
+		b.Run(b.Name()+"-goroutines-"+string(rune('0'+numGoroutines)), func(b *testing.B) {
+			var wg sync.WaitGroup
+			b.ResetTimer()
+
+			// Each goroutine will do b.N/numGoroutines operations
+			opsPerGoroutine := b.N / numGoroutines
+
+			for i := 0; i < numGoroutines; i++ {
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					ticker := time.NewTicker(100 * time.Microsecond)
+					defer ticker.Stop()
+
+					cleanupCount := opsPerGoroutine / 100
+					if cleanupCount < 1 {
+						cleanupCount = 1
+					}
+
+					for i := 0; i < cleanupCount; i++ {
+						<-ticker.C
+						cm.cleanupOldStats()
+					}
+				}()
+			}
+
+			// Add a goroutine that triggers cleanup periodically
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				ticker := time.NewTicker(time.Microsecond)
+				defer ticker.Stop()
+
+				for i := 0; i < opsPerGoroutine; i++ {
+					<-ticker.C
+					cm.cleanupOldStats()
+				}
+			}()
+
+			wg.Wait()
+		})
+	}
+}
+
+// BenchmarkPickAndRecord measures just the locking overhead without the actual work being done
+func BenchmarkPickAndRecord(b *testing.B) {
+	cm, err := NewConcurrencyManager(25, 1, 100)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	for _, numGoroutines := range []int{1, 4, 8, 16, 32} {
+		b.Run(b.Name()+"-goroutines-"+string(rune('0'+numGoroutines)), func(b *testing.B) {
+			var wg sync.WaitGroup
+			b.ResetTimer()
+
+			opsPerGoroutine := b.N / numGoroutines
+
+			for i := 0; i < numGoroutines; i++ {
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+
+					for j := 0; j < opsPerGoroutine; j++ {
+						size := cm.PickConcurrency()
+						cm.RecordDuration(size, time.Millisecond)
+					}
+				}()
+			}
+
+			wg.Wait()
+		})
+	}
 }
 
 func dowork(data []byte, zeros int) ([]byte, int) {
