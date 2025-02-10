@@ -1,3 +1,9 @@
+## v0.50.2 (Released 2025-02-10)
+
+IMPROVEMENTS
+
+- groupsize: cleanup old evaluations concurrently, better locking schematics
+
 ## v0.50.1 (Released 2025-02-10)
 
 IMPROVEMENTS
