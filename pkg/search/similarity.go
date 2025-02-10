@@ -25,7 +25,7 @@ func Similarity[Q any, I any](query Entity[Q], index Entity[I]) float64 {
 
 // DebugSimilarity does the same as Similarity, but logs debug info to w.
 func DebugSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]) float64 {
-	pieces := make([]scorePiece, 0, 8)
+	pieces := make([]scorePiece, 0, 9)
 
 	// Critical identifiers (highest weight)
 	exactIdentifiers := compareExactIdentifiers(w, query, index, criticalIdWeight)
@@ -49,13 +49,21 @@ func DebugSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]
 		}
 		return exactGovernmentIDs.score
 	}
-	pieces = append(pieces, exactIdentifiers, exactCryptoAddresses, exactGovernmentIDs)
+	exactContactInfo := compareExactContactInfo(w, query, index, criticalIdWeight) // Added this
+	if exactContactInfo.matched && exactContactInfo.fieldsCompared > 0 {
+		if math.IsNaN(exactContactInfo.score) {
+			return 0.0
+		}
+		return exactContactInfo.score
+	}
+	pieces = append(pieces, exactIdentifiers, exactCryptoAddresses, exactGovernmentIDs, exactContactInfo)
 
 	if w != nil {
-		debug(w, "Critical pieces")
-		debug(w, "exact identifiers: %#v\n", pieces[0])
-		debug(w, "crypto addresses: %#v\n", pieces[1])
-		debug(w, "gov IDs: %#v\n", pieces[2])
+		debug(w, "Critical pieces\n")
+		debug(w, "  exact identifiers: %#v\n", pieces[0])
+		debug(w, "  crypto addresses: %#v\n", pieces[1])
+		debug(w, "  gov IDs: %#v\n", pieces[2])
+		debug(w, "  contact info: %#v\n", pieces[3])
 	}
 
 	// Name comparison (second highest weight)
@@ -64,9 +72,9 @@ func DebugSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]
 		compareEntityTitlesFuzzy(w, query, index, nameWeight),
 	)
 	if w != nil {
-		debug(w, "name comparison")
-		debug(w, "name: %#v\n", pieces[3])
-		debug(w, "titles: %#v\n", pieces[4])
+		debug(w, "name comparison\n")
+		debug(w, "  name: %#v\n", pieces[3])
+		debug(w, "  titles: %#v\n", pieces[4])
 	}
 
 	// Supporting information (lower weight)
@@ -76,10 +84,10 @@ func DebugSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]
 		compareSupportingInfo(w, query, index, supportingInfoWeight),
 	)
 	if w != nil {
-		debug(w, "supporting info")
-		debug(w, "dates: %#v\n", pieces[5])
-		debug(w, "addresses: %#v\n", pieces[6])
-		debug(w, "supporting into: %#v\n", pieces[7])
+		debug(w, "supporting info\n")
+		debug(w, "  dates: %#v\n", pieces[5])
+		debug(w, "  addresses: %#v\n", pieces[6])
+		debug(w, "  supporting into: %#v\n", pieces[7])
 	}
 
 	finalScore := calculateFinalScore(w, pieces, query, index)
@@ -132,7 +140,7 @@ const (
 	// Score thresholds
 	typeMismatchScore       = 0.667
 	criticalCovThreshold    = 0.7
-	minCoverageThreshold    = 0.28 // how many fields did the query compare the index against?
+	minCoverageThreshold    = 0.35 // how many fields did the query compare the index against?
 	perfectMatchBoost       = 1.15
 	criticalFieldMultiplier = 1.2
 
@@ -169,9 +177,11 @@ func calculateFinalScore[Q any, I any](w io.Writer, pieces []scorePiece, query E
 	finalScore := applyPenaltiesAndBonuses(baseScore, coverage, fields, query.Type == index.Type)
 
 	if w != nil {
-		debug(w, "calculateFinalScore: fields=%#v  coverage=%#v ", fields, coverage)
-		debug(w, " baseScore=%v ", baseScore)
-		debug(w, " finalScore=%.2f\n", finalScore)
+		debug(w, "calculateFinalScore:\n")
+		debug(w, "  fields=%#v\n", fields)
+		debug(w, "  coverage=%#v\n", coverage)
+		debug(w, "  baseScore=%v\n", baseScore)
+		debug(w, "  finalScore=%.2f\n", finalScore)
 	}
 
 	return finalScore
@@ -260,22 +270,32 @@ type coverage struct {
 func applyPenaltiesAndBonuses(baseScore float64, cov coverage, fields entityFields, sameType bool) float64 {
 	score := baseScore
 
-	// Apply coverage penalties
+	// Lighter coverage penalties
 	if cov.ratio < minCoverageThreshold {
-		score *= 0.98 // Significant penalty for low overall coverage
+		score *= 0.95
 	}
 	if cov.criticalRatio < criticalCovThreshold {
-		score *= 0.95 // Penalty for missing critical fields
+		score *= 0.90
 	}
 
-	// Apply perfect match bonus
-	if fields.hasName && fields.hasID && fields.hasCritical && cov.ratio > 0.95 && score > highConfidenceThreshold {
+	// Lighter minimum fields requirement
+	if fields.required < 2 {
+		score *= 0.85
+	}
+
+	// Reduced name-only match penalty
+	if !fields.hasID && fields.hasName {
+		score *= 0.95
+	}
+
+	// Perfect match requirements
+	if fields.hasName && fields.hasID && fields.hasCritical && cov.ratio > 0.70 && score > highConfidenceThreshold {
 		score = math.Min(1.0, score*perfectMatchBoost)
 	}
 
 	// Handle type mismatches
 	if !sameType {
-		score = math.Min(score, typeMismatchScore)
+		score = 0.0
 	}
 
 	return score

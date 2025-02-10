@@ -89,14 +89,17 @@ func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], we
 	}
 
 	// Apply additional criteria for match quality
-	finalScore := adjustScoreBasedOnQuality(bestMatch, len(qTerms))
+	bestMatch.score = adjustScoreBasedOnQuality(bestMatch, len(qTerms))
+	if !isNameCloseEnough(query.Name, index.Name) {
+		bestMatch.score *= 0.85
+	}
 
 	return scorePiece{
-		score:          finalScore,
+		score:          bestMatch.score,
 		weight:         weight,
-		matched:        isHighConfidenceMatch(bestMatch, finalScore),
+		matched:        bestMatch.score > 0.6,
 		required:       true,
-		exact:          finalScore > exactMatchThreshold,
+		exact:          bestMatch.isExact,
 		fieldsCompared: 1,
 		pieceType:      "name",
 	}
@@ -249,6 +252,34 @@ func adjustScoreBasedOnQuality(match nameMatch, queryTermCount int) float64 {
 func isHighConfidenceMatch(match nameMatch, finalScore float64) bool {
 	// Must meet both term matching and score criteria
 	return match.matchingTerms >= minMatchingTerms && finalScore > nameMatchThreshold
+}
+
+func isNameCloseEnough(queryName, indexName string) bool {
+	// Normalize both names
+	qName := strings.ToLower(strings.TrimSpace(queryName))
+	iName := strings.ToLower(strings.TrimSpace(indexName))
+
+	// Split into terms
+	qTerms := strings.Fields(qName)
+	iTerms := strings.Fields(iName)
+
+	// More lenient length difference check
+	if float64(len(qTerms))/float64(len(iTerms)) < 0.3 || float64(len(qTerms))/float64(len(iTerms)) > 3.0 {
+		return false
+	}
+
+	// More lenient matching threshold
+	matchCount := 0
+	for _, qTerm := range qTerms {
+		for _, iTerm := range iTerms {
+			if strings.Contains(iTerm, qTerm) || strings.Contains(qTerm, iTerm) {
+				matchCount++
+				break
+			}
+		}
+	}
+
+	return float64(matchCount)/float64(len(qTerms)) >= 0.4
 }
 
 const (

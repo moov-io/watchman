@@ -1,0 +1,59 @@
+{
+    "name": "'Abd al-Rahman Ould Muhammad al-Husayn Ould Muhammad SALIM",
+    "entityType": "person",
+    "sourceList": "us_ofac",
+    "sourceID": "12889",
+    "person": {
+        "name": "'Abd al-Rahman Ould Muhammad al-Husayn Ould Muhammad SALIM",
+        "altNames": [
+            "Yunis AL-MAURITANI",
+            "Younis AL-MAURITANI",
+            "Sheikh Yunis AL-MAURITANI",
+            "Shaykh Yunis THE MAURITANIAN",
+            "Salih THE MAURITANIAN",
+            "CHINGHEITY",
+            "Abdarrahmane ould Mohamed el Houcein ould Mohamed SALEM",
+            "Mohamed SALEM",
+            "Youssef Ould Abdel JELIL",
+            "El Hadj Ould Abdel GHADER",
+            "Abdel KHADER",
+            "Abou SOULEIMANE"
+        ],
+        "gender": "",
+        "birthDate": "1981-01-01T00:00:00Z",
+        "deathDate": null,
+        "titles": null,
+        "governmentIDs": null
+    },
+    "business": null,
+    "organization": null,
+    "aircraft": null,
+    "vessel": null,
+    "contact": {
+        "emailAddresses": null,
+        "phoneNumbers": null,
+        "faxNumbers": null,
+        "websites": null
+    },
+    "addresses": null,
+    "cryptoAddresses": null,
+    "affiliations": null,
+    "sanctionsInfo": null,
+    "historicalInfo": null,
+    "sourceData": {
+        "callSign": "",
+        "entityID": "12889",
+        "grossRegisteredTonnage": "",
+        "program": [
+            "SDGT"
+        ],
+        "remarks": "DOB 1981; POB Saudi Arabia; nationality Mauritania; a.k.a. 'AL-MAURITANI, Yunis'; a.k.a. 'AL-MAURITANI, Younis'; a.k.a. 'AL-MAURITANI, Sheikh Yunis'; a.k.a. 'THE MAURITANIAN, Shaykh Yunis'; a.k.a. 'THE MAURITANIAN, Salih'; a.k.a. 'CHINGHEITY'.",
+        "sdnName": "SALIM, 'Abd al-Rahman Ould Muhammad al-Husayn Ould Muhammad",
+        "sdnType": "individual",
+        "title": "",
+        "tonnage": "",
+        "vesselFlag": "",
+        "vesselOwner": "",
+        "vesselType": ""
+    }
+}

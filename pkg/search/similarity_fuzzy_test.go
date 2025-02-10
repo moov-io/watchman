@@ -86,8 +86,8 @@ func TestCompareName(t *testing.T) {
 			index: Entity[any]{
 				Name: "AEROCARIBBEAN AIRLINES",
 			},
-			expectedScore: 0.686,
-			shouldMatch:   false,
+			expectedScore: 0.6857,
+			shouldMatch:   true,
 			exact:         false,
 		},
 		{
@@ -106,7 +106,7 @@ func TestCompareName(t *testing.T) {
 			},
 			expectedScore: 0.90,
 			shouldMatch:   true,
-			exact:         false,
+			exact:         true,
 		},
 		{
 			name: "alternative name match for person",
@@ -150,6 +150,19 @@ func TestCompareName(t *testing.T) {
 				Name: "BANCO NACIONAL DE CUBA",
 			},
 			expectedScore: 0.0,
+			shouldMatch:   false,
+			exact:         false,
+		},
+
+		{
+			name: "index has longer name",
+			query: Entity[any]{
+				Name: "mohamed salem",
+			},
+			index: Entity[any]{
+				Name: "abd al rahman ould muhammad al husayn ould muhammad salim",
+			},
+			expectedScore: 0.591,
 			shouldMatch:   false,
 			exact:         false,
 		},

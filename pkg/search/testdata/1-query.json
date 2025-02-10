@@ -1,0 +1,42 @@
+{
+    "name": "Mohamed Salem",
+    "entityType": "person",
+    "sourceList": "",
+    "sourceID": "841454f7-c547-4136-a92f-94cb9337afc0",
+    "person": {
+        "name": "Mohamed Salem",
+        "altNames": null,
+        "gender": "",
+        "birthDate": null,
+        "deathDate": null,
+        "titles": null,
+        "governmentIDs": null
+    },
+    "business": null,
+    "organization": null,
+    "aircraft": null,
+    "vessel": null,
+    "contact": {
+        "emailAddresses": null,
+        "phoneNumbers": null,
+        "faxNumbers": null,
+        "websites": null
+    },
+    "addresses": [
+        {
+            "line1": "245 Malcolm blvd",
+            "line2": "",
+            "city": "Brooklyn",
+            "postalCode": "11233",
+            "state": "NY",
+            "country": "United States",
+            "latitude": 0,
+            "longitude": 0
+        }
+    ],
+    "cryptoAddresses": null,
+    "affiliations": null,
+    "sanctionsInfo": null,
+    "historicalInfo": null,
+    "sourceData": null
+}
