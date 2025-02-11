@@ -24,6 +24,7 @@ require (
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673
 	go.opentelemetry.io/otel v1.29.0
 	go.opentelemetry.io/otel/trace v1.29.0
+	go.uber.org/automaxprocs v1.6.0
 	golang.org/x/sync v0.10.0
 	golang.org/x/text v0.21.0
 )

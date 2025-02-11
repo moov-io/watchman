@@ -24,6 +24,7 @@ import (
 	"github.com/moov-io/watchman/internal/search"
 
 	"github.com/gorilla/mux"
+	"go.uber.org/automaxprocs/maxprocs"
 )
 
 func main() {
@@ -32,6 +33,9 @@ func main() {
 		"version": log.String(watchman.Version),
 	})
 	logger.Log("Starting watchman server")
+
+	// Set runtime.GOMAXPROCS
+	maxprocs.Set(maxprocs.Logger(logger.Info().Logf))
 
 	config, err := LoadConfig(logger)
 	if err != nil {
