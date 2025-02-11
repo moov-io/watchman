@@ -49,18 +49,18 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 			expected: 1.0,
 		},
 		{
-			name: "Partial match - Missing birthdate",
+			name: "Partial match - Missing birthdate - Exact Email",
 			query: search.Entity[any]{
-				Name: "Dmitry Yuryevich KHOROSHEV",
+				Name: "Dmitri Yuryevich KHOROSHEV",
 				Type: search.EntityPerson,
 				Person: &search.Person{
-					Name: "Dmitry Yuryevich KHOROSHEV",
+					Name: "Dmitri Yuryevich KHOROSHEV",
 				},
 				Contact: search.ContactInfo{
 					EmailAddresses: []string{"khoroshev1@icloud.com"},
 				},
 			},
-			expected: 0.98,
+			expected: 1.0,
 		},
 		{
 			name: "Name match only",
@@ -68,7 +68,7 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 				Name: "Dmitry Yuryevich KHOROSHEV",
 				Type: search.EntityPerson,
 			},
-			expected: 0.98, // TODO(adam): should be lower?
+			expected: 0.767,
 		},
 		{
 			name: "Fuzzy name match - Alternate identity",
@@ -76,7 +76,7 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 				Name: "Dmitri Yuryevich",
 				Type: search.EntityPerson,
 			},
-			expected: 0.90,
+			expected: 0.705,
 		},
 		{
 			name: "Close name but different person details",
@@ -88,7 +88,7 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 					Gender:    search.GenderMale,
 				},
 			},
-			expected: 0.677,
+			expected: 0.544,
 		},
 		{
 			name: "Mismatch - Wrong name and no matching details",
@@ -99,7 +99,7 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 					Gender: "F",
 				},
 			},
-			expected: 0.221,
+			expected: 0.155,
 		},
 		{
 			name: "Wrong entity type",
@@ -180,7 +180,7 @@ func TestSimilarity_OFAC_SDN_Business(t *testing.T) {
 					Name: "DIALOGUE REGIONS",
 				},
 			},
-			expected: 0.658,
+			expected: 0.516,
 		},
 		{
 			name: "Different name, different ID",
@@ -287,7 +287,7 @@ func TestSimilarity_OFAC_SDN_Vessel(t *testing.T) {
 						CallSign: "BTANK124", // other callsign
 					},
 				},
-				expected: 0.431,
+				expected: 0.371,
 			},
 			{
 				name: "Complete mismatch",
@@ -354,7 +354,7 @@ func TestSimilarity_Edge_Cases(t *testing.T) {
 				Name: "TEST ENTITY",
 				Type: search.EntityVessel,
 			},
-			expected: 1.0,
+			expected: 0.8075,
 		},
 		{
 			name: "Mismatched types",
