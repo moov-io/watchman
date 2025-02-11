@@ -39,5 +39,5 @@ func TestMockClient(t *testing.T) {
 
 	first := resp.Entities[0]
 	require.Equal(t, "Jane Doe", first.Name)
-	require.InDelta(t, 0.523, first.Match, 0.001)
+	require.InDelta(t, 0.554, first.Match, 0.001)
 }

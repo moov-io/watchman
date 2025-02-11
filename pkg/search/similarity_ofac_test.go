@@ -68,7 +68,7 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 				Name: "Dmitry Yuryevich KHOROSHEV",
 				Type: search.EntityPerson,
 			},
-			expected: 0.767,
+			expected: 0.812,
 		},
 		{
 			name: "Fuzzy name match - Alternate identity",
@@ -76,7 +76,7 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 				Name: "Dmitri Yuryevich",
 				Type: search.EntityPerson,
 			},
-			expected: 0.705,
+			expected: 0.746,
 		},
 		{
 			name: "Close name but different person details",
@@ -354,7 +354,7 @@ func TestSimilarity_Edge_Cases(t *testing.T) {
 				Name: "TEST ENTITY",
 				Type: search.EntityVessel,
 			},
-			expected: 0.8075,
+			expected: 0.855,
 		},
 		{
 			name: "Mismatched types",

@@ -14,13 +14,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSimilarity_EdgeCases(t *testing.T) {
+func TestSimilarity_EmptyQuery(t *testing.T) {
 	var query search.Entity[search.Value]
 	index := ofactest.FindEntity(t, "47371")
 
 	got := search.Similarity(query, index)
 	require.InDelta(t, 0.0, got, 0.001)
-
 }
 
 func TestSimilarityDebug_FromJSON(t *testing.T) {
@@ -32,7 +31,7 @@ func TestSimilarityDebug_FromJSON(t *testing.T) {
 	t.Logf("%.2f - %v (%v)", got, query.Name, index.Name)
 	fmt.Println(buf.String())
 
-	require.InDelta(t, got, 0.652, 0.001)
+	require.InDelta(t, got, 0.690, 0.001)
 }
 
 func readEntity(tb testing.TB, name string) search.Entity[search.Value] {

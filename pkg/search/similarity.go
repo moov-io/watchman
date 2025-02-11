@@ -15,6 +15,7 @@ const (
 	// Weights for different categories
 	criticalIdWeight     = 50.0
 	nameWeight           = 35.0
+	addressWeight        = 25.0
 	supportingInfoWeight = 15.0
 )
 
@@ -73,21 +74,21 @@ func DebugSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]
 	)
 	if w != nil {
 		debug(w, "name comparison\n")
-		debug(w, "  name: %#v\n", pieces[3])
-		debug(w, "  titles: %#v\n", pieces[4])
+		debug(w, "  name: %#v\n", pieces[4])
+		debug(w, "  titles: %#v\n", pieces[5])
 	}
 
 	// Supporting information (lower weight)
 	pieces = append(pieces,
 		compareEntityDates(w, query, index, supportingInfoWeight),
-		compareAddresses(w, query, index, supportingInfoWeight),
+		compareAddresses(w, query, index, addressWeight),
 		compareSupportingInfo(w, query, index, supportingInfoWeight),
 	)
 	if w != nil {
 		debug(w, "supporting info\n")
-		debug(w, "  dates: %#v\n", pieces[5])
-		debug(w, "  addresses: %#v\n", pieces[6])
-		debug(w, "  supporting into: %#v\n", pieces[7])
+		debug(w, "  dates: %#v\n", pieces[6])
+		debug(w, "  addresses: %#v\n", pieces[7])
+		debug(w, "  supporting into: %#v\n", pieces[8])
 	}
 
 	finalScore := calculateFinalScore(w, pieces, query, index)
@@ -159,6 +160,7 @@ type entityFields struct {
 	hasName     bool
 	hasID       bool
 	hasCritical bool
+	hasAddress  bool
 }
 
 func calculateFinalScore[Q any, I any](w io.Writer, pieces []scorePiece, query Entity[Q], index Entity[I]) float64 {
@@ -168,13 +170,13 @@ func calculateFinalScore[Q any, I any](w io.Writer, pieces []scorePiece, query E
 
 	// Get field counts and critical field information
 	fields := countFieldsByImportance(pieces)
-	coverage := calculateCoverage(pieces, index)
+	coverage := calculateCoverage(w, pieces, index)
 
 	// Calculate base score with weighted importance
 	baseScore := calculateBaseScore(pieces, fields)
 
 	// Apply coverage penalties
-	finalScore := applyPenaltiesAndBonuses(baseScore, coverage, fields, query.Type == index.Type)
+	finalScore := applyPenaltiesAndBonuses(w, baseScore, coverage, fields, query.Type == index.Type)
 
 	if w != nil {
 		debug(w, "calculateFinalScore:\n")
@@ -204,6 +206,9 @@ func countFieldsByImportance(pieces []scorePiece) entityFields {
 			}
 			if piece.exact && (piece.pieceType == "identifiers" || piece.pieceType == "gov-ids-exact") {
 				fields.hasID = true
+			}
+			if piece.pieceType == "address" {
+				fields.hasAddress = true
 			}
 			if piece.exact {
 				fields.hasCritical = true
@@ -239,7 +244,7 @@ func calculateBaseScore(pieces []scorePiece, fields entityFields) float64 {
 	return totalScore / totalWeight
 }
 
-func calculateCoverage[I any](pieces []scorePiece, index Entity[I]) coverage {
+func calculateCoverage[I any](w io.Writer, pieces []scorePiece, index Entity[I]) coverage {
 	indexFields := countAvailableFields(index)
 	if indexFields == 0 {
 		return coverage{ratio: 1.0, criticalRatio: 1.0}
@@ -256,6 +261,11 @@ func calculateCoverage[I any](pieces []scorePiece, index Entity[I]) coverage {
 		}
 	}
 
+	if w != nil {
+		debug(w, "fieldsCompared=%v  indexFields=%v  criticalFieldsCompared=%v  criticalTotal=%v\n",
+			fieldsCompared, indexFields, criticalFieldsCompared, criticalTotal)
+	}
+
 	return coverage{
 		ratio:         float64(fieldsCompared) / float64(indexFields),
 		criticalRatio: float64(criticalFieldsCompared) / float64(criticalTotal),
@@ -267,35 +277,64 @@ type coverage struct {
 	criticalRatio float64
 }
 
-func applyPenaltiesAndBonuses(baseScore float64, cov coverage, fields entityFields, sameType bool) float64 {
+func applyPenaltiesAndBonuses(w io.Writer, baseScore float64, cov coverage, fields entityFields, sameType bool) float64 {
 	score := baseScore
+
+	if w != nil {
+		debug(w, "applyPenaltiesAndBonuses\n")
+		debug(w, "  start: %.2f\n", score)
+	}
 
 	// Lighter coverage penalties
 	if cov.ratio < minCoverageThreshold {
 		score *= 0.95
+
+		if w != nil {
+			debug(w, "  cov.ratio < minCoverageThreshold = %.2f\n", score)
+		}
 	}
 	if cov.criticalRatio < criticalCovThreshold {
 		score *= 0.90
+
+		if w != nil {
+			debug(w, "  cov.criticalRatio < criticalCovThreshold = %.2f\n", score)
+		}
 	}
 
 	// Lighter minimum fields requirement
 	if fields.required < 2 {
-		score *= 0.85
+		score *= 0.90
+
+		if w != nil {
+			debug(w, "  fields.required < 2 = %.2f\n", score)
+		}
 	}
 
 	// Reduced name-only match penalty
-	if !fields.hasID && fields.hasName {
+	if !fields.hasID && !fields.hasAddress && fields.hasName {
 		score *= 0.95
+
+		if w != nil {
+			debug(w, "  reduced name-only match penalty = %.2f\n", score)
+		}
 	}
 
 	// Perfect match requirements
 	if fields.hasName && fields.hasID && fields.hasCritical && cov.ratio > 0.70 && score > highConfidenceThreshold {
 		score = math.Min(1.0, score*perfectMatchBoost)
+
+		if w != nil {
+			debug(w, "  perfect match requirements = %.2f\n", score)
+		}
 	}
 
 	// Handle type mismatches
 	if !sameType {
 		score = 0.0
+
+		if w != nil {
+			debug(w, "  !sameType = %.2f\n", score)
+		}
 	}
 
 	return score
