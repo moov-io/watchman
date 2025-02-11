@@ -1,3 +1,12 @@
+## v0.50.4 (Released 2025-02-11)
+
+IMPROVEMENTS
+
+- cmd/server: set automaxprocs on startup
+- ofactest: include Client for calling Sanctions List Search application
+- search: benchmark Similarity with debug and without
+- search: weight addresses more, consider address as signal to not downrank
+
 ## v0.50.3 (Released 2025-02-11)
 
 IMPROVEMENTS
