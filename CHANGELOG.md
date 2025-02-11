@@ -1,3 +1,9 @@
+## v0.50.3 (Released 2025-02-11)
+
+IMPROVEMENTS
+
+- search: factor in contact info, weight only name match less
+
 ## v0.50.2 (Released 2025-02-10)
 
 IMPROVEMENTS
