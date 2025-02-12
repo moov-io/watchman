@@ -14,6 +14,8 @@ type Stats struct {
 
 	StartedAt time.Time `json:"startedAt"`
 	EndedAt   time.Time `json:"endedAt"`
+
+	Version string `json:"version"`
 }
 
 type Config struct {

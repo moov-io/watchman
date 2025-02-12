@@ -44,6 +44,8 @@ type ListInfoResponse struct {
 
 	StartedAt time.Time `json:"startedAt"`
 	EndedAt   time.Time `json:"endedAt"`
+
+	Version string `json:"version"`
 }
 
 func (c *client) ListInfo(ctx context.Context) (ListInfoResponse, error) {

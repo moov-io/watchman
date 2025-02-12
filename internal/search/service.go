@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/moov-io/watchman"
 	"github.com/moov-io/watchman/internal/download"
 	"github.com/moov-io/watchman/internal/groupsize"
 	"github.com/moov-io/watchman/internal/indices"
@@ -60,6 +61,7 @@ func (s *service) LatestStats() download.Stats {
 		ListHashes: s.latestStats.ListHashes,
 		StartedAt:  s.latestStats.StartedAt,
 		EndedAt:    s.latestStats.EndedAt,
+		Version:    watchman.Version,
 	}
 	return out
 }
