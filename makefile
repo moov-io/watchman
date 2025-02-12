@@ -145,20 +145,16 @@ docker: clean docker-hub docker-openshift docker-static
 
 docker-hub:
 	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman:${VERSION} -f Dockerfile .
-	docker tag moov/watchman:${VERSION} moov/watchman:latest
 
 docker-openshift:
 	docker build --pull --build-arg VERSION=${VERSION} -t quay.io/moov/watchman:${VERSION} -f Dockerfile-openshift --build-arg VERSION=${VERSION} .
-	docker tag quay.io/moov/watchman:${VERSION} quay.io/moov/watchman:latest
 
 docker-static:
 	docker build --pull -t moov/watchman:static -f Dockerfile-static .
 
 release-push:
 	docker push moov/watchman:${VERSION}
-	docker push moov/watchman:latest
 	docker push moov/watchman:static
 
 quay-push:
 	docker push quay.io/moov/watchman:${VERSION}
-	docker push quay.io/moov/watchman:latest
