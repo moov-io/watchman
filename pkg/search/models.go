@@ -210,7 +210,7 @@ type Address struct {
 
 func (a Address) Format() string {
 	out := fmt.Sprintf("%s %s %s %s %s %s", a.Line1, a.Line2, a.City, a.PostalCode, a.State, a.Country)
-	return strings.ReplaceAll(out, "  ", " ")
+	return strings.ReplaceAll(strings.TrimSpace(out), "  ", " ")
 }
 
 type Affiliation struct {
