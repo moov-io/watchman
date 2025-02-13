@@ -18,7 +18,7 @@ var (
 	ofacDownloaderSetup sync.Once
 )
 
-func FindEntity(tb testing.TB, entityID string) search.Entity[search.Value] {
+func GetDownloader(tb testing.TB) download.Downloader {
 	tb.Helper()
 
 	logger := log.NewTestLogger()
@@ -35,7 +35,13 @@ func FindEntity(tb testing.TB, entityID string) search.Entity[search.Value] {
 		ofacDownloader = dl
 	})
 
-	stats, err := ofacDownloader.RefreshAll(context.Background())
+	return ofacDownloader
+}
+
+func FindEntity(tb testing.TB, entityID string) search.Entity[search.Value] {
+	tb.Helper()
+
+	stats, err := GetDownloader(tb).RefreshAll(context.Background())
 	require.NoError(tb, err)
 
 	for _, entity := range stats.Entities {

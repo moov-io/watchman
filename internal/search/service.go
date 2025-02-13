@@ -1,7 +1,9 @@
 package search
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"strconv"
@@ -95,6 +97,7 @@ type SearchOpts struct {
 	MinMatch float64
 
 	RequestID      string
+	Debug          bool
 	DebugSourceIDs []string
 }
 
@@ -108,6 +111,11 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	stats := minmaxmed.New(10) // window size
 	items := largest.NewItems[search.Entity[search.Value]](opts.Limit, opts.MinMatch)
 
+	var debugs *largest.Items[*bytes.Buffer]
+	if opts.Debug {
+		debugs = largest.NewItems[*bytes.Buffer](opts.Limit, opts.MinMatch)
+	}
+
 	groupSize, err := getGroupSize(s.cm)
 	if err != nil {
 		return nil, fmt.Errorf("getGroupSize: %w", err)
@@ -116,7 +124,22 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 
 	indices.ProcessSliceFn(s.latestStats.Entities, groupSize, func(index search.Entity[search.Value]) {
 		start := time.Now()
-		score := search.DebugSimilarity(nil, query, index) // TODO(adam): add proper debug functionality?
+
+		var score float64
+		if !opts.Debug {
+			score = search.Similarity(query, index)
+		} else {
+			var buf bytes.Buffer
+			buf.Grow(1700) // approximate size of debug logs
+
+			score = search.DebugSimilarity(&buf, query, index)
+
+			// Add debug buffer to be stored
+			debugs.Add(largest.Item[*bytes.Buffer]{
+				Value:  &buf,
+				Weight: score,
+			})
+		}
 		stats.AddDuration(time.Since(start))
 
 		items.Add(largest.Item[search.Entity[search.Value]]{
@@ -137,17 +160,26 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	stats.AddEvent(span)
 
 	results := items.Items()
+	debugLogs := debugs.Items()
 	var out []search.SearchedEntity[search.Value]
 
-	for _, res := range results {
+	for idx, res := range results {
 		if res.Value.SourceID == "" || res.Weight <= 0.001 {
 			continue
 		}
 
-		out = append(out, search.SearchedEntity[search.Value]{
+		searched := search.SearchedEntity[search.Value]{
 			Entity: res.Value,
 			Match:  res.Weight,
-		})
+		}
+
+		if len(debugLogs) > idx {
+			if debugLogs[idx].Value != nil {
+				searched.Debug = base64.StdEncoding.EncodeToString(debugLogs[idx].Value.Bytes())
+			}
+		}
+
+		out = append(out, searched)
 	}
 
 	return out, nil

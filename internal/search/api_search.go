@@ -94,6 +94,7 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 		Limit:          extractSearchLimit(r),
 		MinMatch:       extractSearchMinMatch(r),
 		RequestID:      q.Get("requestID"),
+		Debug:          debug,
 		DebugSourceIDs: strings.Split(q.Get("debugSourceIDs"), ","),
 	}
 	if debug {
