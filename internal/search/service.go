@@ -106,7 +106,7 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	defer span.End()
 
 	stats := minmaxmed.New(10) // window size
-	items := largest.NewItems(opts.Limit, opts.MinMatch)
+	items := largest.NewItems[search.Entity[search.Value]](opts.Limit, opts.MinMatch)
 
 	groupSize, err := getGroupSize(s.cm)
 	if err != nil {
@@ -119,7 +119,7 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 		score := search.DebugSimilarity(nil, query, index) // TODO(adam): add proper debug functionality?
 		stats.AddDuration(time.Since(start))
 
-		items.Add(largest.Item{
+		items.Add(largest.Item[search.Entity[search.Value]]{
 			Value:  index,
 			Weight: score,
 		})

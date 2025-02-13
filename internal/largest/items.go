@@ -7,32 +7,30 @@ package largest
 import (
 	"sort"
 	"sync"
-
-	"github.com/moov-io/watchman/pkg/search"
 )
 
-type Item struct {
-	Value  search.Entity[search.Value]
+type Item[T any] struct {
+	Value  T
 	Weight float64
 }
 
 // Items keeps track of a set of Items (with a Value and Weight),
 // up to a fixed capacity, only retaining the highest weights (>= minMatch).
-type Items struct {
+type Items[T any] struct {
 	mu       sync.Mutex
-	items    []Item
+	items    []Item[T]
 	capacity int
 	minMatch float64
 }
 
 // NewItems returns a structure which tracks the top-weighted Items,
 // subject to minMatch and a fixed capacity.
-func NewItems(capacity int, minMatch float64) *Items {
+func NewItems[T any](capacity int, minMatch float64) *Items[T] {
 	if minMatch <= 0.001 {
 		minMatch = 0.01
 	}
-	return &Items{
-		items:    make([]Item, 0, capacity),
+	return &Items[T]{
+		items:    make([]Item[T], 0, capacity),
 		capacity: capacity,
 		minMatch: minMatch,
 	}
@@ -40,7 +38,7 @@ func NewItems(capacity int, minMatch float64) *Items {
 
 // Add inserts an Item if it meets the minMatch threshold,
 // ensuring we only keep the top N items by Weight.
-func (xs *Items) Add(it Item) {
+func (xs *Items[T]) Add(it Item[T]) {
 	if it.Weight < xs.minMatch {
 		// Skip if below minMatch threshold
 		return
@@ -71,7 +69,7 @@ func (xs *Items) Add(it Item) {
 
 // insertDescending inserts an Item so that xs.items remains
 // sorted by Weight in descending order (index 0 is highest).
-func (xs *Items) insertDescending(it Item) {
+func (xs *Items[T]) insertDescending(it Item[T]) {
 	// Find the position using binary search
 	// We want the first spot where items[i].Weight < it.Weight.
 	i := sort.Search(len(xs.items), func(i int) bool {
@@ -86,11 +84,15 @@ func (xs *Items) insertDescending(it Item) {
 }
 
 // All returns a copy of all items in descending Weight order.
-func (xs *Items) Items() []Item {
+func (xs *Items[T]) Items() []Item[T] {
+	if xs == nil {
+		return nil
+	}
+
 	xs.mu.Lock()
 	defer xs.mu.Unlock()
 
-	out := make([]Item, len(xs.items))
+	out := make([]Item[T], len(xs.items))
 	copy(out, xs.items)
 	return out
 }

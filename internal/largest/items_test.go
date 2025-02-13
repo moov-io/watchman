@@ -15,8 +15,8 @@ import (
 
 // Helper to create a largest.Item with a given name and weight.
 // The Value is a search.Entity[search.Value] with just a Name for illustration.
-func makeItem(name string, w float64) largest.Item {
-	return largest.Item{
+func makeItem(name string, w float64) largest.Item[search.Entity[search.Value]] {
+	return largest.Item[search.Entity[search.Value]]{
 		Value: search.Entity[search.Value]{
 			Name: name,
 			// Type: could be set if needed, but not required for this test
@@ -27,7 +27,7 @@ func makeItem(name string, w float64) largest.Item {
 
 func TestItems_Basic(t *testing.T) {
 	// We’ll track the top 3 items (capacity=3). Items below weight=2.0 are ignored (minMatch=2.0)
-	xs := largest.NewItems(3, 2.0)
+	xs := largest.NewItems[search.Entity[search.Value]](3, 2.0)
 
 	// Initially, it should be empty
 	require.Empty(t, xs.Items(), "expected no items at start")
@@ -86,7 +86,7 @@ func TestItems_Basic(t *testing.T) {
 
 func TestItems_MinMatch(t *testing.T) {
 	// Another quick test: if minMatch is 10.0, even high items below 10.0 get ignored
-	xs := largest.NewItems(2, 10.0)
+	xs := largest.NewItems[search.Entity[search.Value]](2, 10.0)
 
 	xs.Add(makeItem("X", 9.9))
 	xs.Add(makeItem("Y", 10.0))
