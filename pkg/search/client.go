@@ -45,6 +45,7 @@ type ListInfoResponse struct {
 	StartedAt time.Time `json:"startedAt"`
 	EndedAt   time.Time `json:"endedAt"`
 
+	// Version is the version of Watchman that returned results.
 	Version string `json:"version"`
 }
 
