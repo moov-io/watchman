@@ -45,51 +45,34 @@ func TestConcurrencyManager(t *testing.T) {
 	})
 }
 
-func BenchmarkConcurrentConcurrencyManager(b *testing.B) {
-	cm, err := NewConcurrencyManager(25, 1, 100)
-	if err != nil {
-		b.Fatal(err)
+func BenchmarkConcurrencyManager(b *testing.B) {
+	// Test cases covering key scenarios
+	tests := []struct {
+		name          string
+		goroutines    int
+		cleanupFreq   time.Duration
+		recordingFreq time.Duration
+	}{
+		{"SingleThreaded", 1, time.Second, time.Millisecond},
+		{"ModerateContention", 4, time.Second, time.Millisecond},
+		{"HighContention", 16, time.Second, time.Millisecond},
 	}
 
-	data := make([]byte, 32)
-	_, err = rand.Read(data)
-	if err != nil {
-		b.Fatal(err)
-	}
-
-	// Test with different concurrency levels
-	for _, numGoroutines := range []int{1, 4, 8, 16, 32} {
-		b.Run(b.Name()+"-goroutines-"+string(rune('0'+numGoroutines)), func(b *testing.B) {
-			var wg sync.WaitGroup
-			b.ResetTimer()
-
-			// Each goroutine will do b.N/numGoroutines operations
-			opsPerGoroutine := b.N / numGoroutines
-
-			for i := 0; i < numGoroutines; i++ {
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-					ticker := time.NewTicker(100 * time.Microsecond)
-					defer ticker.Stop()
-
-					cleanupCount := opsPerGoroutine / 100
-					if cleanupCount < 1 {
-						cleanupCount = 1
-					}
-
-					for i := 0; i < cleanupCount; i++ {
-						<-ticker.C
-						cm.cleanupOldStats()
-					}
-				}()
+	for _, tc := range tests {
+		b.Run(tc.name, func(b *testing.B) {
+			cm, err := NewConcurrencyManager(25, 1, 100)
+			if err != nil {
+				b.Fatal(err)
 			}
 
-			// Add a goroutine that triggers cleanup periodically
+			var wg sync.WaitGroup
+			opsPerGoroutine := b.N / tc.goroutines
+
+			// Start cleanup goroutine
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				ticker := time.NewTicker(time.Microsecond)
+				ticker := time.NewTicker(tc.cleanupFreq)
 				defer ticker.Stop()
 
 				for i := 0; i < opsPerGoroutine; i++ {
@@ -98,31 +81,16 @@ func BenchmarkConcurrentConcurrencyManager(b *testing.B) {
 				}
 			}()
 
-			wg.Wait()
-		})
-	}
-}
-
-// BenchmarkPickAndRecord measures just the locking overhead without the actual work being done
-func BenchmarkPickAndRecord(b *testing.B) {
-	cm, err := NewConcurrencyManager(25, 1, 100)
-	if err != nil {
-		b.Fatal(err)
-	}
-
-	for _, numGoroutines := range []int{1, 4, 8, 16, 32} {
-		b.Run(b.Name()+"-goroutines-"+string(rune('0'+numGoroutines)), func(b *testing.B) {
-			var wg sync.WaitGroup
-			b.ResetTimer()
-
-			opsPerGoroutine := b.N / numGoroutines
-
-			for i := 0; i < numGoroutines; i++ {
+			// Start worker goroutines
+			for i := 0; i < tc.goroutines; i++ {
 				wg.Add(1)
 				go func() {
 					defer wg.Done()
+					ticker := time.NewTicker(tc.recordingFreq)
+					defer ticker.Stop()
 
-					for j := 0; j < opsPerGoroutine; j++ {
+					for i := 0; i < opsPerGoroutine; i++ {
+						<-ticker.C
 						size := cm.PickConcurrency()
 						cm.RecordDuration(size, time.Millisecond)
 					}
@@ -131,6 +99,25 @@ func BenchmarkPickAndRecord(b *testing.B) {
 
 			wg.Wait()
 		})
+	}
+}
+
+func BenchmarkEvaluationLatency(b *testing.B) {
+	cm, err := NewConcurrencyManager(25, 1, 100)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	// Pre-populate with some data
+	for i := 0; i < 1000; i++ {
+		size := cm.PickConcurrency()
+		cm.RecordDuration(size, time.Millisecond)
+	}
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		cm.evaluate()
 	}
 }
 
