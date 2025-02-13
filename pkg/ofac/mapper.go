@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/moov-io/watchman/internal/country"
 	"github.com/moov-io/watchman/internal/indices"
 	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/pkg/search"
@@ -194,7 +195,7 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []Alt
 			AltNames:               altNames,
 			IMONumber:              firstValue(findMatchingRemarks(remarks, "IMO")),
 			Type:                   normalizeVesselType(cmp.Or(sdn.VesselType, firstValue(findMatchingRemarks(remarks, "Vessel Type")))),
-			Flag:                   normalizeCountryCode(cmp.Or(sdn.VesselFlag, firstValue(findMatchingRemarks(remarks, "Flag")))),
+			Flag:                   country.Normalize(cmp.Or(sdn.VesselFlag, firstValue(findMatchingRemarks(remarks, "Flag")))),
 			MMSI:                   firstValue(findMatchingRemarks(remarks, "MMSI")),
 			Tonnage:                parseTonnage(cmp.Or(sdn.Tonnage, firstValue(findMatchingRemarks(remarks, "Tonnage")))),
 			CallSign:               sdn.CallSign,
@@ -208,7 +209,7 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []Alt
 			Name:     sdn.SDNName,
 			AltNames: altNames,
 			Type:     normalizeAircraftType(firstValue(findMatchingRemarks(remarks, "Aircraft Type"))),
-			Flag:     normalizeCountryCode(firstValue(findMatchingRemarks(remarks, "Flag"))),
+			Flag:     country.Normalize(firstValue(findMatchingRemarks(remarks, "Flag"))),
 			Built: withFirstP(findMatchingRemarks(remarks, "Manufacture Date"), func(in remark) *time.Time {
 				t, err := parseTime(dobPatterns, in.value)
 				if err != nil {
@@ -358,7 +359,7 @@ func parseGovernmentIDs(remarks []string) []search.GovernmentID {
 	for _, r := range remarks {
 		// Extract country first
 		countryRaw := extractCountry(r)
-		country := normalizeCountry(countryRaw)
+		country := country.Normalize(countryRaw)
 
 		// Remove the country from the remark for cleaner ID extraction
 		remarkWithoutCountry := r
@@ -380,43 +381,6 @@ func parseGovernmentIDs(remarks []string) []search.GovernmentID {
 	}
 
 	return ids
-}
-
-func normalizeCountry(country string) string {
-	// Mapping of common country name variations to standard names
-	countryMap := map[string]string{
-		"USA":    "United States",
-		"U.S.A.": "United States",
-		"US":     "United States",
-		"U.S.":   "United States",
-		"UK":     "United Kingdom",
-		"U.K.":   "United Kingdom",
-		"UAE":    "United Arab Emirates",
-		"ROK":    "South Korea",
-		"DPRK":   "North Korea",
-		"PRC":    "China",
-		"ROC":    "Taiwan",
-		"россия": "Russia",
-		"РОССИЯ": "Russia",
-		"中国":     "China",
-		"日本":     "Japan",
-		"한국":     "South Korea",
-		"España": "Spain",
-		"ESPAÑA": "Spain",
-	}
-
-	// First try direct mapping
-	if normalized, exists := countryMap[strings.ToUpper(strings.TrimSpace(country))]; exists {
-		return normalized
-	}
-
-	// If no direct mapping, return original (could be extended with more sophisticated matching)
-	return country
-}
-
-func normalizeCountryCode(country string) string {
-	// TODO: Implement conversion to ISO-3166
-	return strings.TrimSpace(country)
 }
 
 func normalizeVesselType(vesselType string) search.VesselType {
