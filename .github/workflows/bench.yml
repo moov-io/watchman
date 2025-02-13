@@ -1,0 +1,52 @@
+name: watchman Benchmarks
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 12 * * *"
+
+permissions:
+  deployments: write
+  contents: write
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    steps:
+      # "The workflow must contain at least one job with no dependencies."
+      - run: date
+
+  benchmark-common:
+    uses: moov-io/benchmarks/.github/workflows/bench.yml@master
+    secrets: inherit
+    with:
+      name: watchman
+      setup: |
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-dev and xorg-dev
+      output_dir: "common"
+      command: |
+        go test ./pkg/search/... -short -bench BenchmarkDebugSimilarity -run BenchmarkDebugSimilarity -benchmem > output.txt
+        go test ./internal/search/... -short -bench Benchmark_Search/dynamic -run Benchmark_Search -benchmem >> output.txt
+        go test ./internal/search/... -short -bench BenchmarkAPI_Search -run BenchmarkAPI_Search -benchmem >> output.txt
+        go test ./internal/stringscore/... -short -bench BenchmarkJaroWinkler -run BenchmarkJaroWinkler -benchmem >> output.txt
+        go test ./internal/postalpool/... -short -bench BenchmarkPostalPool -run BenchmarkPostalPool -benchmem >> output.txt
+
+  benchmark-ofac:
+    uses: moov-io/benchmarks/.github/workflows/bench.yml@master
+    secrets: inherit
+    needs: [benchmark-common] # wait so "git push"'s don't collide
+    with:
+      name: watchman
+      setup: |
+        git fetch origin
+        git rebase origin/master
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-dev and xorg-dev
+      output_dir: "ofac"
+      command: |
+        go test ./pkg/ofac/... -short -bench Benchmark -run Benchmark -benchmem > output.txt
+
+# TODO(adam): include libpostal benchmarks
+# make install
+# go test -tags libpostal ./pkg/address/... -bench=Bench -run Bench -benchmem >> output.txt
