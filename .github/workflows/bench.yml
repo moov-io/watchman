@@ -9,43 +9,75 @@ permissions:
   contents: write
 
 jobs:
-  setup:
-    name: Setup
-    runs-on: ubuntu-latest
-    steps:
-      # "The workflow must contain at least one job with no dependencies."
-      - run: date
+  build:
+    name: Go Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
 
-  benchmark-common:
-    uses: moov-io/benchmarks/.github/workflows/bench.yml@master
-    secrets: inherit
-    with:
-      name: watchman
-      setup: |
+    steps:
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v3
+
+    - name: Setup Linux Dependencies
+      run: |
         sudo apt-get update
         sudo apt-get install -y libgl1-mesa-dev and xorg-dev
-      output_dir: "common"
-      command: |
+
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v5
+      with:
+        go-version: stable
+      id: go
+
+    - name: Running Common Benchmarks
+      run: |
         go test ./pkg/search/... -short -bench BenchmarkDebugSimilarity -run BenchmarkDebugSimilarity -benchmem > output.txt
         go test ./internal/search/... -short -bench Benchmark_Search/dynamic -run Benchmark_Search -benchmem >> output.txt
         go test ./internal/search/... -short -bench BenchmarkAPI_Search -run BenchmarkAPI_Search -benchmem >> output.txt
         go test ./internal/stringscore/... -short -bench BenchmarkJaroWinkler -run BenchmarkJaroWinkler -benchmem >> output.txt
         go test ./internal/postalpool/... -short -bench BenchmarkPostalPool -run BenchmarkPostalPool -benchmem >> output.txt
 
-  benchmark-ofac:
-    uses: moov-io/benchmarks/.github/workflows/bench.yml@master
-    secrets: inherit
-    needs: [benchmark-common] # wait so "git push"'s don't collide
-    with:
-      name: watchman
-      setup: |
-        git fetch origin
-        git rebase origin/master
-        sudo apt-get update
-        sudo apt-get install -y libgl1-mesa-dev and xorg-dev
-      output_dir: "ofac"
-      command: |
+    - name: Store benchmark result
+      uses: benchmark-action/github-action-benchmark@v1
+      with:
+        name: "moov-io/watchman Common Benchmarks"
+        tool: 'go'
+        output-file-path: "./output.txt"
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        auto-push: true
+        # Show alert with commit comment on detecting possible performance regression
+        alert-threshold: '120%'
+        comment-on-alert: true
+        fail-on-alert: true
+        alert-comment-cc-users: '@adamdecaf'
+        max-items-in-chart: 25
+        # Update files on master branch
+        gh-pages-branch: master
+        benchmark-data-dir-path: "docs/bench/common/"
+
+    - name: Running OFAC Benchmarks
+      run: |
         go test ./pkg/ofac/... -short -bench Benchmark -run Benchmark -benchmem > output.txt
+
+    - name: Store benchmark result
+      uses: benchmark-action/github-action-benchmark@v1
+      with:
+        name: "moov-io/watchman OFAC Benchmarks"
+        tool: 'go'
+        output-file-path: "./output.txt"
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        auto-push: true
+        # Show alert with commit comment on detecting possible performance regression
+        alert-threshold: '120%'
+        comment-on-alert: true
+        fail-on-alert: true
+        alert-comment-cc-users: '@adamdecaf'
+        max-items-in-chart: 25
+        # Update files on master branch
+        gh-pages-branch: master
+        benchmark-data-dir-path: "docs/bench/ofac/"
 
 # TODO(adam): include libpostal benchmarks
 # make install
