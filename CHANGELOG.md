@@ -1,3 +1,22 @@
+## v0.50.5 (Released 2025-02-13)
+
+IMPROVEMENTS
+
+- ast: quick sanity check test
+- country: centralize normalization
+- docs: add arabic phonetics
+- groupsize: cleanup benchmarks
+- largest: make Items generic
+- postalpool: force healthchecks to make network calls
+- search: return watchman version in /v2/listinfo
+- search: support ?debug query param to return base64 encoded matching data
+- search: trim Address.Format()
+
+BUILD
+
+- build: require basic code coverage, use default linters
+- build: stop publishing :latest docker tag
+
 ## v0.50.4 (Released 2025-02-11)
 
 IMPROVEMENTS
