@@ -45,6 +45,10 @@ func NewClient(conf Config, endpoints []string) *Client {
 }
 
 func (c *Client) ParseAddress(ctx context.Context, input string) (search.Address, error) {
+	return c.parseAddress(ctx, input, true)
+}
+
+func (c *Client) parseAddress(ctx context.Context, input string, includeCGOSelf bool) (search.Address, error) {
 	ctx, span := telemetry.StartSpan(ctx, "postalpool-parse-address")
 	defer span.End()
 
@@ -53,8 +57,12 @@ func (c *Client) ParseAddress(ctx context.Context, input string) (search.Address
 		return address.ParseAddress(input), nil
 	}
 
-	// Simple round-robin including self
-	idx := int(c.next.Add(1)) % (len(c.endpoints) + 1)
+	// Simple round-robin including self or not
+	var offset int
+	if includeCGOSelf {
+		offset += 1
+	}
+	idx := int(c.next.Add(1)) % (len(c.endpoints) + offset)
 
 	// If idx equals last position, use local instance
 	if idx == len(c.endpoints) {
@@ -90,6 +98,10 @@ func (c *Client) ParseAddress(ctx context.Context, input string) (search.Address
 	return addr, nil
 }
 
+const (
+	healthCheckAddress = "123 1st st anytown ca 90210"
+)
+
 func (c *Client) healthcheck(ctx context.Context) error {
 	ctx, span := telemetry.StartSpan(ctx, "postalpool-client-healthcheck")
 	defer span.End()
@@ -110,9 +122,10 @@ func (c *Client) healthcheck(ctx context.Context) error {
 				case <-ctx.Done():
 					results <- fmt.Errorf("healthcheck timed out for %s", ep)
 					return
+
 				case <-ticker.C:
-					_, err := c.ParseAddress(ctx, "")
-					if err == nil {
+					addr, err := c.parseAddress(ctx, healthCheckAddress, false) // force network connections
+					if addr.Format() != "" && err == nil {
 						results <- nil
 						return
 					}

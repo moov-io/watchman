@@ -22,6 +22,14 @@ func TestPostalPool(t *testing.T) {
 	t.Logf("%#v", addr)
 }
 
+// Benchmark_PostalPool tests the performance / memory usage of HTTP calls to a postal-server binary
+// ran under the postalpool worker group.
+//
+// In order to accurately measure postal-server performance with libpostal you must build the binary with
+//
+//	GOTAGS="-tags libpostal" make build
+//
+// Otherwise your test will be measuring performance without libpostal compiled into postal-server.
 func Benchmark_PostalPool(b *testing.B) {
 	ctx := context.Background()
 	svc := setupPostalPool(b)
@@ -66,7 +74,7 @@ func setupPostalPool(tb testing.TB) *Service {
 
 	conf := Config{
 		Enabled:        true,
-		Instances:      10,
+		Instances:      1,
 		StartingPort:   10000,
 		StartupTimeout: 60 * time.Second,
 		BinaryPath:     filepath.Join("..", "..", "bin", "postal-server"),
