@@ -12,6 +12,7 @@ import (
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/base/strx"
 	"github.com/moov-io/base/telemetry"
+	"github.com/moov-io/watchman/internal/country"
 	"github.com/moov-io/watchman/internal/postalpool"
 	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/pkg/address"
@@ -287,12 +288,14 @@ func readAddresses(ctx context.Context, addressParsingPool *postalpool.Service, 
 			addr, err := addressParsingPool.ParseAddress(ctx, input)
 			if err == nil {
 				out[idx] = addr
-				continue
 			}
+		} else {
+			// Fallback to standard parsing
+			out[idx] = address.ParseAddress(input)
 		}
 
-		// Fallback to standard parsing
-		out[idx] = address.ParseAddress(input)
+		// Normalize the country
+		out[idx].Country = country.Normalize(out[idx].Country)
 	}
 
 	return out

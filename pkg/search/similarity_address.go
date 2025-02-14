@@ -4,7 +4,6 @@ import (
 	"io"
 	"strings"
 
-	"github.com/moov-io/iso3166"
 	"github.com/moov-io/watchman/internal/stringscore"
 )
 
@@ -23,7 +22,7 @@ func compareAddresses[Q any, I any](w io.Writer, query Entity[Q], index Entity[I
 	var scores []float64
 
 	if w != nil {
-		debug(w, "Address Comparison Details:\n")
+		debug(w, "address comparison details: query=%d  index=%d\n", len(query.Addresses), len(index.Addresses))
 	}
 
 	// Compare addresses
@@ -133,9 +132,8 @@ func compareAddress(w io.Writer, query, index Address) float64 {
 
 	// Compare country
 	if query.Country != "" && index.Country != "" {
-		queryCountryCode := findCountryCode(query.Country)
-		indexCountryCode := findCountryCode(index.Country)
-		match := strings.EqualFold(queryCountryCode, indexCountryCode)
+		// We assume the query and index Country fields are normalized before Similarity
+		match := strings.EqualFold(query.Country, index.Country)
 		score := boolToScore(match)
 		totalScore += score * countryWeight
 		totalWeight += countryWeight
@@ -158,20 +156,4 @@ func compareAddress(w io.Writer, query, index Address) float64 {
 			finalScore, totalScore, totalWeight)
 	}
 	return finalScore
-}
-
-func findCountryCode(country string) string {
-	// If country is a valid iso3166 code, return it
-	if iso3166.Valid(country) {
-		return country
-	}
-
-	// Otherwise if we can lookup the code return that.
-	code := iso3166.LookupCode(country)
-	if code != "" {
-		return code
-	}
-
-	// Return the original input otherwise
-	return country
 }

@@ -136,7 +136,7 @@ func TestAPI_readSearchRequest(t *testing.T) {
 			City:       "ACMETOWN",
 			PostalCode: "54321",
 			State:      "KY",
-			Country:    "UNITED STATES",
+			Country:    "United States",
 		}
 		require.Len(t, query.Addresses, 1)
 		require.Equal(t, expected, query.Addresses[0])
