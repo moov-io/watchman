@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"net/url"
 	"sync/atomic"
@@ -36,11 +37,26 @@ type Client struct {
 
 func NewClient(conf Config, endpoints []string) *Client {
 	return &Client{
-		conf:      conf,
-		endpoints: endpoints,
-		httpClient: &http.Client{
-			Timeout: cmp.Or(conf.RequestTimeout, 10*time.Second),
-		},
+		conf:       conf,
+		endpoints:  endpoints,
+		httpClient: defaultHttpClient(conf),
+	}
+}
+
+func defaultHttpClient(conf Config) *http.Client {
+	dialer := cmp.Or(conf.Dialer, &net.Dialer{
+		Timeout:   5 * time.Second,
+		KeepAlive: 60 * time.Second,
+	})
+	transport := cmp.Or(conf.Transport, &http.Transport{
+		MaxIdleConnsPerHost: 20,
+		MaxIdleConns:        200,
+		IdleConnTimeout:     5 * time.Minute,
+		DialContext:         dialer.DialContext,
+	})
+	return &http.Client{
+		Transport: transport,
+		Timeout:   cmp.Or(conf.RequestTimeout, 10*time.Second),
 	}
 }
 
