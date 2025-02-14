@@ -1,6 +1,8 @@
 package postalpool
 
 import (
+	"net"
+	"net/http"
 	"time"
 )
 
@@ -12,6 +14,9 @@ type Config struct {
 	StartupTimeout time.Duration
 
 	RequestTimeout time.Duration
+
+	Dialer    *net.Dialer
+	Transport *http.Transport
 
 	BinaryPath string
 }

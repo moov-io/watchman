@@ -1,0 +1,11 @@
+Enabled: true
+Instances: 2
+StartingPort: 10000
+StartupTimeout: "60s"
+RequestTimeout: "10s"
+Dialer:
+  Timeout: "5s"
+Transport:
+  MaxIdleConnsPerHost: 10
+  MaxIdleConns: 200
+BinaryPath: "/bin/postal-server"
