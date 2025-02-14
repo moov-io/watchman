@@ -1,3 +1,15 @@
+## v0.50.6 (Released 2025-02-14)
+
+IMPROVEMENTS
+
+- fix: normalize Country once
+- minmaxmed: optimize implementation
+- postalpool: better pooling by default, offer configurable knobs
+
+BUILD
+
+- fix(deps): update opentelemetry-go monorepo to v1.34.0
+
 ## v0.50.5 (Released 2025-02-13)
 
 IMPROVEMENTS
