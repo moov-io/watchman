@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/moov-io/watchman/internal/country"
 	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/pkg/csl_us/gen/ENHANCED_XML"
 	"github.com/moov-io/watchman/pkg/search"
@@ -362,7 +363,7 @@ func mapAddresses(addresses *ENHANCED_XML.EntityAddresses) []search.Address {
 			}
 		}
 		if addr.Country != nil {
-			mappedAddr.Country = cmp.Or(mappedAddr.Country, addr.Country.Text)
+			mappedAddr.Country = country.Normalize(cmp.Or(mappedAddr.Country, addr.Country.Text))
 		}
 
 		if mappedAddr.Line1 != "" && mappedAddr.Country != "" {

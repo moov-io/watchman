@@ -2,21 +2,14 @@ package search
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
 
+	"github.com/moov-io/watchman/internal/country"
 	"github.com/stretchr/testify/require"
 )
 
-func TestAddress_findCountryCode(t *testing.T) {
-	require.Equal(t, "US", findCountryCode("US"))
-	require.Equal(t, "US", findCountryCode("USA"))
-	require.Equal(t, "US", findCountryCode("UNITED STATES"))
-	require.Equal(t, "US", findCountryCode("united states of america"))
-}
-
 func TestCompareAddress(t *testing.T) {
-	var buf bytes.Buffer
-
 	tests := []struct {
 		name     string
 		query    Address
@@ -121,7 +114,7 @@ func TestCompareAddress(t *testing.T) {
 			index: Address{
 				Country: "US",
 			},
-			expected: 1.0,
+			expected: 0.0, // no match, because compareAddress assumes normalization
 		},
 		{
 			name: "complex_partial_match",
@@ -184,8 +177,52 @@ func TestCompareAddress(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			var buf bytes.Buffer
 			score := compareAddress(&buf, tt.query, tt.index)
+
+			if testing.Verbose() {
+				fmt.Println(buf.String())
+			}
+
 			require.InDelta(t, tt.expected, score, 0.001, "addresses should have expected similarity score (got %.2f, want %.2f)", score, tt.expected)
+		})
+	}
+}
+
+func TestCompareAddress_Normalized(t *testing.T) {
+	tests := []struct {
+		name     string
+		query    Address
+		index    Address
+		expected float64
+	}{
+		{
+			name: "country_code_vs_name",
+			query: Address{
+				Country: "United States",
+			},
+			index: Address{
+				Country: "US",
+			},
+			expected: 1.0,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Normalize country (like callers of compareAddress do)
+			tt.query.Country = country.Normalize(tt.query.Country)
+			tt.index.Country = country.Normalize(tt.index.Country)
+
+			var buf bytes.Buffer
+			score := compareAddress(&buf, tt.query, tt.index)
+
+			if testing.Verbose() {
+				fmt.Println(buf.String())
+			}
+
+			require.InDelta(t, tt.expected, score, 0.001,
+				"addresses should have expected similarity score (got %.2f, want %.2f)", score, tt.expected)
 		})
 	}
 }
