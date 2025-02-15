@@ -12,6 +12,7 @@ Watchman:
     IncludedLists:
       - "us_csl"
       - "us_ofac"
+      - "ru_fa"
 
   PostalPool:
     Enabled: false
