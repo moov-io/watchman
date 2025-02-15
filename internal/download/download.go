@@ -11,6 +11,7 @@ import (
 	"github.com/moov-io/base/telemetry"
 	"github.com/moov-io/watchman/pkg/csl_us"
 	"github.com/moov-io/watchman/pkg/ofac"
+	"github.com/moov-io/watchman/pkg/ru_fa"
 	"github.com/moov-io/watchman/pkg/search"
 
 	"github.com/moov-io/base/log"
@@ -69,6 +70,19 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 	// Create a WaitGroup to track all producers
 	var producerWg sync.WaitGroup
 
+	// ru_fa Records
+	if slices.Contains(dl.conf.IncludedLists, search.SourceRUFA) {
+		producerWg.Add(1)
+		g.Go(func() error {
+			defer producerWg.Done()
+			err := loadRUFARecords(ctx, logger, dl.conf, preparedLists)
+			if err != nil {
+				return fmt.Errorf("loading ru_fa records: %w", err)
+			}
+			return nil
+		})
+	}
+
 	// OFAC Records
 	if slices.Contains(dl.conf.IncludedLists, search.SourceUSOFAC) {
 		producerWg.Add(1)
@@ -122,6 +136,42 @@ type preparedList struct {
 	Entities []search.Entity[search.Value]
 
 	Hash string
+}
+
+func loadRUFARecords(ctx context.Context, logger log.Logger, conf Config, responseCh chan preparedList) error {
+	ctx, span := telemetry.StartSpan(ctx, "load-rufa-records")
+	defer span.End()
+
+	start := time.Now()
+	files, err := ru_fa.Download(ctx, logger, conf.InitialDataDirectory)
+	if err != nil {
+		return fmt.Errorf("RUFA download: %v", err)
+	}
+	defer files.Close()
+
+	span.AddEvent("finished downloading")
+
+	if len(files) == 0 {
+		return fmt.Errorf("unexpected %d OFAC files found", len(files))
+	}
+
+	logger.Debug().Logf("finished RUFA download: %v", time.Since(start))
+	start = time.Now()
+
+	tbls, err := ru_fa.Read(files)
+	if err != nil {
+		return fmt.Errorf("parsing RUFA: %w", err)
+	}
+	span.AddEvent("finished parsing")
+
+	var entities = ru_fa.WrapEntities(tbls)
+
+	responseCh <- preparedList{
+		ListName: search.SourceRUFA,
+		Entities: entities,
+		Hash:     "xxx",
+	}
+	return nil
 }
 
 func loadOFACRecords(ctx context.Context, logger log.Logger, conf Config, responseCh chan preparedList) error {
