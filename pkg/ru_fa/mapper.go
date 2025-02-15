@@ -11,7 +11,7 @@ func WrapEntities(tbls Tables) []search.Entity[search.Value] {
 	// Wrap Non-commercial Organizations (assumed as organizations)
 	for i, org := range tbls.NonCommercialOrgs {
 		entity := search.Entity[search.Value]{
-			Name:       org.Name,
+			Name:       org.NameTranslit,
 			Type:       search.EntityOrganization,
 			Source:     search.SourceRUFA,
 			SourceID:   fmt.Sprintf("ru_nc_%d", i+1),
@@ -23,7 +23,7 @@ func WrapEntities(tbls Tables) []search.Entity[search.Value] {
 	// Wrap Mass Media (assumed as organizations)
 	for i, m := range tbls.MassMedias {
 		entity := search.Entity[search.Value]{
-			Name:       m.Name,
+			Name:       m.NameTranslit,
 			Type:       search.EntityOrganization,
 			Source:     search.SourceRUFA,
 			SourceID:   fmt.Sprintf("ru_mm_%d", i+1),
@@ -35,7 +35,7 @@ func WrapEntities(tbls Tables) []search.Entity[search.Value] {
 	// Wrap Media Individuals (assumed as persons)
 	for i, mi := range tbls.MediaIndividuals {
 		entity := search.Entity[search.Value]{
-			Name:       mi.Name,
+			Name:       mi.NameTranslit,
 			Type:       search.EntityPerson,
 			Source:     search.SourceRUFA,
 			SourceID:   fmt.Sprintf("ru_mi_%d", i+1),
@@ -47,7 +47,7 @@ func WrapEntities(tbls Tables) []search.Entity[search.Value] {
 	// Wrap Foreign Agent Individuals (assumed as persons)
 	for i, fai := range tbls.ForeignAgentIndividuals {
 		entity := search.Entity[search.Value]{
-			Name:       fai.Name,
+			Name:       fai.NameTranslit,
 			Type:       search.EntityPerson,
 			Source:     search.SourceRUFA,
 			SourceID:   fmt.Sprintf("ru_fai_%d", i+1),
@@ -59,7 +59,7 @@ func WrapEntities(tbls Tables) []search.Entity[search.Value] {
 	// Wrap Unregistered Associations (assumed as organizations)
 	for i, ua := range tbls.UnregisteredAssociations {
 		entity := search.Entity[search.Value]{
-			Name:       ua.Name,
+			Name:       ua.NameTranslit,
 			Type:       search.EntityOrganization,
 			Source:     search.SourceRUFA,
 			SourceID:   fmt.Sprintf("ru_ua_%d", i+1),
