@@ -6,14 +6,12 @@ toolchain go1.23.4
 
 require (
 	fyne.io/fyne/v2 v2.5.3
-	github.com/JaderDias/movingmedian v0.0.0-20220813210630-d8c6b6de8835
 	github.com/abadojack/whatlanggo v1.0.1
 	github.com/antchfx/htmlquery v1.3.3
 	github.com/bbalet/stopwords v1.0.0
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-retryablehttp v0.7.7
 	github.com/jaswdr/faker v1.19.1
-	github.com/karlseguin/ccache/v3 v3.0.6
 	github.com/knieriem/odf v0.1.0
 	github.com/moov-io/base v0.53.0
 	github.com/moov-io/iso3166 v0.2.1

@@ -5,13 +5,10 @@ import (
 	"math"
 	"regexp"
 	"strings"
-	"time"
 	"unicode"
 
 	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/internal/stringscore"
-
-	"github.com/karlseguin/ccache/v3"
 )
 
 const (
@@ -105,20 +102,8 @@ func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], we
 	}
 }
 
-var (
-	normalizedNameCache = ccache.New(ccache.Configure[string]().MaxSize(50000).ItemsToPrune(1000))
-	defaultCacheTTL     = 48 * time.Hour
-)
-
 // normalizeName performs thorough name normalization
 func normalizeName(name string) string {
-	item, _ := normalizedNameCache.Fetch(name, defaultCacheTTL, func() (string, error) {
-		return actuallyNormalize(name), nil
-	})
-	return item.Value()
-}
-
-func actuallyNormalize(name string) string {
 	// Convert to lowercase and trim spaces
 	name = strings.ToLower(strings.TrimSpace(name))
 
@@ -154,18 +139,9 @@ func actuallyNormalize(name string) string {
 
 var (
 	noiseTerms = []string{"the", "and", "or", "of", "in", "at", "by"}
-
-	filterSignificantTermsCache = ccache.New(ccache.Configure[[]string]().MaxSize(50000).ItemsToPrune(1000))
 )
 
 func filterSignificantTerms(s string) []string {
-	item, _ := filterSignificantTermsCache.Fetch(s, defaultCacheTTL, func() ([]string, error) {
-		return actuallyFilterSignificantTerms(s), nil
-	})
-	return item.Value()
-}
-
-func actuallyFilterSignificantTerms(s string) []string {
 	if s == "" {
 		return nil
 	}
