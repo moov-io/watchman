@@ -24,7 +24,7 @@ func TestSimilarity_EmptyQuery(t *testing.T) {
 
 func TestSimilarityDebug_FromJSON(t *testing.T) {
 	query := readEntity(t, "1-query.json")
-	index := readEntity(t, "1-index.json")
+	index := readEntity(t, "1-index.json").Normalize()
 
 	var buf bytes.Buffer
 	got := search.DebugSimilarity(&buf, query, index)

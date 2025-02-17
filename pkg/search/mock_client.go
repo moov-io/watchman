@@ -64,3 +64,9 @@ func (c *MockClient) SearchByEntity(ctx context.Context, query Entity[Value], op
 
 	return resp, nil
 }
+
+func (c *MockClient) Normalize() {
+	for idx := range c.Index {
+		c.Index[idx] = c.Index[idx].Normalize()
+	}
+}

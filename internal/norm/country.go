@@ -1,4 +1,4 @@
-package country
+package norm
 
 import (
 	"cmp"
@@ -30,7 +30,7 @@ var (
 	}
 )
 
-func Normalize(input string) string {
+func Country(input string) string {
 	// try input as ISO 3166 code
 	if name := iso3166.GetName(input); name != "" {
 		over := countryCodeOverrides[strings.ToUpper(input)]

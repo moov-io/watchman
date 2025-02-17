@@ -25,6 +25,7 @@ func TestMockClient(t *testing.T) {
 		Name: "Storage Savers",
 		Type: search.EntityBusiness,
 	})
+	mc.Normalize()
 
 	query := search.Entity[search.Value]{
 		Name: "John Doe",

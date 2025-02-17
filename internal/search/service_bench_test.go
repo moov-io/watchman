@@ -63,9 +63,11 @@ func Benchmark_SearchParallel(b *testing.B) {
 		Limit:    5,
 		MinMatch: 0.80,
 	}
+	b.ResetTimer()
 
 	b.Run("individual", func(b *testing.B) {
 		query := ofactest.FindEntity(b, "29702")
+		b.ResetTimer()
 
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
@@ -78,6 +80,7 @@ func Benchmark_SearchParallel(b *testing.B) {
 
 	b.Run("business", func(b *testing.B) {
 		query := ofactest.FindEntity(b, "44525")
+		b.ResetTimer()
 
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
@@ -90,6 +93,7 @@ func Benchmark_SearchParallel(b *testing.B) {
 
 	b.Run("vessel", func(b *testing.B) {
 		query := ofactest.FindEntity(b, "50972")
+		b.ResetTimer()
 
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
@@ -102,6 +106,7 @@ func Benchmark_SearchParallel(b *testing.B) {
 
 	b.Run("aircraft", func(b *testing.B) {
 		query := ofactest.FindEntity(b, "48727")
+		b.ResetTimer()
 
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {

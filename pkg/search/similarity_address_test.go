@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/moov-io/watchman/internal/country"
+	"github.com/moov-io/watchman/internal/norm"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -211,8 +212,8 @@ func TestCompareAddress_Normalized(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Normalize country (like callers of compareAddress do)
-			tt.query.Country = country.Normalize(tt.query.Country)
-			tt.index.Country = country.Normalize(tt.index.Country)
+			tt.query.Country = norm.Country(tt.query.Country)
+			tt.index.Country = norm.Country(tt.index.Country)
 
 			var buf bytes.Buffer
 			score := compareAddress(&buf, tt.query, tt.index)

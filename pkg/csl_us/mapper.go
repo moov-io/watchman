@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/moov-io/watchman/internal/country"
+	"github.com/moov-io/watchman/internal/norm"
 	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/pkg/csl_us/gen/ENHANCED_XML"
 	"github.com/moov-io/watchman/pkg/search"
@@ -39,14 +39,17 @@ func ToEntity(src ENHANCED_XML.EntitiesEntity) search.Entity[search.Value] {
 	case 600: // Individual
 		entity.Type = search.EntityPerson
 		entity.Person = mapPerson(src)
+
 	case 601: // Entity
 		// For entities, we need to determine if it's a business or organization
 		// Could use Organization Type field or other attributes to distinguish
 		entity.Type = search.EntityBusiness
 		entity.Business = mapBusiness(src)
+
 	case 602: // Vessel
 		entity.Type = search.EntityVessel
 		entity.Vessel = mapVessel(src)
+
 	case 91120: // Aircraft
 		entity.Type = search.EntityAircraft
 		entity.Aircraft = mapAircraft(src)
@@ -59,7 +62,7 @@ func ToEntity(src ENHANCED_XML.EntitiesEntity) search.Entity[search.Value] {
 	entity.Affiliations = mapAffiliations(src.Relationships)
 	entity.SanctionsInfo = mapSanctionsInfo(src)
 
-	return entity
+	return entity.Normalize()
 }
 
 // getPrimaryName returns the primary formatted name from translations
@@ -363,7 +366,7 @@ func mapAddresses(addresses *ENHANCED_XML.EntityAddresses) []search.Address {
 			}
 		}
 		if addr.Country != nil {
-			mappedAddr.Country = country.Normalize(cmp.Or(mappedAddr.Country, addr.Country.Text))
+			mappedAddr.Country = norm.Country(cmp.Or(mappedAddr.Country, addr.Country.Text))
 		}
 
 		if mappedAddr.Line1 != "" && mappedAddr.Country != "" {

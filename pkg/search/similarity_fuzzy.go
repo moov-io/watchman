@@ -7,6 +7,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/moov-io/watchman/internal/norm"
 	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/internal/stringscore"
 )
@@ -33,8 +34,7 @@ type nameMatch struct {
 }
 
 func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) scorePiece {
-	qName := normalizeName(query.Name)
-	iName := normalizeName(index.Name)
+	qName := norm.Name(query.Name)
 
 	// Early return for empty query
 	if qName == "" {
@@ -42,7 +42,7 @@ func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], we
 	}
 
 	// Exact match fast path
-	if qName == iName {
+	if qName == index.PreparedFields.Name {
 		return scorePiece{
 			score:          1.0,
 			weight:         weight,
@@ -61,22 +61,20 @@ func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], we
 	}
 
 	// Check primary name
-	bestMatch := compareNameTerms(qTerms, iName)
+	bestMatch := compareNameTerms(qTerms, index.PreparedFields.Name)
 
-	// Check alternate names for persons
-	if query.Person != nil && index.Person != nil {
-		for _, altName := range index.Person.AltNames {
-			altMatch := compareNameTerms(qTerms, normalizeName(altName))
-			if altMatch.score > bestMatch.score {
-				bestMatch = altMatch
-			}
+	// Check alternate names
+	for idx := range index.PreparedFields.AltNames {
+		altMatch := compareNameTerms(qTerms, index.PreparedFields.AltNames[idx])
+		if altMatch.score > bestMatch.score {
+			bestMatch = altMatch
 		}
 	}
 
 	// Check historical names with penalty
 	for _, hist := range index.HistoricalInfo {
 		if strings.EqualFold(hist.Type, "Former Name") {
-			histMatch := compareNameTerms(qTerms, normalizeName(hist.Value))
+			histMatch := compareNameTerms(qTerms, norm.Name(hist.Value))
 			histMatch.score *= 0.95 // Apply penalty for historical names
 			histMatch.isHistorical = true
 			if histMatch.score > bestMatch.score {
@@ -100,41 +98,6 @@ func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], we
 		fieldsCompared: 1,
 		pieceType:      "name",
 	}
-}
-
-// normalizeName performs thorough name normalization
-func normalizeName(name string) string {
-	// Convert to lowercase and trim spaces
-	name = strings.ToLower(strings.TrimSpace(name))
-
-	// Remove all punctuation and normalize whitespace
-	var normalized strings.Builder
-	lastWasSpace := true // Start with true to trim leading spaces
-
-	for _, r := range name {
-		if unicode.IsPunct(r) || unicode.IsSymbol(r) {
-			if !lastWasSpace {
-				normalized.WriteRune(' ')
-				lastWasSpace = true
-			}
-			continue
-		}
-
-		if unicode.IsSpace(r) {
-			if !lastWasSpace {
-				normalized.WriteRune(' ')
-				lastWasSpace = true
-			}
-			continue
-		}
-
-		if unicode.IsLetter(r) || unicode.IsNumber(r) {
-			normalized.WriteRune(r)
-			lastWasSpace = false
-		}
-	}
-
-	return strings.TrimSpace(normalized.String())
 }
 
 var (

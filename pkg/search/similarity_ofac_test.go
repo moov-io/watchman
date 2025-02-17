@@ -180,7 +180,7 @@ func TestSimilarity_OFAC_SDN_Business(t *testing.T) {
 					Name: "DIALOGUE REGIONS",
 				},
 			},
-			expected: 0.516,
+			expected: 0.812,
 		},
 		{
 			name: "Different name, different ID",
@@ -198,7 +198,7 @@ func TestSimilarity_OFAC_SDN_Business(t *testing.T) {
 					},
 				},
 			},
-			expected: 0.0,
+			expected: 0.087,
 		},
 		{
 			name: "Wrong entity type",

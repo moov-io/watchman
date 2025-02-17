@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/moov-io/watchman/internal/country"
 	"github.com/moov-io/watchman/internal/indices"
+	"github.com/moov-io/watchman/internal/norm"
 	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/pkg/search"
 )
@@ -126,6 +126,7 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []Alt
 			Name:     prepare.RemoveCompanyTitles(sdn.SDNName),
 			AltNames: altNames,
 		}
+
 		out.Business.Created = findDateStamp(findMatchingRemarks(remarks, "Organization Established Date"))
 		// out.Business.Dissolved = findDateStamp(findMatchingRemarks(remarks, "TODO(adam)"))
 
@@ -195,7 +196,7 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []Alt
 			AltNames:               altNames,
 			IMONumber:              firstValue(findMatchingRemarks(remarks, "IMO")),
 			Type:                   normalizeVesselType(cmp.Or(sdn.VesselType, firstValue(findMatchingRemarks(remarks, "Vessel Type")))),
-			Flag:                   country.Normalize(cmp.Or(sdn.VesselFlag, firstValue(findMatchingRemarks(remarks, "Flag")))),
+			Flag:                   norm.Country(cmp.Or(sdn.VesselFlag, firstValue(findMatchingRemarks(remarks, "Flag")))),
 			MMSI:                   firstValue(findMatchingRemarks(remarks, "MMSI")),
 			Tonnage:                parseTonnage(cmp.Or(sdn.Tonnage, firstValue(findMatchingRemarks(remarks, "Tonnage")))),
 			CallSign:               sdn.CallSign,
@@ -209,7 +210,7 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []Alt
 			Name:     sdn.SDNName,
 			AltNames: altNames,
 			Type:     normalizeAircraftType(firstValue(findMatchingRemarks(remarks, "Aircraft Type"))),
-			Flag:     country.Normalize(firstValue(findMatchingRemarks(remarks, "Flag"))),
+			Flag:     norm.Country(firstValue(findMatchingRemarks(remarks, "Flag"))),
 			Built: withFirstP(findMatchingRemarks(remarks, "Manufacture Date"), func(in remark) *time.Time {
 				t, err := parseTime(dobPatterns, in.value)
 				if err != nil {
@@ -221,9 +222,10 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []Alt
 			SerialNumber: parseSerialNumber(remarks),
 			ICAOCode:     firstValue(findMatchingRemarks(remarks, "ICAO Code")),
 		}
+
 	}
 
-	return out
+	return out.Normalize()
 }
 
 func parseAddresses(inputs []Address) []search.Address {
@@ -233,7 +235,7 @@ func parseAddresses(inputs []Address) []search.Address {
 		// {... Address:"place du Lac 2", CityStateProvincePostalCode:"Geneve 1204", Country:"Switzerland", AddressRemarks:""}
 		var addr search.Address
 		addr.Line1 = inputs[i].Address
-		addr.Country = country.Normalize(inputs[i].Country)
+		addr.Country = norm.Country(inputs[i].Country)
 
 		parts := strings.Fields(inputs[i].CityStateProvincePostalCode)
 		if len(parts) == 1 {
@@ -359,7 +361,7 @@ func parseGovernmentIDs(remarks []string) []search.GovernmentID {
 	for _, r := range remarks {
 		// Extract country first
 		countryRaw := extractCountry(r)
-		country := country.Normalize(countryRaw)
+		country := norm.Country(countryRaw)
 
 		// Remove the country from the remark for cleaner ID extraction
 		remarkWithoutCountry := r

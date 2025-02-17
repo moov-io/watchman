@@ -12,7 +12,7 @@ import (
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/base/strx"
 	"github.com/moov-io/base/telemetry"
-	"github.com/moov-io/watchman/internal/country"
+	"github.com/moov-io/watchman/internal/norm"
 	"github.com/moov-io/watchman/internal/postalpool"
 	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/pkg/address"
@@ -243,7 +243,7 @@ func readSearchRequest(ctx context.Context, addressParsingPool *postalpool.Servi
 	// SanctionsInfo  *SanctionsInfo   `json:"sanctionsInfo"`
 	// HistoricalInfo []HistoricalInfo `json:"historicalInfo"`
 
-	return req, nil
+	return req.Normalize(), nil
 }
 
 var (
@@ -295,7 +295,7 @@ func readAddresses(ctx context.Context, addressParsingPool *postalpool.Service, 
 		}
 
 		// Normalize the country
-		out[idx].Country = country.Normalize(out[idx].Country)
+		out[idx].Country = norm.Country(out[idx].Country)
 	}
 
 	return out

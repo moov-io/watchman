@@ -170,7 +170,8 @@ func TestCompareName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := compareName(&buf, tt.query, tt.index, 1.0)
+			// Precompute the Entity like search service does
+			result := compareName(&buf, tt.query, tt.index.Normalize(), 1.0)
 
 			assert.InDelta(t, tt.expectedScore, result.score, 0.1,
 				"expected score %v but got %v", tt.expectedScore, result.score)
@@ -430,52 +431,6 @@ func TestCompareAffiliationsFuzzy(t *testing.T) {
 }
 
 // Helper function tests
-
-func TestNormalizeName(t *testing.T) {
-	tests := []struct {
-		name     string
-		input    string
-		expected string
-	}{
-		{
-			name:     "standard name",
-			input:    "AEROCARIBBEAN AIRLINES",
-			expected: "aerocaribbean airlines",
-		},
-		{
-			name:     "name with punctuation",
-			input:    "ANGLO-CARIBBEAN CO., LTD.",
-			expected: "anglo caribbean co ltd",
-		},
-		{
-			name:     "extra whitespace",
-			input:    "  BANCO   NACIONAL  DE   CUBA  ",
-			expected: "banco nacional de cuba",
-		},
-		{
-			name:     "mixed case with special chars",
-			input:    "Banco.Nacional_de@Cuba",
-			expected: "banco nacional de cuba",
-		},
-		{
-			name:     "empty string",
-			input:    "",
-			expected: "",
-		},
-		{
-			name:     "only special chars",
-			input:    ".,!@#$%^&*()",
-			expected: "",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := normalizeName(tt.input)
-			assert.Equal(t, tt.expected, result)
-		})
-	}
-}
 
 func TestNormalizeTitle(t *testing.T) {
 	tests := []struct {

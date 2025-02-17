@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/moov-io/watchman/internal/norm"
 )
 
 type Value interface{}
@@ -33,6 +35,8 @@ type Entity[T Value] struct {
 	Affiliations   []Affiliation    `json:"affiliations"`
 	SanctionsInfo  *SanctionsInfo   `json:"sanctionsInfo"`
 	HistoricalInfo []HistoricalInfo `json:"historicalInfo"`
+
+	PreparedFields PreparedFields `json:"-"`
 
 	SourceData T `json:"sourceData"` // Contains all original list data with source list naming
 }
@@ -229,4 +233,36 @@ type HistoricalInfo struct {
 	Type  string    `json:"type"`  // e.g., "Former Name", "Previous Flag"
 	Value string    `json:"value"` // The historical value
 	Date  time.Time `json:"date,omitempty"`
+}
+
+type PreparedFields struct {
+	Name     string
+	AltNames []string
+}
+
+func (e Entity[T]) Normalize() Entity[T] {
+	e.PreparedFields.Name = norm.Name(e.Name)
+
+	if e.Person != nil {
+		e.PreparedFields.AltNames = normalizeNames(e.Person.AltNames)
+	}
+	if e.Business != nil {
+		e.PreparedFields.AltNames = normalizeNames(e.Business.AltNames)
+	}
+	if e.Aircraft != nil {
+		e.PreparedFields.AltNames = normalizeNames(e.Aircraft.AltNames)
+	}
+	if e.Vessel != nil {
+		e.PreparedFields.AltNames = normalizeNames(e.Vessel.AltNames)
+	}
+
+	return e
+}
+
+func normalizeNames(altNames []string) []string {
+	out := make([]string, len(altNames))
+	for idx := range altNames {
+		out[idx] = norm.Name(altNames[idx])
+	}
+	return out
 }
