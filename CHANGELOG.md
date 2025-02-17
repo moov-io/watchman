@@ -1,3 +1,10 @@
+## v0.50.7 (Released 2025-02-17)
+
+IMPROVEMENTS
+
+- search: precompute normalized name, altnames
+- search: remove ccache
+
 ## v0.50.6 (Released 2025-02-14)
 
 IMPROVEMENTS
