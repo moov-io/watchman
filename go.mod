@@ -12,6 +12,7 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-retryablehttp v0.7.7
 	github.com/jaswdr/faker v1.19.1
+	github.com/jaswdr/faker/v2 v2.3.3
 	github.com/knieriem/odf v0.1.0
 	github.com/moov-io/base v0.53.0
 	github.com/moov-io/iso3166 v0.2.1
