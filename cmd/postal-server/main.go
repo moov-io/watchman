@@ -24,7 +24,7 @@ func main() {
 
 	router := mux.NewRouter()
 	router.Methods("GET").Path("/parse").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		addr := address.ParseAddress(strings.TrimSpace(r.URL.Query().Get("address")))
+		addr := address.ParseAddress(context.Background(), strings.TrimSpace(r.URL.Query().Get("address")))
 		json.NewEncoder(w).Encode(addr)
 	})
 

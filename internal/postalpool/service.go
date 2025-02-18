@@ -99,7 +99,7 @@ func (ps *Service) Shutdown() {
 
 func (ps *Service) ParseAddress(ctx context.Context, input string) (search.Address, error) {
 	if ps.client == nil {
-		return address.ParseAddress(input), nil
+		return address.ParseAddress(ctx, input), nil
 	}
 	return ps.client.ParseAddress(ctx, input)
 }

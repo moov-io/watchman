@@ -291,7 +291,7 @@ func readAddresses(ctx context.Context, addressParsingPool *postalpool.Service, 
 			}
 		} else {
 			// Fallback to standard parsing
-			out[idx] = address.ParseAddress(input)
+			out[idx] = address.ParseAddress(ctx, input)
 		}
 
 		// Normalize the country

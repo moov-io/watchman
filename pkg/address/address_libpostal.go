@@ -3,14 +3,23 @@
 package address
 
 import (
+	"context"
 	"strings"
 
+	"github.com/moov-io/base/telemetry"
 	"github.com/moov-io/watchman/pkg/search"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 
 	postal "github.com/openvenues/gopostal/parser"
 )
 
-func ParseAddress(input string) search.Address {
+func ParseAddress(ctx context.Context, input string) search.Address {
+	_, span := telemetry.StartSpan(ctx, "parse-address", trace.WithAttributes(
+		attribute.String("address.method", "libpostal"),
+	))
+	defer span.End()
+
 	parts := postal.ParseAddress(input)
 
 	return organizeLibpostalComponents(parts)

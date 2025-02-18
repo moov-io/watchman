@@ -70,7 +70,7 @@ func (c *Client) parseAddress(ctx context.Context, input string, includeCGOSelf 
 
 	if len(c.endpoints) == 0 {
 		span.SetAttributes(attribute.String("postalpool.method", "cgo-zero"))
-		return address.ParseAddress(input), nil
+		return address.ParseAddress(ctx, input), nil
 	}
 
 	// Simple round-robin including self or not
@@ -83,7 +83,7 @@ func (c *Client) parseAddress(ctx context.Context, input string, includeCGOSelf 
 	// If idx equals last position, use local instance
 	if idx == len(c.endpoints) {
 		span.SetAttributes(attribute.String("postalpool.method", "cgo-self"))
-		return address.ParseAddress(input), nil
+		return address.ParseAddress(ctx, input), nil
 	}
 
 	endpoint := c.endpoints[idx]
