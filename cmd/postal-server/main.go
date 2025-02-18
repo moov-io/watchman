@@ -3,13 +3,13 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/moov-io/watchman/internal/postalpool/coder"
 	"github.com/moov-io/watchman/pkg/address"
 
 	"github.com/gorilla/mux"
@@ -25,7 +25,12 @@ func main() {
 	router := mux.NewRouter()
 	router.Methods("GET").Path("/parse").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		addr := address.ParseAddress(context.Background(), strings.TrimSpace(r.URL.Query().Get("address")))
-		json.NewEncoder(w).Encode(addr)
+
+		enc := coder.GetEncoder()
+		enc.Reset(w)
+		defer coder.SaveEncoder(enc)
+
+		enc.Encode(addr)
 	})
 
 	// Setup HTTP server

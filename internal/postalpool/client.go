@@ -3,7 +3,6 @@ package postalpool
 import (
 	"cmp"
 	"context"
-	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
@@ -11,6 +10,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/moov-io/watchman/internal/postalpool/coder"
 	"github.com/moov-io/watchman/pkg/address"
 	"github.com/moov-io/watchman/pkg/search"
 
@@ -107,7 +107,11 @@ func (c *Client) parseAddress(ctx context.Context, input string, includeCGOSelf 
 		defer resp.Body.Close()
 	}
 
-	err = json.NewDecoder(resp.Body).Decode(&addr)
+	dec := coder.GetDecoder()
+	dec.Reset(resp.Body)
+	defer coder.SaveDecoder(dec)
+
+	err = dec.Decode(&addr)
 	if err != nil {
 		return addr, fmt.Errorf("reading postal-server response: %w", err)
 	}

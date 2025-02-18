@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/moov-io/base/log"
+	"github.com/moov-io/watchman/pkg/address"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -56,14 +58,26 @@ func Benchmark_PostalPool(b *testing.B) {
 		"Building 23, Floor 2, Sevastopol Maritime Complex, 45 Port Street, Sevastopol 99011",
 		"Office 445, Tripoli Trade Center, Omar Al-Mukhtar Street, Tripoli, Libya",
 	}
-
 	b.ResetTimer()
-	b.RunParallel(func(pb *testing.PB) {
-		var index atomic.Int32
-		for pb.Next() {
-			// Get next address in a thread-safe way
-			svc.ParseAddress(ctx, inputs[int(index.Add(1))%len(inputs)])
-		}
+
+	b.Run("Client", func(b *testing.B) {
+		b.RunParallel(func(pb *testing.PB) {
+			var index atomic.Int32
+			for pb.Next() {
+				// Get next address in a thread-safe way
+				svc.client.parseAddress(ctx, inputs[int(index.Add(1))%len(inputs)], false)
+			}
+		})
+	})
+
+	b.Run("Direct", func(b *testing.B) {
+		b.RunParallel(func(pb *testing.PB) {
+			var index atomic.Int32
+			for pb.Next() {
+				// Get next address in a thread-safe way
+				address.ParseAddress(ctx, inputs[int(index.Add(1))%len(inputs)])
+			}
+		})
 	})
 }
 
