@@ -656,23 +656,15 @@ func compareExactContactInfo[Q any, I any](w io.Writer, query Entity[Q], index E
 	}
 
 	// Compare phone numbers (normalized)
-	if len(query.Contact.PhoneNumbers) > 0 && len(index.Contact.PhoneNumbers) > 0 {
+	if len(query.PreparedFields.PhoneNumbers) > 0 && len(index.PreparedFields.PhoneNumbers) > 0 {
 		fieldsCompared++
-		matches = append(matches, compareContactField(
-			query.Contact.PhoneNumbers,
-			index.Contact.PhoneNumbers,
-			normalizePhoneNumber,
-		))
+		matches = append(matches, compareContactField(query.PreparedFields.PhoneNumbers, index.PreparedFields.PhoneNumbers))
 	}
 
 	// Compare fax numbers (normalized same as phones)
-	if len(query.Contact.FaxNumbers) > 0 && len(index.Contact.FaxNumbers) > 0 {
+	if len(query.PreparedFields.FaxNumbers) > 0 && len(index.PreparedFields.FaxNumbers) > 0 {
 		fieldsCompared++
-		matches = append(matches, compareContactField(
-			query.Contact.FaxNumbers,
-			index.Contact.FaxNumbers,
-			normalizePhoneNumber,
-		))
+		matches = append(matches, compareContactField(query.PreparedFields.FaxNumbers, index.PreparedFields.FaxNumbers))
 	}
 
 	if fieldsCompared == 0 {

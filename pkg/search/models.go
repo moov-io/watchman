@@ -238,10 +238,15 @@ type HistoricalInfo struct {
 type PreparedFields struct {
 	Name     string
 	AltNames []string
+
+	Contact ContactInfo
 }
 
 func (e Entity[T]) Normalize() Entity[T] {
 	e.PreparedFields.Name = norm.Name(e.Name)
+
+	e.PreparedFields.Contact.PhoneNumbers = normalizePhoneNumbers(e.Contact.PhoneNumbers)
+	e.PreparedFields.Contact.FaxNumbers = normalizePhoneNumbers(e.Contact.FaxNumbers)
 
 	if e.Person != nil {
 		e.PreparedFields.AltNames = normalizeNames(e.Person.AltNames)
@@ -263,6 +268,14 @@ func normalizeNames(altNames []string) []string {
 	out := make([]string, len(altNames))
 	for idx := range altNames {
 		out[idx] = norm.Name(altNames[idx])
+	}
+	return out
+}
+
+func normalizePhoneNumbers(numbers []string) []string {
+	out := make([]string, len(numbers))
+	for idx := range numbers {
+		out[idx] = norm.PhoneNumber(numbers[idx])
 	}
 	return out
 }

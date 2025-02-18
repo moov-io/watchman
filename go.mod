@@ -9,6 +9,7 @@ require (
 	github.com/abadojack/whatlanggo v1.0.1
 	github.com/antchfx/htmlquery v1.3.3
 	github.com/bbalet/stopwords v1.0.0
+	github.com/dongri/phonenumber v0.1.12
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-retryablehttp v0.7.7
 	github.com/jaswdr/faker v1.19.1
