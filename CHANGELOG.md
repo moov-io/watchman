@@ -1,3 +1,14 @@
+## v0.50.8 (Released 2025-02-18)
+
+IMPROVEMENTS
+
+- build: fixup benchmark ResetTimer calls
+- norm: add BenchmarkPhoneNumber, track ./internal/norm/ benchmarks in graph
+- ofactest: start on sampling OFAC data
+- search: leverage query's .PreparedFields.Name in compareName
+- search: normalize phone numbers
+- search: precompute strings.Fields
+
 ## v0.50.7 (Released 2025-02-17)
 
 IMPROVEMENTS
