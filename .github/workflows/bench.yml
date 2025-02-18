@@ -38,6 +38,7 @@ jobs:
         go test ./internal/search/... -short -bench BenchmarkAPI_Search -run BenchmarkAPI_Search -benchmem >> output.txt
         go test ./internal/stringscore/... -short -bench BenchmarkJaroWinkler -run BenchmarkJaroWinkler -benchmem >> output.txt
         go test ./internal/postalpool/... -short -bench BenchmarkPostalPool -run BenchmarkPostalPool -benchmem >> output.txt
+        go test ./internal/norm/... -short -bench Bench -run Bench -benchmem >> output.txt
 
     - name: Store benchmark result
       uses: benchmark-action/github-action-benchmark@v1

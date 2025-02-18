@@ -88,3 +88,40 @@ func TestPhoneNumber(t *testing.T) {
 		})
 	}
 }
+
+func TestPhoneNumber_OFAC(t *testing.T) {
+	cases := []struct {
+		input, expected string
+	}{
+		{input: "53 212 5078868", expected: "532125078868"},
+		{input: "9821227700019", expected: "549821227700019"},
+		{input: "(971) (4) (3248000)", expected: "97143248000"},
+		{input: "+52 686-383-6864", expected: "526863836864"},
+		{input: "+52 631 172 1037", expected: "526311721037"},
+		{input: "85 51 155 5706", expected: "5485511555706"},
+		{input: "(98)(21)(22013392)", expected: "982122013392"},
+		{input: "(218) (0)214778766", expected: "2180214778766"},
+	}
+	for _, tc := range cases {
+		got := norm.PhoneNumber(tc.input)
+		require.Equal(t, tc.expected, got)
+	}
+}
+
+func BenchmarkPhoneNumber(b *testing.B) {
+	inputs := []string{
+		"53 212 5078868",
+		"9821227700019",
+		"(971) (4) (3248000)",
+		"+52 686-383-6864",
+		"+52 631 172 1037",
+		"85 51 155 5706",
+		"(98)(21)(22013392)",
+		"(218) (0)214778766",
+	}
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		norm.PhoneNumber(inputs[(len(inputs)-1)%b.N])
+	}
+}
