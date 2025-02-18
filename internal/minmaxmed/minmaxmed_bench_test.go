@@ -142,7 +142,9 @@ func BenchmarkConcurrentReadWrite(b *testing.B) {
 
 				// Pre-fill with some data
 				for i := 0; i < windowSize; i++ {
-					obs.Add(data[i])
+					if i < len(data) {
+						obs.Add(data[i])
+					}
 				}
 
 				b.ResetTimer()
@@ -169,7 +171,9 @@ func BenchmarkConcurrentReadWrite(b *testing.B) {
 
 				// Pre-fill with some data
 				for i := 0; i < windowSize; i++ {
-					obs.Add(data[i])
+					if i < len(data) {
+						obs.Add(data[i])
+					}
 				}
 
 				b.ResetTimer()
