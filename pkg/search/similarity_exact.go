@@ -3,7 +3,6 @@ package search
 import (
 	"io"
 	"strings"
-	"unicode"
 )
 
 // compareExactIdentifiers covers exact matches for identifiers across all entity types
@@ -288,11 +287,8 @@ func compareExactCryptoAddresses[Q any, I any](w io.Writer, query Entity[Q], ind
 	hasMatch := false
 	score := 0.0
 
-	qCAs := query.CryptoAddresses
-	iCAs := index.CryptoAddresses
-
 	// Early return if either list is empty
-	if len(qCAs) == 0 || len(iCAs) == 0 {
+	if len(query.CryptoAddresses) == 0 || len(index.CryptoAddresses) == 0 {
 		return scorePiece{
 			score:          0,
 			weight:         weight,
@@ -307,32 +303,27 @@ func compareExactCryptoAddresses[Q any, I any](w io.Writer, query Entity[Q], ind
 	fieldsCompared++
 
 	// First try exact matches (both currency and address)
-	for _, qCA := range qCAs {
-		qAddr := strings.ToLower(strings.TrimSpace(qCA.Address))
-		qCurr := strings.ToLower(strings.TrimSpace(qCA.Currency))
-
-		if qAddr == "" {
+	for q := range query.CryptoAddresses {
+		if query.CryptoAddresses[q].Address == "" {
 			continue // Skip empty addresses
 		}
 
-		for _, iCA := range iCAs {
-			iAddr := strings.ToLower(strings.TrimSpace(iCA.Address))
-			iCurr := strings.ToLower(strings.TrimSpace(iCA.Currency))
-
-			// Case 1: Both have currency specified - need both to match
-			if qCurr != "" && iCurr != "" {
-				if qCurr == iCurr && qAddr == iAddr {
-					score = 1.0
-					hasMatch = true
-					goto Done
+		for i := range index.CryptoAddresses {
+			// both have currency specified - need both to match
+			if query.CryptoAddresses[q].Currency != "" && index.CryptoAddresses[i].Currency != "" {
+				// Check currency
+				if strings.EqualFold(query.CryptoAddresses[q].Currency, index.CryptoAddresses[i].Currency) {
+					goto checkAddresses
+				} else {
+					continue
 				}
-			} else {
-				// Case 2: At least one currency empty - match on address only
-				if qAddr == iAddr {
-					score = 1.0
-					hasMatch = true
-					goto Done
-				}
+			}
+			// Check addresses
+		checkAddresses:
+			if strings.EqualFold(query.CryptoAddresses[q].Address, index.CryptoAddresses[i].Address) {
+				score = 1.0
+				hasMatch = true
+				goto Done
 			}
 		}
 	}
@@ -394,13 +385,9 @@ type idMatch struct {
 // compareIdentifiers handles the core logic of comparing two identifier values
 func compareIdentifiers(queryID, indexID string, queryCountry, indexCountry string) idMatch {
 	// Early return if identifiers don't match
-	if !strings.EqualFold(strings.TrimSpace(queryID), strings.TrimSpace(indexID)) {
+	if !strings.EqualFold(queryID, indexID) {
 		return idMatch{score: 0, found: false, exact: false}
 	}
-
-	// If we get here, identifiers match exactly
-	queryCountry = strings.TrimSpace(queryCountry)
-	indexCountry = strings.TrimSpace(indexCountry)
 
 	// If neither has country, it's an exact match but flag no country
 	if queryCountry == "" && indexCountry == "" {
@@ -542,7 +529,7 @@ Done:
 
 func compareExactSourceID[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) scorePiece {
 	// Early return if query has no source ID
-	if strings.TrimSpace(query.SourceID) == "" {
+	if query.SourceID == "" {
 		return scorePiece{
 			score:          0,
 			weight:         weight,
@@ -558,7 +545,7 @@ func compareExactSourceID[Q any, I any](w io.Writer, query Entity[Q], index Enti
 	fieldsCompared := 1
 
 	// Handle case where index has no source ID
-	if strings.TrimSpace(index.SourceID) == "" {
+	if index.SourceID == "" {
 		return scorePiece{
 			score:          0,
 			weight:         weight,
@@ -571,10 +558,7 @@ func compareExactSourceID[Q any, I any](w io.Writer, query Entity[Q], index Enti
 	}
 
 	// Compare normalized source IDs
-	hasMatch := strings.EqualFold(
-		strings.TrimSpace(query.SourceID),
-		strings.TrimSpace(index.SourceID),
-	)
+	hasMatch := strings.EqualFold(query.SourceID, index.SourceID)
 
 	return scorePiece{
 		score:          boolToScore(hasMatch),
@@ -618,10 +602,7 @@ func compareExactSourceList[Q any, I any](w io.Writer, query Entity[Q], index En
 	}
 
 	// Compare normalized sources
-	hasMatch := strings.EqualFold(
-		string(query.Source),
-		string(index.Source),
-	)
+	hasMatch := strings.EqualFold(string(query.Source), string(index.Source))
 
 	return scorePiece{
 		score:          boolToScore(hasMatch),
@@ -651,20 +632,19 @@ func compareExactContactInfo[Q any, I any](w io.Writer, query Entity[Q], index E
 		matches = append(matches, compareContactField(
 			query.Contact.EmailAddresses,
 			index.Contact.EmailAddresses,
-			normalizeEmail,
 		))
 	}
 
-	// Compare phone numbers (normalized)
-	if len(query.PreparedFields.PhoneNumbers) > 0 && len(index.PreparedFields.PhoneNumbers) > 0 {
+	// Compare phone numbers
+	if len(query.PreparedFields.Contact.PhoneNumbers) > 0 && len(index.PreparedFields.Contact.PhoneNumbers) > 0 {
 		fieldsCompared++
-		matches = append(matches, compareContactField(query.PreparedFields.PhoneNumbers, index.PreparedFields.PhoneNumbers))
+		matches = append(matches, compareContactField(query.PreparedFields.Contact.PhoneNumbers, index.PreparedFields.Contact.PhoneNumbers))
 	}
 
-	// Compare fax numbers (normalized same as phones)
-	if len(query.PreparedFields.FaxNumbers) > 0 && len(index.PreparedFields.FaxNumbers) > 0 {
+	// Compare fax numbers
+	if len(query.PreparedFields.Contact.FaxNumbers) > 0 && len(index.PreparedFields.Contact.FaxNumbers) > 0 {
 		fieldsCompared++
-		matches = append(matches, compareContactField(query.PreparedFields.FaxNumbers, index.PreparedFields.FaxNumbers))
+		matches = append(matches, compareContactField(query.PreparedFields.Contact.FaxNumbers, index.PreparedFields.Contact.FaxNumbers))
 	}
 
 	if fieldsCompared == 0 {
@@ -704,19 +684,14 @@ func compareExactContactInfo[Q any, I any](w io.Writer, query Entity[Q], index E
 }
 
 // compareContactField handles the comparison logic for a single type of contact field
-func compareContactField(queryValues, indexValues []string, normalize func(string) string) contactFieldMatch {
+func compareContactField(queryValues, indexValues []string) contactFieldMatch {
 	matches := 0
 
-	// Create map of normalized index values for faster lookup
-	indexMap := make(map[string]bool, len(indexValues))
-	for _, iv := range indexValues {
-		indexMap[normalize(iv)] = true
-	}
-
-	// Check each query value against the map
-	for _, qv := range queryValues {
-		if indexMap[normalize(qv)] {
-			matches++
+	for q := range queryValues {
+		for i := range indexValues {
+			if strings.EqualFold(queryValues[q], indexValues[i]) {
+				matches++
+			}
 		}
 	}
 
@@ -727,41 +702,4 @@ func compareContactField(queryValues, indexValues []string, normalize func(strin
 		totalQuery: len(queryValues),
 		score:      score,
 	}
-}
-
-// normalizeEmail normalizes email addresses for comparison
-// TODO(adam):
-func normalizeEmail(email string) string {
-	return strings.ToLower(strings.TrimSpace(email))
-}
-
-// normalizePhoneNumber strips all non-numeric characters and normalizes phone numbers
-// TODO(adam):
-func normalizePhoneNumber(phone string) string {
-	var normalized strings.Builder
-
-	// Strip everything except digits and plus sign (for international prefix)
-	for _, r := range phone {
-		if unicode.IsDigit(r) || r == '+' {
-			normalized.WriteRune(r)
-		}
-	}
-
-	// Handle international format
-	result := normalized.String()
-	if strings.HasPrefix(result, "+") {
-		return result // Keep international format as is
-	}
-
-	// If it's a 10-digit number without country code, keep as is
-	if len(result) == 10 {
-		return result
-	}
-
-	// If it has more digits but no plus, assume it includes country code
-	if len(result) > 10 {
-		return "+" + result
-	}
-
-	return result
 }

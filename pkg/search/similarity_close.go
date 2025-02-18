@@ -195,9 +195,7 @@ func compareDates(date1, date2 *time.Time) float64 {
 
 // areDatesLogical checks if dates make temporal sense
 func areDatesLogical(person *Person, index *Person) bool {
-	if person.BirthDate != nil && person.DeathDate != nil &&
-		index.BirthDate != nil && index.DeathDate != nil {
-
+	if person.BirthDate != nil && person.DeathDate != nil && index.BirthDate != nil && index.DeathDate != nil {
 		// Check that birth precedes death in both records
 		personValid := person.BirthDate.Before(*person.DeathDate)
 		indexValid := index.BirthDate.Before(*index.DeathDate)

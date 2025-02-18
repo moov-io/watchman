@@ -366,7 +366,7 @@ func countAvailableFields[I any](index Entity[I]) int {
 func countCommonFields[I any](index Entity[I]) int {
 	count := 0
 
-	if strings.TrimSpace(index.Name) != "" {
+	if index.Name != "" {
 		count++
 	}
 	if index.Source != "" {
