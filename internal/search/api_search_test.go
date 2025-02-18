@@ -197,6 +197,7 @@ func TestAPI_Search(t *testing.T) {
 
 func BenchmarkAPI_Search(b *testing.B) {
 	env := testAPI(b)
+	b.ResetTimer()
 
 	b.Run("normal", func(b *testing.B) {
 		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=5", nil)

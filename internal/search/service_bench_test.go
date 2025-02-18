@@ -25,8 +25,6 @@ func Benchmark_Search(b *testing.B) {
 		MinMatch: 0.1,
 	}
 
-	b.ResetTimer()
-
 	search := func(b *testing.B) {
 		b.Helper()
 
@@ -36,6 +34,8 @@ func Benchmark_Search(b *testing.B) {
 			require.Greater(b, len(results), 0)
 		}
 	}
+
+	b.ResetTimer()
 
 	b.Run("fixed group size", func(b *testing.B) {
 		groups := []int{1, 3, 5, 10, 20, 25, 50, 100, 150, 200, 250}

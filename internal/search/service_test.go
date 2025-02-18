@@ -57,6 +57,8 @@ func TestService_Search(t *testing.T) {
 }
 
 func testService(tb testing.TB) Service {
+	tb.Helper()
+
 	files := testInputs(tb,
 		filepath.Join("..", "..", "pkg", "ofac", "testdata", "sdn.csv"),
 		filepath.Join("..", "..", "pkg", "ofac", "testdata", "alt.csv"),

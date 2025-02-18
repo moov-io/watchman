@@ -35,6 +35,8 @@ func BenchmarkDebugSimilarity(b *testing.B) {
 		})
 	}
 
+	b.ResetTimer()
+
 	// individuals
 	individuals := []search.Entity[search.Value]{
 		ofactest.FindEntity(b, "15102"),
