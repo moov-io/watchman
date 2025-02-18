@@ -2,9 +2,10 @@ package search
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCompareName(t *testing.T) {
@@ -173,11 +174,11 @@ func TestCompareName(t *testing.T) {
 			// Precompute the Entity like search service does
 			result := compareName(&buf, tt.query.Normalize(), tt.index.Normalize(), 1.0)
 
-			assert.InDelta(t, tt.expectedScore, result.score, 0.1,
+			require.InDelta(t, tt.expectedScore, result.score, 0.1,
 				"expected score %v but got %v", tt.expectedScore, result.score)
-			assert.Equal(t, tt.shouldMatch, result.matched,
+			require.Equal(t, tt.shouldMatch, result.matched,
 				"expected matched=%v but got matched=%v", tt.shouldMatch, result.matched)
-			assert.Equal(t, tt.exact, result.exact,
+			require.Equal(t, tt.exact, result.exact,
 				"expected exact=%v but got exact=%v", tt.exact, result.exact)
 		})
 	}
@@ -280,11 +281,11 @@ func TestCompareEntityTitlesFuzzy(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result := compareEntityTitlesFuzzy(&buf, tt.query, tt.index, 1.0)
 
-			assert.InDelta(t, tt.expectedScore, result.score, 0.1,
+			require.InDelta(t, tt.expectedScore, result.score, 0.1,
 				"expected score %v but got %v", tt.expectedScore, result.score)
-			assert.Equal(t, tt.shouldMatch, result.matched,
+			require.Equal(t, tt.shouldMatch, result.matched,
 				"expected matched=%v but got matched=%v", tt.shouldMatch, result.matched)
-			assert.Equal(t, tt.exact, result.exact,
+			require.Equal(t, tt.exact, result.exact,
 				"expected exact=%v but got exact=%v", tt.exact, result.exact)
 		})
 	}
@@ -418,13 +419,13 @@ func TestCompareAffiliationsFuzzy(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := compareAffiliationsFuzzy(&buf, tt.query, tt.index, 1.0)
+			result := compareAffiliationsFuzzy(&buf, tt.query.Normalize(), tt.index.Normalize(), 1.0)
 
-			assert.InDelta(t, tt.expectedScore, result.score, 0.1,
+			require.InDelta(t, tt.expectedScore, result.score, 0.1,
 				"expected score %v but got %v", tt.expectedScore, result.score)
-			assert.Equal(t, tt.shouldMatch, result.matched,
+			require.Equal(t, tt.shouldMatch, result.matched,
 				"expected matched=%v but got matched=%v", tt.shouldMatch, result.matched)
-			assert.Equal(t, tt.exact, result.exact,
+			require.Equal(t, tt.exact, result.exact,
 				"expected exact=%v but got exact=%v", tt.exact, result.exact)
 		})
 	}
@@ -468,7 +469,7 @@ func TestNormalizeTitle(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := normalizeTitle(tt.input)
-			assert.Equal(t, tt.expected, result)
+			require.Equal(t, tt.expected, result)
 		})
 	}
 }
@@ -520,8 +521,8 @@ func TestCalculateNameScore(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			score := calculateNameScore(tt.queryName, tt.indexName)
-			assert.InDelta(t, tt.expectedScore, score, 0.1)
+			score := calculateNameScore(strings.Fields(tt.queryName), strings.Fields(tt.indexName))
+			require.InDelta(t, tt.expectedScore, score, 0.1)
 		})
 	}
 }
@@ -592,53 +593,7 @@ func TestCalculateTypeScore(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			score := calculateTypeScore(tt.queryType, tt.indexType)
-			assert.InDelta(t, tt.expectedScore, score, 0.1)
-		})
-	}
-}
-
-func TestFilterSignificantTerms(t *testing.T) {
-	tests := []struct {
-		name     string
-		input    string
-		expected []string
-	}{
-		{
-			name:     "all significant terms",
-			input:    "banco nacional cuba",
-			expected: []string{"banco", "nacional", "cuba"},
-		},
-		{
-			name:     "with noise terms",
-			input:    "the banco of nacional and cuba",
-			expected: []string{"banco", "nacional", "cuba"},
-		},
-		{
-			name:     "with short terms",
-			input:    "al banco de nacional",
-			expected: []string{"banco", "nacional"},
-		},
-		{
-			name:     "only noise terms",
-			input:    "the of and in at",
-			expected: nil,
-		},
-		{
-			name:     "empty input",
-			input:    "",
-			expected: nil,
-		},
-		{
-			name:     "mixed case terms",
-			input:    "THE Banco OF Nacional",
-			expected: []string{"Banco", "Nacional"},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := filterSignificantTerms(tt.input)
-			assert.Equal(t, tt.expected, result)
+			require.InDelta(t, tt.expectedScore, score, 0.1)
 		})
 	}
 }
@@ -691,7 +646,7 @@ func TestCalculateCombinedScore(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			score := calculateCombinedScore(tt.nameScore, tt.typeScore)
-			assert.InDelta(t, tt.expectedScore, score, 0.1)
+			require.InDelta(t, tt.expectedScore, score, 0.1)
 		})
 	}
 }
@@ -743,7 +698,7 @@ func TestCalculateFinalAffiliateScore(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			score := calculateFinalAffiliateScore(tt.matches)
-			assert.InDelta(t, tt.expectedScore, score, 0.1)
+			require.InDelta(t, tt.expectedScore, score, 0.1)
 		})
 	}
 }

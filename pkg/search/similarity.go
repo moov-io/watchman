@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"math"
-	"strings"
 )
 
 const (
@@ -422,7 +421,7 @@ func countBusinessFields(b *Business) int {
 	}
 
 	count := 0
-	if strings.TrimSpace(b.Name) != "" {
+	if b.Name != "" {
 		count++
 	}
 	if len(b.AltNames) > 0 {
@@ -444,7 +443,7 @@ func countOrganizationFields(o *Organization) int {
 	}
 
 	count := 0
-	if strings.TrimSpace(o.Name) != "" {
+	if o.Name != "" {
 		count++
 	}
 	if len(o.AltNames) > 0 {

@@ -239,11 +239,16 @@ type PreparedFields struct {
 	Name     string
 	AltNames []string
 
+	// NameFields and AltNameFields are precomputed slices of significant terms
+	NameFields    []string
+	AltNameFields [][]string
+
 	Contact ContactInfo
 }
 
 func (e Entity[T]) Normalize() Entity[T] {
 	e.PreparedFields.Name = norm.Name(e.Name)
+	e.PreparedFields.NameFields = norm.RemoveInsignificantTerms(strings.Fields(e.PreparedFields.Name))
 
 	e.PreparedFields.Contact.PhoneNumbers = normalizePhoneNumbers(e.Contact.PhoneNumbers)
 	e.PreparedFields.Contact.FaxNumbers = normalizePhoneNumbers(e.Contact.FaxNumbers)
@@ -259,6 +264,11 @@ func (e Entity[T]) Normalize() Entity[T] {
 	}
 	if e.Vessel != nil {
 		e.PreparedFields.AltNames = normalizeNames(e.Vessel.AltNames)
+	}
+
+	e.PreparedFields.AltNameFields = make([][]string, len(e.PreparedFields.AltNames))
+	for idx := range e.PreparedFields.AltNames {
+		e.PreparedFields.AltNameFields[idx] = norm.RemoveInsignificantTerms(strings.Fields(e.PreparedFields.AltNames[idx]))
 	}
 
 	return e

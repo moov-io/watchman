@@ -21,7 +21,7 @@ func TestFirstCharacterSoundexMatch(t *testing.T) {
 
 func TestDisablePhoneticFiltering(t *testing.T) {
 	search := strings.Fields("ian mckinley")
-	indexed := "tian xiang 7"
+	indexed := strings.Fields("tian xiang 7")
 
 	t.Setenv("DISABLE_PHONETIC_FILTERING", "no")
 	score := BestPairsJaroWinkler(search, indexed)

@@ -39,3 +39,32 @@ func Name(name string) string {
 
 	return strings.TrimSpace(normalized.String())
 }
+
+var (
+	// Minimum length for a name term to be considered significant
+	minTermLength = 3
+
+	noiseTerms = []string{"the", "and", "or", "of", "in", "at", "by"}
+)
+
+func RemoveInsignificantTerms(terms []string) []string {
+	out := make([]string, 0, len(terms))
+	for t := range terms {
+		var found bool
+		for n := range noiseTerms {
+			if strings.EqualFold(terms[t], noiseTerms[n]) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			if len(terms[t]) >= minTermLength {
+				out = append(out, terms[t])
+			}
+		}
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
+}

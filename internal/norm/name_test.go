@@ -1,6 +1,7 @@
 package norm
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -47,6 +48,52 @@ func TestNormalizeName(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := Name(tt.input)
+			require.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestRemoveInsignificantTerms(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected []string
+	}{
+		{
+			name:     "all significant terms",
+			input:    "banco nacional cuba",
+			expected: []string{"banco", "nacional", "cuba"},
+		},
+		{
+			name:     "with noise terms",
+			input:    "the banco of nacional and cuba",
+			expected: []string{"banco", "nacional", "cuba"},
+		},
+		{
+			name:     "with short terms",
+			input:    "al banco de nacional",
+			expected: []string{"banco", "nacional"},
+		},
+		{
+			name:     "only noise terms",
+			input:    "the of and in at",
+			expected: nil,
+		},
+		{
+			name:     "empty input",
+			input:    "",
+			expected: nil,
+		},
+		{
+			name:     "mixed case terms",
+			input:    "THE Banco OF Nacional",
+			expected: []string{"Banco", "Nacional"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := RemoveInsignificantTerms(strings.Fields(tt.input))
 			require.Equal(t, tt.expected, result)
 		})
 	}

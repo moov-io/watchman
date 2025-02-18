@@ -58,14 +58,13 @@ func readInt(override string, value int) int {
 //
 // The pairwise scores are combined into an average in a way that corrects for character length, and the fraction of the
 // indexed term that didn't match.
-func BestPairsJaroWinkler(searchTokens []string, indexed string) float64 {
+func BestPairsJaroWinkler(searchTokens []string, indexedTokens []string) float64 {
 	type Score struct {
 		score          float64
 		searchTokenIdx int
 		indexTokenIdx  int
 	}
 
-	indexedTokens := strings.Fields(indexed)
 	searchTokensLength := sumLength(searchTokens)
 	indexTokensLength := sumLength(indexedTokens)
 

@@ -73,6 +73,6 @@ func TestBestPairsJaroWinkler__TruePositives(t *testing.T) {
 
 func compareAlgorithms(indexedName string, query string) (float64, float64) {
 	oldScore := stringscore.JaroWinkler(indexedName, query)
-	newScore := stringscore.BestPairsJaroWinkler(strings.Fields(query), indexedName)
+	newScore := stringscore.BestPairsJaroWinkler(strings.Fields(query), strings.Fields(indexedName))
 	return oldScore, newScore
 }

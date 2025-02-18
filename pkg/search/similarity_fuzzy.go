@@ -5,7 +5,6 @@ import (
 	"math"
 	"regexp"
 	"strings"
-	"unicode"
 
 	"github.com/moov-io/watchman/internal/norm"
 	"github.com/moov-io/watchman/internal/prepare"
@@ -13,9 +12,6 @@ import (
 )
 
 const (
-	// Minimum length for a name term to be considered significant
-	minTermLength = 3
-
 	// Minimum number of significant terms that must match for a high confidence match
 	minMatchingTerms = 2
 
@@ -52,18 +48,12 @@ func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], we
 		}
 	}
 
-	// Get query terms and filter out insignificant ones
-	qTerms := filterSignificantTerms(query.PreparedFields.Name)
-	if len(qTerms) == 0 {
-		return scorePiece{score: 0, weight: 0, fieldsCompared: 0, pieceType: "name"}
-	}
-
 	// Check primary name
-	bestMatch := compareNameTerms(qTerms, index.PreparedFields.Name)
+	bestMatch := compareNameTerms(query.PreparedFields.NameFields, index.PreparedFields.NameFields)
 
 	// Check alternate names
-	for idx := range index.PreparedFields.AltNames {
-		altMatch := compareNameTerms(qTerms, index.PreparedFields.AltNames[idx])
+	for idx := range index.PreparedFields.AltNameFields {
+		altMatch := compareNameTerms(query.PreparedFields.NameFields, index.PreparedFields.AltNameFields[idx])
 		if altMatch.score > bestMatch.score {
 			bestMatch = altMatch
 		}
@@ -72,7 +62,9 @@ func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], we
 	// Check historical names with penalty
 	for _, hist := range index.HistoricalInfo {
 		if strings.EqualFold(hist.Type, "Former Name") {
-			histMatch := compareNameTerms(qTerms, norm.Name(hist.Value))
+			indexHistoricalTerms := strings.Fields(norm.Name(hist.Value))
+
+			histMatch := compareNameTerms(query.PreparedFields.NameFields, indexHistoricalTerms)
 			histMatch.score *= 0.95 // Apply penalty for historical names
 			histMatch.isHistorical = true
 			if histMatch.score > bestMatch.score {
@@ -82,8 +74,8 @@ func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], we
 	}
 
 	// Apply additional criteria for match quality
-	bestMatch.score = adjustScoreBasedOnQuality(bestMatch, len(qTerms))
-	if !isNameCloseEnough(query.Name, index.Name) {
+	bestMatch.score = adjustScoreBasedOnQuality(bestMatch, len(query.PreparedFields.NameFields))
+	if !isNameCloseEnough(query.PreparedFields, index.PreparedFields) {
 		bestMatch.score *= 0.85
 	}
 
@@ -98,65 +90,10 @@ func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], we
 	}
 }
 
-var (
-	noiseTerms = []string{"the", "and", "or", "of", "in", "at", "by"}
-)
+// compareNameFields performs detailed term-by-term comparison
+func compareNameTerms(queryTerms, indexTerms []string) nameMatch {
+	score := stringscore.BestPairsJaroWinkler(queryTerms, indexTerms)
 
-func filterSignificantTerms(s string) []string {
-	if s == "" {
-		return nil
-	}
-
-	var terms []string
-	start := -1
-
-	for i, r := range s {
-		if unicode.IsSpace(r) {
-			if start != -1 {
-				if term := checkAndGetTerm(s[start:i]); term != "" {
-					terms = append(terms, term)
-				}
-				start = -1
-			}
-		} else if start == -1 {
-			start = i
-		}
-	}
-
-	if start != -1 {
-		if term := checkAndGetTerm(s[start:]); term != "" {
-			terms = append(terms, term)
-		}
-	}
-
-	if len(terms) == 0 {
-		return nil
-	}
-	return terms
-}
-
-func checkAndGetTerm(term string) string {
-	if len(term) < minTermLength {
-		return ""
-	}
-
-	for _, noise := range noiseTerms {
-		if strings.EqualFold(term, noise) {
-			return ""
-		}
-	}
-
-	return term
-}
-
-// compareNameTerms performs detailed term-by-term comparison
-func compareNameTerms(queryTerms []string, indexName string) nameMatch {
-	indexTerms := filterSignificantTerms(indexName)
-	if len(indexTerms) == 0 {
-		return nameMatch{score: 0}
-	}
-
-	score := stringscore.BestPairsJaroWinkler(queryTerms, strings.Join(indexTerms, " "))
 	matchingTerms := 0
 	if score > termMatchThreshold {
 		matchingTerms = len(queryTerms)
@@ -191,32 +128,27 @@ func isHighConfidenceMatch(match nameMatch, finalScore float64) bool {
 	return match.matchingTerms >= minMatchingTerms && finalScore > nameMatchThreshold
 }
 
-func isNameCloseEnough(queryName, indexName string) bool {
-	// Normalize both names
-	qName := strings.ToLower(strings.TrimSpace(queryName))
-	iName := strings.ToLower(strings.TrimSpace(indexName))
-
-	// Split into terms
-	qTerms := strings.Fields(qName)
-	iTerms := strings.Fields(iName)
+func isNameCloseEnough(query, index PreparedFields) bool {
+	qTermCount := strings.Count(query.Name, " ") + 1 // one space == two terms
+	iTermCount := strings.Count(index.Name, " ") + 1
 
 	// More lenient length difference check
-	if float64(len(qTerms))/float64(len(iTerms)) < 0.3 || float64(len(qTerms))/float64(len(iTerms)) > 3.0 {
+	if float64(qTermCount)/float64(iTermCount) < 0.3 || float64(qTermCount)/float64(iTermCount) > 3.0 {
 		return false
 	}
 
 	// More lenient matching threshold
 	matchCount := 0
-	for _, qTerm := range qTerms {
-		for _, iTerm := range iTerms {
-			if strings.Contains(iTerm, qTerm) || strings.Contains(qTerm, iTerm) {
+	for q := range query.NameFields {
+		for i := range index.NameFields {
+			if strings.Contains(index.NameFields[i], query.NameFields[q]) || strings.Contains(query.NameFields[q], index.NameFields[i]) {
 				matchCount++
 				break
 			}
 		}
 	}
 
-	return float64(matchCount)/float64(len(qTerms)) >= 0.4
+	return float64(matchCount)/float64(qTermCount) >= 0.4
 }
 
 const (
@@ -378,7 +310,7 @@ func calculateTitleSimilarity(title1, title2 string) float64 {
 	}
 
 	// Use JaroWinkler for term comparison
-	score := stringscore.BestPairsJaroWinkler(terms1, title2)
+	score := stringscore.BestPairsJaroWinkler(terms1, terms2)
 
 	// Adjust score based on length difference
 	lengthDiff := math.Abs(float64(len(terms1) - len(terms2)))
@@ -524,6 +456,11 @@ func findBestAffiliationMatch(queryAff Affiliation, indexAffs []Affiliation) aff
 		return affiliationMatch{}
 	}
 
+	qFields := strings.Fields(qName)
+	if len(qFields) == 0 {
+		return affiliationMatch{}
+	}
+
 	var bestMatch affiliationMatch
 
 	for _, iAff := range indexAffs {
@@ -533,7 +470,12 @@ func findBestAffiliationMatch(queryAff Affiliation, indexAffs []Affiliation) aff
 		}
 
 		// Calculate name match score
-		nameScore := calculateNameScore(qName, iName)
+		iFields := strings.Fields(iName)
+		if len(iFields) == 0 {
+			continue
+		}
+
+		nameScore := calculateNameScore(qFields, iFields)
 		if nameScore <= bestMatch.nameScore {
 			continue
 		}
@@ -557,6 +499,13 @@ func findBestAffiliationMatch(queryAff Affiliation, indexAffs []Affiliation) aff
 	return bestMatch
 }
 
+func calculateNameScore(query, index []string) float64 {
+	if len(query) == 0 || len(index) == 0 {
+		return 0.0
+	}
+	return stringscore.BestPairsJaroWinkler(query, index)
+}
+
 // normalizeAffiliationName normalizes an entity name for comparison
 func normalizeAffiliationName(name string) string {
 	// Basic normalization
@@ -567,24 +516,7 @@ func normalizeAffiliationName(name string) string {
 	for _, suffix := range suffixes {
 		name = strings.TrimSuffix(name, suffix)
 	}
-
 	return strings.TrimSpace(name)
-}
-
-// calculateNameScore calculates similarity between entity names
-func calculateNameScore(queryName, indexName string) float64 {
-	// Exact match check
-	if queryName == indexName {
-		return 1.0
-	}
-
-	// Calculate similarity using terms
-	queryTerms := strings.Fields(queryName)
-	if len(queryTerms) == 0 {
-		return 0.0
-	}
-
-	return stringscore.BestPairsJaroWinkler(queryTerms, indexName)
 }
 
 // calculateTypeScore determines how well affiliation types match

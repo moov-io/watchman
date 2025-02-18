@@ -128,7 +128,8 @@ func TestJaroWinkler(t *testing.T) {
 	for i := range cases {
 		v := cases[i]
 		// Only need to call chomp on s1, see jaroWinkler doc
-		eql(t, fmt.Sprintf("#%d %s vs %s", i, v.indexed, v.search), stringscore.BestPairsJaroWinkler(strings.Fields(v.search), v.indexed), v.match)
+		eql(t, fmt.Sprintf("#%d %s vs %s", i, v.indexed, v.search),
+			stringscore.BestPairsJaroWinkler(strings.Fields(v.search), strings.Fields(v.indexed)), v.match)
 	}
 }
 
@@ -188,12 +189,18 @@ func BenchmarkJaroWinkler(b *testing.B) {
 
 	fake := faker.New()
 
+	b.ResetTimer()
+
 	b.Run("BestPairsJaroWinkler", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
+			b.StopTimer()
 			nameTokens := strings.Fields(fake.Person().Name())
-			idx := randomIndex(len(results.SDNs))
 
-			score := stringscore.BestPairsJaroWinkler(nameTokens, results.SDNs[idx].SDNName)
+			idx := randomIndex(len(results.SDNs))
+			indexTokens := strings.Fields(results.SDNs[idx].SDNName)
+			b.StartTimer()
+
+			score := stringscore.BestPairsJaroWinkler(nameTokens, indexTokens)
 			require.Greater(b, score, -0.01)
 		}
 	})
