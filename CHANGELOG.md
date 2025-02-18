@@ -1,3 +1,11 @@
+## v0.50.9 (Released 2025-02-18)
+
+IMPROVEMENTS
+
+- address: telemetry for all cases of ParseAddress
+- ofactest: fix sample rate
+- stringscore: make benchmark more consistent
+
 ## v0.50.8 (Released 2025-02-18)
 
 IMPROVEMENTS
