@@ -34,15 +34,13 @@ type nameMatch struct {
 }
 
 func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) scorePiece {
-	qName := norm.Name(query.Name)
-
 	// Early return for empty query
-	if qName == "" {
+	if query.PreparedFields.Name == "" {
 		return scorePiece{score: 0, weight: 0, fieldsCompared: 0, pieceType: "name"}
 	}
 
 	// Exact match fast path
-	if qName == index.PreparedFields.Name {
+	if query.PreparedFields.Name == index.PreparedFields.Name {
 		return scorePiece{
 			score:          1.0,
 			weight:         weight,
@@ -55,7 +53,7 @@ func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], we
 	}
 
 	// Get query terms and filter out insignificant ones
-	qTerms := filterSignificantTerms(qName)
+	qTerms := filterSignificantTerms(query.PreparedFields.Name)
 	if len(qTerms) == 0 {
 		return scorePiece{score: 0, weight: 0, fieldsCompared: 0, pieceType: "name"}
 	}

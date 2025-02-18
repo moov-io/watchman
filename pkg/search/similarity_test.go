@@ -23,7 +23,7 @@ func TestSimilarity_EmptyQuery(t *testing.T) {
 }
 
 func TestSimilarityDebug_FromJSON(t *testing.T) {
-	query := readEntity(t, "1-query.json")
+	query := readEntity(t, "1-query.json").Normalize()
 	index := readEntity(t, "1-index.json").Normalize()
 
 	var buf bytes.Buffer

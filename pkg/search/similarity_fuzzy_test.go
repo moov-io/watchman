@@ -171,7 +171,7 @@ func TestCompareName(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Precompute the Entity like search service does
-			result := compareName(&buf, tt.query, tt.index.Normalize(), 1.0)
+			result := compareName(&buf, tt.query.Normalize(), tt.index.Normalize(), 1.0)
 
 			assert.InDelta(t, tt.expectedScore, result.score, 0.1,
 				"expected score %v but got %v", tt.expectedScore, result.score)

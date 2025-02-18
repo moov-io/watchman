@@ -22,10 +22,11 @@ func TestService_Search(t *testing.T) {
 	svc := testService(t)
 
 	t.Run("basic", func(t *testing.T) {
-		results, err := svc.Search(ctx, search.Entity[search.Value]{
+		query := search.Entity[search.Value]{
 			Name: "SHIPPING LIMITED",
 			Type: search.EntityBusiness,
-		}, opts)
+		}
+		results, err := svc.Search(ctx, query.Normalize(), opts)
 		require.NoError(t, err)
 		require.Greater(t, len(results), 0)
 
@@ -37,11 +38,12 @@ func TestService_Search(t *testing.T) {
 	})
 
 	t.Run("crypto address", func(t *testing.T) {
-		results, err := svc.Search(ctx, search.Entity[search.Value]{
+		query := search.Entity[search.Value]{
 			CryptoAddresses: []search.CryptoAddress{
 				{Currency: "XBT", Address: "12VrYZgS1nmf9KHHped24xBb1aLLRpV2cT"},
 			},
-		}, opts)
+		}
+		results, err := svc.Search(ctx, query.Normalize(), opts)
 		require.NoError(t, err)
 		require.Greater(t, len(results), 0)
 

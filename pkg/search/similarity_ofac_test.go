@@ -113,7 +113,7 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			score := search.DebugSimilarity(debug(t), tc.query, indexEntity)
+			score := search.DebugSimilarity(debug(t), tc.query.Normalize(), indexEntity)
 			require.InDelta(t, tc.expected, score, 0.02)
 		})
 	}
@@ -212,7 +212,7 @@ func TestSimilarity_OFAC_SDN_Business(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			score := search.DebugSimilarity(debug(t), tc.query, indexEntity)
+			score := search.DebugSimilarity(debug(t), tc.query.Normalize(), indexEntity)
 			require.InDelta(t, tc.expected, score, 0.05)
 		})
 	}
@@ -315,7 +315,7 @@ func TestSimilarity_OFAC_SDN_Vessel(t *testing.T) {
 
 		for _, tc := range testCases {
 			t.Run(tc.name, func(t *testing.T) {
-				score := search.DebugSimilarity(debug(t), tc.query, indexEntity)
+				score := search.DebugSimilarity(debug(t), tc.query.Normalize(), indexEntity)
 				require.InDelta(t, tc.expected, score, 0.02)
 
 				// Additional assertions for specific score thresholds
@@ -368,7 +368,7 @@ func TestSimilarity_Edge_Cases(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			score := search.DebugSimilarity(debug(t), tc.query, indexEntity)
+			score := search.DebugSimilarity(debug(t), tc.query.Normalize(), indexEntity)
 			require.InDelta(t, tc.expected, score, 0.02)
 		})
 	}

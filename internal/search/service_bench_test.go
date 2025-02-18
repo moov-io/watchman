@@ -20,6 +20,8 @@ func Benchmark_Search(b *testing.B) {
 		Name: "Xao Ling",
 		Type: search.EntityPerson,
 	}
+	query = query.Normalize()
+
 	opts := SearchOpts{
 		Limit:    20,
 		MinMatch: 0.1,
