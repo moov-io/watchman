@@ -80,8 +80,11 @@ func BestPairsJaroWinkler(searchTokens []string, indexedTokens []string) float64
 		for indexIdx, indexedToken := range indexedTokens {
 			// Compare the first letters phonetically and only run jaro-winkler on those which are similar
 			if disablePhoneticFiltering || firstCharacterSoundexMatch(indexedToken, searchToken) {
-				score := customJaroWinkler(indexedToken, searchToken)
-				scores = append(scores, Score{score, searchIdx, indexIdx})
+				scores = append(scores, Score{
+					score:          customJaroWinkler(indexedToken, searchToken),
+					searchTokenIdx: searchIdx,
+					indexTokenIdx:  indexIdx,
+				})
 			}
 		}
 	}

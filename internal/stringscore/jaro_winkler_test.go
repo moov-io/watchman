@@ -5,21 +5,14 @@
 package stringscore_test
 
 import (
-	"crypto/rand"
 	"fmt"
-	"io"
 	"math"
-	"math/big"
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/internal/stringscore"
-	"github.com/moov-io/watchman/pkg/ofac"
 
-	"github.com/jaswdr/faker"
 	"github.com/stretchr/testify/require"
 )
 
@@ -171,36 +164,47 @@ func TestEql(t *testing.T) {
 }
 
 func BenchmarkJaroWinkler(b *testing.B) {
-	fd, err := os.Open(filepath.Join("..", "..", "test", "testdata", "sdn.csv"))
-	if err != nil {
-		b.Error(err)
+	inputs := []string{
+		"Seyed Mohammad HASHEMI",
+		"KOREA RUNGRADO GENERAL TRADING CORPORATION",
+		"KOREA HAEGUMGANG TRADING CORPORATION",
+		"Sendy FLORES CASTRO",
+		"ERVIN DANESH ARYAN COMPANY",
+		"Husam 'Adbd-al-Barr AL-FAKHURI",
+		"Oleg Anatolievich KAMSHILOV",
+		"SHAHID KARIMI INDUSTRIES",
+		"ORAMA PROPERTIES LTD",
+		"Pyong Chan KIM",
+		"HAO FAN 6",
+		"KOTI CORP",
+		"IRAN HORMUZ 12",
+		"NARI SHIPPING AND CHARTERING GMBH & CO. KG",
+		"PROMSYRIOIMPORT",
+		"AO ZAVOD FIOLENT",
+		"NARIA GENERAL TRADING LLC",
+		"Faruq AL-SURI",
+		"SANDINO",
+		"CAPITAL S.A.L.",
+		"Ali DARASSA",
+		"Ali Akbar Rezaei TAVANA",
+		"CENTRAL PUBLIC PROSECUTORS OFFICE",
+		"Seyyed Mohammad ATABAK",
+		"PARSIAN TOURISM AND RECREATIONAL CENTERS COMPANY",
+		"THE YANGON GALLERY",
 	}
-	results, err := ofac.Read(map[string]io.ReadCloser{"sdn.csv": fd})
-	require.NoError(b, err)
-	require.Len(b, results.SDNs, 7379)
-
-	randomIndex := func(length int) int {
-		n, err := rand.Int(rand.Reader, big.NewInt(1e9))
-		if err != nil {
-			panic(err)
-		}
-		return int(n.Int64()) % length
-	}
-
-	fake := faker.New()
-
 	b.ResetTimer()
 
 	b.Run("BestPairsJaroWinkler", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			b.StopTimer()
-			nameTokens := strings.Fields(fake.Person().Name())
+			query := i % (len(inputs) - 1)
+			index := (i + 1) % (len(inputs) - 1)
 
-			idx := randomIndex(len(results.SDNs))
-			indexTokens := strings.Fields(results.SDNs[idx].SDNName)
+			queryTokens := strings.Fields(inputs[query])
+			indexTokens := strings.Fields(inputs[index])
 			b.StartTimer()
 
-			score := stringscore.BestPairsJaroWinkler(nameTokens, indexTokens)
+			score := stringscore.BestPairsJaroWinkler(queryTokens, indexTokens)
 			require.Greater(b, score, -0.01)
 		}
 	})
