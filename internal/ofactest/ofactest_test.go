@@ -33,7 +33,7 @@ func TestOFACTest_Sample(t *testing.T) {
 		}
 
 		// Entity has passed our checks, so sample it
-		if shouldSample(1.0) {
+		if shouldSample(0.01) {
 			sample = append(sample, stats.Entities[idx])
 		}
 	}
@@ -49,7 +49,11 @@ var (
 )
 
 func shouldSample(chance float64) bool {
+	if chance < 1.0 {
+		chance *= 100.0
+	}
+
 	n, _ := rand.Int(rand.Reader, max)
 
-	return float64(n.Int64()/100.0) < chance
+	return float64(n.Int64()) < chance
 }
