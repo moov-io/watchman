@@ -6,14 +6,36 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/moov-io/base/log"
+	"github.com/moov-io/watchman/internal/download"
 	"github.com/moov-io/watchman/internal/ofactest"
 	"github.com/moov-io/watchman/pkg/search"
 
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	downloadRealRecords = false
+)
+
 func TestOFACTest_Sample(t *testing.T) {
-	dl := ofactest.GetDownloader(t)
+	logger := log.NewTestLogger()
+
+	var dl download.Downloader
+	var err error
+
+	if downloadRealRecords {
+		// Use a real downloader (to pull from OFAC website)
+		dl, err = download.NewDownloader(logger, download.Config{
+			IncludedLists: []search.SourceList{
+				search.SourceUSOFAC,
+			},
+		})
+	} else {
+		// Use a mock downloader with OFAC files from ./pkg/ofac/testdata/
+		dl = ofactest.GetDownloader(t)
+	}
+	require.NoError(t, err)
 
 	stats, err := dl.RefreshAll(context.Background())
 	require.NoError(t, err)
@@ -42,6 +64,7 @@ func TestOFACTest_Sample(t *testing.T) {
 	for idx := range sample {
 		t.Logf("%v - %q", sample[idx].SourceID, gather(sample[idx]))
 	}
+	t.Logf("sampled %d records", len(sample))
 }
 
 var (
