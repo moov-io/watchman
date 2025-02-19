@@ -1,3 +1,13 @@
+## v0.50.10 (Released 2025-02-19)
+
+IMPROVEMENTS
+
+- postalpool: use msgpack over JSON for binary pool
+
+BUILD
+
+- build(deps-dev): bump nokogiri from 1.16.7 to 1.18.3 in /docs
+
 ## v0.50.9 (Released 2025-02-18)
 
 IMPROVEMENTS
