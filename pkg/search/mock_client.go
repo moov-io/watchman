@@ -35,6 +35,9 @@ func (c *MockClient) SearchByEntity(ctx context.Context, query Entity[Value], op
 		return SearchResponse{}, c.Err
 	}
 
+	// Make sure to prepare the Query
+	query = query.Normalize()
+
 	// Record the search
 	c.mu.Lock()
 	c.Searches = append(c.Searches, query)

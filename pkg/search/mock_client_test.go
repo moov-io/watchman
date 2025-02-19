@@ -34,7 +34,7 @@ func TestMockClient(t *testing.T) {
 	opts := search.SearchOpts{
 		Limit: 2,
 	}
-	resp, err := mc.SearchByEntity(ctx, query.Normalize(), opts)
+	resp, err := mc.SearchByEntity(ctx, query, opts)
 	require.NoError(t, err)
 	require.Len(t, resp.Entities, 2)
 
