@@ -32,7 +32,7 @@ func New(total, groups int) []int {
 	return append(xs, total)
 }
 
-// ProcessSlice processes items concurrently using a worker pool
+// ProcessSliceFn executes f over the input slice concurrency
 func ProcessSlice[T any, F any](in []T, workers int, f func(T) F) []F {
 	if len(in) == 0 {
 		return nil
@@ -47,39 +47,34 @@ func ProcessSlice[T any, F any](in []T, workers int, f func(T) F) []F {
 		return out
 	}
 
-	// Calculate chunk size
-	chunkSize := len(in) / workers
-	if chunkSize < 1 {
-		chunkSize = 1
-	}
-
-	// Pre-allocate output slice
 	out := make([]F, len(in))
+
+	// Create work distribution channels
+	jobs := make(chan int, len(in))
 	var wg sync.WaitGroup
 
-	// Process chunks directly, writing to pre-allocated slice
-	for i := 0; i < len(in); i += chunkSize {
+	// Start worker pool
+	for w := 0; w < workers; w++ {
 		wg.Add(1)
-		start := i
-		end := i + chunkSize
-		if end > len(in) {
-			end = len(in)
-		}
-
-		go func(start, end int) {
+		go func() {
 			defer wg.Done()
-			// Process chunk and write directly to output slice
-			for i, item := range in[start:end] {
-				out[start+i] = f(item)
+			for i := range jobs {
+				out[i] = f(in[i])
 			}
-		}(start, end)
+		}()
 	}
+
+	// Send work to workers
+	for i := range in {
+		jobs <- i
+	}
+	close(jobs)
 
 	wg.Wait()
 	return out
 }
 
-// ProcessSliceFn processes items in chunks concurrently
+// ProcessSliceFn executes f over the input slice concurrency
 func ProcessSliceFn[T any](in []T, workers int, f func(T)) {
 	if len(in) == 0 {
 		return
@@ -93,30 +88,26 @@ func ProcessSliceFn[T any](in []T, workers int, f func(T)) {
 		return
 	}
 
-	// Calculate chunk size
-	chunkSize := len(in) / workers
-	if chunkSize < 1 {
-		chunkSize = 1
-	}
-
+	// Create work distribution channels
+	jobs := make(chan int, len(in))
 	var wg sync.WaitGroup
 
-	// Process chunks directly
-	for i := 0; i < len(in); i += chunkSize {
+	// Start worker pool
+	for w := 0; w < workers; w++ {
 		wg.Add(1)
-		start := i
-		end := i + chunkSize
-		if end > len(in) {
-			end = len(in)
-		}
-
-		go func(start, end int) {
+		go func() {
 			defer wg.Done()
-			for _, item := range in[start:end] {
-				f(item)
+			for i := range jobs {
+				f(in[i])
 			}
-		}(start, end)
+		}()
 	}
+
+	// Send work to workers
+	for i := range in {
+		jobs <- i
+	}
+	close(jobs)
 
 	wg.Wait()
 }
