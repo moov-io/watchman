@@ -18,5 +18,6 @@ type Config struct {
 	Dialer    *net.Dialer
 	Transport *http.Transport
 
-	BinaryPath string
+	BinaryPath       string
+	CGOSelfInstances int
 }

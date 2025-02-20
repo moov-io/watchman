@@ -25,6 +25,7 @@ import (
 // when no longer needed. The Service ensures all worker processes are properly
 // terminated on shutdown.
 type Service struct {
+	conf      Config
 	processes []*exec.Cmd
 	client    *Client
 }
@@ -44,6 +45,7 @@ func NewService(logger log.Logger, conf Config) (*Service, error) {
 	logger.Info().Logf("starting %v with %v instances starting at %v", binPath, conf.Instances, conf.StartingPort)
 
 	ps := &Service{
+		conf:      conf,
 		processes: make([]*exec.Cmd, conf.Instances),
 	}
 	if conf.Instances <= 0 {
@@ -61,6 +63,7 @@ func NewService(logger log.Logger, conf Config) (*Service, error) {
 		g.Go(func() error {
 			cmd := exec.Command(binPath)
 			cmd.Env = append(cmd.Env, fmt.Sprintf("PORT=%d", port))
+			cmd.Env = append(cmd.Env, fmt.Sprintf("REQUEST_TIMEOUT=%v", conf.RequestTimeout))
 
 			err := cmd.Start()
 			if err != nil {

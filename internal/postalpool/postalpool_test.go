@@ -87,11 +87,12 @@ func setupPostalPool(tb testing.TB) *Service {
 	logger := log.NewTestLogger()
 
 	conf := Config{
-		Enabled:        true,
-		Instances:      1,
-		StartingPort:   10000,
-		StartupTimeout: 60 * time.Second,
-		BinaryPath:     filepath.Join("..", "..", "bin", "postal-server"),
+		Enabled:          true,
+		Instances:        1,
+		StartingPort:     10000,
+		StartupTimeout:   60 * time.Second,
+		BinaryPath:       filepath.Join("..", "..", "bin", "postal-server"),
+		CGOSelfInstances: 2,
 	}
 	_, err := os.Stat(conf.BinaryPath)
 	if err != nil {

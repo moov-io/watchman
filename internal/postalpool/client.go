@@ -76,12 +76,12 @@ func (c *Client) parseAddress(ctx context.Context, input string, includeCGOSelf 
 	// Simple round-robin including self or not
 	var offset int
 	if includeCGOSelf {
-		offset += 1
+		offset += c.conf.CGOSelfInstances
 	}
 	idx := int(c.next.Add(1)) % (len(c.endpoints) + offset)
 
 	// If idx equals last position, use local instance
-	if idx == len(c.endpoints) {
+	if idx >= len(c.endpoints) {
 		span.SetAttributes(attribute.String("postalpool.method", "cgo-self"))
 		return address.ParseAddress(ctx, input), nil
 	}
