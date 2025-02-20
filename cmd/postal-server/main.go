@@ -34,7 +34,7 @@ func main() {
 	})
 
 	// Setup HTTP server
-	defaultTimeout := readDuration(os.Getenv("REQUEST_DURATION"), 5*time.Second)
+	defaultTimeout := readDuration(os.Getenv("REQUEST_DURATION"), 10*time.Second) // default matches config.default.yml
 	serve := &http.Server{
 		Addr:    ":" + port,
 		Handler: router,
