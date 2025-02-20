@@ -92,6 +92,7 @@ func setupPostalPool(tb testing.TB) *Service {
 		StartingPort:     10000,
 		StartupTimeout:   60 * time.Second,
 		BinaryPath:       filepath.Join("..", "..", "bin", "postal-server"),
+		RequestTimeout:   5 * time.Second,
 		CGOSelfInstances: 2,
 	}
 	_, err := os.Stat(conf.BinaryPath)
