@@ -56,7 +56,7 @@ func NewService(logger log.Logger, conf Config) (*Service, error) {
 		idx := i
 
 		port := conf.StartingPort + idx
-		endpoints[idx] = fmt.Sprintf("http://localhost:%d", port)
+		endpoints[idx] = fmt.Sprintf("http://127.0.0.1:%d", port)
 
 		g.Go(func() error {
 			cmd := exec.Command(binPath)
