@@ -92,6 +92,10 @@ func NewService(logger log.Logger, conf Config) (*Service, error) {
 	return ps, nil
 }
 
+func (ps *Service) Ratio() string {
+	return fmt.Sprintf("%d cgo to %d binary", ps.conf.CGOSelfInstances, ps.conf.Instances)
+}
+
 func (ps *Service) Shutdown() {
 	for _, proc := range ps.processes {
 		if proc != nil {
