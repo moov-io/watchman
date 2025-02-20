@@ -224,4 +224,43 @@ func BenchmarkAPI_Search(b *testing.B) {
 			}
 		}
 	})
+
+	b.Run("name,address", func(b *testing.B) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=5", nil)
+
+		for b.Loop() {
+			w := httptest.NewRecorder()
+			env.router.ServeHTTP(w, req)
+
+			if w.Code != http.StatusOK {
+				b.Fatalf("unexpected %v status code", w.Code)
+			}
+		}
+	})
+
+	b.Run("name,email", func(b *testing.B) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=5", nil)
+
+		for b.Loop() {
+			w := httptest.NewRecorder()
+			env.router.ServeHTTP(w, req)
+
+			if w.Code != http.StatusOK {
+				b.Fatalf("unexpected %v status code", w.Code)
+			}
+		}
+	})
+
+	b.Run("name,address,email", func(b *testing.B) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=5", nil)
+
+		for b.Loop() {
+			w := httptest.NewRecorder()
+			env.router.ServeHTTP(w, req)
+
+			if w.Code != http.StatusOK {
+				b.Fatalf("unexpected %v status code", w.Code)
+			}
+		}
+	})
 }
