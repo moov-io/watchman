@@ -41,7 +41,8 @@ func TestDownloader_setupPeriodicRefreshing(t *testing.T) {
 	dl, err := download.NewDownloader(logger, conf)
 	require.NoError(t, err)
 
-	searchService, err := search.NewService(logger)
+	searchConfig := search.DefaultConfig()
+	searchService, err := search.NewService(logger, searchConfig)
 	require.NoError(t, err)
 
 	go func() {

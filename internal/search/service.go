@@ -32,19 +32,21 @@ type Service interface {
 	Search(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error)
 }
 
-func NewService(logger log.Logger) (Service, error) {
-	cm, err := groupsize.NewConcurrencyManager(defaultGroupSize, 1, 100)
+func NewService(logger log.Logger, config Config) (Service, error) {
+	cm, err := groupsize.NewConcurrencyManager(config.SearchGroups.Default, config.SearchGroups.Min, config.SearchGroups.Max)
 	if err != nil {
 		return nil, fmt.Errorf("creating search service: %w", err)
 	}
 	return &service{
 		logger: logger,
+		config: config,
 		cm:     cm,
 	}, nil
 }
 
 type service struct {
 	logger log.Logger
+	config Config
 
 	latestStats  download.Stats
 	sync.RWMutex // protects latestStats (which has entities and list hashes)
@@ -184,10 +186,6 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 
 	return out, nil
 }
-
-const (
-	defaultGroupSize = 20 // rough estimate from local testing
-)
 
 func getGroupSize(cm *groupsize.ConcurrencyManager) (int, error) {
 	// After local benchmarking this is a tradeoff between the fastest / most efficient group size picking

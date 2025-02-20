@@ -74,7 +74,8 @@ func testService(tb testing.TB) Service {
 
 	logger := log.NewTestLogger()
 
-	svc, err := NewService(logger)
+	searchConfig := DefaultConfig()
+	svc, err := NewService(logger, searchConfig)
 	require.NoError(tb, err)
 
 	svc.UpdateEntities(download.Stats{
