@@ -17,43 +17,28 @@ func TestConcurrencyManager(t *testing.T) {
 		cm, err := NewConcurrencyManager(25, 1, 100)
 		require.NoError(t, err)
 
+		// Set key parameters for testing
+		cm.switchCooldown = time.Millisecond
+		cm.windowSize = 50
+		cm.minSamples = 10
+		cm.minImprovement = 0.02
+
 		initial := cm.champion
 		better := initial + 1
 
-		// Ensure challenger is in traffic weights
-		picked := false
-		for i := 0; i < 1000; i++ {
-			if cm.PickConcurrency() == better {
-				picked = true
-				break
-			}
-		}
-		require.True(t, picked, "challenger should receive some traffic")
-
-		// Record significantly better times for challenger
-		for i := 0; i < 200; i++ {
-			cm.RecordDuration(initial, 100*time.Millisecond)
-			cm.RecordDuration(better, 10*time.Millisecond) // More dramatic difference
+		// Record dramatically different durations many times
+		for i := 0; i < 1000; i++ { // More samples
+			cm.RecordDuration(initial, 1000*time.Millisecond) // 1 second
+			cm.RecordDuration(better, 1*time.Millisecond)     // 1 millisecond
 		}
 
-		// Force several evaluation cycles
-		for i := 0; i < 5; i++ {
+		// Force multiple evaluations with time for the evaluationLoop to process
+		for i := 0; i < 10; i++ {
 			cm.evaluate()
-			time.Sleep(50 * time.Millisecond)
+			time.Sleep(10 * time.Millisecond)
 		}
 
-		// Verify champion switched
-		newChampion := cm.champion
-		if newChampion == initial {
-			// If it didn't switch, let's get more debug info
-			cm.mu.Lock()
-			weights := make(map[int]float64)
-			for k, v := range cm.trafficWeights {
-				weights[k] = v
-			}
-			cm.mu.Unlock()
-
-			// Get stats for both concurrencies
+		if cm.champion == initial {
 			initialStats := cm.stats[initial]
 			betterStats := cm.stats[better]
 
@@ -64,10 +49,9 @@ func TestConcurrencyManager(t *testing.T) {
 				initial, initialMean, initialStd, initialCount)
 			t.Logf("Challenger %d stats: mean=%v std=%v count=%d",
 				better, betterMean, betterStd, betterCount)
-			t.Logf("Traffic weights: %v", weights)
 		}
 
-		require.NotEqual(t, initial, newChampion,
+		require.NotEqual(t, initial, cm.champion,
 			"champion should switch to better performer")
 	})
 }

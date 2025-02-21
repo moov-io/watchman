@@ -87,10 +87,12 @@ func NewConcurrencyManager(initialChampion, minC, maxC int) (*ConcurrencyManager
 		confidenceLevel: 1.645, // approximate z-score for 90% CI
 		minSamples:      10,
 		minImprovement:  0.02,
+		windowSize:      100,         // Add explicit window size
+		switchCooldown:  time.Second, // Add explicit cooldown
 		cleanupInterval: 10 * time.Minute,
 		lastCleanup:     time.Now(),
 		lastCleanupUnix: time.Now().Unix(),
-		evaluateChan:    make(chan struct{}, 1), // buffered channel to prevent blocking
+		evaluateChan:    make(chan struct{}, 1),
 	}
 
 	cm.setChampion(initialChampion)
