@@ -87,7 +87,7 @@ func NewConcurrencyManager(initialChampion, minC, maxC int) (*ConcurrencyManager
 		confidenceLevel: 1.645, // approximate z-score for 90% CI
 		minSamples:      10,
 		minImprovement:  0.02,
-		cleanupInterval: time.Hour,
+		cleanupInterval: 10 * time.Minute,
 		lastCleanup:     time.Now(),
 		lastCleanupUnix: time.Now().Unix(),
 		evaluateChan:    make(chan struct{}, 1), // buffered channel to prevent blocking
@@ -97,6 +97,9 @@ func NewConcurrencyManager(initialChampion, minC, maxC int) (*ConcurrencyManager
 
 	// Start evaluation goroutine
 	go cm.evaluationLoop()
+
+	// Run cleanup in an async goroutine
+	go cm.startBackgroundCleanup()
 
 	return cm, nil
 }
@@ -168,12 +171,6 @@ func (cm *ConcurrencyManager) setChampion(c int) {
 
 	cm.champion = c
 
-	// Clean up old stats before setting new weights
-	lastCleanup := atomic.LoadInt64(&cm.lastCleanupUnix)
-	if time.Unix(lastCleanup, 0).Add(cm.cleanupInterval).Before(time.Now()) {
-		cm.cleanupOldStats()
-	}
-
 	// Clear traffic weights and stats
 	cm.trafficWeights = make(map[int]float64)
 
@@ -216,6 +213,17 @@ func (cm *ConcurrencyManager) ensureStats(c int) {
 
 func (cm *ConcurrencyManager) getStatsNoLock(concurrency int) *rollingStats {
 	return cm.stats[concurrency]
+}
+
+func (cm *ConcurrencyManager) startBackgroundCleanup() {
+	go func() {
+		ticker := time.NewTicker(cm.cleanupInterval)
+		defer ticker.Stop()
+
+		for range ticker.C {
+			cm.cleanupOldStats()
+		}
+	}()
 }
 
 func (cm *ConcurrencyManager) cleanupOldStats() {
@@ -263,12 +271,6 @@ func (cm *ConcurrencyManager) PickConcurrency() int {
 }
 
 func (cm *ConcurrencyManager) RecordDuration(concurrency int, d time.Duration) {
-	// Fast cleanup check using atomic
-	lastCleanup := atomic.LoadInt64(&cm.lastCleanupUnix)
-	if time.Unix(lastCleanup, 0).Add(cm.cleanupInterval).Before(time.Now()) {
-		cm.cleanupOldStats()
-	}
-
 	var st *rollingStats
 	cm.mu.Lock()
 	st = cm.stats[concurrency]
