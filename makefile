@@ -107,6 +107,10 @@ us-csl-models:
 
 .PHONY: models models-setup us-csl-models
 
+.PHONY: setup-webui
+setup-webui:
+	go install fyne.io/fyne/v2/cmd/fyne@latest
+
 .PHONY: build build-server postal-server build-webui
 build: build-server postal-server build-webui
 
@@ -117,7 +121,6 @@ postal-server:
 	go build ${GOTAGS} -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/postal-server github.com/moov-io/watchman/cmd/postal-server
 
 build-webui:
-# 	go install fyne.io/fyne/v2/cmd/fyne@latest
 	cd ./cmd/ui/ && fyne package --icon ./assets/icon.jpeg -os web && cd -
 
 .PHONY: check
