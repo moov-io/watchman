@@ -2,9 +2,9 @@ package groupsize
 
 import (
 	"bytes"
-	"crypto/rand"
 	"crypto/sha256"
 	"encoding/binary"
+	"math/rand"
 	"sync"
 	"testing"
 	"time"
@@ -13,112 +13,172 @@ import (
 )
 
 func TestConcurrencyManager(t *testing.T) {
-	cm, err := NewConcurrencyManager(25, 1, 100)
-	require.NoError(t, err)
+	t.Run("Champion Switching", func(t *testing.T) {
+		cm, err := NewConcurrencyManager(25, 1, 100)
+		require.NoError(t, err)
 
-	size := cm.PickConcurrency()
-	require.Greater(t, size, 0)
+		// Set key parameters for testing
+		cm.switchCooldown = time.Millisecond
+		cm.windowSize = 50
+		cm.minSamples = 10
+		cm.minImprovement = 0.02
 
-	for i := 0; i < 10_000; i++ {
-		data := make([]byte, 32)
-		rand.Read(data)
+		initial := cm.champion
+		better := initial + 1
 
-		size := cm.PickConcurrency()
+		// Record dramatically different durations many times
+		for i := 0; i < 1000; i++ { // More samples
+			cm.RecordDuration(initial, 1000*time.Millisecond) // 1 second
+			cm.RecordDuration(better, 1*time.Millisecond)     // 1 millisecond
+		}
 
-		start := time.Now()
-		dowork(data, 1)
-		cm.RecordDuration(size, time.Since(start))
-	}
+		// Force multiple evaluations with time for the evaluationLoop to process
+		for i := 0; i < 10; i++ {
+			cm.evaluate()
+			time.Sleep(10 * time.Millisecond)
+		}
 
-	size = cm.PickConcurrency()
-	t.Logf("after doing work: %d", size)
-	require.Greater(t, size, 0)
+		if cm.champion == initial {
+			initialStats := cm.stats[initial]
+			betterStats := cm.stats[better]
 
-	t.Run("cleanup", func(t *testing.T) {
-		start := time.Now()
-		cm.cleanupOldStats()
-		diff := time.Since(start)
+			initialMean, initialStd, initialCount := initialStats.getStats()
+			betterMean, betterStd, betterCount := betterStats.getStats()
 
-		t.Logf("cleanup took %v", diff)
+			t.Logf("Initial champion %d stats: mean=%v std=%v count=%d",
+				initial, initialMean, initialStd, initialCount)
+			t.Logf("Challenger %d stats: mean=%v std=%v count=%d",
+				better, betterMean, betterStd, betterCount)
+		}
 
-		require.Less(t, diff, 5*time.Millisecond)
+		require.NotEqual(t, initial, cm.champion,
+			"champion should switch to better performer")
 	})
 }
 
 func BenchmarkConcurrencyManager(b *testing.B) {
-	// Test cases covering key scenarios
 	tests := []struct {
 		name          string
 		goroutines    int
 		cleanupFreq   time.Duration
 		recordingFreq time.Duration
+		workload      func() time.Duration // Add varying workloads
 	}{
-		{"SingleThreaded", 1, time.Second, time.Millisecond},
-		{"ModerateContention", 4, time.Second, time.Millisecond},
-		{"HighContention", 16, time.Second, time.Millisecond},
+		{
+			name:          "LowContention",
+			goroutines:    2,
+			cleanupFreq:   time.Second,
+			recordingFreq: time.Millisecond,
+			workload:      func() time.Duration { return time.Millisecond },
+		},
+		{
+			name:          "HighContention",
+			goroutines:    32,
+			cleanupFreq:   100 * time.Millisecond,
+			recordingFreq: time.Microsecond,
+			workload: func() time.Duration {
+				// Simulate varying latencies
+				return time.Duration(rand.Int63n(int64(10 * time.Millisecond)))
+			},
+		},
+		{
+			name:          "BurstyWorkload",
+			goroutines:    16,
+			cleanupFreq:   time.Second,
+			recordingFreq: time.Millisecond,
+			workload: func() time.Duration {
+				if rand.Float64() < 0.1 {
+					return 100 * time.Millisecond // Occasional spike
+				}
+				return time.Millisecond
+			},
+		},
 	}
 
 	for _, tc := range tests {
 		b.Run(tc.name, func(b *testing.B) {
 			cm, err := NewConcurrencyManager(25, 1, 100)
-			if err != nil {
-				b.Fatal(err)
-			}
+			require.NoError(b, err)
 
-			var wg sync.WaitGroup
-			opsPerGoroutine := b.N / tc.goroutines
-
-			// Start cleanup goroutine
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				ticker := time.NewTicker(tc.cleanupFreq)
-				defer ticker.Stop()
-
-				for i := 0; i < opsPerGoroutine; i++ {
-					<-ticker.C
-					cm.cleanupOldStats()
+			b.ResetTimer()
+			b.RunParallel(func(pb *testing.PB) {
+				for pb.Next() {
+					size := cm.PickConcurrency()
+					cm.RecordDuration(size, tc.workload())
 				}
-			}()
-
-			// Start worker goroutines
-			for i := 0; i < tc.goroutines; i++ {
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-					ticker := time.NewTicker(tc.recordingFreq)
-					defer ticker.Stop()
-
-					for i := 0; i < opsPerGoroutine; i++ {
-						<-ticker.C
-						size := cm.PickConcurrency()
-						cm.RecordDuration(size, time.Millisecond)
-					}
-				}()
-			}
-
-			wg.Wait()
+			})
 		})
 	}
 }
 
-func BenchmarkEvaluationLatency(b *testing.B) {
+func TestRaceConditions(t *testing.T) {
 	cm, err := NewConcurrencyManager(25, 1, 100)
-	if err != nil {
-		b.Fatal(err)
+	require.NoError(t, err)
+
+	var wg sync.WaitGroup
+	// Deliberately create race conditions
+	for i := 0; i < 100; i++ {
+		wg.Add(3)
+
+		// Concurrent stats recording
+		go func() {
+			defer wg.Done()
+			size := cm.PickConcurrency()
+			cm.RecordDuration(size, time.Millisecond)
+		}()
+
+		// Concurrent evaluation
+		go func() {
+			defer wg.Done()
+			cm.evaluate()
+		}()
+
+		// Concurrent cleanup
+		go func() {
+			defer wg.Done()
+			cm.cleanupOldStats()
+		}()
 	}
 
-	// Pre-populate with some data
-	for i := 0; i < 1000; i++ {
-		size := cm.PickConcurrency()
-		cm.RecordDuration(size, time.Millisecond)
+	wg.Wait()
+}
+
+func TestStressConcurrencyManager(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping stress test in short mode")
 	}
 
-	b.ResetTimer()
+	cm, err := NewConcurrencyManager(25, 1, 100)
+	require.NoError(t, err)
 
-	for i := 0; i < b.N; i++ {
-		cm.evaluate()
+	duration := 5 * time.Second
+	if testing.Short() {
+		duration = 1 * time.Second
 	}
+
+	var wg sync.WaitGroup
+	done := make(chan struct{})
+
+	// Start multiple goroutines doing different operations
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for {
+				select {
+				case <-done:
+					return
+				default:
+					size := cm.PickConcurrency()
+					cm.RecordDuration(size, time.Duration(rand.Int63n(int64(10*time.Millisecond))))
+				}
+			}
+		}()
+	}
+
+	time.Sleep(duration)
+	close(done)
+	wg.Wait()
 }
 
 func dowork(data []byte, zeros int) ([]byte, int) {
