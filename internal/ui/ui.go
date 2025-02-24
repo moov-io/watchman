@@ -30,16 +30,14 @@ func New(ctx context.Context, env Environment) fyne.App {
 	w := a.NewWindow("Hello World")
 	w.SetTitle("Watchman")
 
-	// w.IsMobile() bool
-	// w.IsBrowser() bool
-	// w.SetFullScreen(bool)
-
 	// Center the overall window and make it a reasonable size
-	env.Width = 800.0
-	env.Height = 500.0
-	w.Resize(fyne.NewSize(env.Width, env.Height))
+	if !device.IsMobile() && !device.IsBrowser() {
+		env.Width = 1200.0
+		env.Height = 800.0
+		w.Resize(fyne.NewSize(env.Width, env.Height))
+		w.CenterOnScreen()
+	}
 	w.Show()
-	w.CenterOnScreen()
 
 	// Set app tabs along the top
 	tabs := container.NewAppTabs(
