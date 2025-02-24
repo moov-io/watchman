@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/moov-io/watchman"
 	"github.com/moov-io/watchman/internal/ast"
 	"github.com/moov-io/watchman/pkg/search"
 
@@ -154,11 +155,11 @@ func newMultilineInput(visibleRows int) *widget.Entry {
 }
 
 var (
-	modelsPath = filepath.Join("pkg", "search", "models.go")
+	modelsPath = filepath.Join("pkg", "search", "models.go") // needs to match what's in ../../package.go
 )
 
 func newSelect(modelName string) *widget.Select {
-	values, err := ast.ExtractVariablesOfType(modelsPath, modelName)
+	values, err := ast.ExtractVariablesOfType(watchman.ModelsFilesystem, modelsPath, modelName)
 	if err != nil {
 		panic(fmt.Sprintf("reading %s values: %v", modelName, err)) //nolint:forbidigo
 	}

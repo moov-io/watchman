@@ -1,6 +1,7 @@
 package ast_test
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -10,8 +11,9 @@ import (
 )
 
 func TestExtractVariablesOfType(t *testing.T) {
-	modelsPath := filepath.Join("..", "..", "pkg", "search", "models.go")
-	found, err := ast.ExtractVariablesOfType(modelsPath, "EntityType")
+	fsys := os.DirFS(filepath.Join("..", ".."))
+	modelsPath := filepath.Join("pkg", "search", "models.go")
+	found, err := ast.ExtractVariablesOfType(fsys, modelsPath, "EntityType")
 	require.NoError(t, err)
 
 	expected := []string{"aircraft", "business", "organization", "person", "vessel"}

@@ -6,14 +6,21 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"os"
+	"io"
+	"io/fs"
 	"slices"
 	"strconv"
 )
 
 // ExtractVariablesOfType parses a Go source file and finds all variables of the specified type.
-func ExtractVariablesOfType(path, typeName string) ([]string, error) {
-	src, err := os.ReadFile(path)
+func ExtractVariablesOfType(fsys fs.FS, path, typeName string) ([]string, error) {
+	fd, err := fsys.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("opening %s failed: %w", path, err)
+	}
+	defer fd.Close()
+
+	src, err := io.ReadAll(fd)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
