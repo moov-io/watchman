@@ -58,8 +58,11 @@ func (c *controller) AppendRoutes(router *mux.Router) *mux.Router {
 
 func (c *controller) listinfo(w http.ResponseWriter, r *http.Request) {
 	stats := c.service.LatestStats()
-	w.WriteHeader(http.StatusOK)
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
 	json.NewEncoder(w).Encode(stats)
 }
 
@@ -118,6 +121,7 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 		c.logger.Debug().Logf("found %d entities\n", len(entities))
 	}
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(search.SearchResponse{
 		Entities: entities,
