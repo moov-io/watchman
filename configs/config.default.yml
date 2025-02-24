@@ -13,6 +13,14 @@ Watchman:
       - "us_csl"
       - "us_ofac"
 
+  Search:
+    # Tune these settings based on your available resources (CPUs, etc).
+    # Usually a multiple (i.e. 2x, 4x) of GOMAXPROCS is optimal.
+    SearchGroups:
+      Default: 10
+      Min: 1
+      Max: 25
+
   PostalPool:
     Enabled: false
     Instances: 2

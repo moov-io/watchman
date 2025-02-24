@@ -69,7 +69,7 @@ func main() {
 	errs := make(chan error, 1)
 
 	// Setup search service and endpoints
-	searchService, err := search.NewService(logger)
+	searchService, err := search.NewService(logger, config.Search)
 	if err != nil {
 		logger.Fatal().LogErrorf("problem setting up search service: %v", err)
 		os.Exit(1)

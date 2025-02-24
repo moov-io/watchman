@@ -45,7 +45,8 @@ func testAPI(tb testing.TB) testSetup {
 
 	logger := log.NewTestLogger()
 
-	service, err := NewService(logger)
+	searchConfig := DefaultConfig()
+	service, err := NewService(logger, searchConfig)
 	require.NoError(tb, err)
 
 	dl := ofactest.GetDownloader(tb)

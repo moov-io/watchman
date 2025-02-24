@@ -8,6 +8,7 @@ import (
 	watchman "github.com/moov-io/watchman"
 	"github.com/moov-io/watchman/internal/download"
 	"github.com/moov-io/watchman/internal/postalpool"
+	"github.com/moov-io/watchman/internal/search"
 
 	"github.com/moov-io/base/config"
 	"github.com/moov-io/base/log"
@@ -23,6 +24,7 @@ type Config struct {
 	Telemetry telemetry.Config
 
 	Download   download.Config
+	Search     search.Config
 	PostalPool postalpool.Config
 }
 
