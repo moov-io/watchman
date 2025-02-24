@@ -1,0 +1,7 @@
+FROM caddy:2-alpine
+
+WORKDIR /usr/share/caddy
+
+COPY ./cmd/ui/wasm /usr/share/caddy/wasm
+COPY ./cmd/ui/deploy/Caddyfile /etc/caddy/Caddyfile
+EXPOSE 8000

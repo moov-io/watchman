@@ -30,7 +30,6 @@ openapi-generator*jar
 
 /libpostal/
 
-webui/build/
-webui/node_modules/
+/cmd/ui/wasm/
 
 makefile.dev

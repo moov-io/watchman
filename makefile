@@ -107,14 +107,18 @@ us-csl-models:
 
 .PHONY: models models-setup us-csl-models
 
-.PHONY: build build-server postal-server
-build: build-server postal-server
+.PHONY: build build-server postal-server build-webui
+build: build-server postal-server build-webui
 
 build-server:
 	go build ${GOTAGS} -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/server github.com/moov-io/watchman/cmd/server
 
 postal-server:
 	go build ${GOTAGS} -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/postal-server github.com/moov-io/watchman/cmd/postal-server
+
+build-webui:
+# 	go install fyne.io/fyne/v2/cmd/fyne@latest
+	cd ./cmd/ui/ && fyne package --icon ./assets/icon.jpeg -os web && cd -
 
 .PHONY: check
 check:
@@ -141,20 +145,24 @@ else
 	GOOS=${PLATFORM} go build -o bin/watchman-${PLATFORM}-amd64 github.com/moov-io/watchman/cmd/server
 endif
 
-docker: clean docker-hub docker-openshift docker-static
+docker: clean docker-hub docker-openshift docker-static docker-webui
 
 docker-hub:
 	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman:${VERSION} -f Dockerfile .
 
 docker-openshift:
-	docker build --pull --build-arg VERSION=${VERSION} -t quay.io/moov/watchman:${VERSION} -f Dockerfile-openshift --build-arg VERSION=${VERSION} .
+	docker build --pull --build-arg VERSION=${VERSION} -t quay.io/moov/watchman:${VERSION} -f Dockerfile.openshift --build-arg VERSION=${VERSION} .
 
 docker-static:
-	docker build --pull -t moov/watchman:static -f Dockerfile-static .
+	docker build --pull -t moov/watchman:static -f Dockerfile.static .
+
+docker-webui:
+	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman-webui:${VERSION} -f Dockerfile.webui .
 
 release-push:
 	docker push moov/watchman:${VERSION}
 	docker push moov/watchman:static
+#	docker push moov/watchman-webui
 
 quay-push:
 	docker push quay.io/moov/watchman:${VERSION}
