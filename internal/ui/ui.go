@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -22,6 +23,9 @@ type Environment struct {
 
 func New(ctx context.Context, env Environment) fyne.App {
 	a := app.New()
+
+	// Don't allow for Dark Mode
+	a.Settings().SetTheme(theme.LightTheme())
 
 	device := fyne.CurrentDevice()
 	env.Logger.Debug().Logf("device: mobile=%v browser=%v keyboard=%v",
