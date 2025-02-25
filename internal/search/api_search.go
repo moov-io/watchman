@@ -89,9 +89,6 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-	if debug {
-		c.logger.Debug().Logf("request: %#v", req)
-	}
 
 	q := r.URL.Query()
 	opts := SearchOpts{
@@ -100,9 +97,6 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 		RequestID:      q.Get("requestID"),
 		Debug:          debug,
 		DebugSourceIDs: strings.Split(q.Get("debugSourceIDs"), ","),
-	}
-	if debug {
-		c.logger.Debug().Logf("opts: %#v", opts)
 	}
 
 	span.SetAttributes(
@@ -116,9 +110,6 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 
 		w.WriteHeader(http.StatusBadRequest)
 		return
-	}
-	if debug {
-		c.logger.Debug().Logf("found %d entities\n", len(entities))
 	}
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
