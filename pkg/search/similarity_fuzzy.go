@@ -92,7 +92,10 @@ func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], we
 
 // compareNameFields performs detailed term-by-term comparison
 func compareNameTerms(queryTerms, indexTerms []string) nameMatch {
-	score := stringscore.BestPairsJaroWinkler(queryTerms, indexTerms)
+	var score float64
+	if len(indexTerms) > 0 {
+		score = stringscore.BestPairsJaroWinkler(queryTerms, indexTerms)
+	}
 
 	matchingTerms := 0
 	if score > termMatchThreshold {
