@@ -707,7 +707,7 @@ func createEntityDetailsView(env Environment, entity search.SearchedEntity[searc
 
 	// Wrap entity details in a scroll container
 	detailScrollContainer := container.NewScroll(content)
-	detailScrollContainer.SetMinSize(fyne.NewSize(0, env.Height*0.4))
+	detailScrollContainer.SetMinSize(fyne.NewSize(0, env.Height*0.3))
 
 	// Create debug panel for this entity
 	var debugContent fyne.CanvasObject
