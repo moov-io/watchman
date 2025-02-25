@@ -89,9 +89,6 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-	if debug {
-		c.logger.Debug().Logf("request: %#v", req)
-	}
 
 	q := r.URL.Query()
 	opts := SearchOpts{
@@ -100,9 +97,6 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 		RequestID:      q.Get("requestID"),
 		Debug:          debug,
 		DebugSourceIDs: strings.Split(q.Get("debugSourceIDs"), ","),
-	}
-	if debug {
-		c.logger.Debug().Logf("opts: %#v", opts)
 	}
 
 	span.SetAttributes(
@@ -116,9 +110,6 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 
 		w.WriteHeader(http.StatusBadRequest)
 		return
-	}
-	if debug {
-		c.logger.Debug().Logf("found %d entities\n", len(entities))
 	}
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -220,14 +211,21 @@ func readSearchRequest(ctx context.Context, addressParsingPool *postalpool.Servi
 			CallSign: q.Get("callSign"),
 			Owner:    q.Get("owner"),
 		}
-		req.Vessel.Tonnage, err = readInt(q.Get("tonnage"))
-		if err != nil {
-			return req, fmt.Errorf("reading vessel tonnage: %w", err)
+		if v := strings.TrimSpace(q.Get("tonnage")); v != "" {
+			req.Vessel.Tonnage, err = readInt(v)
+			if err != nil {
+				return req, fmt.Errorf("reading vessel tonnage: %w", err)
+			}
 		}
-		req.Vessel.GrossRegisteredTonnage, err = readInt(q.Get("grossRegisteredTonnage"))
-		if err != nil {
-			return req, fmt.Errorf("reading vessel GrossRegisteredTonnage: %w", err)
+		if v := strings.TrimSpace(q.Get("grossRegisteredTonnage")); v != "" {
+			req.Vessel.GrossRegisteredTonnage, err = readInt(v)
+			if err != nil {
+				return req, fmt.Errorf("reading vessel GrossRegisteredTonnage: %w", err)
+			}
 		}
+
+	default:
+		return req, fmt.Errorf("missing type")
 	}
 
 	// contact info // TODO(adam): normalize
@@ -269,8 +267,11 @@ func readDate(input string) *time.Time {
 }
 
 func readInt(input string) (int, error) {
-	n, err := strconv.ParseInt(input, 10, 32)
-	return int(n), err
+	n, err := strconv.ParseInt(input, 10, 20) // -524,288 to 523,767
+	if err != nil {
+		return 0, err
+	}
+	return int(n), nil
 }
 
 func readStrings(inputs ...[]string) []string {

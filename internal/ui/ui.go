@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -23,6 +24,9 @@ type Environment struct {
 func New(ctx context.Context, env Environment) fyne.App {
 	a := app.New()
 
+	// Don't allow for Dark Mode
+	a.Settings().SetTheme(theme.LightTheme())
+
 	device := fyne.CurrentDevice()
 	env.Logger.Debug().Logf("device: mobile=%v browser=%v keyboard=%v",
 		device.IsMobile(), device.IsBrowser(), device.HasKeyboard())
@@ -30,16 +34,14 @@ func New(ctx context.Context, env Environment) fyne.App {
 	w := a.NewWindow("Hello World")
 	w.SetTitle("Watchman")
 
-	// w.IsMobile() bool
-	// w.IsBrowser() bool
-	// w.SetFullScreen(bool)
-
 	// Center the overall window and make it a reasonable size
-	env.Width = 800.0
-	env.Height = 500.0
-	w.Resize(fyne.NewSize(env.Width, env.Height))
+	if !device.IsMobile() && !device.IsBrowser() {
+		env.Width = 1500.0
+		env.Height = 900.0
+		w.Resize(fyne.NewSize(env.Width, env.Height))
+		w.CenterOnScreen()
+	}
 	w.Show()
-	w.CenterOnScreen()
 
 	// Set app tabs along the top
 	tabs := container.NewAppTabs(
