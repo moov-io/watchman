@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -75,6 +76,24 @@ func (c *client) ListInfo(ctx context.Context) (ListInfoResponse, error) {
 
 type SearchResponse struct {
 	Entities []SearchedEntity[Value] `json:"entities"`
+}
+
+func (s *SearchResponse) UnmarshalJSON(data []byte) error {
+	var aux struct {
+		Entities []SearchedEntity[Value] `json:"entities"`
+		Error    string                  `json:"error"`
+	}
+	err := json.Unmarshal(data, &aux)
+	if err != nil {
+		return err
+	}
+	if aux.Error != "" {
+		return errors.New(aux.Error)
+	}
+
+	s.Entities = aux.Entities
+
+	return nil
 }
 
 type SearchOpts struct {
