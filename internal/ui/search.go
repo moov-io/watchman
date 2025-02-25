@@ -308,60 +308,6 @@ func createAddressContent() fyne.CanvasObject {
 	)
 }
 
-func showResults(env Environment, results *fyne.Container, entities []search.SearchedEntity[search.Value]) error {
-	results.RemoveAll()
-	defer results.Show()
-
-	header := widget.NewLabelWithStyle("Results", fyne.TextAlignLeading, fyne.TextStyle{
-		Bold: true,
-	})
-	results.Add(header)
-
-	var data = [][]string{
-		{"top left", "top right"},
-		{"bottom left", "bottom right"},
-	}
-
-	for _, row := range data {
-		elm := container.NewHBox()
-
-		for _, cell := range row {
-			c := widget.NewLabel(cell)
-			elm.Add(c)
-		}
-
-		results.Add(elm)
-	}
-
-	results.Refresh()
-
-	return nil
-}
-
-func createFixedWarningContainer(env Environment) *fyne.Container {
-	container := container.NewHBox()
-	container.Hide()
-	return container
-}
-
-func showWarning(env Environment, warning *fyne.Container, err error) {
-	warning.RemoveAll()
-
-	if err == nil {
-		warning.Hide()
-		return
-	}
-
-	// Create a warning label with explicit style
-	warningLabel := widget.NewRichTextWithText("Problem: " + err.Error())
-	warningLabel.Wrapping = fyne.TextWrapWord
-
-	// Use limited width to prevent it from expanding too much
-	warning.Add(warningLabel)
-	warning.Show()
-	warning.Refresh()
-}
-
 func newInput() *widget.Entry {
 	e := widget.NewEntry()
 	e.Validator = func(input string) error {
@@ -631,67 +577,6 @@ func UpdateResults(ctx context.Context, env Environment, resultsContainer *fyne.
 	contentContainer.Refresh()
 }
 
-func createDebugPanel(entities []search.SearchedEntity[search.Value]) fyne.CanvasObject {
-	// Create a container for the debug panel
-	debugContainer := container.NewVBox()
-
-	// Add header
-	debugHeader := widget.NewLabelWithStyle("Debug Information", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	debugContainer.Add(debugHeader)
-	debugContainer.Add(widget.NewSeparator())
-
-	// If no entities, show a message
-	if len(entities) == 0 {
-		debugContainer.Add(widget.NewLabel("No debug information available"))
-		return container.NewScroll(debugContainer)
-	}
-
-	// Create tabs for debug info of each entity
-	debugTabs := container.NewAppTabs()
-
-	// Create a tab for each entity's debug information
-	for i, entity := range entities {
-		// Create debug content
-		var debugContent fyne.CanvasObject
-
-		if entity.Debug != "" {
-			// Decode base64 debug information
-			debugData, err := base64.StdEncoding.DecodeString(entity.Debug)
-
-			fmt.Printf("\n\n%s\n", string(debugData))
-
-			if err != nil {
-				debugContent = widget.NewLabel(fmt.Sprintf("Error decoding debug data: %v", err))
-			} else {
-				// Create a multiline text display for the debug info
-				debugText := widget.NewMultiLineEntry()
-				debugText.SetText(string(debugData))
-				debugText.Disable() // Make it read-only
-				debugText.Wrapping = fyne.TextWrapWord
-				debugText.Refresh()
-				debugContent = debugText
-			}
-		} else {
-			debugContent = widget.NewLabel("No debug information available for this entity")
-		}
-
-		// Wrap in scroll container
-		scrollableDebug := container.NewScroll(debugContent)
-
-		// Add as a tab
-		debugTabs.Append(container.NewTabItem(
-			fmt.Sprintf("Entity %d", i+1),
-			scrollableDebug,
-		))
-	}
-
-	// Add tabs to container
-	debugContainer.Add(debugTabs)
-
-	// Return a scrollable container
-	return container.NewScroll(debugContainer)
-}
-
 func createSummaryView(entities []search.SearchedEntity[search.Value]) fyne.CanvasObject {
 	// Create a table for the summary view
 	table := widget.NewTable(
@@ -757,16 +642,25 @@ func createSummaryView(entities []search.SearchedEntity[search.Value]) fyne.Canv
 
 // createEntityDetailsView builds a detailed view for a single entity with integrated debug panel
 func createEntityDetailsView(env Environment, entity search.SearchedEntity[search.Value]) fyne.CanvasObject {
+	// Create a vertical container for the entire view
+	mainContainer := container.NewVBox()
+
+	// Create a consistent header with match score
+	headerContainer := container.NewVBox()
+
+	// Add match score badge to header in a consistent position
+	matchScoreBadge := createMatchScoreBadge(entity.Match)
+	headerContainer.Add(matchScoreBadge)
+	headerContainer.Add(widget.NewSeparator())
+
+	// Add the header to the main container
+	mainContainer.Add(headerContainer)
+
 	// Create a horizontal split container for entity details and debug info
 	detailsAndDebugSplit := container.NewHSplit(nil, nil)
 
 	// Create a container for entity details
 	content := container.NewVBox()
-
-	// Add match score information
-	matchScoreBadge := createMatchScoreBadge(entity.Match)
-	content.Add(matchScoreBadge)
-	content.Add(widget.NewSeparator())
 
 	// Basic information section
 	basicInfoSection := createBasicInfoSection(entity.Entity)
@@ -833,15 +727,11 @@ func createEntityDetailsView(env Environment, entity search.SearchedEntity[searc
 			)
 		} else {
 			// Create a multiline text display for the debug info with standard text color
-			debugText := widget.NewLabel(string(debugData))
+			debugText := widget.NewLabel(string(debugData) + strings.Repeat("\n", 5))
 			debugText.Wrapping = fyne.TextWrapWord
 
 			// Use a VBox container to preserve the header formatting
-			debugPanel := container.NewVBox(
-				debugHeader,
-				widget.NewSeparator(),
-				debugText,
-			)
+			debugPanel := container.NewVBox(debugHeader, debugText)
 
 			// Wrap in scroll container for long debug output
 			debugContent = container.NewScroll(debugPanel)
@@ -861,7 +751,10 @@ func createEntityDetailsView(env Environment, entity search.SearchedEntity[searc
 	// Set the split offset (35% for entity details, 65% for debug)
 	detailsAndDebugSplit.SetOffset(0.35)
 
-	return detailsAndDebugSplit
+	// Add the split container to the main container
+	mainContainer.Add(detailsAndDebugSplit)
+
+	return mainContainer
 }
 
 // createBasicInfoSection creates a section for basic entity information
@@ -1259,14 +1152,14 @@ func createMatchScoreBadge(match float64) fyne.CanvasObject {
 		textColor = color.NRGBA{R: 0, G: 128, B: 0, A: 255} // Green for low match
 	}
 
-	// Create the text label with score using canvas.Text (no unused variable)
+	// Create the score text
 	scoreText := fmt.Sprintf("Match Score: %.1f%%", match*100)
 	scoreTextObj := canvas.NewText(scoreText, textColor)
 	scoreTextObj.TextStyle = fyne.TextStyle{Bold: true}
-	scoreTextObj.Alignment = fyne.TextAlignLeading
+	scoreTextObj.Alignment = fyne.TextAlignTrailing
 
-	// Put the colored text in a container that aligns to the right
-	container := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), scoreTextObj)
+	// Create a consistent container for the badge with fixed alignment
+	badgeContainer := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), scoreTextObj)
 
-	return container
+	return badgeContainer
 }
