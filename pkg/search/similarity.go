@@ -24,91 +24,126 @@ func Similarity[Q any, I any](query Entity[Q], index Entity[I]) float64 {
 }
 
 // DebugSimilarity does the same as Similarity, but logs debug info to w.
+//
+// The format written to w is not machine readable and is intended for humans to read.
+// The format will evolve over time. No stability guarentees are given over what is written.
 func DebugSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]) float64 {
-	pieces := make([]scorePiece, 0, 9)
-
-	// Critical identifiers (highest weight)
-	exactIdentifiers := compareExactIdentifiers(w, query, index, criticalIdWeight)
-	if exactIdentifiers.matched && exactIdentifiers.fieldsCompared > 0 {
-		if math.IsNaN(exactIdentifiers.score) {
-			return 0.0
-		}
-		return exactIdentifiers.score
+	details := DetailedSimilarity(w, query, index)
+	if len(details.Pieces) != 9 {
+		panic(fmt.Sprintf("BUG: got an unexpected amount of %d ScorePieces", len(details.Pieces))) //nolint:forbidigo
 	}
-	exactCryptoAddresses := compareExactCryptoAddresses(w, query, index, criticalIdWeight)
-	if exactCryptoAddresses.matched && exactCryptoAddresses.fieldsCompared > 0 {
-		if math.IsNaN(exactCryptoAddresses.score) {
-			return 0.0
-		}
-		return exactCryptoAddresses.score
-	}
-	exactGovernmentIDs := compareExactGovernmentIDs(w, query, index, criticalIdWeight)
-	if exactGovernmentIDs.matched && exactGovernmentIDs.fieldsCompared > 0 {
-		if math.IsNaN(exactGovernmentIDs.score) {
-			return 0.0
-		}
-		return exactGovernmentIDs.score
-	}
-	exactContactInfo := compareExactContactInfo(w, query, index, criticalIdWeight) // Added this
-	if exactContactInfo.matched && exactContactInfo.fieldsCompared > 0 {
-		if math.IsNaN(exactContactInfo.score) {
-			return 0.0
-		}
-		return exactContactInfo.score
-	}
-	pieces = append(pieces, exactIdentifiers, exactCryptoAddresses, exactGovernmentIDs, exactContactInfo)
 
 	if w != nil {
+		// Critical comparisons (exact matches)
 		debug(w, "Critical pieces\n")
-		debug(w, "  exact identifiers: %#v\n", pieces[0])
-		debug(w, "  crypto addresses: %#v\n", pieces[1])
-		debug(w, "  gov IDs: %#v\n", pieces[2])
-		debug(w, "  contact info: %#v\n", pieces[3])
+		debug(w, "  exact identifiers: %#v\n", details.Pieces[0])
+		debug(w, "  crypto addresses: %#v\n", details.Pieces[1])
+		debug(w, "  gov IDs: %#v\n", details.Pieces[2])
+		debug(w, "  contact info: %#v\n", details.Pieces[3])
+
+		// Name comparison (second highest weight)
+		debug(w, "name comparison\n")
+		debug(w, "  name: %#v\n", details.Pieces[4])
+		debug(w, "  titles: %#v\n", details.Pieces[5])
+
+		// Supporting information (lower weight)
+		debug(w, "supporting info\n")
+		debug(w, "  dates: %#v\n", details.Pieces[6])
+		debug(w, "  addresses: %#v\n", details.Pieces[7])
+		debug(w, "  supporting into: %#v\n", details.Pieces[8])
+
+		// Final Score
+		debug(w, "finalScore=%.2f", details.FinalScore)
 	}
 
+	return details.FinalScore
+}
+
+// DetailedSimilarity returns the scoring details of each query piece against the index Entity.
+//
+// This is intended to give detailed results of which fields matched and how they were scored against each other.
+// The fields returned in SimilarityScore may change as the general similarity algorithm and scoring methodologies evolve.
+// There is no API stability guarentee for SimilarityScore.
+func DetailedSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]) SimilarityScore {
+	out := SimilarityScore{
+		Pieces: make([]ScorePiece, 0, 9),
+	}
+
+	// Critical identifiers (highest weight)
+	var exactOverride bool
+	exactIdentifiers := compareExactIdentifiers(w, query, index, criticalIdWeight)
+	if exactIdentifiers.Matched && exactIdentifiers.FieldsCompared > 0 {
+		exactOverride = true
+		if math.IsNaN(exactIdentifiers.Score) {
+			exactIdentifiers.Score = 1.0
+		}
+	}
+
+	exactCryptoAddresses := compareExactCryptoAddresses(w, query, index, criticalIdWeight)
+	if exactCryptoAddresses.Matched && exactCryptoAddresses.FieldsCompared > 0 {
+		exactOverride = true
+		if math.IsNaN(exactCryptoAddresses.Score) {
+			exactCryptoAddresses.Score = 1.0
+		}
+	}
+
+	exactGovernmentIDs := compareExactGovernmentIDs(w, query, index, criticalIdWeight)
+	if exactGovernmentIDs.Matched && exactGovernmentIDs.FieldsCompared > 0 {
+		exactOverride = true
+		if math.IsNaN(exactGovernmentIDs.Score) {
+			exactGovernmentIDs.Score = 1.0
+		}
+	}
+
+	exactContactInfo := compareExactContactInfo(w, query, index, criticalIdWeight)
+	if exactContactInfo.Matched && exactContactInfo.FieldsCompared > 0 {
+		exactOverride = true
+		if math.IsNaN(exactContactInfo.Score) {
+			exactContactInfo.Score = 1.0
+		}
+	}
+	out.Pieces = append(out.Pieces, exactIdentifiers, exactCryptoAddresses, exactGovernmentIDs, exactContactInfo)
+
 	// Name comparison (second highest weight)
-	pieces = append(pieces,
+	out.Pieces = append(out.Pieces,
 		compareName(w, query, index, nameWeight),
 		compareEntityTitlesFuzzy(w, query, index, nameWeight),
 	)
-	if w != nil {
-		debug(w, "name comparison\n")
-		debug(w, "  name: %#v\n", pieces[4])
-		debug(w, "  titles: %#v\n", pieces[5])
-	}
 
 	// Supporting information (lower weight)
-	pieces = append(pieces,
+	out.Pieces = append(out.Pieces,
 		compareEntityDates(w, query, index, supportingInfoWeight),
 		compareAddresses(w, query, index, addressWeight),
 		compareSupportingInfo(w, query, index, supportingInfoWeight),
 	)
-	if w != nil {
-		debug(w, "supporting info\n")
-		debug(w, "  dates: %#v\n", pieces[6])
-		debug(w, "  addresses: %#v\n", pieces[7])
-		debug(w, "  supporting into: %#v\n", pieces[8])
-	}
 
-	finalScore := calculateFinalScore(w, pieces, query, index)
-	if math.IsNaN(finalScore) {
-		return 0.0
+	out.FinalScore = calculateFinalScore(w, out.Pieces, exactOverride, query, index)
+	if math.IsNaN(out.FinalScore) {
+		out.FinalScore = 1.0
 	}
-	if w != nil {
-		debug(w, "finalScore=%.2f", finalScore)
-	}
-	return finalScore
+	return out
 }
 
-// scorePiece is a partial scoring result from one comparison function
-type scorePiece struct {
-	score          float64 // 0-1 for this piece
-	weight         float64 // weight for final
-	matched        bool    // whether there's a "match"
-	required       bool    // if this piece is "required" for a high overall score
-	exact          bool    // whether it's an exact match
-	fieldsCompared int     // how many fields were actually compared
-	pieceType      string  // e.g. "identifiers", "name", etc.
+// SimilarityScore gives detailed results of which fields matched and how they were scored against each other.
+//
+// The fields returned in SimilarityScore may change as the general similarity algorithm and scoring methodologies evolve.
+// There is no API stability guarentee for SimilarityScore.
+type SimilarityScore struct {
+	Pieces     []ScorePiece `json:"pieces"`
+	FinalScore float64      `json:"finalScore"`
+}
+
+// ScorePiece is a partial scoring result from one comparison function
+//
+// There is no API stability guarentee for ScorePiece.
+type ScorePiece struct {
+	Score          float64 `json:"score"`          // 0-1 for this piece
+	Weight         float64 `json:"weight"`         // weight for final
+	Matched        bool    `json:"matched"`        // whether there's a "match"
+	Required       bool    `json:"required"`       // if this piece is "required" for a high overall score
+	Exact          bool    `json:"exact"`          // whether it's an exact match
+	FieldsCompared int     `json:"fieldsCompared"` // how many fields were actually compared
+	PieceType      string  `json:"pieceType"`      // e.g. "identifiers", "name", etc.
 }
 
 func boolToScore(b bool) float64 {
@@ -162,7 +197,7 @@ type entityFields struct {
 	hasAddress  bool
 }
 
-func calculateFinalScore[Q any, I any](w io.Writer, pieces []scorePiece, query Entity[Q], index Entity[I]) float64 {
+func calculateFinalScore[Q any, I any](w io.Writer, pieces []ScorePiece, exactOverride bool, query Entity[Q], index Entity[I]) float64 {
 	if len(pieces) == 0 || query.Type != index.Type {
 		return 0
 	}
@@ -179,37 +214,40 @@ func calculateFinalScore[Q any, I any](w io.Writer, pieces []scorePiece, query E
 
 	if w != nil {
 		debug(w, "calculateFinalScore:\n")
+		debug(w, "  exactOverride=%v\n", exactOverride)
 		debug(w, "  fields=%#v\n", fields)
 		debug(w, "  coverage=%#v\n", coverage)
 		debug(w, "  baseScore=%v\n", baseScore)
-		debug(w, "  finalScore=%.2f\n", finalScore)
+		debug(w, "  finalScore=%.2f (overridden: %v)\n", finalScore, exactOverride)
 	}
-
+	if exactOverride {
+		return 1.0
+	}
 	return finalScore
 }
 
-func countFieldsByImportance(pieces []scorePiece) entityFields {
+func countFieldsByImportance(pieces []ScorePiece) entityFields {
 	var fields entityFields
 
 	for _, piece := range pieces {
-		if piece.weight <= 0 || piece.fieldsCompared == 0 {
+		if piece.Weight <= 0 || piece.FieldsCompared == 0 {
 			continue
 		}
 
-		if piece.required {
-			fields.required += piece.fieldsCompared
+		if piece.Required {
+			fields.required += piece.FieldsCompared
 		}
-		if piece.matched {
-			if piece.pieceType == "name" {
+		if piece.Matched {
+			if piece.PieceType == "name" {
 				fields.hasName = true
 			}
-			if piece.exact && (piece.pieceType == "identifiers" || piece.pieceType == "gov-ids-exact") {
+			if piece.Exact && (piece.PieceType == "identifiers" || piece.PieceType == "gov-ids-exact") {
 				fields.hasID = true
 			}
-			if piece.pieceType == "address" {
+			if piece.PieceType == "address" {
 				fields.hasAddress = true
 			}
-			if piece.exact {
+			if piece.Exact {
 				fields.hasCritical = true
 			}
 		}
@@ -218,22 +256,22 @@ func countFieldsByImportance(pieces []scorePiece) entityFields {
 	return fields
 }
 
-func calculateBaseScore(pieces []scorePiece, fields entityFields) float64 {
+func calculateBaseScore(pieces []ScorePiece, fields entityFields) float64 {
 	var totalScore, totalWeight float64
 
 	for _, piece := range pieces {
-		if piece.weight <= 0 || piece.fieldsCompared == 0 {
+		if piece.Weight <= 0 || piece.FieldsCompared == 0 {
 			continue
 		}
 
 		// Apply importance multiplier for critical fields
 		multiplier := 1.0
-		if piece.required {
+		if piece.Required {
 			multiplier = criticalFieldMultiplier
 		}
 
-		totalScore += piece.score * piece.weight * multiplier
-		totalWeight += piece.weight * multiplier
+		totalScore += piece.Score * piece.Weight * multiplier
+		totalWeight += piece.Weight * multiplier
 	}
 
 	if totalWeight == 0 {
@@ -243,7 +281,7 @@ func calculateBaseScore(pieces []scorePiece, fields entityFields) float64 {
 	return totalScore / totalWeight
 }
 
-func calculateCoverage[I any](w io.Writer, pieces []scorePiece, index Entity[I]) coverage {
+func calculateCoverage[I any](w io.Writer, pieces []ScorePiece, index Entity[I]) coverage {
 	indexFields := countAvailableFields(index)
 	if indexFields == 0 {
 		return coverage{ratio: 1.0, criticalRatio: 1.0}
@@ -253,10 +291,10 @@ func calculateCoverage[I any](w io.Writer, pieces []scorePiece, index Entity[I])
 	var criticalTotal int
 
 	for _, p := range pieces {
-		fieldsCompared += p.fieldsCompared
-		if p.required {
-			criticalFieldsCompared += p.fieldsCompared
-			criticalTotal += p.fieldsCompared
+		fieldsCompared += p.FieldsCompared
+		if p.Required {
+			criticalFieldsCompared += p.FieldsCompared
+			criticalTotal += p.FieldsCompared
 		}
 	}
 
@@ -272,8 +310,8 @@ func calculateCoverage[I any](w io.Writer, pieces []scorePiece, index Entity[I])
 }
 
 type coverage struct {
-	ratio         float64
-	criticalRatio float64
+	ratio         float64 `json:"ratio"`
+	criticalRatio float64 `json:"criticalRatio"`
 }
 
 func applyPenaltiesAndBonuses(w io.Writer, baseScore float64, cov coverage, fields entityFields, sameType bool) float64 {

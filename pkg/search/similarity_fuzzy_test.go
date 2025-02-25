@@ -174,12 +174,9 @@ func TestCompareName(t *testing.T) {
 			// Precompute the Entity like search service does
 			result := compareName(&buf, tt.query.Normalize(), tt.index.Normalize(), 1.0)
 
-			require.InDelta(t, tt.expectedScore, result.score, 0.1,
-				"expected score %v but got %v", tt.expectedScore, result.score)
-			require.Equal(t, tt.shouldMatch, result.matched,
-				"expected matched=%v but got matched=%v", tt.shouldMatch, result.matched)
-			require.Equal(t, tt.exact, result.exact,
-				"expected exact=%v but got exact=%v", tt.exact, result.exact)
+			require.InDelta(t, tt.expectedScore, result.Score, 0.1, "expected score %v but got %v", tt.expectedScore, result.Score)
+			require.Equal(t, tt.shouldMatch, result.Matched, "expected matched=%v but got matched=%v", tt.shouldMatch, result.Matched)
+			require.Equal(t, tt.exact, result.Exact, "expected exact=%v but got exact=%v", tt.exact, result.Exact)
 		})
 	}
 }
@@ -281,12 +278,9 @@ func TestCompareEntityTitlesFuzzy(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result := compareEntityTitlesFuzzy(&buf, tt.query, tt.index, 1.0)
 
-			require.InDelta(t, tt.expectedScore, result.score, 0.1,
-				"expected score %v but got %v", tt.expectedScore, result.score)
-			require.Equal(t, tt.shouldMatch, result.matched,
-				"expected matched=%v but got matched=%v", tt.shouldMatch, result.matched)
-			require.Equal(t, tt.exact, result.exact,
-				"expected exact=%v but got exact=%v", tt.exact, result.exact)
+			require.InDelta(t, tt.expectedScore, result.Score, 0.1, "expected score %v but got %v", tt.expectedScore, result.Score)
+			require.Equal(t, tt.shouldMatch, result.Matched, "expected matched=%v but got matched=%v", tt.shouldMatch, result.Matched)
+			require.Equal(t, tt.exact, result.Exact, "expected exact=%v but got exact=%v", tt.exact, result.Exact)
 		})
 	}
 }
@@ -421,12 +415,9 @@ func TestCompareAffiliationsFuzzy(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result := compareAffiliationsFuzzy(&buf, tt.query.Normalize(), tt.index.Normalize(), 1.0)
 
-			require.InDelta(t, tt.expectedScore, result.score, 0.1,
-				"expected score %v but got %v", tt.expectedScore, result.score)
-			require.Equal(t, tt.shouldMatch, result.matched,
-				"expected matched=%v but got matched=%v", tt.shouldMatch, result.matched)
-			require.Equal(t, tt.exact, result.exact,
-				"expected exact=%v but got exact=%v", tt.exact, result.exact)
+			require.InDelta(t, tt.expectedScore, result.Score, 0.1, "expected score %v but got %v", tt.expectedScore, result.Score)
+			require.Equal(t, tt.shouldMatch, result.Matched, "expected matched=%v but got matched=%v", tt.shouldMatch, result.Matched)
+			require.Equal(t, tt.exact, result.Exact, "expected exact=%v but got exact=%v", tt.exact, result.Exact)
 		})
 	}
 }
