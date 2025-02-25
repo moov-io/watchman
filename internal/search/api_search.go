@@ -223,6 +223,9 @@ func readSearchRequest(ctx context.Context, addressParsingPool *postalpool.Servi
 				return req, fmt.Errorf("reading vessel GrossRegisteredTonnage: %w", err)
 			}
 		}
+
+	default:
+		return req, fmt.Errorf("missing type")
 	}
 
 	// contact info // TODO(adam): normalize
@@ -264,8 +267,11 @@ func readDate(input string) *time.Time {
 }
 
 func readInt(input string) (int, error) {
-	n, err := strconv.ParseInt(input, 10, 32)
-	return int(n), err
+	n, err := strconv.ParseInt(input, 10, 20) // -524,288 to 523,767
+	if err != nil {
+		return 0, err
+	}
+	return int(n), nil
 }
 
 func readStrings(inputs ...[]string) []string {
