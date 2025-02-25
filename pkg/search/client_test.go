@@ -73,6 +73,28 @@ func TestClient_SearchByEntity(t *testing.T) {
 		response, err := scope.client.SearchByEntity(ctx, query, opts)
 		require.NoError(t, err)
 		require.NotEmpty(t, response.Entities)
+
+		require.Empty(t, response.Entities[0].Details)
+		require.InDelta(t, response.Entities[0].Details.FinalScore, 0.00, 0.001)
+	})
+
+	t.Run("debug", func(t *testing.T) {
+		ctx := context.Background()
+		query := public.Entity[public.Value]{
+			Name: "Flight",
+			Type: public.EntityAircraft,
+		}
+		opts := public.SearchOpts{
+			Limit: 10,
+			Debug: true,
+		}
+
+		response, err := scope.client.SearchByEntity(ctx, query, opts)
+		require.NoError(t, err)
+		require.NotEmpty(t, response.Entities)
+
+		require.NotEmpty(t, response.Entities[0].Details)
+		require.Greater(t, response.Entities[0].Details.FinalScore, 0.01)
 	})
 
 	t.Run("missing type", func(t *testing.T) {

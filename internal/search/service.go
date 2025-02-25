@@ -103,6 +103,11 @@ type SearchOpts struct {
 	DebugSourceIDs []string
 }
 
+type debugRespone struct {
+	scores search.SimilarityScore
+	buffer *bytes.Buffer
+}
+
 func (s *service) performSearch(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error) {
 	ctx, span := telemetry.StartSpan(ctx, "perform-search", trace.WithAttributes(
 		attribute.Int("opts.limit", opts.Limit),
@@ -113,9 +118,9 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	stats := minmaxmed.New(10) // window size
 	items := largest.NewItems[search.Entity[search.Value]](opts.Limit, opts.MinMatch)
 
-	var debugs *largest.Items[*bytes.Buffer]
+	var debugs *largest.Items[debugRespone]
 	if opts.Debug {
-		debugs = largest.NewItems[*bytes.Buffer](opts.Limit, opts.MinMatch)
+		debugs = largest.NewItems[debugRespone](opts.Limit, opts.MinMatch)
 	}
 
 	groupSize, err := getGroupSize(s.cm)
@@ -134,11 +139,15 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 			var buf bytes.Buffer
 			buf.Grow(1700) // approximate size of debug logs
 
-			score = search.DebugSimilarity(&buf, query, index)
+			scores := search.DetailedSimilarity(&buf, query, index)
+			score = scores.FinalScore
 
 			// Add debug buffer to be stored
-			debugs.Add(largest.Item[*bytes.Buffer]{
-				Value:  &buf,
+			debugs.Add(largest.Item[debugRespone]{
+				Value: debugRespone{
+					scores: scores,
+					buffer: &buf,
+				},
 				Weight: score,
 			})
 		}
@@ -176,8 +185,11 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 		}
 
 		if len(debugLogs) > idx {
-			if debugLogs[idx].Value != nil {
-				searched.Debug = base64.StdEncoding.EncodeToString(debugLogs[idx].Value.Bytes())
+			scores := debugLogs[idx].Value
+			searched.Details = scores.scores
+
+			if scores.buffer != nil {
+				searched.Debug = base64.StdEncoding.EncodeToString(scores.buffer.Bytes())
 			}
 		}
 
