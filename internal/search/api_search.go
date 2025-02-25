@@ -211,13 +211,17 @@ func readSearchRequest(ctx context.Context, addressParsingPool *postalpool.Servi
 			CallSign: q.Get("callSign"),
 			Owner:    q.Get("owner"),
 		}
-		req.Vessel.Tonnage, err = readInt(q.Get("tonnage"))
-		if err != nil {
-			return req, fmt.Errorf("reading vessel tonnage: %w", err)
+		if v := strings.TrimSpace(q.Get("tonnage")); v != "" {
+			req.Vessel.Tonnage, err = readInt(v)
+			if err != nil {
+				return req, fmt.Errorf("reading vessel tonnage: %w", err)
+			}
 		}
-		req.Vessel.GrossRegisteredTonnage, err = readInt(q.Get("grossRegisteredTonnage"))
-		if err != nil {
-			return req, fmt.Errorf("reading vessel GrossRegisteredTonnage: %w", err)
+		if v := strings.TrimSpace(q.Get("grossRegisteredTonnage")); v != "" {
+			req.Vessel.GrossRegisteredTonnage, err = readInt(v)
+			if err != nil {
+				return req, fmt.Errorf("reading vessel GrossRegisteredTonnage: %w", err)
+			}
 		}
 	}
 
