@@ -2,6 +2,7 @@ package ui
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"image/color"
 	"path/filepath"
@@ -19,54 +20,43 @@ import (
 )
 
 func SearchContainer(ctx context.Context, env Environment) fyne.CanvasObject {
-	// Create main container with fixed layout
+	// Create main container
 	mainContainer := container.New(layout.NewBorderLayout(nil, nil, nil, nil))
-
-	// Create a fixed height container to hold warnings and the search button
-	// Replace the HBox with a BorderLayout which handles horizontal spacing better
-	fixedHeightPanel := container.New(layout.NewBorderLayout(nil, nil, nil, nil))
-	fixedHeightPanel.Resize(fyne.NewSize(env.Width, 60))
-
-	// Create a container for the warning that will take the left half
-	warningContainer := createFixedWarningContainer(env)
 
 	// Create containers for different sections
 	formContainer := container.NewVBox()
 	resultsContainer := ResultsContainer(env)
 
-	// Create the search form
-	searchForm, submitButton := searchFormWithButton(ctx, env, warningContainer, resultsContainer)
+	// Create a warning label
+	warningLabel := widget.NewLabel("")
+	warningLabel.Hide()
 
-	// Create a container for the search button with fixed width
-	buttonContainer := container.New(layout.NewCenterLayout(), submitButton)
-	submitButton.Resize(fyne.NewSize(200, 40))
+	// Create the search form and button
+	searchForm, submitButton := searchFormWithButton(ctx, env, warningLabel, resultsContainer)
 
-	// Add warnings to the left and button to the right
-	fixedHeightPanel.Add(warningContainer) // This will be on the "leading" edge of the border layout
-	fixedHeightPanel.Add(buttonContainer)  // This will be on the "trailing" edge
+	// Create a container for the bottom panel with warning and button
+	bottomPanel := container.NewHBox(warningLabel, layout.NewSpacer(), submitButton)
 
-	// Create a scroll container for the form with fixed height
+	// Create a scroll container for the form
 	formScrollContainer := container.NewScroll(searchForm)
-	formScrollContainer.SetMinSize(fyne.NewSize(0, env.Height*0.5)) // 50% of available height
+	formScrollContainer.SetMinSize(fyne.NewSize(0, env.Height*0.5))
 
+	// Add components to the form container
 	formContainer.Add(formScrollContainer)
-	formContainer.Add(fixedHeightPanel)
+	formContainer.Add(bottomPanel)
 
-	// Create a split layout that maintains size proportions
+	// Create a split layout
 	splitContent := container.NewVSplit(
 		formContainer,
 		resultsContainer,
 	)
-
-	// Set initial position of the splitter (60% to form, 40% to results)
 	splitContent.SetOffset(0.6)
 
 	mainContainer.Add(splitContent)
-
 	return mainContainer
 }
 
-func searchFormWithButton(ctx context.Context, env Environment, warning *fyne.Container, results *fyne.Container) (*widget.Form, *widget.Button) {
+func searchFormWithButton(ctx context.Context, env Environment, warningLabel *widget.Label, results *fyne.Container) (*widget.Form, *widget.Button) {
 	// Create entity type section contents
 	peopleContent := createPeopleContent()
 	businessContent := createBusinessContent()
@@ -150,33 +140,36 @@ func searchFormWithButton(ctx context.Context, env Environment, warning *fyne.Co
 	}
 
 	submitButton := widget.NewButton("Search", func() {
-		warning.Hide()
-		warning.RemoveAll()
+		// Hide any existing warning
+		warningLabel.Hide()
 
 		// Check if EntityType is selected
 		if entityTypeSelect.Selected == "" {
-			showWarning(env, warning, fmt.Errorf("EntityType is required"))
+			warningLabel.SetText("Problem: EntityType is required")
+			warningLabel.Show()
 			return
 		}
 
+		// Rest of the existing code
 		populatedItems := collectPopulatedItems(items)
 		env.Logger.Info().Logf("searching with %d fields", len(populatedItems))
 
 		query := buildQueryEntity(populatedItems)
 		searchOpts := search.SearchOpts{
 			Limit: 5,
+			Debug: true,
 		}
 		resp, err := env.Client.SearchByEntity(ctx, query, searchOpts)
 		if err != nil {
 			env.Logger.Error().LogErrorf("ERROR performing search: %v", err)
-			showWarning(env, warning, err)
+			warningLabel.SetText("Problem: " + err.Error())
+			warningLabel.Show()
 			return
 		}
 
 		UpdateResults(ctx, env, results, resp.Entities)
 	})
 	submitButton.Importance = widget.HighImportance
-	submitButton.Resize(fyne.NewSize(200, 40)) // Make the button wider for better visibility
 
 	return form, submitButton
 }
@@ -346,14 +339,8 @@ func showResults(env Environment, results *fyne.Container, entities []search.Sea
 }
 
 func createFixedWarningContainer(env Environment) *fyne.Container {
-	// Create a basic label for displaying warnings
-	warningLabel := widget.NewLabel("")
-	warningLabel.Wrapping = fyne.TextWrapWord
-
-	// Use a horizontal layout for the label with padding
-	container := container.NewPadded(warningLabel)
+	container := container.NewHBox()
 	container.Hide()
-
 	return container
 }
 
@@ -365,12 +352,12 @@ func showWarning(env Environment, warning *fyne.Container, err error) {
 		return
 	}
 
-	// Create a simple label with the error message
-	errorLabel := widget.NewLabel("Problem: " + err.Error())
-	errorLabel.Wrapping = fyne.TextWrapWord
+	// Create a warning label with explicit style
+	warningLabel := widget.NewRichTextWithText("Problem: " + err.Error())
+	warningLabel.Wrapping = fyne.TextWrapWord
 
-	// Add the label to the container
-	warning.Add(errorLabel)
+	// Use limited width to prevent it from expanding too much
+	warning.Add(warningLabel)
 	warning.Show()
 	warning.Refresh()
 }
@@ -618,32 +605,93 @@ func UpdateResults(ctx context.Context, env Environment, resultsContainer *fyne.
 		return
 	}
 
-	// Add a tab container to organize results
+	// Create a tab container to organize results
 	tabs := container.NewAppTabs()
 
 	// Create a tab for each result entity
-	for i, entity := range entities {
-		// Create the content for this entity tab
+	for _, entity := range entities {
+		// Create the content for this entity tab with integrated debug panel
 		entityContent := createEntityDetailsView(env, entity)
 
 		// Add as a tab
 		tabItem := container.NewTabItem(
-			fmt.Sprintf("Result %d (%s)", i+1, formatEntityType(entity.Entity.Type)),
+			fmt.Sprintf("%s (%s)", entity.Entity.Name, formatEntityType(entity.Entity.Type)),
 			entityContent,
 		)
 		tabs.Append(tabItem)
 	}
 
-	// Add a summary tab at the beginning that shows all results in a table
+	// Add a summary tab at the beginning that shows all results in a table (no debug panel)
 	summaryTab := container.NewTabItem("Summary", createSummaryView(entities))
 	tabs.Items = append([]*container.TabItem{summaryTab}, tabs.Items...)
 	tabs.SetTabLocation(container.TabLocationTop)
 
+	// Add the tabs directly to the content container
 	contentContainer.Add(tabs)
 	contentContainer.Refresh()
 }
 
-// Helper function to create a summary view of all results
+func createDebugPanel(entities []search.SearchedEntity[search.Value]) fyne.CanvasObject {
+	// Create a container for the debug panel
+	debugContainer := container.NewVBox()
+
+	// Add header
+	debugHeader := widget.NewLabelWithStyle("Debug Information", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	debugContainer.Add(debugHeader)
+	debugContainer.Add(widget.NewSeparator())
+
+	// If no entities, show a message
+	if len(entities) == 0 {
+		debugContainer.Add(widget.NewLabel("No debug information available"))
+		return container.NewScroll(debugContainer)
+	}
+
+	// Create tabs for debug info of each entity
+	debugTabs := container.NewAppTabs()
+
+	// Create a tab for each entity's debug information
+	for i, entity := range entities {
+		// Create debug content
+		var debugContent fyne.CanvasObject
+
+		if entity.Debug != "" {
+			// Decode base64 debug information
+			debugData, err := base64.StdEncoding.DecodeString(entity.Debug)
+
+			fmt.Printf("\n\n%s\n", string(debugData))
+
+			if err != nil {
+				debugContent = widget.NewLabel(fmt.Sprintf("Error decoding debug data: %v", err))
+			} else {
+				// Create a multiline text display for the debug info
+				debugText := widget.NewMultiLineEntry()
+				debugText.SetText(string(debugData))
+				debugText.Disable() // Make it read-only
+				debugText.Wrapping = fyne.TextWrapWord
+				debugText.Refresh()
+				debugContent = debugText
+			}
+		} else {
+			debugContent = widget.NewLabel("No debug information available for this entity")
+		}
+
+		// Wrap in scroll container
+		scrollableDebug := container.NewScroll(debugContent)
+
+		// Add as a tab
+		debugTabs.Append(container.NewTabItem(
+			fmt.Sprintf("Entity %d", i+1),
+			scrollableDebug,
+		))
+	}
+
+	// Add tabs to container
+	debugContainer.Add(debugTabs)
+
+	// Return a scrollable container
+	return container.NewScroll(debugContainer)
+}
+
 func createSummaryView(entities []search.SearchedEntity[search.Value]) fyne.CanvasObject {
 	// Create a table for the summary view
 	table := widget.NewTable(
@@ -659,6 +707,7 @@ func createSummaryView(entities []search.SearchedEntity[search.Value]) fyne.Canv
 		func(id widget.TableCellID, cell fyne.CanvasObject) {
 			label := cell.(*widget.Label)
 			label.Alignment = fyne.TextAlignLeading
+			label.Wrapping = fyne.TextTruncate
 
 			// Header row
 			if id.Row == 0 {
@@ -695,19 +744,23 @@ func createSummaryView(entities []search.SearchedEntity[search.Value]) fyne.Canv
 		},
 	)
 
-	// Set column widths
-	table.SetColumnWidth(0, 200)
-	table.SetColumnWidth(1, 120)
-	table.SetColumnWidth(2, 100)
-	table.SetColumnWidth(3, 120)
-	table.SetColumnWidth(4, 120)
+	// Set column widths with more appropriate distribution
+	// With the debug panel taking up space, we need to adjust column widths
+	table.SetColumnWidth(0, 400) // Name - slightly narrower
+	table.SetColumnWidth(1, 90)  // Type - narrower
+	table.SetColumnWidth(2, 90)  // Match Score
+	table.SetColumnWidth(3, 90)  // Source
+	table.SetColumnWidth(4, 90)  // ID
 
 	return container.NewPadded(table)
 }
 
-// createEntityDetailsView builds a detailed view for a single entity
+// createEntityDetailsView builds a detailed view for a single entity with integrated debug panel
 func createEntityDetailsView(env Environment, entity search.SearchedEntity[search.Value]) fyne.CanvasObject {
-	// Create a container for all sections
+	// Create a horizontal split container for entity details and debug info
+	detailsAndDebugSplit := container.NewHSplit(nil, nil)
+
+	// Create a container for entity details
 	content := container.NewVBox()
 
 	// Add match score information
@@ -758,11 +811,57 @@ func createEntityDetailsView(env Environment, entity search.SearchedEntity[searc
 		content.Add(createCryptoAddressesSection(entity.Entity.CryptoAddresses))
 	}
 
-	// Wrap in a scroll container
-	scrollContainer := container.NewScroll(content)
-	scrollContainer.SetMinSize(fyne.NewSize(0, env.Height*0.4))
+	// Wrap entity details in a scroll container
+	detailScrollContainer := container.NewScroll(content)
+	detailScrollContainer.SetMinSize(fyne.NewSize(0, env.Height*0.4))
 
-	return scrollContainer
+	// Create debug panel for this entity
+	var debugContent fyne.CanvasObject
+
+	// Debug panel header
+	debugHeader := widget.NewLabelWithStyle("Debug Information", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+
+	if entity.Debug != "" {
+		// Decode base64 debug information
+		debugData, err := base64.StdEncoding.DecodeString(entity.Debug)
+
+		if err != nil {
+			debugContent = container.NewVBox(
+				debugHeader,
+				widget.NewSeparator(),
+				widget.NewLabel(fmt.Sprintf("Error decoding debug data: %v", err)),
+			)
+		} else {
+			// Create a multiline text display for the debug info with standard text color
+			debugText := widget.NewLabel(string(debugData))
+			debugText.Wrapping = fyne.TextWrapWord
+
+			// Use a VBox container to preserve the header formatting
+			debugPanel := container.NewVBox(
+				debugHeader,
+				widget.NewSeparator(),
+				debugText,
+			)
+
+			// Wrap in scroll container for long debug output
+			debugContent = container.NewScroll(debugPanel)
+		}
+	} else {
+		debugContent = container.NewVBox(
+			debugHeader,
+			widget.NewSeparator(),
+			widget.NewLabel("No debug information available for this entity"),
+		)
+	}
+
+	// Set the components of the split container
+	detailsAndDebugSplit.Leading = detailScrollContainer // Left side: entity details
+	detailsAndDebugSplit.Trailing = debugContent         // Right side: debug panel
+
+	// Set the split offset (35% for entity details, 65% for debug)
+	detailsAndDebugSplit.SetOffset(0.35)
+
+	return detailsAndDebugSplit
 }
 
 // createBasicInfoSection creates a section for basic entity information
@@ -1152,7 +1251,7 @@ func formatEntityType(entityType search.EntityType) string {
 func createMatchScoreBadge(match float64) fyne.CanvasObject {
 	// Determine text color based on match percentage
 	var textColor color.Color
-	if match >= 0.9 {
+	if match >= 0.85 {
 		textColor = color.NRGBA{R: 220, G: 0, B: 0, A: 255} // Red for high match
 	} else if match >= 0.7 {
 		textColor = color.NRGBA{R: 255, G: 165, B: 0, A: 255} // Orange for medium match

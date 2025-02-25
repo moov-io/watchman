@@ -36,8 +36,8 @@ func New(ctx context.Context, env Environment) fyne.App {
 
 	// Center the overall window and make it a reasonable size
 	if !device.IsMobile() && !device.IsBrowser() {
-		env.Width = 1200.0
-		env.Height = 800.0
+		env.Width = 1500.0
+		env.Height = 900.0
 		w.Resize(fyne.NewSize(env.Width, env.Height))
 		w.CenterOnScreen()
 	}
