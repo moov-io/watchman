@@ -30,6 +30,7 @@ openapi-generator*jar
 
 /libpostal/
 
+cmd/ui/fyne_*.go
 /cmd/ui/wasm/
 
 makefile.dev
