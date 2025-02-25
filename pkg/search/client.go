@@ -80,6 +80,7 @@ type SearchResponse struct {
 type SearchOpts struct {
 	Limit    int
 	MinMatch float64
+	Debug    bool
 }
 
 func (c *client) SearchByEntity(ctx context.Context, entity Entity[Value], opts SearchOpts) (SearchResponse, error) {
@@ -126,6 +127,9 @@ func buildQueryParameters(q url.Values, entity Entity[Value], opts SearchOpts) u
 	}
 	if opts.MinMatch > 0.00 {
 		q.Set("minMatch", fmt.Sprintf("%.2f", opts.MinMatch))
+	}
+	if opts.Debug {
+		q.Set("debug", "yes")
 	}
 
 	// Person, Business, Organization, Aircraft, Vessel
