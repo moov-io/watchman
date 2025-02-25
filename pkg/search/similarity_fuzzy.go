@@ -29,22 +29,22 @@ type nameMatch struct {
 	isHistorical  bool
 }
 
-func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) scorePiece {
+func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) ScorePiece {
 	// Early return for empty query
 	if query.PreparedFields.Name == "" {
-		return scorePiece{score: 0, weight: 0, fieldsCompared: 0, pieceType: "name"}
+		return ScorePiece{Score: 0, Weight: 0, FieldsCompared: 0, PieceType: "name"}
 	}
 
 	// Exact match fast path
 	if query.PreparedFields.Name == index.PreparedFields.Name {
-		return scorePiece{
-			score:          1.0,
-			weight:         weight,
-			matched:        true,
-			required:       true,
-			exact:          true,
-			fieldsCompared: 1,
-			pieceType:      "name",
+		return ScorePiece{
+			Score:          1.0,
+			Weight:         weight,
+			Matched:        true,
+			Required:       true,
+			Exact:          true,
+			FieldsCompared: 1,
+			PieceType:      "name",
 		}
 	}
 
@@ -79,20 +79,23 @@ func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], we
 		bestMatch.score *= 0.85
 	}
 
-	return scorePiece{
-		score:          bestMatch.score,
-		weight:         weight,
-		matched:        bestMatch.score > 0.6,
-		required:       true,
-		exact:          bestMatch.isExact,
-		fieldsCompared: 1,
-		pieceType:      "name",
+	return ScorePiece{
+		Score:          bestMatch.score,
+		Weight:         weight,
+		Matched:        bestMatch.score > 0.6,
+		Required:       true,
+		Exact:          bestMatch.isExact,
+		FieldsCompared: 1,
+		PieceType:      "name",
 	}
 }
 
 // compareNameFields performs detailed term-by-term comparison
 func compareNameTerms(queryTerms, indexTerms []string) nameMatch {
-	score := stringscore.BestPairsJaroWinkler(queryTerms, indexTerms)
+	var score float64
+	if len(indexTerms) > 0 {
+		score = stringscore.BestPairsJaroWinkler(queryTerms, indexTerms)
+	}
 
 	matchingTerms := 0
 	if score > termMatchThreshold {
@@ -183,9 +186,9 @@ var (
 	spaceRegexp = regexp.MustCompile(`\s+`)
 )
 
-func compareEntityTitlesFuzzy[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) scorePiece {
+func compareEntityTitlesFuzzy[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) ScorePiece {
 	if query.Person == nil || index.Person == nil {
-		return scorePiece{score: 0, weight: 0, fieldsCompared: 0, pieceType: "titles"}
+		return ScorePiece{Score: 0, Weight: 0, FieldsCompared: 0, PieceType: "titles"}
 	}
 
 	// Prepare normalized index titles once
@@ -197,7 +200,7 @@ func compareEntityTitlesFuzzy[Q any, I any](w io.Writer, query Entity[Q], index 
 	}
 
 	if len(normalizedIndexTitles) == 0 {
-		return scorePiece{score: 0, weight: 0, fieldsCompared: 0, pieceType: "titles"}
+		return ScorePiece{Score: 0, Weight: 0, FieldsCompared: 0, PieceType: "titles"}
 	}
 
 	fieldsCompared := 0
@@ -248,14 +251,14 @@ func compareEntityTitlesFuzzy[Q any, I any](w io.Writer, query Entity[Q], index 
 		finalScore = float64(matches) / float64(total)
 	}
 
-	return scorePiece{
-		score:          finalScore,
-		weight:         weight,
-		matched:        finalScore > 0.5,
-		required:       false,
-		exact:          finalScore > exactMatchThreshold,
-		fieldsCompared: fieldsCompared,
-		pieceType:      "titles",
+	return ScorePiece{
+		Score:          finalScore,
+		Weight:         weight,
+		Matched:        finalScore > 0.5,
+		Required:       false,
+		Exact:          finalScore > exactMatchThreshold,
+		FieldsCompared: fieldsCompared,
+		PieceType:      "titles",
 	}
 }
 
@@ -387,30 +390,30 @@ type affiliationMatch struct {
 	exactMatch bool
 }
 
-func compareAffiliationsFuzzy[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) scorePiece {
+func compareAffiliationsFuzzy[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) ScorePiece {
 	// Early return if no affiliations to compare
 	if len(query.Affiliations) == 0 {
-		return scorePiece{
-			score:          0,
-			weight:         weight,
-			matched:        false,
-			required:       false,
-			exact:          false,
-			fieldsCompared: 0,
-			pieceType:      "affiliations",
+		return ScorePiece{
+			Score:          0,
+			Weight:         weight,
+			Matched:        false,
+			Required:       false,
+			Exact:          false,
+			FieldsCompared: 0,
+			PieceType:      "affiliations",
 		}
 	}
 
 	// Validate index affiliations
 	if len(index.Affiliations) == 0 {
-		return scorePiece{
-			score:          0,
-			weight:         weight,
-			matched:        false,
-			required:       false,
-			exact:          false,
-			fieldsCompared: 1, // We had query affiliations but no index matches
-			pieceType:      "affiliations",
+		return ScorePiece{
+			Score:          0,
+			Weight:         weight,
+			Matched:        false,
+			Required:       false,
+			Exact:          false,
+			FieldsCompared: 1, // We had query affiliations but no index matches
+			PieceType:      "affiliations",
 		}
 	}
 
@@ -424,28 +427,28 @@ func compareAffiliationsFuzzy[Q any, I any](w io.Writer, query Entity[Q], index 
 	}
 
 	if len(matches) == 0 {
-		return scorePiece{
-			score:          0,
-			weight:         weight,
-			matched:        false,
-			required:       false,
-			exact:          false,
-			fieldsCompared: 1,
-			pieceType:      "affiliations",
+		return ScorePiece{
+			Score:          0,
+			Weight:         weight,
+			Matched:        false,
+			Required:       false,
+			Exact:          false,
+			FieldsCompared: 1,
+			PieceType:      "affiliations",
 		}
 	}
 
 	// Calculate final score
 	finalScore := calculateFinalAffiliateScore(matches)
 
-	return scorePiece{
-		score:          finalScore,
-		weight:         weight,
-		matched:        finalScore > affiliationNameThreshold,
-		required:       false,
-		exact:          finalScore > exactMatchThreshold,
-		fieldsCompared: 1,
-		pieceType:      "affiliations",
+	return ScorePiece{
+		Score:          finalScore,
+		Weight:         weight,
+		Matched:        finalScore > affiliationNameThreshold,
+		Required:       false,
+		Exact:          finalScore > exactMatchThreshold,
+		FieldsCompared: 1,
+		PieceType:      "affiliations",
 	}
 }
 

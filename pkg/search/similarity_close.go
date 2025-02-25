@@ -16,9 +16,9 @@ const (
 )
 
 // compareEntityDates performs date comparisons based on entity type
-func compareEntityDates[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) scorePiece {
+func compareEntityDates[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) ScorePiece {
 	if query.Type != index.Type {
-		return scorePiece{score: 0, weight: weight, pieceType: "dates", fieldsCompared: 0}
+		return ScorePiece{Score: 0, Weight: weight, PieceType: "dates", FieldsCompared: 0}
 	}
 
 	var dateScore float64
@@ -36,14 +36,14 @@ func compareEntityDates[Q any, I any](w io.Writer, query Entity[Q], index Entity
 		dateScore, matched, fieldsCompared = compareAssetDates(query.Type, query, index)
 	}
 
-	return scorePiece{
-		score:          dateScore,
-		weight:         weight,
-		matched:        matched,
-		required:       fieldsCompared > 0,
-		exact:          dateScore > 0.99,
-		fieldsCompared: fieldsCompared,
-		pieceType:      "dates",
+	return ScorePiece{
+		Score:          dateScore,
+		Weight:         weight,
+		Matched:        matched,
+		Required:       fieldsCompared > 0,
+		Exact:          dateScore > 0.99,
+		FieldsCompared: fieldsCompared,
+		PieceType:      "dates",
 	}
 }
 

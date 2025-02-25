@@ -10,7 +10,7 @@ import (
 func TestCompareBusinessExactIDs(t *testing.T) {
 	cases := []struct {
 		query, index Business
-		expected     scorePiece
+		expected     ScorePiece
 	}{
 		{
 			query: Business{
@@ -23,14 +23,14 @@ func TestCompareBusinessExactIDs(t *testing.T) {
 					{Type: GovernmentIDTax, Country: "United States", Identifier: "52-2083095"},
 				},
 			},
-			expected: scorePiece{
-				score:          1.0,
-				weight:         50,
-				matched:        true,
-				required:       true,
-				exact:          true,
-				fieldsCompared: 1,
-				pieceType:      "identifiers",
+			expected: ScorePiece{
+				Score:          1.0,
+				Weight:         50,
+				Matched:        true,
+				Required:       true,
+				Exact:          true,
+				FieldsCompared: 1,
+				PieceType:      "identifiers",
 			},
 		},
 	}

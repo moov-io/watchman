@@ -6,17 +6,17 @@ import (
 )
 
 // compareExactIdentifiers covers exact matches for identifiers across all entity types
-func compareExactIdentifiers[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) scorePiece {
+func compareExactIdentifiers[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) ScorePiece {
 	// If types don't match, return early
 	if query.Type != index.Type {
-		return scorePiece{
-			score:          0,
-			weight:         weight,
-			matched:        false,
-			required:       false,
-			exact:          false,
-			fieldsCompared: 1,
-			pieceType:      "identifiers",
+		return ScorePiece{
+			Score:          0,
+			Weight:         weight,
+			Matched:        false,
+			Required:       false,
+			Exact:          false,
+			FieldsCompared: 1,
+			PieceType:      "identifiers",
 		}
 	}
 
@@ -33,7 +33,7 @@ func compareExactIdentifiers[Q any, I any](w io.Writer, query Entity[Q], index E
 	case EntityAircraft:
 		return compareAircraftExactIDs(w, query.Aircraft, index.Aircraft, weight)
 	default:
-		return scorePiece{score: 0, weight: 0, fieldsCompared: 0, pieceType: "identifiers"}
+		return ScorePiece{Score: 0, Weight: 0, FieldsCompared: 0, PieceType: "identifiers"}
 	}
 }
 
@@ -42,9 +42,9 @@ func normalizeIdentifier(id string) string {
 }
 
 // comparePersonExactIDs checks exact matches for Person-specific identifiers
-func comparePersonExactIDs(w io.Writer, query *Person, index *Person, weight float64) scorePiece {
+func comparePersonExactIDs(w io.Writer, query *Person, index *Person, weight float64) ScorePiece {
 	if query == nil || index == nil {
-		return scorePiece{score: 0, weight: 0, fieldsCompared: 0, pieceType: "identifiers"}
+		return ScorePiece{Score: 0, Weight: 0, FieldsCompared: 0, PieceType: "identifiers"}
 	}
 
 	fieldsCompared := 0
@@ -75,21 +75,21 @@ GovIDDone:
 		finalScore = score / totalWeight
 	}
 
-	return scorePiece{
-		score:          finalScore,
-		weight:         weight,
-		matched:        hasMatch,
-		required:       fieldsCompared > 0,
-		exact:          finalScore > 0.99,
-		fieldsCompared: fieldsCompared,
-		pieceType:      "identifiers",
+	return ScorePiece{
+		Score:          finalScore,
+		Weight:         weight,
+		Matched:        hasMatch,
+		Required:       fieldsCompared > 0,
+		Exact:          finalScore > 0.99,
+		FieldsCompared: fieldsCompared,
+		PieceType:      "identifiers",
 	}
 }
 
 // compareBusinessExactIDs checks exact matches for Business-specific identifiers
-func compareBusinessExactIDs(w io.Writer, query *Business, index *Business, weight float64) scorePiece {
+func compareBusinessExactIDs(w io.Writer, query *Business, index *Business, weight float64) ScorePiece {
 	if query == nil || index == nil {
-		return scorePiece{score: 0, weight: 0, fieldsCompared: 0, pieceType: "identifiers"}
+		return ScorePiece{Score: 0, Weight: 0, FieldsCompared: 0, PieceType: "identifiers"}
 	}
 
 	fieldsCompared := 0
@@ -121,21 +121,21 @@ IdentifierDone:
 		finalScore = score / totalWeight
 	}
 
-	return scorePiece{
-		score:          finalScore,
-		weight:         weight,
-		matched:        hasMatch,
-		required:       fieldsCompared > 0,
-		exact:          finalScore > 0.99,
-		fieldsCompared: fieldsCompared,
-		pieceType:      "identifiers",
+	return ScorePiece{
+		Score:          finalScore,
+		Weight:         weight,
+		Matched:        hasMatch,
+		Required:       fieldsCompared > 0,
+		Exact:          finalScore > 0.99,
+		FieldsCompared: fieldsCompared,
+		PieceType:      "identifiers",
 	}
 }
 
 // compareOrgExactIDs checks exact matches for Organization-specific identifiers
-func compareOrgExactIDs(w io.Writer, query *Organization, index *Organization, weight float64) scorePiece {
+func compareOrgExactIDs(w io.Writer, query *Organization, index *Organization, weight float64) ScorePiece {
 	if query == nil || index == nil {
-		return scorePiece{score: 0, weight: 0, fieldsCompared: 0, pieceType: "identifiers"}
+		return ScorePiece{Score: 0, Weight: 0, FieldsCompared: 0, PieceType: "identifiers"}
 	}
 
 	fieldsCompared := 0
@@ -167,21 +167,21 @@ IdentifierDone:
 		finalScore = score / totalWeight
 	}
 
-	return scorePiece{
-		score:          finalScore,
-		weight:         weight,
-		matched:        hasMatch,
-		required:       fieldsCompared > 0,
-		exact:          finalScore > 0.99,
-		fieldsCompared: fieldsCompared,
-		pieceType:      "identifiers",
+	return ScorePiece{
+		Score:          finalScore,
+		Weight:         weight,
+		Matched:        hasMatch,
+		Required:       fieldsCompared > 0,
+		Exact:          finalScore > 0.99,
+		FieldsCompared: fieldsCompared,
+		PieceType:      "identifiers",
 	}
 }
 
 // compareVesselExactIDs checks exact matches for Vessel-specific identifiers
-func compareVesselExactIDs(w io.Writer, query *Vessel, index *Vessel, weight float64) scorePiece {
+func compareVesselExactIDs(w io.Writer, query *Vessel, index *Vessel, weight float64) ScorePiece {
 	if query == nil || index == nil {
-		return scorePiece{score: 0, weight: 0, fieldsCompared: 0, pieceType: "identifiers"}
+		return ScorePiece{Score: 0, Weight: 0, FieldsCompared: 0, PieceType: "identifiers"}
 	}
 
 	fieldsCompared := 0
@@ -224,21 +224,21 @@ func compareVesselExactIDs(w io.Writer, query *Vessel, index *Vessel, weight flo
 		finalScore = score / totalWeight
 	}
 
-	return scorePiece{
-		score:          finalScore,
-		weight:         weight,
-		matched:        hasMatch,
-		required:       fieldsCompared > 0,
-		exact:          finalScore > 0.99,
-		fieldsCompared: fieldsCompared,
-		pieceType:      "identifiers",
+	return ScorePiece{
+		Score:          finalScore,
+		Weight:         weight,
+		Matched:        hasMatch,
+		Required:       fieldsCompared > 0,
+		Exact:          finalScore > 0.99,
+		FieldsCompared: fieldsCompared,
+		PieceType:      "identifiers",
 	}
 }
 
 // compareAircraftExactIDs checks exact matches for Aircraft-specific identifiers
-func compareAircraftExactIDs(w io.Writer, query *Aircraft, index *Aircraft, weight float64) scorePiece {
+func compareAircraftExactIDs(w io.Writer, query *Aircraft, index *Aircraft, weight float64) ScorePiece {
 	if query == nil || index == nil {
-		return scorePiece{score: 0, weight: 0, fieldsCompared: 0, pieceType: "identifiers"}
+		return ScorePiece{Score: 0, Weight: 0, FieldsCompared: 0, PieceType: "identifiers"}
 	}
 
 	fieldsCompared := 0
@@ -271,32 +271,32 @@ func compareAircraftExactIDs(w io.Writer, query *Aircraft, index *Aircraft, weig
 		finalScore = score / totalWeight
 	}
 
-	return scorePiece{
-		score:          finalScore,
-		weight:         weight,
-		matched:        hasMatch,
-		required:       fieldsCompared > 0,
-		exact:          finalScore > 0.99,
-		fieldsCompared: fieldsCompared,
-		pieceType:      "identifiers",
+	return ScorePiece{
+		Score:          finalScore,
+		Weight:         weight,
+		Matched:        hasMatch,
+		Required:       fieldsCompared > 0,
+		Exact:          finalScore > 0.99,
+		FieldsCompared: fieldsCompared,
+		PieceType:      "identifiers",
 	}
 }
 
-func compareExactCryptoAddresses[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) scorePiece {
+func compareExactCryptoAddresses[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) ScorePiece {
 	fieldsCompared := 0
 	hasMatch := false
 	score := 0.0
 
 	// Early return if either list is empty
 	if len(query.CryptoAddresses) == 0 || len(index.CryptoAddresses) == 0 {
-		return scorePiece{
-			score:          0,
-			weight:         weight,
-			matched:        false,
-			required:       false,
-			exact:          false,
-			fieldsCompared: 0,
-			pieceType:      "crypto-exact",
+		return ScorePiece{
+			Score:          0,
+			Weight:         weight,
+			Matched:        false,
+			Required:       false,
+			Exact:          false,
+			FieldsCompared: 0,
+			PieceType:      "crypto-exact",
 		}
 	}
 
@@ -329,28 +329,28 @@ func compareExactCryptoAddresses[Q any, I any](w io.Writer, query Entity[Q], ind
 	}
 
 Done:
-	return scorePiece{
-		score:          score,
-		weight:         weight,
-		matched:        hasMatch,
-		required:       false,
-		exact:          score > 0.99,
-		fieldsCompared: fieldsCompared,
-		pieceType:      "crypto-exact",
+	return ScorePiece{
+		Score:          score,
+		Weight:         weight,
+		Matched:        hasMatch,
+		Required:       false,
+		Exact:          score > 0.99,
+		FieldsCompared: fieldsCompared,
+		PieceType:      "crypto-exact",
 	}
 }
 
 // compareExactGovernmentIDs compares government IDs across entity types
-func compareExactGovernmentIDs[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) scorePiece {
+func compareExactGovernmentIDs[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) ScorePiece {
 	if query.Type != index.Type {
-		return scorePiece{
-			score:          0,
-			weight:         weight,
-			matched:        false,
-			required:       false,
-			exact:          false,
-			fieldsCompared: 0,
-			pieceType:      "gov-ids-exact",
+		return ScorePiece{
+			Score:          0,
+			Weight:         weight,
+			Matched:        false,
+			Required:       false,
+			Exact:          false,
+			FieldsCompared: 0,
+			PieceType:      "gov-ids-exact",
 		}
 	}
 
@@ -362,14 +362,14 @@ func compareExactGovernmentIDs[Q any, I any](w io.Writer, query Entity[Q], index
 	case EntityOrganization:
 		return compareOrgGovernmentIDs(query.Organization, index.Organization, weight)
 	default:
-		return scorePiece{
-			score:          0,
-			weight:         weight,
-			matched:        false,
-			required:       false,
-			exact:          false,
-			fieldsCompared: 0,
-			pieceType:      "gov-ids-exact",
+		return ScorePiece{
+			Score:          0,
+			Weight:         weight,
+			Matched:        false,
+			Required:       false,
+			Exact:          false,
+			FieldsCompared: 0,
+			PieceType:      "gov-ids-exact",
 		}
 	}
 }
@@ -408,16 +408,16 @@ func compareIdentifiers(queryID, indexID string, queryCountry, indexCountry stri
 	return idMatch{score: 0.7, found: true, exact: false, hasCountry: true}
 }
 
-func comparePersonGovernmentIDs(query *Person, index *Person, weight float64) scorePiece {
+func comparePersonGovernmentIDs(query *Person, index *Person, weight float64) ScorePiece {
 	if query == nil || index == nil {
-		return scorePiece{score: 0, weight: weight, fieldsCompared: 0, pieceType: "gov-ids-exact"}
+		return ScorePiece{Score: 0, Weight: weight, FieldsCompared: 0, PieceType: "gov-ids-exact"}
 	}
 
 	qIDs := query.GovernmentIDs
 	iIDs := index.GovernmentIDs
 
 	if len(qIDs) == 0 || len(iIDs) == 0 {
-		return scorePiece{score: 0, weight: weight, fieldsCompared: 0, pieceType: "gov-ids-exact"}
+		return ScorePiece{Score: 0, Weight: weight, FieldsCompared: 0, PieceType: "gov-ids-exact"}
 	}
 
 	fieldsCompared := 1
@@ -436,27 +436,27 @@ func comparePersonGovernmentIDs(query *Person, index *Person, weight float64) sc
 	}
 
 Done:
-	return scorePiece{
-		score:          bestMatch.score,
-		weight:         weight,
-		matched:        bestMatch.found,
-		required:       false,
-		exact:          bestMatch.exact,
-		fieldsCompared: fieldsCompared,
-		pieceType:      "gov-ids-exact",
+	return ScorePiece{
+		Score:          bestMatch.score,
+		Weight:         weight,
+		Matched:        bestMatch.found,
+		Required:       false,
+		Exact:          bestMatch.exact,
+		FieldsCompared: fieldsCompared,
+		PieceType:      "gov-ids-exact",
 	}
 }
 
-func compareBusinessGovernmentIDs(query *Business, index *Business, weight float64) scorePiece {
+func compareBusinessGovernmentIDs(query *Business, index *Business, weight float64) ScorePiece {
 	if query == nil || index == nil {
-		return scorePiece{score: 0, weight: weight, fieldsCompared: 0, pieceType: "gov-ids-exact"}
+		return ScorePiece{Score: 0, Weight: weight, FieldsCompared: 0, PieceType: "gov-ids-exact"}
 	}
 
 	qIDs := query.GovernmentIDs
 	iIDs := index.GovernmentIDs
 
 	if len(qIDs) == 0 || len(iIDs) == 0 {
-		return scorePiece{score: 0, weight: weight, fieldsCompared: 0, pieceType: "gov-ids-exact"}
+		return ScorePiece{Score: 0, Weight: weight, FieldsCompared: 0, PieceType: "gov-ids-exact"}
 	}
 
 	fieldsCompared := 1
@@ -476,27 +476,27 @@ func compareBusinessGovernmentIDs(query *Business, index *Business, weight float
 	}
 
 Done:
-	return scorePiece{
-		score:          bestMatch.score,
-		weight:         weight,
-		matched:        bestMatch.found,
-		required:       false,
-		exact:          bestMatch.exact,
-		fieldsCompared: fieldsCompared,
-		pieceType:      "gov-ids-exact",
+	return ScorePiece{
+		Score:          bestMatch.score,
+		Weight:         weight,
+		Matched:        bestMatch.found,
+		Required:       false,
+		Exact:          bestMatch.exact,
+		FieldsCompared: fieldsCompared,
+		PieceType:      "gov-ids-exact",
 	}
 }
 
-func compareOrgGovernmentIDs(query *Organization, index *Organization, weight float64) scorePiece {
+func compareOrgGovernmentIDs(query *Organization, index *Organization, weight float64) ScorePiece {
 	if query == nil || index == nil {
-		return scorePiece{score: 0, weight: weight, fieldsCompared: 0, pieceType: "gov-ids-exact"}
+		return ScorePiece{Score: 0, Weight: weight, FieldsCompared: 0, PieceType: "gov-ids-exact"}
 	}
 
 	qIDs := query.GovernmentIDs
 	iIDs := index.GovernmentIDs
 
 	if len(qIDs) == 0 || len(iIDs) == 0 {
-		return scorePiece{score: 0, weight: weight, fieldsCompared: 0, pieceType: "gov-ids-exact"}
+		return ScorePiece{Score: 0, Weight: weight, FieldsCompared: 0, PieceType: "gov-ids-exact"}
 	}
 
 	fieldsCompared := 1
@@ -516,28 +516,28 @@ func compareOrgGovernmentIDs(query *Organization, index *Organization, weight fl
 	}
 
 Done:
-	return scorePiece{
-		score:          bestMatch.score,
-		weight:         weight,
-		matched:        bestMatch.found,
-		required:       false,
-		exact:          bestMatch.exact,
-		fieldsCompared: fieldsCompared,
-		pieceType:      "gov-ids-exact",
+	return ScorePiece{
+		Score:          bestMatch.score,
+		Weight:         weight,
+		Matched:        bestMatch.found,
+		Required:       false,
+		Exact:          bestMatch.exact,
+		FieldsCompared: fieldsCompared,
+		PieceType:      "gov-ids-exact",
 	}
 }
 
-func compareExactSourceID[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) scorePiece {
+func compareExactSourceID[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) ScorePiece {
 	// Early return if query has no source ID
 	if query.SourceID == "" {
-		return scorePiece{
-			score:          0,
-			weight:         weight,
-			matched:        false,
-			required:       false,
-			exact:          false,
-			fieldsCompared: 0,
-			pieceType:      "source-id-exact",
+		return ScorePiece{
+			Score:          0,
+			Weight:         weight,
+			Matched:        false,
+			Required:       false,
+			Exact:          false,
+			FieldsCompared: 0,
+			PieceType:      "source-id-exact",
 		}
 	}
 
@@ -546,42 +546,42 @@ func compareExactSourceID[Q any, I any](w io.Writer, query Entity[Q], index Enti
 
 	// Handle case where index has no source ID
 	if index.SourceID == "" {
-		return scorePiece{
-			score:          0,
-			weight:         weight,
-			matched:        false,
-			required:       false,
-			exact:          false,
-			fieldsCompared: fieldsCompared,
-			pieceType:      "source-id-exact",
+		return ScorePiece{
+			Score:          0,
+			Weight:         weight,
+			Matched:        false,
+			Required:       false,
+			Exact:          false,
+			FieldsCompared: fieldsCompared,
+			PieceType:      "source-id-exact",
 		}
 	}
 
 	// Compare normalized source IDs
 	hasMatch := strings.EqualFold(query.SourceID, index.SourceID)
 
-	return scorePiece{
-		score:          boolToScore(hasMatch),
-		weight:         weight,
-		matched:        hasMatch,
-		required:       false,
-		exact:          hasMatch, // If matched, it's exact by definition
-		fieldsCompared: fieldsCompared,
-		pieceType:      "source-id-exact",
+	return ScorePiece{
+		Score:          boolToScore(hasMatch),
+		Weight:         weight,
+		Matched:        hasMatch,
+		Required:       false,
+		Exact:          hasMatch, // If matched, it's exact by definition
+		FieldsCompared: fieldsCompared,
+		PieceType:      "source-id-exact",
 	}
 }
 
-func compareExactSourceList[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) scorePiece {
+func compareExactSourceList[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) ScorePiece {
 	// Early return if query has no source
 	if query.Source == "" {
-		return scorePiece{
-			score:          0,
-			weight:         weight,
-			matched:        false,
-			required:       false,
-			exact:          false,
-			fieldsCompared: 0,
-			pieceType:      "source-list",
+		return ScorePiece{
+			Score:          0,
+			Weight:         weight,
+			Matched:        false,
+			Required:       false,
+			Exact:          false,
+			FieldsCompared: 0,
+			PieceType:      "source-list",
 		}
 	}
 
@@ -590,28 +590,28 @@ func compareExactSourceList[Q any, I any](w io.Writer, query Entity[Q], index En
 
 	// Handle case where index has no source
 	if index.Source == "" {
-		return scorePiece{
-			score:          0,
-			weight:         weight,
-			matched:        false,
-			required:       false,
-			exact:          false,
-			fieldsCompared: fieldsCompared,
-			pieceType:      "source-list",
+		return ScorePiece{
+			Score:          0,
+			Weight:         weight,
+			Matched:        false,
+			Required:       false,
+			Exact:          false,
+			FieldsCompared: fieldsCompared,
+			PieceType:      "source-list",
 		}
 	}
 
 	// Compare normalized sources
 	hasMatch := strings.EqualFold(string(query.Source), string(index.Source))
 
-	return scorePiece{
-		score:          boolToScore(hasMatch),
-		weight:         weight,
-		matched:        hasMatch,
-		required:       false,
-		exact:          hasMatch, // If matched, it's exact by definition
-		fieldsCompared: fieldsCompared,
-		pieceType:      "source-list",
+	return ScorePiece{
+		Score:          boolToScore(hasMatch),
+		Weight:         weight,
+		Matched:        hasMatch,
+		Required:       false,
+		Exact:          hasMatch, // If matched, it's exact by definition
+		FieldsCompared: fieldsCompared,
+		PieceType:      "source-list",
 	}
 }
 
@@ -622,7 +622,7 @@ type contactFieldMatch struct {
 	score      float64
 }
 
-func compareExactContactInfo[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) scorePiece {
+func compareExactContactInfo[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) ScorePiece {
 	fieldsCompared := 0
 	var matches []contactFieldMatch
 
@@ -648,14 +648,14 @@ func compareExactContactInfo[Q any, I any](w io.Writer, query Entity[Q], index E
 	}
 
 	if fieldsCompared == 0 {
-		return scorePiece{
-			score:          0,
-			weight:         weight,
-			matched:        false,
-			required:       false,
-			exact:          false,
-			fieldsCompared: 0,
-			pieceType:      "contact-exact",
+		return ScorePiece{
+			Score:          0,
+			Weight:         weight,
+			Matched:        false,
+			Required:       false,
+			Exact:          false,
+			FieldsCompared: 0,
+			PieceType:      "contact-exact",
 		}
 	}
 
@@ -672,14 +672,14 @@ func compareExactContactInfo[Q any, I any](w io.Writer, query Entity[Q], index E
 
 	finalScore := totalScore / float64(len(matches))
 
-	return scorePiece{
-		score:          finalScore,
-		weight:         weight,
-		matched:        totalMatches > 0,
-		required:       false,
-		exact:          finalScore > 0.99,
-		fieldsCompared: fieldsCompared,
-		pieceType:      "contact-exact",
+	return ScorePiece{
+		Score:          finalScore,
+		Weight:         weight,
+		Matched:        totalMatches > 0,
+		Required:       false,
+		Exact:          finalScore > 0.99,
+		FieldsCompared: fieldsCompared,
+		PieceType:      "contact-exact",
 	}
 }
 

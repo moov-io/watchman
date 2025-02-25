@@ -17,7 +17,7 @@ const (
 	countryWeight = 4.0 // Country - critical for international
 )
 
-func compareAddresses[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) scorePiece {
+func compareAddresses[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) ScorePiece {
 	fieldsCompared := 0
 	var scores []float64
 
@@ -34,18 +34,18 @@ func compareAddresses[Q any, I any](w io.Writer, query Entity[Q], index Entity[I
 	}
 
 	if len(scores) == 0 {
-		return scorePiece{score: 0, weight: weight, fieldsCompared: 0, pieceType: "address"}
+		return ScorePiece{Score: 0, Weight: weight, FieldsCompared: 0, PieceType: "address"}
 	}
 
 	avgScore := calculateAverage(scores)
-	return scorePiece{
-		score:          avgScore,
-		weight:         weight,
-		matched:        avgScore > 0.5,
-		required:       false,
-		exact:          avgScore > 0.99,
-		fieldsCompared: fieldsCompared,
-		pieceType:      "address",
+	return ScorePiece{
+		Score:          avgScore,
+		Weight:         weight,
+		Matched:        avgScore > 0.5,
+		Required:       false,
+		Exact:          avgScore > 0.99,
+		FieldsCompared: fieldsCompared,
+		PieceType:      "address",
 	}
 }
 

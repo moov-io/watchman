@@ -13,4 +13,10 @@ type SearchedEntity[T any] struct {
 	//
 	// The format will change over time and should not be parsed by machines.
 	Debug string `json:"debug,omitempty"`
+
+	// Details includes field level matching and scoring results
+	//
+	// The fields returned may change as the general similarity algorithm and scoring methodologies evolve.
+	// There is no API stability guarentee for Details or SimilarityScore.
+	Details SimilarityScore `json:"details,omitempty,omitzero"`
 }

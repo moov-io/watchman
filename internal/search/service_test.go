@@ -2,6 +2,8 @@ package search
 
 import (
 	"context"
+	"encoding/base64"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -17,7 +19,7 @@ import (
 
 func TestService_Search(t *testing.T) {
 	ctx := context.Background()
-	opts := SearchOpts{Limit: 10, MinMatch: 0.01}
+	opts := SearchOpts{Limit: 10, MinMatch: 0.01, Debug: testing.Verbose()}
 
 	svc := testService(t)
 
@@ -39,22 +41,27 @@ func TestService_Search(t *testing.T) {
 
 	t.Run("crypto address", func(t *testing.T) {
 		query := search.Entity[search.Value]{
+			Type: search.EntityBusiness,
 			CryptoAddresses: []search.CryptoAddress{
 				{Currency: "XBT", Address: "12VrYZgS1nmf9KHHped24xBb1aLLRpV2cT"},
 			},
 		}
 		results, err := svc.Search(ctx, query.Normalize(), opts)
 		require.NoError(t, err)
-		require.Greater(t, len(results), 0)
 
 		t.Logf("got %d results", len(results))
-		t.Logf("")
-		t.Logf("%#v", results[0])
+		if len(results) > 0 {
+			t.Logf("match: %.2f", results[0].Match)
+			t.Logf("%#v", results[0].Entity)
+
+			bs, err := base64.StdEncoding.DecodeString(results[0].Debug)
+			require.NoError(t, err)
+			fmt.Println(string(bs))
+		}
+		require.Greater(t, len(results), 0)
 
 		res := results[0]
-		require.InDelta(t, 1.00, res.Match, 0.001)
-
-		// 36216
+		require.InDelta(t, 1.00, res.Match, 0.001) // 36216
 	})
 }
 
