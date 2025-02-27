@@ -25,7 +25,7 @@ func GetDownloader(tb testing.TB) download.Downloader {
 
 	ofacDownloaderSetup.Do(func() {
 		conf := download.Config{
-			InitialDataDirectory: filepath.Join("..", "..", "pkg", "ofac", "testdata"),
+			InitialDataDirectory: filepath.Join("..", "..", "pkg", "sources", "ofac", "testdata"),
 		}
 		conf.IncludedLists = append(conf.IncludedLists, search.SourceUSOFAC)
 

@@ -16,8 +16,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/moov-io/watchman/pkg/csl_us/gen/ENHANCED_XML"
 	"github.com/moov-io/watchman/pkg/download"
+	"github.com/moov-io/watchman/pkg/sources/csl_us/gen/ENHANCED_XML"
 )
 
 type ListData struct {

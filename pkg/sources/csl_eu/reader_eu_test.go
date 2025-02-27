@@ -13,7 +13,7 @@ import (
 )
 
 func TestReadEU(t *testing.T) {
-	fd, err := os.Open(filepath.Join("..", "..", "test", "testdata", "eu_csl.csv"))
+	fd, err := os.Open(filepath.Join("..", "..", "..", "test", "testdata", "eu_csl.csv"))
 	if err != nil {
 		t.Error(err)
 	}

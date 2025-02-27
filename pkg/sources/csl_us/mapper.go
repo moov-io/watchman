@@ -13,8 +13,8 @@ import (
 
 	"github.com/moov-io/watchman/internal/norm"
 	"github.com/moov-io/watchman/internal/prepare"
-	"github.com/moov-io/watchman/pkg/csl_us/gen/ENHANCED_XML"
 	"github.com/moov-io/watchman/pkg/search"
+	"github.com/moov-io/watchman/pkg/sources/csl_us/gen/ENHANCED_XML"
 )
 
 func ConvertSanctionsData(data *ENHANCED_XML.SanctionsData) []search.Entity[search.Value] {

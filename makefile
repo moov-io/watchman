@@ -99,11 +99,11 @@ models-setup:
 	go install github.com/gocomply/xsd2go/cli/gocomply_xsd2go@latest
 
 us-csl-models:
-	@mkdir -p ./pkg/csl_us/gen/
-	wget -O ./pkg/csl_us/gen/ENHANCED_XML.xsd https://sanctionslistservice.ofac.treas.gov/api/PublicationPreview/exports/ENHANCED_XML.xsd
+	@mkdir -p ./pkg/sources/csl_us/gen/
+	wget -O ./pkg/sources/csl_us/gen/ENHANCED_XML.xsd https://sanctionslistservice.ofac.treas.gov/api/PublicationPreview/exports/ENHANCED_XML.xsd
 	gocomply_xsd2go convert \
-		./pkg/csl_us/gen/ENHANCED_XML.xsd \
-		github.com/moov-io/watchman/pkg/csl_us/gen ./pkg/csl_us/gen/
+		./pkg/sources/csl_us/gen/ENHANCED_XML.xsd \
+		github.com/moov-io/watchman/pkg/sources/csl_us/gen ./pkg/sources/csl_us/gen/
 
 .PHONY: models models-setup us-csl-models
 

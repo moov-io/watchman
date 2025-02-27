@@ -14,7 +14,7 @@ import (
 )
 
 func TestReadCSL(t *testing.T) {
-	fd, err := os.Open(filepath.Join("..", "..", "test", "testdata", "ConList.csv"))
+	fd, err := os.Open(filepath.Join("..", "..", "..", "test", "testdata", "ConList.csv"))
 	if err != nil {
 		t.Error(err)
 	}
@@ -81,7 +81,11 @@ func TestReadCSL(t *testing.T) {
 func TestReadUKSanctionsList(t *testing.T) {
 	t.Setenv("WITH_UK_SANCTIONS_LIST", "false")
 
-	fd, err := os.Open(filepath.Join("..", "..", "test", "testdata", "UK_Sanctions_List.ods"))
+	if testing.Short() {
+		return
+	}
+
+	fd, err := os.Open(filepath.Join("..", "..", "..", "test", "testdata", "UK_Sanctions_List.ods"))
 	if err != nil {
 		t.Error(err)
 	}

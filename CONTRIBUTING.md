@@ -30,7 +30,7 @@ This project uses [Go Modules](https://go.dev/blog/using-go-modules) and Go v1.1
 # Just pull down into the Go Module's cache, not the source code.
 $ go get -u github.com/moov-io/watchman
 
-$ go doc github.com/moov-io/watchman/pkg/ofac SDN
+$ go doc github.com/moov-io/watchman/pkg/sources/ofac SDN
 ```
 
 You can pull a working repository of our code code with git:

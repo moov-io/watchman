@@ -32,7 +32,7 @@ func TestOFACTest_Sample(t *testing.T) {
 			},
 		})
 	} else {
-		// Use a mock downloader with OFAC files from ./pkg/ofac/testdata/
+		// Use a mock downloader with OFAC files from ./pkg/sources/ofac/testdata/
 		dl = ofactest.GetDownloader(t)
 	}
 	require.NoError(t, err)

@@ -18,7 +18,7 @@ import (
 
 func TestRead(t *testing.T) {
 	testdata := func(fn string) map[string]io.ReadCloser {
-		fd, err := os.Open(filepath.Join("..", "..", "test", "testdata", fn))
+		fd, err := os.Open(filepath.Join("..", "..", "..", "test", "testdata", fn))
 		if err != nil {
 			t.Error(err)
 		}
@@ -207,7 +207,7 @@ func TestSDNComments_CryptoCurrencies(t *testing.T) {
 func TestDownload__OFAC_Spillover(t *testing.T) {
 	ctx := context.Background()
 	logger := log.NewTestLogger()
-	initialDir := filepath.Join("..", "..", "test", "testdata", "static")
+	initialDir := filepath.Join("..", "..", "..", "test", "testdata", "static")
 
 	files, err := Download(ctx, logger, initialDir)
 	require.NoError(t, err)

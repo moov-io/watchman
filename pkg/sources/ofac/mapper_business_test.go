@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/moov-io/watchman/internal/ofactest"
-	"github.com/moov-io/watchman/pkg/ofac"
 	"github.com/moov-io/watchman/pkg/search"
+	"github.com/moov-io/watchman/pkg/sources/ofac"
 
 	"github.com/stretchr/testify/require"
 )

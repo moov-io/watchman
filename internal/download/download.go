@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/moov-io/base/telemetry"
-	"github.com/moov-io/watchman/pkg/csl_us"
-	"github.com/moov-io/watchman/pkg/ofac"
 	"github.com/moov-io/watchman/pkg/search"
+	"github.com/moov-io/watchman/pkg/sources/csl_us"
+	"github.com/moov-io/watchman/pkg/sources/ofac"
 
 	"github.com/moov-io/base/log"
 	"golang.org/x/sync/errgroup"

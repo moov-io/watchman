@@ -10,8 +10,8 @@ import (
 	"testing"
 
 	"github.com/moov-io/watchman/internal/download"
-	"github.com/moov-io/watchman/pkg/ofac"
 	"github.com/moov-io/watchman/pkg/search"
+	"github.com/moov-io/watchman/pkg/sources/ofac"
 
 	"github.com/moov-io/base/log"
 	"github.com/stretchr/testify/require"
@@ -69,10 +69,10 @@ func testService(tb testing.TB) Service {
 	tb.Helper()
 
 	files := testInputs(tb,
-		filepath.Join("..", "..", "pkg", "ofac", "testdata", "sdn.csv"),
-		filepath.Join("..", "..", "pkg", "ofac", "testdata", "alt.csv"),
-		filepath.Join("..", "..", "pkg", "ofac", "testdata", "add.csv"),
-		filepath.Join("..", "..", "pkg", "ofac", "testdata", "sdn_comments.csv"),
+		filepath.Join("..", "..", "pkg", "sources", "ofac", "testdata", "sdn.csv"),
+		filepath.Join("..", "..", "pkg", "sources", "ofac", "testdata", "alt.csv"),
+		filepath.Join("..", "..", "pkg", "sources", "ofac", "testdata", "add.csv"),
+		filepath.Join("..", "..", "pkg", "sources", "ofac", "testdata", "sdn_comments.csv"),
 	)
 	ofacRecords, err := ofac.Read(files)
 	require.NoError(tb, err)

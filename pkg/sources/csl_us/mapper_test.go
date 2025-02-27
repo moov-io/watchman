@@ -8,8 +8,8 @@ import (
 	"encoding/xml"
 	"testing"
 
-	"github.com/moov-io/watchman/pkg/csl_us/gen/ENHANCED_XML"
 	"github.com/moov-io/watchman/pkg/search"
+	"github.com/moov-io/watchman/pkg/sources/csl_us/gen/ENHANCED_XML"
 
 	"github.com/stretchr/testify/require"
 )
