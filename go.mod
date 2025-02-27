@@ -12,7 +12,7 @@ require (
 	github.com/dongri/phonenumber v0.1.12
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-retryablehttp v0.7.7
-	github.com/jaswdr/faker v1.19.1
+	github.com/jaswdr/faker/v2 v2.3.3
 	github.com/knieriem/odf v0.1.0
 	github.com/moov-io/base v0.53.0
 	github.com/moov-io/iso3166 v0.2.1
@@ -20,6 +20,7 @@ require (
 	github.com/pariz/gountries v0.1.6
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.4.0
+	github.com/vmihailenco/msgpack/v5 v5.4.1
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673
 	go.opentelemetry.io/otel v1.34.0
 	go.opentelemetry.io/otel/trace v1.34.0
@@ -84,7 +85,6 @@ require (
 	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/yuin/goldmark v1.7.1 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
