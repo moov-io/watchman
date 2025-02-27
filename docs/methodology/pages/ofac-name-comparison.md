@@ -1,14 +1,8 @@
----
-layout: page
-title: OFAC Portal Name Comparison
-hide_hero: true
-show_sidebar: false
-menubar: docs-menu
----
 ## Comparison with OFAC portalThe OFAC portal returned 20 100% matches for "Khamis Al"
 
 Comparing OFAC Names against "Khamis Al"
-|----|----|----|
+
+| Query Term | OFAC Name | Similarity Score |
 | Khamis Al |	ALESSAWI, Khamis F Ali	| 0.872 |
 | Khamis Al |	AL-GADDAFI, Khamis	| 0.688 |
 | Khamis Al |	AL-ISSAWI, Khamis Farhan Al-Khanjar	| 0.739 |

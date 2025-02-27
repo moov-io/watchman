@@ -41,26 +41,18 @@ func TestOFACMethodology_Name(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	buf.WriteString(`---
-layout: page
-title: OFAC Portal Name Comparison
-hide_hero: true
-show_sidebar: false
-menubar: docs-menu
----
-`)
 	buf.WriteString("## Comparison with OFAC portal")
 	buf.WriteString(fmt.Sprintf("The OFAC portal returned %d 100%% matches for %q\n", len(ofacPerfectMatches), queryName))
 
 	// Scoring these names against our original query
-	buf.WriteString(fmt.Sprintf("\nComparing OFAC Names against %q\n", queryName))
+	buf.WriteString(fmt.Sprintf("\nComparing OFAC Names against %q\n\n", queryName))
 
 	var nameTable bytes.Buffer
-	nameTable.WriteString("|----|----|----|\n")
+	nameTable.WriteString("| Query Term | OFAC Name | Similarity Score |\n")
 	w := tabwriter.NewWriter(&nameTable, 0, 0, 1, ' ', 0)
 	for _, result := range ofacPerfectMatches {
 		score := stringscore.BestPairsJaroWinkler(strings.Fields(queryName), strings.Fields(result.Name))
-		fmt.Fprintf(&nameTable, "| %s |\t%s\t| %.3f |\n", queryName, result.Name, score)
+		fmt.Fprintf(&nameTable, "| %s |\t%s\t| %.3f |\n", queryName, strings.TrimSpace(result.Name), score)
 	}
 	nameTable.WriteString("|----|----|----|\n")
 	w.Flush()
