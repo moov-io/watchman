@@ -12,7 +12,7 @@ import (
 
 func TestExtractVariablesOfType(t *testing.T) {
 	fsys := os.DirFS(filepath.Join("..", ".."))
-	modelsPath := filepath.Join("pkg", "search", "models.go")
+	modelsPath := "pkg/search/models.go" // DirFS always expects forward slashes
 	found, err := ast.ExtractVariablesOfType(fsys, modelsPath, "EntityType")
 	require.NoError(t, err)
 
