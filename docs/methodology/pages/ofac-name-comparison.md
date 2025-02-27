@@ -1,6 +1,7 @@
-## Comparison with OFAC portalThe OFAC portal returned 20 100% matches for "Khamis Al"
+## Comparison with OFAC portal
+The OFAC portal returned 20 100% matches for "Khamis Al"
 
-Comparing OFAC Names against "Khamis Al"
+Comparing OFAC Names against "Khamis Al" using Watchman's name similarity algorithm
 
 | Query Term | OFAC Name | Similarity Score |
 |----|----|----|

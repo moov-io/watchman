@@ -41,11 +41,11 @@ func TestOFACMethodology_Name(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	buf.WriteString("## Comparison with OFAC portal")
+	buf.WriteString("## Comparison with OFAC portal\n")
 	buf.WriteString(fmt.Sprintf("The OFAC portal returned %d 100%% matches for %q\n", len(ofacPerfectMatches), queryName))
 
 	// Scoring these names against our original query
-	buf.WriteString(fmt.Sprintf("\nComparing OFAC Names against %q\n\n", queryName))
+	buf.WriteString(fmt.Sprintf("\nComparing OFAC Names against %q using Watchman's name similarity algorithm\n\n", queryName))
 
 	var nameTable bytes.Buffer
 	nameTable.WriteString("| Query Term | OFAC Name | Similarity Score |\n")
