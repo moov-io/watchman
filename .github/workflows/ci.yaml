@@ -23,6 +23,7 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: go_changes
         with:
+          predicate-quantifier: 'every'
           filters: |
             src:
               - go.mod
