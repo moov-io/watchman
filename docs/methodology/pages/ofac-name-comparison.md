@@ -1,5 +1,5 @@
 ## Comparison with OFAC portal
-The OFAC portal returned 20 100% matches for "Khamis Al"
+The [OFAC portal](https://sanctionssearch.ofac.treas.gov/) returned 20 100% matches for "Khamis Al"
 
 Comparing OFAC Names against "Khamis Al" using Watchman's name similarity algorithm
 
