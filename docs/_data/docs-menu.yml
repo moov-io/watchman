@@ -33,6 +33,8 @@
   items:
     - name: Model Validation
       link: /model-validation/
+    - name: Scoring Methodology
+      link: /methodology/
 
 - label: Production and monitoring
   items:
