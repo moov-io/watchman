@@ -1,3 +1,10 @@
+---
+layout: page
+title: OFAC Portal Name Comparison
+hide_hero: true
+show_sidebar: false
+menubar: docs-menu
+---
 ## Comparison with OFAC portalThe OFAC portal returned 20 100% matches for "Khamis Al"
 
 Comparing OFAC Names against "Khamis Al"

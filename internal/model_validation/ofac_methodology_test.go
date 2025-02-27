@@ -41,6 +41,14 @@ func TestOFACMethodology_Name(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
+	buf.WriteString(`---
+layout: page
+title: OFAC Portal Name Comparison
+hide_hero: true
+show_sidebar: false
+menubar: docs-menu
+---
+`)
 	buf.WriteString("## Comparison with OFAC portal")
 	buf.WriteString(fmt.Sprintf("The OFAC portal returned %d 100%% matches for %q\n", len(ofacPerfectMatches), queryName))
 

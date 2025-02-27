@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Model Methodology
+title: Watchman Model Methodology
 hide_hero: true
 show_sidebar: false
 menubar: docs-menu
