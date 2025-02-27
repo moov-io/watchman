@@ -49,12 +49,12 @@ func TestOFACMethodology_Name(t *testing.T) {
 
 	var nameTable bytes.Buffer
 	nameTable.WriteString("| Query Term | OFAC Name | Similarity Score |\n")
+	nameTable.WriteString("|----|----|----|\n")
 	w := tabwriter.NewWriter(&nameTable, 0, 0, 1, ' ', 0)
 	for _, result := range ofacPerfectMatches {
 		score := stringscore.BestPairsJaroWinkler(strings.Fields(queryName), strings.Fields(result.Name))
 		fmt.Fprintf(&nameTable, "| %s |\t%s\t| %.3f |\n", queryName, strings.TrimSpace(result.Name), score)
 	}
-	nameTable.WriteString("|----|----|----|\n")
 	w.Flush()
 	buf.Write(nameTable.Bytes())
 

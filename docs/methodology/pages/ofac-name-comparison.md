@@ -3,6 +3,7 @@
 Comparing OFAC Names against "Khamis Al"
 
 | Query Term | OFAC Name | Similarity Score |
+|----|----|----|
 | Khamis Al |	ALESSAWI, Khamis F Ali	| 0.872 |
 | Khamis Al |	AL-GADDAFI, Khamis	| 0.688 |
 | Khamis Al |	AL-ISSAWI, Khamis Farhan Al-Khanjar	| 0.739 |
@@ -23,4 +24,3 @@ Comparing OFAC Names against "Khamis Al"
 | Khamis Al |	NAJJAR, Khamis Jawdat Khamis	| 0.759 |
 | Khamis Al |	QADDAFI, Khamis	| 0.784 |
 | Khamis Al |	QADHAFI, Khamis	| 0.784 |
-|----|----|----|
