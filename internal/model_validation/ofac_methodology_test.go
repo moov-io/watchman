@@ -1,9 +1,11 @@
 package model_validation
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"text/tabwriter"
@@ -37,14 +39,29 @@ func TestOFACMethodology_Name(t *testing.T) {
 			ofacPerfectMatches = append(ofacPerfectMatches, result)
 		}
 	}
-	fmt.Printf("OFAC portal returned %d 100%% matches for %q\n", len(ofacPerfectMatches), queryName)
+
+	var buf bytes.Buffer
+	buf.WriteString("## Comparison with OFAC portal")
+	buf.WriteString(fmt.Sprintf("The OFAC portal returned %d 100%% matches for %q\n", len(ofacPerfectMatches), queryName))
 
 	// Scoring these names against our original query
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
-	fmt.Printf("\nComparing OFAC Names against %q\n", queryName)
+	buf.WriteString(fmt.Sprintf("\nComparing OFAC Names against %q\n", queryName))
+
+	var nameTable bytes.Buffer
+	nameTable.WriteString("|----|----|----|\n")
+	w := tabwriter.NewWriter(&nameTable, 0, 0, 1, ' ', 0)
 	for _, result := range ofacPerfectMatches {
 		score := stringscore.BestPairsJaroWinkler(strings.Fields(queryName), strings.Fields(result.Name))
-		fmt.Fprintf(w, "| %s |\t%s\t| %.3f |\n", queryName, result.Name, score)
+		fmt.Fprintf(&nameTable, "| %s |\t%s\t| %.3f |\n", queryName, result.Name, score)
 	}
+	nameTable.WriteString("|----|----|----|\n")
 	w.Flush()
+	buf.Write(nameTable.Bytes())
+
+	// Update our methodology docs
+	where := filepath.Join("..", "..", "docs", "methodology", "pages", "ofac-name-comparison.md")
+	err = os.WriteFile(where, buf.Bytes(), 0600)
+	require.NoError(t, err)
+
+	fmt.Println(buf.String())
 }
