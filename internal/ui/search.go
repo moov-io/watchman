@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"image/color"
-	"path/filepath"
 	"strings"
 
 	"github.com/moov-io/watchman"
@@ -323,7 +322,7 @@ func newMultilineInput(visibleRows int) *widget.Entry {
 }
 
 var (
-	modelsPath = filepath.Join("pkg", "search", "models.go") // needs to match what's in ../../package.go
+	modelsPath = "pkg/search/models.go" // needs to match what's in ../../package.go, DirFS expects forward slashes
 )
 
 func newSelect(modelName string) *widget.Select {
