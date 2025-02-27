@@ -8,8 +8,8 @@ env:
   RELEASE: yes
 
 jobs:
-  testing:
-    name: Testing
+  short:
+    name: Short tests
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -38,14 +38,35 @@ jobs:
         choco install -y make mingw
 
     - name: Short Tests
-      env:
-        GOTEST_FLAGS: "-short"
       run: |
         make check
+      env:
+        GOTEST_FLAGS: "-short"
+
+  sources-long:
+    name: Long testing pkg/sources/
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v5
+      with:
+        go-version: stable
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Short Tests
+      run: go test ./pkg/sources... -count 1 -v
 
   create_release:
     name: Create Release
-    needs: [testing]
+    needs: [short, sources-long]
     runs-on: ubuntu-latest
     steps:
     - name: Create Release
@@ -70,7 +91,7 @@ jobs:
 
   publish:
     name: Publish
-    needs: [testing, create_release]
+    needs: [short, sources-long, create_release]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -150,7 +171,7 @@ jobs:
 
   docker-hub:
     name: Docker Hub
-    needs: [testing, create_release]
+    needs: [short, sources-long, create_release]
     runs-on: ubuntu-latest
     steps:
     - name: Set up Go 1.x
@@ -181,7 +202,7 @@ jobs:
 
   docker-openshift:
     name: Docker Openshift
-    needs: [testing, create_release]
+    needs: [short, sources-long, create_release]
     runs-on: ubuntu-latest
     steps:
     - name: Set up Go 1.x
