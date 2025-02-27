@@ -1,0 +1,37 @@
+name: 'CI'
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+  pull_request: {}
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: read
+
+jobs:
+  detect_changes:
+    name: Detect file changes
+    runs-on: ubuntu-latest
+    outputs:
+      go_changes: ${{ steps.go_changes.outputs.src }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: go_changes
+        with:
+          filters: |
+            src:
+              - go.mod
+              - '**/*.go'
+              - '!internal/model_validation/*.go'
+
+  go:
+    needs: detect_changes
+    if: ${{ needs.detect_changes.outputs.go_changes == 'true' }}
+    uses: ./.github/workflows/go.yml
+    name: Go Tests
+    secrets: inherit
