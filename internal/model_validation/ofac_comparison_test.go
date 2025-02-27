@@ -19,6 +19,10 @@ const (
 )
 
 func TestOFAC_Comparsion_Person(t *testing.T) {
+	if testing.Short() {
+		t.Skip("-short flag provided")
+	}
+
 	// 29702,"LIFSHITS, Artem Mikhaylovich","individual","CYBER2] [ELECTION-EO13848",-0- ,-0- ,-0- ,-0- ,-0- ,-0- ,-0- ,"DOB 26 Dec 1992; nationality Russia; Email Address mycryptodeals@yandex.ru; alt. Email Address artemlv@hotmail.com; Gender Male; Digital Currency Address - XBT 12udabs2TkX7NXCSj6KpqXfakjE52ZPLhz; alt. Digital Currency Address - XBT 1DT3tenf14cxz9WFNxmYrXFbB6TFiVWA9U; Digital Currency Address - ETH 0x901bb9583b24d97e995513c6778dc6888ab6870e; alt. Digital Currency Address - ETH 0xa7e5d5a720f06526557c513402f2e6b5fa20b008; Secondary sanctions risk: Ukraine-/Russia-Related Sanctions Regulations, 31 CFR 589.201; Phone Number 79110354982; Digital Currency Address - LTC Leo3j36nn1JcsUQruytQhFUdCdCH5YHMR3; Digital Currency Address - DASH Xs3vzQmNvAxRa3Xo8XzQqUb3BMgb9EogF4; Passport 719032284."
 	indexEntry := ofactest.FindEntity(t, "29702")
 
