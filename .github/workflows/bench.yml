@@ -59,9 +59,9 @@ jobs:
         gh-pages-branch: master
         benchmark-data-dir-path: "docs/bench/common/"
 
-    - name: Running OFAC Benchmarks
+    - name: Running Sources Benchmarks
       run: |
-        go test ./pkg/ofac/... -short -bench Benchmark -run Benchmark -benchmem > output.txt
+        go test ./pkg/sources/ofac/... -short -bench Benchmark -run Benchmark -benchmem > output.txt
 
     - name: Store benchmark result
       uses: benchmark-action/github-action-benchmark@v1
