@@ -79,7 +79,7 @@ func TestCompareDates_EdgeCases(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := compareDates(&tc.query, &tc.index)
+			got := compareDates(tc.query, tc.index)
 			require.InDelta(t, got, tc.expected, 0.001)
 		})
 	}
