@@ -170,6 +170,15 @@ func compareAssetDates[Q any, I any](entityType EntityType, query Entity[Q], ind
 
 // compareDates calculates similarity score between two dates
 func compareDates(date1, date2 *time.Time) float64 {
+	if date1 == nil || date2 == nil {
+		return 0.0
+	}
+
+	// There are two common ways to compare dates
+	// 1. Same Day and Month but adjacent year  -- 03-10-1970 and 03-10-1971 or 03-10-1972
+	// 2. Same Day and Year, but adjacent month -- 01-10-1970 and 02-10-1970 or 11-10-1970
+	// TODO(adam): needs updating
+
 	// Normalize to same time of day
 	d1 := date1.Truncate(24 * time.Hour)
 	d2 := date2.Truncate(24 * time.Hour)
