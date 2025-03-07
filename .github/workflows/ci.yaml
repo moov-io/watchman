@@ -21,18 +21,24 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: dorny/paths-filter@v3
+        id: gomod_changes
+        with:
+          filters: |
+            src:
+              - go.mod
+
+      - uses: dorny/paths-filter@v3
         id: go_changes
         with:
           predicate-quantifier: 'every'
           filters: |
             src:
-              - go.mod
               - '**/*.go'
               - '!internal/model_validation/*.go'
 
   go:
     needs: detect_changes
-    if: ${{ needs.detect_changes.outputs.go_changes == 'true' }}
+    if: ${{ needs.detect_changes.outputs.gomod_changes == 'true' || needs.detect_changes.outputs.go_changes == 'true' }}
     uses: ./.github/workflows/go.yml
     name: Go Tests
     secrets: inherit
