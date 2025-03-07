@@ -1,0 +1,275 @@
+openapi: 3.0.2
+info:
+  description: |
+    Moov Watchman offers download, parse, and search functions over numerous trade sanction lists from the United States, agencies, and nonprofits for complying with regional laws.
+  contact:
+    url: https://github.com/moov-io/watchman
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Watchman API
+  version: v2
+
+servers:
+  - url: http://localhost:8084
+    description: Local development
+
+paths:
+  /v2/listinfo:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListInfoResponse'
+          description: Current lists watchman has prepared and indexed for search
+          headers:
+            Access-Control-Allow-Origin:
+              description: '*'
+              schema:
+                type: string
+            Content-Type:
+              description: application/json
+              schema:
+                type: string
+  /v2/search:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+          description: Successful search
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad request
+          headers:
+            Content-Type:
+              description: application/json
+              schema:
+                type: string
+        default:
+          description: ""
+components:
+  schemas:
+    Address:
+      properties:
+        line1:
+          type: string
+        line2:
+          type: string
+        city:
+          type: string
+        postalCode:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+          description: ISO-3166 code
+      type: object
+    Aircraft:
+      properties:
+        altNames:
+          items:
+            type: string
+          type: array
+        built:
+          format: date
+          type: string
+        flag:
+          type: string
+        icaoCode:
+          type: string
+        model:
+          type: string
+        name:
+          type: string
+        serialNumber:
+          type: string
+        type:
+          type: string
+      type: object
+    Business:
+      properties:
+        altNames:
+          items:
+            type: string
+          type: array
+        created:
+          format: date
+          type: string
+        dissolved:
+          format: date
+          type: string
+        name:
+          type: string
+      type: object
+    Contact:
+      properties:
+        emailAddresses:
+          items:
+            type: string
+          type: array
+        faxNumbers:
+          items:
+            type: string
+          type: array
+        phoneNumbers:
+          items:
+            type: string
+          type: array
+        websites:
+          items:
+            type: string
+          type: array
+      type: object
+    CryptoAddress:
+      properties:
+        address:
+          type: string
+        currency:
+          type: string
+      type: object
+    Entity:
+      properties:
+        addresses:
+          items:
+            $ref: '#/components/schemas/Address'
+          type: array
+        aircraft:
+          $ref: '#/components/schemas/Aircraft'
+        business:
+          $ref: '#/components/schemas/Business'
+        contact:
+          $ref: '#/components/schemas/Contact'
+        cryptoAddresses:
+          items:
+            $ref: '#/components/schemas/CryptoAddress'
+          type: array
+        name:
+          type: string
+        organization:
+          $ref: '#/components/schemas/Organization'
+        person:
+          $ref: '#/components/schemas/Person'
+        type:
+          enum:
+          - person
+          - business
+          - organization
+          - aircraft
+          - vessel
+          type: string
+        vessel:
+          $ref: '#/components/schemas/Vessel'
+      type: object
+    ErrorResponse:
+      properties:
+        error:
+          type: string
+      type: object
+    ListInfoResponse:
+      properties:
+        lists:
+          type: object
+          example:
+            us_csl: 442
+            us_ofac: 17646
+          description: Count of entities parsed from each list
+        listHashes:
+          type: object
+          example:
+            us_csl: "a572...cf42"
+            us_ofac: "0629...9aab"
+          description: Hash of each list's original contents
+        startedAt:
+          format: date
+          type: string
+          description: Timestamp of when list refresh started
+        endedAt:
+          format: date
+          type: string
+          description: Timestamp of when list refresh completed
+        version:
+          type: string
+          example: "v0.51.0"
+      type: object
+    Organization:
+      properties:
+        altNames:
+          items:
+            type: string
+          type: array
+        created:
+          format: date
+          type: string
+        dissolved:
+          format: date
+          type: string
+        name:
+          type: string
+      type: object
+    Person:
+      properties:
+        altNames:
+          items:
+            type: string
+          type: array
+        birthDate:
+          format: date
+          type: string
+        deathDate:
+          format: date
+          type: string
+        gender:
+          type: string
+        name:
+          type: string
+        titles:
+          items:
+            type: string
+          type: array
+      type: object
+    SearchResponse:
+      properties:
+        entities:
+          items:
+            $ref: '#/components/schemas/Entity'
+          type: array
+      type: object
+    Vessel:
+      properties:
+        altNames:
+          items:
+            type: string
+          type: array
+        built:
+          format: date
+          type: string
+        callSign:
+          type: string
+        flag:
+          type: string
+        grossRegisteredTonnage:
+          type: integer
+        imoNumber:
+          type: string
+        mmsi:
+          type: string
+        model:
+          type: string
+        name:
+          type: string
+        owner:
+          type: string
+        tonnage:
+          type: integer
+        type:
+          type: string
+      type: object
