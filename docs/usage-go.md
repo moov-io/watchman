@@ -10,13 +10,30 @@ menubar: docs-menu
 
 > For documentation on older releases of Watchman (v0.31.x series), please visit the [older docs website](https://github.com/moov-io/watchman/tree/v0.31.3/docs) in our GitHub repository.
 
-This project uses [Go Modules](https://go.dev/blog/using-go-modules) and Go v1.18 or newer. See [Golang's install instructions](https://golang.org/doc/install) for help setting up Go. You can download the source code and we offer [tagged and released versions](https://github.com/moov-io/watchman/releases/latest) as well. We highly recommend you use a tagged release for production.
+[![GoDoc](https://pkg.go.dev/github.com/moov-io/watchman?status.svg)](https://pkg.go.dev/github.com/moov-io/watchman)
 
-```
-$ git@github.com:moov-io/watchman.git
+```go
+import (
+    "github.com/moov-io/watchman/pkg/search"
+)
 
-# Pull down into the Go Module cache
-$ go get -u github.com/moov-io/watchman
+func main() {
+    client := search.NewClient(nil, "http://localhost:8084")
 
-$ go doc github.com/moov-io/watchman/client Search
+    ctx := context.Background()
+    query := public.Entity[public.Value]{
+    	Name: "Flight",
+    	Type: public.EntityAircraft,
+    }
+    var opts public.SearchOpts
+
+    response, err := scope.client.SearchByEntity(ctx, query, opts)
+    if err != nil {
+         // deal with errors
+    }
+
+    for _, entity := response.Entities {
+        // do something with each entity
+    }
+}
 ```
