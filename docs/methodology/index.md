@@ -187,4 +187,4 @@ Watchman's matching algorithms are validated through:
 - [Application of Jaro-Winkler String Comparator in Enhancing Veterans Administrative Records](https://nces.ed.gov/FCSM/pdf/H_4HyoParkFCSM2018final.pdf)
 - [Efficient Approximate Entity Matching Using Jaro-Winkler Distance](https://jqin.gitee.io/files/wise2017-wang.pdf)
 
-For more information on validation, see the [Model Validation](/watchman/model-validation/) page.
+For more information on validation, see the [Scoring Methodology](/watchman/methodology/) page.

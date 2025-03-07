@@ -103,5 +103,5 @@ This produces more comprehensive screening with fewer false negatives while stil
 ## Next Steps
 
 - See the [Search Documentation](/watchman/search/) for detailed query options
-- Explore the [Model Validation](/watchman/model-validation/) methodology
+- Explore the [Scoring Methodology](/watchman/methodology/)
 - Check the [Configuration Guide](/watchman/config/) for deployment options
