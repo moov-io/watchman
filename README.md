@@ -52,16 +52,17 @@ We encourage you to try out the new Watchman and [report any issues or requests 
 - [Usage](#usage)
   - As an API
     - [Docker](#docker) ([Config](#configuration-settings))
-    - [Google Cloud](#google-cloud-run) ([Config](#configuration-settings))
-    - [Webhook notifications](#webhook-notifications)
     - [Data persistence](#data-persistence)
-  - [As a Go module](#go-library)
-  - [As an in-browser search tool](#in-browser-watchman-search)
+- [Configuration](#configuration)
 - [Useful resources](#useful-resources)
+   - [Similarity Configuration](#similarity-configuration)
+   - [Source List Configuration](#source-list-configuration)
+- [FAQ](#faq)
 - [Getting help](#getting-help)
 - [Supported and tested platforms](#supported-and-tested-platforms)
 - [Contributing](#contributing)
 - [Related projects](#related-projects)
+- [License](#license)
 
 ## Project status
 
@@ -152,8 +153,11 @@ Run a search for an individual or business
 
 </details>
 
+### Data persistence
 
-### Configuration
+By design, Watchman **does not persist** (save) any data about the search queries or actions created. The only storage occurs in memory of the process and upon restart Watchman will have no files or data saved. Also, no in-memory encryption of the data is performed.
+
+## Configuration
 
 | Environmental Variable | Description | Default |
 |-----|-----|-----|
@@ -193,10 +197,6 @@ Run a search for an individual or business
 | `US_CSL_DOWNLOAD_URL` | Use an alternate URL for downloading US Consolidated Screening List | Subresource of `api.trade.gov` |
 | `CSL_DOWNLOAD_TEMPLATE` | Same as `US_CSL_DOWNLOAD_URL` | |
 
-### Data persistence
-
-By design, Watchman **does not persist** (save) any data about the search queries or actions created. The only storage occurs in memory of the process and upon restart Watchman will have no files or data saved. Also, no in-memory encryption of the data is performed.
-
 ### FAQ
 
 #### Reporting hits to OFAC
@@ -233,10 +233,6 @@ If you find a security issue please contact us at [`security@moov.io`](mailto:se
 Yes please! Please review our [Contributing guide](CONTRIBUTING.md) and [Code of Conduct](https://github.com/moov-io/ach/blob/master/CODE_OF_CONDUCT.md) to get started! Checkout our [issues for first time contributors](https://github.com/moov-io/watchman/contribute) for something to help out with.
 
 Run `make install` to setup [gopostal](https://github.com/openvenues/gopostal) / [libpostal](https://github.com/openvenues/libpostal) for Watchman.
-
-### Releasing
-
-To make a release of ach simply open a pull request with `CHANGELOG.md` and `version.go` updated with the next version number and details. You'll also need to push the tag (i.e. `git push origin v1.0.0`) to origin in order for CI to make the release.
 
 ## Related projects
 As part of Moov's initiative to offer open source fintech infrastructure, we have a large collection of active projects you may find useful:
