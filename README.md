@@ -26,19 +26,28 @@
 
 Moov's mission is to give developers an easy way to create and integrate bank processing into their own software products. Our open source projects are each focused on solving a single responsibility in financial services and designed around performance, scalability, and ease of use.
 
-Moov Watchman offers download, parse, and search functions over numerous trade sanction lists from the United States, agencies, and nonprofits for complying with regional laws.
+## What is Watchman?
 
-Lists included in search are:
+Moov Watchman is a high-performance sanctions screening and compliance tool that helps businesses meet their regulatory obligations. It provides an HTTP server and [Go library](https://pkg.go.dev/github.com/moov-io/watchman/pkg/search#Client) for searching against multiple global sanctions and screening lists.
 
-- US Treasury - [Office of Foreign Assets Control (OFAC)](https://ofac.treasury.gov/sanctions-list-service)
-- trade.gov [Consolidated Screening List](https://www.trade.gov/consolidated-screening-list)
-- EU - [Consolidated Sanctions List](https://data.europa.eu/data/datasets/consolidated-list-of-persons-groups-and-entities-subject-to-eu-financial-sanctions?locale=en)
-   - NOTE: it is recommended to [create your own europa.eu account](https://webgate.ec.europa.eu/cas/login) and then access the [EU Financial Sanctions Files](https://webgate.ec.europa.eu/fsd/fsf)
-      - Use the token described under the "Show settings for crawler/robot" section
-- UK - [OFSI Sactions List](https://www.gov.uk/government/publications/financial-sanctions-consolidated-list-of-targets/consolidated-list-of-targets#contents)
-- UK - [Sanctions List](https://www.gov.uk/government/publications/the-uk-sanctions-list) (Disabled by default)
+## Key Features
 
-All United States, UK and European Union companies are required to comply with various regulations and sanction lists (such as the US Patriot Act requiring compliance with the BIS Denied Persons List).
+- **Comprehensive Coverage**: Integrates multiple global watchlists in one unified system
+- **High-Performance Search**: Optimized for speed and accuracy using advanced matching algorithms
+- **Flexible Integration**: HTTP API and Go library for easy integration into your systems
+- **Automated Updates**: Regular refreshes of watchlist data to ensure compliance
+
+## Included Lists
+
+Watchman integrates the following lists to help you maintain global compliance:
+
+| Source | List |
+|--------|------|
+| US Treasury | [Office of Foreign Assets Control (OFAC)](https://ofac.treasury.gov/sanctions-list-service) |
+| US Government | [Consolidated Screening List (CSL)](https://www.trade.gov/consolidated-screening-list) |
+| European Union | [Consolidated Sanctions List](https://data.europa.eu/data/datasets/consolidated-list-of-persons-groups-and-entities-subject-to-eu-financial-sanctions?locale=en) |
+| United Kingdom | [OFSI Sanctions List](https://www.gov.uk/government/publications/financial-sanctions-consolidated-list-of-targets/consolidated-list-of-targets#contents) |
+| United Kingdom | [Sanctions List](https://www.gov.uk/government/publications/the-uk-sanctions-list) (Disabled by default) |
 
 ## v2 Endpoints (v0.50.x series and beyond)
 

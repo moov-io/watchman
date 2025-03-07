@@ -1,9 +1,9 @@
 - name: API
   link: https://moov-io.github.io/watchman/api
 - name: Go
-  link: https://pkg.go.dev/github.com/moov-io/watchman#section-documentation
-- name: Demo
-  link: https://oss.moov.io/watchman/
+  link: https://pkg.go.dev/github.com/moov-io/watchman
+# - name: Demo
+#   link: https://oss.moov.io/watchman/
 - name: Community
   dropdown:
     - name: Awesome Fintech

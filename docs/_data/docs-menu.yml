@@ -9,25 +9,17 @@
   items:
     - name: Docker
       link: /usage-docker/
-    - name: Google Cloud Run
-      link: /usage-google-cloud/
-    - name: Webhook notifications
-      link: /webhook-notifications/
     - name: Configuration
-      link: /usage-configuration/
+      link: /config/
     - name: Go library
       link: /usage-go/
 
 - label: Watchman search
   items:
-    - name: File structure
-      link: /file-structure/
     - name: Search options
       link: /search/
     - name: Precomputation pipeline
       link: /pipeline/
-    - name: High availability
-      link: /ha/
 
 - label: Risk Management
   items:
@@ -38,9 +30,5 @@
 
 - label: Production and monitoring
   items:
-    - name: Production runbook
-      link: /runbook/
-    - name: Prometheus metrics
-      link: /metrics/
     - name: Caching Data Files
       link: /cache-data-files/

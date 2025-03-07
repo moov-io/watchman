@@ -1,71 +1,78 @@
 ---
 layout: page
-title: Precomputation pipeline
+title: Name Processing Pipeline
 hide_hero: true
 show_sidebar: false
 menubar: docs-menu
 ---
 
-# Pipeline
+# Name Processing Pipeline
 
-Watchman performs various operations on records prior to their inclusion in the search index and offers some inspection capabilities into the search index.
+## Overview
 
-Setting `DEBUG_NAME_PIPELINE=true` will enable verbose logging of every text processing step performed on records prior to inclusion in the search index.
+Before entities are added to the search index, Watchman processes their names and associated data to improve search accuracy. This processing pipeline standardizes different text variations to ensure that similar entities will match during searches, even when their original formats differ.
 
-```
-ts=2019-12-19T17:11:25.325105Z caller=pipeline.go:84 pipeline=*main.reorderSDNStep result="ANGLO-CARIBBEAN CO., LTD." original="ANGLO-CARIBBEAN CO., LTD."
-ts=2019-12-19T17:11:25.32513Z caller=pipeline.go:84 pipeline=*main.companyNameCleanupStep result=ANGLO-CARIBBEAN. original="ANGLO-CARIBBEAN CO., LTD."
-ts=2019-12-19T17:11:25.325583Z caller=pipeline.go:84 pipeline=*main.stopwordsStep result=anglo-caribbean original="ANGLO-CARIBBEAN CO., LTD."
-ts=2019-12-19T17:11:25.325613Z caller=pipeline.go:84 pipeline=*main.normalizeStep result="anglo caribbean" original="ANGLO-CARIBBEAN CO., LTD."
-```
+## Pipeline Stages
 
-Note: Some record types are skipped in pipeline steps.
+The pipeline consists of four main stages that transform entity data:
 
-## Debugging SDNs
+### 1. Name Reordering
 
-For a more precise inspection of a specific SDN record, call the following endpoint. The `debug` object is included along with the SDN in question.
+Transforms inverted names (typically found in sanctions lists) into standard order.
 
-```
-$ curl -s localhost:9094/debug/sdn/16016 | jq .
-{
-  "SDN": {
-    "entityID": "16016",
-    "sdnName": "CYLINDER SYSTEM L.T.D.",
-    // ...
-    "remarks": "Tax ID No. 27694384517 (Croatia)."
-  },
-  "debug": {
-    "indexedName": "cylinder system",
-    "parsedRemarksId": "27694384517"
-  }
-}
-```
+**Example**:
+- `MADURO MOROS, Nicolas` → `Nicolas MADURO MOROS`
 
-## Pipeline steps
+This makes it easier to match names entered in natural order during searches.
 
-**Reordering of individual names**
+### 2. Company Name Cleanup
 
-This step processes SDN and SSI entries to rearrange their name into a "first middle last" ordering.
+Removes legal suffixes and business entity types from company names.
 
-Example: `MADURO MOROS, Nicolas` into `Nicolas MADURO MOROS`
+**Example**:
+- `AMD CO. LTD AGENCY` → `AMD AGENCY`
 
-**Company name cleanup**
+This focuses matching on the core business name rather than common legal designations.
 
-This step strips SDN and SSI company suffixes/titles from their indexed name. The original name from their source file is never changed.
+### 3. Stopword Removal
 
-Example: `AMD CO. LTD AGENCY` into `AMD AGENCY`
+Removes common words (like "the", "and", "of") that don't help distinguish entities.
 
-**Stopwords removal**
+**Example**:
+- `BANK OF AMERICA` → `BANK AMERICA`
 
-This step removes stopwords from SDN and SSI entities. [Stopwords](https://en.wikipedia.org/wiki/Stop_words) are typically the most common words in languages and don't convey necessary information in a sentence. They are more typically used for grammatical correctness and thus can be ignored in search rankings.
+This prevents common words from reducing match quality.
 
-Example: `COLOMBIANA DE CERDOS LTDA.` into `colombiana cerdos ltda`
-Example: `Trees and Trucks` into `trees trucks`
+### 4. Text Normalization
 
-**Normalization**
+Standardizes text by removing accents, converting to lowercase, and handling special characters.
 
-This step "normalizes" all text passed to it by converting it to lowercase, removing punctuation, and applying [UTF-8 Normalization](https://en.wikipedia.org/wiki/Unicode_equivalence#Normalization) to support searching non-English names with English letters. Watchman has a primary focus on American business which often performs this same conversion as a result of human or computer systems.
+**Example**:
+- `Raúl Castro` → `raul castro`
 
-Example: `Raúl Castro` into `raul castro`
+This ensures that searches work regardless of capitalization or special characters.
 
-More information: [Why You Need to Normalize Unicode Strings](https://withblue.ink/2019/03/11/why-you-need-to-normalize-unicode-strings.html)
+## Entity-Specific Processing
+
+Different entity types (person, business, vessel, etc.) receive specialized processing:
+
+- **Person entities**: Name reordering, gender standardization, proper handling of titles
+- **Business entities**: Company suffix removal, registration number standardization
+- **Vessels/Aircraft**: Specialized identifier formatting (IMO numbers, call signs)
+
+## Impact on Searching
+
+Understanding this pipeline helps you build more effective search queries:
+
+1. **Don't worry about name format** - Both `John Smith` and `SMITH, John` will match
+2. **Company suffixes don't matter** - `Acme Inc` and `ACME Corporation` will match
+3. **Accents and case are ignored** - `José` and `jose` are treated the same
+4. **Common words can be omitted** - `Bank of America` and `Bank America` are equivalent
+
+## Debugging
+
+If you need to see how your search terms are being processed:
+
+1. Enable debug mode in your searches with `debug=true`
+
+This will help you understand why particular searches are or aren't matching expected results.

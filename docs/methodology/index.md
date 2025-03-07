@@ -1,151 +1,182 @@
 ---
 layout: page
-title: Watchman Model Methodology
+title: Matching Methodology
 hide_hero: true
 show_sidebar: false
 menubar: docs-menu
 ---
 
-## Moov Watchman's Advanced Similarity Analysis
+# Watchman Matching Methodology
 
-### Introduction
+## Overview
 
-Moov Watchman implements a sophisticated multi-layered similarity matching system that significantly outperforms basic search tools like OFAC's SDN search portal. The system features a well-architected matching framework designed for high accuracy in sanctions screening and compliance workflows. This document provides a detailed overview of how Watchman's scoring algorithms work.
+Moov Watchman implements a sophisticated multi-dimensional matching system designed to balance accuracy, performance, and usability for compliance professionals. This document explains the technical foundations of Watchman's matching algorithms.
 
-### Core Matching Architecture
+## Core Matching Architecture
 
-Watchman's matching engine uses a hierarchical approach to entity matching that considers multiple dimensions of similarity with appropriate weighting for each component:
+![Matching Architecture](https://via.placeholder.com/800x400?text=Watchman+Matching+Architecture)
 
-- **Critical Identifiers** (highest priority): Exact matches of government IDs, crypto addresses, and contact information
+Watchman uses a hierarchical matching approach that evaluates entity similarity across multiple dimensions:
 
-- **Name Comparison** (high priority): Sophisticated fuzzy matching of entity names and titles
+| Priority | Component | Description |
+|----------|-----------|-------------|
+| Highest | Critical Identifiers | Government IDs, passport numbers, registration codes |
+| High | Name Matching | Sophisticated fuzzy matching of entity names |
+| Medium | Supporting Information | Addresses, dates of birth, and contextual metadata |
+| Low | Relationship Data | Connections to other entities, when available |
 
-- **Supporting Information** (medium priority): Contextual details like addresses, dates, and other entity metadata
+## Advanced Name Matching
 
-This layered design allows Watchman to make nuanced decisions about match quality, prioritizing the most definitive identifiers while still considering supporting evidence.
+### Jaro-Winkler Algorithm
 
-### Advanced Name Matching
+Watchman uses an enhanced version of the Jaro-Winkler string similarity algorithm:
 
-The core of Watchman's matching capability lies in its sophisticated name matching algorithms:
+```
+sim_jw(s1, s2) = sim_j(s1, s2) + p * l * (1 - sim_j(s1, s2))
+```
 
-#### Jaro-Winkler with Customizations
+Where:
+- `sim_j` is the base Jaro similarity
+- `p` is the prefix scaling factor (default 0.1)
+- `l` is the length of the common prefix (up to 4 characters)
 
-While OFAC or other typical search uses basic keyword matching, Watchman employs enhanced Jaro-Winkler string similarity with custom adjustments:
+Watchman's implementation includes:
 
-**Token-based Comparisons**: Names are broken into tokens/words, and each token from the search query is matched against the indexed terms using a pairwise approach
+1. **Token-based Comparison**
+   - Names are tokenized and compared word-by-word
+   - Example: "John Michael Smith" → ["john", "michael", "smith"]
 
-**Length Difference Penalties**: The algorithm penalizes matches between terms with significant length differences
+2. **Positional Weighting**
+   - Tokens in similar positions receive higher match scores
+   - Handles name order variations more effectively
 
-**Different First Letter Penalties**: Additional penalties are applied when words begin with different letters
+3. **Length Normalization**
+   - Shorter token comparisons are weighted differently than longer ones
+   - Prevents bias towards long or short names
 
-**Adjacent Term Similarity**: The algorithm checks for matches in adjacent positions, accommodating name inversions and word order differences
+4. **First-Letter Penalty**
+   - Different first letters receive an additional penalty
+   - Based on research showing first letters are rarely mistranscribed
 
-#### Phonetic Matching
+### Phonetic Matching
 
-Watchman implements phonetic matching to catch similar-sounding names regardless of spelling variations:
+For handling spelling variations, especially in transliterated names, Watchman includes:
 
-**Soundex**: The system uses a modified Soundex algorithm that groups phonetically similar letters
+1. **Modified Soundex**
+   - Groups phonetically similar characters
+   - Example: "Smith" and "Smyth" have identical phonetic codes
 
-**First Character Analysis**: Names are compared based on their first character's phonetic class, reducing unnecessary comparisons for clearly dissimilar names
+2. **First Character Analysis**
+   - Names with different first-character phonetic classes are less likely to match
+   - Improves performance by eliminating obvious non-matches early
 
-**Efficiency Optimization**: Phonetic filtering is applied early in the comparison process to eliminate obviously non-matching pairs
+## Entity-Type Specific Matching
 
-### Entity-Type Specific Matching
+Watchman applies specialized matching logic based on entity type:
 
-Watchman differentiates between various entity types (Person, Business, Organization, Vessel, Aircraft) and applies specialized matching rules for each:
+### Person Matching
 
-#### Person Matching
+- **ID Verification**: Exact matches on government IDs
+- **Name Components**: First, middle, last name specifics
+- **Date Verification**: Birth date comparison when available
+- **Title Comparison**: Professional roles and titles
 
-**Government ID Comparison**: High priority for exact matches of ID numbers
+### Business Matching
 
-**Title Comparison**: Fuzzy matching of professional titles with abbreviation expansion
+- **Registration Numbers**: Tax and business identifiers
+- **Name Normalization**: Special handling of business entity types
+- **Abbreviation Handling**: Common business abbreviations (Inc → Incorporated)
 
-**Birth/Death Date Analysis**: Date comparison with consistency checking between birth and death dates
+### Vessel/Aircraft Matching
 
-**Logical Validation**: The system checks that dates make temporal sense (birth precedes death)
+- **Specialized Identifiers**: IMO numbers, call signs, registration codes
+- **Flag/Registry** Confirmation: Jurisdictional information
+- **Technical Details**: Tonnage, model, etc.
 
-#### Business/Organization Matching
+## Scoring System
 
-**Registration ID Comparison**: Primary focus on government/tax identification numbers
+The final match score is calculated through:
 
-**Name Variations**: Consideration of alternate names and historical names
+1. **Weighted Component Aggregation**
+   - Each component's score is multiplied by its importance weight
+   - Formula: `final_score = Σ(component_score * component_weight) / Σ(component_weight)`
 
-**Creation/Dissolution Dates**: Temporal validation for business lifecycle
+2. **Critical Field Multipliers**
+   - Required fields receive extra weight
+   - Exact matches on certain fields can override fuzzy matching
 
-#### Vessel/Aircraft Matching
+3. **Coverage Analysis**
+   - Penalties applied when query doesn't cover enough entity fields
+   - Prevents high scores from partial data
 
-**Industry-specific Identifiers**: Primary matching using IMO numbers, call signs, MMSI (for vessels) or serial numbers and ICAO codes (for aircraft)
+4. **Perfect Match Boosting**
+   - High-quality matches that meet specific thresholds receive a boost
+   - Configurable via `EXACT_MATCH_FAVORITISM` environment variable
 
-**Registration Details**: Flag country, model, and ownership comparison
+## Threshold Configuration
 
-#### Address and Contact Information Matching
+Watchman allows customizing match thresholds for different risk tolerances:
 
-Watchman applies weighted matching to different address components:
+| Threshold | Default Value | Use Case |
+|-----------|--------------|----------|
+| High Confidence | 0.95+ | Automatic blocking/alerts |
+| Medium Confidence | 0.85-0.94 | Manual review queue |
+| Low Confidence | 0.70-0.84 | Enhanced due diligence |
 
-**Primary Address Line**: Highest priority (most important component)
+## Performance Optimizations
 
-**City and Country**: High priority (critical for location)
+Watchman includes several performance enhancements:
 
-**Postal Code**: Strong verification priority
+1. **Early Termination**
+   - Once a high-confidence match is found, detailed scoring may be skipped
+   - Reduces processing time for obvious matches
 
-**Secondary Address Info and State**: Supporting information priority
+2. **Phonetic Pre-filtering**
+   - Initial filtering based on phonetic codes
+   - Narrows candidate pool before expensive comparison
 
-This weighted approach prioritizes the most important address components while still considering all available information.
+3. **Caching**
+   - Frequently searched entities are cached
+   - Improves performance for common searches
 
-### Comprehensive Scoring System
+4. **Parallel Processing**
+   - Multi-threaded search for large entity sets
+   - Scales with available CPU cores
 
-The final match score is calculated through a sophisticated process:
+## Benefits for Compliance Teams
 
-**Weighted Component Aggregation**: Each component score is multiplied by its importance weight
+Watchman's sophisticated matching provides several key advantages:
 
-**Critical Field Multiplier**: Required fields are given additional weight
+1. **Reduced False Positives**
+   - Multi-dimensional scoring reduces irrelevant matches
+   - Context-aware matching prioritizes meaningful similarities
 
-**Coverage Analysis: Penalties** are applied if the query doesn't cover enough of the index entity's available fields
+2. **Improved Match Confidence**
+   - Detailed scoring provides better justification for match decisions
+   - More information for analysts making review decisions
 
-**Perfect Match Boosting**: High-quality matches that meet specific criteria receive a boost
+3. **Comprehensive Audit Trail**
+   - Score components show exactly why matches occurred
+   - Helps demonstrate compliance program effectiveness
 
-**Type Mismatch Handling**: Entity type mismatches result in a zero score
+4. **Risk-Based Approach**
+   - Configurable thresholds align with organizational risk tolerance
+   - Different rules can be applied to different entity types or programs
 
-### Score Adjustment Based on Match Quality
+## Validation Methodology
 
-Watchman applies various score adjustments based on match quality:
+Watchman's matching algorithms are validated through:
 
-**Minimum Field Requirements**: Penalties for queries with insufficient field coverage
+1. **Test Suite Verification**
+   - Comprehensive test cases covering edge cases
+   - Regression testing on algorithm changes
 
-**Name-Only Match Penalties**: Reduced confidence in matches based solely on name
+2. **Known Entity Testing**
+   - Verification against known sanctions entities and aliases
+   - Spelling variation handling
 
-**Historical Name Handling**: Names identified as "Former Name" receive a penalty
+3. **False Positive Analysis**
+   - Regular review of common false positives
+   - Algorithm tuning to reduce unnecessary matches
 
-**Exact Match Override**: Certain exact matches of critical identifiers automatically receive a perfect score
-
-### Implementation Optimizations
-
-Watchman includes several optimizations that improve both accuracy and performance:
-
-**Early Termination**: The algorithm stops comparing once a high-confidence match is found
-
-**Phonetic Filtering**: Preliminary filtering reduces unnecessary detailed comparisons
-
-**Selective Deep Analysis**: Detailed analysis is applied only to promising candidates
-
-**Configuration Flexibility**: The system allows tuning of algorithm parameters
-
-### Benefits for Compliance Teams
-
-For risk and compliance professionals, Watchman's sophisticated matching offers several benefits:
-
-**Reduced False Positives**: The multi-dimensional scoring and contextual analysis help differentiate between true and false matches
-
-**Improved Match Confidence**: Detailed scoring provides better justification for match decisions
-
-**Audit Trail**: The system's detailed scoring components provide clear rationale for matches
-
-**Configurable Thresholds**: Teams can adjust sensitivity based on risk tolerance
-
-**Enhanced Detection**: The sophisticated algorithms can identify potential sanctions matches that would be missed by conventional systems
-
-### Conclusion
-
-Moov Watchman's advanced match scoring system represents a significant improvement over basic search tools like OFAC's search portal. By combining probabilistic string matching, phonetic analysis, entity-specific logic, and weighted multi-dimensional scoring, Watchman provides compliance teams with more accurate and explainable match results.
-
-The system's attention to detail—from handling name variations to applying logical consistency checks—demonstrates a deep understanding of the challenges in entity resolution for sanctions screening. For auditors and compliance professionals, this means greater confidence in screening results, better justification for match decisions, and a more robust compliance program overall.
+For more information on validation, see the [Model Validation](/model-validation) page.

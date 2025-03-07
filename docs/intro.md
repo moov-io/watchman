@@ -1,50 +1,109 @@
 ---
 layout: page
-title: Intro
+title: Introduction
 hide_hero: true
 show_sidebar: false
 menubar: docs-menu
 ---
 
-## What is Watchman?
+# Introduction to Moov Watchman
 
-The Watchman project implements an HTTP server and [Go library](https://pkg.go.dev/github.com/moov-io/watchman) for searching, parsing, and downloading lists. Below, you can find a detailed list of features offered by Watchman:
+## Core Functionality
 
-- Download OFAC, BIS Denied Persons List, Consolidated Screening List, and various other data sources on startup
-  - Admin endpoint to [manually refresh OFAC, CSL, and other data sources](https://moov-io.github.io/watchman/runbook/#force-data-refresh)
-- Index data for searches
-- Libraries for OFAC, US CSL, UK/EU CSL, and BIS DPL data to download and parse their custom files
+Watchman is a robust compliance screening tool that provides:
 
-Searching across all sanction lists Watchman uses the [Jaro–Winkler](https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance) algorithm to score the probability of each search query matching a list entry. This follows after what the [US Treasury OFAC Search](https://ofac.treasury.gov/faqs/892) uses and what is [recommended in academic literature](https://www.wseas.org/multimedia/journals/computers/2015/a965705-699.pdf).
+1. **Data Management**:
+   - Automatic downloading of sanctions lists (OFAC, BIS, CSL, etc.)
+   - Regular refreshing of data to maintain compliance
+   - Custom data file support for specialized screening needs
 
-## FAQ
+2. **Search Capabilities**:
+   - High-performance indexing and search functionality
+   - Advanced fuzzy matching using Jaro-Winkler algorithms
+   - Multi-field search with entity type filtering
 
-### How are entities from the list indexed and used in search?
+3. **Integration Options**:
+   - HTTP API for web and service integration
+   - Native Go library for direct implementation
+   - Webhook notifications for automated workflows
 
-<p>
-    Entities from sanction lists and other data files are folded through various pre-computations prior to inclusion in the search index.
-    This means the following steps will occur (in order):
-    <ul>
-        <li>
-            <strong>SDN Reordering</strong><br />
-            Each individual's SDN name is re-ordered (Example: from "MADURO MOROS, Nicolas" to "Nicolas MADURO MOROS").
-        </li>
-        <li>
-            <strong>Company Name Cleanup</strong><br />
-            Suffixes from company names such as: "CO.", "INC.", "L.L.C.", etc are removed.
-        </li>
-        <li>
-            <strong>Stopword Removal</strong><br />
-            <a href="https://en.wikipedia.org/wiki/Stop_words">Stopwords</a> are removed. See <a href="https://github.com/bbalet/stopwords">bbalet/stopwords</a> for a full list of supported languages and words subject to removal.
-        </li>
-        <li>
-            <strong>UTF-8 Normalization</strong><br />
-            Punctuation is removed along with extra spaces on both ends of the entity name.
-            Using <a href="https://godoc.org/golang.org/x/text/unicode/norm#Form">Go's /x/text normalization</a> methods we consolidate entity names and search queries for better searching across multiple languages.
-        </li>
-    </ul>
-</p>
+## Available Libraries and Components
 
-### Why are exact matches of words not ranked higher?
+| Component | Purpose |
+|-----------|---------|
+| OFAC Library | Parse and process US OFAC sanctions data |
+| US CSL Library | Process the US Consolidated Screening List |
+| UK/EU CSL Library | Handle European sanctions data formats |
+| BIS DPL Library | Process denied persons lists |
 
-Watchman offers an environmental variable called `EXACT_MATCH_FAVORITISM` that can adjust the weight of exact matches within a query. This value is a percentage (float64) added to exact matches prior to computing the final match percentage. Try using 0.1, 0.25 or 0.5 with your testing.
+## Search Methodology
+
+### Jaro-Winkler Similarity Algorithm
+
+Watchman uses the [Jaro-Winkler distance](https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance) algorithm to score the similarity between search queries and list entries. This approach:
+
+- Matches the methodology used by [US Treasury's OFAC Search](https://ofac.treasury.gov/faqs/892)
+- Is specifically optimized for person names and other proper nouns
+- Produces scores from 0.0 (completely different) to 1.0 (exact match)
+- Has been validated by [academic research](https://www.wseas.org/multimedia/journals/computers/2015/a965705-699.pdf) as effective for compliance screening
+
+### Search Customization
+
+Watchman offers environment variables to adjust search behavior:
+
+- `EXACT_MATCH_FAVORITISM`: Controls weight given to exact matches (recommended values: 0.1, 0.25, or 0.5)
+- `DEBUG_NAME_PIPELINE`: Enables verbose logging of text processing steps
+
+## Common Questions
+
+### How are entities prepared for the search index?
+
+Entities undergo a multi-step preparation process before being indexed:
+
+1. **SDN Name Reordering**
+   ```
+   "MADURO MOROS, Nicolas" → "Nicolas MADURO MOROS"
+   ```
+
+2. **Company Name Cleanup**
+   ```
+   "ACME CORPORATION, INC." → "ACME CORPORATION"
+   ```
+   *Legal suffixes like "CO.", "INC.", "L.L.C." are removed*
+
+3. **Stopword Removal**
+   ```
+   "TREES AND EQUIPMENT LTD" → "TREES EQUIPMENT LTD"
+   ```
+   *Common words like "and", "the", "of" are removed*
+
+4. **UTF-8 Normalization**
+   ```
+   "Raúl Castro" → "raul castro"
+   ```
+   *Punctuation is removed, text is lowercased, and diacritical marks are normalized*
+
+The resulting normalized names enable more accurate matching across different formats and variations of the same entity.
+
+### What's the difference between Watchman's search and standard text search?
+
+Standard text search typically relies on exact matches or simple wildcards, which can:
+- Miss alternative spellings
+- Fail to handle name inversions
+- Be overly sensitive to typos
+- Require multiple manual searches
+
+Watchman's fuzzy matching approach allows for:
+- Identification of similar names despite variations
+- Tolerance for typographical errors
+- Handling of word order differences
+- Normalization of international character sets
+- Confidence scoring to prioritize results
+
+This produces more comprehensive screening with fewer false negatives while still providing the tools to manage false positives effectively.
+
+## Next Steps
+
+- See the [Search Documentation](/search) for detailed query options
+- Explore the [Model Validation](/model-validation) methodology
+- Check the [Configuration Guide](/configuration) for deployment options

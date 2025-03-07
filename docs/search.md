@@ -1,307 +1,181 @@
 ---
 layout: page
-title: Search options
+title: Search Guide
 hide_hero: true
 show_sidebar: false
 menubar: docs-menu
 ---
 
-# Search
+# Watchman Search Guide
 
-Moov Watchman offers numerous search options for inspecting the OFAC, SDN, CSL, and other related data. Certain endpoints don't inspect all supported lists.
+## Search Options Overview
 
-## Supported combinations
-
-- All fields, all lists
-   - `?q=<string>`
-- Name search, Searches OFAC, SSI, DPs, and BIS Entities
-   - `?name=<string>`
-   - An Address can be included, Only Searches the OFAC list
-      - `address=<string>&city=<string>&state=<string>&providence=<string>&zip=<string>&country=<string>`
-- ID search, Only searches the OFAC list
-   - `?id=<string>`
-- Alt Name search, Only searches the OFAC list
-   - `?altName=<string>`
-- Address search, Only searches the OFAC list
-   - `&address=<string>&city=<string>&state=<string>&providence=<string>&zip=<string>&country=<string>`
-
-## All in one
-
-The most common endpoint for searching across all data Watchman has indexed. To perform this search make an HTTP query like the following:
-
-See the [API documentation](https://moov-io.github.io/watchman/api/#get-/search) for full request/response data.
+Watchman provides multiple search endpoints and parameters to help you find the exact matches you need. Different search options access different combinations of watchlists.
 
 ```
-curl 'http://localhost:8084/search?q=nicolas+maduro&limit=1'
+GET /v2/search?type=person&name=nicolas+maduro&limit=1
 ```
-```
+
+### Entity Types
+
+The API requires specifying an entity type:
+
+| Type | Description | Example Query |
+|------|-------------|---------------|
+| `person` | Individual persons | `?type=person&name=nicolas maduro` |
+| `business` | Business entities | `?type=business&name=tidewater` |
+| `organization` | Non-business organizations | `?type=organization&name=hamas` |
+| `aircraft` | Aircraft registrations | `?type=aircraft&callSign=EP-GOM` |
+| `vessel` | Maritime vessels | `?type=vessel&imoNumber=9401598` |
+
+### Advanced Entity Search Parameters
+
+Each entity type supports specific search parameters:
+
+#### Person Parameters
+- `name`: Primary name
+- `altNames[]`: Alternative names
+- `gender`: Gender (male/female/unknown)
+- `birthDate`: Date of birth (YYYY-MM-DD)
+- `deathDate`: Date of death (YYYY-MM-DD)
+- `titles[]`: Professional titles
+
+#### Business/Organization Parameters
+- `name`: Entity name
+- `altNames[]`: Alternative names
+- `created`: Formation date (YYYY-MM-DD)
+- `dissolved`: Dissolution date (YYYY-MM-DD)
+
+#### Aircraft Parameters
+- `name`: Aircraft name/identifier
+- `altNames[]`: Alternative designations
+- `aircraftType`: Type of aircraft
+- `flag`: Country of registration
+- `built`: Build date (YYYY-MM-DD)
+- `icaoCode`: ICAO code
+- `model`: Aircraft model
+- `serialNumber`: Serial number
+
+#### Vessel Parameters
+- `name`: Vessel name
+- `altNames[]`: Alternative names
+- `imoNumber`: IMO number
+- `vesselType`: Type of vessel
+- `flag`: Flag country
+- `built`: Build date (YYYY-MM-DD)
+- `mmsi`: MMSI identifier
+- `callSign`: Radio call sign
+- `tonnage`: Vessel tonnage
+- `grossRegisteredTonnage`: GRT measurement
+- `owner`: Vessel owner
+
+#### Common Parameters for All Entity Types
+- `address[]`: Physical addresses
+- `email[]`, `emailAddress[]`, `emailAddresses[]`: Email addresses
+- `phone[]`, `phoneNumber[]`, `phoneNumbers[]`: Phone numbers
+- `fax[]`, `faxNumber[]`, `faxNumbers[]`: Fax numbers
+- `website[]`, `websites[]`: Associated websites
+- `cryptoAddress[]`: Cryptocurrency addresses (format: `currency:address`)
+
+### Search Response
+
+The API returns a unified structure with match scores and entity details:
+
+```json
 {
-  "SDNs": [
+  "entities": [
     {
-      "entityID": "22790",
-      "sdnName": "MADURO MOROS, Nicolas",
-      "sdnType": "individual",
-      "program": "VENEZUELA",
-      "title": "President of the Bolivarian Republic of Venezuela",
-      "callSign": "",
-      "vesselType": "",
-      "tonnage": "",
-      "grossRegisteredTonnage": "",
-      "vesselFlag": "",
-      "vesselOwner": "",
-      "remarks": "DOB 23 Nov 1962; POB Caracas, Venezuela; citizen Venezuela; Gender Male; Cedula No. 5892464 (Venezuela); President of the Bolivarian Republic of Venezuela.",
+      "entity": {
+        "name": "MADURO MOROS, Nicolas",
+        "entityType": "person",
+        "sourceList": "us_ofac",
+        "sourceID": "22790",
+        "person": {
+          "name": "Nicolas MADURO MOROS",
+          "gender": "male",
+          "birthDate": "1962-11-23T00:00:00Z"
+        },
+        "addresses": [
+          {
+            "city": "Caracas",
+            "country": "VE"
+          }
+        ]
+      },
       "match": 0.9444444444444444
-    }
-  ],
-  "altNames": [
-    {
-      "entityID": "11318",
-      "alternateID": "11868",
-      "alternateType": "aka",
-      "alternateName": "NICO",
-      "alternateRemarks": "",
-      "match": 0.8615384615384615
-    }
-  ],
-  "addresses": [
-    {
-      "entityID": "16182",
-      "addressID": "24386",
-      "address": "Colonia Moderna",
-      "cityStateProvincePostalCode": "San Pedro Sula, Cortes",
-      "country": "Honduras",
-      "addressRemarks": "",
-      "match": 0.7804695304695305
-    }
-  ],
-  "deniedPersons": [
-    {
-      "name": "LISONG MA",
-      "streetAddress": "INMATE NUMBER - 80644-053, MOSHANNON VALLEY, CORRECTIONAL INSTITUTION, 555 GEO DRIVE",
-      "city": "PHILIPSBURG",
-      "state": "PA",
-      "country": "US",
-      "postalCode": "16866",
-      "effectiveDate": "10/31/2014",
-      "expirationDate": "05/27/2024",
-      "standardOrder": "Y",
-      "lastUpdate": "2014-11-07",
-      "action": "FR NOTICE ADDED",
-      "frCitation": "79 F.R. 66354 11/7/14",
-      "match": 0.7673992673992674
     }
   ]
 }
 ```
 
-## SDN names
+## Name Search
 
-This search operation will only return results matching SDN names from your query:
-
-```
-curl 'http://localhost:8084/search?name=nicolas+maduro&limit=1'
-```
-```
-{
-  "SDNs": [
-    {
-      "entityID": "22790",
-      "sdnName": "MADURO MOROS, Nicolas",
-      "sdnType": "individual",
-      "program": "VENEZUELA",
-      "title": "President of the Bolivarian Republic of Venezuela",
-      "callSign": "",
-      "vesselType": "",
-      "tonnage": "",
-      "grossRegisteredTonnage": "",
-      "vesselFlag": "",
-      "vesselOwner": "",
-      "remarks": "DOB 23 Nov 1962; POB Caracas, Venezuela; citizen Venezuela; Gender Male; Cedula No. 5892464 (Venezuela); President of the Bolivarian Republic of Venezuela.",
-      "match": 0.9444444444444444
-    }
-  ],
-  "altNames": null,
-  "addresses": null,
-  "deniedPersons": null
-}
-```
-
-## SDN remark IDs
-
-SDN Remarks contain semi-structured data which Watchman attempts to parse. One common element of this data is a National or Governmental ID which uniquely identifies an entity.
+The name search targets primary entity names across key watchlists:
 
 ```
-curl 'http://localhost:8084/search?id=5892464&limit=1'
-```
-```
-{
-  "SDNs": [
-    {
-      "entityID": "22790",
-      "sdnName": "MADURO MOROS, Nicolas",
-      "sdnType": "individual",
-      "program": "VENEZUELA",
-      "title": "President of the Bolivarian Republic of Venezuela",
-      "callSign": "",
-      "vesselType": "",
-      "tonnage": "",
-      "grossRegisteredTonnage": "",
-      "vesselFlag": "",
-      "vesselOwner": "",
-      "remarks": "DOB 23 Nov 1962; POB Caracas, Venezuela; citizen Venezuela; Gender Male; Cedula No. 5892464 (Venezuela); President of the Bolivarian Republic of Venezuela.",
-      "match": 1
-    }
-  ],
-  "altNames": null,
-  "addresses": null,
-  "deniedPersons": null
-}
+GET /search?name=maduro&limit=2
 ```
 
-## SDN alternate names
+**Use this when**: You're specifically looking for matches against primary entity names.
 
-Often an entity will have multiple names which are in the OFAC dataset:
+## Alternate Name Search
 
-```
-curl 'http://localhost:8084/search?altName=NATIONAL+BANK+OF+CUBA&limit=1'
-```
-```
-{
-  "SDNs": null,
-  "altNames": [
-    {
-      "entityID": "306",
-      "alternateID": "220",
-      "alternateType": "aka",
-      "alternateName": "NATIONAL BANK OF CUBA",
-      "alternateRemarks": "",
-      "match": 1
-    }
-  ],
-  "addresses": null,
-  "deniedPersons": null
-}
-```
-
-Note - The SDN has an alternate name (in this case its primary name is its regional name):
+Many sanctioned entities operate under aliases or alternate names. This search targets those specifically:
 
 ```
-curl 'http://localhost:8084/sdn/306'
-```
-```
-{
-  "entityID": "306",
-  "sdnName": "BANCO NACIONAL DE CUBA",
-  "sdnType": "",
-  "program": "CUBA",
-  "title": "",
-  "callSign": "",
-  "vesselType": "",
-  "tonnage": "",
-  "grossRegisteredTonnage": "",
-  "vesselFlag": "",
-  "vesselOwner": "",
-  "remarks": "a.k.a. 'BNC'."
-}
+GET /search?altNames=NATIONAL+BANK+OF+CUBA
 ```
 
-## SDN addresses
+**Use this when**: You're looking for entities that might be using known aliases.
 
-An address can also be a query against the OFAC data. There are multiple query parameters available here to further refine results:
+## Address Search
 
-- address
-- city
-- state
-- providence
-- zip
-- country
+Address search helps identify entities associated with specific locations:
 
 ```
-curl 'http://localhost:8084/search?address=first+st&province=harare&country=zimbabew&limit=1'
-```
-```
-{
-  "SDNs": null,
-  "altNames": null,
-  "addresses": [
-    {
-      "entityID": "8178",
-      "addressID": "7437",
-      "address": "First Floor, Victory House, 88 Robert Mugabe Road",
-      "cityStateProvincePostalCode": "Harare",
-      "country": "Zimbabwe",
-      "addressRemarks": "",
-      "match": 0.8261904761904761
-    }
-  ],
-  "deniedPersons": null
-}
+GET /search?address=first+st&province=harare&country=zimbabwe
 ```
 
-## Filtering
+Available address parameters:
+- `address`: Street address or general location
+- `city`: City name
+- `state`: State or region
+- `province`: Province name
+- `zip`: Postal or ZIP code
+- `country`: Country name
 
-Moov Watchman offers filters to further refine search results. The supported query parameters are:
+## Filtering Results
 
-- `sdnType`: This is commonly `individual`, `aicraft`, or `vessel`.
-- `program`: The specific U.S. sanctions program which added the entity. (Example: `SDGT`)
-
-```
-curl 'http://localhost:8084/search?name=EP&sdnType=aircraft&limit=1&program=sdgt'
-```
-```
-{
-  "SDNs": [
-    {
-      "entityID": "15431",
-      "sdnName": "EP-GOM",
-      "sdnType": "aircraft",
-      "program": "SDGT",
-      "title": "",
-      "callSign": "",
-      "vesselType": "",
-      "tonnage": "",
-      "grossRegisteredTonnage": "",
-      "vesselFlag": "",
-      "vesselOwner": "",
-      "remarks": "Aircraft Construction Number (also called L/N or S/N or F/N) 8401; Aircraft Manufacture Date 1992; Aircraft Model IL76-TD; Aircraft Operator YAS AIR; Aircraft Manufacturer's Serial Number (MSN) 1023409321; Linked To: POUYA AIR.",
-      "match": 0.84
-    }
-  ],
-  "altNames": null,
-  "addresses": null,
-  "deniedPersons": null
-}
-```
-
-## US Consolidated Screening List (CSL)
-
-Moov Watchman offers searching the entire US CSL list. The supported query parameters are:
-
-- `name`: Legal name of entity on list
-- `limit`: Maximum number of results to return
-
-Refer to the [API docs for searching US CSL](https://moov-io.github.io/watchman/api/#get-/search/us-csl) for more details.
+Filtering is built into the entity model:
 
 ```
-curl "http://localhost:8084/search/us-csl?name=Al&limit=10
+GET /v2/search?type=person&name=maduro&minMatch=0.8
 ```
-```
-{
-  "SDNs": null,
-  "altNames": null,
-  "addresses": null,
-  "deniedPersons": null,
-  "bisEntities": [ ... ],
-  "militaryEndUsers": [ ... ],
-  "sectoralSanctions": [ ... ],
-  "unverifiedCSL": [ ... ],
-  "nonproliferationSanctions": [ ... ],
-  "foreignSanctionsEvaders": [ ... ],
-  "palestinianLegislativeCouncil": [ ... ],
-  "captaList": [ ... ],
-  "itarDebarred": [ ... ],
-  "nonSDNChineseMilitaryIndustrialComplex": [ ... ],
-  "nonSDNMenuBasedSanctionsList": [ ... ],
-  "refreshedAt": "2022-09-07T20:35:35.773313Z"
-}
-```
+
+Parameters:
+- `minMatch`: Minimum match score (0.0-1.0) to include in results
+- `limit`: Maximum number of results to return (default: 10, max: 100)
+- `debug`: Include detailed scoring information when set to "true"
+
+
+## Best Practices
+
+1. **Use specific IDs when available**
+   - ID-based searches provide the highest confidence matches
+   - Example: government IDs, IMO numbers, passport numbers
+
+2. **Combine multiple parameters**
+   - Searching with name + address improves match quality
+   - Example: `?type=person&name=maduro&address=caracas&country=VE`
+
+3. **Adjust match thresholds**
+   - Set `minMatch` parameter for filtering low-confidence matches
+   - Configure match favoritism based on your risk tolerance
+
+5. **Include contextual information**
+   - Add dates, addresses, and identifiers when available
+   - Reduces false positives and improves match confidence
+
+## API Documentation
+
+For complete API details, refer to the [API Documentation](https://moov-io.github.io/watchman/api/).
