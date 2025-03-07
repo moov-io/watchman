@@ -208,11 +208,11 @@ func getGroupSize(cm *groupsize.ConcurrencyManager) (int, error) {
 	//
 	// Using groupsize.ConcurrencyManager provides the quickest searches while using an insignificant amount of memory
 	// compared to what similarity scoring uses.
-	fromEnv := strings.TrimSpace(os.Getenv("SEARCH_GROUP_COUNT"))
+	fromEnv := strings.TrimSpace(os.Getenv("SEARCH_GOROUTINE_COUNT"))
 	if fromEnv != "" {
 		n, err := strconv.ParseUint(fromEnv, 10, 8)
 		if err != nil {
-			return 0, fmt.Errorf("parsing SEARCH_GROUP_COUNT=%q failed: %v", fromEnv, err)
+			return 0, fmt.Errorf("parsing SEARCH_GOROUTINE_COUNT=%q failed: %v", fromEnv, err)
 		}
 		return int(n), nil
 	}

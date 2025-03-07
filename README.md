@@ -3,7 +3,7 @@
 <p align="center">
   <a href="https://moov-io.github.io/watchman/">Project Documentation</a>
   ·
-  <a href="https://moov-io.github.io/watchman/api/#overview">API Endpoints</a> <a href="https://moov-io.github.io/watchman/admin/">(Admin Endpoints)</a>
+  <a href="https://moov-io.github.io/watchman/api/#overview">API Endpoints</a>
   ·
   <a href="https://moov.io/blog/education/watchman-api-guide/">API Guide</a>
   ·
@@ -16,49 +16,35 @@
 
 [![GoDoc](https://godoc.org/github.com/moov-io/watchman?status.svg)](https://godoc.org/github.com/moov-io/watchman)
 [![Build Status](https://github.com/moov-io/watchman/workflows/Go/badge.svg)](https://github.com/moov-io/watchman/actions)
-[![Coverage Status](https://codecov.io/gh/moov-io/watchman/branch/master/graph/badge.svg)](https://codecov.io/gh/moov-io/watchman)
 [![Go Report Card](https://goreportcard.com/badge/github.com/moov-io/watchman)](https://goreportcard.com/report/github.com/moov-io/watchman)
-[![Repo Size](https://img.shields.io/github/languages/code-size/moov-io/watchman?label=project%20size)](https://github.com/moov-io/watchman)
 [![Apache 2 License](https://img.shields.io/badge/license-Apache2-blue.svg)](https://raw.githubusercontent.com/moov-io/ach/master/LICENSE)
 [![Slack Channel](https://slack.moov.io/badge.svg?bg=e01563&fgColor=fffff)](https://slack.moov.io/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/moov/watchman)](https://hub.docker.com/r/moov/watchman)
-[![GitHub Stars](https://img.shields.io/github/stars/moov-io/watchman)](https://github.com/moov-io/watchman)
 [![Twitter](https://img.shields.io/twitter/follow/moov?style=social)](https://twitter.com/moov?lang=en)
 
 # moov-io/watchman
 
 Moov's mission is to give developers an easy way to create and integrate bank processing into their own software products. Our open source projects are each focused on solving a single responsibility in financial services and designed around performance, scalability, and ease of use.
 
-Moov Watchman offers download, parse, and search functions over numerous trade sanction lists from the United States, agencies, and nonprofits for complying with regional laws. Also included is a [web UI](#in-browser-watchman-search) and an async [webhook notification service](#webhook-notifications) to initiate processes on remote systems.
+Moov Watchman offers download, parse, and search functions over numerous trade sanction lists from the United States, agencies, and nonprofits for complying with regional laws.
 
 Lists included in search are:
 
-- US Treasury - Office of Foreign Assets Control
-  - [Specially Designated Nationals](https://home.treasury.gov/policy-issues/financial-sanctions/specially-designated-nationals-and-blocked-persons-list-sdn-human-readable-lists)
-    - Includes SDN, SDN Alternative Names, SDN Addresses
-- [United States Consolidated Screening List](https://www.export.gov/article2?id=Consolidated-Screening-List)
-   - Department of Commerce – Bureau of Industry and Security
-      - [Denied Persons List](https://www.bis.doc.gov/index.php/policy-guidance/lists-of-parties-of-concern/denied-persons-list)
-      - [Unverified List](https://www.bis.doc.gov/index.php/policy-guidance/lists-of-parties-of-concern/unverified-list)
-      - [Entity List](https://www.bis.doc.gov/index.php/policy-guidance/lists-of-parties-of-concern/entity-list)
-   - Department of State – Bureau of International Security and Non-proliferation
-      - [Nonproliferation Sanctions](http://www.state.gov/t/isn/c15231.htm)
-   - Department of State – Directorate of Defense Trade Controls
-      - ITAR Debarred (DTC)
-   - Department of the Treasury – Office of Foreign Assets Control
-      - [Specially Designated Nationals List](https://ofac.treasury.gov/specially-designated-nationals-list-data-formats-data-schemas)
-      - [Foreign Sanctions Evaders List](https://ofac.treasury.gov/consolidated-sanctions-list-non-sdn-lists/foreign-sanctions-evaders-fse-list)
-      - [Sectoral Sanctions Identifications List](https://ofac.treasury.gov/consolidated-sanctions-list-non-sdn-lists/sectoral-sanctions-identifications-ssi-list)
-      - [Palestinian Legislative Council List](https://ofac.treasury.gov/consolidated-sanctions-list/non-sdn-palestinian-legislative-council-ns-plc-list)
-   - Department of the Treasury – Office of Foreign Assets Control
-      - [Sectoral Sanctions Identifications List](https://ofac.treasury.gov/consolidated-sanctions-list-non-sdn-lists/sectoral-sanctions-identifications-ssi-list)
-- [EU - Consolidated Sanctions List](https://data.europa.eu/data/datasets/consolidated-list-of-persons-groups-and-entities-subject-to-eu-financial-sanctions?locale=en)
+- US Treasury - [Office of Foreign Assets Control (OFAC)](https://ofac.treasury.gov/sanctions-list-service)
+- trade.gov [Consolidated Screening List](https://www.trade.gov/consolidated-screening-list)
+- EU - [Consolidated Sanctions List](https://data.europa.eu/data/datasets/consolidated-list-of-persons-groups-and-entities-subject-to-eu-financial-sanctions?locale=en)
    - NOTE: it is recommended to [create your own europa.eu account](https://webgate.ec.europa.eu/cas/login) and then access the [EU Financial Sanctions Files](https://webgate.ec.europa.eu/fsd/fsf)
       - Use the token described under the "Show settings for crawler/robot" section
-- [UK - OFSI Sactions List](https://www.gov.uk/government/publications/financial-sanctions-consolidated-list-of-targets/consolidated-list-of-targets#contents)
-- [UK - Sanctions List](https://www.gov.uk/government/publications/the-uk-sanctions-list) (Disabled by default)
+- UK - [OFSI Sactions List](https://www.gov.uk/government/publications/financial-sanctions-consolidated-list-of-targets/consolidated-list-of-targets#contents)
+- UK - [Sanctions List](https://www.gov.uk/government/publications/the-uk-sanctions-list) (Disabled by default)
 
 All United States, UK and European Union companies are required to comply with various regulations and sanction lists (such as the US Patriot Act requiring compliance with the BIS Denied Persons List).
+
+## v2 Endpoints (v0.50.x series and beyond)
+
+The v0.50.x series of Watchman has introduced a new v2 search endpoint and removed the older endpoint. This was done to offer a unified response model, improve overall performance, and work towards a stable v1.0 release.
+
+We encourage you to try out the new Watchman and [report any issues or requests in slack](https://slack.moov.io) (`#watchman` channel).
 
 ## Table of contents
 
@@ -83,193 +69,141 @@ Moov Watchman is actively used in multiple production environments. Please star 
 
 ## Usage
 
-The Watchman project implements an HTTP server and [Go library](https://pkg.go.dev/github.com/moov-io/watchman) for searching, parsing, and downloading lists. Below, you can find a detailed list of features offered by Watchman:
+The Watchman project implements an HTTP server and [Go library](https://pkg.go.dev/github.com/moov-io/watchman/pkg/search#Client) for searching against Watchman.
 
-- Download OFAC, US/UK/EU CSL, BIS Denied Persons List (DPL), and various other data sources on startup
-  - Admin endpoint to [manually refresh OFAC and DPL data](docs/runbook.md#force-data-refresh)
-- Index data for searches
-- Library for OFAC and BIS DPL data to download and parse their custom files
+Government lists are downloaded (and refreshed), parsed, prepared, normalized, and indexed in-memory. Searches operate concurrently and do not require an external database or connection.
 
 ### Docker
 
-We publish a [public Docker image `moov/watchman`](https://hub.docker.com/r/moov/watchman/) from Docker Hub or use this repository. No configuration is required to serve on `:8084` and metrics at `:9094/metrics` in Prometheus format. We also have Docker images for [OpenShift](https://quay.io/repository/moov/watchman?tab=tags) published as `quay.io/moov/watchman`. Lastly, we offer a `moov/watchman:static` Docker image with files from 2019. This image can be useful for faster local testing or consistent results.
+We publish a [public Docker image `moov/watchman`](https://hub.docker.com/r/moov/watchman/) from Docker Hub or use this repository. No configuration is required to serve on `:8084`. We also have Docker images for [OpenShift](https://quay.io/repository/moov/watchman?tab=tags) published as `quay.io/moov/watchman`. Lastly, we offer a `moov/watchman:static` Docker image with files from 2019. This image can be useful for faster local testing or consistent results.
 
 Pull & start the Docker image:
 ```
 docker pull moov/watchman:latest
-docker run -p 8084:8084 -p 9094:9094 moov/watchman:latest
+docker run -p 8084:8084 moov/watchman:latest
 ```
 
-Get information about a company using their entity ID:
-```
-curl "localhost:8084/ofac/companies/13374"
-```
-```
+Run a search for an individual or business
+<details>
+<summary>`curl -s "http://localhost:8084/v2/search?name=Nicolas+Maduro&type=person&limit=1&minMatch=0.75" | jq . `</summary>
+
+```json
 {
-   "id":"13374",
-   "sdn":{
-      "entityID":"13374",
-      "sdnName":"SYRONICS",
-      "sdnType":"",
-      "program":[
-         "NPWMD"
-      ],
-      "title":"",
-      "callSign":"",
-      "vesselType":"",
-      "tonnage":"",
-      "grossRegisteredTonnage":"",
-      "vesselFlag":"",
-      "vesselOwner":"",
-      "remarks":""
-   },
-   "addresses":[
-      {
-         "entityID":"13374",
-         "addressID":"21360",
-         "address":"Kaboon Street, PO Box 5966",
-         "cityStateProvincePostalCode":"Damascus",
-         "country":"Syria",
-         "addressRemarks":""
-      }
-   ],
-   "alts":[
-      {
-         "entityID":"13374",
-         "alternateID":"15056",
-         "alternateType":"aka",
-         "alternateName":"SYRIAN ARAB CO. FOR ELECTRONIC INDUSTRIES",
-         "alternateRemarks":""
-      }
-   ],
-   "comments":null,
-   "status":null
+  "entities": [
+    {
+      "name": "Nicolas MADURO MOROS",
+      "entityType": "person",
+      "sourceList": "us_ofac",
+      "sourceID": "22790",
+      "person": {
+        "name": "Nicolas MADURO MOROS",
+        "altNames": null,
+        "gender": "male",
+        "birthDate": "1962-11-23T00:00:00Z",
+        "deathDate": null,
+        "titles": [
+          "President of the Bolivarian Republic of Venezuela"
+        ],
+        "governmentIDs": [
+          {
+            "type": "cedula",
+            "country": "Venezuela",
+            "identifier": "5892464"
+          }
+        ]
+      },
+      "business": null,
+      "organization": null,
+      "aircraft": null,
+      "vessel": null,
+      "contact": {
+        "emailAddresses": null,
+        "phoneNumbers": null,
+        "faxNumbers": null,
+        "websites": null
+      },
+      "addresses": null,
+      "cryptoAddresses": null,
+      "affiliations": null,
+      "sanctionsInfo": null,
+      "historicalInfo": null,
+      "sourceData": {
+        "entityID": "22790",
+        "sdnName": "MADURO MOROS, Nicolas",
+        "sdnType": "individual",
+        "program": [
+          "VENEZUELA",
+          "IRAN-CON-ARMS-EO"
+        ],
+        "title": "President of the Bolivarian Republic of Venezuela",
+        "callSign": "",
+        "vesselType": "",
+        "tonnage": "",
+        "grossRegisteredTonnage": "",
+        "vesselFlag": "",
+        "vesselOwner": "",
+        "remarks": "DOB 23 Nov 1962; POB Caracas, Venezuela; citizen Venezuela; Gender Male; Cedula No. 5892464 (Venezuela); President of the Bolivarian Republic of Venezuela."
+      },
+      "match": 0.7784062500000001
+    }
+  ]
 }
 ```
 
-### Google Cloud Run
+</details>
 
-To get started in a hosted environment you can deploy this project to the Google Cloud Platform.
 
-From your [Google Cloud dashboard](https://console.cloud.google.com/home/dashboard) create a new project and call it:
-```
-moov-watchman-demo
-```
-
-Enable the [Container Registry](https://cloud.google.com/container-registry) API for your project and associate a [billing account](https://cloud.google.com/billing/docs/how-to/manage-billing-account) if needed. Then, open the Cloud Shell terminal and run the following Docker commands, substituting your unique project ID:
-
-```
-docker pull moov/watchman
-docker tag moov/watchman gcr.io/<PROJECT-ID>/watchman
-docker push gcr.io/<PROJECT-ID>/watchman
-```
-
-Deploy the container to Cloud Run:
-```
-gcloud run deploy --image gcr.io/<PROJECT-ID>/watchman --port 8084
-```
-
-Select your target platform to `1`, service name to `watchman`, and region to the one closest to you (enable Google API service if a prompt appears). Upon a successful build you will be given a URL where the API has been deployed:
-
-```
-https://YOUR-WATCHMAN-APP-URL.a.run.app
-```
-
-Now you can ping the server:
-```
-curl https://YOUR-WATCHMAN-APP-URL.a.run.app/ping
-```
-You should get this response:
-```
-PONG
-```
-
-### Configuration settings
+### Configuration
 
 | Environmental Variable | Description | Default |
 |-----|-----|-----|
 | `DATA_REFRESH_INTERVAL` | Interval for data redownload and reparse. `off` disables this refreshing. | 12h |
 | `INITIAL_DATA_DIRECTORY` | Directory filepath with initial files to use instead of downloading. Periodic downloads will replace the initial files. | Empty |
-| `SEARCH_MAX_WORKERS` | Maximum number of goroutines used for search. | 1024 |
-| `ADJACENT_SIMILARITY_POSITIONS` | How many nearby words to search for highest max similarly score. | 3 |
-| `EXACT_MATCH_FAVORITISM` | Extra weighting assigned to exact matches. | 0.0 |
-| `DISABLE_PHONETIC_FILTERING` | Force scoring search terms against every indexed record. | `false` |
+| `HTTPS_CERT_FILE` | Filepath containing a certificate (or intermediate chain) to be served by the HTTP server. Requires all traffic be over secure HTTP. | Empty |
+| `HTTPS_KEY_FILE`  | Filepath of a private key matching the leaf certificate from `HTTPS_CERT_FILE`. | Empty |
+| `LOG_FORMAT` | Format for logging lines to be written as. | Options: `json`, `plain` - Default: `plain` |
+| `LOG_LEVEL` | Level of logging to emit. | Options: `trace`, `info` - Default: `info` |
+
+### Similarity Configuration
+
+| Environmental Variable | Description | Default |
+|-----|-----|-----|
+| `SEARCH_GOROUTINE_COUNT` | Set a fixed number of goroutines used for each search. Default is to dynamically optimize for faster results. | Empty |
+| `KEEP_STOPWORDS` | Boolean to keep stopwords in names. | `false` |
+| `JARO_WINKLER_BOOST_THRESHOLD` | Jaro-Winkler boost threshold. | 0.7 |
+| `JARO_WINKLER_PREFIX_SIZE` | Jaro-Winkler prefix size. | 4 |
 | `LENGTH_DIFFERENCE_CUTOFF_FACTOR` | Minimum ratio for the length of two matching tokens, before they score is penalised. | 0.9       |
 | `LENGTH_DIFFERENCE_PENALTY_WEIGHT` | Weight of penalty applied to scores when two matching tokens have different lengths. | 0.3    |
 | `DIFFERENT_LETTER_PENALTY_WEIGHT` | Weight of penalty applied to scores when two matching tokens begin with different letters. | 0.9   |
 | `UNMATCHED_INDEX_TOKEN_WEIGHT` | Weight of penalty applied to scores when part of the indexed name isn't matched. | 0.15    |
-| `JARO_WINKLER_BOOST_THRESHOLD` | Jaro-Winkler boost threshold. | 0.7 |
-| `JARO_WINKLER_PREFIX_SIZE` | Jaro-Winkler prefix size. | 4 |
-| `LOG_FORMAT` | Format for logging lines to be written as. | Options: `json`, `plain` - Default: `plain` |
-| `LOG_LEVEL` | Level of logging to emit. | Options: `trace`, `info` - Default: `info` |
-| `BASE_PATH` | HTTP path to serve API and web UI from. | `/` |
-| `HTTP_BIND_ADDRESS` | Address to bind HTTP server on. This overrides the command-line flag `-http.addr`. | Default: `:8084` |
-| `HTTP_ADMIN_BIND_ADDRESS` | Address to bind admin HTTP server on. This overrides the command-line flag `-admin.addr`. | Default: `:9094` |
-| `HTTPS_CERT_FILE` | Filepath containing a certificate (or intermediate chain) to be served by the HTTP server. Requires all traffic be over secure HTTP. | Empty |
-| `HTTPS_KEY_FILE`  | Filepath of a private key matching the leaf certificate from `HTTPS_CERT_FILE`. | Empty |
-| `DISABLE_WEB_UI` | Skip serving and setup of the web UI. | Default: `false` |
-| `WEB_ROOT` | Directory to serve web UI from. | Default: `webui/` |
-| `WEBHOOK_MAX_WORKERS` | Maximum number of workers processing webhooks. | Default: 10 |
-| `DOWNLOAD_WEBHOOK_URL` | Optional webhook URL called when data downloads / refreshes occur. | Empty |
-| `DOWNLOAD_WEBHOOK_AUTH_TOKEN` | Optional `Authorization` header included on download webhooks. | Empty |
+| `ADJACENT_SIMILARITY_POSITIONS` | How many nearby words to search for highest max similarly score. | 3 |
+| `EXACT_MATCH_FAVORITISM` | Extra weighting assigned to exact matches. | 0.0 |
+| `DISABLE_PHONETIC_FILTERING` | Force scoring search terms against every indexed record. | `false` |
 
-#### List configurations
+#### Source List Configuration
 
 | Environmental Variable | Description | Default |
 |-----|-----|-----|
 | `OFAC_DOWNLOAD_TEMPLATE` | HTTP address for downloading raw OFAC files. | `https://www.treasury.gov/ofac/downloads/%s` |
-| `DPL_DOWNLOAD_TEMPLATE` | HTTP address for downloading the DPL. | `https://www.bis.doc.gov/dpl/%s` |
+| `EU_CSL_TOKEN` | Token used to download the EU Consolidated Screening List | `<valid-token>` |
 | `EU_CSL_DOWNLOAD_URL` | Use an alternate URL for downloading EU Consolidated Screening List | Subresource of `webgate.ec.europa.eu` |
-| `WITH_OFAC_LIST` | Download and parse the US OFAC List | Default: `true` |
-| `WITH_US_DPL_LIST` | Download and parse the US Denied Persons List (DPL) | Default: `true` |
-| `WITH_US_CSL_SANCTIONS_LIST` | Download and parse the US Consolidated Screening List | Default: `true` |
-| `WITH_EU_SCREENING_LIST` | Download and parse the EU Consolidated Screening List | Default: `true` |
-| `WITH_UK_CSL_SANCTIONS_LIST` | Download and parse the UK CSL Sanctions List on startup. | Default: `true` |
 | `UK_CSL_DOWNLOAD_URL` | Use an alternate URL for downloading UK Consolidated Screening List | Subresource of `www.gov.uk` |
 | `UK_SANCTIONS_LIST_URL` | Use an alternate URL for downloading UK Sanctions List | Subresource of `www.gov.uk` |
 | `WITH_UK_SANCTIONS_LIST` | Download and parse the UK Sanctions List on startup. | Default: `false` |
 | `US_CSL_DOWNLOAD_URL` | Use an alternate URL for downloading US Consolidated Screening List | Subresource of `api.trade.gov` |
 | `CSL_DOWNLOAD_TEMPLATE` | Same as `US_CSL_DOWNLOAD_URL` | |
-| `KEEP_STOPWORDS` | Boolean to keep stopwords in names. | `false` |
-| `DEBUG_NAME_PIPELINE` | Boolean to print debug messages for each name (SDN, SSI) processing step. | `false` |
-
-##### Downloads
-
-Moov Watchman supports sending a webhook (`POST` HTTP Request) when the underlying data is refreshed. The body will be the count of entities indexed for each list. The body will be in JSON format and the same schema as the manual data refresh endpoint.
-
-##### Watching a specific customer or company by ID
-
-Moov Watchman supports sending a webhook periodically when a specific [Company](https://moov-io.github.io/watchman/api/#post-/ofac/companies/-companyID-/watch) or [Customer](https://moov-io.github.io/watchman/api/#post-/ofac/customers/-customerID-/watch) is to be watched. This is designed to update another system about an OFAC entry's sanction status.
-
-##### Watching a customer or company name
-
-Moov Watchman supports sending a webhook periodically with a free-form name of a [Company](https://moov-io.github.io/watchman/api/#post-/ofac/companies/watch) or [Customer](https://moov-io.github.io/watchman/api/#post-/ofac/customers/watch). This allows external applications to be notified when an entity matching that name is added to the OFAC list. The match percentage will be included in the JSON payload.
-
-#### Prometheus metrics
-
-- `http_response_duration_seconds`: A histogram of HTTP response timings.
-- `last_data_refresh_success`: Unix timestamp of when data was last refreshed successfully.
-- `last_data_refresh_count`: Count of records for a given sanction or entity list.
-- `match_percentages` A histogram which holds the match percentages with a label (`type`) of searches.
-   - `type`: Can be address, q, remarksID, name, altName
 
 ### Data persistence
 
-By design, Watchman  **does not persist** (save) any data about the search queries or actions created. The only storage occurs in memory of the process and upon restart Watchman will have no files or data saved. Also, no in-memory encryption of the data is performed.
+By design, Watchman **does not persist** (save) any data about the search queries or actions created. The only storage occurs in memory of the process and upon restart Watchman will have no files or data saved. Also, no in-memory encryption of the data is performed.
 
-### Go library
+### FAQ
 
-Watchman offers [several packages for usage as libraries](https://pkg.go.dev/github.com/moov-io/watchman/pkg).
+#### Reporting hits to OFAC
 
-### In-browser Watchman search
+OFAC requires [reporting of positive hits](https://ofac.treasury.gov/ofac-reporting-system). Work with your Financial Institution for complete details.
 
-Using the [WebUI](https://moov-io.github.io/watchman/webui/), you can instantly perform advanced OFAC Watchman searches. Simply fill search fields and generate a detailed report that includes match percentage, alternative names, effective/expiration dates, IDs, addresses, and other useful information. This tool is particularly useful for completing quick searches with the aid of a intuitive interface.
-
-## Reporting blocks to OFAC
-
-OFAC requires annual reports of blocked entities and [offers guidance for this report](https://www.treasury.gov/resource-center/sanctions/Documents/ofac_blocked_property_guidance.pdf). Section [31 C.F.R. § 501.603(b)(2)](https://www.ecfr.gov/cgi-bin/text-idx?SID=be4f2a1608abec5d93170fb03af99939&mc=true&node=se31.3.501_1603&rgn=div8) requires this annual report.
-
-## Useful resources
+#### Useful resources
 
 - [OFAC Sanctions Search Page](https://sanctionssearch.ofac.treas.gov/)
 - [Subscribe for OFAC email updates](https://service.govdelivery.com/accounts/USTREAS/subscriber/new)
@@ -281,20 +215,18 @@ OFAC requires annual reports of blocked entities and [offers guidance for this r
 
 ## Getting help
 
-We maintain a [runbook for common issues](docs/runbook.md) and configuration options. Also, if you've encountered a security issue please contact us at [`security@moov.io`](mailto:security@moov.io).
-
  channel | info
  ------- | -------
 [Project Documentation](https://moov-io.github.io/watchman/) | Our project documentation available online.
 Twitter [@moov](https://twitter.com/moov)	| You can follow Moov.io's Twitter feed to get updates on our project(s). You can also tweet us questions or just share blogs or stories.
 [GitHub Issue](https://github.com/moov-io/watchman/issues) | If you are able to reproduce a problem please open a GitHub Issue under the specific project that caused the error.
-[moov-io slack](https://slack.moov.io/) | Join our slack channel to have an interactive discussion about the development of the project.
+[moov-io slack](https://slack.moov.io/) | Join our slack channel (`#watchman`) to have an interactive discussion about the development of the project.
+
+If you find a security issue please contact us at [`security@moov.io`](mailto:security@moov.io).
 
 ## Supported and tested platforms
 
 - 64-bit Linux (Ubuntu, Debian), macOS, and Windows
-
-Note: 32-bit platforms have known issues and are not supported.
 
 ## Contributing
 
@@ -305,10 +237,6 @@ Run `make install` to setup [gopostal](https://github.com/openvenues/gopostal) /
 ### Releasing
 
 To make a release of ach simply open a pull request with `CHANGELOG.md` and `version.go` updated with the next version number and details. You'll also need to push the tag (i.e. `git push origin v1.0.0`) to origin in order for CI to make the release.
-
-### Testing
-
-We maintain a comprehensive suite of unit tests and recommend table-driven testing when a particular function warrants several very similar test cases. To run all test files in the current directory, use `go test`. Current overall coverage can be found on [Codecov](https://app.codecov.io/gh/moov-io/watchman/).
 
 ## Related projects
 As part of Moov's initiative to offer open source fintech infrastructure, we have a large collection of active projects you may find useful:

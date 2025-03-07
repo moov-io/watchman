@@ -43,7 +43,7 @@ func Benchmark_Search(b *testing.B) {
 		groups := []int{1, 3, 5, 10, 20, 25, 50, 100, 150, 200, 250}
 		for _, g := range groups {
 			b.Run(fmt.Sprintf("%d", g), func(b *testing.B) {
-				b.Setenv("SEARCH_GROUP_COUNT", strconv.Itoa(g))
+				b.Setenv("SEARCH_GOROUTINE_COUNT", strconv.Itoa(g))
 
 				search(b)
 			})
@@ -51,7 +51,7 @@ func Benchmark_Search(b *testing.B) {
 	})
 
 	b.Run("dynamic group size", func(b *testing.B) {
-		b.Setenv("SEARCH_GROUP_COUNT", "") // clear
+		b.Setenv("SEARCH_GOROUTINE_COUNT", "") // clear
 
 		search(b)
 	})
