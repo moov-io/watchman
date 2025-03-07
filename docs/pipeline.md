@@ -8,6 +8,8 @@ menubar: docs-menu
 
 # Name Processing Pipeline
 
+> For documentation on older releases of Watchman (v0.31.x series), please visit the [older docs website](https://github.com/moov-io/watchman/tree/v0.31.3/docs) in our GitHub repository.
+
 ## Overview
 
 Before entities are added to the search index, Watchman processes their names and associated data to improve search accuracy. This processing pipeline standardizes different text variations to ensure that similar entities will match during searches, even when their original formats differ.

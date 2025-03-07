@@ -8,6 +8,8 @@ menubar: docs-menu
 
 # Model Validation
 
+> This page only applies to v0.50.x releases of Watchman and newer.
+
 A model is defined as "a quantitative method, system, or approach that applies statistical, economic, financial, or mathematical theories, techniques, and assumptions to process input data into quantitative estimates." Watchman offers a statistical scoring of names, addresses, government identifiers, and other data against watchlists from numerous public sources. Watchman is a modern software application used by many companies in production deployments at cloud scale.
 
 ## Data Sources
