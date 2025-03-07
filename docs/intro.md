@@ -13,7 +13,7 @@ menubar: docs-menu
 Watchman is a robust compliance screening tool that provides:
 
 1. **Data Management**:
-   - Automatic downloading of sanctions lists (OFAC, BIS, CSL, etc.)
+   - Automatic downloading of sanctions lists (US OFAC, US CSL, UK, EU, etc.)
    - Regular refreshing of data to maintain compliance
    - Custom data file support for specialized screening needs
 
@@ -32,9 +32,8 @@ Watchman is a robust compliance screening tool that provides:
 | Component | Purpose |
 |-----------|---------|
 | OFAC Library | Parse and process US OFAC sanctions data |
-| US CSL Library | Process the US Consolidated Screening List |
-| UK/EU CSL Library | Handle European sanctions data formats |
-| BIS DPL Library | Process denied persons lists |
+| US CSL  | Process the US Consolidated Screening List |
+| UK/EU CSL | Handle UK and European sanctions data formats |
 
 ## Search Methodology
 
@@ -52,7 +51,6 @@ Watchman uses the [Jaro-Winkler distance](https://en.wikipedia.org/wiki/Jaro%E2%
 Watchman offers environment variables to adjust search behavior:
 
 - `EXACT_MATCH_FAVORITISM`: Controls weight given to exact matches (recommended values: 0.1, 0.25, or 0.5)
-- `DEBUG_NAME_PIPELINE`: Enables verbose logging of text processing steps
 
 ## Common Questions
 
@@ -104,6 +102,6 @@ This produces more comprehensive screening with fewer false negatives while stil
 
 ## Next Steps
 
-- See the [Search Documentation](/search) for detailed query options
-- Explore the [Model Validation](/model-validation) methodology
-- Check the [Configuration Guide](/configuration) for deployment options
+- See the [Search Documentation](/watchman/search/) for detailed query options
+- Explore the [Model Validation](/watchman/model-validation/) methodology
+- Check the [Configuration Guide](/watchman/config/) for deployment options

@@ -47,9 +47,9 @@ Watchman helps you manage these compliance obligations efficiently through a sin
 
 To begin using Watchman, see our:
 
-- [Docker Usage](/usage-docker/)
-- [API Documentation](/api/)
-- [Configuration Options](/config/)
+- [Docker Usage](/watchman/usage-docker/)
+- [API Documentation](/watchman/api/)
+- [Configuration Options](/watchman/config/)
 
 ## About Moov
 
