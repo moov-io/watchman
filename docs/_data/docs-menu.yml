@@ -23,8 +23,6 @@
 
 - label: Risk Management
   items:
-    - name: Model Validation
-      link: /model-validation/
     - name: Scoring Methodology
       link: /methodology/
 
