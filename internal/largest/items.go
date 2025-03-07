@@ -23,11 +23,18 @@ type Items[T any] struct {
 	minMatch float64
 }
 
+const (
+	maxCapacity = 100
+)
+
 // NewItems returns a structure which tracks the top-weighted Items,
 // subject to minMatch and a fixed capacity.
 func NewItems[T any](capacity int, minMatch float64) *Items[T] {
 	if minMatch <= 0.001 {
 		minMatch = 0.01
+	}
+	if capacity > maxCapacity {
+		capacity = maxCapacity
 	}
 	return &Items[T]{
 		items:    make([]Item[T], 0, capacity),
