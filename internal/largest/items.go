@@ -33,7 +33,7 @@ func NewItems[T any](capacity int, minMatch float64) *Items[T] {
 	if minMatch <= 0.001 {
 		minMatch = 0.01
 	}
-	if capacity > maxCapacity {
+	if capacity < 0 || capacity > maxCapacity {
 		capacity = maxCapacity
 	}
 	return &Items[T]{

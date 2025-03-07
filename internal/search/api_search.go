@@ -137,6 +137,9 @@ func extractSearchLimit(r *http.Request) int {
 	if limit > hardResultsLimit {
 		limit = hardResultsLimit
 	}
+	if limit < 0 {
+		limit = softResultsLimit
+	}
 	return limit
 }
 
