@@ -151,16 +151,16 @@ endif
 docker: clean docker-hub docker-openshift docker-static docker-webui
 
 docker-hub:
-	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman:${VERSION} -f Dockerfile .
+	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman:${VERSION} -f ./build/Dockerfile .
 
 docker-openshift:
-	docker build --pull --build-arg VERSION=${VERSION} -t quay.io/moov/watchman:${VERSION} -f Dockerfile.openshift --build-arg VERSION=${VERSION} .
+	docker build --pull --build-arg VERSION=${VERSION} -t quay.io/moov/watchman:${VERSION} -f ./build/Dockerfile.openshift --build-arg VERSION=${VERSION} .
 
 docker-static:
-	docker build --pull -t moov/watchman:static -f Dockerfile.static .
+	docker build --pull -t moov/watchman:static -f ./build/Dockerfile.static .
 
 docker-webui:
-	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman-webui:${VERSION} -f Dockerfile.webui .
+	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman-webui:${VERSION} -f ./build/Dockerfile.webui .
 
 release-push:
 	docker push moov/watchman:${VERSION}
