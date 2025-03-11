@@ -117,6 +117,10 @@ func TestJaroWinkler(t *testing.T) {
 		// prepare.LowerAndRemovePunctuation
 		{"i c sogo kenkyusho", prepare.LowerAndRemovePunctuation("A.I.C. SOGO KENKYUSHO"), 0.858},
 		{prepare.LowerAndRemovePunctuation("A.I.C. SOGO KENKYUSHO"), "sogo kenkyusho", 0.972},
+
+		// From https://github.com/moov-io/watchman/issues/594
+		{"JSCARGUMENT", "JSC ARGUMENT", 0.413},
+		{"ARGUMENTJSC", "JSC ARGUMENT", 0.750},
 	}
 	for i := range cases {
 		v := cases[i]
