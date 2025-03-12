@@ -115,8 +115,14 @@ func TestJaroWinkler(t *testing.T) {
 		{"group preservation holy sites", "flibbity jibbity flobbity jobbity grobbity zobbity group", 0.263},
 
 		// prepare.LowerAndRemovePunctuation
-		{"i c sogo kenkyusho", prepare.LowerAndRemovePunctuation("A.I.C. SOGO KENKYUSHO"), 0.858},
+		{"i c sogo kenkyusho", prepare.LowerAndRemovePunctuation("A.I.C. SOGO KENKYUSHO"), 0.968},
 		{prepare.LowerAndRemovePunctuation("A.I.C. SOGO KENKYUSHO"), "sogo kenkyusho", 0.972},
+		{prepare.LowerAndRemovePunctuation("11,420.2-1 CORP."), "11 420 2 1 corp", 1.000},
+		{prepare.LowerAndRemovePunctuation("11,420.2-1 CORP."), "11 420 21 corp", 0.947},
+		{prepare.LowerAndRemovePunctuation("11,420.2-1 CORP."), "11420 2 1 corp", 0.849},
+		{prepare.LowerAndRemovePunctuation("11,420.2-1 CORP."), "11420 21 corp", 0.787},
+		{prepare.LowerAndRemovePunctuation("11,420.2-1 CORP."), "114202 1 corp", 0.802},
+		{prepare.LowerAndRemovePunctuation("11,420.2-1 CORP."), "1142021 corp", 0.752},
 
 		// From https://github.com/moov-io/watchman/issues/594
 		{"JSCARGUMENT", "JSC ARGUMENT", 0.413},
@@ -127,6 +133,34 @@ func TestJaroWinkler(t *testing.T) {
 		// Only need to call chomp on s1, see jaroWinkler doc
 		eql(t, fmt.Sprintf("#%d %s vs %s", i, v.indexed, v.search),
 			stringscore.BestPairsJaroWinkler(strings.Fields(v.search), strings.Fields(v.indexed)), v.match)
+	}
+}
+
+func TestBestPairCombinationJaroWinkler(t *testing.T) {
+	cases := []struct {
+		indexed, search string
+		match           float64
+	}{
+		// prepare.LowerAndRemovePunctuation
+		{"i c sogo kenkyusho", prepare.LowerAndRemovePunctuation("A.I.C. SOGO KENKYUSHO"), 0.968},
+		{prepare.LowerAndRemovePunctuation("A.I.C. SOGO KENKYUSHO"), "sogo kenkyusho", 0.972},
+		{prepare.LowerAndRemovePunctuation("11,420.2-1 CORP."), "11 420 2 1 corp", 1.0},
+		{prepare.LowerAndRemovePunctuation("11,420.2-1 CORP."), "11 420 21 corp", 1.0},
+		{prepare.LowerAndRemovePunctuation("11,420.2-1 CORP."), "11420 2 1 corp", 1.0},
+		{prepare.LowerAndRemovePunctuation("11,420.2-1 CORP."), "11420 21 corp", 1.0},
+		{prepare.LowerAndRemovePunctuation("11,420.2-1 CORP."), "114202 1 corp", 0.944},
+		{prepare.LowerAndRemovePunctuation("11,420.2-1 CORP."), "1142021 corp", 0.892},
+
+		// From https://github.com/moov-io/watchman/issues/594
+		{"JSCARGUMENT", "JSC ARGUMENT", 1.000},
+		{"ARGUMENTJSC", "JSC ARGUMENT", 0.750},
+	}
+	for i := range cases {
+		v := cases[i]
+
+		// Only need to call chomp on s1, see jaroWinkler doc
+		eql(t, fmt.Sprintf("#%d %s vs %s", i, v.indexed, v.search),
+			stringscore.BestPairCombinationJaroWinkler(strings.Fields(v.search), strings.Fields(v.indexed)), v.match)
 	}
 }
 
@@ -212,4 +246,51 @@ func BenchmarkJaroWinkler(b *testing.B) {
 			require.Greater(b, score, -0.01)
 		}
 	})
+
+	b.Run("BestPairCombinationJaroWinkler", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			b.StopTimer()
+			query := i % (len(inputs) - 1)
+			index := (i + 1) % (len(inputs) - 1)
+
+			queryTokens := strings.Fields(inputs[query])
+			indexTokens := strings.Fields(inputs[index])
+			b.StartTimer()
+
+			score := stringscore.BestPairCombinationJaroWinkler(queryTokens, indexTokens)
+			require.Greater(b, score, -0.01)
+		}
+	})
+}
+
+func TestGenerateWordCombinations(t *testing.T) {
+	cases := []struct {
+		name     string
+		input    []string
+		expected [][]string
+	}{
+		{
+			name:  "JSC ARGUMENT",
+			input: []string{"JSC", "ARGUMENT"},
+			expected: [][]string{
+				[]string{"JSC", "ARGUMENT"},
+				[]string{"JSCARGUMENT"},
+			},
+		},
+		{
+			name:  "11,420.2-1 CORP",
+			input: strings.Fields(prepare.LowerAndRemovePunctuation("11,420.2-1 CORP")),
+			expected: [][]string{
+				[]string{"11", "420", "2", "1", "corp"},
+				[]string{"11420", "21", "corp"},
+				[]string{"11420", "2", "1", "corp"},
+			},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := stringscore.GenerateWordCombinations(tc.input)
+			require.ElementsMatch(t, tc.expected, got)
+		})
+	}
 }

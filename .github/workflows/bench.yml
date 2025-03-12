@@ -36,7 +36,7 @@ jobs:
         go test ./pkg/search/... -short -bench BenchmarkDebugSimilarity -run BenchmarkDebugSimilarity -benchmem > output.txt
         go test ./internal/search/... -short -bench Benchmark_Search/dynamic -run Benchmark_Search -benchmem >> output.txt
         go test ./internal/search/... -short -bench BenchmarkAPI_Search -run BenchmarkAPI_Search -benchmem >> output.txt
-        go test ./internal/stringscore/... -short -bench BenchmarkJaroWinkler -run BenchmarkJaroWinkler -benchmem >> output.txt
+        go test ./internal/stringscore/... -short -bench Benchmark -run Benchmark -benchmem >> output.txt
         go test ./internal/postalpool/... -short -bench BenchmarkPostalPool -run BenchmarkPostalPool -benchmem >> output.txt
         go test ./internal/norm/... -short -bench Bench -run Bench -benchmem >> output.txt
 

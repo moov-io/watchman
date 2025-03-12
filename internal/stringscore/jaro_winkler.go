@@ -265,3 +265,91 @@ func JaroWinklerWithFavoritism(indexedTerm, query string, favoritism float64) fl
 	}
 	return math.Min(sum/float64(len(scores)), 1.00)
 }
+
+// GenerateWordCombinations creates variations of the input words by combining short words
+// with their neighbors, to handle cases like "JSC ARGUMENT" vs "JSCARGUMENT"
+func GenerateWordCombinations(tokens []string) [][]string {
+	result := [][]string{tokens} // Start with original tokens
+
+	// Don't bother with this for single token strings
+	if len(tokens) <= 1 {
+		return result
+	}
+
+	// Create a version with short words combined with the next word
+	combinedForward := make([]string, 0, len(tokens))
+	skipNext := false
+
+	for i := 0; i < len(tokens); i++ {
+		if skipNext {
+			skipNext = false
+			continue
+		}
+
+		// If this is a short word and not the last one, combine with next
+		if i < len(tokens)-1 && len(tokens[i]) <= 3 {
+			combinedForward = append(combinedForward, tokens[i]+tokens[i+1])
+			skipNext = true
+		} else {
+			combinedForward = append(combinedForward, tokens[i])
+		}
+	}
+
+	// Add the forward-combined version if it's different
+	if len(combinedForward) < len(tokens) {
+		result = append(result, combinedForward)
+	}
+
+	// Create a version with short words combined with the previous word
+	combinedBackward := make([]string, 0, len(tokens))
+	for i := 0; i < len(tokens); i++ {
+		// If this is a short word and not the first one, combine with previous
+		// (but skip if we already handled it in a previous iteration)
+		if i > 0 && len(tokens[i]) <= 3 && len(combinedBackward) == i {
+			combinedBackward[i-1] = combinedBackward[i-1] + tokens[i]
+		} else {
+			combinedBackward = append(combinedBackward, tokens[i])
+		}
+	}
+
+	// Add the backward-combined version if it's different
+	if len(combinedBackward) < len(tokens) && !tokenSlicesEqual(combinedBackward, combinedForward) {
+		result = append(result, combinedBackward)
+	}
+
+	return result
+}
+
+// tokenSlicesEqual compares two string slices for equality
+func tokenSlicesEqual(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+// BestPairCombinationJaroWinkler compares a search query to an indexed term with improved handling
+// of short words and spacing variations
+func BestPairCombinationJaroWinkler(searchTokens []string, indexedTokens []string) float64 {
+	// Generate variations with different word combinations
+	searchCombinations := GenerateWordCombinations(searchTokens)
+	indexedCombinations := GenerateWordCombinations(indexedTokens)
+
+	// Try all combinations and take the highest score
+	var maxScore float64
+	for _, searchVariation := range searchCombinations {
+		for _, indexedVariation := range indexedCombinations {
+			score := BestPairsJaroWinkler(searchVariation, indexedVariation)
+			if score > maxScore {
+				maxScore = score
+			}
+		}
+	}
+
+	return maxScore
+}

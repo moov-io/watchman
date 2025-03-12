@@ -93,7 +93,7 @@ func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], we
 func compareNameTerms(queryTerms, indexTerms []string) nameMatch {
 	var score float64
 	if len(indexTerms) > 0 {
-		score = stringscore.BestPairsJaroWinkler(queryTerms, indexTerms)
+		score = stringscore.BestPairCombinationJaroWinkler(queryTerms, indexTerms)
 	}
 
 	matchingTerms := 0
@@ -312,7 +312,7 @@ func calculateTitleSimilarity(title1, title2 string) float64 {
 	}
 
 	// Use JaroWinkler for term comparison
-	score := stringscore.BestPairsJaroWinkler(terms1, terms2)
+	score := stringscore.BestPairCombinationJaroWinkler(terms1, terms2)
 
 	// Adjust score based on length difference
 	lengthDiff := math.Abs(float64(len(terms1) - len(terms2)))
@@ -505,7 +505,7 @@ func calculateNameScore(query, index []string) float64 {
 	if len(query) == 0 || len(index) == 0 {
 		return 0.0
 	}
-	return stringscore.BestPairsJaroWinkler(query, index)
+	return stringscore.BestPairCombinationJaroWinkler(query, index)
 }
 
 // normalizeAffiliationName normalizes an entity name for comparison
