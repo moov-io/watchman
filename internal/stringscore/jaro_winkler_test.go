@@ -273,17 +273,17 @@ func TestGenerateWordCombinations(t *testing.T) {
 			name:  "JSC ARGUMENT",
 			input: []string{"JSC", "ARGUMENT"},
 			expected: [][]string{
-				[]string{"JSC", "ARGUMENT"},
-				[]string{"JSCARGUMENT"},
+				{"JSC", "ARGUMENT"},
+				{"JSCARGUMENT"},
 			},
 		},
 		{
 			name:  "11,420.2-1 CORP",
 			input: strings.Fields(prepare.LowerAndRemovePunctuation("11,420.2-1 CORP")),
 			expected: [][]string{
-				[]string{"11", "420", "2", "1", "corp"},
-				[]string{"11420", "21", "corp"},
-				[]string{"11420", "2", "1", "corp"},
+				{"11", "420", "2", "1", "corp"},
+				{"11420", "21", "corp"},
+				{"11420", "2", "1", "corp"},
 			},
 		},
 	}
