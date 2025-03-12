@@ -6,7 +6,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/moov-io/watchman/internal/norm"
 	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/internal/stringscore"
 )
@@ -62,7 +61,7 @@ func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], we
 	// Check historical names with penalty
 	for _, hist := range index.HistoricalInfo {
 		if strings.EqualFold(hist.Type, "Former Name") {
-			indexHistoricalTerms := strings.Fields(norm.Name(hist.Value))
+			indexHistoricalTerms := strings.Fields(prepare.LowerAndRemovePunctuation(hist.Value))
 
 			histMatch := compareNameTerms(query.PreparedFields.NameFields, indexHistoricalTerms)
 			histMatch.score *= 0.95 // Apply penalty for historical names

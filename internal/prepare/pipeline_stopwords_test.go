@@ -84,11 +84,11 @@ func TestStopwords__apply(t *testing.T) {
 		},
 		{
 			in:       "11AA420 CORP.", // Issue 483 #3
-			expected: "11aa420 corp",
+			expected: "11aa420 corp.",
 		},
 	}
 	for _, test := range cases {
-		got := RemoveStopwords(test.in, "")
+		got := RemoveStopwords(test.in)
 		require.Equal(t, test.expected, got)
 	}
 }

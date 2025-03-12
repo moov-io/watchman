@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	punctuationReplacer = strings.NewReplacer(".", "", ",", "", "-", " ", "  ", " ")
+	punctuationReplacer = strings.NewReplacer(".", " ", ",", " ", "-", " ")
 )
 
 // LowerAndRemovePunctuation will lowercase each substring and remove punctuation
@@ -27,11 +27,38 @@ var (
 func LowerAndRemovePunctuation(s string) string {
 	trimmed := strings.TrimSpace(strings.ToLower(punctuationReplacer.Replace(s)))
 
+	// Remove all punctuation and normalize whitespace
+	var normalized strings.Builder
+	lastWasSpace := true // Start with true to trim leading spaces
+
+	for _, r := range trimmed {
+		if unicode.IsPunct(r) || unicode.IsSymbol(r) {
+			if !lastWasSpace {
+				normalized.WriteRune(' ')
+				lastWasSpace = true
+			}
+			continue
+		}
+
+		if unicode.IsSpace(r) {
+			if !lastWasSpace {
+				normalized.WriteRune(' ')
+				lastWasSpace = true
+			}
+			continue
+		}
+
+		if unicode.IsLetter(r) || unicode.IsNumber(r) {
+			normalized.WriteRune(r)
+			lastWasSpace = false
+		}
+	}
+
 	// UTF-8 normalization
 	chain := getTransformChain()
 	defer saveBuffer(chain)
 
-	result, _, _ := transform.String(chain, trimmed)
+	result, _, _ := transform.String(chain, strings.TrimSpace(normalized.String()))
 	return result
 }
 

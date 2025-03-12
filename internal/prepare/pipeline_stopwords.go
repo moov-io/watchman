@@ -42,19 +42,25 @@ var (
 	numberRegex = regexp.MustCompile(`([\d\.\,\-]{1,}[\d]{1,})`)
 )
 
-func RemoveStopwords(in string, countryName string) string {
-	lang := detectLanguage(in, countryName)
+func RemoveStopwords(input string) string {
+	info := whatlanggo.Detect(input)
 
-	return removeStopwords(in, lang)
+	return removeStopwords(input, info.Lang)
 }
 
-func removeStopwords(in string, lang whatlanggo.Lang) string {
+func RemoveStopwordsCountry(input string, countryName string) string {
+	lang := detectLanguage(input, countryName)
+
+	return removeStopwords(input, lang)
+}
+
+func removeStopwords(input string, lang whatlanggo.Lang) string {
 	if keepStopwords {
-		return in
+		return input
 	}
 
 	var out []string
-	words := strings.Fields(strings.ToLower(in))
+	words := strings.Fields(strings.ToLower(input))
 	for i := range words {
 		cleaned := strings.TrimSpace(words[i])
 

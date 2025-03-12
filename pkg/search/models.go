@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/moov-io/watchman/internal/norm"
+	"github.com/moov-io/watchman/internal/prepare"
 )
 
 type Value interface{}
@@ -247,8 +248,8 @@ type PreparedFields struct {
 }
 
 func (e Entity[T]) Normalize() Entity[T] {
-	e.PreparedFields.Name = norm.Name(e.Name)
-	e.PreparedFields.NameFields = norm.RemoveInsignificantTerms(strings.Fields(e.PreparedFields.Name))
+	e.PreparedFields.Name = prepare.LowerAndRemovePunctuation(e.Name)
+	e.PreparedFields.NameFields = removeStopwords(e.PreparedFields.Name)
 
 	e.PreparedFields.Contact.PhoneNumbers = normalizePhoneNumbers(e.Contact.PhoneNumbers)
 	e.PreparedFields.Contact.FaxNumbers = normalizePhoneNumbers(e.Contact.FaxNumbers)
@@ -266,23 +267,40 @@ func (e Entity[T]) Normalize() Entity[T] {
 		e.PreparedFields.AltNames = normalizeNames(e.Vessel.AltNames)
 	}
 
-	e.PreparedFields.AltNameFields = make([][]string, len(e.PreparedFields.AltNames))
-	for idx := range e.PreparedFields.AltNames {
-		e.PreparedFields.AltNameFields[idx] = norm.RemoveInsignificantTerms(strings.Fields(e.PreparedFields.AltNames[idx]))
+	if len(e.PreparedFields.AltNames) > 0 {
+		e.PreparedFields.AltNameFields = make([][]string, len(e.PreparedFields.AltNames))
+		for idx := range e.PreparedFields.AltNames {
+			e.PreparedFields.AltNameFields[idx] = removeStopwords(e.PreparedFields.AltNames[idx])
+		}
 	}
 
 	return e
 }
 
+func removeStopwords(input string) []string {
+	if input == "" {
+		return nil
+	}
+	return strings.Fields(prepare.RemoveStopwords(input))
+}
+
 func normalizeNames(altNames []string) []string {
+	if len(altNames) == 0 {
+		return nil
+	}
+
 	out := make([]string, len(altNames))
 	for idx := range altNames {
-		out[idx] = norm.Name(altNames[idx])
+		out[idx] = prepare.LowerAndRemovePunctuation(altNames[idx])
 	}
 	return out
 }
 
 func normalizePhoneNumbers(numbers []string) []string {
+	if len(numbers) == 0 {
+		return nil
+	}
+
 	out := make([]string, len(numbers))
 	for idx := range numbers {
 		out[idx] = norm.PhoneNumber(numbers[idx])

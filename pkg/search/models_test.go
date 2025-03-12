@@ -46,3 +46,21 @@ func TestEntityJSON(t *testing.T) {
 }`)
 	require.Equal(t, expected, string(bs))
 }
+
+func TestEntity_Normalize(t *testing.T) {
+	cases := []struct {
+		name            string
+		input, expected Entity[Value]
+	}{
+		{
+			name:     "empty",
+			input:    Entity[Value]{},
+			expected: Entity[Value]{},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			require.Equal(t, tc.expected, tc.input.Normalize())
+		})
+	}
+}
