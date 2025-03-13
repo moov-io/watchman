@@ -5,7 +5,7 @@ go 1.22.9
 toolchain go1.23.4
 
 require (
-	fyne.io/fyne/v2 v2.5.3
+	fyne.io/fyne/v2 v2.5.5
 	github.com/abadojack/whatlanggo v1.0.1
 	github.com/antchfx/htmlquery v1.3.3
 	github.com/bbalet/stopwords v1.0.0
@@ -65,6 +65,7 @@ require (
 	github.com/markbates/pkger v0.17.1 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/nicksnyder/go-i18n/v2 v2.4.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
