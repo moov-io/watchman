@@ -10,6 +10,8 @@ menubar: docs-menu
 
 > For documentation on older releases of Watchman (v0.31.x series), please visit the [older docs website](https://github.com/moov-io/watchman/tree/v0.31.3/docs) in our GitHub repository.
 
+![](images/overview.png)
+
 ## Search Options Overview
 
 Watchman provides multiple search endpoints and parameters to help you find the exact matches you need. Different search options access different combinations of watchlists.
