@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/moov-io/watchman"
+	"github.com/moov-io/watchman/internal/concurrencychamp"
 	"github.com/moov-io/watchman/internal/download"
-	"github.com/moov-io/watchman/internal/groupsize"
 	"github.com/moov-io/watchman/internal/indices"
 	"github.com/moov-io/watchman/internal/largest"
 	"github.com/moov-io/watchman/internal/minmaxmed"
@@ -33,7 +33,7 @@ type Service interface {
 }
 
 func NewService(logger log.Logger, config Config) (Service, error) {
-	cm, err := groupsize.NewConcurrencyManager(config.SearchGroups.Default, config.SearchGroups.Min, config.SearchGroups.Max)
+	cm, err := concurrencychamp.NewConcurrencyManager(config.SearchGroups.Default, config.SearchGroups.Min, config.SearchGroups.Max)
 	if err != nil {
 		return nil, fmt.Errorf("creating search service: %w", err)
 	}
@@ -51,7 +51,7 @@ type service struct {
 	latestStats  download.Stats
 	sync.RWMutex // protects latestStats (which has entities and list hashes)
 
-	cm *groupsize.ConcurrencyManager
+	cm *concurrencychamp.ConcurrencyManager
 }
 
 func (s *service) LatestStats() download.Stats {
@@ -123,13 +123,13 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 		debugs = largest.NewItems[debugRespone](opts.Limit, opts.MinMatch)
 	}
 
-	groupSize, err := getGroupSize(s.cm)
+	goroutineCount, err := getGoroutineCount(s.cm)
 	if err != nil {
-		return nil, fmt.Errorf("getGroupSize: %w", err)
+		return nil, fmt.Errorf("getGoroutineCount: %w", err)
 	}
 	start := time.Now()
 
-	indices.ProcessSliceFn(s.latestStats.Entities, groupSize, func(index search.Entity[search.Value]) {
+	indices.ProcessSliceFn(s.latestStats.Entities, goroutineCount, func(index search.Entity[search.Value]) {
 		start := time.Now()
 
 		var score float64
@@ -160,10 +160,10 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	})
 
 	diff := time.Since(start)
-	s.cm.RecordDuration(groupSize, diff)
+	s.cm.RecordDuration(goroutineCount, diff)
 
 	span.SetAttributes(
-		attribute.Int("search.group_size", groupSize),
+		attribute.Int("search.goroutine_count", goroutineCount),
 		attribute.Int64("search.duration", diff.Milliseconds()),
 	)
 
@@ -199,14 +199,14 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	return out, nil
 }
 
-func getGroupSize(cm *groupsize.ConcurrencyManager) (int, error) {
+func getGoroutineCount(cm *concurrencychamp.ConcurrencyManager) (int, error) {
 	// After local benchmarking this is a tradeoff between the fastest / most efficient group size picking
 	// and offering configurability to users.
 	//
 	// Using an atomic cache to store ParseUint's result is ~75% slower than just calling strconv.ParseUint every time.
 	// This may be an inaccurate result on other hardware/platforms.
 	//
-	// Using groupsize.ConcurrencyManager provides the quickest searches while using an insignificant amount of memory
+	// Using concurrencychamp.ConcurrencyManager provides the quickest searches while using an insignificant amount of memory
 	// compared to what similarity scoring uses.
 	fromEnv := strings.TrimSpace(os.Getenv("SEARCH_GOROUTINE_COUNT"))
 	if fromEnv != "" {

@@ -1,4 +1,4 @@
-package groupsize
+package concurrencychamp
 
 import (
 	"fmt"

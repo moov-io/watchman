@@ -1,4 +1,4 @@
-package groupsize
+package concurrencychamp
 
 import (
 	"bytes"
@@ -103,8 +103,8 @@ func BenchmarkConcurrencyManager(b *testing.B) {
 			b.ResetTimer()
 			b.RunParallel(func(pb *testing.PB) {
 				for pb.Next() {
-					size := cm.PickConcurrency()
-					cm.RecordDuration(size, tc.workload())
+					champ := cm.PickConcurrency()
+					cm.RecordDuration(champ, tc.workload())
 				}
 			})
 		})
@@ -123,8 +123,8 @@ func TestRaceConditions(t *testing.T) {
 		// Concurrent stats recording
 		go func() {
 			defer wg.Done()
-			size := cm.PickConcurrency()
-			cm.RecordDuration(size, time.Millisecond)
+			champ := cm.PickConcurrency()
+			cm.RecordDuration(champ, time.Millisecond)
 		}()
 
 		// Concurrent evaluation
@@ -169,8 +169,8 @@ func TestStressConcurrencyManager(t *testing.T) {
 				case <-done:
 					return
 				default:
-					size := cm.PickConcurrency()
-					cm.RecordDuration(size, time.Duration(rand.Int63n(int64(10*time.Millisecond))))
+					champ := cm.PickConcurrency()
+					cm.RecordDuration(champ, time.Duration(rand.Int63n(int64(10*time.Millisecond))))
 				}
 			}
 		}()
