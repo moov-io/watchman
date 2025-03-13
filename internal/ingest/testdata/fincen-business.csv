@@ -1,0 +1,3 @@
+tracking_number,business_name,dba_name,number,number_type,incorporated,street,city,state,zip,country,phone
+123456,Acme Corp,Acme Corp LLC,,,,999 South Marine Corps Drive,Anytown,CA,90210,US,
+654321,Anvil Investments LLC,,992288844,EIN,,79 Other Way,Othertown,NY,12946,US,
