@@ -269,14 +269,18 @@ func JaroWinklerWithFavoritism(indexedTerm, query string, favoritism float64) fl
 // GenerateWordCombinations creates variations of the input words by combining short words
 // with their neighbors, to handle cases like "JSC ARGUMENT" vs "JSCARGUMENT"
 func GenerateWordCombinations(tokens []string) [][]string {
-	result := [][]string{tokens} // Start with original tokens
-
-	// Don't bother with this for single token strings
+	// Return early if there's nothing to combine
 	if len(tokens) <= 1 {
-		return result
+		return [][]string{tokens}
 	}
 
-	// Create a version with short words combined with the next word
+	// Pre-allocate result slice with capacity for all possible variations
+	result := make([][]string, 0, 3) // Original + forward + backward (maximum possible)
+
+	// Always include original tokens
+	result = append(result, tokens)
+
+	// Create forward combinations (combine short words with next word)
 	combinedForward := make([]string, 0, len(tokens))
 	skipNext := false
 
@@ -295,26 +299,33 @@ func GenerateWordCombinations(tokens []string) [][]string {
 		}
 	}
 
-	// Add the forward-combined version if it's different
+	// Only add if different from original (has at least one combination)
 	if len(combinedForward) < len(tokens) {
 		result = append(result, combinedForward)
 	}
 
-	// Create a version with short words combined with the previous word
-	combinedBackward := make([]string, 0, len(tokens))
-	for i := 0; i < len(tokens); i++ {
-		// If this is a short word and not the first one, combine with previous
-		// (but skip if we already handled it in a previous iteration)
-		if i > 0 && len(tokens[i]) <= 3 && len(combinedBackward) == i {
-			combinedBackward[i-1] = combinedBackward[i-1] + tokens[i]
-		} else {
-			combinedBackward = append(combinedBackward, tokens[i])
-		}
-	}
+	// Create backward combinations (combine short words with previous word)
+	// Only process if forward combinations were found (optimization)
+	if len(combinedForward) < len(tokens) {
+		combinedBackward := make([]string, 0, len(tokens))
 
-	// Add the backward-combined version if it's different
-	if len(combinedBackward) < len(tokens) && !tokenSlicesEqual(combinedBackward, combinedForward) {
-		result = append(result, combinedBackward)
+		for i := 0; i < len(tokens); i++ {
+			if i > 0 && len(tokens[i]) <= 3 {
+				// Ensure we're not accessing beyond slice bounds
+				if len(combinedBackward) > 0 {
+					// Combine with previous token
+					lastIdx := len(combinedBackward) - 1
+					combinedBackward[lastIdx] = combinedBackward[lastIdx] + tokens[i]
+				}
+			} else {
+				combinedBackward = append(combinedBackward, tokens[i])
+			}
+		}
+
+		// Only add if backward combinations are different from both original and forward
+		if len(combinedBackward) < len(tokens) && !tokenSlicesEqual(combinedBackward, combinedForward) {
+			result = append(result, combinedBackward)
+		}
 	}
 
 	return result

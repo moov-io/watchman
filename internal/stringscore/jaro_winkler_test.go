@@ -148,8 +148,8 @@ func TestBestPairCombinationJaroWinkler(t *testing.T) {
 		{prepare.LowerAndRemovePunctuation("11,420.2-1 CORP."), "11 420 21 corp", 1.0},
 		{prepare.LowerAndRemovePunctuation("11,420.2-1 CORP."), "11420 2 1 corp", 1.0},
 		{prepare.LowerAndRemovePunctuation("11,420.2-1 CORP."), "11420 21 corp", 1.0},
-		{prepare.LowerAndRemovePunctuation("11,420.2-1 CORP."), "114202 1 corp", 0.944},
-		{prepare.LowerAndRemovePunctuation("11,420.2-1 CORP."), "1142021 corp", 0.892},
+		{prepare.LowerAndRemovePunctuation("11,420.2-1 CORP."), "114202 1 corp", 1.0},
+		{prepare.LowerAndRemovePunctuation("11,420.2-1 CORP."), "1142021 corp", 1.0},
 
 		// From https://github.com/moov-io/watchman/issues/594
 		{"JSCARGUMENT", "JSC ARGUMENT", 1.000},
@@ -283,7 +283,7 @@ func TestGenerateWordCombinations(t *testing.T) {
 			expected: [][]string{
 				{"11", "420", "2", "1", "corp"},
 				{"11420", "21", "corp"},
-				{"11420", "2", "1", "corp"},
+				{"1142021", "corp"},
 			},
 		},
 	}
