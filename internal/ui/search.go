@@ -128,6 +128,9 @@ func SearchContainer(ctx context.Context, env Environment) fyne.CanvasObject {
 		)
 		searchOpts := search.SearchOpts{Limit: 5, Debug: true}
 
+		// Push a notification to the system
+		sendSearchNotification(query)
+
 		// Perform search in a goroutine to avoid blocking the UI
 		go func() {
 			resp, err := env.Client.SearchByEntity(ctx, query, searchOpts)
@@ -145,6 +148,17 @@ func SearchContainer(ctx context.Context, env Environment) fyne.CanvasObject {
 	}
 
 	return mainContent
+}
+
+func sendSearchNotification(query search.Entity[search.Value]) {
+	device := fyne.CurrentDevice()
+	if device.IsBrowser() || device.IsMobile() {
+		return
+	}
+
+	msg := fyne.NewNotification("Watchman Search", fmt.Sprintf("Searching for %s", query.Name))
+
+	fyne.CurrentApp().SendNotification(msg)
 }
 
 // buildQueryEntity creates a search query from form data
