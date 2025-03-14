@@ -156,7 +156,7 @@ func sendSearchNotification(query search.Entity[search.Value]) {
 		return
 	}
 
-	msg := fyne.NewNotification("Watchman Search", fmt.Sprintf("Searching for %s", query.Name))
+	msg := fyne.NewNotification("Watchman Search", fmt.Sprintf("%s search for %s", query.Type, query.Name))
 
 	fyne.CurrentApp().SendNotification(msg)
 }
