@@ -11,7 +11,6 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
-	"fyne.io/fyne/v2/widget"
 )
 
 type Environment struct {
@@ -34,6 +33,7 @@ func New(ctx context.Context, env Environment) fyne.App {
 	a.Settings().SetTheme(theme.LightTheme())
 
 	device := fyne.CurrentDevice()
+
 	env.Logger.Debug().Logf("device: mobile=%v browser=%v keyboard=%v",
 		device.IsMobile(), device.IsBrowser(), device.HasKeyboard())
 
@@ -45,7 +45,7 @@ func New(ctx context.Context, env Environment) fyne.App {
 		// Browser-specific settings
 		env.Width = 1200.0 // Slightly narrower for browser
 		env.Height = 800.0
-	} else if !device.IsMobile() {
+	} else {
 		// Desktop settings
 		env.Width = 1500.0
 		env.Height = 900.0
@@ -57,7 +57,7 @@ func New(ctx context.Context, env Environment) fyne.App {
 	// Set app tabs along the top
 	tabs := container.NewAppTabs(
 		container.NewTabItem("Search", SearchContainer(ctx, env)),
-		container.NewTabItem("Admin", widget.NewLabel("TODO - admin operations")),
+		container.NewTabItem("Admin", AdminContainer(ctx, env)),
 	)
 	tabs.SetTabLocation(container.TabLocationTop)
 

@@ -2,9 +2,7 @@ package ui
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
-	"image/color"
 	"strings"
 
 	"github.com/moov-io/watchman"
@@ -12,637 +10,611 @@ import (
 	"github.com/moov-io/watchman/pkg/search"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
+// SearchContainer creates a search interface with entity selection, form fields, and results display.
 func SearchContainer(ctx context.Context, env Environment) fyne.CanvasObject {
-	// Create main container
-	mainContainer := container.New(layout.NewBorderLayout(nil, nil, nil, nil))
+	// Entity Type Section
+	entityTypeLabel := widget.NewLabelWithStyle("Entity Type", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	entityTypes := []string{"Person", "Business", "Organization", "Aircraft", "Vessel"}
+	entityTypeRadio := widget.NewRadioGroup(entityTypes, nil)
+	entityTypeRadio.Horizontal = true
 
-	// Create containers for different sections
-	formContainer := container.NewVBox()
-	resultsContainer := ResultsContainer(env)
-
-	// Create a warning label
-	warningLabel := widget.NewLabel("")
-	warningLabel.Hide()
-
-	// Create the search form and button
-	searchForm, submitButton := searchFormWithButton(ctx, env, warningLabel, resultsContainer)
-
-	// Create a container for the bottom panel with warning and button
-	bottomPanel := container.NewHBox(warningLabel, layout.NewSpacer(), submitButton)
-
-	// Create a scroll container for the form
-	formScrollContainer := container.NewScroll(searchForm)
-
-	device := fyne.CurrentDevice()
-	if device.IsBrowser() {
-		// Adjust for browser/WASM environment
-		formScrollContainer.SetMinSize(fyne.NewSize(0, 300)) // Fixed size for browser
-	} else {
-		// Normal sizing for desktop
-		formScrollContainer.SetMinSize(fyne.NewSize(0, env.Height*0.5))
-	}
-
-	// Add components to the form container
-	formContainer.Add(formScrollContainer)
-	formContainer.Add(bottomPanel)
-
-	// Create a split layout
-	splitContent := container.NewVSplit(
-		formContainer,
-		resultsContainer,
-	)
-
-	if device.IsBrowser() {
-		splitContent.SetOffset(0.7) // Larger form section in browser
-	} else {
-		splitContent.SetOffset(0.6) // Normal split for desktop
-	}
-
-	mainContainer.Add(splitContent)
-	return mainContainer
-}
-
-func searchFormWithButton(ctx context.Context, env Environment, warningLabel *widget.Label, results *fyne.Container) (*widget.Form, *widget.Button) {
-	// Create entity type section contents
-	peopleContent := createPeopleContent()
+	// Entity-Specific Content
+	personContent := createPersonContent()
 	businessContent := createBusinessContent()
 	organizationContent := createOrganizationContent()
 	aircraftContent := createAircraftContent()
 	vesselContent := createVesselContent()
-	contactContent := createContactContent()
-	addressContent := createAddressContent()
+	entityFieldsContainer := container.NewVBox()
 
-	// Create expandable sections
-	peopleSection := NewExpandableSection("People", peopleContent)
-	businessSection := NewExpandableSection("Business", businessContent)
-	organizationSection := NewExpandableSection("Organization", organizationContent)
-	aircraftSection := NewExpandableSection("Aircraft", aircraftContent)
-	vesselSection := NewExpandableSection("Vessel", vesselContent)
-	contactSection := NewExpandableSection("Contact Info", contactContent)
-	addressSection := NewExpandableSection("Addresses", addressContent)
-
-	// Create entity type select with callback to show/hide appropriate sections
-	entityTypeSelect := newSelect("EntityType")
-	entityTypeSelect.PlaceHolder = "(required)"
-
-	entityTypeSelect.OnChanged = func(selected string) {
-		// Hide all entity-specific sections first
-		peopleSection.Expanded = false
-		businessSection.Expanded = false
-		organizationSection.Expanded = false
-		aircraftSection.Expanded = false
-		vesselSection.Expanded = false
-
-		// Show relevant section based on selection
+	// Update entity-specific fields based on selected entity type
+	entityTypeRadio.OnChanged = func(selected string) {
+		entityFieldsContainer.RemoveAll()
 		switch selected {
-		case string(search.EntityPerson):
-			peopleSection.Expanded = true
-		case string(search.EntityBusiness):
-			businessSection.Expanded = true
-		case string(search.EntityOrganization):
-			organizationSection.Expanded = true
-		case string(search.EntityAircraft):
-			aircraftSection.Expanded = true
-		case string(search.EntityVessel):
-			vesselSection.Expanded = true
+		case "Person":
+			entityFieldsContainer.Add(personContent)
+		case "Business":
+			entityFieldsContainer.Add(businessContent)
+		case "Organization":
+			entityFieldsContainer.Add(organizationContent)
+		case "Aircraft":
+			entityFieldsContainer.Add(aircraftContent)
+		case "Vessel":
+			entityFieldsContainer.Add(vesselContent)
 		}
-
-		// Refresh all sections
-		peopleSection.Refresh()
-		businessSection.Refresh()
-		organizationSection.Refresh()
-		aircraftSection.Refresh()
-		vesselSection.Refresh()
+		entityFieldsContainer.Refresh()
 	}
 
-	items := []*widget.FormItem{
-		{Text: "Name", Widget: newInput()},
-		{Text: "EntityType *", Widget: entityTypeSelect},
-		{
-			Text:     "SourceList",
-			HintText: "Original list the entity appeared on",
-			Widget:   newSelect("SourceList"),
-		},
+	// Common Search Fields
+	commonFieldsLabel := widget.NewLabelWithStyle("Common Fields", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	warningLabel := widget.NewLabel("")
+	warningLabel.TextStyle = fyne.TextStyle{Bold: true}
+	warningLabel.Hide()
+	nameEntry := widget.NewEntry()
+	nameEntry.PlaceHolder = "Enter name to search"
+	sourceSelect := newSelect("SourceList") // Assume newSelect is a custom function returning a widget.Select
+	sourceSelect.PlaceHolder = "Select source list (optional)"
+	searchForm := widget.NewForm(
+		widget.NewFormItem("Name", nameEntry),
+		widget.NewFormItem("Source List", sourceSelect),
+	)
 
-		// Entity type sections
-		{Text: "", Widget: peopleSection},
-		{Text: "", Widget: businessSection},
-		{Text: "", Widget: organizationSection},
-		{Text: "", Widget: aircraftSection},
-		{Text: "", Widget: vesselSection},
+	// Entity-Specific Fields Section
+	entitySpecificLabel := widget.NewLabelWithStyle("Entity-Specific Fields", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 
-		// Common fields for all entity types
-		{Text: "", Widget: contactSection},
-		{Text: "", Widget: addressSection},
+	// Search Button
+	searchButton := widget.NewButtonWithIcon("Search", theme.SearchIcon(), nil)
+	searchButton.Importance = widget.HighImportance
+	buttonContainer := container.NewHBox(warningLabel, layout.NewSpacer(), searchButton)
 
-		// Other Fields section
-		{Text: "Other Fields", Widget: widget.NewLabel(" ")},
-		{Text: "CryptoAddresses", Widget: newMultilineInput(2)},
-	}
+	// Top Content Layout
+	topContent := container.NewVBox(
+		entityTypeLabel,
+		entityTypeRadio,
+		widget.NewSeparator(),
+		commonFieldsLabel,
+		searchForm,
+		widget.NewSeparator(),
+		entitySpecificLabel,
+		entityFieldsContainer,
+		buttonContainer,
+	)
 
-	if fyne.CurrentDevice().IsBrowser() {
-		// Add a maximum width constraint for inputs in browser mode
-		for _, item := range items {
-			if entry, ok := item.Widget.(*widget.Entry); ok {
-				// Wrap the entry in a container that respects minimum size
-				spacer := canvas.NewRectangle(color.Transparent)
-				spacer.SetMinSize(fyne.NewSize(300, entry.MinSize().Height))
+	// Results Section
+	resultsHeader := widget.NewLabelWithStyle("Results", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	resultsSeparator := widget.NewSeparator()
+	resultsContent := container.NewVBox(widget.NewLabel("Search results will appear here"))
 
-				fixedWidthContainer := container.New(
-					layout.NewMaxLayout(),
-					spacer,
-					entry,
-				)
+	// Main Layout
+	center := container.NewVBox(resultsHeader, resultsSeparator, resultsContent)
+	mainContent := container.NewVBox(topContent, center)
 
-				// Replace the widget in the form item
-				item.Widget = fixedWidthContainer
-			}
-		}
-	}
-
-	form := &widget.Form{
-		Items:    items,
-		OnSubmit: nil, // We'll handle submission with our custom button
-	}
-
-	submitButton := widget.NewButton("Search", func() {
-		// Hide any existing warning
+	// Search Button Callback
+	searchButton.OnTapped = func() {
 		warningLabel.Hide()
 
-		// Check if EntityType is selected
-		if entityTypeSelect.Selected == "" {
-			warningLabel.SetText("Problem: EntityType is required")
+		// Validate required fields
+		if entityTypeRadio.Selected == "" {
+			warningLabel.SetText("Please select an entity type")
+			warningLabel.Show()
+			return
+		}
+		if nameEntry.Text == "" {
+			warningLabel.SetText("Please enter a name to search")
 			warningLabel.Show()
 			return
 		}
 
-		// Rest of the existing code
-		populatedItems := collectPopulatedItems(items)
-		env.Logger.Info().Logf("searching with %d fields", len(populatedItems))
+		// Clear and update results
+		resultsContent.RemoveAll()
+		resultsContent.Add(widget.NewLabel("Searching... Please wait"))
+		resultsContent.Refresh()
 
-		query := buildQueryEntity(populatedItems)
-		searchOpts := search.SearchOpts{
-			Limit: 5,
-			Debug: true,
-		}
-		resp, err := env.Client.SearchByEntity(ctx, query, searchOpts)
-		if err != nil {
-			env.Logger.Error().LogErrorf("ERROR performing search: %v", err)
-			warningLabel.SetText("Problem: " + err.Error())
-			warningLabel.Show()
-			return
-		}
+		// Build search query (assume buildQueryEntity is defined elsewhere)
+		query := buildQueryEntity(
+			entityTypeRadio.Selected,
+			nameEntry.Text,
+			sourceSelect.Selected,
+			personContent,
+			businessContent,
+			organizationContent,
+			aircraftContent,
+			vesselContent,
+		)
+		searchOpts := search.SearchOpts{Limit: 5, Debug: true}
 
-		UpdateResults(ctx, env, results, resp.Entities)
-	})
-	submitButton.Importance = widget.HighImportance
+		// Perform search in a goroutine to avoid blocking the UI
+		go func() {
+			resp, err := env.Client.SearchByEntity(ctx, query, searchOpts)
+			fyne.CurrentApp().Driver().CanvasForObject(mainContent).Content().Refresh()
+			if err != nil {
+				env.Logger.Error().LogErrorf("ERROR performing search: %v", err)
+				resultsContent.RemoveAll()
+				resultsContent.Add(widget.NewLabel(fmt.Sprintf("Error: %v", err)))
+				resultsContent.Refresh()
+				return
+			}
+			// Update results (assume updateResultsDisplay is defined elsewhere)
+			updateResultsDisplay(env, resultsContent, resp.Entities)
+		}()
+	}
 
-	return form, submitButton
+	return mainContent
 }
 
-// Helper functions to create content containers for each section
-func createPeopleContent() fyne.CanvasObject {
+// buildQueryEntity creates a search query from form data
+func buildQueryEntity(
+	entityType,
+	name,
+	sourceList string,
+	personContent fyne.CanvasObject,
+	businessContent fyne.CanvasObject,
+	organizationContent fyne.CanvasObject,
+	aircraftContent fyne.CanvasObject,
+	vesselContent fyne.CanvasObject,
+) search.Entity[search.Value] {
+	var entity search.Entity[search.Value]
+
+	// Set common fields
+	entity.Name = name
+
+	if sourceList != "" {
+		entity.Source = search.SourceList(sourceList)
+	}
+
+	// Set entity type and specific fields based on selection
+	switch entityType {
+	case "Person":
+		entity.Type = search.EntityPerson
+		entity.Person = extractPersonFields(personContent)
+		entity.Person.Name = name
+	case "Business":
+		entity.Type = search.EntityBusiness
+		entity.Business = extractBusinessFields(businessContent)
+		entity.Business.Name = name
+	case "Organization":
+		entity.Type = search.EntityOrganization
+		entity.Organization = extractOrganizationFields(organizationContent)
+		entity.Organization.Name = name
+	case "Aircraft":
+		entity.Type = search.EntityAircraft
+		entity.Aircraft = extractAircraftFields(aircraftContent)
+		entity.Aircraft.Name = name
+	case "Vessel":
+		entity.Type = search.EntityVessel
+		entity.Vessel = extractVesselFields(vesselContent)
+		entity.Vessel.Name = name
+	}
+
+	// Return the query entity
+	return entity
+}
+
+func extractPersonFields(content fyne.CanvasObject) *search.Person {
+	person := &search.Person{}
+
+	// Safely extract data from the form
+	if content == nil {
+		return person
+	}
+
+	container, isContainer := content.(*fyne.Container)
+	if !isContainer || len(container.Objects) < 2 {
+		return person
+	}
+
+	form, isForm := container.Objects[1].(*widget.Form)
+	if !isForm {
+		return person
+	}
+
+	// Extract alt names
+	if len(form.Items) > 0 {
+		if entry, isEntry := form.Items[0].Widget.(*widget.Entry); entry.MultiLine && isEntry {
+			if entry.Text != "" {
+				person.AltNames = strings.Split(entry.Text, "\n")
+			}
+		}
+	}
+
+	// Extract gender
+	if len(form.Items) > 1 {
+		if select_, isSelect := form.Items[1].Widget.(*widget.Select); isSelect {
+			if select_.Selected != "" {
+				person.Gender = search.Gender(strings.ToLower(select_.Selected))
+			}
+		}
+	}
+
+	// Extract other fields as needed
+
+	return person
+}
+
+func extractBusinessFields(content fyne.CanvasObject) *search.Business {
+	business := &search.Business{}
+
+	// Safely extract data from the form
+	if content == nil {
+		return business
+	}
+
+	container, isContainer := content.(*fyne.Container)
+	if !isContainer || len(container.Objects) < 2 {
+		return business
+	}
+
+	form, isForm := container.Objects[1].(*widget.Form)
+	if !isForm {
+		return business
+	}
+
+	// Extract alt names
+	if len(form.Items) > 0 {
+		if entry, isEntry := form.Items[0].Widget.(*widget.Entry); entry.MultiLine && isEntry {
+			if entry.Text != "" {
+				business.AltNames = strings.Split(entry.Text, "\n")
+			}
+		}
+	}
+
+	// Extract other fields as needed
+
+	return business
+}
+
+func extractOrganizationFields(content fyne.CanvasObject) *search.Organization {
+	org := &search.Organization{}
+
+	// Safely extract data from the form
+	if content == nil {
+		return org
+	}
+
+	container, isContainer := content.(*fyne.Container)
+	if !isContainer || len(container.Objects) < 2 {
+		return org
+	}
+
+	form, isForm := container.Objects[1].(*widget.Form)
+	if !isForm {
+		return org
+	}
+
+	// Extract alt names
+	if len(form.Items) > 0 {
+		if entry, isEntry := form.Items[0].Widget.(*widget.Entry); entry.MultiLine && isEntry {
+			if entry.Text != "" {
+				org.AltNames = strings.Split(entry.Text, "\n")
+			}
+		}
+	}
+
+	// Extract other fields as needed
+
+	return org
+}
+
+func extractAircraftFields(content fyne.CanvasObject) *search.Aircraft {
+	aircraft := &search.Aircraft{}
+
+	// Safely extract data from the form
+	if content == nil {
+		return aircraft
+	}
+
+	container, isContainer := content.(*fyne.Container)
+	if !isContainer || len(container.Objects) < 2 {
+		return aircraft
+	}
+
+	form, isForm := container.Objects[1].(*widget.Form)
+	if !isForm {
+		return aircraft
+	}
+
+	// Extract alt names
+	if len(form.Items) > 0 {
+		if entry, isEntry := form.Items[0].Widget.(*widget.Entry); entry.MultiLine && isEntry {
+			if entry.Text != "" {
+				aircraft.AltNames = strings.Split(entry.Text, "\n")
+			}
+		}
+	}
+
+	// Extract type
+	if len(form.Items) > 1 {
+		if select_, isSelect := form.Items[1].Widget.(*widget.Select); isSelect {
+			if select_.Selected != "" {
+				aircraft.Type = search.AircraftType(strings.ToLower(select_.Selected))
+			}
+		}
+	}
+
+	// Extract other fields as needed
+
+	return aircraft
+}
+
+func extractVesselFields(content fyne.CanvasObject) *search.Vessel {
+	vessel := &search.Vessel{}
+
+	// Safely extract data from the form
+	if content == nil {
+		return vessel
+	}
+
+	container, isContainer := content.(*fyne.Container)
+	if !isContainer || len(container.Objects) < 2 {
+		return vessel
+	}
+
+	form, isForm := container.Objects[1].(*widget.Form)
+	if !isForm {
+		return vessel
+	}
+
+	// Extract alt names
+	if len(form.Items) > 0 {
+		if entry, isEntry := form.Items[0].Widget.(*widget.Entry); entry.MultiLine && isEntry {
+			if entry.Text != "" {
+				vessel.AltNames = strings.Split(entry.Text, "\n")
+			}
+		}
+	}
+
+	// Extract IMO number
+	if len(form.Items) > 1 {
+		if entry, isEntry := form.Items[1].Widget.(*widget.Entry); isEntry {
+			vessel.IMONumber = entry.Text
+		}
+	}
+
+	// Extract type
+	if len(form.Items) > 2 {
+		if select_, isSelect := form.Items[2].Widget.(*widget.Select); isSelect {
+			if select_.Selected != "" {
+				vessel.Type = search.VesselType(strings.ToLower(select_.Selected))
+			}
+		}
+	}
+
+	// Extract other fields as needed
+
+	return vessel
+}
+
+// Create person-specific form
+func createPersonContent() fyne.CanvasObject {
+	form := widget.NewForm()
+
+	altNamesEntry := widget.NewMultiLineEntry()
+	altNamesEntry.PlaceHolder = "Alternative names, one per line"
+	altNamesEntry.SetMinRowsVisible(2)
+	form.Append("Alt Names", altNamesEntry)
+
+	genderSelect := newSelect("Gender")
+	genderSelect.PlaceHolder = "Select gender"
+	form.Append("Gender", genderSelect)
+
+	birthDateEntry := widget.NewEntry()
+	birthDateEntry.PlaceHolder = "YYYY-MM-DD"
+	form.Append("Birth Date", birthDateEntry)
+
+	// Add an ID section
+	idEntry := widget.NewMultiLineEntry()
+	idEntry.PlaceHolder = "ID type:number:country, one per line"
+	idEntry.SetMinRowsVisible(2)
+	form.Append("Government IDs", idEntry)
+
 	return container.NewVBox(
-		widget.NewLabel("Name:"),
-		newInput(),
-		widget.NewLabel("Alt Names:"),
-		newMultilineInput(2),
-		widget.NewLabel("Gender:"),
-		newSelect("Gender"),
-		widget.NewLabel("Birth Date:"),
-		newInput(), // Date picker would be better here
-		widget.NewLabel("Death Date:"),
-		newInput(), // Date picker would be better here
-		widget.NewLabel("Titles:"),
-		newMultilineInput(2),
-		widget.NewLabel("Government IDs:"),
-		newMultilineInput(2),
+		widget.NewLabelWithStyle("Person Fields", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		form,
 	)
 }
 
+// Create business-specific form
 func createBusinessContent() fyne.CanvasObject {
+	form := widget.NewForm()
+
+	altNamesEntry := widget.NewMultiLineEntry()
+	altNamesEntry.PlaceHolder = "Alternative names, one per line"
+	altNamesEntry.SetMinRowsVisible(2)
+	form.Append("Alt Names", altNamesEntry)
+
+	createdDateEntry := widget.NewEntry()
+	createdDateEntry.PlaceHolder = "YYYY-MM-DD"
+	form.Append("Created Date", createdDateEntry)
+
+	dissolvedDateEntry := widget.NewEntry()
+	dissolvedDateEntry.PlaceHolder = "YYYY-MM-DD"
+	form.Append("Dissolved Date", dissolvedDateEntry)
+
+	// Add an ID section
+	idEntry := widget.NewMultiLineEntry()
+	idEntry.PlaceHolder = "ID type:number:country, one per line"
+	idEntry.SetMinRowsVisible(2)
+	form.Append("Government IDs", idEntry)
+
 	return container.NewVBox(
-		widget.NewLabel("Name:"),
-		newInput(),
-		widget.NewLabel("Alt Names:"),
-		newMultilineInput(2),
-		widget.NewLabel("Created Date:"),
-		newInput(), // Date picker would be better
-		widget.NewLabel("Dissolved Date:"),
-		newInput(), // Date picker would be better
-		widget.NewLabel("Government IDs:"),
-		newMultilineInput(2),
+		widget.NewLabelWithStyle("Business Fields", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		form,
 	)
 }
 
+// Create organization-specific form
 func createOrganizationContent() fyne.CanvasObject {
+	form := widget.NewForm()
+
+	altNamesEntry := widget.NewMultiLineEntry()
+	altNamesEntry.PlaceHolder = "Alternative names, one per line"
+	altNamesEntry.SetMinRowsVisible(2)
+	form.Append("Alt Names", altNamesEntry)
+
+	createdDateEntry := widget.NewEntry()
+	createdDateEntry.PlaceHolder = "YYYY-MM-DD"
+	form.Append("Created Date", createdDateEntry)
+
+	dissolvedDateEntry := widget.NewEntry()
+	dissolvedDateEntry.PlaceHolder = "YYYY-MM-DD"
+	form.Append("Dissolved Date", dissolvedDateEntry)
+
+	// Add an ID section
+	idEntry := widget.NewMultiLineEntry()
+	idEntry.PlaceHolder = "ID type:number:country, one per line"
+	idEntry.SetMinRowsVisible(2)
+	form.Append("Government IDs", idEntry)
+
 	return container.NewVBox(
-		widget.NewLabel("Name:"),
-		newInput(),
-		widget.NewLabel("Alt Names:"),
-		newMultilineInput(2),
-		widget.NewLabel("Created Date:"),
-		newInput(), // Date picker would be better
-		widget.NewLabel("Dissolved Date:"),
-		newInput(), // Date picker would be better
-		widget.NewLabel("Government IDs:"),
-		newMultilineInput(2),
+		widget.NewLabelWithStyle("Organization Fields", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		form,
 	)
 }
 
+// Create aircraft-specific form
 func createAircraftContent() fyne.CanvasObject {
+	form := widget.NewForm()
+
+	altNamesEntry := widget.NewMultiLineEntry()
+	altNamesEntry.PlaceHolder = "Alternative names, one per line"
+	altNamesEntry.SetMinRowsVisible(2)
+	form.Append("Alt Names", altNamesEntry)
+
+	typeSelect := newSelect("AircraftType")
+	typeSelect.PlaceHolder = "Select aircraft type"
+	form.Append("Type", typeSelect)
+
+	flagEntry := widget.NewEntry()
+	flagEntry.PlaceHolder = "Country flag"
+	form.Append("Flag", flagEntry)
+
+	builtDateEntry := widget.NewEntry()
+	builtDateEntry.PlaceHolder = "YYYY-MM-DD"
+	form.Append("Built Date", builtDateEntry)
+
+	icaoCodeEntry := widget.NewEntry()
+	icaoCodeEntry.PlaceHolder = "ICAO code"
+	form.Append("ICAO Code", icaoCodeEntry)
+
+	modelEntry := widget.NewEntry()
+	modelEntry.PlaceHolder = "Aircraft model"
+	form.Append("Model", modelEntry)
+
+	serialNumberEntry := widget.NewEntry()
+	serialNumberEntry.PlaceHolder = "Serial number"
+	form.Append("Serial Number", serialNumberEntry)
+
 	return container.NewVBox(
-		widget.NewLabel("Name:"),
-		newInput(),
-		widget.NewLabel("Alt Names:"),
-		newMultilineInput(2),
-		widget.NewLabel("Type:"),
-		newSelect("AircraftType"),
-		widget.NewLabel("Flag:"),
-		newInput(), // Maybe a country select
-		widget.NewLabel("Built Date:"),
-		newInput(), // Date picker would be better
-		widget.NewLabel("ICAO Code:"),
-		newInput(),
-		widget.NewLabel("Model:"),
-		newInput(),
-		widget.NewLabel("Serial Number:"),
-		newInput(),
+		widget.NewLabelWithStyle("Aircraft Fields", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		form,
 	)
 }
 
+// Create vessel-specific form
 func createVesselContent() fyne.CanvasObject {
+	form := widget.NewForm()
+
+	altNamesEntry := widget.NewMultiLineEntry()
+	altNamesEntry.PlaceHolder = "Alternative names, one per line"
+	altNamesEntry.SetMinRowsVisible(2)
+	form.Append("Alt Names", altNamesEntry)
+
+	imoNumberEntry := widget.NewEntry()
+	imoNumberEntry.PlaceHolder = "IMO number"
+	form.Append("IMO Number", imoNumberEntry)
+
+	typeSelect := newSelect("VesselType")
+	typeSelect.PlaceHolder = "Select vessel type"
+	form.Append("Type", typeSelect)
+
+	flagEntry := widget.NewEntry()
+	flagEntry.PlaceHolder = "Country flag"
+	form.Append("Flag", flagEntry)
+
+	mmsiEntry := widget.NewEntry()
+	mmsiEntry.PlaceHolder = "MMSI number"
+	form.Append("MMSI", mmsiEntry)
+
+	callSignEntry := widget.NewEntry()
+	callSignEntry.PlaceHolder = "Call sign"
+	form.Append("Call Sign", callSignEntry)
+
 	return container.NewVBox(
-		widget.NewLabel("Name:"),
-		newInput(),
-		widget.NewLabel("Alt Names:"),
-		newMultilineInput(2),
-		widget.NewLabel("IMO Number:"),
-		newInput(),
-		widget.NewLabel("Type:"),
-		newSelect("VesselType"),
-		widget.NewLabel("Flag:"),
-		newInput(), // Maybe a country select
-		widget.NewLabel("Built Date:"),
-		newInput(), // Date picker would be better
-		widget.NewLabel("Model:"),
-		newInput(),
-		widget.NewLabel("Tonnage:"),
-		newInput(),
-		widget.NewLabel("MMSI:"),
-		newInput(),
-		widget.NewLabel("Call Sign:"),
-		newInput(),
-		widget.NewLabel("Gross Registered Tonnage:"),
-		newInput(),
-		widget.NewLabel("Owner:"),
-		newInput(),
+		widget.NewLabelWithStyle("Vessel Fields", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		form,
 	)
 }
 
-func createContactContent() fyne.CanvasObject {
-	return container.NewVBox(
-		widget.NewLabel("Email Addresses:"),
-		newMultilineInput(2),
-		widget.NewLabel("Phone Numbers:"),
-		newMultilineInput(2),
-		widget.NewLabel("Fax Numbers:"),
-		newMultilineInput(2),
-		widget.NewLabel("Websites:"),
-		newMultilineInput(2),
-	)
-}
-
-func createAddressContent() fyne.CanvasObject {
-	return container.NewVBox(
-		widget.NewLabel("Line 1:"),
-		newInput(),
-		widget.NewLabel("Line 2:"),
-		newInput(),
-		widget.NewLabel("City:"),
-		newInput(),
-		widget.NewLabel("Postal Code:"),
-		newInput(),
-		widget.NewLabel("State:"),
-		newInput(),
-		widget.NewLabel("Country:"),
-		newInput(), // Could be a country select
-		widget.NewLabel("Latitude:"),
-		newInput(),
-		widget.NewLabel("Longitude:"),
-		newInput(),
-	)
-}
-
-func newInput() *widget.Entry {
-	e := widget.NewEntry()
-	e.Validator = func(input string) error {
-		return nil
-	}
-	return e
-}
-
-func newMultilineInput(visibleRows int) *widget.Entry {
-	e := widget.NewMultiLineEntry()
-	e.SetMinRowsVisible(visibleRows)
-	return e
-}
-
-var (
-	modelsPath = "pkg/search/models.go" // needs to match what's in ../../package.go, DirFS expects forward slashes
-)
-
+// Helper function to create a select widget with model values
 func newSelect(modelName string) *widget.Select {
-	values, err := ast.ExtractVariablesOfType(watchman.ModelsFilesystem, modelsPath, modelName)
+	var values []string
+
+	// Try to get values from models, but provide defaults if it fails
+	var err error
+	values, err = ast.ExtractVariablesOfType(watchman.ModelsFilesystem, "pkg/search/models.go", modelName)
 	if err != nil {
-		panic(fmt.Sprintf("reading %s values: %v", modelName, err)) //nolint:forbidigo
-	}
-
-	selectWidget := widget.NewSelect(values, func(_ string) {})
-
-	return selectWidget
-}
-
-type item struct {
-	name, value string
-}
-
-// Updated to collect values from expandable sections as well
-func collectPopulatedItems(formItems []*widget.FormItem) []item {
-	var out []item
-	for i := range formItems {
-		switch w := formItems[i].Widget.(type) {
-		case *fyne.Container:
-			for _, obj := range w.Objects {
-				if entry, ok := obj.(*widget.Entry); ok {
-					if entry.Text != "" {
-						out = append(out, item{name: formItems[i].Text, value: entry.Text})
-					}
-				} else if sel, ok := obj.(*widget.Select); ok {
-					if sel.Selected != "" {
-						out = append(out, item{name: formItems[i].Text, value: sel.Selected})
-					}
-				}
-			}
-
-		case *widget.Entry:
-			if w.Text != "" {
-				out = append(out, item{name: formItems[i].Text, value: w.Text})
-			}
-
-		case *widget.Select:
-			if w.Selected != "" {
-				out = append(out, item{name: formItems[i].Text, value: w.Selected})
-			}
-
-		case *ExpandableSection:
-			// For expandable sections, we need to examine their content
-			if content, ok := w.Content.(*fyne.Container); ok {
-				// Process each item in the container
-				for j := 0; j < len(content.Objects); j += 2 {
-					// Even indices should be labels, odd indices should be widgets
-					if j+1 < len(content.Objects) {
-						if label, okLabel := content.Objects[j].(*widget.Label); okLabel {
-							fieldName := label.Text
-							// Remove the colon if present
-							if len(fieldName) > 0 && fieldName[len(fieldName)-1] == ':' {
-								fieldName = fieldName[:len(fieldName)-1]
-							}
-
-							// Check the widget type
-							switch inputWidget := content.Objects[j+1].(type) {
-							case *widget.Entry:
-								if inputWidget.Text != "" {
-									out = append(out, item{name: fieldName, value: inputWidget.Text})
-								}
-							case *widget.Select:
-								if inputWidget.Selected != "" {
-									out = append(out, item{name: fieldName, value: inputWidget.Selected})
-								}
-							}
-						}
-					}
-				}
-			}
-
-		case *widget.Label:
-			// ignore
-		}
-	}
-	return out
-}
-
-// Update buildQueryEntity to handle fields from the expandable sections
-func buildQueryEntity(populatedItems []item) search.Entity[search.Value] {
-	var out search.Entity[search.Value]
-
-	// Initialize the nested structs
-	out.Person = &search.Person{}
-	out.Business = &search.Business{}
-	out.Organization = &search.Organization{}
-	out.Aircraft = &search.Aircraft{}
-	out.Vessel = &search.Vessel{}
-
-	for _, qry := range populatedItems {
-		switch qry.name {
-		// Basic properties
-		case "Name":
-			// Handle based on selected entity type
-			if out.Type == search.EntityPerson {
-				out.Person.Name = qry.value
-			} else if out.Type == search.EntityBusiness {
-				out.Business.Name = qry.value
-			} else if out.Type == search.EntityOrganization {
-				out.Organization.Name = qry.value
-			} else if out.Type == search.EntityAircraft {
-				out.Aircraft.Name = qry.value
-			} else if out.Type == search.EntityVessel {
-				out.Vessel.Name = qry.value
-			}
-			out.Name = qry.value
-		case "EntityType", "EntityType *":
-			out.Type = search.EntityType(qry.value)
+		// Use sensible defaults if extraction fails
+		switch modelName {
 		case "SourceList":
-			out.Source = search.SourceList(qry.value)
-
-		// Person properties
+			values = []string{"SDN", "Consolidated", "DPL", "SSI", "FSE", "PLC"}
 		case "Gender":
-			out.Person.Gender = search.Gender(qry.value)
-		case "Birth Date":
-			// Would need parsing logic for date
-		case "Death Date":
-			// Would need parsing logic for date
-		case "Titles":
-			// Would need parsing for multi-line
-
-		// Business/Organization properties
-		case "Created Date":
-			// Would need parsing logic for date
-		case "Dissolved Date":
-			// Would need parsing logic for date
-
-		// Aircraft properties
-		case "ICAO Code":
-			out.Aircraft.ICAOCode = qry.value
-		case "Type":
-			if out.Type == search.EntityAircraft {
-				out.Aircraft.Type = search.AircraftType(qry.value)
-			} else if out.Type == search.EntityVessel {
-				out.Vessel.Type = search.VesselType(qry.value)
-			}
-		case "Serial Number":
-			out.Aircraft.SerialNumber = qry.value
-
-		// Vessel properties
-		case "IMO Number":
-			out.Vessel.IMONumber = qry.value
-		case "MMSI":
-			out.Vessel.MMSI = qry.value
-		case "Call Sign":
-			out.Vessel.CallSign = qry.value
-		case "Tonnage":
-			// Would need int parsing
-		case "Gross Registered Tonnage":
-			// Would need int parsing
-		case "Owner":
-			out.Vessel.Owner = qry.value
-
-		// Contact info
-		case "Email Addresses":
-			// Would need parsing for multi-line
-		case "Phone Numbers":
-			// Would need parsing for multi-line
-		case "Fax Numbers":
-			// Would need parsing for multi-line
-		case "Websites":
-			// Would need parsing for multi-line
-
-		// Address info - would need to handle as a slice
-		case "Line 1":
-			// Would need to create an address and append
-		case "Line 2":
-			// ...
-		case "City":
-			// ...
-
-		// Crypto addresses
-		case "CryptoAddresses":
-			// Would need parsing logic for crypto addresses
+			values = []string{"Male", "Female", "Unknown"}
+		case "AircraftType":
+			values = []string{"Commercial", "Military", "Private"}
+		case "VesselType":
+			values = []string{"Cargo", "Tanker", "Passenger", "Fishing"}
+		default:
+			values = []string{}
 		}
+
+		fyne.LogError("Error extracting "+modelName+" values, using defaults", err)
 	}
 
-	// Clean up any nil struct pointers if they weren't populated
-	if out.Person.Name == "" {
-		out.Person = nil
-	}
-	if out.Business.Name == "" {
-		out.Business = nil
-	}
-	if out.Organization.Name == "" {
-		out.Organization = nil
-	}
-	if out.Aircraft.Name == "" {
-		out.Aircraft = nil
-	}
-	if out.Vessel.Name == "" {
-		out.Vessel = nil
-	}
-
-	return out
+	return widget.NewSelect(values, nil)
 }
 
-// ResultsContainer provides a fixed-size container for displaying search results
-// that won't jump around when populated
-func ResultsContainer(env Environment) *fyne.Container {
-	// Create a fixed height container to prevent layout jumps
-	resultsContainer := container.NewVBox()
-	resultsContainer.Resize(fyne.NewSize(env.Width, env.Height*0.4))
-
-	// Add a placeholder that will be replaced with actual results
-	placeholder := widget.NewLabel("Search results will appear here")
-	placeholder.Alignment = fyne.TextAlignCenter
-
-	resultsContainer.Add(placeholder)
-
-	// Wrap in a scroll container with larger fixed height to prevent jumping
-	scrollContainer := container.NewScroll(resultsContainer)
-	scrollContainer.SetMinSize(fyne.NewSize(0, env.Height*0.4))
-
-	return container.NewVBox(
-		widget.NewLabelWithStyle("Results", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-		widget.NewSeparator(),
-		scrollContainer,
-	)
-}
-
-// UpdateResults populates the results container with entity data
-func UpdateResults(ctx context.Context, env Environment, resultsContainer *fyne.Container, entities []search.SearchedEntity[search.Value]) {
-	// Get the scroll container (which is the second element in the results VBox)
-	scrollContainer := resultsContainer.Objects[2].(*container.Scroll)
-
-	// Get the actual content container
-	contentContainer := scrollContainer.Content.(*fyne.Container)
-
-	// Clear existing content
-	contentContainer.RemoveAll()
+func updateResultsDisplay(env Environment, resultsContent *fyne.Container, entities []search.SearchedEntity[search.Value]) {
+	resultsContent.RemoveAll()
 
 	if len(entities) == 0 {
-		noResults := widget.NewLabelWithStyle("No matching results found", fyne.TextAlignCenter, fyne.TextStyle{})
-		contentContainer.Add(noResults)
-		contentContainer.Refresh()
+		resultsContent.Add(widget.NewLabel("No matching results found"))
+		resultsContent.Refresh()
 		return
 	}
 
-	// Create a tab container to organize results
-	tabs := container.NewAppTabs()
+	resultTabs := container.NewAppTabs()
 
-	// Create a tab for each result entity
+	// Summary tab
+	summaryTable := createSummaryTable(entities)
+	resultTabs.Append(container.NewTabItem("Summary", summaryTable))
+
+	// Entity tabs
 	for _, entity := range entities {
-		// Create the content for this entity tab with integrated debug panel
-		entityContent := createEntityDetailsView(env, entity)
+		entityDetails := createEntityDetailsCard(env, entity)
 
-		// Add as a tab
-		tabItem := container.NewTabItem(
+		resultTabs.Append(container.NewTabItem(
 			fmt.Sprintf("%s (%s)", entity.Entity.Name, formatEntityType(entity.Entity.Type)),
-			entityContent,
-		)
-		tabs.Append(tabItem)
+			entityDetails,
+		))
 	}
 
-	// Add a summary tab at the beginning that shows all results in a table (no debug panel)
-	summaryTab := container.NewTabItem("Summary", createSummaryView(entities))
-	tabs.Items = append([]*container.TabItem{summaryTab}, tabs.Items...)
-	tabs.SetTabLocation(container.TabLocationTop)
-
-	// Add the tabs directly to the content container
-	contentContainer.Add(tabs)
-	contentContainer.Refresh()
+	resultsContent.Add(resultTabs)
+	resultsContent.Refresh()
 }
 
-func createSummaryView(entities []search.SearchedEntity[search.Value]) fyne.CanvasObject {
-	// Create a table for the summary view
+func createSummaryTable(entities []search.SearchedEntity[search.Value]) fyne.CanvasObject {
 	table := widget.NewTable(
-		// Function to determine number of rows/columns
-		func() (int, int) {
-			return len(entities) + 1, 5 // +1 for header row, 5 columns
-		},
-		// Function to create cell content
-		func() fyne.CanvasObject {
-			return widget.NewLabel("Wide Content To Set Column Width")
-		},
-		// Function to update cell content
+		func() (int, int) { return len(entities) + 1, 5 },
+		func() fyne.CanvasObject { return widget.NewLabel("                         ") },
 		func(id widget.TableCellID, cell fyne.CanvasObject) {
 			label := cell.(*widget.Label)
 			label.Alignment = fyne.TextAlignLeading
 			label.Wrapping = fyne.TextTruncate
-
-			// Header row
 			if id.Row == 0 {
 				label.TextStyle = fyne.TextStyle{Bold: true}
 				switch id.Col {
@@ -659,14 +631,12 @@ func createSummaryView(entities []search.SearchedEntity[search.Value]) fyne.Canv
 				}
 				return
 			}
-
-			// Data rows
 			entity := entities[id.Row-1]
 			switch id.Col {
 			case 0:
 				label.SetText(entity.Entity.Name)
 			case 1:
-				label.SetText(string(entity.Entity.Type))
+				label.SetText(formatEntityType(entity.Entity.Type))
 			case 2:
 				label.SetText(fmt.Sprintf("%.1f%%", entity.Match*100))
 			case 3:
@@ -676,494 +646,332 @@ func createSummaryView(entities []search.SearchedEntity[search.Value]) fyne.Canv
 			}
 		},
 	)
+	table.SetColumnWidth(0, 200)
+	table.SetColumnWidth(1, 100)
+	table.SetColumnWidth(2, 100)
+	table.SetColumnWidth(3, 150)
+	table.SetColumnWidth(4, 150)
 
-	// Set column widths with more appropriate distribution
-	// With the debug panel taking up space, we need to adjust column widths
-	table.SetColumnWidth(0, 400) // Name - slightly narrower
-	table.SetColumnWidth(1, 90)  // Type - narrower
-	table.SetColumnWidth(2, 90)  // Match Score
-	table.SetColumnWidth(3, 90)  // Source
-	table.SetColumnWidth(4, 90)  // ID
+	for idx := range entities {
+		table.SetRowHeight(idx, 50)
+	}
 
-	return container.NewPadded(table)
+	return container.New(layout.NewMaxLayout(), table)
 }
 
-// createEntityDetailsView builds a detailed view for a single entity with integrated debug panel
-func createEntityDetailsView(env Environment, entity search.SearchedEntity[search.Value]) fyne.CanvasObject {
-	// Create a vertical container for the entire view
-	mainContainer := container.NewVBox()
-
-	// Create a consistent header with match score
-	headerContainer := container.NewVBox()
-
-	// Add match score badge to header in a consistent position
-	matchScoreBadge := createMatchScoreBadge(entity.Match)
-	headerContainer.Add(matchScoreBadge)
-	headerContainer.Add(widget.NewSeparator())
-
-	// Add the header to the main container
-	mainContainer.Add(headerContainer)
-
-	// Create a horizontal split container for entity details and debug info
-	detailsAndDebugSplit := container.NewHSplit(nil, nil)
-
-	// Create a container for entity details
+// Create a card that displays entity details
+func createEntityDetailsCard(env Environment, entity search.SearchedEntity[search.Value]) fyne.CanvasObject {
+	// Create a container for all entity information
 	content := container.NewVBox()
 
-	// Basic information section
-	basicInfoSection := createBasicInfoSection(entity.Entity)
-	content.Add(basicInfoSection)
+	// Add match score indicator
+	matchScore := widget.NewLabelWithStyle(
+		fmt.Sprintf("Match Score: %.1f%%", entity.Match*100),
+		fyne.TextAlignTrailing,
+		fyne.TextStyle{Bold: true},
+	)
+	content.Add(matchScore)
+	content.Add(widget.NewSeparator())
 
-	// Create entity-specific sections based on type
+	// Add basic entity information
+	basicInfo := widget.NewForm(
+		widget.NewFormItem("Name", widget.NewLabel(entity.Entity.Name)),
+		widget.NewFormItem("Type", widget.NewLabel(formatEntityType(entity.Entity.Type))),
+	)
+
+	if string(entity.Entity.Source) != "" {
+		basicInfo.Append("Source", widget.NewLabel(string(entity.Entity.Source)))
+	}
+
+	if entity.Entity.SourceID != "" {
+		basicInfo.Append("Source ID", widget.NewLabel(entity.Entity.SourceID))
+	}
+
+	basicInfoCard := widget.NewCard("Basic Information", "", basicInfo)
+	content.Add(basicInfoCard)
+
+	// Add entity-specific information based on type
 	switch entity.Entity.Type {
 	case search.EntityPerson:
 		if entity.Entity.Person != nil {
-			content.Add(createPersonSection(*entity.Entity.Person))
+			content.Add(createPersonInfoCard(*entity.Entity.Person))
 		}
 	case search.EntityBusiness:
 		if entity.Entity.Business != nil {
-			content.Add(createBusinessSection(*entity.Entity.Business))
+			content.Add(createBusinessInfoCard(*entity.Entity.Business))
 		}
 	case search.EntityOrganization:
 		if entity.Entity.Organization != nil {
-			content.Add(createOrganizationSection(*entity.Entity.Organization))
+			content.Add(createOrganizationInfoCard(*entity.Entity.Organization))
 		}
 	case search.EntityAircraft:
 		if entity.Entity.Aircraft != nil {
-			content.Add(createAircraftSection(*entity.Entity.Aircraft))
+			content.Add(createAircraftInfoCard(*entity.Entity.Aircraft))
 		}
 	case search.EntityVessel:
 		if entity.Entity.Vessel != nil {
-			content.Add(createVesselSection(*entity.Entity.Vessel))
+			content.Add(createVesselInfoCard(*entity.Entity.Vessel))
 		}
 	}
 
-	// Add contact information section if available
+	// Add contact information if available
 	if hasContactInfo(entity.Entity.Contact) {
-		content.Add(createContactSection(entity.Entity.Contact))
+		content.Add(createContactInfoCard(entity.Entity.Contact))
 	}
 
-	// Add addresses section if available
+	// Add addresses if available
 	if len(entity.Entity.Addresses) > 0 {
-		content.Add(createAddressesSection(entity.Entity.Addresses))
+		content.Add(createAddressesCard(entity.Entity.Addresses))
 	}
 
-	// Add crypto addresses section if available
-	if len(entity.Entity.CryptoAddresses) > 0 {
-		content.Add(createCryptoAddressesSection(entity.Entity.CryptoAddresses))
-	}
+	// Wrap in a scroll container
+	detailsScroll := container.NewVScroll(content)
 
-	// Wrap entity details in a scroll container
-	detailScrollContainer := container.NewScroll(content)
-	detailScrollContainer.SetMinSize(fyne.NewSize(0, env.Height*0.3))
-
-	// Create debug panel for this entity
-	var debugContent fyne.CanvasObject
-
-	// Debug panel header
-	debugHeader := widget.NewLabelWithStyle("Debug Information", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-
-	if entity.Debug != "" {
-		// Decode base64 debug information
-		debugData, err := base64.StdEncoding.DecodeString(entity.Debug)
-
-		if err != nil {
-			debugContent = container.NewVBox(
-				debugHeader,
-				widget.NewSeparator(),
-				widget.NewLabel(fmt.Sprintf("Error decoding debug data: %v", err)),
-			)
-		} else {
-			// Create a multiline text display for the debug info with standard text color
-			debugText := widget.NewLabel(string(debugData) + strings.Repeat("\n", 5))
-			debugText.Wrapping = fyne.TextWrapWord
-
-			// Use a VBox container to preserve the header formatting
-			debugPanel := container.NewVBox(debugHeader, debugText)
-
-			// Wrap in scroll container for long debug output
-			debugContent = container.NewScroll(debugPanel)
-		}
+	device := fyne.CurrentDevice()
+	if device.IsBrowser() {
+		detailsScroll.SetMinSize(fyne.NewSize(0, env.Height*0.15))
 	} else {
-		debugContent = container.NewVBox(
-			debugHeader,
-			widget.NewSeparator(),
-			widget.NewLabel("No debug information available for this entity"),
-		)
+		detailsScroll.SetMinSize(fyne.NewSize(0, env.Height*0.25))
 	}
 
-	// Set the components of the split container
-	detailsAndDebugSplit.Leading = detailScrollContainer // Left side: entity details
-	detailsAndDebugSplit.Trailing = debugContent         // Right side: debug panel
-
-	// Set the split offset (35% for entity details, 65% for debug)
-	detailsAndDebugSplit.SetOffset(0.35)
-
-	// Add the split container to the main container
-	mainContainer.Add(detailsAndDebugSplit)
-
-	return mainContainer
+	return detailsScroll
 }
 
-// createBasicInfoSection creates a section for basic entity information
-func createBasicInfoSection(entity search.Entity[search.Value]) fyne.CanvasObject {
-	grid := container.New(layout.NewFormLayout())
-
-	// Add basic entity information
-	grid.Add(widget.NewLabelWithStyle("Name:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-	grid.Add(widget.NewLabel(entity.Name))
-
-	grid.Add(widget.NewLabelWithStyle("Type:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-	grid.Add(widget.NewLabel(string(entity.Type)))
-
-	grid.Add(widget.NewLabelWithStyle("Source:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-	grid.Add(widget.NewLabel(string(entity.Source)))
-
-	if entity.SourceID != "" {
-		grid.Add(widget.NewLabelWithStyle("Source ID:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(entity.SourceID))
-	}
-
-	section := NewExpandableSection("Basic Information", grid)
-	section.Expanded = true
-	return section
-}
-
-// createPersonSection creates a section for person-specific information
-func createPersonSection(person search.Person) fyne.CanvasObject {
-	grid := container.New(layout.NewFormLayout())
+func createPersonInfoCard(person search.Person) fyne.CanvasObject {
+	form := widget.NewForm()
 
 	if len(person.AltNames) > 0 {
-		grid.Add(widget.NewLabelWithStyle("Alt Names:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(strings.Join(person.AltNames, ", ")))
+		form.Append("Alt Names", widget.NewLabel(strings.Join(person.AltNames, ", ")))
 	}
 
 	if person.Gender != "" {
-		grid.Add(widget.NewLabelWithStyle("Gender:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(string(person.Gender)))
+		form.Append("Gender", widget.NewLabel(string(person.Gender)))
 	}
 
 	if person.BirthDate != nil {
-		grid.Add(widget.NewLabelWithStyle("Birth Date:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(person.BirthDate.Format("2006-01-02")))
+		form.Append("Birth Date", widget.NewLabel(person.BirthDate.Format("2006-01-02")))
 	}
 
 	if person.DeathDate != nil {
-		grid.Add(widget.NewLabelWithStyle("Death Date:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(person.DeathDate.Format("2006-01-02")))
+		form.Append("Death Date", widget.NewLabel(person.DeathDate.Format("2006-01-02")))
 	}
 
 	if len(person.Titles) > 0 {
-		grid.Add(widget.NewLabelWithStyle("Titles:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(strings.Join(person.Titles, ", ")))
+		form.Append("Titles", widget.NewLabel(strings.Join(person.Titles, ", ")))
 	}
 
 	if len(person.GovernmentIDs) > 0 {
-		grid.Add(widget.NewLabelWithStyle("Gov't IDs:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
 		idStrings := make([]string, len(person.GovernmentIDs))
 		for i, id := range person.GovernmentIDs {
 			idStrings[i] = fmt.Sprintf("%s: %s (%s)", id.Type, id.Identifier, id.Country)
 		}
-		grid.Add(widget.NewLabel(strings.Join(idStrings, "\n")))
+		form.Append("Government IDs", widget.NewLabel(strings.Join(idStrings, "\n")))
 	}
 
-	section := NewExpandableSection("Person Details", grid)
-	section.Expanded = true
-	return section
+	return widget.NewCard("Person Details", "", form)
 }
 
-// createBusinessSection creates a section for business-specific information
-func createBusinessSection(business search.Business) fyne.CanvasObject {
-	grid := container.New(layout.NewFormLayout())
+func createBusinessInfoCard(business search.Business) fyne.CanvasObject {
+	form := widget.NewForm()
 
 	if len(business.AltNames) > 0 {
-		grid.Add(widget.NewLabelWithStyle("Alt Names:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(strings.Join(business.AltNames, ", ")))
+		form.Append("Alt Names", widget.NewLabel(strings.Join(business.AltNames, ", ")))
 	}
 
 	if business.Created != nil {
-		grid.Add(widget.NewLabelWithStyle("Created:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(business.Created.Format("2006-01-02")))
+		form.Append("Created", widget.NewLabel(business.Created.Format("2006-01-02")))
 	}
 
 	if business.Dissolved != nil {
-		grid.Add(widget.NewLabelWithStyle("Dissolved:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(business.Dissolved.Format("2006-01-02")))
+		form.Append("Dissolved", widget.NewLabel(business.Dissolved.Format("2006-01-02")))
 	}
 
 	if len(business.GovernmentIDs) > 0 {
-		grid.Add(widget.NewLabelWithStyle("Gov't IDs:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
 		idStrings := make([]string, len(business.GovernmentIDs))
 		for i, id := range business.GovernmentIDs {
 			idStrings[i] = fmt.Sprintf("%s: %s (%s)", id.Type, id.Identifier, id.Country)
 		}
-		grid.Add(widget.NewLabel(strings.Join(idStrings, "\n")))
+		form.Append("Government IDs", widget.NewLabel(strings.Join(idStrings, "\n")))
 	}
 
-	section := NewExpandableSection("Business Details", grid)
-	section.Expanded = true
-	return section
+	return widget.NewCard("Business Details", "", form)
 }
 
-// createOrganizationSection creates a section for organization-specific information
-func createOrganizationSection(org search.Organization) fyne.CanvasObject {
-	grid := container.New(layout.NewFormLayout())
+func createOrganizationInfoCard(org search.Organization) fyne.CanvasObject {
+	form := widget.NewForm()
 
 	if len(org.AltNames) > 0 {
-		grid.Add(widget.NewLabelWithStyle("Alt Names:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(strings.Join(org.AltNames, ", ")))
+		form.Append("Alt Names", widget.NewLabel(strings.Join(org.AltNames, ", ")))
 	}
 
 	if org.Created != nil {
-		grid.Add(widget.NewLabelWithStyle("Created:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(org.Created.Format("2006-01-02")))
+		form.Append("Created", widget.NewLabel(org.Created.Format("2006-01-02")))
 	}
 
 	if org.Dissolved != nil {
-		grid.Add(widget.NewLabelWithStyle("Dissolved:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(org.Dissolved.Format("2006-01-02")))
+		form.Append("Dissolved", widget.NewLabel(org.Dissolved.Format("2006-01-02")))
 	}
 
 	if len(org.GovernmentIDs) > 0 {
-		grid.Add(widget.NewLabelWithStyle("Gov't IDs:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
 		idStrings := make([]string, len(org.GovernmentIDs))
 		for i, id := range org.GovernmentIDs {
 			idStrings[i] = fmt.Sprintf("%s: %s (%s)", id.Type, id.Identifier, id.Country)
 		}
-		grid.Add(widget.NewLabel(strings.Join(idStrings, "\n")))
+		form.Append("Government IDs", widget.NewLabel(strings.Join(idStrings, "\n")))
 	}
 
-	section := NewExpandableSection("Organization Details", grid)
-	section.Expanded = true
-	return section
+	return widget.NewCard("Organization Details", "", form)
 }
 
-// createAircraftSection creates a section for aircraft-specific information
-func createAircraftSection(aircraft search.Aircraft) fyne.CanvasObject {
-	grid := container.New(layout.NewFormLayout())
+func createAircraftInfoCard(aircraft search.Aircraft) fyne.CanvasObject {
+	form := widget.NewForm()
 
 	if len(aircraft.AltNames) > 0 {
-		grid.Add(widget.NewLabelWithStyle("Alt Names:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(strings.Join(aircraft.AltNames, ", ")))
+		form.Append("Alt Names", widget.NewLabel(strings.Join(aircraft.AltNames, ", ")))
 	}
 
 	if aircraft.Type != "" {
-		grid.Add(widget.NewLabelWithStyle("Type:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(string(aircraft.Type)))
+		form.Append("Type", widget.NewLabel(string(aircraft.Type)))
 	}
 
 	if aircraft.Flag != "" {
-		grid.Add(widget.NewLabelWithStyle("Flag:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(aircraft.Flag))
+		form.Append("Flag", widget.NewLabel(aircraft.Flag))
 	}
 
 	if aircraft.Built != nil {
-		grid.Add(widget.NewLabelWithStyle("Built:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(aircraft.Built.Format("2006-01-02")))
+		form.Append("Built", widget.NewLabel(aircraft.Built.Format("2006-01-02")))
 	}
 
 	if aircraft.ICAOCode != "" {
-		grid.Add(widget.NewLabelWithStyle("ICAO Code:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(aircraft.ICAOCode))
+		form.Append("ICAO Code", widget.NewLabel(aircraft.ICAOCode))
 	}
 
 	if aircraft.Model != "" {
-		grid.Add(widget.NewLabelWithStyle("Model:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(aircraft.Model))
+		form.Append("Model", widget.NewLabel(aircraft.Model))
 	}
 
 	if aircraft.SerialNumber != "" {
-		grid.Add(widget.NewLabelWithStyle("Serial Number:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(aircraft.SerialNumber))
+		form.Append("Serial Number", widget.NewLabel(aircraft.SerialNumber))
 	}
 
-	section := NewExpandableSection("Aircraft Details", grid)
-	section.Expanded = true
-	return section
+	return widget.NewCard("Aircraft Details", "", form)
 }
 
-// createVesselSection creates a section for vessel-specific information
-func createVesselSection(vessel search.Vessel) fyne.CanvasObject {
-	grid := container.New(layout.NewFormLayout())
+func createVesselInfoCard(vessel search.Vessel) fyne.CanvasObject {
+	form := widget.NewForm()
 
 	if len(vessel.AltNames) > 0 {
-		grid.Add(widget.NewLabelWithStyle("Alt Names:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(strings.Join(vessel.AltNames, ", ")))
+		form.Append("Alt Names", widget.NewLabel(strings.Join(vessel.AltNames, ", ")))
 	}
 
 	if vessel.IMONumber != "" {
-		grid.Add(widget.NewLabelWithStyle("IMO Number:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(vessel.IMONumber))
+		form.Append("IMO Number", widget.NewLabel(vessel.IMONumber))
 	}
 
 	if vessel.Type != "" {
-		grid.Add(widget.NewLabelWithStyle("Type:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(string(vessel.Type)))
+		form.Append("Type", widget.NewLabel(string(vessel.Type)))
 	}
 
 	if vessel.Flag != "" {
-		grid.Add(widget.NewLabelWithStyle("Flag:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(vessel.Flag))
+		form.Append("Flag", widget.NewLabel(vessel.Flag))
 	}
 
 	if vessel.Built != nil {
-		grid.Add(widget.NewLabelWithStyle("Built:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(vessel.Built.Format("2006-01-02")))
+		form.Append("Built", widget.NewLabel(vessel.Built.Format("2006-01-02")))
 	}
 
 	if vessel.Model != "" {
-		grid.Add(widget.NewLabelWithStyle("Model:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(vessel.Model))
+		form.Append("Model", widget.NewLabel(vessel.Model))
 	}
 
 	if vessel.Tonnage > 0 {
-		grid.Add(widget.NewLabelWithStyle("Tonnage:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(fmt.Sprintf("%d", vessel.Tonnage)))
+		form.Append("Tonnage", widget.NewLabel(fmt.Sprintf("%d", vessel.Tonnage)))
 	}
 
 	if vessel.MMSI != "" {
-		grid.Add(widget.NewLabelWithStyle("MMSI:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(vessel.MMSI))
+		form.Append("MMSI", widget.NewLabel(vessel.MMSI))
 	}
 
 	if vessel.CallSign != "" {
-		grid.Add(widget.NewLabelWithStyle("Call Sign:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(vessel.CallSign))
+		form.Append("Call Sign", widget.NewLabel(vessel.CallSign))
 	}
 
 	if vessel.GrossRegisteredTonnage > 0 {
-		grid.Add(widget.NewLabelWithStyle("GRT:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(fmt.Sprintf("%d", vessel.GrossRegisteredTonnage)))
+		form.Append("Gross Registered Tonnage", widget.NewLabel(fmt.Sprintf("%d", vessel.GrossRegisteredTonnage)))
 	}
 
 	if vessel.Owner != "" {
-		grid.Add(widget.NewLabelWithStyle("Owner:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(vessel.Owner))
+		form.Append("Owner", widget.NewLabel(vessel.Owner))
 	}
 
-	section := NewExpandableSection("Vessel Details", grid)
-	section.Expanded = true
-	return section
+	return widget.NewCard("Vessel Details", "", form)
 }
 
-// createContactSection creates a section for contact information
-func createContactSection(contact search.ContactInfo) fyne.CanvasObject {
-	grid := container.New(layout.NewFormLayout())
+func createContactInfoCard(contact search.ContactInfo) fyne.CanvasObject {
+	form := widget.NewForm()
 
 	if len(contact.EmailAddresses) > 0 {
-		grid.Add(widget.NewLabelWithStyle("Email:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(strings.Join(contact.EmailAddresses, "\n")))
+		form.Append("Email Addresses", widget.NewLabel(strings.Join(contact.EmailAddresses, "\n")))
 	}
 
 	if len(contact.PhoneNumbers) > 0 {
-		grid.Add(widget.NewLabelWithStyle("Phone:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(strings.Join(contact.PhoneNumbers, "\n")))
+		form.Append("Phone Numbers", widget.NewLabel(strings.Join(contact.PhoneNumbers, "\n")))
 	}
 
 	if len(contact.FaxNumbers) > 0 {
-		grid.Add(widget.NewLabelWithStyle("Fax:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(strings.Join(contact.FaxNumbers, "\n")))
+		form.Append("Fax Numbers", widget.NewLabel(strings.Join(contact.FaxNumbers, "\n")))
 	}
 
 	if len(contact.Websites) > 0 {
-		grid.Add(widget.NewLabelWithStyle("Websites:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(strings.Join(contact.Websites, "\n")))
+		form.Append("Websites", widget.NewLabel(strings.Join(contact.Websites, "\n")))
 	}
 
-	section := NewExpandableSection("Contact Information", grid)
-	section.Expanded = true
-	return section
+	return widget.NewCard("Contact Information", "", form)
 }
 
-// createAddressesSection creates a section for addresses
-func createAddressesSection(addresses []search.Address) fyne.CanvasObject {
-	content := container.NewVBox()
+func createAddressesCard(addresses []search.Address) fyne.CanvasObject {
+	container := container.NewVBox()
 
-	for i, addr := range addresses {
-		addressCard := createAddressCard(i+1, addr)
-		content.Add(addressCard)
-	}
+	for i, address := range addresses {
+		addressForm := widget.NewForm()
 
-	section := NewExpandableSection("Addresses", content)
-	section.Expanded = true
-	return section
-}
-
-// createAddressCard creates a card for an individual address
-func createAddressCard(index int, addr search.Address) fyne.CanvasObject {
-	card := container.NewVBox()
-
-	// Address title
-	title := widget.NewLabelWithStyle(fmt.Sprintf("Address %d", index), fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	card.Add(title)
-
-	// Address details
-	grid := container.New(layout.NewFormLayout())
-
-	if addr.Line1 != "" {
-		grid.Add(widget.NewLabelWithStyle("Line 1:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(addr.Line1))
-	}
-
-	if addr.Line2 != "" {
-		grid.Add(widget.NewLabelWithStyle("Line 2:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(addr.Line2))
-	}
-
-	if addr.City != "" {
-		grid.Add(widget.NewLabelWithStyle("City:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(addr.City))
-	}
-
-	if addr.State != "" {
-		grid.Add(widget.NewLabelWithStyle("State/Province:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(addr.State))
-	}
-
-	if addr.PostalCode != "" {
-		grid.Add(widget.NewLabelWithStyle("Postal Code:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(addr.PostalCode))
-	}
-
-	if addr.Country != "" {
-		grid.Add(widget.NewLabelWithStyle("Country:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(addr.Country))
-	}
-
-	if addr.Latitude != 0 || addr.Longitude != 0 {
-		grid.Add(widget.NewLabelWithStyle("Coordinates:", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(fmt.Sprintf("%.6f, %.6f", addr.Latitude, addr.Longitude)))
-	}
-
-	card.Add(grid)
-
-	// Add a divider after each address except the last one
-	card.Add(widget.NewSeparator())
-
-	return card
-}
-
-// createCryptoAddressesSection creates a section for crypto addresses
-func createCryptoAddressesSection(cryptoAddresses []search.CryptoAddress) fyne.CanvasObject {
-	grid := container.New(layout.NewFormLayout())
-
-	for i, crypto := range cryptoAddresses {
-		grid.Add(widget.NewLabelWithStyle(fmt.Sprintf("%s:", crypto.Currency), fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}))
-		grid.Add(widget.NewLabel(crypto.Address))
-
-		// Add a bit of spacing every 2 addresses
-		if i%2 == 1 && i < len(cryptoAddresses)-1 {
-			grid.Add(widget.NewLabel(""))
-			grid.Add(widget.NewLabel(""))
+		if address.Line1 != "" {
+			addressForm.Append("Line 1", widget.NewLabel(address.Line1))
 		}
+
+		if address.Line2 != "" {
+			addressForm.Append("Line 2", widget.NewLabel(address.Line2))
+		}
+
+		if address.City != "" {
+			addressForm.Append("City", widget.NewLabel(address.City))
+		}
+
+		if address.State != "" {
+			addressForm.Append("State", widget.NewLabel(address.State))
+		}
+
+		if address.PostalCode != "" {
+			addressForm.Append("Postal Code", widget.NewLabel(address.PostalCode))
+		}
+
+		if address.Country != "" {
+			addressForm.Append("Country", widget.NewLabel(address.Country))
+		}
+
+		if address.Latitude != 0 || address.Longitude != 0 {
+			addressForm.Append("Coordinates", widget.NewLabel(
+				fmt.Sprintf("Lat: %.6f, Lon: %.6f", address.Latitude, address.Longitude),
+			))
+		}
+
+		container.Add(widget.NewCard(fmt.Sprintf("Address %d", i+1), "", addressForm))
 	}
 
-	section := NewExpandableSection("Crypto Addresses", grid)
-	section.Expanded = true
-	return section
+	return container
 }
 
-// hasContactInfo checks if there is any contact information to display
+// Helper function to check if contact info has any data
 func hasContactInfo(contact search.ContactInfo) bool {
 	return len(contact.EmailAddresses) > 0 ||
 		len(contact.PhoneNumbers) > 0 ||
@@ -1171,7 +979,7 @@ func hasContactInfo(contact search.ContactInfo) bool {
 		len(contact.Websites) > 0
 }
 
-// Helper to format entity type for display
+// Helper function to format entity type for display
 func formatEntityType(entityType search.EntityType) string {
 	switch entityType {
 	case search.EntityPerson:
@@ -1187,27 +995,4 @@ func formatEntityType(entityType search.EntityType) string {
 	default:
 		return string(entityType)
 	}
-}
-
-func createMatchScoreBadge(match float64) fyne.CanvasObject {
-	// Determine text color based on match percentage
-	var textColor color.Color
-	if match >= 0.85 {
-		textColor = color.NRGBA{R: 220, G: 0, B: 0, A: 255} // Red for high match
-	} else if match >= 0.7 {
-		textColor = color.NRGBA{R: 255, G: 165, B: 0, A: 255} // Orange for medium match
-	} else {
-		textColor = color.NRGBA{R: 0, G: 128, B: 0, A: 255} // Green for low match
-	}
-
-	// Create the score text
-	scoreText := fmt.Sprintf("Match Score: %.1f%%", match*100)
-	scoreTextObj := canvas.NewText(scoreText, textColor)
-	scoreTextObj.TextStyle = fyne.TextStyle{Bold: true}
-	scoreTextObj.Alignment = fyne.TextAlignTrailing
-
-	// Create a consistent container for the badge with fixed alignment
-	badgeContainer := container.New(layout.NewHBoxLayout(), layout.NewSpacer(), scoreTextObj)
-
-	return badgeContainer
 }
