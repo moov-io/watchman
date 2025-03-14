@@ -186,8 +186,6 @@ func searchFormWithButton(ctx context.Context, env Environment, warningLabel *wi
 		populatedItems := collectPopulatedItems(items)
 		env.Logger.Info().Logf("searching with %d fields", len(populatedItems))
 
-		fmt.Printf("populatedItems: %#v\n", populatedItems)
-
 		query := buildQueryEntity(populatedItems)
 		searchOpts := search.SearchOpts{
 			Limit: 5,
@@ -379,8 +377,6 @@ type item struct {
 func collectPopulatedItems(formItems []*widget.FormItem) []item {
 	var out []item
 	for i := range formItems {
-		fmt.Printf("formItems[%d].Widget: %#v\n", i, formItems[i].Widget)
-
 		switch w := formItems[i].Widget.(type) {
 		case *fyne.Container:
 			for _, obj := range w.Objects {
