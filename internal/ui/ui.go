@@ -30,7 +30,7 @@ func New(ctx context.Context, env Environment) fyne.App {
 	})
 
 	// Don't allow for Dark Mode
-	a.Settings().SetTheme(theme.LightTheme())
+	a.Settings().SetTheme(newDefaultTheme(theme.LightTheme()))
 
 	device := fyne.CurrentDevice()
 
