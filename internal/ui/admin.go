@@ -91,11 +91,7 @@ func AdminContainer(ctx context.Context, env Environment) fyne.CanvasObject {
 }
 
 // updateListInfo fetches the list info and updates the UI
-func updateListInfo(env Environment, ctx context.Context,
-	versionLabel, startedLabel, endedLabel *widget.Label,
-	listsContent fyne.CanvasObject) {
-
-	// Call ListInfo directly from env.Client
+func updateListInfo(env Environment, ctx context.Context, versionLabel, startedLabel, endedLabel *widget.Label, listsContent fyne.CanvasObject) {
 	listInfo, err := env.Client.ListInfo(ctx)
 	if err != nil {
 		versionLabel.SetText(fmt.Sprintf("Error: %s", err))
