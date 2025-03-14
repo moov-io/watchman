@@ -1,12 +1,14 @@
 package ui
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"strings"
 
 	"github.com/moov-io/watchman"
 	"github.com/moov-io/watchman/internal/ast"
+	"github.com/moov-io/watchman/internal/ui/arch"
 	"github.com/moov-io/watchman/pkg/search"
 
 	"fyne.io/fyne/v2"
@@ -50,13 +52,16 @@ func SearchContainer(ctx context.Context, env Environment) fyne.CanvasObject {
 		entityFieldsContainer.Refresh()
 	}
 
+	// Grab any prefilled values from the environment
+	prefilledValues := arch.PrefillValues()
+
 	// Common Search Fields
 	commonFieldsLabel := widget.NewLabelWithStyle("Common Fields", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 	warningLabel := widget.NewLabel("")
 	warningLabel.TextStyle = fyne.TextStyle{Bold: true}
 	warningLabel.Hide()
 	nameEntry := widget.NewEntry()
-	nameEntry.PlaceHolder = "Enter name to search"
+	nameEntry.PlaceHolder = cmp.Or(prefilledValues.Get("name"), "Enter name to search")
 	sourceSelect := newSelect("SourceList") // Assume newSelect is a custom function returning a widget.Select
 	sourceSelect.PlaceHolder = "Select source list (optional)"
 	searchForm := widget.NewForm(
