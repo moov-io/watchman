@@ -737,27 +737,34 @@ func createEntityDetailsCard(env Environment, entity search.SearchedEntity[searc
 	return detailsScroll
 }
 
+func wordWrappingLabel(text string) *widget.Label {
+	label := widget.NewLabel(text)
+	label.Wrapping = fyne.TextWrapWord
+
+	return label
+}
+
 func createPersonInfoCard(person search.Person) fyne.CanvasObject {
 	form := widget.NewForm()
 
 	if len(person.AltNames) > 0 {
-		form.Append("Alt Names", widget.NewLabel(strings.Join(person.AltNames, ", ")))
+		form.Append("Alt Names", wordWrappingLabel(strings.Join(person.AltNames, ", ")))
 	}
 
 	if person.Gender != "" {
-		form.Append("Gender", widget.NewLabel(string(person.Gender)))
+		form.Append("Gender", wordWrappingLabel(string(person.Gender)))
 	}
 
 	if person.BirthDate != nil {
-		form.Append("Birth Date", widget.NewLabel(person.BirthDate.Format("2006-01-02")))
+		form.Append("Birth Date", wordWrappingLabel(person.BirthDate.Format("2006-01-02")))
 	}
 
 	if person.DeathDate != nil {
-		form.Append("Death Date", widget.NewLabel(person.DeathDate.Format("2006-01-02")))
+		form.Append("Death Date", wordWrappingLabel(person.DeathDate.Format("2006-01-02")))
 	}
 
 	if len(person.Titles) > 0 {
-		form.Append("Titles", widget.NewLabel(strings.Join(person.Titles, ", ")))
+		form.Append("Titles", wordWrappingLabel(strings.Join(person.Titles, ", ")))
 	}
 
 	if len(person.GovernmentIDs) > 0 {
@@ -765,7 +772,7 @@ func createPersonInfoCard(person search.Person) fyne.CanvasObject {
 		for i, id := range person.GovernmentIDs {
 			idStrings[i] = fmt.Sprintf("%s: %s (%s)", id.Type, id.Identifier, id.Country)
 		}
-		form.Append("Government IDs", widget.NewLabel(strings.Join(idStrings, "\n")))
+		form.Append("Government IDs", wordWrappingLabel(strings.Join(idStrings, "\n")))
 	}
 
 	return widget.NewCard("Person Details", "", form)
@@ -775,15 +782,15 @@ func createBusinessInfoCard(business search.Business) fyne.CanvasObject {
 	form := widget.NewForm()
 
 	if len(business.AltNames) > 0 {
-		form.Append("Alt Names", widget.NewLabel(strings.Join(business.AltNames, ", ")))
+		form.Append("Alt Names", wordWrappingLabel(strings.Join(business.AltNames, ", ")))
 	}
 
 	if business.Created != nil {
-		form.Append("Created", widget.NewLabel(business.Created.Format("2006-01-02")))
+		form.Append("Created", wordWrappingLabel(business.Created.Format("2006-01-02")))
 	}
 
 	if business.Dissolved != nil {
-		form.Append("Dissolved", widget.NewLabel(business.Dissolved.Format("2006-01-02")))
+		form.Append("Dissolved", wordWrappingLabel(business.Dissolved.Format("2006-01-02")))
 	}
 
 	if len(business.GovernmentIDs) > 0 {
@@ -791,7 +798,7 @@ func createBusinessInfoCard(business search.Business) fyne.CanvasObject {
 		for i, id := range business.GovernmentIDs {
 			idStrings[i] = fmt.Sprintf("%s: %s (%s)", id.Type, id.Identifier, id.Country)
 		}
-		form.Append("Government IDs", widget.NewLabel(strings.Join(idStrings, "\n")))
+		form.Append("Government IDs", wordWrappingLabel(strings.Join(idStrings, "\n")))
 	}
 
 	return widget.NewCard("Business Details", "", form)
@@ -801,15 +808,15 @@ func createOrganizationInfoCard(org search.Organization) fyne.CanvasObject {
 	form := widget.NewForm()
 
 	if len(org.AltNames) > 0 {
-		form.Append("Alt Names", widget.NewLabel(strings.Join(org.AltNames, ", ")))
+		form.Append("Alt Names", wordWrappingLabel(strings.Join(org.AltNames, ", ")))
 	}
 
 	if org.Created != nil {
-		form.Append("Created", widget.NewLabel(org.Created.Format("2006-01-02")))
+		form.Append("Created", wordWrappingLabel(org.Created.Format("2006-01-02")))
 	}
 
 	if org.Dissolved != nil {
-		form.Append("Dissolved", widget.NewLabel(org.Dissolved.Format("2006-01-02")))
+		form.Append("Dissolved", wordWrappingLabel(org.Dissolved.Format("2006-01-02")))
 	}
 
 	if len(org.GovernmentIDs) > 0 {
@@ -817,7 +824,7 @@ func createOrganizationInfoCard(org search.Organization) fyne.CanvasObject {
 		for i, id := range org.GovernmentIDs {
 			idStrings[i] = fmt.Sprintf("%s: %s (%s)", id.Type, id.Identifier, id.Country)
 		}
-		form.Append("Government IDs", widget.NewLabel(strings.Join(idStrings, "\n")))
+		form.Append("Government IDs", wordWrappingLabel(strings.Join(idStrings, "\n")))
 	}
 
 	return widget.NewCard("Organization Details", "", form)
@@ -827,31 +834,31 @@ func createAircraftInfoCard(aircraft search.Aircraft) fyne.CanvasObject {
 	form := widget.NewForm()
 
 	if len(aircraft.AltNames) > 0 {
-		form.Append("Alt Names", widget.NewLabel(strings.Join(aircraft.AltNames, ", ")))
+		form.Append("Alt Names", wordWrappingLabel(strings.Join(aircraft.AltNames, ", ")))
 	}
 
 	if aircraft.Type != "" {
-		form.Append("Type", widget.NewLabel(string(aircraft.Type)))
+		form.Append("Type", wordWrappingLabel(string(aircraft.Type)))
 	}
 
 	if aircraft.Flag != "" {
-		form.Append("Flag", widget.NewLabel(aircraft.Flag))
+		form.Append("Flag", wordWrappingLabel(aircraft.Flag))
 	}
 
 	if aircraft.Built != nil {
-		form.Append("Built", widget.NewLabel(aircraft.Built.Format("2006-01-02")))
+		form.Append("Built", wordWrappingLabel(aircraft.Built.Format("2006-01-02")))
 	}
 
 	if aircraft.ICAOCode != "" {
-		form.Append("ICAO Code", widget.NewLabel(aircraft.ICAOCode))
+		form.Append("ICAO Code", wordWrappingLabel(aircraft.ICAOCode))
 	}
 
 	if aircraft.Model != "" {
-		form.Append("Model", widget.NewLabel(aircraft.Model))
+		form.Append("Model", wordWrappingLabel(aircraft.Model))
 	}
 
 	if aircraft.SerialNumber != "" {
-		form.Append("Serial Number", widget.NewLabel(aircraft.SerialNumber))
+		form.Append("Serial Number", wordWrappingLabel(aircraft.SerialNumber))
 	}
 
 	return widget.NewCard("Aircraft Details", "", form)
@@ -861,47 +868,47 @@ func createVesselInfoCard(vessel search.Vessel) fyne.CanvasObject {
 	form := widget.NewForm()
 
 	if len(vessel.AltNames) > 0 {
-		form.Append("Alt Names", widget.NewLabel(strings.Join(vessel.AltNames, ", ")))
+		form.Append("Alt Names", wordWrappingLabel(strings.Join(vessel.AltNames, ", ")))
 	}
 
 	if vessel.IMONumber != "" {
-		form.Append("IMO Number", widget.NewLabel(vessel.IMONumber))
+		form.Append("IMO Number", wordWrappingLabel(vessel.IMONumber))
 	}
 
 	if vessel.Type != "" {
-		form.Append("Type", widget.NewLabel(string(vessel.Type)))
+		form.Append("Type", wordWrappingLabel(string(vessel.Type)))
 	}
 
 	if vessel.Flag != "" {
-		form.Append("Flag", widget.NewLabel(vessel.Flag))
+		form.Append("Flag", wordWrappingLabel(vessel.Flag))
 	}
 
 	if vessel.Built != nil {
-		form.Append("Built", widget.NewLabel(vessel.Built.Format("2006-01-02")))
+		form.Append("Built", wordWrappingLabel(vessel.Built.Format("2006-01-02")))
 	}
 
 	if vessel.Model != "" {
-		form.Append("Model", widget.NewLabel(vessel.Model))
+		form.Append("Model", wordWrappingLabel(vessel.Model))
 	}
 
 	if vessel.Tonnage > 0 {
-		form.Append("Tonnage", widget.NewLabel(fmt.Sprintf("%d", vessel.Tonnage)))
+		form.Append("Tonnage", wordWrappingLabel(fmt.Sprintf("%d", vessel.Tonnage)))
 	}
 
 	if vessel.MMSI != "" {
-		form.Append("MMSI", widget.NewLabel(vessel.MMSI))
+		form.Append("MMSI", wordWrappingLabel(vessel.MMSI))
 	}
 
 	if vessel.CallSign != "" {
-		form.Append("Call Sign", widget.NewLabel(vessel.CallSign))
+		form.Append("Call Sign", wordWrappingLabel(vessel.CallSign))
 	}
 
 	if vessel.GrossRegisteredTonnage > 0 {
-		form.Append("Gross Registered Tonnage", widget.NewLabel(fmt.Sprintf("%d", vessel.GrossRegisteredTonnage)))
+		form.Append("Gross Registered Tonnage", wordWrappingLabel(fmt.Sprintf("%d", vessel.GrossRegisteredTonnage)))
 	}
 
 	if vessel.Owner != "" {
-		form.Append("Owner", widget.NewLabel(vessel.Owner))
+		form.Append("Owner", wordWrappingLabel(vessel.Owner))
 	}
 
 	return widget.NewCard("Vessel Details", "", form)
@@ -911,19 +918,19 @@ func createContactInfoCard(contact search.ContactInfo) fyne.CanvasObject {
 	form := widget.NewForm()
 
 	if len(contact.EmailAddresses) > 0 {
-		form.Append("Email Addresses", widget.NewLabel(strings.Join(contact.EmailAddresses, "\n")))
+		form.Append("Email Addresses", wordWrappingLabel(strings.Join(contact.EmailAddresses, "\n")))
 	}
 
 	if len(contact.PhoneNumbers) > 0 {
-		form.Append("Phone Numbers", widget.NewLabel(strings.Join(contact.PhoneNumbers, "\n")))
+		form.Append("Phone Numbers", wordWrappingLabel(strings.Join(contact.PhoneNumbers, "\n")))
 	}
 
 	if len(contact.FaxNumbers) > 0 {
-		form.Append("Fax Numbers", widget.NewLabel(strings.Join(contact.FaxNumbers, "\n")))
+		form.Append("Fax Numbers", wordWrappingLabel(strings.Join(contact.FaxNumbers, "\n")))
 	}
 
 	if len(contact.Websites) > 0 {
-		form.Append("Websites", widget.NewLabel(strings.Join(contact.Websites, "\n")))
+		form.Append("Websites", wordWrappingLabel(strings.Join(contact.Websites, "\n")))
 	}
 
 	return widget.NewCard("Contact Information", "", form)
@@ -932,40 +939,40 @@ func createContactInfoCard(contact search.ContactInfo) fyne.CanvasObject {
 func createAddressesCard(addresses []search.Address) fyne.CanvasObject {
 	container := container.NewVBox()
 
-	for i, address := range addresses {
+	for _, address := range addresses {
 		addressForm := widget.NewForm()
 
 		if address.Line1 != "" {
-			addressForm.Append("Line 1", widget.NewLabel(address.Line1))
+			addressForm.Append("Line 1", wordWrappingLabel(address.Line1))
 		}
 
 		if address.Line2 != "" {
-			addressForm.Append("Line 2", widget.NewLabel(address.Line2))
+			addressForm.Append("Line 2", wordWrappingLabel(address.Line2))
 		}
 
 		if address.City != "" {
-			addressForm.Append("City", widget.NewLabel(address.City))
+			addressForm.Append("City", wordWrappingLabel(address.City))
 		}
 
 		if address.State != "" {
-			addressForm.Append("State", widget.NewLabel(address.State))
+			addressForm.Append("State", wordWrappingLabel(address.State))
 		}
 
 		if address.PostalCode != "" {
-			addressForm.Append("Postal Code", widget.NewLabel(address.PostalCode))
+			addressForm.Append("Postal Code", wordWrappingLabel(address.PostalCode))
 		}
 
 		if address.Country != "" {
-			addressForm.Append("Country", widget.NewLabel(address.Country))
+			addressForm.Append("Country", wordWrappingLabel(address.Country))
 		}
 
 		if address.Latitude != 0 || address.Longitude != 0 {
-			addressForm.Append("Coordinates", widget.NewLabel(
+			addressForm.Append("Coordinates", wordWrappingLabel(
 				fmt.Sprintf("Lat: %.6f, Lon: %.6f", address.Latitude, address.Longitude),
 			))
 		}
 
-		container.Add(widget.NewCard(fmt.Sprintf("Address %d", i+1), "", addressForm))
+		container.Add(widget.NewCard("Address", "", addressForm))
 	}
 
 	return container
