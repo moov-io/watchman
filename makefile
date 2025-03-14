@@ -127,7 +127,7 @@ postal-server:
 	go build ${GOTAGS} -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/postal-server github.com/moov-io/watchman/cmd/postal-server
 
 build-webui:
-	cd ./cmd/ui/ && fyne package --icon ./assets/icon.jpeg -os web --appVersion "${APP_VERSION}" && cd -
+	cd ./cmd/ui/ && fyne package --release --icon ./assets/icon.jpeg -os web --appVersion "${APP_VERSION}" && cd -
 
 .PHONY: check
 check:
