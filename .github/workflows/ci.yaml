@@ -36,13 +36,6 @@ jobs:
               - '**/*.go'
               - '!internal/model_validation/*.go'
 
-  codeql:
-    needs: detect_changes
-    if: ${{ needs.detect_changes.outputs.go_changes == 'true' }}
-    uses: ./.github/workflows/codeql.yaml
-    name: CodeQL Analysis
-    secrets: inherit
-
   go:
     needs: detect_changes
     if: ${{ needs.detect_changes.outputs.gomod_changes == 'true' || needs.detect_changes.outputs.go_changes == 'true' }}
