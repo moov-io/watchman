@@ -163,9 +163,7 @@ func sendSearchNotification(query search.Entity[search.Value]) {
 
 // buildQueryEntity creates a search query from form data
 func buildQueryEntity(
-	entityType,
-	name,
-	sourceList string,
+	entityType, name, sourceList string,
 	personContent fyne.CanvasObject,
 	businessContent fyne.CanvasObject,
 	organizationContent fyne.CanvasObject,
@@ -205,14 +203,12 @@ func buildQueryEntity(
 		entity.Vessel.Name = name
 	}
 
-	// Return the query entity
 	return entity
 }
 
 func extractPersonFields(content fyne.CanvasObject) *search.Person {
 	person := &search.Person{}
 
-	// Safely extract data from the form
 	if content == nil {
 		return person
 	}
@@ -245,15 +241,12 @@ func extractPersonFields(content fyne.CanvasObject) *search.Person {
 		}
 	}
 
-	// Extract other fields as needed
-
 	return person
 }
 
 func extractBusinessFields(content fyne.CanvasObject) *search.Business {
 	business := &search.Business{}
 
-	// Safely extract data from the form
 	if content == nil {
 		return business
 	}
@@ -277,15 +270,12 @@ func extractBusinessFields(content fyne.CanvasObject) *search.Business {
 		}
 	}
 
-	// Extract other fields as needed
-
 	return business
 }
 
 func extractOrganizationFields(content fyne.CanvasObject) *search.Organization {
 	org := &search.Organization{}
 
-	// Safely extract data from the form
 	if content == nil {
 		return org
 	}
@@ -309,15 +299,12 @@ func extractOrganizationFields(content fyne.CanvasObject) *search.Organization {
 		}
 	}
 
-	// Extract other fields as needed
-
 	return org
 }
 
 func extractAircraftFields(content fyne.CanvasObject) *search.Aircraft {
 	aircraft := &search.Aircraft{}
 
-	// Safely extract data from the form
 	if content == nil {
 		return aircraft
 	}
@@ -350,15 +337,12 @@ func extractAircraftFields(content fyne.CanvasObject) *search.Aircraft {
 		}
 	}
 
-	// Extract other fields as needed
-
 	return aircraft
 }
 
 func extractVesselFields(content fyne.CanvasObject) *search.Vessel {
 	vessel := &search.Vessel{}
 
-	// Safely extract data from the form
 	if content == nil {
 		return vessel
 	}
@@ -398,12 +382,9 @@ func extractVesselFields(content fyne.CanvasObject) *search.Vessel {
 		}
 	}
 
-	// Extract other fields as needed
-
 	return vessel
 }
 
-// Create person-specific form
 func createPersonContent() fyne.CanvasObject {
 	form := widget.NewForm()
 
@@ -432,7 +413,6 @@ func createPersonContent() fyne.CanvasObject {
 	)
 }
 
-// Create business-specific form
 func createBusinessContent() fyne.CanvasObject {
 	form := widget.NewForm()
 
@@ -461,7 +441,6 @@ func createBusinessContent() fyne.CanvasObject {
 	)
 }
 
-// Create organization-specific form
 func createOrganizationContent() fyne.CanvasObject {
 	form := widget.NewForm()
 
@@ -490,7 +469,6 @@ func createOrganizationContent() fyne.CanvasObject {
 	)
 }
 
-// Create aircraft-specific form
 func createAircraftContent() fyne.CanvasObject {
 	form := widget.NewForm()
 
@@ -529,7 +507,6 @@ func createAircraftContent() fyne.CanvasObject {
 	)
 }
 
-// Create vessel-specific form
 func createVesselContent() fyne.CanvasObject {
 	form := widget.NewForm()
 
@@ -675,7 +652,6 @@ func createSummaryTable(entities []search.SearchedEntity[search.Value]) fyne.Can
 
 // Create a card that displays entity details
 func createEntityDetailsCard(env Environment, entity search.SearchedEntity[search.Value]) fyne.CanvasObject {
-	// Create a container for all entity information
 	content := container.NewVBox()
 
 	// Add match score indicator
