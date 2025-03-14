@@ -129,7 +129,7 @@ func SearchContainer(ctx context.Context, env Environment) fyne.CanvasObject {
 		searchOpts := search.SearchOpts{Limit: 5, Debug: true}
 
 		// Push a notification to the system
-		sendSearchNotification(query)
+		sendSearchNotification(entityTypeRadio.Selected, query)
 
 		// Perform search in a goroutine to avoid blocking the UI
 		go func() {
@@ -150,13 +150,13 @@ func SearchContainer(ctx context.Context, env Environment) fyne.CanvasObject {
 	return mainContent
 }
 
-func sendSearchNotification(query search.Entity[search.Value]) {
+func sendSearchNotification(entityType string, query search.Entity[search.Value]) {
 	device := fyne.CurrentDevice()
 	if device.IsBrowser() || device.IsMobile() {
 		return
 	}
 
-	msg := fyne.NewNotification("Watchman Search", fmt.Sprintf("%s search for %s", query.Type, query.Name))
+	msg := fyne.NewNotification("Watchman Search", fmt.Sprintf("%s search for %s", entityType, query.Name))
 
 	fyne.CurrentApp().SendNotification(msg)
 }
