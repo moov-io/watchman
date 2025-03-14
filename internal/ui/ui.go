@@ -35,7 +35,12 @@ func New(ctx context.Context, env Environment) fyne.App {
 	w.SetTitle("Watchman")
 
 	// Center the overall window and make it a reasonable size
-	if !device.IsMobile() && !device.IsBrowser() {
+	if device.IsBrowser() {
+		// Browser-specific settings
+		env.Width = 1200.0 // Slightly narrower for browser
+		env.Height = 800.0
+	} else if !device.IsMobile() {
+		// Desktop settings
 		env.Width = 1500.0
 		env.Height = 900.0
 		w.Resize(fyne.NewSize(env.Width, env.Height))

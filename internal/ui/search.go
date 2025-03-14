@@ -38,7 +38,15 @@ func SearchContainer(ctx context.Context, env Environment) fyne.CanvasObject {
 
 	// Create a scroll container for the form
 	formScrollContainer := container.NewScroll(searchForm)
-	formScrollContainer.SetMinSize(fyne.NewSize(0, env.Height*0.5))
+
+	device := fyne.CurrentDevice()
+	if device.IsBrowser() {
+		// Adjust for browser/WASM environment
+		formScrollContainer.SetMinSize(fyne.NewSize(0, 300)) // Fixed size for browser
+	} else {
+		// Normal sizing for desktop
+		formScrollContainer.SetMinSize(fyne.NewSize(0, env.Height*0.5))
+	}
 
 	// Add components to the form container
 	formContainer.Add(formScrollContainer)
@@ -49,7 +57,12 @@ func SearchContainer(ctx context.Context, env Environment) fyne.CanvasObject {
 		formContainer,
 		resultsContainer,
 	)
-	splitContent.SetOffset(0.6)
+
+	if device.IsBrowser() {
+		splitContent.SetOffset(0.7) // Larger form section in browser
+	} else {
+		splitContent.SetOffset(0.6) // Normal split for desktop
+	}
 
 	mainContainer.Add(splitContent)
 	return mainContainer
@@ -133,6 +146,26 @@ func searchFormWithButton(ctx context.Context, env Environment, warningLabel *wi
 		{Text: "CryptoAddresses", Widget: newMultilineInput(2)},
 	}
 
+	if fyne.CurrentDevice().IsBrowser() {
+		// Add a maximum width constraint for inputs in browser mode
+		for _, item := range items {
+			if entry, ok := item.Widget.(*widget.Entry); ok {
+				// Wrap the entry in a container that respects minimum size
+				spacer := canvas.NewRectangle(color.Transparent)
+				spacer.SetMinSize(fyne.NewSize(300, entry.MinSize().Height))
+
+				fixedWidthContainer := container.New(
+					layout.NewMaxLayout(),
+					spacer,
+					entry,
+				)
+
+				// Replace the widget in the form item
+				item.Widget = fixedWidthContainer
+			}
+		}
+	}
+
 	form := &widget.Form{
 		Items:    items,
 		OnSubmit: nil, // We'll handle submission with our custom button
@@ -152,6 +185,8 @@ func searchFormWithButton(ctx context.Context, env Environment, warningLabel *wi
 		// Rest of the existing code
 		populatedItems := collectPopulatedItems(items)
 		env.Logger.Info().Logf("searching with %d fields", len(populatedItems))
+
+		fmt.Printf("populatedItems: %#v\n", populatedItems)
 
 		query := buildQueryEntity(populatedItems)
 		searchOpts := search.SearchOpts{
@@ -344,15 +379,32 @@ type item struct {
 func collectPopulatedItems(formItems []*widget.FormItem) []item {
 	var out []item
 	for i := range formItems {
+		fmt.Printf("formItems[%d].Widget: %#v\n", i, formItems[i].Widget)
+
 		switch w := formItems[i].Widget.(type) {
+		case *fyne.Container:
+			for _, obj := range w.Objects {
+				if entry, ok := obj.(*widget.Entry); ok {
+					if entry.Text != "" {
+						out = append(out, item{name: formItems[i].Text, value: entry.Text})
+					}
+				} else if sel, ok := obj.(*widget.Select); ok {
+					if sel.Selected != "" {
+						out = append(out, item{name: formItems[i].Text, value: sel.Selected})
+					}
+				}
+			}
+
 		case *widget.Entry:
 			if w.Text != "" {
 				out = append(out, item{name: formItems[i].Text, value: w.Text})
 			}
+
 		case *widget.Select:
 			if w.Selected != "" {
 				out = append(out, item{name: formItems[i].Text, value: w.Selected})
 			}
+
 		case *ExpandableSection:
 			// For expandable sections, we need to examine their content
 			if content, ok := w.Content.(*fyne.Container); ok {
@@ -382,6 +434,7 @@ func collectPopulatedItems(formItems []*widget.FormItem) []item {
 					}
 				}
 			}
+
 		case *widget.Label:
 			// ignore
 		}
