@@ -92,12 +92,18 @@ func (e *ExpandableSection) Refresh() {
 		}
 	}
 
-	// No parent access, just refresh the container
-	e.container.Refresh()
-	e.BaseWidget.Refresh()
 	// Force a resize on browser to ensure proper layout
 	if fyne.CurrentDevice().IsBrowser() {
 		e.container.Resize(e.container.MinSize())
+	}
+
+	// Skip refreshing the entire container in browser - just refresh the icon
+	if fyne.CurrentDevice().IsBrowser() {
+		e.icon.Refresh()
+		e.BaseWidget.Refresh()
+	} else {
+		e.container.Refresh()
+		e.BaseWidget.Refresh()
 	}
 }
 
