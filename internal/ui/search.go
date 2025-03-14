@@ -743,7 +743,7 @@ func createEntityDetailsCard(env Environment, entity search.SearchedEntity[searc
 
 	device := fyne.CurrentDevice()
 	if device.IsBrowser() {
-		detailsScroll.SetMinSize(fyne.NewSize(0, env.Height*0.15))
+		detailsScroll.SetMinSize(fyne.NewSize(0, env.Height*0.20))
 	} else {
 		detailsScroll.SetMinSize(fyne.NewSize(0, env.Height*0.40))
 	}
