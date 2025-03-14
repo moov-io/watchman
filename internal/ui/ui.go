@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/moov-io/base/log"
+	"github.com/moov-io/watchman"
 	"github.com/moov-io/watchman/pkg/search"
 
 	"fyne.io/fyne/v2"
@@ -23,6 +24,11 @@ type Environment struct {
 
 func New(ctx context.Context, env Environment) fyne.App {
 	a := app.New()
+
+	app.SetMetadata(fyne.AppMetadata{
+		Name:    "Watchman",
+		Version: watchman.Version,
+	})
 
 	// Don't allow for Dark Mode
 	a.Settings().SetTheme(theme.LightTheme())

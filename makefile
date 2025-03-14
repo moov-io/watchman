@@ -15,13 +15,19 @@ ifndef VERSION
 	endif
 endif
 
+ifdef RELEASE
+	APP_VERSION := $(shell echo ${VERSION} | tr -d 'v')
+else
+	APP_VERSION := 0.0.0
+endif
+
 # If arch is define create a new env variable with the path slash for docker.
 ifdef ARCH
 	ARCH_SUFFIX := .${ARCH}
 	ARCH_PATH := ${ARCH}/
 endif
 
-.PHONY: all run build docker release check test
+.PHONY: all run build docker check test
 
 all: build
 
@@ -121,7 +127,7 @@ postal-server:
 	go build ${GOTAGS} -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/postal-server github.com/moov-io/watchman/cmd/postal-server
 
 build-webui:
-	cd ./cmd/ui/ && fyne package --icon ./assets/icon.jpeg -os web && cd -
+	cd ./cmd/ui/ && fyne package --icon ./assets/icon.jpeg -os web --appVersion "${APP_VERSION}" && cd -
 
 .PHONY: check
 check:
