@@ -244,6 +244,8 @@ If you find a security issue please contact us at [`security@moov.io`](mailto:se
 
 Yes please! Please review our [Contributing guide](CONTRIBUTING.md) and [Code of Conduct](https://github.com/moov-io/ach/blob/master/CODE_OF_CONDUCT.md) to get started! Checkout our [issues for first time contributors](https://github.com/moov-io/watchman/contribute) for something to help out with.
 
+Building Watchman's source code follows standard Go commands. You can use `make build` to compile the code and `make check` to run linters and tests.
+
 Run `make install` to setup [gopostal](https://github.com/openvenues/gopostal) / [libpostal](https://github.com/openvenues/libpostal) for Watchman.
 
 ## Related projects
