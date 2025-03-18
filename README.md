@@ -93,9 +93,12 @@ docker pull moov/watchman:latest
 docker run -p 8084:8084 moov/watchman:latest
 ```
 
-Run a search for an individual or business
+Run a search for an individual or business:
+```
+curl -s "http://localhost:8084/v2/search?name=Nicolas+Maduro&type=person&limit=1&minMatch=0.75" | jq .
+```
+
 <details>
-<summary>`curl -s "http://localhost:8084/v2/search?name=Nicolas+Maduro&type=person&limit=1&minMatch=0.75" | jq . `</summary>
 
 ```json
 {
