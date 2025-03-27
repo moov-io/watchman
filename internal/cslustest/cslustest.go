@@ -25,7 +25,7 @@ func FindEntity(tb testing.TB, entityID string) search.Entity[search.Value] {
 
 	cslusDownloaderSetup.Do(func() {
 		conf := download.Config{
-			InitialDataDirectory: filepath.Join("..", "..", "pkg", "csl_us", "testdata"),
+			InitialDataDirectory: filepath.Join("..", "..", "sources", "pkg", "csl_us", "testdata"),
 		}
 		conf.IncludedLists = append(conf.IncludedLists, search.SourceUSCSL)
 
