@@ -26,7 +26,7 @@ func Similarity[Q any, I any](query Entity[Q], index Entity[I]) float64 {
 // DebugSimilarity does the same as Similarity, but logs debug info to w.
 //
 // The format written to w is not machine readable and is intended for humans to read.
-// The format will evolve over time. No stability guarentees are given over what is written.
+// The format will evolve over time. No stability guarantee is given over what is written.
 func DebugSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]) float64 {
 	details := DetailedSimilarity(w, query, index)
 	if len(details.Pieces) != 9 {
@@ -63,7 +63,7 @@ func DebugSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]
 //
 // This is intended to give detailed results of which fields matched and how they were scored against each other.
 // The fields returned in SimilarityScore may change as the general similarity algorithm and scoring methodologies evolve.
-// There is no API stability guarentee for SimilarityScore.
+// There is no API stability guarantee for SimilarityScore.
 func DetailedSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]) SimilarityScore {
 	out := SimilarityScore{
 		Pieces: make([]ScorePiece, 0, 9),
@@ -127,7 +127,7 @@ func DetailedSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity
 // SimilarityScore gives detailed results of which fields matched and how they were scored against each other.
 //
 // The fields returned in SimilarityScore may change as the general similarity algorithm and scoring methodologies evolve.
-// There is no API stability guarentee for SimilarityScore.
+// There is no API stability guarantee for SimilarityScore.
 type SimilarityScore struct {
 	Pieces     []ScorePiece `json:"pieces"`
 	FinalScore float64      `json:"finalScore"`
@@ -135,7 +135,7 @@ type SimilarityScore struct {
 
 // ScorePiece is a partial scoring result from one comparison function
 //
-// There is no API stability guarentee for ScorePiece.
+// There is no API stability guarantee for ScorePiece.
 type ScorePiece struct {
 	Score          float64 `json:"score"`          // 0-1 for this piece
 	Weight         float64 `json:"weight"`         // weight for final
@@ -178,13 +178,6 @@ const (
 	minCoverageThreshold    = 0.35 // how many fields did the query compare the index against?
 	perfectMatchBoost       = 1.15
 	criticalFieldMultiplier = 1.2
-
-	// Minimum field requirements by entity type
-	minPersonFields   = 3 // e.g., name, DOB, gender
-	minBusinessFields = 3 // e.g., name, identifier, creation date
-	minOrgFields      = 3 // e.g., name, identifier, creation date
-	minVesselFields   = 3 // e.g., IMO, name, flag
-	minAircraftFields = 3 // e.g., serial number, model, flag
 )
 
 // entityFields tracks required and available fields for an entity

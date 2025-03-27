@@ -1,12 +1,12 @@
 ---
 layout: page
-title: Data Preperation Pipeline
+title: Data preparation Pipeline
 hide_hero: true
 show_sidebar: false
 menubar: docs-menu
 ---
 
-# Data Preperation Pipeline
+# Data Preparation Pipeline
 
 > For documentation on older releases of Watchman (v0.31.x series), please visit the [older docs website](https://github.com/moov-io/watchman/tree/v0.31.3/docs) in our GitHub repository.
 

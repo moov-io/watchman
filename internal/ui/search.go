@@ -586,7 +586,7 @@ func updateResultsDisplay(env Environment, resultsContent *fyne.Container, entit
 	resultTabs := container.NewAppTabs()
 
 	// Summary tab
-	summaryTable := createSummaryTable(entities)
+	summaryTable := createSummaryTable(env, entities)
 	resultTabs.Append(container.NewTabItem("Summary", summaryTable))
 
 	// Entity tabs
@@ -603,12 +603,16 @@ func updateResultsDisplay(env Environment, resultsContent *fyne.Container, entit
 	resultsContent.Refresh()
 }
 
-func createSummaryTable(entities []search.SearchedEntity[search.Value]) fyne.CanvasObject {
+func createSummaryTable(env Environment, entities []search.SearchedEntity[search.Value]) fyne.CanvasObject {
 	table := widget.NewTable(
 		func() (int, int) { return len(entities) + 1, 5 },
 		func() fyne.CanvasObject { return widget.NewLabel("                         ") },
 		func(id widget.TableCellID, cell fyne.CanvasObject) {
-			label := cell.(*widget.Label)
+			label, ok := cell.(*widget.Label)
+			if !ok {
+				env.Logger.Error().LogErrorf("unexpected %T (wanted *widget.Label)", cell)
+				return
+			}
 			label.Alignment = fyne.TextAlignLeading
 			label.Wrapping = fyne.TextTruncate
 			if id.Row == 0 {

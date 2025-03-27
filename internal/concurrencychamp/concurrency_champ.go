@@ -3,7 +3,7 @@ package concurrencychamp
 import (
 	"fmt"
 	"math"
-	"math/rand"
+	"math/rand/v2"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -14,7 +14,7 @@ import (
 type rollingStats struct {
 	mu       sync.RWMutex // Use RWMutex instead of Mutex for better read concurrency
 	buffer   []time.Duration
-	capacity int
+	capacity int32
 	index    int32 // Use atomic for index operations
 	count    int32 // Use atomic for count operations
 	mean     float64
@@ -38,13 +38,10 @@ type ConcurrencyManager struct {
 	// champion gets ~80% of requests, challengers ~10% each
 	trafficWeights map[int]float64
 
-	// For picking concurrency randomly
-	randSource *rand.Rand
-
 	// Confidence / decision parameters
 	confidenceLevel float64 // e.g., 1.96 for ~95%
-	windowSize      int     // rolling window for each concurrency
-	minSamples      int     // min samples before we do a compare
+	windowSize      int32   // rolling window for each concurrency
+	minSamples      int32   // min samples before we do a compare
 	minImprovement  float64
 
 	// cleanup
@@ -83,7 +80,6 @@ func NewConcurrencyManager(initialChampion, minC, maxC int) (*ConcurrencyManager
 		maxC:            maxC,
 		stats:           make(map[int]*rollingStats),
 		trafficWeights:  make(map[int]float64),
-		randSource:      rand.New(rand.NewSource(time.Now().UnixNano())),
 		confidenceLevel: 1.645, // approximate z-score for 90% CI
 		minSamples:      10,
 		minImprovement:  0.02,
@@ -107,7 +103,7 @@ func NewConcurrencyManager(initialChampion, minC, maxC int) (*ConcurrencyManager
 }
 
 // newRollingStats creates a ring buffer of a given capacity.
-func newRollingStats(capacity int) *rollingStats {
+func newRollingStats(capacity int32) *rollingStats {
 	if capacity <= 0 {
 		capacity = 100 // Default to reasonable size
 	}
@@ -129,7 +125,7 @@ func (rs *rollingStats) add(d time.Duration) {
 
 	// If we're overwriting an old value, remove its contribution
 	old := rs.buffer[atomic.LoadInt32(&rs.index)]
-	if atomic.LoadInt32(&rs.count) >= int32(rs.capacity) {
+	if atomic.LoadInt32(&rs.count) >= rs.capacity {
 		// we have a full buffer, so subtract old from the Welford's calc
 		oldVal := float64(old.Microseconds())
 		n := float64(atomic.LoadInt32(&rs.count))
@@ -144,7 +140,7 @@ func (rs *rollingStats) add(d time.Duration) {
 
 	// Insert the new duration into the ring buffer
 	rs.buffer[rs.index] = d
-	atomic.StoreInt32(&rs.index, (atomic.LoadInt32(&rs.index)+1)%int32(rs.capacity))
+	atomic.StoreInt32(&rs.index, (atomic.LoadInt32(&rs.index)+1)%rs.capacity)
 
 	// Add new value
 	n := float64(atomic.LoadInt32(&rs.count))
@@ -155,16 +151,16 @@ func (rs *rollingStats) add(d time.Duration) {
 }
 
 // getStats returns (mean, stddev, sampleSize) from the rolling stats
-func (rs *rollingStats) getStats() (mean float64, stddev float64, n int) {
+func (rs *rollingStats) getStats() (mean float64, stddev float64, n int32) {
 	rs.mu.RLock()
 	defer rs.mu.RUnlock()
 
 	count := atomic.LoadInt32(&rs.count)
 	if count < 2 {
-		return rs.mean, 0, int(count)
+		return rs.mean, 0, count
 	}
 	variance := rs.m2 / float64(count-1)
-	return rs.mean, math.Sqrt(variance), int(count)
+	return rs.mean, math.Sqrt(variance), count
 }
 
 func (cm *ConcurrencyManager) setChampion(c int) {
@@ -213,10 +209,6 @@ func (cm *ConcurrencyManager) ensureStats(c int) {
 	}
 }
 
-func (cm *ConcurrencyManager) getStatsNoLock(concurrency int) *rollingStats {
-	return cm.stats[concurrency]
-}
-
 func (cm *ConcurrencyManager) startBackgroundCleanup() {
 	go func() {
 		ticker := time.NewTicker(cm.cleanupInterval)
@@ -261,7 +253,7 @@ func (cm *ConcurrencyManager) PickConcurrency() int {
 		return cm.champion
 	}
 
-	r := cm.randSource.Float64() * total
+	r := rand.Float64() * total //nolint:gosec
 	for c, w := range cm.trafficWeights {
 		r -= w
 		if r <= 0 {
@@ -285,7 +277,7 @@ func (cm *ConcurrencyManager) RecordDuration(concurrency int, d time.Duration) {
 	st.add(d)
 
 	// Increment sample count atomically
-	if atomic.AddInt32(&cm.totalSamples, 1) >= int32(cm.minSamples) {
+	if atomic.AddInt32(&cm.totalSamples, 1) >= cm.minSamples {
 		select {
 		case cm.evaluateChan <- struct{}{}:
 		default:
@@ -386,7 +378,7 @@ func (cm *ConcurrencyManager) evaluate() {
 
 // confidenceInterval returns (low, high) for the mean at a given confidence level (z).
 // mean in microseconds, std in microseconds, count is sample size.
-func confidenceInterval(mean, std float64, count int, z float64) interval {
+func confidenceInterval(mean, std float64, count int32, z float64) interval {
 	var ci interval
 	if count < 2 || std == 0 {
 		// degenerate

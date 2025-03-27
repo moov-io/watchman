@@ -109,7 +109,7 @@ type debugRespone struct {
 }
 
 func (s *service) performSearch(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error) {
-	ctx, span := telemetry.StartSpan(ctx, "perform-search", trace.WithAttributes(
+	_, span := telemetry.StartSpan(ctx, "perform-search", trace.WithAttributes(
 		attribute.Int("opts.limit", opts.Limit),
 		attribute.Float64("opts.min_match", opts.MinMatch),
 	))

@@ -17,6 +17,6 @@ type SearchedEntity[T any] struct {
 	// Details includes field level matching and scoring results
 	//
 	// The fields returned may change as the general similarity algorithm and scoring methodologies evolve.
-	// There is no API stability guarentee for Details or SimilarityScore.
+	// There is no API stability guarantee for Details or SimilarityScore.
 	Details SimilarityScore `json:"details,omitempty,omitzero"`
 }

@@ -152,8 +152,8 @@ func loadOFACRecords(ctx context.Context, logger log.Logger, conf Config, respon
 
 	entities := ofac.GroupIntoEntities(res.SDNs, res.Addresses, res.SDNComments, res.AlternateIdentities)
 
-	logger.Debug().Logf("finished OFAC preperation: %v", time.Since(start))
-	span.AddEvent("finished OFAC preperation")
+	logger.Debug().Logf("finished OFAC preparation: %v", time.Since(start))
+	span.AddEvent("finished OFAC preparation")
 
 	if len(entities) == 0 && conf.ErrorOnEmptyList {
 		return errors.New("no entities parsed from US OFAC")
@@ -195,8 +195,8 @@ func loadCSLUSRecords(ctx context.Context, logger log.Logger, conf Config, respo
 
 	entities := csl_us.ConvertSanctionsData(res.SanctionsData)
 
-	logger.Debug().Logf("finished US CSL preperation: %v", time.Since(start))
-	span.AddEvent("finished US CSL preperation")
+	logger.Debug().Logf("finished US CSL preparation: %v", time.Since(start))
+	span.AddEvent("finished US CSL preparation")
 
 	if len(entities) == 0 && conf.ErrorOnEmptyList {
 		return errors.New("no entities parsed from US CSL")

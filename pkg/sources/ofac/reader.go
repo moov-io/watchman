@@ -134,7 +134,6 @@ func csvAddressFile(results *Results, f io.ReadCloser) (string, error) {
 	reader.ReuseRecord = true
 
 	// Pre-allocate record with known field count
-	record := make([]string, 6)
 	recordCopy := make([]string, 6)
 
 	for {
@@ -152,12 +151,13 @@ func csvAddressFile(results *Results, f io.ReadCloser) (string, error) {
 			}
 			return "", err
 		}
+
+		copy(recordCopy, readRecord)
+		record := replaceNull(recordCopy)
+
 		if len(record) != 6 {
 			continue
 		}
-
-		copy(recordCopy, readRecord)
-		record = replaceNull(recordCopy)
 
 		entityID := record[0]
 		if _, ok := results.Addresses[entityID]; !ok {
@@ -188,7 +188,6 @@ func csvAlternateIdentityFile(results *Results, f io.ReadCloser) (string, error)
 	reader.ReuseRecord = true
 
 	// Pre-allocate with exact sizes needed
-	record := make([]string, 5)
 	recordCopy := make([]string, 5)
 
 	for {
@@ -210,7 +209,7 @@ func csvAlternateIdentityFile(results *Results, f io.ReadCloser) (string, error)
 
 		// Make a copy since we'll store this data
 		copy(recordCopy, readRecord)
-		record = replaceNull(recordCopy)
+		record := replaceNull(recordCopy)
 
 		entityID := record[0]
 		// Pre-allocate slice if not exists with typical capacity
@@ -241,10 +240,16 @@ func csvSDNFile(results *Results, f io.ReadCloser) (string, error) {
 	reader.ReuseRecord = true
 
 	// Grab pre-allocated record slice with known field count
-	record := csvRecordPool.Get().([]string)
+	record, ok := csvRecordPool.Get().([]string)
+	if !ok {
+		return "", fmt.Errorf("unexpected %T from csvRecordPool", record)
+	}
 	defer csvRecordPool.Put(record)
 
-	recordCopy := csvRecordPool.Get().([]string)
+	recordCopy, ok := csvRecordPool.Get().([]string)
+	if !ok {
+		return "", fmt.Errorf("unexpected %T from csvRecordPool (as copy)", recordCopy)
+	}
 	defer csvRecordPool.Put(recordCopy)
 
 	for {
@@ -304,7 +309,6 @@ func csvSDNCommentsFile(results *Results, f io.ReadCloser) (string, error) {
 	reader.LazyQuotes = true
 
 	// Pre-allocate record slices
-	record := make([]string, 2) // Comments file has 2 fields
 	recordCopy := make([]string, 2)
 
 	for {
@@ -327,7 +331,7 @@ func csvSDNCommentsFile(results *Results, f io.ReadCloser) (string, error) {
 
 		// Make a copy since we'll store this data
 		copy(recordCopy, readRecord)
-		record = replaceNull(recordCopy)
+		record := replaceNull(recordCopy)
 
 		entityID := record[0]
 		// Pre-allocate slice if not exists
@@ -481,28 +485,11 @@ func findMatchingRemarks(remarks []string, suffix string) []remark {
 	return out
 }
 
-func findRemarkValues(remarks []string, suffix string) []string {
-	found := findMatchingRemarks(remarks, suffix)
-	var out []string
-	for i := range found {
-		out = append(out, found[i].value)
-	}
-	return out
-}
-
 func firstValue(values []remark) string {
 	if len(values) == 0 {
 		return ""
 	}
 	return values[0].value
-}
-
-func withFirstF[T any](values []remark, f func(remark) T) T {
-	if len(values) == 0 {
-		var zero T
-		return zero
-	}
-	return f(values[0])
 }
 
 func withFirstP[T any](values []remark, f func(remark) *T) *T {
