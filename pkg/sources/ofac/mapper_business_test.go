@@ -264,3 +264,57 @@ func TestMapper__CompleteBusinessWithRemarks(t *testing.T) {
 	require.Equal(t, "Former Name", e.HistoricalInfo[0].Type)
 	require.Equal(t, "OLD ACME LTD", e.HistoricalInfo[0].Value)
 }
+
+func TestMapper_Business_Remarks_GovernmentID(t *testing.T) {
+	cases := []struct {
+		remarks       string
+		governmentIDs []search.GovernmentID
+	}{
+		{
+			remarks: "US FEIN 65-0842701; Business Registration Document # P9800004558 (United States).",
+			governmentIDs: []search.GovernmentID{
+				{Type: "business-registration", Country: "United States", Identifier: "P9800004558"},
+			},
+		},
+		{
+			remarks: "Business Registration Document # UNP 101119568 (Belarus)",
+			governmentIDs: []search.GovernmentID{
+				{Type: "business-registration", Country: "Belarus", Identifier: "UNP"},
+			},
+		},
+		{
+			remarks: "Business Registration Document # HRB147158.",
+			governmentIDs: []search.GovernmentID{
+				{Type: "business-registration", Identifier: "HRB147158"},
+			},
+		},
+		{
+			remarks: "Business Registration Document # CUD: A201309051410465765 (Mexico); Folio Mercantil No. 168954 (Mexico).",
+			governmentIDs: []search.GovernmentID{
+				{Type: "business-registration", Country: "Mexico", Identifier: "CUD"},
+			},
+		},
+		{
+			remarks: "Business Registration Number 229172 (United Arab Emirates);",
+			governmentIDs: []search.GovernmentID{
+				{Type: "business-registration", Country: "United Arab Emirates", Identifier: "229172"},
+			},
+		},
+		{
+			remarks: "Business Registration Number CH-660.0.559.011-2 (Switzerland);",
+			governmentIDs: []search.GovernmentID{
+				{Type: "business-registration", Country: "Switzerland", Identifier: "CH-660.0.559.011-2"},
+			},
+		},
+	}
+	for _, tc := range cases {
+		sdn := ofac.SDN{
+			SDNType: "-0-",
+			Remarks: tc.remarks,
+		}
+		got := ofac.ToEntity(sdn, nil, nil, nil)
+		require.NotNil(t, got.Business)
+
+		require.ElementsMatch(t, tc.governmentIDs, got.Business.GovernmentIDs)
+	}
+}

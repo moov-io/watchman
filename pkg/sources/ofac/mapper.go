@@ -320,7 +320,7 @@ var (
 	governmentIDElectoralRegex = regexp.MustCompile(`(?i)Electoral\s+Registry\s+(?:No\.|Number)?\s*([A-Z0-9-]+)`)
 
 	// Business Registration
-	governmentIDBusinessRegistrationRegex = regexp.MustCompile(`(?i)Business\s+Registration\s+(?:No\.|Number|Document)?\s*([A-Z0-9-\.]+)`)
+	governmentIDBusinessRegistrationRegex = regexp.MustCompile(`(?i)Business\s+Registration\s+(?:No\.|Number|Document)?\s*#?\s*([A-Z0-9-\.]+)`)
 	governmentIDCompanyNumberRegex        = regexp.MustCompile(`(?i)Company\s+Number\s+([0-9]+)`)
 	governmentIDLegalEntityNumberRegex    = regexp.MustCompile(`(?i)Legal\s+Entity\s+Number\s+([A-Za-z0-9\-\.]+)`)
 	governmentIDCommercialRegistryRegex   = regexp.MustCompile(`(?i)Commercial\s+Registry\s+(?:No\.|Number)?\s*([A-Z0-9-./]+)`)
