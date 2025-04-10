@@ -8,10 +8,10 @@ import (
 )
 
 type Config struct {
-	SearchGroups SearchGroups
+	Goroutines Goroutines
 }
 
-type SearchGroups struct {
+type Goroutines struct {
 	Default int
 	Min     int
 	Max     int
@@ -26,7 +26,7 @@ func DefaultConfig() Config {
 	}
 
 	return Config{
-		SearchGroups: SearchGroups{
+		Goroutines: Goroutines{
 			Default: cpus * 2,
 			Min:     cpus,
 			Max:     cpus * 4,

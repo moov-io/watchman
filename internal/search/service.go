@@ -33,7 +33,7 @@ type Service interface {
 }
 
 func NewService(logger log.Logger, config Config) (Service, error) {
-	cm, err := concurrencychamp.NewConcurrencyManager(config.SearchGroups.Default, config.SearchGroups.Min, config.SearchGroups.Max)
+	cm, err := concurrencychamp.NewConcurrencyManager(config.Goroutines.Default, config.Goroutines.Min, config.Goroutines.Max)
 	if err != nil {
 		return nil, fmt.Errorf("creating search service: %w", err)
 	}
