@@ -2,6 +2,8 @@ openapi: 3.0.2
 info:
   description: |
     Moov Watchman offers download, parse, and search functions over numerous trade sanction lists from the United States, agencies, and nonprofits for complying with regional laws.
+
+    > For documentation on older releases of Watchman (v0.31.x series), please visit the [older docs website](https://github.com/moov-io/watchman/tree/v0.31.3/docs) in our GitHub repository.
   contact:
     url: https://github.com/moov-io/watchman
   license:
@@ -17,6 +19,8 @@ servers:
 paths:
   /v2/listinfo:
     get:
+      summary: Get information about available sanction lists
+      description: Returns information about the lists watchman has prepared and indexed for search
       responses:
         "200":
           content:
@@ -35,6 +39,339 @@ paths:
                 type: string
   /v2/search:
     get:
+      summary: Search for entities in sanction lists
+      description: Search for entities in the sanction lists based on the provided parameters
+      parameters:
+        - name: name
+          in: query
+          description: Name of the entity to search for
+          required: false
+          schema:
+            type: string
+        - name: type
+          in: query
+          description: Type of entity to search for
+          required: true
+          schema:
+            type: string
+            enum:
+              - person
+              - business
+              - organization
+              - aircraft
+              - vessel
+        - name: altNames
+          in: query
+          description: Alternative names for the entity
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
+        - name: limit
+          in: query
+          description: Maximum number of results to return (default 10, max 100)
+          required: false
+          schema:
+            type: integer
+            default: 10
+            maximum: 100
+            minimum: 1
+        - name: minMatch
+          in: query
+          description: Minimum match threshold for search results
+          required: false
+          schema:
+            type: number
+            format: float
+            minimum: 0
+            maximum: 1
+        - name: requestID
+          in: query
+          description: Client-provided ID for request tracking
+          required: false
+          schema:
+            type: string
+        - name: debug
+          in: query
+          description: Enable debug mode for additional information
+          required: false
+          schema:
+            type: boolean
+        - name: debugSourceIDs
+          in: query
+          description: Comma-separated list of source IDs to debug
+          required: false
+          schema:
+            type: string
+
+        # Person-specific parameters
+        - name: gender
+          in: query
+          description: Gender of the person (for type=person)
+          required: false
+          schema:
+            type: string
+        - name: birthDate
+          in: query
+          description: Birth date of the person (for type=person) in YYYY-MM-DD, YYYY-MM, or YYYY format
+          required: false
+          schema:
+            type: string
+        - name: deathDate
+          in: query
+          description: Death date of the person (for type=person) in YYYY-MM-DD, YYYY-MM, or YYYY format
+          required: false
+          schema:
+            type: string
+        - name: titles
+          in: query
+          description: Titles of the person (for type=person)
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
+
+        # Business and Organization parameters
+        - name: created
+          in: query
+          description: Creation date of the business/organization in YYYY-MM-DD, YYYY-MM, or YYYY format
+          required: false
+          schema:
+            type: string
+        - name: dissolved
+          in: query
+          description: Dissolution date of the business/organization in YYYY-MM-DD, YYYY-MM, or YYYY format
+          required: false
+          schema:
+            type: string
+
+        # Aircraft parameters
+        - name: aircraftType
+          in: query
+          description: Type of aircraft (for type=aircraft)
+          required: false
+          schema:
+            type: string
+        - name: icaoCode
+          in: query
+          description: ICAO code of the aircraft (for type=aircraft)
+          required: false
+          schema:
+            type: string
+        - name: model
+          in: query
+          description: Model of the aircraft (for type=aircraft)
+          required: false
+          schema:
+            type: string
+        - name: serialNumber
+          in: query
+          description: Serial number of the aircraft (for type=aircraft)
+          required: false
+          schema:
+            type: string
+        - name: built
+          in: query
+          description: Build date of the aircraft (for type=aircraft) in YYYY-MM-DD, YYYY-MM, or YYYY format
+          required: false
+          schema:
+            type: string
+        - name: flag
+          in: query
+          description: Flag/country of the aircraft (for type=aircraft)
+          required: false
+          schema:
+            type: string
+
+        # Vessel parameters
+        - name: imoNumber
+          in: query
+          description: IMO number of the vessel (for type=vessel)
+          required: false
+          schema:
+            type: string
+        - name: vesselType
+          in: query
+          description: Type of vessel (for type=vessel)
+          required: false
+          schema:
+            type: string
+        - name: mmsi
+          in: query
+          description: MMSI of the vessel (for type=vessel)
+          required: false
+          schema:
+            type: string
+        - name: callSign
+          in: query
+          description: Call sign of the vessel (for type=vessel)
+          required: false
+          schema:
+            type: string
+        - name: owner
+          in: query
+          description: Owner of the vessel (for type=vessel)
+          required: false
+          schema:
+            type: string
+        - name: tonnage
+          in: query
+          description: Tonnage of the vessel (for type=vessel)
+          required: false
+          schema:
+            type: integer
+        - name: grossRegisteredTonnage
+          in: query
+          description: Gross registered tonnage of the vessel (for type=vessel)
+          required: false
+          schema:
+            type: integer
+
+        # Contact parameters
+        - name: email
+          in: query
+          description: Email address of the entity
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
+        - name: emailAddress
+          in: query
+          description: Alternative parameter for email address of the entity
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
+        - name: emailAddresses
+          in: query
+          description: Alternative parameter for email addresses of the entity
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
+        - name: phone
+          in: query
+          description: Phone number of the entity
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
+        - name: phoneNumber
+          in: query
+          description: Alternative parameter for phone number of the entity
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
+        - name: phoneNumbers
+          in: query
+          description: Alternative parameter for phone numbers of the entity
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
+        - name: fax
+          in: query
+          description: Fax number of the entity
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
+        - name: faxNumber
+          in: query
+          description: Alternative parameter for fax number of the entity
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
+        - name: faxNumbers
+          in: query
+          description: Alternative parameter for fax numbers of the entity
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
+        - name: website
+          in: query
+          description: Website of the entity
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
+        - name: websites
+          in: query
+          description: Alternative parameter for websites of the entity
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
+
+        # Address parameters
+        - name: address
+          in: query
+          description: Address of the entity
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
+        - name: addresses
+          in: query
+          description: Alternative parameter for addresses of the entity
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
+
+        # Crypto address parameters
+        - name: cryptoAddress
+          in: query
+          description: Cryptocurrency address of the entity in format CURRENCY:ADDRESS (e.g., XBT:x123456)
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
+        - name: cryptoAddresses
+          in: query
+          description: Alternative parameter for cryptocurrency addresses of the entity
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
+
       responses:
         "200":
           content:
@@ -42,6 +379,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/SearchResponse'
           description: Successful search
+          headers:
+            Access-Control-Allow-Origin:
+              description: '*'
+              schema:
+                type: string
+            Content-Type:
+              description: application/json
+              schema:
+                type: string
         "400":
           content:
             application/json:
@@ -61,17 +407,22 @@ components:
       properties:
         line1:
           type: string
+          description: First line of the address
         line2:
           type: string
+          description: Second line of the address
         city:
           type: string
+          description: City name
         postalCode:
           type: string
+          description: Postal or ZIP code
         state:
           type: string
+          description: State, province, or region
         country:
           type: string
-          description: ISO-3166 code
+          description: ISO-3166 country code
       type: object
     Aircraft:
       properties:
@@ -79,21 +430,29 @@ components:
           items:
             type: string
           type: array
+          description: Alternative names for the aircraft
         built:
           format: date
           type: string
+          description: Build date of the aircraft
         flag:
           type: string
+          description: Country flag of the aircraft
         icaoCode:
           type: string
+          description: ICAO code of the aircraft
         model:
           type: string
+          description: Model of the aircraft
         name:
           type: string
+          description: Name of the aircraft
         serialNumber:
           type: string
+          description: Serial number of the aircraft
         type:
           type: string
+          description: Type of aircraft
       type: object
     Business:
       properties:
@@ -101,14 +460,18 @@ components:
           items:
             type: string
           type: array
+          description: Alternative names for the business
         created:
           format: date
           type: string
+          description: Creation date of the business
         dissolved:
           format: date
           type: string
+          description: Dissolution date of the business
         name:
           type: string
+          description: Name of the business
       type: object
     Contact:
       properties:
@@ -116,25 +479,31 @@ components:
           items:
             type: string
           type: array
+          description: Email addresses associated with the entity
         faxNumbers:
           items:
             type: string
           type: array
+          description: Fax numbers associated with the entity
         phoneNumbers:
           items:
             type: string
           type: array
+          description: Phone numbers associated with the entity
         websites:
           items:
             type: string
           type: array
+          description: Websites associated with the entity
       type: object
     CryptoAddress:
       properties:
         address:
           type: string
+          description: Cryptocurrency address
         currency:
           type: string
+          description: Cryptocurrency code (e.g., BTC, ETH, XBT)
       type: object
     Entity:
       properties:
@@ -142,22 +511,30 @@ components:
           items:
             $ref: '#/components/schemas/Address'
           type: array
+          description: Addresses associated with the entity
         aircraft:
           $ref: '#/components/schemas/Aircraft'
+          description: Aircraft details (if entity type is aircraft)
         business:
           $ref: '#/components/schemas/Business'
+          description: Business details (if entity type is business)
         contact:
           $ref: '#/components/schemas/Contact'
+          description: Contact information for the entity
         cryptoAddresses:
           items:
             $ref: '#/components/schemas/CryptoAddress'
           type: array
+          description: Cryptocurrency addresses associated with the entity
         name:
           type: string
+          description: Primary name of the entity
         organization:
           $ref: '#/components/schemas/Organization'
+          description: Organization details (if entity type is organization)
         person:
           $ref: '#/components/schemas/Person'
+          description: Person details (if entity type is person)
         type:
           enum:
           - person
@@ -166,13 +543,16 @@ components:
           - aircraft
           - vessel
           type: string
+          description: Type of entity
         vessel:
           $ref: '#/components/schemas/Vessel'
+          description: Vessel details (if entity type is vessel)
       type: object
     ErrorResponse:
       properties:
         error:
           type: string
+          description: Error message
       type: object
     ListInfoResponse:
       properties:
@@ -199,6 +579,7 @@ components:
         version:
           type: string
           example: "v0.51.0"
+          description: Version of the Watchman service
       type: object
     Organization:
       properties:
@@ -206,14 +587,18 @@ components:
           items:
             type: string
           type: array
+          description: Alternative names for the organization
         created:
           format: date
           type: string
+          description: Creation date of the organization
         dissolved:
           format: date
           type: string
+          description: Dissolution date of the organization
         name:
           type: string
+          description: Name of the organization
       type: object
     Person:
       properties:
@@ -221,20 +606,26 @@ components:
           items:
             type: string
           type: array
+          description: Alternative names for the person
         birthDate:
           format: date
           type: string
+          description: Birth date of the person
         deathDate:
           format: date
           type: string
+          description: Death date of the person
         gender:
           type: string
+          description: Gender of the person
         name:
           type: string
+          description: Name of the person
         titles:
           items:
             type: string
           type: array
+          description: Titles held by the person
       type: object
     SearchResponse:
       properties:
@@ -242,6 +633,7 @@ components:
           items:
             $ref: '#/components/schemas/Entity'
           type: array
+          description: List of matching entities
       type: object
     Vessel:
       properties:
@@ -249,27 +641,39 @@ components:
           items:
             type: string
           type: array
+          description: Alternative names for the vessel
         built:
           format: date
           type: string
+          description: Build date of the vessel
         callSign:
           type: string
+          description: Call sign of the vessel
         flag:
           type: string
+          description: Country flag of the vessel
         grossRegisteredTonnage:
           type: integer
+          description: Gross registered tonnage of the vessel
         imoNumber:
           type: string
+          description: IMO number of the vessel
         mmsi:
           type: string
+          description: MMSI of the vessel
         model:
           type: string
+          description: Model of the vessel
         name:
           type: string
+          description: Name of the vessel
         owner:
           type: string
+          description: Owner of the vessel
         tonnage:
           type: integer
+          description: Tonnage of the vessel
         type:
           type: string
+          description: Type of vessel
       type: object
