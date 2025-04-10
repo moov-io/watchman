@@ -38,8 +38,9 @@ Watchman:
       Max: 25
 ```
 
-<details>
-<summary>PostalPool</summary>
+#### PostalPool
+
+PostalPool is an experiment for improving address parsing. It's optional configuration and may be removed in the future.
 
 ```yaml
   PostalPool:
