@@ -19,6 +19,7 @@ require (
 	github.com/pariz/gountries v0.1.6
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.4.0
+	github.com/urfave/cli/v3 v3.1.1
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673
 	go.opentelemetry.io/otel v1.35.0
