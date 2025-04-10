@@ -1,4 +1,4 @@
-## v0.51.1 (Released 2025-04-10)
+## v0.51.2 (Released 2025-04-10)
 
 BREAKING CHANGE
 
