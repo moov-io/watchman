@@ -123,6 +123,9 @@ jobs:
       run: |
         choco install -y make mingw
 
+    - name: Install Fyne
+      run: make setup-webui
+
     - name: Distribute
       run: make dist
 
