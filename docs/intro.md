@@ -27,13 +27,24 @@ Watchman is a robust compliance screening tool that provides:
    - Native Go library for direct implementation
    - Webhook notifications for automated workflows
 
-## Available Libraries and Components
+## Included Lists
 
-| Component | Purpose |
-|-----------|---------|
-| OFAC Library | Parse and process US OFAC sanctions data |
-| US CSL  | Process the US Consolidated Screening List |
-| UK/EU CSL | Handle UK and European sanctions data formats |
+Watchman integrates the following lists to help you maintain global compliance:
+
+| Source | List |
+|--------|------|
+| US Treasury | [Office of Foreign Assets Control (OFAC)](https://ofac.treasury.gov/sanctions-list-service) |
+| US Government | [Consolidated Screening List (CSL)](https://www.trade.gov/consolidated-screening-list) |
+
+### Future Lists
+
+The v0.5x series of Watchman has revamped its search engine. The following lists are being re-added into Watchman.
+
+| Source | List |
+|--------|------|
+| European Union | [Consolidated Sanctions List](https://data.europa.eu/data/datasets/consolidated-list-of-persons-groups-and-entities-subject-to-eu-financial-sanctions?locale=en) |
+| United Kingdom | [OFSI Sanctions List](https://www.gov.uk/government/publications/financial-sanctions-consolidated-list-of-targets/consolidated-list-of-targets#contents) |
+| United Kingdom | [Sanctions List](https://www.gov.uk/government/publications/the-uk-sanctions-list) (Disabled by default) |
 
 ## Search Methodology
 
@@ -54,7 +65,26 @@ Watchman offers environment variables to adjust search behavior:
 
 ## Common Questions
 
-### How are entities prepared for the search index?
+### What's the difference between Watchman's search and standard text search?
+
+Standard text search typically relies on exact matches or simple wildcards, which can:
+- Miss alternative spellings
+- Fail to handle name inversions
+- Be overly sensitive to typos
+- Require multiple manual searches
+
+Watchman's fuzzy matching approach allows for:
+- Identification of similar names despite variations
+- Tolerance for typographical errors
+- Handling of word order differences
+- Normalization of international character sets
+- Confidence scoring to prioritize results
+
+This produces more comprehensive screening with fewer false negatives while still providing the tools to manage false positives effectively.
+
+## List Specific Questions
+
+### How are OFAC entities prepared for the search index?
 
 Entities undergo a multi-step preparation process before being indexed:
 
@@ -82,23 +112,6 @@ Entities undergo a multi-step preparation process before being indexed:
    *Punctuation is removed, text is lowercased, and diacritical marks are normalized*
 
 The resulting normalized names enable more accurate matching across different formats and variations of the same entity.
-
-### What's the difference between Watchman's search and standard text search?
-
-Standard text search typically relies on exact matches or simple wildcards, which can:
-- Miss alternative spellings
-- Fail to handle name inversions
-- Be overly sensitive to typos
-- Require multiple manual searches
-
-Watchman's fuzzy matching approach allows for:
-- Identification of similar names despite variations
-- Tolerance for typographical errors
-- Handling of word order differences
-- Normalization of international character sets
-- Confidence scoring to prioritize results
-
-This produces more comprehensive screening with fewer false negatives while still providing the tools to manage false positives effectively.
 
 ## Next Steps
 
