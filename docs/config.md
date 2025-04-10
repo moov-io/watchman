@@ -53,8 +53,6 @@ PostalPool is an experiment for improving address parsing. It's optional configu
     CGOSelfInstances: 1
 ```
 
-</details>
-
 ### Environment Variables
 
 | Environmental Variable | Description | Default |
