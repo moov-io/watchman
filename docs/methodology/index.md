@@ -8,6 +8,8 @@ menubar: docs-menu
 
 # Similarity Methodology
 
+> For documentation on older releases of Watchman (v0.31.x series), please visit the [older docs website](https://github.com/moov-io/watchman/tree/v0.31.3/docs) in our GitHub repository.
+
 ## Overview
 
 Moov Watchman implements a sophisticated multi-dimensional matching system designed to balance accuracy, performance, and usability for compliance professionals. This document explains the technical foundations of Watchman's matching algorithms.

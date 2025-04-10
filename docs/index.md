@@ -32,7 +32,7 @@ Watchman integrates the following lists to help you maintain global compliance:
 
 ### Future Lists
 
-The v0.5x series of Watchman has revamped its search engine. The following lists are being re-added into Watchman.
+The v0.5X series of Watchman has revamped its search engine. The following lists are being re-added into Watchman.
 
 | Source | List |
 |--------|------|

@@ -8,6 +8,8 @@ menubar: docs-menu
 
 # Caching Data Files
 
+> For documentation on older releases of Watchman (v0.31.x series), please visit the [older docs website](https://github.com/moov-io/watchman/tree/v0.31.3/docs) in our GitHub repository.
+
 Watchman supports sourcing data files from the local filesystem and falling back to the remote servers when local files do not exist. This is helpful for flakey servers or when operating a large number of Watchman instances.
 
 By setting `INITIAL_DATA_DIRECTORY` to a local directory Watchman will look for the following files.

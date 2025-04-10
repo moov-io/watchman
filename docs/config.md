@@ -8,6 +8,8 @@ menubar: docs-menu
 
 ## Configuration
 
+> For documentation on older releases of Watchman (v0.31.x series), please visit the [older docs website](https://github.com/moov-io/watchman/tree/v0.31.3/docs) in our GitHub repository.
+
 ### File
 
 Set the `APP_CONFIG` environment variable with a filepath to a yaml file containing the following:

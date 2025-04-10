@@ -48,7 +48,7 @@ Watchman integrates the following lists to help you maintain global compliance:
 
 ### Future Lists
 
-The v0.5x series of Watchman has revamped its search engine. The following lists are being re-added into Watchman.
+The v0.5X series of Watchman has revamped its search engine. The following lists are being re-added into Watchman.
 
 | Source | List |
 |--------|------|
@@ -56,9 +56,9 @@ The v0.5x series of Watchman has revamped its search engine. The following lists
 | United Kingdom | [OFSI Sanctions List](https://www.gov.uk/government/publications/financial-sanctions-consolidated-list-of-targets/consolidated-list-of-targets#contents) |
 | United Kingdom | [Sanctions List](https://www.gov.uk/government/publications/the-uk-sanctions-list) (Disabled by default) |
 
-## v2 Endpoints (v0.50.x series and beyond)
+## v2 Endpoints (v0.5X series and beyond)
 
-The v0.50.x series of Watchman has introduced a new v2 search endpoint and removed the older endpoint. This was done to offer a unified response model, improve overall performance, and work towards a stable v1.0 release.
+The v0.5X series of Watchman has introduced a new v2 search endpoint and removed the older endpoint. This was done to offer a unified response model, improve overall performance, and work towards a stable v1.0 release.
 
 We encourage you to try out the new Watchman and [report any issues or requests in slack](https://slack.moov.io) (`#watchman` channel).
 
