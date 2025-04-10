@@ -8,65 +8,14 @@ env:
   RELEASE: yes
 
 jobs:
-  short:
-    name: Short tests
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    steps:
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v5
-      with:
-        go-version: stable
-      id: go
-
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Setup Linux Dependencies
-      if: runner.os == 'Linux'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libgl1-mesa-dev and xorg-dev
-
-    - name: Setup Windows Dependencies
-      if: runner.os == 'Windows'
-      run: |
-        choco install -y make mingw
-
-    - name: Short Tests
-      run: |
-        make check
-      env:
-        GOTEST_FLAGS: "-short"
-
-  sources-long:
-    name: Long testing pkg/sources/
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    steps:
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v5
-      with:
-        go-version: stable
-      id: go
-
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Short Tests
-      run: go test ./pkg/sources... -count 1 -v
+  tests:
+    uses: .github/workflows/go.yml
+    name: Go Tests
+    secrets: inherit
 
   create_release:
     name: Create Release
-    needs: [short, sources-long]
+    needs: [tests]
     runs-on: ubuntu-latest
     steps:
     - name: Create Release
@@ -91,7 +40,7 @@ jobs:
 
   publish:
     name: Publish
-    needs: [short, sources-long, create_release]
+    needs: [tests, create_release]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -174,7 +123,7 @@ jobs:
 
   docker-hub:
     name: Docker Hub
-    needs: [short, sources-long, create_release]
+    needs: [tests, create_release]
     runs-on: ubuntu-latest
     steps:
     - name: Set up Go 1.x
@@ -205,7 +154,7 @@ jobs:
 
   docker-openshift:
     name: Docker Openshift
-    needs: [short, sources-long, create_release]
+    needs: [tests, create_release]
     runs-on: ubuntu-latest
     steps:
     - name: Set up Go 1.x

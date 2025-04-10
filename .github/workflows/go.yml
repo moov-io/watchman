@@ -5,6 +5,18 @@ on:
   workflow_dispatch:
 
 jobs:
+  linters:
+    name: Run Go Linters
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    steps:
+    - name: Run Linters
+      run: make check
+      env:
+        SKIP_TESTS: yes
+
   short:
     name: Short tests
     runs-on: ${{ matrix.os }}
@@ -36,6 +48,7 @@ jobs:
       run: make check
       env:
         GOTEST_FLAGS: "-short"
+        SKIP_LINTERS: yes
 
   sources-long:
     name: Long testing pkg/sources/
