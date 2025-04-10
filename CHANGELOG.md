@@ -1,3 +1,17 @@
+## v0.51.0 (Released 2025-04-10)
+
+BREAKING CHANGE
+
+Watchman has undergone a complete overhaul of it's API endpoints, public models, search methodology, performance, and much more. We've redesigned Watchman to offer a unified endpoint and models to search sanctioned entities from any supported list. We encourage you to try out the new Watchman and report back any issues, comments, concerns you have.
+
+This release contains a lot of changes so make sure to test, validate and verify your usage. Let us know in the `#watchman` slack room how the new version works for you. We are planning to make continual scoring improvements.
+
+IMPROVEMENTS
+
+- search: unified endpoint and model for all supported lists
+- search: better performance for concurrently processing sanction lists
+- search: integrate [libpostal](https://github.com/openvenues/libpostal) for address parsing and normalization
+
 ## v0.50.10 (Released 2025-02-19)
 
 IMPROVEMENTS
