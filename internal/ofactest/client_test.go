@@ -8,10 +8,6 @@ import (
 )
 
 func TestClient(t *testing.T) {
-	if testing.Short() {
-		t.Skip("-short flag provided")
-	}
-
 	cc := NewClient()
 
 	ctx := context.Background()

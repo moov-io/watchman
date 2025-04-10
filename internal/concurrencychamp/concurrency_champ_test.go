@@ -144,10 +144,6 @@ func TestRaceConditions(t *testing.T) {
 }
 
 func TestStressConcurrencyManager(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping stress test in short mode")
-	}
-
 	cm, err := NewConcurrencyManager(25, 1, 100)
 	require.NoError(t, err)
 
