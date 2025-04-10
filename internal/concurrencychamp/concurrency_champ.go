@@ -253,7 +253,7 @@ func (cm *ConcurrencyManager) PickConcurrency() int {
 		return cm.champion
 	}
 
-	r := rand.Float64() * total //nolint:gosec
+	r := rand.Float64() * total
 	for c, w := range cm.trafficWeights {
 		r -= w
 		if r <= 0 {
