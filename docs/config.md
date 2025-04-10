@@ -8,6 +8,54 @@ menubar: docs-menu
 
 ## Configuration
 
+### File
+
+Set the `APP_CONFIG` environment variable with a filepath to a yaml file containing the following:
+
+```yaml
+Watchman:
+  Servers:
+    BindAddress: ":8084"
+    AdminAddress: ":9094"
+
+  Telemetry:
+    ServiceName: "watchman"
+
+  Download:
+    RefreshInterval: "12h"
+    InitialDataDirectory: ""
+    IncludedLists:
+      - "us_csl"
+      - "us_ofac"
+
+  Search:
+    # Tune these settings based on your available resources (CPUs, etc).
+    # Watchman will dynamically find an optimal goroutine count for faster responses.
+    # Usually a multiple (i.e. 2x, 4x) of GOMAXPROCS is optimal.
+    Goroutines:
+      Default: 10
+      Min: 1
+      Max: 25
+```
+
+<details>
+<summary>PostalPool</summary>
+
+```yaml
+  PostalPool:
+    Enabled: false
+    Instances: 2
+    StartingPort: 10000
+    StartupTimeout: "60s"
+    RequestTimeout: "10s"
+    BinaryPath: "" # POSTAL_SERVER_BIN_PATH is set in Dockerfile
+    CGOSelfInstances: 1
+```
+
+</details>
+
+### Environment Variables
+
 | Environmental Variable | Description | Default |
 |-----|-----|-----|
 | `DATA_REFRESH_INTERVAL` | Interval for data redownload and reparse. `off` disables this refreshing. | 12h |
