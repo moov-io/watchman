@@ -4,6 +4,14 @@ import (
 	"unicode"
 )
 
+// TODO(adam): implement double metaphone and Beider-Morse Phonetic Matching
+// add configuration to pick between soundex, double metaphone, and beider-morse
+//
+// phonetic filter can be disabled, which might be good to Moov to do (try DISABLE_PHONETIC_FILTERING=yes)
+//
+// I think we should introduce phonetic similarity (and remove phonetic filtering)
+// TODO(adam): deploy DISABLE_PHONETIC_FILTERING=yes and rerun the moov search, see what falls out
+
 var soundexMap = map[rune]rune{
 	'A': 'A', 'E': 'A', 'I': 'A', 'O': 'A', 'U': 'A', 'Y': 'A', // vowels
 	'B': 'B', 'F': 'B', 'P': 'B', 'V': 'B', // similar sounds

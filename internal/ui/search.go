@@ -53,7 +53,7 @@ func SearchContainer(ctx context.Context, env Environment) fyne.CanvasObject {
 	}
 
 	// Grab any prefilled values from the environment
-	prefilledValues := arch.PrefillValues()
+	prefilledValues := arch.PrefillValues() // TODO(adam): need the rest of these supported (just have "name")
 
 	// Common Search Fields
 	commonFieldsLabel := widget.NewLabelWithStyle("Common Fields", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})

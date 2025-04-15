@@ -17,6 +17,8 @@ import (
 )
 
 func TestJaroWinkler(t *testing.T) {
+	t.Setenv("DISABLE_PHONETIC_FILTERING", "")
+
 	cases := []struct {
 		indexed, search string
 		match           float64
@@ -34,6 +36,7 @@ func TestJaroWinkler(t *testing.T) {
 		// real world case
 		{"john doe", "paul john", 0.624},
 		{"john doe", "john othername", 0.440},
+		{"tai me", "taim", 0.819},
 
 		// close match
 		{"jane doe", "jane doe2", 0.940},
@@ -127,6 +130,14 @@ func TestJaroWinkler(t *testing.T) {
 		// From https://github.com/moov-io/watchman/issues/594
 		{"JSCARGUMENT", "JSC ARGUMENT", 0.413},
 		{"ARGUMENTJSC", "JSC ARGUMENT", 0.750},
+
+		// Names that sound similar
+		{"ivan", "john", 0.01}, // TODO(adam): should match higher, they're phonetically closer
+		{"john smith", "john smythe", 0.893},
+
+		// common spellings
+		{"sean", "shawn", 0.757}, // TODO(adam): should match higher? They're phonetically similar
+		{"mohamed", "muhammed", 0.849},
 	}
 	for i := range cases {
 		v := cases[i]

@@ -167,6 +167,13 @@ func TestCompareName(t *testing.T) {
 			shouldMatch:   false,
 			exact:         false,
 		},
+
+		// TODO(adam):
+		// {"JSCARGUMENT", "JSC ARGUMENT", 0.413},
+		// {"ivan", "john", 0.01},
+		// {"john smith", "john smythe", 0.893},
+		// {"sean", "shawn", 0.01},
+		// {"mohamed", "muhammed", 0.849},
 	}
 
 	for _, tt := range tests {
