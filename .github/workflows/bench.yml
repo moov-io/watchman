@@ -31,7 +31,17 @@ jobs:
         go-version: stable
       id: go
 
+    - name: Should Run Benchmarks
+      id: should_run_benchmarks
+      run: |
+        if git show -s --format=%ae HEAD | grep -q "[^@]*\.github\.com"; then
+           echo "should_run=false" >> $GITHUB_OUTPUT
+        else
+           echo "should_run=true" >> $GITHUB_OUTPUT
+        fi
+
     - name: Running Common Benchmarks
+      if: steps.should_run_benchmarks.outputs.should_run == 'true'
       run: |
         go test ./pkg/search/... -short -bench BenchmarkDebugSimilarity -run BenchmarkDebugSimilarity -benchmem > output.txt
         go test ./internal/search/... -short -bench Benchmark_Search/dynamic -run Benchmark_Search -benchmem >> output.txt
@@ -41,6 +51,7 @@ jobs:
         go test ./internal/norm/... -short -bench Bench -run Bench -benchmem >> output.txt
 
     - name: Store benchmark result
+      if: steps.should_run_benchmarks.outputs.should_run == 'true'
       uses: benchmark-action/github-action-benchmark@v1
       with:
         name: "moov-io/watchman Common Benchmarks"
@@ -60,10 +71,12 @@ jobs:
         benchmark-data-dir-path: "docs/bench/common/"
 
     - name: Running Sources Benchmarks
+      if: steps.should_run_benchmarks.outputs.should_run == 'true'
       run: |
         go test ./pkg/sources/ofac/... -short -bench Benchmark -run Benchmark -benchmem > output.txt
 
     - name: Store benchmark result
+      if: steps.should_run_benchmarks.outputs.should_run == 'true'
       uses: benchmark-action/github-action-benchmark@v1
       with:
         name: "moov-io/watchman OFAC Benchmarks"
