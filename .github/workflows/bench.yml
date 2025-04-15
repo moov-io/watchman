@@ -1,4 +1,4 @@
-name: watchman Benchmarks
+name: Benchmarks
 on:
   workflow_dispatch:
   schedule:

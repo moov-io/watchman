@@ -9,7 +9,7 @@ env:
 
 jobs:
   tests:
-    uses: .github/workflows/go.yml
+    uses: .github/workflows/go.yml@master
     name: Go Tests
     secrets: inherit
 
