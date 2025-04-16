@@ -37,6 +37,7 @@ func TestJaroWinkler(t *testing.T) {
 		{"john doe", "paul john", 0.624},
 		{"john doe", "john othername", 0.440},
 		{"tai me", "taim", 0.819},
+		{"elvin", "elvis", 0.920},
 
 		// close match
 		{"jane doe", "jane doe2", 0.940},
