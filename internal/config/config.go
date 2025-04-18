@@ -2,11 +2,12 @@
 // Use of this source code is governed by an Apache License
 // license that can be found in the LICENSE file.
 
-package main
+package config
 
 import (
 	watchman "github.com/moov-io/watchman"
 	"github.com/moov-io/watchman/internal/download"
+	"github.com/moov-io/watchman/internal/ingest"
 	"github.com/moov-io/watchman/internal/postalpool"
 	"github.com/moov-io/watchman/internal/search"
 
@@ -26,6 +27,8 @@ type Config struct {
 	Download   download.Config
 	Search     search.Config
 	PostalPool postalpool.Config
+
+	Ingest ingest.Config
 }
 
 type ServerConfig struct {

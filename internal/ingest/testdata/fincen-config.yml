@@ -1,0 +1,73 @@
+Watchman:
+  Ingest:
+    files:
+      fincen-business:
+        format: csv
+        mapping:
+          name:
+            column: business_name
+          sourceID:
+            column: tracking_number
+          type:
+            default: "business"
+          business:
+            name:
+              column: business_name
+            altNames:
+              columns: dba_name
+            created:
+              column: incorporated
+            governmentIDs:
+              type:
+                column: number_type
+              identifier:
+                column: number
+          contact:
+            phoneNumbers:
+              columns: phone
+          addresses:
+            line1:
+              columns: street
+            city:
+              columns: city
+            state:
+              columns: state
+            postalCode:
+              columns: zip
+            country:
+              columns: country
+      fincen-person:
+        format: csv
+        mapping:
+          name:
+            merge: [first_name, suffix, middle_name, last_name]
+          sourceID:
+            column: tracking_number
+          type:
+            default: "person"
+          person:
+            name:
+              merge: [first_name, middle_name, last_name]
+            altNames:
+              merge: [alias_first_name, alias_suffix, alias_middle_name, alias_last_name]
+            birthDate:
+              column: dob
+            governmentIDs:
+              type:
+                column: number_type
+              identifier:
+                column: number
+          contact:
+            phoneNumbers:
+              columns: phone
+          addresses:
+            line1:
+              columns: street
+            city:
+              columns: city
+            state:
+              columns: state
+            postalCode:
+              columns: zip
+            country:
+              columns: country
