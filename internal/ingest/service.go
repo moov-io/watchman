@@ -146,11 +146,19 @@ func readColumnArrayDef(headers []string, def ColumnArrayDef, row []string) []st
 			fields = append(fields, value)
 		}
 	}
+
+	var name string
 	for _, col := range def.Merge {
 		value := strings.TrimSpace(row[slices.Index(headers, col)])
 		if value != "" {
-			fields = append(fields, value)
+			name += fmt.Sprintf(" %s", value)
 		}
+	}
+
+	name = strings.TrimSpace(name)
+
+	if name != "" {
+		fields = append(fields, name)
 	}
 
 	return fields
@@ -159,6 +167,8 @@ func readColumnArrayDef(headers []string, def ColumnArrayDef, row []string) []st
 var (
 	acceptedTimeFormats = []string{
 		"2006-01-02",
+		"1/2/2006",
+		"01/02/2006",
 	}
 )
 
