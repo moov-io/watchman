@@ -30,8 +30,9 @@ func TestService_ReadEntitiesFromFile_FincenBusiness(t *testing.T) {
 	require.NoError(t, err)
 	t.Cleanup(func() { fd.Close() })
 
-	entities, err := svc.ReadEntitiesFromFile(ctx, "fincen-business", fd)
+	parsedFile, err := svc.ReadEntitiesFromFile(ctx, "fincen-business", fd)
 	require.NoError(t, err)
+	require.Equal(t, "fincen-business", parsedFile.FileType)
 
 	expected := []search.Entity[search.Value]{
 		{
@@ -77,7 +78,7 @@ func TestService_ReadEntitiesFromFile_FincenBusiness(t *testing.T) {
 			},
 		},
 	}
-	require.ElementsMatch(t, expected, entities)
+	require.ElementsMatch(t, expected, parsedFile.Entities)
 }
 
 func TestService_ReadEntitiesFromFile_FincenPerson(t *testing.T) {
@@ -95,8 +96,9 @@ func TestService_ReadEntitiesFromFile_FincenPerson(t *testing.T) {
 	require.NoError(t, err)
 	t.Cleanup(func() { fd.Close() })
 
-	entities, err := svc.ReadEntitiesFromFile(ctx, "fincen-person", fd)
+	parsedFile, err := svc.ReadEntitiesFromFile(ctx, "fincen-person", fd)
 	require.NoError(t, err)
+	require.Equal(t, "fincen-person", parsedFile.FileType)
 
 	expected := []search.Entity[search.Value]{
 		{
@@ -175,11 +177,12 @@ func TestService_ReadEntitiesFromFile_FincenPerson(t *testing.T) {
 			},
 		},
 	}
-	// require.ElementsMatch(t, expected, entities)
 
-	require.Equal(t, expected[0], entities[0])
-	require.Equal(t, expected[1], entities[1])
-	require.Equal(t, expected[2], entities[2])
+	require.Len(t, parsedFile.Entities, len(expected))
+
+	require.Equal(t, expected[0], parsedFile.Entities[0])
+	require.Equal(t, expected[1], parsedFile.Entities[1])
+	require.Equal(t, expected[2], parsedFile.Entities[2])
 }
 
 func ptr[T any](in T) *T {

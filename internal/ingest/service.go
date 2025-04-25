@@ -14,7 +14,7 @@ import (
 )
 
 type Service interface {
-	ReadEntitiesFromFile(ctx context.Context, name string, contents io.Reader) ([]search.Entity[search.Value], error)
+	ReadEntitiesFromFile(ctx context.Context, name string, contents io.Reader) (FileEntities, error)
 }
 
 func NewService(logger log.Logger, conf Config) Service {
@@ -29,30 +29,38 @@ type service struct {
 	conf   Config
 }
 
-func (s *service) ReadEntitiesFromFile(ctx context.Context, name string, contents io.Reader) ([]search.Entity[search.Value], error) {
-	schema, found := s.conf.Files[name]
-	if !found {
-		return nil, fmt.Errorf("schema %s not found", name)
-	}
-
-	switch Format(strings.ToLower(string(schema.Format))) {
-	case FormatCSV:
-		return s.readEntitiesFromCSVFile(ctx, name, schema, contents)
-	default:
-		return nil, fmt.Errorf("unknown format %v", schema.Format)
-	}
+type FileEntities struct {
+	FileType string
+	Entities []search.Entity[search.Value]
 }
 
-func (s *service) readEntitiesFromCSVFile(ctx context.Context, name string, schema File, contents io.Reader) ([]search.Entity[search.Value], error) {
+func (s *service) ReadEntitiesFromFile(ctx context.Context, name string, contents io.Reader) (FileEntities, error) {
+	for fileType, schema := range s.conf.Files {
+		if strings.EqualFold(name, fileType) {
+			// Process the file according to the schema type
+			switch Format(strings.ToLower(string(schema.Format))) {
+			case FormatCSV:
+				return s.readEntitiesFromCSVFile(ctx, fileType, schema, contents)
+			default:
+				return FileEntities{}, fmt.Errorf("unknown format %v", schema.Format)
+			}
+		}
+	}
+	return FileEntities{}, fmt.Errorf("schema %s not found", name)
+}
+
+func (s *service) readEntitiesFromCSVFile(ctx context.Context, name string, schema File, contents io.Reader) (FileEntities, error) {
+	out := FileEntities{
+		FileType: name,
+	}
 
 	r := csv.NewReader(contents)
 
 	headers, err := r.Read()
 	if err != nil {
-		return nil, fmt.Errorf("problem reading headers: %w", err)
+		return out, fmt.Errorf("problem reading headers: %w", err)
 	}
 
-	var out []search.Entity[search.Value]
 	for {
 		// Read each row until we run out
 		row, err := r.Read()
@@ -60,7 +68,7 @@ func (s *service) readEntitiesFromCSVFile(ctx context.Context, name string, sche
 			if err == io.EOF {
 				break
 			}
-			return nil, fmt.Errorf("problem reading row: %w", err)
+			return out, fmt.Errorf("problem reading row: %w", err)
 		}
 
 		var entity search.Entity[search.Value]
@@ -81,7 +89,7 @@ func (s *service) readEntitiesFromCSVFile(ctx context.Context, name string, sche
 
 			birthDate, err := readTime(readColumnDef(headers, schema.Mapping.Person.BirthDate, row))
 			if err != nil {
-				return nil, fmt.Errorf("reading person birth date: %w", err)
+				return out, fmt.Errorf("reading person birth date: %w", err)
 			}
 			if !birthDate.IsZero() {
 				entity.Person.BirthDate = &birthDate
@@ -96,7 +104,7 @@ func (s *service) readEntitiesFromCSVFile(ctx context.Context, name string, sche
 
 			created, err := readTime(readColumnDef(headers, schema.Mapping.Business.Created, row))
 			if err != nil {
-				return nil, fmt.Errorf("reading business creation time: %w", err)
+				return out, fmt.Errorf("reading business creation time: %w", err)
 			}
 			if !created.IsZero() {
 				entity.Business.Created = &created
@@ -108,10 +116,10 @@ func (s *service) readEntitiesFromCSVFile(ctx context.Context, name string, sche
 
 		entity.Addresses = readAddresses(headers, schema.Mapping.Addresses, row)
 
-		out = append(out, entity)
+		out.Entities = append(out.Entities, entity)
 	}
-	return out, nil
 
+	return out, nil
 }
 
 func readType(headers []string, def Type, row []string) string {

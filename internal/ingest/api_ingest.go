@@ -73,14 +73,14 @@ func (c *controller) ingestFile(w http.ResponseWriter, r *http.Request) {
 	bs, err := io.ReadAll(r.Body)
 	logger.Debug().Logf("read %d bytes error=%v", len(bs), err)
 
-	queryEntities, err := c.service.ReadEntitiesFromFile(ctx, fileType, bytes.NewReader(bs))
+	parsedFile, err := c.service.ReadEntitiesFromFile(ctx, fileType, bytes.NewReader(bs))
 	if err != nil {
-		err = logger.Error().LogErrorf("problem reading entities from %s file: %w", fileType, err).Err()
+		err = logger.Error().LogErrorf("problem reading entities from %s file: %w", parsedFile.FileType, err).Err()
 		api.ErrorResponse(w, err)
 		return
 	}
 
-	logger.Info().Logf("found %d entities from %s file", len(queryEntities), fileType)
+	logger.Info().Logf("found %d entities from %s file", len(parsedFile.Entities), parsedFile.FileType)
 
 	q := r.URL.Query()
 	debug := strx.Yes(r.URL.Query().Get("debug"))
@@ -94,17 +94,17 @@ func (c *controller) ingestFile(w http.ResponseWriter, r *http.Request) {
 
 	// Concurrently search for each
 	var wg sync.WaitGroup
-	wg.Add(len(queryEntities))
+	wg.Add(len(parsedFile.Entities))
 
 	errorCh := make(chan error, 1)
-	responses := make([]pubsearch.IngestedEntities, len(queryEntities))
+	responses := make([]pubsearch.IngestedEntities, len(parsedFile.Entities))
 
-	for idx := range queryEntities {
+	for idx := range parsedFile.Entities {
 		go func(idx int) {
 			defer wg.Done()
 
 			// Concurrently run each search
-			query := queryEntities[idx]
+			query := parsedFile.Entities[idx]
 
 			entities, err := c.searchService.Search(ctx, query, searchOpts)
 			if err != nil {
@@ -129,13 +129,13 @@ func (c *controller) ingestFile(w http.ResponseWriter, r *http.Request) {
 	// Check for search errors
 	err = <-errorCh
 	if err != nil {
-		err = logger.Error().LogErrorf("problem running ingest search from %s file: %w", fileType, err).Err()
+		err = logger.Error().LogErrorf("problem running ingest search from %s file: %w", parsedFile.FileType, err).Err()
 		api.ErrorResponse(w, err)
 		return
 	}
 
 	err = api.JsonResponse(w, pubsearch.IngestSearchResponse{
-		FileType: fileType,
+		FileType: parsedFile.FileType,
 		Records:  responses,
 	})
 	if err != nil {
