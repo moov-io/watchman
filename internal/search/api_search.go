@@ -2,7 +2,6 @@ package search
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -12,6 +11,7 @@ import (
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/base/strx"
 	"github.com/moov-io/base/telemetry"
+	"github.com/moov-io/watchman/internal/api"
 	"github.com/moov-io/watchman/internal/norm"
 	"github.com/moov-io/watchman/internal/postalpool"
 	"github.com/moov-io/watchman/internal/prepare"
@@ -59,15 +59,7 @@ func (c *controller) AppendRoutes(router *mux.Router) *mux.Router {
 func (c *controller) listinfo(w http.ResponseWriter, r *http.Request) {
 	stats := c.service.LatestStats()
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	json.NewEncoder(w).Encode(stats)
-}
-
-type errorResponse struct {
-	Error string `json:"error"`
+	api.JsonResponse(w, stats)
 }
 
 func (c *controller) search(w http.ResponseWriter, r *http.Request) {
@@ -78,15 +70,8 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 
 	req, err := readSearchRequest(ctx, c.addressParsingPool, r)
 	if err != nil {
-		err = fmt.Errorf("problem reading v2 search request: %w", err)
-		c.logger.Error().LogError(err)
-
-		w.WriteHeader(http.StatusBadRequest)
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(errorResponse{
-			Error: err.Error(),
-		})
-
+		err = c.logger.Error().LogErrorf("problem reading v2 search request: %w", err).Err()
+		api.ErrorResponse(w, err)
 		return
 	}
 
@@ -106,15 +91,12 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 
 	entities, err := c.service.Search(ctx, req, opts)
 	if err != nil {
-		c.logger.Error().LogErrorf("problem with v2 search: %v", err)
-
-		w.WriteHeader(http.StatusBadRequest)
+		err = c.logger.Error().LogErrorf("problem with v2 search: %v", err).Err()
+		api.ErrorResponse(w, err)
 		return
 	}
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(search.SearchResponse{
+	err = api.JsonResponse(w, search.SearchResponse{
 		Entities: entities,
 	})
 	if err != nil {

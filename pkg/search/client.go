@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -17,6 +18,7 @@ import (
 type Client interface {
 	ListInfo(ctx context.Context) (ListInfoResponse, error)
 	SearchByEntity(ctx context.Context, entity Entity[Value], opts SearchOpts) (SearchResponse, error)
+	IngestFile(ctx context.Context, fileType string, file io.Reader) (IngestSearchResponse, error)
 }
 
 func NewClient(httpClient *http.Client, baseAddress string) Client {
@@ -337,4 +339,18 @@ func setCryptoAddresses(q url.Values, cryptoAddresses []CryptoAddress) {
 	for _, addr := range cryptoAddresses {
 		q.Add("cryptoAddress", fmt.Sprintf("%s:%s", addr.Currency, addr.Address))
 	}
+}
+
+type IngestSearchResponse struct {
+	FileType string             `json:"fileType"`
+	Records  []IngestedEntities `json:"records"`
+}
+
+type IngestedEntities struct {
+	Query    Entity[Value]           `json:"query"`
+	Entities []SearchedEntity[Value] `json:"entities"`
+}
+
+func (c *client) IngestFile(ctx context.Context, fileType string, file io.Reader) (IngestSearchResponse, error) {
+	return IngestSearchResponse{}, nil
 }

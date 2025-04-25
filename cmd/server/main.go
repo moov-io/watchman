@@ -21,6 +21,7 @@ import (
 	"github.com/moov-io/watchman"
 	"github.com/moov-io/watchman/internal/config"
 	"github.com/moov-io/watchman/internal/download"
+	"github.com/moov-io/watchman/internal/ingest"
 	"github.com/moov-io/watchman/internal/postalpool"
 	"github.com/moov-io/watchman/internal/search"
 
@@ -91,6 +92,10 @@ func main() {
 	}
 	searchController := search.NewController(logger, searchService, addressParsingPool)
 	searchController.AppendRoutes(router)
+
+	ingestService := ingest.NewService(logger, conf.Ingest)
+	ingestController := ingest.NewController(logger, ingestService, searchService)
+	ingestController.AppendRoutes(router)
 
 	// Start Admin server (with Prometheus metrics)
 	adminServer, err := admin.New(admin.Opts{
