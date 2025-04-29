@@ -207,6 +207,7 @@ By design, Watchman **does not persist** (save) any data about the search querie
 
 | Environmental Variable | Description | Default |
 |-----|-----|-----|
+| `DOWNLOAD_TIMEOUT` | Duration of time allowed for a list to fully download. | `45s` |
 | `OFAC_DOWNLOAD_TEMPLATE` | HTTP address for downloading raw OFAC files. | `https://www.treasury.gov/ofac/downloads/%s` |
 | `EU_CSL_TOKEN` | Token used to download the EU Consolidated Screening List | `<valid-token>` |
 | `EU_CSL_DOWNLOAD_URL` | Use an alternate URL for downloading EU Consolidated Screening List | Subresource of `webgate.ec.europa.eu` |
