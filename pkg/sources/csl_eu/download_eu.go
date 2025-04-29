@@ -25,7 +25,7 @@ var (
 )
 
 func DownloadEU(ctx context.Context, logger log.Logger, initialDir string) (map[string]io.ReadCloser, error) {
-	dl := download.New(logger, download.HTTPClient)
+	dl := download.New(logger, nil)
 
 	euCSLNameAndSource := make(map[string]string)
 	euCSLNameAndSource["eu_csl.csv"] = euDownloadURL

@@ -25,7 +25,7 @@ var (
 )
 
 func DownloadCSL(ctx context.Context, logger log.Logger, initialDir string) (map[string]io.ReadCloser, error) {
-	dl := download.New(logger, download.HTTPClient)
+	dl := download.New(logger, nil)
 
 	ukCSLNameAndSource := make(map[string]string)
 	ukCSLNameAndSource["ConList.csv"] = ukCSLDownloadURL
@@ -34,7 +34,7 @@ func DownloadCSL(ctx context.Context, logger log.Logger, initialDir string) (map
 }
 
 func DownloadSanctionsList(ctx context.Context, logger log.Logger, initialDir string) (map[string]io.ReadCloser, error) {
-	dl := download.New(logger, download.HTTPClient)
+	dl := download.New(logger, nil)
 
 	ukSanctionsNameAndSource := make(map[string]string)
 
@@ -63,7 +63,7 @@ func fetchLatestUKSanctionsListURL(ctx context.Context, logger log.Logger, initi
 	ukSanctionsNameAndSource := make(map[string]string)
 	ukSanctionsNameAndSource["UK_Sanctions_List.ods"] = defaultUKSanctionsListHTML
 
-	dl := download.New(logger, download.HTTPClient)
+	dl := download.New(logger, nil)
 
 	pages, err := dl.GetFiles(ctx, initialDir, ukSanctionsNameAndSource)
 	if err != nil {
