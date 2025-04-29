@@ -30,7 +30,7 @@ var (
 )
 
 func Download(ctx context.Context, logger log.Logger, initialDir string) (download.Files, error) {
-	dl := download.New(logger, download.HTTPClient)
+	dl := download.New(logger, nil)
 
 	addrs := make(map[string]string)
 	for i := range ofacFilenames {

@@ -5,6 +5,7 @@
 package download
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"fmt"
@@ -22,12 +23,28 @@ import (
 )
 
 var (
-	HTTPClient = &http.Client{
-		Timeout: 45 * time.Second,
-	}
+	defaultTimeout = 45 * time.Second
 )
 
+var (
+	HTTPClient, _ = DefaultHTTPClient()
+)
+
+func DefaultHTTPClient() (*http.Client, error) {
+	timeout, err := time.ParseDuration(cmp.Or(os.Getenv("DOWNLOAD_TIMEOUT"), defaultTimeout.String()))
+	if err != nil {
+		return nil, fmt.Errorf("parsing download timeout: %w", err)
+	}
+
+	return &http.Client{
+		Timeout: timeout,
+	}, nil
+}
+
 func New(logger log.Logger, httpClient *http.Client) *Downloader {
+	if httpClient == nil {
+		httpClient, _ = DefaultHTTPClient()
+	}
 	return &Downloader{
 		HTTP:   httpClient,
 		Logger: logger,

@@ -14,7 +14,7 @@ import (
 func TestClient_GetFiles_InitialDir(t *testing.T) {
 	logger := log.NewTestLogger()
 
-	dl := download.New(logger, download.HTTPClient)
+	dl := download.New(logger, nil)
 	require.NotNil(t, dl)
 
 	ctx := context.Background()
