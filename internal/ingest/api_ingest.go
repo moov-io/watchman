@@ -1,9 +1,7 @@
 package ingest
 
 import (
-	"bytes"
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
 	"sync"
@@ -48,7 +46,7 @@ func (c *controller) AppendRoutes(router *mux.Router) *mux.Router {
 }
 
 func (c *controller) ingestFile(w http.ResponseWriter, r *http.Request) {
-	fileType := mux.Vars(r)["type"]
+	fileType := api.CleanUserInput(mux.Vars(r)["type"])
 	if fileType == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -70,12 +68,9 @@ func (c *controller) ingestFile(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 
-	bs, err := io.ReadAll(r.Body)
-	logger.Debug().Logf("read %d bytes error=%v", len(bs), err)
-
-	parsedFile, err := c.service.ReadEntitiesFromFile(ctx, fileType, bytes.NewReader(bs))
+	parsedFile, err := c.service.ReadEntitiesFromFile(ctx, fileType, r.Body)
 	if err != nil {
-		err = logger.Error().LogErrorf("problem reading entities from %s file: %w", parsedFile.FileType, err).Err()
+		err = logger.Error().LogErrorf("problem reading entities from %s file: %w", fileType, err).Err()
 		api.ErrorResponse(w, err)
 		return
 	}
