@@ -35,7 +35,7 @@ func TestCompareAddress(t *testing.T) {
 			index: Address{
 				Line1: "123 Main St",
 			},
-			expected: 0.941, // High but not exact due to Street vs St
+			expected: 0.876, // High but not exact due to Street vs St
 		},
 		{
 			name: "only_line1_different_number",
@@ -65,7 +65,7 @@ func TestCompareAddress(t *testing.T) {
 			index: Address{
 				City: "Los Angles", // Common misspelling
 			},
-			expected: 0.964,
+			expected: 0.958,
 		},
 		{
 			name: "only_postal",
@@ -89,7 +89,7 @@ func TestCompareAddress(t *testing.T) {
 				City:  "New York",
 				State: "NY",
 			},
-			expected: 0.969,
+			expected: 0.987,
 		},
 		{
 			name: "similar_addresses_different_line2",
@@ -105,7 +105,7 @@ func TestCompareAddress(t *testing.T) {
 				City:  "New York",
 				State: "NY",
 			},
-			expected: 0.974,
+			expected: 0.9877,
 		},
 		{
 			name: "country_code_vs_name",
@@ -115,7 +115,7 @@ func TestCompareAddress(t *testing.T) {
 			index: Address{
 				Country: "US",
 			},
-			expected: 0.0, // no match, because compareAddress assumes normalization
+			expected: 1.0,
 		},
 		{
 			name: "complex_partial_match",
@@ -131,7 +131,7 @@ func TestCompareAddress(t *testing.T) {
 				City:       "New York",
 				PostalCode: "10013",
 			},
-			expected: 0.792,
+			expected: 0.8958,
 		},
 		{
 			name: "tricky_similar_but_different",
@@ -145,7 +145,7 @@ func TestCompareAddress(t *testing.T) {
 				City:  "New York",
 				State: "NY",
 			},
-			expected: 0.969,
+			expected: 0.905,
 		},
 		{
 			name: "ambiguous_addresses",
@@ -157,7 +157,7 @@ func TestCompareAddress(t *testing.T) {
 				Line1: "100 Washington Ave", // Different street type
 				City:  "Boston",
 			},
-			expected: 0.815,
+			expected: 0.9644,
 		},
 		{
 			name: "missing_fields_comparison",
@@ -174,12 +174,23 @@ func TestCompareAddress(t *testing.T) {
 			},
 			expected: 1.0, // Should still be high as all provided fields match
 		},
+		{
+			// See https://github.com/moov-io/watchman/issues/625
+			name: "tricky half address",
+			query: Address{
+				Line1: "1/a block 2 gulshan-e-iqbal",
+			},
+			index: Address{
+				Line1: "ST 1/A, Block 2, Gulshan-e-Iqbal",
+			},
+			expected: 0.9885,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var buf bytes.Buffer
-			score := compareAddress(&buf, tt.query, tt.index)
+			score := compareAddress(&buf, normalizeAddress(tt.query), normalizeAddress(tt.index))
 
 			if testing.Verbose() {
 				fmt.Println(buf.String())
@@ -216,7 +227,7 @@ func TestCompareAddress_Normalized(t *testing.T) {
 			tt.index.Country = norm.Country(tt.index.Country)
 
 			var buf bytes.Buffer
-			score := compareAddress(&buf, tt.query, tt.index)
+			score := compareAddress(&buf, normalizeAddress(tt.query), normalizeAddress(tt.index))
 
 			if testing.Verbose() {
 				fmt.Println(buf.String())
@@ -249,7 +260,7 @@ func TestCompareAddressesNoMatch(t *testing.T) {
 				City:  "Chicago",
 				State: "IL",
 			},
-			expected: 0.239,
+			expected: 0.0,
 		},
 		{
 			name: "similar_looking_but_different",
@@ -263,7 +274,7 @@ func TestCompareAddressesNoMatch(t *testing.T) {
 				City:  "New York",
 				State: "NY",
 			},
-			expected: 0.886,
+			expected: 0.982,
 		},
 		{
 			name: "transposed_numbers",
@@ -275,13 +286,13 @@ func TestCompareAddressesNoMatch(t *testing.T) {
 				Line1: "321 Main St",
 				City:  "Anytown",
 			},
-			expected: 0.918,
+			expected: 0.867,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			score := compareAddress(&buf, tt.query, tt.index)
+			score := compareAddress(&buf, normalizeAddress(tt.query), normalizeAddress(tt.index))
 			require.InDelta(t, tt.expected, score, 0.001, "different addresses should have low similarity score: %.2f", score)
 		})
 	}
