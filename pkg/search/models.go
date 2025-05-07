@@ -244,16 +244,31 @@ type PreparedFields struct {
 	NameFields    []string
 	AltNameFields [][]string
 
-	Contact ContactInfo
+	Contact   ContactInfo
+	Addresses []PreparedAddress
+}
+
+type PreparedAddress struct {
+	Line1       string   `json:"line1"`
+	Line1Fields []string `json:"line1Fields"`
+
+	Line2       string   `json:"line2"`
+	Line2Fields []string `json:"line2Fields"`
+
+	City       string   `json:"city"`
+	CityFields []string `json:"cityFields"`
+
+	PostalCode string `json:"postalCode"`
+	State      string `json:"state"`
+	Country    string `json:"country"` // ISO-3166 code
 }
 
 func (e Entity[T]) Normalize() Entity[T] {
+	// Name
 	e.PreparedFields.Name = prepare.LowerAndRemovePunctuation(e.Name)
 	e.PreparedFields.NameFields = removeStopwords(e.PreparedFields.Name)
 
-	e.PreparedFields.Contact.PhoneNumbers = normalizePhoneNumbers(e.Contact.PhoneNumbers)
-	e.PreparedFields.Contact.FaxNumbers = normalizePhoneNumbers(e.Contact.FaxNumbers)
-
+	// Entity Type
 	if e.Person != nil {
 		e.PreparedFields.AltNames = normalizeNames(e.Person.AltNames)
 	}
@@ -267,12 +282,20 @@ func (e Entity[T]) Normalize() Entity[T] {
 		e.PreparedFields.AltNames = normalizeNames(e.Vessel.AltNames)
 	}
 
+	// Alt Names
 	if len(e.PreparedFields.AltNames) > 0 {
 		e.PreparedFields.AltNameFields = make([][]string, len(e.PreparedFields.AltNames))
 		for idx := range e.PreparedFields.AltNames {
 			e.PreparedFields.AltNameFields[idx] = removeStopwords(e.PreparedFields.AltNames[idx])
 		}
 	}
+
+	// Contact
+	e.PreparedFields.Contact.PhoneNumbers = normalizePhoneNumbers(e.Contact.PhoneNumbers)
+	e.PreparedFields.Contact.FaxNumbers = normalizePhoneNumbers(e.Contact.FaxNumbers)
+
+	// Addresses
+	e.PreparedFields.Addresses = normalizeAddresses(e.Addresses)
 
 	return e
 }
@@ -305,5 +328,44 @@ func normalizePhoneNumbers(numbers []string) []string {
 	for idx := range numbers {
 		out[idx] = norm.PhoneNumber(numbers[idx])
 	}
+	return out
+}
+
+var (
+	addressCleaner = strings.NewReplacer(",", "")
+)
+
+func normalizeAddresses(addresses []Address) []PreparedAddress {
+	if len(addresses) == 0 {
+		return nil
+	}
+
+	out := make([]PreparedAddress, len(addresses))
+	for idx := range addresses {
+		out[idx] = normalizeAddress(addresses[idx])
+	}
+	return out
+}
+
+func normalizeAddress(addr Address) PreparedAddress {
+	out := PreparedAddress{
+		Line1:      addressCleaner.Replace(strings.ToLower(addr.Line1)),
+		Line2:      addressCleaner.Replace(strings.ToLower(addr.Line2)),
+		City:       strings.ToLower(addr.City),
+		PostalCode: strings.ToLower(addr.PostalCode),
+		State:      strings.ToLower(addr.State),
+		Country:    strings.ToLower(norm.Country(addr.Country)),
+	}
+
+	if out.Line1 != "" {
+		out.Line1Fields = strings.Fields(out.Line1)
+	}
+	if out.Line2 != "" {
+		out.Line2Fields = strings.Fields(out.Line2)
+	}
+	if out.City != "" {
+		out.CityFields = strings.Fields(out.City)
+	}
+
 	return out
 }

@@ -77,6 +77,8 @@ func (c *client) ListInfo(ctx context.Context) (ListInfoResponse, error) {
 }
 
 type SearchResponse struct {
+	Query Entity[Value] `json:"query"`
+
 	Entities []SearchedEntity[Value] `json:"entities"`
 }
 

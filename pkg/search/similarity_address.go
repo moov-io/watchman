@@ -28,7 +28,8 @@ func compareAddresses[Q any, I any](w io.Writer, query Entity[Q], index Entity[I
 	// Compare addresses
 	if len(query.Addresses) > 0 && len(index.Addresses) > 0 {
 		fieldsCompared++
-		if score := findBestAddressMatch(w, query.Addresses, index.Addresses); score > 0 {
+
+		if score := findBestAddressMatch(w, query.PreparedFields.Addresses, index.PreparedFields.Addresses); score > 0 {
 			scores = append(scores, score)
 		}
 	}
@@ -49,7 +50,7 @@ func compareAddresses[Q any, I any](w io.Writer, query Entity[Q], index Entity[I
 	}
 }
 
-func findBestAddressMatch(w io.Writer, queryAddrs, indexAddrs []Address) float64 {
+func findBestAddressMatch(w io.Writer, queryAddrs, indexAddrs []PreparedAddress) float64 {
 	bestScore := 0.0
 	for i, qa := range queryAddrs {
 		for j, ia := range indexAddrs {
@@ -70,12 +71,12 @@ func findBestAddressMatch(w io.Writer, queryAddrs, indexAddrs []Address) float64
 	return bestScore
 }
 
-func compareAddress(w io.Writer, query, index Address) float64 {
+func compareAddress(w io.Writer, query, index PreparedAddress) float64 {
 	var totalScore, totalWeight float64
 
 	// Compare line1 (highest weight)
-	if query.Line1 != "" && index.Line1 != "" {
-		similarity := stringscore.JaroWinkler(query.Line1, index.Line1)
+	if len(query.Line1Fields) > 0 && len(index.Line1Fields) > 0 {
+		similarity := stringscore.BestPairCombinationJaroWinkler(query.Line1Fields, index.Line1Fields)
 		totalScore += similarity * line1Weight
 		totalWeight += line1Weight
 		if w != nil {
@@ -85,8 +86,8 @@ func compareAddress(w io.Writer, query, index Address) float64 {
 	}
 
 	// Compare line2
-	if query.Line2 != "" && index.Line2 != "" {
-		similarity := stringscore.JaroWinkler(query.Line2, index.Line2)
+	if len(query.Line2Fields) > 0 && len(index.Line2Fields) > 0 {
+		similarity := stringscore.BestPairCombinationJaroWinkler(query.Line2Fields, index.Line2Fields)
 		totalScore += similarity * line2Weight
 		totalWeight += line2Weight
 		if w != nil {
@@ -96,8 +97,8 @@ func compareAddress(w io.Writer, query, index Address) float64 {
 	}
 
 	// Compare city
-	if query.City != "" && index.City != "" {
-		similarity := stringscore.JaroWinkler(query.City, index.City)
+	if len(query.CityFields) > 0 && len(index.CityFields) > 0 {
+		similarity := stringscore.BestPairCombinationJaroWinkler(query.CityFields, index.CityFields)
 		totalScore += similarity * cityWeight
 		totalWeight += cityWeight
 		if w != nil {
