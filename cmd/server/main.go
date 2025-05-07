@@ -19,7 +19,9 @@ import (
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/base/telemetry"
 	"github.com/moov-io/watchman"
+	"github.com/moov-io/watchman/internal/config"
 	"github.com/moov-io/watchman/internal/download"
+	"github.com/moov-io/watchman/internal/ingest"
 	"github.com/moov-io/watchman/internal/postalpool"
 	"github.com/moov-io/watchman/internal/search"
 
@@ -37,21 +39,21 @@ func main() {
 	// Set runtime.GOMAXPROCS
 	maxprocs.Set(maxprocs.Logger(logger.Info().Logf))
 
-	config, err := LoadConfig(logger)
+	conf, err := config.LoadConfig(logger)
 	if err != nil {
 		logger.Fatal().LogErrorf("problem loading config: %v", err)
 		os.Exit(1)
 	}
 
 	// Setup telemetry
-	telemetryShutdownFunc, err := telemetry.SetupTelemetry(context.Background(), config.Telemetry, watchman.Version)
+	telemetryShutdownFunc, err := telemetry.SetupTelemetry(context.Background(), conf.Telemetry, watchman.Version)
 	if err != nil {
 		logger.Fatal().LogErrorf("setting up telemetry failed: %w", err)
 		os.Exit(1)
 	}
 	defer telemetryShutdownFunc()
 
-	downloader, err := download.NewDownloader(logger, config.Download)
+	downloader, err := download.NewDownloader(logger, conf.Download)
 	if err != nil {
 		logger.Fatal().LogErrorf("problem setting up downloader: %v", err)
 		os.Exit(1)
@@ -69,12 +71,12 @@ func main() {
 	errs := make(chan error, 1)
 
 	// Setup search service and endpoints
-	searchService, err := search.NewService(logger, config.Search)
+	searchService, err := search.NewService(logger, conf.Search)
 	if err != nil {
 		logger.Fatal().LogErrorf("problem setting up search service: %v", err)
 		os.Exit(1)
 	}
-	err = setupPeriodicRefreshing(ctx, logger, errs, config.Download, downloader, searchService)
+	err = setupPeriodicRefreshing(ctx, logger, errs, conf.Download, downloader, searchService)
 	if err != nil {
 		logger.Fatal().LogErrorf("problem during initial download: %v", err)
 		os.Exit(1)
@@ -83,7 +85,7 @@ func main() {
 	router := mux.NewRouter()
 	addPingRoute(router)
 
-	addressParsingPool, err := postalpool.NewService(logger, config.PostalPool)
+	addressParsingPool, err := postalpool.NewService(logger, conf.PostalPool)
 	if err != nil {
 		logger.Fatal().LogErrorf("problem setting up address parsing pool: %v", err)
 		os.Exit(1)
@@ -91,9 +93,13 @@ func main() {
 	searchController := search.NewController(logger, searchService, addressParsingPool)
 	searchController.AppendRoutes(router)
 
+	ingestService := ingest.NewService(logger, conf.Ingest)
+	ingestController := ingest.NewController(logger, ingestService, searchService)
+	ingestController.AppendRoutes(router)
+
 	// Start Admin server (with Prometheus metrics)
 	adminServer, err := admin.New(admin.Opts{
-		Addr: config.Servers.AdminAddress,
+		Addr: conf.Servers.AdminAddress,
 	})
 	if err != nil {
 		errs <- fmt.Errorf("problem starting admin server: %v", err)
@@ -120,7 +126,7 @@ func main() {
 	// Setup HTTP server
 	defaultTimeout := 20 * time.Second
 	serve := &http.Server{
-		Addr:    config.Servers.BindAddress,
+		Addr:    conf.Servers.BindAddress,
 		Handler: router,
 		TLSConfig: &tls.Config{
 			InsecureSkipVerify:       false,
@@ -140,14 +146,14 @@ func main() {
 
 	// Start business logic HTTP server
 	go func() {
-		certFile := cmp.Or(os.Getenv("HTTPS_CERT_FILE"), config.Servers.TLSCertFile)
-		keyFile := cmp.Or(os.Getenv("HTTPS_KEY_FILE"), config.Servers.TLSKeyFile)
+		certFile := cmp.Or(os.Getenv("HTTPS_CERT_FILE"), conf.Servers.TLSCertFile)
+		keyFile := cmp.Or(os.Getenv("HTTPS_KEY_FILE"), conf.Servers.TLSKeyFile)
 
 		if certFile != "" && keyFile != "" {
-			logger.Logf("binding to %s for secure HTTP server", config.Servers.BindAddress)
+			logger.Logf("binding to %s for secure HTTP server", conf.Servers.BindAddress)
 			errs <- serve.ListenAndServeTLS(certFile, keyFile)
 		} else {
-			logger.Logf("binding to %s for HTTP server", config.Servers.BindAddress)
+			logger.Logf("binding to %s for HTTP server", conf.Servers.BindAddress)
 			errs <- serve.ListenAndServe()
 		}
 	}()

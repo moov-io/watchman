@@ -3,6 +3,7 @@ package search
 import (
 	"cmp"
 	"context"
+	"io"
 	"slices"
 	"sync"
 )
@@ -66,6 +67,10 @@ func (c *MockClient) SearchByEntity(ctx context.Context, query Entity[Value], op
 	}
 
 	return resp, nil
+}
+
+func (c *MockClient) IngestFile(ctx context.Context, fileType string, file io.Reader, opts SearchOpts) (IngestSearchResponse, error) {
+	return IngestSearchResponse{}, nil
 }
 
 func (c *MockClient) Normalize() {
