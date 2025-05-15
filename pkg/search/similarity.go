@@ -129,8 +129,8 @@ func DetailedSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity
 // The fields returned in SimilarityScore may change as the general similarity algorithm and scoring methodologies evolve.
 // There is no API stability guarantee for SimilarityScore.
 type SimilarityScore struct {
-	Pieces     []ScorePiece `json:"pieces"`
-	FinalScore float64      `json:"finalScore"`
+	Pieces     []ScorePiece `json:"pieces,omitzero"`
+	FinalScore float64      `json:"finalScore,omitzero"`
 }
 
 // ScorePiece is a partial scoring result from one comparison function
