@@ -116,7 +116,7 @@ func (c *client) SearchByEntity(ctx context.Context, entity Entity[Value], opts 
 	}
 
 	// Set query parameters
-	addr.RawQuery = buildQueryParameters(setSearchOpts(addr.Query(), opts), entity).Encode()
+	addr.RawQuery = BuildQueryParameters(SetSearchOpts(addr.Query(), opts), entity).Encode()
 
 	// Make the request
 	req, err := retryablehttp.NewRequest("GET", addr.String(), nil)
@@ -139,7 +139,7 @@ func (c *client) SearchByEntity(ctx context.Context, entity Entity[Value], opts 
 	return out, nil
 }
 
-func setSearchOpts(q url.Values, opts SearchOpts) url.Values {
+func SetSearchOpts(q url.Values, opts SearchOpts) url.Values {
 	if opts.Limit > 0 {
 		q.Set("limit", strconv.Itoa(opts.Limit))
 	}
@@ -153,7 +153,7 @@ func setSearchOpts(q url.Values, opts SearchOpts) url.Values {
 	return q
 }
 
-func buildQueryParameters(q url.Values, entity Entity[Value]) url.Values {
+func BuildQueryParameters(q url.Values, entity Entity[Value]) url.Values {
 	q.Set("type", string(entity.Type))
 
 	if entity.Name != "" {
@@ -368,7 +368,7 @@ func (c *client) IngestFile(ctx context.Context, fileType string, file io.Reader
 	}
 
 	// Set query parameters
-	addr.RawQuery = setSearchOpts(addr.Query(), opts).Encode()
+	addr.RawQuery = SetSearchOpts(addr.Query(), opts).Encode()
 
 	// Make the request
 	req, err := retryablehttp.NewRequest("POST", addr.String(), file)
