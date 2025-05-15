@@ -629,6 +629,8 @@ components:
       type: object
     SearchResponse:
       properties:
+        query:
+          $ref: '#/components/schemas/Entity'
         entities:
           items:
             $ref: '#/components/schemas/Entity'

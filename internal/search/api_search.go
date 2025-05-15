@@ -97,6 +97,7 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = api.JsonResponse(w, search.SearchResponse{
+		Query:    req,
 		Entities: entities,
 	})
 	if err != nil {
