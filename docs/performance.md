@@ -18,7 +18,6 @@ and applies transformations—such as reordering names (e.g., "MADURO MOROS, Nic
 library to parse and normalize postal addresses, improving match accuracy at the cost of higher memory usage. This upfront work ensures that searches are faster by reducing the need for on-the-fly
 processing, though it does introduce some memory overhead due to `libpostal`’s requirements.
 
-[!NOTE]
 > The libpostal library can take 2GB of memory to run. Make sure Watchman has enough memory to support your load ontop of libpostal's requirements.
 
 Watchman operates entirely with **in-memory lists**, storing all sanction data in memory without disk persistence. This eliminates I/O bottlenecks, enabling rapid search operations.
@@ -29,10 +28,10 @@ The in-memory approach, paired with precomputed indexes, allows Watchman to hand
 To manage high throughput, Watchman employs **dynamic concurrency with goroutines**. It uses a feedback loop to adjust the number of goroutines based on load, ensuring stable response
 times even on shared hardware. As shown in the first graph below, which tracks search requests per second (req/s) over time, Watchman maintains consistent query performance despite fluctuating load.
 
-![Graph 1: Stable query times with search req/s over time](./images/stable-response-times.png)
+![Graph 1: Stable query times with search req/s over time](../images/stable-response-times.png)
 
 The second graph illustrates how Watchman dynamically adjusts goroutine group sizes, optimizing for overall time to score and keeping response timings steady (typically between 250-1000 ms).
 This concurrency model was a significant improvement over earlier versions, where consistent load could cause slowdowns or crashes. The v0.5x series further refined this by consolidating to a single search model,
 encouraging richer query data for better performance.
 
-![Graph 2: Dynamic adjustment of goroutine group sizes for optimal scoring time](./images/dynamic-goroutines.png)
+![Graph 2: Dynamic adjustment of goroutine group sizes for optimal scoring time](../images/dynamic-goroutines.png)
