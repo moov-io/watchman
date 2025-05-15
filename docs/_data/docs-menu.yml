@@ -30,3 +30,5 @@
   items:
     - name: Caching Data Files
       link: /cache-data-files/
+    - name: Performance
+      link: /performance/
