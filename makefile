@@ -115,7 +115,7 @@ us-csl-models:
 
 .PHONY: setup-webui
 setup-webui:
-	go install fyne.io/fyne/v2/cmd/fyne@latest
+	go install fyne.io/tools/cmd/fyne@latest
 
 .PHONY: build build-server postal-server build-webui
 build: build-server postal-server build-webui
@@ -127,7 +127,7 @@ postal-server:
 	go build ${GOTAGS} -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o ./bin/postal-server github.com/moov-io/watchman/cmd/postal-server
 
 build-webui:
-	cd ./cmd/ui/ && fyne package --release --icon ./assets/icon.jpeg -os web --appVersion "${APP_VERSION}" && cd -
+	cd ./cmd/ui/ && fyne package --release --icon ./assets/icon.jpeg -os web --app-version "${APP_VERSION}" && cd -
 
 .PHONY: check
 check:
@@ -154,7 +154,7 @@ else
 	GOOS=${PLATFORM} go build -o bin/watchman-${PLATFORM}-amd64 github.com/moov-io/watchman/cmd/server
 endif
 
-docker: clean docker-hub docker-openshift docker-static docker-webui
+docker: clean docker-hub docker-openshift docker-static
 
 docker-hub:
 	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman:${VERSION} -f ./build/Dockerfile .
@@ -165,13 +165,9 @@ docker-openshift:
 docker-static:
 	docker build --pull -t moov/watchman:static -f ./build/Dockerfile.static .
 
-docker-webui:
-	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman-webui:${VERSION} -f ./build/Dockerfile.webui .
-
 release-push:
 	docker push moov/watchman:${VERSION}
 	docker push moov/watchman:static
-#	docker push moov/watchman-webui
 
 quay-push:
 	docker push quay.io/moov/watchman:${VERSION}

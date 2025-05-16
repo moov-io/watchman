@@ -144,25 +144,3 @@ jobs:
 
     - name: Docker Build
       run: make docker-static
-
-  webui:
-    name: Build Webui
-    runs-on: [ ubuntu-latest ]
-    steps:
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.23.x'
-      id: go
-
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v3
-
-    - name: Setup fyne
-      run: make setup-webui
-
-    - name: Build Webui
-      run: make build-webui
-
-    - name: Docker Build
-      run: make docker-webui
