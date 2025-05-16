@@ -1,9 +1,12 @@
 package download
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"slices"
 	"sync"
 	"time"
@@ -43,7 +46,7 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 		StartedAt:  time.Now().In(time.UTC),
 	}
 	logger := dl.logger.Info().With(log.Fields{
-		"initial_data_directory": log.String(dl.conf.InitialDataDirectory),
+		"initial_data_directory": log.String(expandInitialDir(initialDataDirectory(dl.conf))),
 	})
 	start := time.Now()
 	logger.Info().Log("starting list refresh")
@@ -124,12 +127,24 @@ type preparedList struct {
 	Hash string
 }
 
+func expandInitialDir(initialDir string) string {
+	dir, err := filepath.Abs(initialDir)
+	if err != nil {
+		dir = initialDir
+	}
+	return dir
+}
+
+func initialDataDirectory(conf Config) string {
+	return cmp.Or(os.Getenv("INITIAL_DATA_DIRECTORY"), conf.InitialDataDirectory)
+}
+
 func loadOFACRecords(ctx context.Context, logger log.Logger, conf Config, responseCh chan preparedList) error {
 	ctx, span := telemetry.StartSpan(ctx, "load-ofac-records")
 	defer span.End()
 
 	start := time.Now()
-	files, err := ofac.Download(ctx, logger, conf.InitialDataDirectory)
+	files, err := ofac.Download(ctx, logger, initialDataDirectory(conf))
 	if err != nil {
 		return fmt.Errorf("OFAC download: %v", err)
 	}
@@ -172,7 +187,7 @@ func loadCSLUSRecords(ctx context.Context, logger log.Logger, conf Config, respo
 	defer span.End()
 
 	start := time.Now()
-	files, err := csl_us.Download(ctx, logger, conf.InitialDataDirectory)
+	files, err := csl_us.Download(ctx, logger, initialDataDirectory(conf))
 	if err != nil {
 		return fmt.Errorf("US CSL download: %w", err)
 	}

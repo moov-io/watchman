@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/moov-io/watchman/internal/download"
+	"github.com/moov-io/watchman/internal/fshelp"
 	"github.com/moov-io/watchman/internal/search"
 
 	"github.com/moov-io/base/log"
@@ -34,8 +35,11 @@ func TestDownloader_setupPeriodicRefreshing(t *testing.T) {
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	logger := log.NewTestLogger()
 
+	pkg, err := fshelp.FindPkgDir()
+	require.NoError(t, err)
+
 	conf := download.Config{
-		InitialDataDirectory: filepath.Join("..", "..", "pkg", "ofac", "testdata"),
+		InitialDataDirectory: filepath.Join(pkg, "ofac", "testdata"),
 	}
 
 	dl, err := download.NewDownloader(logger, conf)

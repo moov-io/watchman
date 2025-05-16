@@ -8,6 +8,7 @@ import (
 
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/internal/download"
+	"github.com/moov-io/watchman/internal/fshelp"
 	"github.com/moov-io/watchman/pkg/search"
 
 	"github.com/stretchr/testify/require"
@@ -24,8 +25,11 @@ func GetDownloader(tb testing.TB) download.Downloader {
 	logger := log.NewTestLogger()
 
 	ofacDownloaderSetup.Do(func() {
+		pkg, err := fshelp.FindPkgDir()
+		require.NoError(tb, err)
+
 		conf := download.Config{
-			InitialDataDirectory: filepath.Join("..", "..", "pkg", "sources", "ofac", "testdata"),
+			InitialDataDirectory: filepath.Join(pkg, "sources", "ofac", "testdata"),
 		}
 		conf.IncludedLists = append(conf.IncludedLists, search.SourceUSOFAC)
 
