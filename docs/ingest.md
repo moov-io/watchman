@@ -149,3 +149,11 @@ business_name,tracking_number,dba_name,incorporated,number_type,number,phone,str
 first_name,middle_name,last_name,suffix,tracking_number,alias_first_name,alias_middle_name,alias_last_name,alias_suffix,dob,number_type,number,phone,street,city,state,zip,country
 "John","A","Doe","Jr","67890","Johnny","B","Doe","","1985-03-22","ssn","123-45-6789","555-5678","456 Oak St","Springfield","IL","62701","US"
 ```
+
+### Search the File
+
+You can then perform searches against the ingested file.
+
+```
+GET /v2/search?type=fincen-person&name=John+Doe&type=person
+```
