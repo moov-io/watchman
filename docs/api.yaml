@@ -401,6 +401,36 @@ paths:
                 type: string
         default:
           description: ""
+
+  /v2/ingest/{fileType}:
+    post:
+      summary: Import a file as a dataset
+      description: Import a file as an in-memory dataset for use in searches.
+      parameters:
+        - name: fileType
+          in: path
+          description: Dataset name which matches a schema defined in the Watchman config
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              description: A plaintext CSV file
+              type: string
+              example: |
+                first,middle,last
+                john,,doe
+      responses:
+        '200':
+          description: File ingested successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestFileResponse'
+
 components:
   schemas:
     Address:
@@ -679,3 +709,13 @@ components:
           type: string
           description: Type of vessel
       type: object
+    IngestFileResponse:
+      properties:
+        fileType:
+          type: string
+          description: Dataset name used for file import
+        entities:
+          items:
+            $ref: '#/components/schemas/Entity'
+          type: array
+          description: Entities that were imported

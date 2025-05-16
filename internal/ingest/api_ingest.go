@@ -35,14 +35,14 @@ func (c *controller) AppendRoutes(router *mux.Router) *mux.Router {
 	router.
 		Name("ingest-file").
 		Methods("POST").
-		Path("/v2/ingest/{type}").
+		Path("/v2/ingest/{fileType}").
 		HandlerFunc(c.ingestFile)
 
 	return router
 }
 
 func (c *controller) ingestFile(w http.ResponseWriter, r *http.Request) {
-	fileType := api.CleanUserInput(mux.Vars(r)["type"])
+	fileType := api.CleanUserInput(mux.Vars(r)["fileType"])
 	if fileType == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
