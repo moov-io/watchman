@@ -24,6 +24,7 @@ import (
 	"github.com/moov-io/watchman/internal/ingest"
 	"github.com/moov-io/watchman/internal/postalpool"
 	"github.com/moov-io/watchman/internal/search"
+	"github.com/moov-io/watchman/internal/webui"
 
 	"github.com/gorilla/mux"
 	"go.uber.org/automaxprocs/maxprocs"
@@ -96,6 +97,10 @@ func main() {
 	ingestService := ingest.NewService(logger, conf.Ingest)
 	ingestController := ingest.NewController(logger, ingestService, searchService)
 	ingestController.AppendRoutes(router)
+
+	// Add the Webui last
+	webuiController := webui.NewController(logger, conf.Webui)
+	webuiController.AppendRoutes(router)
 
 	// Start Admin server (with Prometheus metrics)
 	adminServer, err := admin.New(admin.Opts{

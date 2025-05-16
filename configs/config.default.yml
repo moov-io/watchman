@@ -6,6 +6,9 @@ Watchman:
   Telemetry:
     ServiceName: "watchman"
 
+  Webui:
+    BasePath: "/"
+
   Download:
     RefreshInterval: "12h"
     InitialDataDirectory: ""

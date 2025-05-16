@@ -1,8 +1,0 @@
-{
-  auto_https off
-}
-
-:8000 {
-  root * /usr/share/caddy/wasm
-  file_server browse
-}
