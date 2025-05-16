@@ -28,8 +28,15 @@ func GetDownloader(tb testing.TB) download.Downloader {
 		pkg, err := fshelp.FindPkgDir()
 		require.NoError(tb, err)
 
+		initialDir := filepath.Join(pkg, "..", "internal", "ofactest", "testdata")
+
+		// By default use a small set of OFAC records, but use the larger record set for benchmarks
+		if _, ok := tb.(*testing.B); ok {
+			initialDir = filepath.Join(pkg, "sources", "ofac", "testdata")
+		}
+
 		conf := download.Config{
-			InitialDataDirectory: filepath.Join(pkg, "sources", "ofac", "testdata"),
+			InitialDataDirectory: initialDir,
 		}
 		conf.IncludedLists = append(conf.IncludedLists, search.SourceUSOFAC)
 

@@ -10,7 +10,6 @@ import (
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/internal/config"
 	"github.com/moov-io/watchman/internal/ingest"
-	"github.com/moov-io/watchman/internal/ofactest"
 	"github.com/moov-io/watchman/internal/search"
 	pubsearch "github.com/moov-io/watchman/pkg/search"
 
@@ -24,12 +23,6 @@ func TestIngest_API(t *testing.T) {
 	searchConfig := search.DefaultConfig()
 	searchService, err := search.NewService(logger, searchConfig)
 	require.NoError(t, err)
-
-	dl := ofactest.GetDownloader(t)
-	stats, err := dl.RefreshAll(context.Background())
-	require.NoError(t, err)
-
-	searchService.UpdateEntities(stats)
 
 	t.Setenv("APP_CONFIG_SECRETS", filepath.Join("testdata", "fincen-config.yml"))
 	ingestConf, err := config.LoadConfig(logger)

@@ -29,8 +29,8 @@ func TestAPI_ListInfo(t *testing.T) {
 	require.Equal(t, http.StatusOK, w.Code)
 
 	body := w.Body.String()
-	require.Contains(t, body, `"lists":{"us_ofac":16989}`)
-	require.Contains(t, body, `"listHashes":{"us_ofac":"28c0044e94`)
+	require.Contains(t, body, `"lists":{"us_ofac":17}`)
+	require.Contains(t, body, `"listHashes":{"us_ofac":"b9d56301`)
 }
 
 type testSetup struct {
