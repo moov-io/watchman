@@ -1,13 +1,9 @@
 package ingest
 
 import (
-	"fmt"
 	"net/http"
-	"strings"
-	"sync"
 
 	"github.com/moov-io/base/log"
-	"github.com/moov-io/base/strx"
 	"github.com/moov-io/base/telemetry"
 	"github.com/moov-io/watchman/internal/api"
 	"github.com/moov-io/watchman/internal/search"
@@ -77,61 +73,13 @@ func (c *controller) ingestFile(w http.ResponseWriter, r *http.Request) {
 
 	logger.Info().Logf("found %d entities from %s file", len(parsedFile.Entities), parsedFile.FileType)
 
-	q := r.URL.Query()
-	debug := strx.Yes(r.URL.Query().Get("debug"))
+	// Set the parsed entities in-memory
+	ingestKey := pubsearch.SourceList(parsedFile.FileType)
+	c.searchService.SetIngestedEntities(ingestKey, parsedFile.Entities)
 
-	searchOpts := search.SearchOpts{
-		Limit:          1,
-		RequestID:      q.Get("requestID"),
-		Debug:          debug,
-		DebugSourceIDs: strings.Split(q.Get("debugSourceIDs"), ","),
-	}
-
-	// Concurrently search for each
-	var wg sync.WaitGroup
-	wg.Add(len(parsedFile.Entities))
-
-	errorCh := make(chan error, 1)
-	responses := make([]pubsearch.IngestedEntities, len(parsedFile.Entities))
-
-	for idx := range parsedFile.Entities {
-		go func(idx int) {
-			defer wg.Done()
-
-			// Concurrently run each search
-			query := parsedFile.Entities[idx]
-
-			entities, err := c.searchService.Search(ctx, query, searchOpts)
-			if err != nil {
-				errorCh <- fmt.Errorf("searching %v/%v failed: %w", query.Source, query.SourceID, err)
-			}
-
-			responses[idx] = pubsearch.IngestedEntities{
-				Query:    query,
-				Entities: entities,
-			}
-		}(idx)
-	}
-
-	// Wait for all searches to complete
-	wg.Wait()
-
-	// Send at least an empty error
-	go func() {
-		errorCh <- nil
-	}()
-
-	// Check for search errors
-	err = <-errorCh
-	if err != nil {
-		err = logger.Error().LogErrorf("problem running ingest search from %s file: %w", parsedFile.FileType, err).Err()
-		api.ErrorResponse(w, err)
-		return
-	}
-
-	err = api.JsonResponse(w, pubsearch.IngestSearchResponse{
+	err = api.JsonResponse(w, pubsearch.IngestFileResponse{
 		FileType: parsedFile.FileType,
-		Records:  responses,
+		Entities: parsedFile.Entities,
 	})
 	if err != nil {
 		span.RecordError(err)

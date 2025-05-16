@@ -27,6 +27,8 @@ import (
 
 type Service interface {
 	LatestStats() download.Stats
+
+	SetIngestedEntities(ingestKey search.SourceList, entities []search.Entity[search.Value])
 	UpdateEntities(stats download.Stats)
 
 	Search(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error)
@@ -37,10 +39,14 @@ func NewService(logger log.Logger, config Config) (Service, error) {
 	if err != nil {
 		return nil, fmt.Errorf("creating search service: %w", err)
 	}
+
+	ingestedFiles := make(map[search.SourceList][]search.Entity[search.Value])
+
 	return &service{
-		logger: logger,
-		config: config,
-		cm:     cm,
+		logger:        logger,
+		config:        config,
+		ingestedFiles: ingestedFiles,
+		cm:            cm,
 	}, nil
 }
 
@@ -48,8 +54,9 @@ type service struct {
 	logger log.Logger
 	config Config
 
-	latestStats  download.Stats
-	sync.RWMutex // protects latestStats (which has entities and list hashes)
+	sync.RWMutex  // protects latestStats and ingestedFiles
+	ingestedFiles map[search.SourceList][]search.Entity[search.Value]
+	latestStats   download.Stats
 
 	cm *concurrencychamp.ConcurrencyManager
 }
@@ -68,6 +75,13 @@ func (s *service) LatestStats() download.Stats {
 		Version:    watchman.Version,
 	}
 	return out
+}
+
+func (s *service) SetIngestedEntities(ingestKey search.SourceList, entities []search.Entity[search.Value]) {
+	s.Lock()
+	defer s.Unlock()
+
+	s.ingestedFiles[ingestKey] = entities
 }
 
 func (s *service) UpdateEntities(stats download.Stats) {
@@ -133,7 +147,13 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	s.RLock()
 	defer s.RUnlock()
 
-	indices.ProcessSliceFn(s.latestStats.Entities, goroutineCount, func(index search.Entity[search.Value]) {
+	// Check if the query is targeting ingested files
+	searchEntities := s.latestStats.Entities
+	if entities, found := s.ingestedFiles[query.Source]; found {
+		searchEntities = entities
+	}
+
+	indices.ProcessSliceFn(searchEntities, goroutineCount, func(index search.Entity[search.Value]) {
 		start := time.Now()
 
 		var score float64
