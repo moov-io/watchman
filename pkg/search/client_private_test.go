@@ -90,7 +90,7 @@ func TestClient_buildQueryParameters(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.entity.Name, func(t *testing.T) {
 			q := make(url.Values)
-			got := buildQueryParameters(setSearchOpts(q, tc.opts), tc.entity)
+			got := BuildQueryParameters(SetSearchOpts(q, tc.opts), tc.entity)
 
 			require.Equal(t, len(tc.expected), len(got)) // same key size
 
