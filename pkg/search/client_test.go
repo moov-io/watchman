@@ -79,10 +79,12 @@ func TestClient_SearchByEntity(t *testing.T) {
 	t.Run("normal", func(t *testing.T) {
 		ctx := context.Background()
 		query := public.Entity[public.Value]{
-			Name: "Flight",
+			Name: "P-532",
 			Type: public.EntityAircraft,
 		}
-		var opts public.SearchOpts
+		opts := public.SearchOpts{
+			Limit: 2,
+		}
 
 		response, err := scope.client.SearchByEntity(ctx, query, opts)
 		require.NoError(t, err)
@@ -95,7 +97,7 @@ func TestClient_SearchByEntity(t *testing.T) {
 	t.Run("debug", func(t *testing.T) {
 		ctx := context.Background()
 		query := public.Entity[public.Value]{
-			Name: "Flight",
+			Name: "P-532",
 			Type: public.EntityAircraft,
 		}
 		opts := public.SearchOpts{
