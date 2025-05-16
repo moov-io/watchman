@@ -116,7 +116,7 @@ func (s *service) readEntitiesFromCSVFile(ctx context.Context, name string, sche
 
 		entity.Addresses = readAddresses(headers, schema.Mapping.Addresses, row)
 
-		out.Entities = append(out.Entities, entity)
+		out.Entities = append(out.Entities, entity.Normalize())
 	}
 
 	return out, nil

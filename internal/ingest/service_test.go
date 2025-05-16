@@ -53,6 +53,23 @@ func TestService_ReadEntitiesFromFile_FincenBusiness(t *testing.T) {
 					Country:    "US",
 				},
 			},
+			PreparedFields: search.PreparedFields{
+				Name:          "acme corp",
+				AltNames:      []string{"acme corp llc"},
+				NameFields:    []string{"acme", "corp"},
+				AltNameFields: [][]string{{"acme", "corp", "llc"}},
+				Addresses: []search.PreparedAddress{
+					{
+						Line1:       "999 south marine corps drive",
+						Line1Fields: []string{"999", "south", "marine", "corps", "drive"},
+						City:        "anytown",
+						CityFields:  []string{"anytown"},
+						PostalCode:  "90210",
+						State:       "ca",
+						Country:     "united states",
+					},
+				},
+			},
 		},
 		{
 			Name:     "Anvil Investments LLC",
@@ -74,6 +91,21 @@ func TestService_ReadEntitiesFromFile_FincenBusiness(t *testing.T) {
 					State:      "NY",
 					PostalCode: "12946",
 					Country:    "US",
+				},
+			},
+			PreparedFields: search.PreparedFields{
+				Name:       "anvil investments llc",
+				NameFields: []string{"anvil", "investments", "llc"},
+				Addresses: []search.PreparedAddress{
+					{
+						Line1:       "79 other way",
+						Line1Fields: []string{"79", "other", "way"},
+						City:        "othertown",
+						CityFields:  []string{"othertown"},
+						PostalCode:  "12946",
+						State:       "ny",
+						Country:     "united states",
+					},
 				},
 			},
 		},
@@ -125,6 +157,23 @@ func TestService_ReadEntitiesFromFile_FincenPerson(t *testing.T) {
 					Country:    "US",
 				},
 			},
+			PreparedFields: search.PreparedFields{
+				Name:          "john jr k doe1",
+				AltNames:      []string{"johnny k doe"},
+				NameFields:    []string{"john", "jr", "k", "doe"},
+				AltNameFields: [][]string{{"johnny", "k", "doe"}},
+				Addresses: []search.PreparedAddress{
+					{
+						Line1:       "193 southfield lane",
+						Line1Fields: []string{"193", "southfield", "lane"},
+						City:        "anytown",
+						CityFields:  []string{"anytown"},
+						PostalCode:  "90210",
+						State:       "ca",
+						Country:     "united states",
+					},
+				},
+			},
 		},
 		{
 			Name:     "Jane K Doe2",
@@ -150,6 +199,23 @@ func TestService_ReadEntitiesFromFile_FincenPerson(t *testing.T) {
 					Country:    "US",
 				},
 			},
+			PreparedFields: search.PreparedFields{
+				Name:          "jane k doe2",
+				AltNames:      []string{"jane l doe"},
+				NameFields:    []string{"jane", "k", "doe2"},
+				AltNameFields: [][]string{{"jane", "l", "doe"}},
+				Addresses: []search.PreparedAddress{
+					{
+						Line1:       "931 southfield lane",
+						Line1Fields: []string{"931", "southfield", "lane"},
+						City:        "anytown",
+						CityFields:  []string{"anytown"},
+						PostalCode:  "90210",
+						State:       "ca",
+						Country:     "united states",
+					},
+				},
+			},
 		},
 		{
 			Name:     "Jose K Doe3",
@@ -173,6 +239,23 @@ func TestService_ReadEntitiesFromFile_FincenPerson(t *testing.T) {
 					State:      "CA",
 					PostalCode: "90210",
 					Country:    "US",
+				},
+			},
+			PreparedFields: search.PreparedFields{
+				Name:          "jose k doe3",
+				AltNames:      []string{"joseph m doe"},
+				NameFields:    []string{"jose", "k", "doe3"},
+				AltNameFields: [][]string{{"joseph", "m", "doe"}},
+				Addresses: []search.PreparedAddress{
+					{
+						Line1:       "391 southfield lane",
+						Line1Fields: []string{"391", "southfield", "lane"},
+						City:        "anytown",
+						CityFields:  []string{"anytown"},
+						PostalCode:  "90210",
+						State:       "ca",
+						Country:     "united states",
+					},
 				},
 			},
 		},

@@ -52,25 +52,36 @@ func TestIngest_API(t *testing.T) {
 	t.Cleanup(func() { file.Close() })
 
 	ctx := context.Background()
-	response, err := client.IngestFile(ctx, "fincen-person", file, pubsearch.SearchOpts{
-		Limit: 1,
-	})
+	ingestResponse, err := client.IngestFile(ctx, "fincen-person", file)
 	require.NoError(t, err)
 
-	require.Equal(t, "fincen-person", response.FileType)
-	require.Len(t, response.Records, 3)
+	require.Equal(t, "fincen-person", ingestResponse.FileType)
+	require.Len(t, ingestResponse.Entities, 3)
 
-	// The number of records should match the incoming CSV
-	for _, rec := range response.Records {
-		// Make sure the query is passed through
-		require.NotEmpty(t, rec.Query.Name)
-
-		// Make sure ?limit was enforced
-		require.Len(t, rec.Entities, 1)
-
-		// Make sure scoring was actaully performed
-		for _, entity := range rec.Entities {
-			require.Greater(t, entity.Match, 0.00)
-		}
+	// Perform a search against the ingested file
+	query := pubsearch.Entity[pubsearch.Value]{
+		Name:   "John K Doe1",
+		Type:   pubsearch.EntityPerson,
+		Source: pubsearch.SourceList("fincen-person"),
+		Addresses: []pubsearch.Address{
+			{
+				Line1:      "193 Southfield Lane",
+				City:       "Anytown",
+				PostalCode: "90210",
+				State:      "CA",
+				Country:    "US",
+			},
+		},
 	}
+	searchResponse, err := searchService.Search(ctx, query.Normalize(), search.SearchOpts{
+		Limit: 1,
+		Debug: true,
+	})
+	require.NoError(t, err)
+	require.Len(t, searchResponse, 1)
+
+	// Sanity check the response
+	require.Equal(t, "John Jr K Doe1", searchResponse[0].Name)
+	require.Equal(t, pubsearch.SourceList("fincen-person"), searchResponse[0].Source)
+	require.InDelta(t, searchResponse[0].Match, 0.883, 0.001)
 }

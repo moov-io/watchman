@@ -18,7 +18,7 @@ import (
 type Client interface {
 	ListInfo(ctx context.Context) (ListInfoResponse, error)
 	SearchByEntity(ctx context.Context, entity Entity[Value], opts SearchOpts) (SearchResponse, error)
-	IngestFile(ctx context.Context, fileType string, file io.Reader, opts SearchOpts) (IngestSearchResponse, error)
+	IngestFile(ctx context.Context, fileType string, file io.Reader) (IngestFileResponse, error)
 }
 
 func NewClient(httpClient *http.Client, baseAddress string) Client {
@@ -348,27 +348,19 @@ func setCryptoAddresses(q url.Values, cryptoAddresses []CryptoAddress) {
 	}
 }
 
-type IngestSearchResponse struct {
-	FileType string             `json:"fileType"`
-	Records  []IngestedEntities `json:"records"`
+type IngestFileResponse struct {
+	FileType string          `json:"fileType"`
+	Entities []Entity[Value] `json:"entities"`
 }
 
-type IngestedEntities struct {
-	Query    Entity[Value]           `json:"query"`
-	Entities []SearchedEntity[Value] `json:"entities"`
-}
-
-func (c *client) IngestFile(ctx context.Context, fileType string, file io.Reader, opts SearchOpts) (IngestSearchResponse, error) {
-	var out IngestSearchResponse
+func (c *client) IngestFile(ctx context.Context, fileType string, file io.Reader) (IngestFileResponse, error) {
+	var out IngestFileResponse
 
 	// Build the URL
 	addr, err := url.Parse(c.baseAddress + fmt.Sprintf("/v2/ingest/%s", fileType))
 	if err != nil {
 		return out, fmt.Errorf("problem creating baseAddress: %w", err)
 	}
-
-	// Set query parameters
-	addr.RawQuery = SetSearchOpts(addr.Query(), opts).Encode()
 
 	// Make the request
 	req, err := retryablehttp.NewRequest("POST", addr.String(), file)
