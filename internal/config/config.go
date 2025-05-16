@@ -10,6 +10,7 @@ import (
 	"github.com/moov-io/watchman/internal/ingest"
 	"github.com/moov-io/watchman/internal/postalpool"
 	"github.com/moov-io/watchman/internal/search"
+	"github.com/moov-io/watchman/internal/webui"
 
 	"github.com/moov-io/base/config"
 	"github.com/moov-io/base/log"
@@ -23,6 +24,8 @@ type GlobalConfig struct {
 type Config struct {
 	Servers   ServerConfig
 	Telemetry telemetry.Config
+
+	Webui webui.Config
 
 	Download   download.Config
 	Search     search.Config
