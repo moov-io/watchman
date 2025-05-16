@@ -129,6 +129,10 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	}
 	start := time.Now()
 
+	// Grab a read-lock over the current set of entities
+	s.RLock()
+	defer s.RUnlock()
+
 	indices.ProcessSliceFn(s.latestStats.Entities, goroutineCount, func(index search.Entity[search.Value]) {
 		start := time.Now()
 
