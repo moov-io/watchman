@@ -8,6 +8,7 @@ import (
 
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/internal/download"
+	"github.com/moov-io/watchman/internal/fshelp"
 	"github.com/moov-io/watchman/pkg/search"
 
 	"github.com/stretchr/testify/require"
@@ -24,8 +25,11 @@ func FindEntity(tb testing.TB, entityID string) search.Entity[search.Value] {
 	logger := log.NewTestLogger()
 
 	cslusDownloaderSetup.Do(func() {
+		pkg, err := fshelp.FindPkgDir()
+		require.NoError(tb, err)
+
 		conf := download.Config{
-			InitialDataDirectory: filepath.Join("..", "..", "sources", "pkg", "csl_us", "testdata"),
+			InitialDataDirectory: filepath.Join(pkg, "sources", "csl_us", "testdata"),
 		}
 		conf.IncludedLists = append(conf.IncludedLists, search.SourceUSCSL)
 

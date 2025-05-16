@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/moov-io/watchman/internal/download"
+	"github.com/moov-io/watchman/internal/fshelp"
 	"github.com/moov-io/watchman/pkg/search"
 	"github.com/moov-io/watchman/pkg/sources/ofac"
 
@@ -68,11 +69,14 @@ func TestService_Search(t *testing.T) {
 func testService(tb testing.TB) Service {
 	tb.Helper()
 
+	pkg, err := fshelp.FindPkgDir()
+	require.NoError(tb, err)
+
 	files := testInputs(tb,
-		filepath.Join("..", "..", "pkg", "sources", "ofac", "testdata", "sdn.csv"),
-		filepath.Join("..", "..", "pkg", "sources", "ofac", "testdata", "alt.csv"),
-		filepath.Join("..", "..", "pkg", "sources", "ofac", "testdata", "add.csv"),
-		filepath.Join("..", "..", "pkg", "sources", "ofac", "testdata", "sdn_comments.csv"),
+		filepath.Join(pkg, "sources", "ofac", "testdata", "sdn.csv"),
+		filepath.Join(pkg, "sources", "ofac", "testdata", "alt.csv"),
+		filepath.Join(pkg, "sources", "ofac", "testdata", "add.csv"),
+		filepath.Join(pkg, "sources", "ofac", "testdata", "sdn_comments.csv"),
 	)
 	ofacRecords, err := ofac.Read(files)
 	require.NoError(tb, err)

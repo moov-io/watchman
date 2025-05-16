@@ -120,6 +120,9 @@ findfiles:
 				mu.Lock()
 				out[name] = fd
 				mu.Unlock()
+
+				dl.Logger.Info().Logf("found %s", file.Name())
+
 				// file is found, skip downloading
 				wg.Done()
 				continue findfiles
@@ -130,7 +133,7 @@ findfiles:
 		go func(wg *sync.WaitGroup, filename, downloadURL string) {
 			defer wg.Done()
 
-			logger := dl.createLogger(filename, downloadURL)
+			logger := dl.createDownloadLogger(filename, downloadURL)
 
 			startTime := time.Now().In(time.UTC)
 			content, err := dl.retryDownload(ctx, downloadURL)
@@ -153,7 +156,7 @@ findfiles:
 	return out, nil
 }
 
-func (dl *Downloader) createLogger(filename, downloadURL string) log.Logger {
+func (dl *Downloader) createDownloadLogger(filename, downloadURL string) log.Logger {
 	var host string
 	u, _ := url.Parse(downloadURL)
 	if u != nil {
