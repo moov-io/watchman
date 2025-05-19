@@ -185,9 +185,9 @@ func compareDates(date1, date2 *time.Time) float64 {
 	d2 := date2.Truncate(24 * time.Hour)
 
 	// Initialize score components
-	yearScore := 0.0
-	monthScore := 0.0
-	dayScore := 0.0
+	var yearScore float64
+	var monthScore float64
+	var dayScore float64
 
 	// Year comparison: ±5 years tolerance
 	yearDiff := math.Abs(float64(d1.Year() - d2.Year()))
