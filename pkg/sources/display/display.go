@@ -28,6 +28,13 @@ func DetailsURL(entity search.Entity[search.Value]) string {
 	}
 	// Format the entity as a Watchman search URL
 	u, _ := url.Parse("/v2/search")
-	u.RawQuery = search.BuildQueryParameters(u.Query(), entity).Encode()
+
+	params := search.BuildQueryParameters(u.Query(), entity)
+	if v := params.Get("source"); v == string(search.SourceAPIRequest) {
+		params.Del("source")
+	}
+
+	u.RawQuery = params.Encode()
+
 	return u.String()
 }
