@@ -48,6 +48,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: source
+          in: query
+          description: Source list to filter entity
+          required: false
+          schema:
+            type: string
         - name: type
           in: query
           description: Type of entity to search for
@@ -574,6 +580,15 @@ components:
           - vessel
           type: string
           description: Type of entity
+        source:
+          type: string
+          description: Original list the entity is from
+        sourceID:
+          type: string
+          description: Original list identifier
+        sourceData:
+          type: object
+          description: Original source data
         vessel:
           $ref: '#/components/schemas/Vessel'
           description: Vessel details (if entity type is vessel)
