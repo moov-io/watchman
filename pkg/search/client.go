@@ -156,6 +156,10 @@ func SetSearchOpts(q url.Values, opts SearchOpts) url.Values {
 func BuildQueryParameters(q url.Values, entity Entity[Value]) url.Values {
 	q.Set("type", string(entity.Type))
 
+	if src := string(entity.Source); src != "" {
+		q.Set("source", src)
+	}
+
 	if entity.Name != "" {
 		q.Set("name", entity.Name)
 	}

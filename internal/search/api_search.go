@@ -1,6 +1,7 @@
 package search
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"net/http"
@@ -142,7 +143,7 @@ func readSearchRequest(ctx context.Context, addressParsingPool *postalpool.Servi
 
 	req.Name = strings.TrimSpace(q.Get("name"))
 	req.Type = search.EntityType(strings.TrimSpace(strings.ToLower(q.Get("type"))))
-	req.Source = search.SourceAPIRequest
+	req.Source = cmp.Or(search.SourceList(q.Get("source")), search.SourceAPIRequest)
 
 	switch req.Type {
 	case search.EntityPerson:
