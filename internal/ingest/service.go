@@ -18,6 +18,8 @@ type Service interface {
 }
 
 func NewService(logger log.Logger, conf Config) Service {
+	logger.Info().Logf("found %d ingest fileTypes", len(conf.Files))
+
 	return &service{
 		logger: logger,
 		conf:   conf,
