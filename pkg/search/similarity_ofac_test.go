@@ -88,7 +88,7 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 					Gender:    search.GenderMale,
 				},
 			},
-			expected: 0.544,
+			expected: 0.644,
 		},
 		{
 			name: "Mismatch - Wrong name and no matching details",

@@ -1,6 +1,7 @@
 package search
 
 import (
+	"fmt"
 	"io"
 	"math"
 	"time"
@@ -168,38 +169,89 @@ func compareAssetDates[Q any, I any](entityType EntityType, query Entity[Q], ind
 	return score, score > 0.7, fieldsCompared
 }
 
-// compareDates calculates similarity score between two dates
+const (
+	yearInHours = 60.0 * 24.0 * 365.25
+)
+
+// compareDates calculates a similarity score between two dates, useful for detecting fudged dates
+// Returns a score between 0.0 (no similarity) and 1.0 (exact match).
 func compareDates(date1, date2 *time.Time) float64 {
 	if date1 == nil || date2 == nil {
 		return 0.0
 	}
 
-	// There are two common ways to compare dates
-	// 1. Same Day and Month but adjacent year  -- 03-10-1970 and 03-10-1971 or 03-10-1972
-	// 2. Same Day and Year, but adjacent month -- 01-10-1970 and 02-10-1970 or 11-10-1970
-	// TODO(adam): needs updating
-
-	// Normalize to same time of day
+	// Normalize to same time of day to focus on date components
 	d1 := date1.Truncate(24 * time.Hour)
 	d2 := date2.Truncate(24 * time.Hour)
 
-	// Calculate difference in days
-	diffDays := math.Abs(d1.Sub(d2).Hours() / 24)
+	// Initialize score components
+	yearScore := 0.0
+	monthScore := 0.0
+	dayScore := 0.0
 
-	switch {
-	case diffDays <= float64(exactMatch):
-		return 1.0
-	case diffDays <= float64(veryClose):
-		return 0.95 - (0.05 * (diffDays / float64(veryClose)))
-	case diffDays <= float64(close):
-		return 0.9 - (0.1 * (diffDays / float64(close)))
-	case diffDays <= float64(moderate):
-		return 0.8 - (0.2 * (diffDays / float64(moderate)))
-	case diffDays <= float64(distant):
-		return 0.6 - (0.3 * (diffDays / float64(distant)))
-	default:
-		return 0.0
+	// Year comparison: ±5 years tolerance
+	yearDiff := math.Abs(float64(d1.Year() - d2.Year()))
+	if yearDiff <= 5 {
+		yearScore = 1.0 - (0.1 * yearDiff) // Linear decay: 1.0 for same year, 0.5 at 5 years
+	} else {
+		yearScore = 0.2 // Low score for >5 years, but not zero to allow partial matches
 	}
+
+	// Month comparison: ±1 month tolerance, special handling for 1 vs. 10/11/12
+	month1, month2 := int(d1.Month()), int(d2.Month())
+	monthDiff := math.Abs(float64(month1 - month2))
+	if monthDiff == 0 {
+		monthScore = 1.0 // Exact match
+	} else if monthDiff <= 1 {
+		monthScore = 0.9 // Adjacent months
+	} else if (month1 == 1 && (month2 >= 10 && month2 <= 12)) || (month2 == 1 && (month1 >= 10 && month1 <= 12)) {
+		monthScore = 0.7 // Handle 1 vs. 10/11/12 (common typo or obfuscation)
+	} else {
+		monthScore = 0.3 // Low score for distant months
+	}
+
+	// Day comparison: ±3 days tolerance, special handling for similar numbers
+	day1, day2 := d1.Day(), d2.Day()
+	dayDiff := math.Abs(float64(day1 - day2))
+	if dayDiff == 0 {
+		dayScore = 1.0 // Exact match
+	} else if dayDiff <= 3 {
+		dayScore = 0.95 - (0.05 * dayDiff / 3) // Linear decay for close days
+	} else {
+		// Check for similar numbers (e.g., 1 vs. 11, 2 vs. 22)
+		if areDaysSimilar(day1, day2) {
+			dayScore = 0.7
+		} else {
+			dayScore = 0.3 // Low score for distant days
+		}
+	}
+
+	// Overall score: Weighted average of components
+	// Weights: Year (40%), Month (30%), Day (30%)
+	overallScore := (0.4 * yearScore) + (0.3 * monthScore) + (0.3 * dayScore)
+
+	// Ensure score is between 0.0 and 1.0
+	return math.Max(0.0, math.Min(1.0, overallScore))
+}
+
+// areDaysSimilar checks if two days are numerically similar (e.g., 1 vs. 11, 2 vs. 22).
+func areDaysSimilar(day1, day2 int) bool {
+	// Convert days to strings to check for pattern similarity
+	dayStr1, dayStr2 := fmt.Sprintf("%d", day1), fmt.Sprintf("%d", day2)
+
+	// Case 1: Same single digit or repeated digit (e.g., 1 vs. 11, 2 vs. 22)
+	if dayStr1 == dayStr2[:1] || dayStr2 == dayStr1[:1] {
+		return true
+	}
+
+	// Case 2: Transposed digits (e.g., 12 vs. 21)
+	if len(dayStr1) == 2 && len(dayStr2) == 2 {
+		if dayStr1[0] == dayStr2[1] && dayStr1[1] == dayStr2[0] {
+			return true
+		}
+	}
+
+	return false
 }
 
 // areDatesLogical checks if dates make temporal sense
