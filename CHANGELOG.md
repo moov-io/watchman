@@ -1,3 +1,12 @@
+## v0.52.1 (Released 2025-05-19)
+
+IMPROVEMENTS
+
+- docs: include source data in openapi spec
+- ingest: log how many File templates are read
+- search: read/set source (SouceList) query param
+- sources/display: don't set ?source=api-request
+
 ## v0.52.0 (Released 2025-05-16)
 
 This release of Watchman adds support for [ingesting CSV files as datasets](https://moov-io.github.io/watchman/ingest/), improved address similarity scoring, returning the original query in search results, and consolidating the web interface in the server binary / docker image along with several bug fixes.
