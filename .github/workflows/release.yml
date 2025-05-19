@@ -7,6 +7,9 @@ on:
 env:
   RELEASE: yes
 
+permissions:
+  contents: read
+
 jobs:
   tests:
     uses: ./.github/workflows/go.yml
@@ -17,6 +20,9 @@ jobs:
     name: Create Release
     needs: [tests]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # For creating release
+      actions: write   # For uploading artifact
     steps:
     - name: Create Release
       id: create_release
@@ -45,6 +51,10 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+    permissions:
+      contents: read   # For checkout
+      contents: write  # For uploading release assets
+      actions: read    # For downloading artifact
     steps:
     - name: Set up Go 1.x
       uses: actions/setup-go@v5
@@ -125,6 +135,8 @@ jobs:
     name: Docker Hub
     needs: [tests, create_release]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read  # For checkout
     steps:
     - name: Set up Go 1.x
       uses: actions/setup-go@v5
@@ -156,6 +168,8 @@ jobs:
     name: Docker Openshift
     needs: [tests, create_release]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read  # For checkout
     steps:
     - name: Set up Go 1.x
       uses: actions/setup-go@v5
