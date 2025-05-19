@@ -129,6 +129,7 @@ jobs:
   static:
     name: Static Docker Build
     runs-on: ${{ matrix.os }}
+    needs: [docker]
     strategy:
       matrix:
         os: [ ubuntu-latest ]
