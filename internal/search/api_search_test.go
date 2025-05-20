@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/moov-io/base/log"
+	"github.com/moov-io/watchman/internal/api"
 	"github.com/moov-io/watchman/internal/ofactest"
 	"github.com/moov-io/watchman/pkg/search"
 
@@ -73,8 +74,9 @@ func TestAPI_readSearchRequest(t *testing.T) {
 
 	t.Run("basic", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/v2/search?name=adam&type=person&birthDate=2025-01-02", nil)
+		q := &api.QueryParams{Values: req.URL.Query()}
 
-		query, err := readSearchRequest(ctx, nil, req)
+		query, err := readSearchRequest(ctx, nil, q)
 		require.NoError(t, err)
 
 		require.Equal(t, "adam", query.Name)
@@ -91,8 +93,9 @@ func TestAPI_readSearchRequest(t *testing.T) {
 		address += "&website=corp.com&website=corp2.com"
 
 		req := httptest.NewRequest("GET", address, nil)
+		q := &api.QueryParams{Values: req.URL.Query()}
 
-		query, err := readSearchRequest(ctx, nil, req)
+		query, err := readSearchRequest(ctx, nil, q)
 		require.NoError(t, err)
 		require.Empty(t, query.Name)
 
@@ -110,8 +113,9 @@ func TestAPI_readSearchRequest(t *testing.T) {
 
 	t.Run("crypto addresses", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/v2/search?type=person&cryptoAddress=xbt:12345&cryptoAddress=eth:54321", nil)
+		q := &api.QueryParams{Values: req.URL.Query()}
 
-		query, err := readSearchRequest(ctx, nil, req)
+		query, err := readSearchRequest(ctx, nil, q)
 		require.NoError(t, err)
 		require.Empty(t, query.Name)
 
@@ -126,7 +130,9 @@ func TestAPI_readSearchRequest(t *testing.T) {
 
 	t.Run("address", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/v2/search?type=person&name=Jane&address=123+Acme+St+Acmetown+KY+54321+US", nil)
-		query, err := readSearchRequest(ctx, nil, req)
+		q := &api.QueryParams{Values: req.URL.Query()}
+
+		query, err := readSearchRequest(ctx, nil, q)
 		require.NoError(t, err)
 
 		require.Equal(t, "Jane", query.Name)
@@ -152,6 +158,8 @@ func TestAPI_Search(t *testing.T) {
 
 		w := httptest.NewRecorder()
 		env.router.ServeHTTP(w, req)
+
+		t.Log(w.Body.String())
 
 		require.Equal(t, http.StatusOK, w.Code)
 
