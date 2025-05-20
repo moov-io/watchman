@@ -12,7 +12,7 @@ import (
 	"github.com/moov-io/watchman/pkg/search"
 
 	"github.com/moov-io/base/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var (
