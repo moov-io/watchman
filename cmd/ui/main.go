@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/mail"
 	"os"
 
 	"github.com/moov-io/watchman"
@@ -37,12 +38,12 @@ func main() {
 
 	ctx := context.Background()
 
-	app := &cli.App{
+	app := &cli.Command{
 		Name: "watchman-ui",
 		// UsageText:   "watchman-ui [global options] command [command options]",
 		Description: "Watchman GUI",
-		Authors: []*cli.Author{
-			{Name: "Moov OSS", Email: "oss@moov.io"},
+		Authors: []any{
+			mail.Address{Name: "Moov OSS", Address: "oss@moov.io"},
 		},
 		Flags: []cli.Flag{
 			// Common Flags
@@ -51,10 +52,10 @@ func main() {
 		Commands: []*cli.Command{
 			// commandFind,
 		},
-		Action: func(cliContext *cli.Context) error {
+		Action: func(ctx context.Context, cmd *cli.Command) error {
 			env := ui.Environment{
 				Logger: logger,
-				Client: createWatchmanClient(cliContext.String(flagBaseAddress.Name)),
+				Client: createWatchmanClient(cmd.String(flagBaseAddress.Name)),
 			}
 
 			// cli.ShowAppHelp(ctx)
@@ -63,7 +64,7 @@ func main() {
 		},
 	}
 
-	if err := app.Run(os.Args); err != nil {
+	if err := app.Run(ctx, os.Args); err != nil {
 		fmt.Printf("ERROR running command: %v\n", err)
 		os.Exit(127)
 	}
