@@ -1,6 +1,7 @@
 package download
 
 import (
+	"bytes"
 	"cmp"
 	"context"
 	"errors"
@@ -72,8 +73,13 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 	// Create a WaitGroup to track all producers
 	var producerWg sync.WaitGroup
 
+	// Track what lists have been requested
+	var requestedLists []search.SourceList
+
 	// OFAC Records
 	if slices.Contains(dl.conf.IncludedLists, search.SourceUSOFAC) {
+		requestedLists = append(requestedLists, search.SourceUSOFAC)
+
 		producerWg.Add(1)
 		g.Go(func() error {
 			defer producerWg.Done()
@@ -87,6 +93,8 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 
 	// CSL Records
 	if slices.Contains(dl.conf.IncludedLists, search.SourceUSCSL) {
+		requestedLists = append(requestedLists, search.SourceUSCSL)
+
 		producerWg.Add(1)
 		g.Go(func() error {
 			defer producerWg.Done()
@@ -96,6 +104,19 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 			}
 			return nil
 		})
+	}
+
+	// Compare the configured lists against those we actually loaded.
+	// Any extra lists are an error as we don't want to silently ignore them.
+	if len(requestedLists) > len(dl.conf.IncludedLists) {
+		close(preparedLists)
+
+		return stats, fmt.Errorf("loaded extra lists: %#v loaded compared to %#v configured", requestedLists, dl.conf.IncludedLists)
+	}
+	if extra := findExtraLists(dl.conf.IncludedLists, requestedLists); extra != "" {
+		close(preparedLists)
+
+		return stats, fmt.Errorf("unknown lists: %v", extra)
 	}
 
 	// Add a goroutine to close the channel when all producers are done
@@ -118,6 +139,32 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 	stats.EndedAt = time.Now().In(time.UTC)
 
 	return stats, nil
+}
+
+func findExtraLists(config, loaded []search.SourceList) string {
+	var extra []search.SourceList
+
+	for _, c := range config {
+		var found bool
+		for _, l := range loaded {
+			if c == l {
+				found = true
+				break
+			}
+		}
+		if !found {
+			extra = append(extra, c)
+		}
+	}
+
+	var buf bytes.Buffer
+	for idx, e := range extra {
+		if idx > 0 {
+			buf.WriteString(", ")
+		}
+		buf.WriteString(string(e))
+	}
+	return buf.String()
 }
 
 type preparedList struct {
