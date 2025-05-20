@@ -100,7 +100,7 @@ jobs:
       id: go
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Docker Build
       run: make docker-hub
@@ -119,7 +119,7 @@ jobs:
       id: go
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Build Image
       run: make docker-openshift
@@ -132,14 +132,14 @@ jobs:
       matrix:
         os: [ ubuntu-latest ]
     steps:
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v4
+    - gname: Set up Go 1.x
+      uses: actions/setup-go@v5
       with:
         go-version: stable
       id: go
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Build Image
       run: make docker-static
