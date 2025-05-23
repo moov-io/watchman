@@ -16,6 +16,8 @@ import (
 func TestIntegrity_OFAC_US_CSL(t *testing.T) {
 	t.Run("28603", func(t *testing.T) {
 		ofacEntity := ofactest.FindEntity(t, "28603")
+		ofacEntity.Source = search.SourceAPIRequest
+
 		cslUSEntity := cslustest.FindEntity(t, "28603")
 
 		// Basic Fields
@@ -42,9 +44,9 @@ func TestIntegrity_OFAC_US_CSL(t *testing.T) {
 
 		var buf bytes.Buffer
 		score := search.DebugSimilarity(&buf, ofacEntity, cslUSEntity)
-		require.InDelta(t, 1.00, score, 0.001)
 
 		fmt.Println(buf.String())
 
+		require.InDelta(t, 1.00, score, 0.001)
 	})
 }
