@@ -15,12 +15,6 @@ Watchman:
     IncludedLists:
       - "us_csl"
       - "us_ofac"
-      - "fincen-business" # custom list
-    # Lists:
-    #   us_ofac:
-    #     DownloadURL: ""
-    #   fincen-business: # custom list
-    #     DownloadURL: ""
 
   Search:
     # Tune these settings based on your available resources (CPUs, etc).
