@@ -220,9 +220,6 @@ func readSearchRequest(ctx context.Context, addressParsingPool *postalpool.Servi
 				return req, fmt.Errorf("reading vessel GrossRegisteredTonnage: %w", err)
 			}
 		}
-
-	default:
-		return req, fmt.Errorf("missing type")
 	}
 
 	// contact info // TODO(adam): normalize
