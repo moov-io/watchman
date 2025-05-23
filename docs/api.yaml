@@ -57,7 +57,7 @@ paths:
         - name: type
           in: query
           description: Type of entity to search for
-          required: true
+          required: false
           schema:
             type: string
             enum:
