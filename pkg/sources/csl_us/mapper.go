@@ -5,7 +5,6 @@
 package csl_us
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -86,8 +85,7 @@ func ToEntity(src SanctionsEntry) search.Entity[search.Value] {
 			goto individual
 
 		default:
-			fmt.Printf("\nUnknown src.Type=%v\n", src.Type)
-			fmt.Printf("%#v\n\n", src)
+			goto common
 		}
 
 	individual:
