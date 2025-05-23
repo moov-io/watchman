@@ -132,7 +132,7 @@ jobs:
       matrix:
         os: [ ubuntu-latest ]
     steps:
-    - gname: Set up Go 1.x
+    - name: Set up Go 1.x
       uses: actions/setup-go@v5
       with:
         go-version: stable
