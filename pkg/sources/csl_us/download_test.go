@@ -26,7 +26,7 @@ func TestDownload(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, files, 1)
 
-	file, found := files["CONS_ENHANCED.ZIP"]
+	file, found := files["consolidated.csv"]
 	require.True(t, found)
 	require.NotNil(t, file)
 	require.NoError(t, file.Close())
@@ -47,18 +47,18 @@ func TestDownload_initialDir(t *testing.T) {
 	}
 
 	// create each file
-	mk(t, "CONS_ENHANCED.ZIP", "file=cons_enhanced.zip")
+	mk(t, "consolidated.csv", "file=consolidated.csv")
 
 	files, err := Download(context.Background(), log.NewNopLogger(), dir)
 	require.NoError(t, err)
 	require.Len(t, files, 1)
 
 	for filename, fd := range files {
-		if strings.EqualFold("CONS_ENHANCED.ZIP", filepath.Base(filename)) {
+		if strings.EqualFold("consolidated.csv", filepath.Base(filename)) {
 			bs, err := io.ReadAll(fd)
 			require.NoError(t, err)
 
-			require.Equal(t, "file=cons_enhanced.zip", string(bs))
+			require.Equal(t, "file=consolidated.csv", string(bs))
 		} else {
 			t.Fatalf("unknown file: %v", filename)
 		}

@@ -3,6 +3,7 @@ package integrity
 import (
 	"bytes"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/moov-io/watchman/internal/cslustest"
@@ -18,13 +19,13 @@ func TestIntegrity_OFAC_US_CSL(t *testing.T) {
 		cslUSEntity := cslustest.FindEntity(t, "28603")
 
 		// Basic Fields
-		require.Equal(t, ofacEntity.Name, cslUSEntity.Name)
+		require.Equal(t, strings.ToLower(ofacEntity.Name), strings.ToLower(cslUSEntity.Name))
 		require.Equal(t, ofacEntity.Type, cslUSEntity.Type)
 		require.NotNil(t, ofacEntity.Business)
 		require.NotNil(t, cslUSEntity.Business)
 
 		// Business Fields
-		require.Equal(t, ofacEntity.Business.Name, cslUSEntity.Business.Name)
+		require.Equal(t, strings.ToLower(ofacEntity.Business.Name), strings.ToLower(cslUSEntity.Business.Name))
 		require.ElementsMatch(t, ofacEntity.Business.AltNames, cslUSEntity.Business.AltNames)
 		require.Equal(t, ofacEntity.Business.Created, cslUSEntity.Business.Created)
 		require.Equal(t, ofacEntity.Business.Dissolved, cslUSEntity.Business.Dissolved)

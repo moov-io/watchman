@@ -5,7 +5,6 @@
 package csl_us
 
 import (
-	"cmp"
 	"fmt"
 	"strconv"
 	"strings"
@@ -14,313 +13,337 @@ import (
 	"github.com/moov-io/watchman/internal/norm"
 	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/pkg/search"
-	"github.com/moov-io/watchman/pkg/sources/csl_us/gen/ENHANCED_XML"
 )
 
-func ConvertSanctionsData(data *ENHANCED_XML.SanctionsData) []search.Entity[search.Value] {
+// ConvertSanctionsData converts CSV sanctions data to search entities
+func ConvertSanctionsData(data *ListData) []search.Entity[search.Value] {
 	var out []search.Entity[search.Value]
-	for _, entity := range data.Entities.Entity {
+	for _, entity := range data.SanctionsData {
 		out = append(out, ToEntity(entity))
 	}
 	return out
 }
 
-// ToEntity converts an OFAC XML entity to a search Entity
-func ToEntity(src ENHANCED_XML.EntitiesEntity) search.Entity[search.Value] {
+// ToEntity converts a CSV SanctionsEntry to a search Entity
+func ToEntity(src SanctionsEntry) search.Entity[search.Value] {
 	entity := search.Entity[search.Value]{
 		Source:     search.SourceUSCSL,
-		SourceID:   strconv.Itoa(src.Id),
+		SourceID:   src.ID,
 		SourceData: src,
 	}
 
-	// Map entity type and create corresponding struct
-	// Map based on SDN TYPE reference values
-	switch src.GeneralInfo.EntityType.RefId {
-	case 600: // Individual
+	// Map entity type based on CSV 'Type' field
+	switch strings.ToLower(src.Type) {
+	case "individual":
 		entity.Type = search.EntityPerson
 		entity.Person = mapPerson(src)
 
-	case 601: // Entity
-		// For entities, we need to determine if it's a business or organization
-		// Could use Organization Type field or other attributes to distinguish
-		entity.Type = search.EntityBusiness
-		entity.Business = mapBusiness(src)
+	case "entity":
+		// Determine if it's a business or organization based on source or name
+		// For simplicity, assume entities are businesses unless specific indicators suggest otherwise
+		if strings.Contains(strings.ToLower(src.Source), "military-industrial") || strings.Contains(strings.ToLower(src.Name), "bank") {
+			entity.Type = search.EntityOrganization
+			entity.Organization = mapOrganization(src)
+		} else {
+			entity.Type = search.EntityBusiness
+			entity.Business = mapBusiness(src)
+		}
 
-	case 602: // Vessel
+	case "vessel":
 		entity.Type = search.EntityVessel
 		entity.Vessel = mapVessel(src)
 
-	case 91120: // Aircraft
+	case "aircraft":
 		entity.Type = search.EntityAircraft
 		entity.Aircraft = mapAircraft(src)
+
+	default:
+		// Inspect some lists in detail
+		switch {
+		case
+			strings.Contains(src.Source, "Entity List"),
+			strings.Contains(src.Source, "ITAR Debarred"),
+			strings.Contains(src.Source, "Military End User"),
+			strings.Contains(src.Source, "Unverified List"):
+
+			name := strings.Fields(strings.ToLower(src.Name))
+
+			// Does the entity look like a business?
+			for n := range name {
+				for c := range companyNeedles {
+					if strings.EqualFold(name[n], companyNeedles[c]) {
+						goto business
+					}
+				}
+			}
+			// Otherwise they're an individual
+			goto individual
+
+		case strings.Contains(src.Source, "Nonproliferation Sanctions"):
+			goto business
+
+		case strings.Contains(src.Source, "Denied Persons List"):
+			goto individual
+
+		default:
+			fmt.Printf("\nUnknown src.Type=%v\n", src.Type)
+			fmt.Printf("%#v\n\n", src)
+		}
+
+	individual:
+		entity.Type = search.EntityPerson
+		entity.Person = mapPerson(src)
+		goto common
+
+	business:
+		entity.Type = search.EntityBusiness
+		entity.Business = mapBusiness(src)
+		goto common
 	}
 
+common:
 	// Map common fields
-	entity.Name = getPrimaryName(src.Names, src.GeneralInfo.EntityType.Text)
+	entity.Name = prepare.ReorderSDNName(src.Name, strings.ToLower(src.Type))
 	entity.Contact = mapContactInfo(src)
-	entity.Addresses = mapAddresses(src.Addresses)
-	entity.Affiliations = mapAffiliations(src.Relationships)
+	entity.Addresses = mapAddresses(src)
+	entity.Affiliations = mapAffiliations(src)
 	entity.SanctionsInfo = mapSanctionsInfo(src)
 
 	return entity.Normalize()
 }
 
-// getPrimaryName returns the primary formatted name from translations
-func getPrimaryName(names ENHANCED_XML.EntityNames, entityType string) string {
-	entityType = strings.ToLower(entityType)
-
-	for _, name := range names.Name {
-		if name.IsPrimary {
-			// Find primary translation
-			for _, translation := range name.Translations.Translation {
-				if translation.IsPrimary {
-					// Return formatted full name for primary translation
-					if translation.FormattedFullName != "" {
-						return prepare.ReorderSDNName(translation.FormattedFullName, entityType)
-					}
-					// If no formatted name, build from parts
-					var firstName, lastName string
-					for _, part := range translation.NameParts.NamePart {
-						switch part.Type.RefId {
-						case 1520: // Last Name
-							lastName = part.Value
-						case 1521: // First Name
-							firstName = part.Value
-						}
-					}
-					if lastName != "" && firstName != "" {
-						return fmt.Sprintf("%s %s", firstName, lastName)
-					}
-					return firstName + lastName // Return whatever we have
-				}
-			}
-		}
+var (
+	companyNeedles = []string{
+		"academy",
+		"aviation",
+		"bank",
+		"business",
+		"co.",
+		"committee",
+		"company",
+		"corporation",
+		"defense",
+		"electronics",
+		"equipment",
+		"export",
+		"group",
+		"guard",
+		"holding",
+		"import",
+		"import",
+		"industrial",
+		"industries",
+		"industry",
+		"institute",
+		"intelligence",
+		"international",
+		"investment",
+		"lab",
+		"limited",
+		"limited",
+		"llc",
+		"logistics",
+		"ltd",
+		"ltd.",
+		"partnership",
+		"revolutionary",
+		"solutions",
+		"subsidiary",
+		"supply",
+		"technology",
+		"trading",
+		"university",
 	}
-	return ""
+)
+
+// getPrimaryName returns the primary name from the CSV
+func getPrimaryName(src SanctionsEntry, entityType string) string {
+	return prepare.ReorderSDNName(src.Name, strings.ToLower(entityType))
 }
 
-// getAllNames returns all names including aliases
-func getAllNames(names ENHANCED_XML.EntityNames, entityType string) []string {
-	entityType = strings.ToLower(entityType)
-
-	var allNames []string
-	for _, name := range names.Name {
-		// Skip primary name as it's handled separately
-		if name.IsPrimary {
-			continue
-		}
-
-		// Check alias type by refId
-		var isAlias bool
-		switch name.AliasType.RefId {
-		case 1400: // A.K.A.
-			isAlias = true
-		case 1401: // F.K.A
-			isAlias = true
-		case 1402: // N.K.A
-			isAlias = true
-		}
-
-		if isAlias {
-			for _, translation := range name.Translations.Translation {
-				if translation.IsPrimary && translation.FormattedFullName != "" {
-					name := prepare.ReorderSDNName(translation.FormattedFullName, entityType)
-
-					allNames = append(allNames, name)
-				}
-			}
+// getAllNames returns all alternate names from the CSV
+func getAllNames(src SanctionsEntry, entityType string) []string {
+	if src.AltNames == "" {
+		return nil
+	}
+	// Split alt_names by semicolon and normalize
+	names := strings.Split(src.AltNames, ";")
+	var out []string
+	for _, name := range names {
+		name = strings.TrimSpace(name)
+		if name != "" {
+			out = append(out, prepare.ReorderSDNName(name, strings.ToLower(entityType)))
 		}
 	}
-	return allNames
+	return out
 }
 
-func mapPerson(src ENHANCED_XML.EntitiesEntity) *search.Person {
+func mapPerson(src SanctionsEntry) *search.Person {
 	person := &search.Person{
-		Name:     getPrimaryName(src.Names, "individual"),
-		AltNames: getAllNames(src.Names, "individual"),
+		Name:     getPrimaryName(src, "individual"),
+		AltNames: getAllNames(src, "individual"),
 	}
 
-	// Map features for birth date, death date, gender
-	mapPersonFeatures(src.Features, person)
+	// Map gender from IDs field if available
+	if gender := extractGender(src.IDs); gender != "" {
+		person.Gender = mapGender(gender)
+	}
+
+	// Map birth date
+	if src.DatesOfBirth != "" {
+		if date, err := time.Parse("2006-01-02", src.DatesOfBirth); err == nil {
+			person.BirthDate = &date
+		} else if year, err := strconv.Atoi(src.DatesOfBirth); err == nil {
+			// Handle year-only birth dates (e.g., "1962")
+			date := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
+			person.BirthDate = &date
+		}
+	}
+
+	person.PlaceOfBirth = src.PlacesOfBirth
 
 	// Map government IDs
-	if src.IdentityDocuments != nil {
-		person.GovernmentIDs = mapGovernmentIDs(src.IdentityDocuments)
+	person.GovernmentIDs = mapGovernmentIDs(src)
+
+	// Map titles
+	if src.Title != "" {
+		person.Titles = []string{src.Title}
 	}
 
-	person.Titles = mapTitles(src)
+	// Map Citizenships and Nationalities to GovernmentIDs
+	if src.Citizenships != "" {
+		for _, citizenship := range strings.Split(src.Citizenships, ";") {
+			citizenship = strings.TrimSpace(citizenship)
+			if citizenship != "" {
+				person.GovernmentIDs = append(person.GovernmentIDs, search.GovernmentID{
+					Type:       search.GovernmentIDCitizenship,
+					Country:    norm.Country(citizenship),
+					Identifier: citizenship,
+				})
+			}
+		}
+	}
+
+	if src.Nationalities != "" {
+		for _, nationality := range strings.Split(src.Nationalities, ";") {
+			nationality = strings.TrimSpace(nationality)
+			if nationality != "" {
+				person.GovernmentIDs = append(person.GovernmentIDs, search.GovernmentID{
+					Type:       search.GovernmentIDNationality,
+					Country:    norm.Country(nationality),
+					Identifier: nationality,
+				})
+			}
+		}
+	}
 
 	return person
 }
 
-func mapPersonFeatures(features *ENHANCED_XML.EntityFeatures, person *search.Person) {
-	if features == nil {
-		return
-	}
-
-	for _, feature := range features.Feature {
-		if !feature.IsPrimary {
-			continue
-		}
-
-		switch feature.Type.FeatureTypeId {
-		case 8: // Birthdate
-			if feature.ValueDate != nil {
-				if date, err := time.Parse("2006-01-02", feature.ValueDate.FromDateBegin); err == nil {
-					person.BirthDate = &date
-				}
-			}
-		// case 9: // Place of Birth
-		// 	person.PlaceOfBirth = feature.Value
-		case 91526: // Gender - Male
-			person.Gender = search.GenderMale
-		case 91527: // Gender - Female
-			person.Gender = search.GenderFemale
-		}
-	}
-}
-
-func mapBusiness(src ENHANCED_XML.EntitiesEntity) *search.Business {
+func mapBusiness(src SanctionsEntry) *search.Business {
 	business := &search.Business{
-		Name:     getPrimaryName(src.Names, "business"),
-		AltNames: getAllNames(src.Names, "business"),
+		Name:     getPrimaryName(src, "business"),
+		AltNames: getAllNames(src, "business"),
 	}
 
-	// Map features for registration dates and identifiers
-	if src.Features != nil {
-		for _, feature := range src.Features.Feature {
-			switch feature.Type.Text {
-			case "Registration Date":
-				if date := mapDate(feature.ValueDate); date != nil {
-					business.Created = date
-				}
-			case "Dissolution Date":
-				if date := mapDate(feature.ValueDate); date != nil {
-					business.Dissolved = date
-				}
-			}
+	// Map creation/dissolution dates
+	if src.StartDate != "" {
+		if date, err := time.Parse("2006-01-02", src.StartDate); err == nil {
+			business.Created = &date
+		}
+	}
+	if src.EndDate != "" {
+		if date, err := time.Parse("2006-01-02", src.EndDate); err == nil {
+			business.Dissolved = &date
 		}
 	}
 
-	// Map business identifiers
-	if src.IdentityDocuments != nil {
-		business.GovernmentIDs = mapGovernmentIDs(src.IdentityDocuments)
-	}
+	// Map government IDs
+	business.GovernmentIDs = mapGovernmentIDs(src)
 
 	return business
 }
 
-func mapOrganization(src ENHANCED_XML.EntitiesEntity) *search.Organization {
+func mapOrganization(src SanctionsEntry) *search.Organization {
 	org := &search.Organization{
-		Name:     getPrimaryName(src.Names, "organization"),
-		AltNames: getAllNames(src.Names, "organization"),
+		Name:     getPrimaryName(src, "organization"),
+		AltNames: getAllNames(src, "organization"),
 	}
 
-	// Map features similar to business
-	if src.Features != nil {
-		for _, feature := range src.Features.Feature {
-			switch feature.Type.Text {
-			case "Formation Date":
-				if date := mapDate(feature.ValueDate); date != nil {
-					org.Created = date
-				}
-			case "Dissolution Date":
-				if date := mapDate(feature.ValueDate); date != nil {
-					org.Dissolved = date
-				}
-			}
+	// Map creation/dissolution dates
+	if src.StartDate != "" {
+		if date, err := time.Parse("2006-01-02", src.StartDate); err == nil {
+			org.Created = &date
+		}
+	}
+	if src.EndDate != "" {
+		if date, err := time.Parse("2006-01-02", src.EndDate); err == nil {
+			org.Dissolved = &date
 		}
 	}
 
-	// Map organization identifiers
-	if src.IdentityDocuments != nil {
-		org.GovernmentIDs = mapGovernmentIDs(src.IdentityDocuments)
-	}
+	// Map government IDs
+	org.GovernmentIDs = mapGovernmentIDs(src)
 
 	return org
 }
 
-func mapAircraft(src ENHANCED_XML.EntitiesEntity) *search.Aircraft {
+func mapAircraft(src SanctionsEntry) *search.Aircraft {
 	aircraft := &search.Aircraft{
-		Name:     getPrimaryName(src.Names, "aircraft"),
-		AltNames: getAllNames(src.Names, "aircraft"),
+		Name:     getPrimaryName(src, "aircraft"),
+		AltNames: getAllNames(src, "aircraft"),
+		Type:     mapAircraftType(src.VesselType), // Using VesselType for simplicity, assuming aircraft type is similar
+		Flag:     src.VesselFlag,                  // Map to country code
 	}
 
-	if src.Features != nil {
-		for _, feature := range src.Features.Feature {
-			switch feature.Type.Text {
-			case "Aircraft Type":
-				aircraft.Type = mapAircraftType(feature.Value)
-			case "Construction Date":
-				if date := mapDate(feature.ValueDate); date != nil {
-					aircraft.Built = date
-				}
-			case "Aircraft Model":
-				aircraft.Model = feature.Value
-			case "Serial Number":
-				aircraft.SerialNumber = feature.Value
-			case "Registration Country":
-				aircraft.Flag = feature.Value // Assuming country code is stored in value
-			case "ICAO Number":
-				aircraft.ICAOCode = feature.Value
-			}
+	// Map additional fields if available
+	if src.StartDate != "" {
+		if date, err := time.Parse("2006-01-02", src.StartDate); err == nil {
+			aircraft.Built = &date
 		}
 	}
 
 	return aircraft
 }
 
-func mapVessel(src ENHANCED_XML.EntitiesEntity) *search.Vessel {
+func mapVessel(src SanctionsEntry) *search.Vessel {
 	vessel := &search.Vessel{
-		Name:     getPrimaryName(src.Names, "vessel"),
-		AltNames: getAllNames(src.Names, "vessel"),
+		Name:                   getPrimaryName(src, "vessel"),
+		AltNames:               getAllNames(src, "vessel"),
+		Type:                   mapVesselType(src.VesselType),
+		Flag:                   src.VesselFlag,
+		CallSign:               src.CallSign,
+		Owner:                  src.VesselOwner,
+		Tonnage:                parseIntOrZero(src.GrossTonnage),
+		GrossRegisteredTonnage: parseIntOrZero(src.GrossRegisteredTonnage),
 	}
 
-	if src.Features != nil {
-		for _, feature := range src.Features.Feature {
-			switch feature.Type.Text {
-			case "Vessel Type":
-				vessel.Type = mapVesselType(feature.Value)
-			case "Build Date":
-				if date := mapDate(feature.ValueDate); date != nil {
-					vessel.Built = date
-				}
-			case "IMO Number":
-				vessel.IMONumber = feature.Value
-			case "MMSI Number":
-				vessel.MMSI = feature.Value
-			case "Call Sign":
-				vessel.CallSign = feature.Value
-			case "Tonnage":
-				// Convert string to int, handle error in production code
-				vessel.Tonnage = parseIntOrZero(feature.Value)
-			case "GRT":
-				vessel.GrossRegisteredTonnage = parseIntOrZero(feature.Value)
-			case "Vessel Flag":
-				vessel.Flag = feature.Value // Assuming country code is stored in value
-			case "Vessel Owner":
-				vessel.Owner = feature.Value
-			}
+	// Map build date
+	if src.StartDate != "" {
+		if date, err := time.Parse("2006-01-02", src.StartDate); err == nil {
+			vessel.Built = &date
 		}
 	}
 
 	return vessel
 }
 
-func mapContactInfo(src ENHANCED_XML.EntitiesEntity) search.ContactInfo {
+func mapContactInfo(src SanctionsEntry) search.ContactInfo {
 	info := search.ContactInfo{}
 
-	if src.Features != nil {
-		for _, feature := range src.Features.Feature {
-			switch feature.Type.Text {
-			case "Email Address":
-				info.EmailAddresses = append(info.EmailAddresses, feature.Value)
-			case "Phone Number":
-				info.PhoneNumbers = append(info.PhoneNumbers, feature.Value)
-			case "Fax":
-				info.FaxNumbers = append(info.FaxNumbers, feature.Value)
-			case "Website":
-				info.Websites = append(info.Websites, feature.Value)
+	// Extract contact info from IDs or Remarks if available
+	if src.IDs != "" {
+		ids := strings.Split(src.IDs, ";")
+		for _, id := range ids {
+			id = strings.TrimSpace(id)
+			if strings.HasPrefix(strings.ToLower(id), "website") {
+				info.Websites = append(info.Websites, strings.TrimPrefix(id, "Website "))
+			} else if strings.HasPrefix(strings.ToLower(id), "email address") {
+				info.EmailAddresses = append(info.EmailAddresses, strings.TrimPrefix(id, "Email Address "))
+			} else if strings.HasPrefix(strings.ToLower(id), "telephone") {
+				info.PhoneNumbers = append(info.PhoneNumbers, strings.TrimPrefix(id, "Telephone "))
+			} else if strings.HasPrefix(strings.ToLower(id), "fax") {
+				info.FaxNumbers = append(info.FaxNumbers, strings.TrimPrefix(id, "Fax "))
 			}
 		}
 	}
@@ -328,45 +351,49 @@ func mapContactInfo(src ENHANCED_XML.EntitiesEntity) search.ContactInfo {
 	return info
 }
 
-func mapAddresses(addresses *ENHANCED_XML.EntityAddresses) []search.Address {
-	if addresses == nil {
+func mapAddresses(src SanctionsEntry) []search.Address {
+	if src.Addresses == "" {
 		return nil
 	}
 
 	var result []search.Address
-	for _, addr := range addresses.Address {
-		var mappedAddr search.Address
-
-		// Get primary translation
-		var translation *ENHANCED_XML.AddressTranslationsTranslation
-		for _, t := range addr.Translations.Translation {
-			if t.IsPrimary {
-				translation = &t
-				break
-			}
+	// Split addresses by semicolon for multiple addresses
+	addresses := strings.Split(src.Addresses, ";")
+	for _, addr := range addresses {
+		addr = strings.TrimSpace(addr)
+		if addr == "" {
+			continue
 		}
-		if translation != nil && translation.AddressParts != nil {
-			for _, part := range translation.AddressParts.AddressPart {
-				switch part.Type.RefId {
-				case 1451: // ADDRESS1
-					mappedAddr.Line1 = part.Value
-				case 1452: // ADDRESS2
-					mappedAddr.Line2 = part.Value
-				case 1453: // ADDRESS3
-					mappedAddr.Line2 += part.Value
-				case 1454: // CITY
-					mappedAddr.City = part.Value
-				case 1456: // POSTAL CODE
-					mappedAddr.PostalCode = part.Value
-				case 1455: // STATE/PROVINCE
-					mappedAddr.State = part.Value
-				case 1450: // REGION
-					mappedAddr.Country = part.Value
+
+		// Parse address components (basic parsing, assumes comma-separated parts)
+		parts := strings.Split(addr, ",")
+		var mappedAddr search.Address
+		for i, part := range parts {
+			part = strings.TrimSpace(part)
+			if part == "" {
+				continue
+			}
+
+			// Basic heuristic: last part is often country, second-to-last is city or postal code
+			if i == len(parts)-1 {
+				mappedAddr.Country = norm.Country(part)
+			} else if i == len(parts)-2 {
+				// Check if it's a postal code (basic heuristic)
+				if len(part) <= 10 && strings.ContainsAny(part, "0123456789") {
+					mappedAddr.PostalCode = part
+				} else {
+					mappedAddr.City = part
+				}
+			} else if i == len(parts)-3 && mappedAddr.PostalCode == "" {
+				mappedAddr.City = part
+			} else {
+				// Assume earlier parts are Line1 or Line2
+				if mappedAddr.Line1 == "" {
+					mappedAddr.Line1 = part
+				} else {
+					mappedAddr.Line2 += part + " "
 				}
 			}
-		}
-		if addr.Country != nil {
-			mappedAddr.Country = norm.Country(cmp.Or(mappedAddr.Country, addr.Country.Text))
 		}
 
 		if mappedAddr.Line1 != "" && mappedAddr.Country != "" {
@@ -377,76 +404,100 @@ func mapAddresses(addresses *ENHANCED_XML.EntityAddresses) []search.Address {
 	return result
 }
 
-func mapAffiliations(relationships *ENHANCED_XML.EntityRelationships) []search.Affiliation {
-	if relationships == nil {
+func mapAffiliations(src SanctionsEntry) []search.Affiliation {
+	// Affiliations are not explicitly in the CSV; extract from Remarks if applicable
+	if src.Remarks == "" {
 		return nil
 	}
 
 	var affiliations []search.Affiliation
-	for _, rel := range relationships.Relationship {
-		aff := search.Affiliation{
-			EntityName: rel.RelatedEntity.Text,
-			Type:       rel.Type.Text,
-			Details:    rel.Comments,
+	// Basic heuristic: look for patterns like "Linked To" or "Owned By" in remarks
+	remarks := strings.Split(src.Remarks, ";")
+	for _, remark := range remarks {
+		remark = strings.TrimSpace(remark)
+		if strings.Contains(strings.ToLower(remark), "linked to") ||
+			strings.Contains(strings.ToLower(remark), "owned by") ||
+			strings.Contains(strings.ToLower(remark), "subsidiary of") {
+			parts := strings.SplitN(remark, ":", 2)
+			if len(parts) == 2 {
+				aff := search.Affiliation{
+					Type:    strings.TrimSpace(parts[0]),
+					Details: strings.TrimSpace(parts[1]),
+				}
+				affiliations = append(affiliations, aff)
+			}
 		}
-		affiliations = append(affiliations, aff)
 	}
 
 	return affiliations
 }
 
-func mapSanctionsInfo(src ENHANCED_XML.EntitiesEntity) *search.SanctionsInfo {
+func mapSanctionsInfo(src SanctionsEntry) *search.SanctionsInfo {
 	info := &search.SanctionsInfo{
-		Secondary:   false, // Default value
-		Description: src.GeneralInfo.Remarks,
+		Description: src.Remarks,
 	}
 
-	// Map sanctions programs
-	for _, program := range src.SanctionsPrograms.SanctionsProgram {
-		info.Programs = append(info.Programs, program.Text)
+	// Map programs
+	if src.Programs != "" {
+		info.Programs = strings.Split(src.Programs, ";")
 	}
 
-	// Check for secondary sanctions in features
-	if src.Features != nil {
-		for _, feature := range src.Features.Feature {
-			if feature.Type.Text == "Secondary Sanctions Risk" {
-				info.Secondary = strings.ToLower(feature.Value) == "yes"
-			}
-		}
+	// Check for secondary sanctions in IDs or Remarks
+	if strings.Contains(strings.ToLower(src.IDs), "secondary sanctions") ||
+		strings.Contains(strings.ToLower(src.Remarks), "secondary sanctions") {
+		info.Secondary = true
 	}
 
 	return info
 }
 
-func mapTitles(src ENHANCED_XML.EntitiesEntity) []string {
-	var titles []string
-	if src.GeneralInfo.Title != "" {
-		titles = append(titles, src.GeneralInfo.Title)
+func mapGovernmentIDs(src SanctionsEntry) []search.GovernmentID {
+	if src.IDs == "" {
+		return nil
 	}
 
-	// Additional titles might be in features
-	if src.Features != nil {
-		for _, feature := range src.Features.Feature {
-			if feature.Type.Text == "Title" {
-				titles = append(titles, feature.Value)
-			}
+	var ids []search.GovernmentID
+	idEntries := strings.Split(src.IDs, ";")
+	for _, idEntry := range idEntries {
+		idEntry = strings.TrimSpace(idEntry)
+		if idEntry == "" {
+			continue
+		}
+
+		// Parse ID format (e.g., "Passport, U00242309, TR")
+		parts := strings.Split(idEntry, ",")
+		if len(parts) < 2 {
+			continue
+		}
+
+		idType := strings.TrimSpace(parts[0])
+		identifier := strings.TrimSpace(parts[1])
+		country := ""
+		if len(parts) > 2 {
+			country = norm.Country(strings.TrimSpace(parts[2]))
+		}
+
+		govID := search.GovernmentID{
+			Type:       mapIDType(idType),
+			Country:    country,
+			Identifier: identifier,
+		}
+		if string(govID.Type) != "" {
+			ids = append(ids, govID)
 		}
 	}
 
-	return titles
+	return ids
 }
 
 // Helper functions
 
-func mapDate(datePeriod *ENHANCED_XML.DatePeriodType) *time.Time {
-	if datePeriod == nil {
+func mapDate(dateStr string) *time.Time {
+	if dateStr == "" {
 		return nil
 	}
-	// Use FromDateBegin as the primary date if available
-	if datePeriod.FromDateBegin != "" {
-		if t, err := time.Parse("2006-01-02", datePeriod.FromDateBegin); err == nil {
-			return &t
-		}
+	if t, err := time.Parse("2006-01-02", dateStr); err == nil {
+		return &t
 	}
 	return nil
 }
@@ -462,61 +513,40 @@ func mapGender(value string) search.Gender {
 	}
 }
 
-func mapGovernmentIDs(docs *ENHANCED_XML.EntityIdentityDocuments) []search.GovernmentID {
-	if docs == nil {
-		return nil
-	}
-
-	var ids []search.GovernmentID
-	for _, doc := range docs.IdentityDocument {
-		id := search.GovernmentID{
-			Type:       mapIDType(doc.Type),
-			Country:    getCountryCode(doc.IssuingCountry),
-			Identifier: doc.DocumentNumber,
-		}
-		if string(id.Type) != "" {
-			ids = append(ids, id)
-		}
-	}
-	return ids
-}
-
-// Helper to map ID document type reference IDs to GovernmentIDType values
-func mapIDType(ref ENHANCED_XML.ReferenceValueReferenceType) search.GovernmentIDType {
-	switch ref.RefId {
-	case 1571: // Passport
+func mapIDType(idType string) search.GovernmentIDType {
+	switch strings.ToLower(idType) {
+	case "passport":
 		return search.GovernmentIDPassport
-	case 1577: // Driver's License No.
+	case "driver's license", "drivers license":
 		return search.GovernmentIDDriversLicense
-	case 1584: // National ID No.
+	case "national id", "national identification number":
 		return search.GovernmentIDNational
-	case 1596: // Tax ID No.
+	case "tax id", "tax identification number":
 		return search.GovernmentIDTax
-	case 1572: // SSN
+	case "ssn", "social security number":
 		return search.GovernmentIDSSN
-	case 1570: // Cedula No.
+	case "cedula":
 		return search.GovernmentIDCedula
-	case 1600: // C.U.R.P.
+	case "curp":
 		return search.GovernmentIDCURP
-	case 1595: // C.U.I.T.
+	case "cuit":
 		return search.GovernmentIDCUIT
-	case 1607: // Electoral Registry No.
+	case "electoral registry":
 		return search.GovernmentIDElectoral
-	case 1581, 1585, 91752, 91760, 91761:
-		// Business Registration Document, etc
+	case "business registration", "business registration document", "business registration number":
 		return search.GovernmentIDBusinessRegisration
-	case 1619: // Commercial Registry Number
+	case "commercial registry":
 		return search.GovernmentIDCommercialRegistry
-	case 91759: // Birth Certificate Number
+	case "birth certificate":
 		return search.GovernmentIDBirthCert
-	case 1649: // Refugee ID Card
+	case "refugee id":
 		return search.GovernmentIDRefugee
-	case 1613: // Diplomatic Passport
+	case "diplomatic passport":
 		return search.GovernmentIDDiplomaticPass
-	case 1627: // Personal ID Card
+	case "personal id":
 		return search.GovernmentIDPersonalID
 	default:
-		return "" // Unknown ID type
+		return ""
 	}
 }
 
@@ -538,15 +568,27 @@ func mapVesselType(value string) search.VesselType {
 	}
 }
 
-func getCountryCode(country *ENHANCED_XML.ReferenceValueReferenceType) string {
-	if country == nil {
-		return ""
+func parseIntOrZero(value string) int {
+	if value == "" {
+		return 0
 	}
-	return country.Text
+	if i, err := strconv.Atoi(value); err == nil {
+		return i
+	}
+	return 0
 }
 
-func parseIntOrZero(value string) int {
-	// Implementation would convert string to int, returning 0 on error
-	// Production code should include proper error handling
-	return 0
+func extractGender(ids string) string {
+	// Extract gender from IDs field (e.g., "Gender, Male")
+	idEntries := strings.Split(ids, ";")
+	for _, idEntry := range idEntries {
+		idEntry = strings.TrimSpace(idEntry)
+		if strings.HasPrefix(strings.ToLower(idEntry), "gender") {
+			parts := strings.SplitN(idEntry, ",", 2)
+			if len(parts) == 2 {
+				return strings.TrimSpace(parts[1])
+			}
+		}
+	}
+	return ""
 }

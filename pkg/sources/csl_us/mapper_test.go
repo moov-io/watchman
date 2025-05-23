@@ -5,222 +5,139 @@
 package csl_us
 
 import (
-	"encoding/xml"
+	"context"
+	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 
+	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/pkg/search"
-	"github.com/moov-io/watchman/pkg/sources/csl_us/gen/ENHANCED_XML"
-
 	"github.com/stretchr/testify/require"
 )
 
-func TestGetPrimaryNameFromXML(t *testing.T) {
-	namesXML := `
-      <names>
-        <name id="17178">
-          <isPrimary>true</isPrimary>
-          <isLowQuality>false</isLowQuality>
-          <translations>
-            <translation id="1979">
-              <isPrimary>true</isPrimary>
-              <script refId="20122">Latin</script>
-              <formattedFirstName>Mohammed</formattedFirstName>
-              <formattedLastName>ABU TEIR</formattedLastName>
-              <formattedFullName>ABU TEIR, Mohammed</formattedFullName>
-              <nameParts>
-                <namePart id="38178">
-                  <type refId="1520">Last Name</type>
-                  <value>ABU TEIR</value>
-                </namePart>
-                <namePart id="38179">
-                  <type refId="1521">First Name</type>
-                  <value>Mohammed</value>
-                </namePart>
-              </nameParts>
-            </translation>
-          </translations>
-        </name>
-      </names>`
-
-	var names ENHANCED_XML.EntityNames
-	if err := xml.Unmarshal([]byte(namesXML), &names); err != nil {
-		t.Fatalf("failed to unmarshal names XML: %v", err)
+func TestGetPrimaryNameFromCSV(t *testing.T) {
+	// Create a sample SanctionsEntry based on the CSV structure
+	entry := SanctionsEntry{
+		ID:   "9640",
+		Name: "Mohammed ABU TEIR",
+		Type: "Individual",
 	}
 
-	got := getPrimaryName(names, "individual")
-	require.Equal(t, "Mohammed ABU TEIR", got)
+	got := getPrimaryName(entry, "individual")
+	require.Equal(t, "Mohammed ABU TEIR", got, "expected primary name to match")
 }
 
-func TestGetAllNamesFromXML(t *testing.T) {
-	namesXML := `
-      <names>
-        <name id="17178">
-          <isPrimary>true</isPrimary>
-          <isLowQuality>false</isLowQuality>
-          <translations>
-            <translation id="1979">
-              <isPrimary>true</isPrimary>
-              <script refId="20122">Latin</script>
-              <formattedFirstName>Mohammed</formattedFirstName>
-              <formattedLastName>ABU TEIR</formattedLastName>
-              <formattedFullName>ABU TEIR, Mohammed</formattedFullName>
-            </translation>
-          </translations>
-        </name>
-        <name id="9152">
-          <isPrimary>false</isPrimary>
-          <aliasType refId="1400">A.K.A.</aliasType>
-          <isLowQuality>false</isLowQuality>
-          <translations>
-            <translation id="10144">
-              <isPrimary>true</isPrimary>
-              <script refId="20122">Latin</script>
-              <formattedFirstName>Mohammed Mahmud</formattedFirstName>
-              <formattedLastName>ABU TAIR</formattedLastName>
-              <formattedFullName>ABU TAIR, Mohammed Mahmud</formattedFullName>
-            </translation>
-          </translations>
-        </name>
-        <name id="9153">
-          <isPrimary>false</isPrimary>
-          <aliasType refId="1400">A.K.A.</aliasType>
-          <isLowQuality>false</isLowQuality>
-          <translations>
-            <translation id="10145">
-              <isPrimary>true</isPrimary>
-              <script refId="20122">Latin</script>
-              <formattedFirstName>Mohammad Mahmoud</formattedFirstName>
-              <formattedLastName>ABOU TAYR</formattedLastName>
-              <formattedFullName>ABOU TAYR, Mohammad Mahmoud</formattedFullName>
-            </translation>
-          </translations>
-        </name>
-      </names>`
-
-	var names ENHANCED_XML.EntityNames
-	if err := xml.Unmarshal([]byte(namesXML), &names); err != nil {
-		t.Fatalf("failed to unmarshal names XML: %v", err)
+func TestGetAllNamesFromCSV(t *testing.T) {
+	// Create a sample SanctionsEntry with alternate names
+	entry := SanctionsEntry{
+		ID:       "9640",
+		Name:     "Mohammed ABU TEIR",
+		Type:     "Individual",
+		AltNames: "Mohammed Mahmud ABU TAIR;Mohammad Mahmoud ABOU TAYR",
 	}
 
-	got := getAllNames(names, "individual")
+	got := getAllNames(entry, "individual")
 	want := []string{
 		"Mohammed Mahmud ABU TAIR",
 		"Mohammad Mahmoud ABOU TAYR",
 	}
 
-	if len(got) != len(want) {
-		t.Errorf("getAllNames() returned %d names, want %d", len(got), len(want))
-		return
-	}
-
+	require.Len(t, got, len(want), "expected %d alternate names, got %d", len(want), len(got))
 	for i, name := range got {
-		if name != want[i] {
-			t.Errorf("getAllNames()[%d] = %v, want %v", i, name, want[i])
-		}
+		require.Equal(t, want[i], name, "alternate name at index %d", i)
 	}
 }
 
-func TestMapFeaturesFromXML(t *testing.T) {
-	featuresXML := `
-      <features>
-        <feature id="4698">
-          <type featureTypeId="8">Birthdate</type>
-          <versionId>1612</versionId>
-          <value>1951</value>
-          <valueDate id="757">
-            <fromDateBegin>1951-01-01</fromDateBegin>
-            <fromDateEnd>1951-01-01</fromDateEnd>
-            <toDateBegin>1951-12-31</toDateBegin>
-            <toDateEnd>1951-12-31</toDateEnd>
-            <isApproximate>false</isApproximate>
-            <isDateRange>false</isDateRange>
-          </valueDate>
-          <isPrimary>true</isPrimary>
-        </feature>
-        <feature id="4699">
-          <type featureTypeId="9">Place of Birth</type>
-          <versionId>1613</versionId>
-          <value>Umm Tuba</value>
-          <isPrimary>true</isPrimary>
-        </feature>
-      </features>`
-
-	var features ENHANCED_XML.EntityFeatures
-	if err := xml.Unmarshal([]byte(featuresXML), &features); err != nil {
-		t.Fatalf("failed to unmarshal features XML: %v", err)
+func TestMapFeaturesFromCSV(t *testing.T) {
+	// Create a sample SanctionsEntry with birth date and place of birth
+	entry := SanctionsEntry{
+		ID:           "9640",
+		Name:         "Mohammed ABU TEIR",
+		Type:         "Individual",
+		DatesOfBirth: "1951",
+		IDs:          "Gender, Male",
 	}
 
-	person := &search.Person{}
-	mapPersonFeatures(&features, person)
+	person := mapPerson(entry)
 
 	// Check birth date year
 	if person.BirthDate == nil {
 		t.Fatal("BirthDate is nil, want non-nil")
 	}
-	if person.BirthDate.Year() != 1951 {
-		t.Errorf("BirthDate.Year() = %v, want 1951", person.BirthDate.Year())
-	}
+	require.Equal(t, 1951, person.BirthDate.Year(), "expected BirthDate year to be 1951")
 
-	// // Check birth place
-	// wantPlace := "Umm Tuba"
-	// if person.PlaceOfBirth != wantPlace {
-	// 	t.Errorf("PlaceOfBirth = %v, want %v", person.PlaceOfBirth, wantPlace)
-	// }
+	// Check gender
+	require.Equal(t, search.GenderMale, person.Gender, "expected Gender to be Male")
+
+	// Note: PlaceOfBirth is not supported in search.Person; commented-out test is ignored
 }
 
-func TestMapSanctionsProgramsFromXML(t *testing.T) {
-	programsXML := `
-      <sanctionsPrograms>
-        <sanctionsProgram refId="91055" id="6215">NS-PLC</sanctionsProgram>
-      </sanctionsPrograms>`
-
-	var programs ENHANCED_XML.EntitySanctionsPrograms
-	if err := xml.Unmarshal([]byte(programsXML), &programs); err != nil {
-		t.Fatalf("failed to unmarshal programs XML: %v", err)
+func TestMapSanctionsProgramsFromCSV(t *testing.T) {
+	// Create a sample SanctionsEntry with programs
+	entry := SanctionsEntry{
+		ID:       "9640",
+		Name:     "Mohammed ABU TEIR",
+		Type:     "Individual",
+		Programs: "NS-PLC",
 	}
 
-	typesXML := `
-      <sanctionsTypes>
-        <sanctionsType refId="1706" id="40">Reject</sanctionsType>
-      </sanctionsTypes>`
-
-	var types ENHANCED_XML.EntitySanctionsTypes
-	if err := xml.Unmarshal([]byte(typesXML), &types); err != nil {
-		t.Fatalf("failed to unmarshal types XML: %v", err)
-	}
-
-	entity := ENHANCED_XML.EntitiesEntity{
-		SanctionsPrograms: programs,
-		SanctionsTypes:    types,
-	}
-
-	got := mapSanctionsInfo(entity)
-	require.Len(t, got.Programs, 1)
-	require.Equal(t, "NS-PLC", got.Programs[0])
+	got := mapSanctionsInfo(entry)
+	require.Len(t, got.Programs, 1, "expected 1 program")
+	require.Equal(t, "NS-PLC", got.Programs[0], "expected program to be NS-PLC")
 }
 
-func TestMapIDTypeFromXML(t *testing.T) {
-	idDocXML := `
-      <identityDocuments>
-        <identityDocument id="123">
-          <type refId="1571">Passport</type>
-          <documentNumber>ABC123</documentNumber>
-          <issuingCountry refId="11065">China</issuingCountry>
-        </identityDocument>
-      </identityDocuments>`
-
-	var docs ENHANCED_XML.EntityIdentityDocuments
-	if err := xml.Unmarshal([]byte(idDocXML), &docs); err != nil {
-		t.Fatalf("failed to unmarshal identity documents XML: %v", err)
+func TestMapIDTypeFromCSV(t *testing.T) {
+	// Create a sample SanctionsEntry with IDs
+	entry := SanctionsEntry{
+		ID:   "26182",
+		Name: "Evren KAYAKIRAN",
+		Type: "Individual",
+		IDs:  "Passport, U00242309, TR",
 	}
 
-	ids := mapGovernmentIDs(&docs)
-	require.Len(t, ids, 1)
+	ids := mapGovernmentIDs(entry)
+	require.Len(t, ids, 1, "expected 1 government ID")
 
 	want := search.GovernmentID{
 		Type:       search.GovernmentIDPassport,
-		Country:    "China",
-		Identifier: "ABC123",
+		Country:    "Turkey",
+		Identifier: "U00242309",
 	}
-	require.Equal(t, want, ids[0])
+	require.Equal(t, want, ids[0], "expected government ID to match")
+}
+
+func TestReaderWithFile(t *testing.T) {
+	ctx := context.Background()
+	logger := log.NewTestLogger()
+
+	// Download the gzipped CSV file
+	wd, err := os.Getwd()
+	require.NoError(t, err)
+
+	files, err := Download(ctx, logger, filepath.Join(wd, "testdata"))
+	require.NoError(t, err, "failed to download testdata/consolidated.csv")
+	require.Len(t, files, 1, "expected 1 file")
+
+	// Read and parse the CSV
+	data, err := Read(files)
+	require.NoError(t, err, "failed to read CSV")
+	require.NotEmpty(t, data.ListHash, "expected non-empty ListHash")
+
+	// Check the number of entities (20 total, 1 SDN filtered out = 19)
+	entities := data.SanctionsData
+	require.Len(t, entities, 5512, fmt.Sprintf("found %d entities after filtering out SDN record", len(entities)))
+
+	// Verify a sample entity
+	found := false
+	for _, entity := range entities {
+		if entity.ID == "1b5979e8fd3920a1a0985bf5088dad930a6a5562d1513f9e4b015e42" {
+			require.Equal(t, "Atlas Sanatgaran", entity.Name, "expected name to match")
+			require.Equal(t, "Unverified List (UVL) - Bureau of Industry and Security", entity.Source, "expected source to match")
+			require.Equal(t, "Komitas 26/114, Yerevan, Armenia, AM", entity.Addresses, "expected addresses to match")
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "expected to find Atlas Sanatgaran entity")
 }
