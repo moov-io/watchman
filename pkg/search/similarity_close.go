@@ -18,10 +18,6 @@ const (
 
 // compareEntityDates performs date comparisons based on entity type
 func compareEntityDates[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) ScorePiece {
-	if query.Type != index.Type {
-		return ScorePiece{Score: 0, Weight: weight, PieceType: "dates", FieldsCompared: 0}
-	}
-
 	var dateScore float64
 	var fieldsCompared int
 	var matched bool

@@ -113,18 +113,6 @@ func TestClient_SearchByEntity(t *testing.T) {
 		require.Greater(t, response.Entities[0].Details.FinalScore, 0.01)
 	})
 
-	t.Run("missing type", func(t *testing.T) {
-		ctx := context.Background()
-		query := public.Entity[public.Value]{
-			Name: "John",
-		}
-		var opts public.SearchOpts
-
-		response, err := scope.client.SearchByEntity(ctx, query, opts)
-		require.ErrorContains(t, err, "missing type")
-		require.Empty(t, response.Entities)
-	})
-
 	t.Run("error", func(t *testing.T) {
 		ctx := context.Background()
 		query := public.Entity[public.Value]{

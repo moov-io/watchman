@@ -61,6 +61,8 @@ var (
 	SourceUKCSL  SourceList = "uk_csl"
 	SourceUSCSL  SourceList = "us_csl"
 	SourceUSOFAC SourceList = "us_ofac"
+
+	sourceEmpty SourceList = ""
 )
 
 type Person struct {
