@@ -255,7 +255,7 @@ func loadCSLUSRecords(ctx context.Context, logger log.Logger, conf Config, respo
 	}
 	span.AddEvent("finished parsing")
 
-	entities := csl_us.ConvertSanctionsData(res.SanctionsData)
+	entities := csl_us.ConvertSanctionsData(res)
 
 	logger.Debug().Logf("finished US CSL preparation: %v", time.Since(start))
 	span.AddEvent("finished US CSL preparation")

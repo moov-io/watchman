@@ -66,12 +66,16 @@ var (
 )
 
 type Person struct {
-	Name      string     `json:"name"`
-	AltNames  []string   `json:"altNames"`
-	Gender    Gender     `json:"gender"`
-	BirthDate *time.Time `json:"birthDate"`
-	DeathDate *time.Time `json:"deathDate"`
-	Titles    []string   `json:"titles"`
+	Name     string   `json:"name"`
+	AltNames []string `json:"altNames"`
+
+	Gender Gender `json:"gender"`
+
+	BirthDate    *time.Time `json:"birthDate"`
+	PlaceOfBirth string     `json:"placeOfBirth"`
+	DeathDate    *time.Time `json:"deathDate"`
+
+	Titles []string `json:"titles"`
 
 	GovernmentIDs []GovernmentID `json:"governmentIDs"`
 }
@@ -124,6 +128,8 @@ var (
 	GovernmentIDRefugee             GovernmentIDType = "refugee-id"
 	GovernmentIDDiplomaticPass      GovernmentIDType = "diplomatic-passport"
 	GovernmentIDPersonalID          GovernmentIDType = "personal-id"
+	GovernmentIDCitizenship         GovernmentIDType = "citizenship"
+	GovernmentIDNationality         GovernmentIDType = "nationality"
 )
 
 type Business struct {
@@ -230,6 +236,13 @@ type SanctionsInfo struct {
 	Programs    []string `json:"programs"`    // e.g., "SDGT", "IRGC"
 	Secondary   bool     `json:"secondary"`   // Subject to secondary sanctions
 	Description string   `json:"description"` // Additional details
+
+	// FederalRegisterNotice string `json:"federalRegisterNotice"`
+	// StandardOrder         string `json:"standardOrder"`
+	// LicenseRequirement    string `json:"licenseRequirement"`
+	// LicensePolicy         string `json:"licensePolicy"`
+	// SourceListURL         string `json:"sourceListURL"`
+	// SourceInformationURL  string `json:"sourceInformationURL"`
 }
 
 type HistoricalInfo struct {

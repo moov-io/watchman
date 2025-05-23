@@ -16,28 +16,20 @@ import (
 )
 
 var (
-	publicUSDownloadURL = "https://sanctionslistservice.ofac.treas.gov/api/PublicationPreview/exports/%s"
+	publicUSDownloadURL = "https://data.trade.gov/downloadable_consolidated_screening_list/v1/%s"
 	usDownloadURL       = strx.Or(os.Getenv("US_CSL_DOWNLOAD_TEMPLATE"), os.Getenv("US_CSL_DOWNLOAD_URL"), publicUSDownloadURL)
 )
 
 func Download(ctx context.Context, logger log.Logger, initialDir string) (download.Files, error) {
 	dl := download.New(logger, nil)
 
-	cslURL, err := buildDownloadURL(usDownloadURL)
+	where, err := url.Parse(fmt.Sprintf(usDownloadURL, "consolidated.csv"))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("building url: %w", err)
 	}
 
-	cslNameAndSource := make(map[string]string)
-	cslNameAndSource["CONS_ENHANCED.ZIP"] = cslURL
+	addrs := make(map[string]string)
+	addrs["consolidated.csv"] = where.String()
 
-	return dl.GetFiles(ctx, initialDir, cslNameAndSource)
-}
-
-func buildDownloadURL(urlStr string) (string, error) {
-	cslURL, err := url.Parse(fmt.Sprintf(urlStr, "CONS_ENHANCED.ZIP"))
-	if err != nil {
-		return "", err
-	}
-	return cslURL.String(), nil
+	return dl.GetFiles(ctx, initialDir, addrs)
 }
