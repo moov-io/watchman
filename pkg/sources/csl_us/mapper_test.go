@@ -16,18 +16,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGetPrimaryNameFromCSV(t *testing.T) {
-	// Create a sample SanctionsEntry based on the CSV structure
-	entry := SanctionsEntry{
-		ID:   "9640",
-		Name: "Mohammed ABU TEIR",
-		Type: "Individual",
-	}
-
-	got := getPrimaryName(entry, "individual")
-	require.Equal(t, "Mohammed ABU TEIR", got, "expected primary name to match")
-}
-
 func TestGetAllNamesFromCSV(t *testing.T) {
 	// Create a sample SanctionsEntry with alternate names
 	entry := SanctionsEntry{

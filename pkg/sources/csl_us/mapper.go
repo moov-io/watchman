@@ -101,7 +101,7 @@ func ToEntity(src SanctionsEntry) search.Entity[search.Value] {
 
 common:
 	// Map common fields
-	entity.Name = prepare.ReorderSDNName(src.Name, strings.ToLower(src.Type))
+	entity.Name = cleanSubsidiarySuffix(src)
 	entity.Contact = mapContactInfo(src)
 	entity.Addresses = mapAddresses(src)
 	entity.Affiliations = mapAffiliations(src)
@@ -154,9 +154,14 @@ var (
 	}
 )
 
-// getPrimaryName returns the primary name from the CSV
-func getPrimaryName(src SanctionsEntry, entityType string) string {
-	return prepare.ReorderSDNName(src.Name, strings.ToLower(entityType))
+var (
+	subsidiaryCleaner = strings.NewReplacer(
+		"; and any successor,", "", "sub-unit,", "", "or subsidiary thereof", "",
+	)
+)
+
+func cleanSubsidiarySuffix(src SanctionsEntry) string {
+	return strings.TrimSpace(subsidiaryCleaner.Replace(src.Name))
 }
 
 // getAllNames returns all alternate names from the CSV
@@ -178,7 +183,7 @@ func getAllNames(src SanctionsEntry, entityType string) []string {
 
 func mapPerson(src SanctionsEntry) *search.Person {
 	person := &search.Person{
-		Name:     getPrimaryName(src, "individual"),
+		Name:     cleanSubsidiarySuffix(src),
 		AltNames: getAllNames(src, "individual"),
 	}
 
@@ -240,7 +245,7 @@ func mapPerson(src SanctionsEntry) *search.Person {
 
 func mapBusiness(src SanctionsEntry) *search.Business {
 	business := &search.Business{
-		Name:     getPrimaryName(src, "business"),
+		Name:     cleanSubsidiarySuffix(src),
 		AltNames: getAllNames(src, "business"),
 	}
 
@@ -264,7 +269,7 @@ func mapBusiness(src SanctionsEntry) *search.Business {
 
 func mapOrganization(src SanctionsEntry) *search.Organization {
 	org := &search.Organization{
-		Name:     getPrimaryName(src, "organization"),
+		Name:     cleanSubsidiarySuffix(src),
 		AltNames: getAllNames(src, "organization"),
 	}
 
@@ -288,7 +293,7 @@ func mapOrganization(src SanctionsEntry) *search.Organization {
 
 func mapAircraft(src SanctionsEntry) *search.Aircraft {
 	aircraft := &search.Aircraft{
-		Name:     getPrimaryName(src, "aircraft"),
+		Name:     cleanSubsidiarySuffix(src),
 		AltNames: getAllNames(src, "aircraft"),
 		Type:     mapAircraftType(src.VesselType), // Using VesselType for simplicity, assuming aircraft type is similar
 		Flag:     src.VesselFlag,                  // Map to country code
@@ -306,7 +311,7 @@ func mapAircraft(src SanctionsEntry) *search.Aircraft {
 
 func mapVessel(src SanctionsEntry) *search.Vessel {
 	vessel := &search.Vessel{
-		Name:                   getPrimaryName(src, "vessel"),
+		Name:                   cleanSubsidiarySuffix(src),
 		AltNames:               getAllNames(src, "vessel"),
 		Type:                   mapVesselType(src.VesselType),
 		Flag:                   src.VesselFlag,
