@@ -29,7 +29,7 @@ func FindEntity(tb testing.TB, entityID string) search.Entity[search.Value] {
 		require.NoError(tb, err)
 
 		conf := download.Config{
-			InitialDataDirectory: filepath.Join(pkg, "sources", "csl_us", "testdata"),
+			InitialDataDirectory: filepath.Join(pkg, "..", "internal", "cslustest", "testdata"),
 		}
 		conf.IncludedLists = append(conf.IncludedLists, search.SourceUSCSL)
 
