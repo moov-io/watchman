@@ -70,12 +70,12 @@ jobs:
         gh-pages-branch: master
         benchmark-data-dir-path: "docs/bench/common/"
 
-    - name: Running Sources Benchmarks
+    - name: Running OFAC Benchmarks
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
       run: |
         go test ./pkg/sources/ofac/... -short -bench Benchmark -run Benchmark -benchmem > output.txt
 
-    - name: Store benchmark result
+    - name: Store OFAC results
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
       uses: benchmark-action/github-action-benchmark@v1
       with:
@@ -93,7 +93,32 @@ jobs:
         max-items-in-chart: 25
         # Update files on master branch
         gh-pages-branch: master
-        benchmark-data-dir-path: "docs/bench/ofac/"
+        benchmark-data-dir-path: "docs/bench/sources/ofac/"
+
+    - name: Running CSL US Benchmarks
+      if: steps.should_run_benchmarks.outputs.should_run == 'true'
+      run: |
+        go test ./pkg/sources/csl_us/... -short -bench Benchmark -run Benchmark -benchmem > output.txt
+
+    - name: Store CSL US results
+      if: steps.should_run_benchmarks.outputs.should_run == 'true'
+      uses: benchmark-action/github-action-benchmark@v1
+      with:
+        name: "moov-io/watchman CSL US Benchmarks"
+        tool: 'go'
+        output-file-path: "./output.txt"
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        skip-fetch-gh-pages: true
+        auto-push: true
+        # Show alert with commit comment on detecting possible performance regression
+        alert-threshold: '120%'
+        comment-on-alert: true
+        fail-on-alert: true
+        alert-comment-cc-users: '@adamdecaf'
+        max-items-in-chart: 25
+        # Update files on master branch
+        gh-pages-branch: master
+        benchmark-data-dir-path: "docs/bench/sources/csl_us/"
 
 # TODO(adam): include libpostal benchmarks
 # make install
