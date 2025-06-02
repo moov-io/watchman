@@ -1,3 +1,21 @@
+## v0.52.2 (Released 2025-06-02)
+
+IMPROVEMENTS
+
+- docs: type param on search is no longer required
+- download: error when unknown lists are provided in the config
+- search: error requests when extra/unused query params are supplied
+- search: stop requiring type API query param
+- sources/csl_us: clean "and any subsidiary" from entity names
+- sources/csl_us: read CSV from trade.gov
+- sources/csl_us: set ReuseRecord on reader
+
+BUILD
+
+- build: setup CSL US benchmarks
+- sources/csl_us: setup benchmarks, use smaller test file
+- sources/ofac: add benchmark for FindEntity
+
 ## v0.52.1 (Released 2025-05-19)
 
 IMPROVEMENTS
