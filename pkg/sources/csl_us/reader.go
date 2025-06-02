@@ -79,6 +79,7 @@ func parseCSVContents(filename string, contents io.ReadCloser) (*ListData, error
 	// Read and parse CSV
 	reader := csv.NewReader(buftee)
 	reader.FieldsPerRecord = 29 // Based on the provided CSV structure
+	reader.ReuseRecord = true   // Reuse the record slice to reduce memory allocations
 
 	// Read header
 	_, err := reader.Read() // Skip header row
