@@ -39,38 +39,38 @@ func BenchmarkDebugSimilarity(b *testing.B) {
 
 	// individuals
 	individuals := []search.Entity[search.Value]{
-		ofactest.FindEntity(b, "15102"),
-		ofactest.FindEntity(b, "29702"),
-		ofactest.FindEntity(b, "48603"),
+		ofactest.EntityForBenchmark(b, "15102"),
+		ofactest.EntityForBenchmark(b, "29702"),
+		ofactest.EntityForBenchmark(b, "48603"),
 	}
 	bench(b, "individuals", individuals, false)
 	bench(b, "individuals", individuals, true)
 
 	// businesses
 	businesses := []search.Entity[search.Value]{
-		ofactest.FindEntity(b, "12685"),
-		ofactest.FindEntity(b, "28603"),
-		ofactest.FindEntity(b, "33151"),
-		ofactest.FindEntity(b, "44525"),
-		ofactest.FindEntity(b, "50544"),
+		ofactest.EntityForBenchmark(b, "12685"),
+		ofactest.EntityForBenchmark(b, "28603"),
+		ofactest.EntityForBenchmark(b, "33151"),
+		ofactest.EntityForBenchmark(b, "44525"),
+		ofactest.EntityForBenchmark(b, "50544"),
 	}
 	bench(b, "businesses", businesses, false)
 	bench(b, "businesses", businesses, true)
 
 	// vessel
 	vessels := []search.Entity[search.Value]{
-		ofactest.FindEntity(b, "47371"),
-		ofactest.FindEntity(b, "50972"),
-		ofactest.FindEntity(b, "52327"),
+		ofactest.EntityForBenchmark(b, "47371"),
+		ofactest.EntityForBenchmark(b, "50972"),
+		ofactest.EntityForBenchmark(b, "52327"),
 	}
 	bench(b, "vessels", vessels, false)
 	bench(b, "vessels", vessels, true)
 
 	// aircraft
 	aircraft := []search.Entity[search.Value]{
-		ofactest.FindEntity(b, "11195"),
-		ofactest.FindEntity(b, "19709"),
-		ofactest.FindEntity(b, "48727"),
+		ofactest.EntityForBenchmark(b, "11195"),
+		ofactest.EntityForBenchmark(b, "19709"),
+		ofactest.EntityForBenchmark(b, "48727"),
 	}
 	bench(b, "aircraft", aircraft, false)
 	bench(b, "aircraft", aircraft, true)

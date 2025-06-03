@@ -65,3 +65,9 @@ func FindEntity(tb testing.TB, entityID string) search.Entity[search.Value] {
 
 	return search.Entity[search.Value]{}
 }
+
+func EntityForBenchmark(tb testing.TB, entityID string) search.Entity[search.Value] {
+	entity := FindEntity(tb, entityID)
+	entity.SourceID = ""
+	return entity
+}
