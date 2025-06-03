@@ -92,7 +92,7 @@ func TestMapBusiness_ChinaElectronicsTechnologyGroup(t *testing.T) {
 	expectedAddresses := []search.Address{
 		{Line1: "113 Hezuo Road", City: "Hebei", Country: "China"},
 		{Line1: "21 Changsheng Street", City: "Hebei", Country: "China"},
-		{Line1: "21 Changsheng Road", Line2: "Shijiazhuang Hebei China ", City: "Hebei Province", Country: "China"},
+		{Line1: "21 Changsheng Road", Line2: "Shijiazhuang Hebei China", City: "Hebei Province", Country: "China"},
 	}
 	require.ElementsMatch(t, expectedAddresses, entity.Addresses)
 

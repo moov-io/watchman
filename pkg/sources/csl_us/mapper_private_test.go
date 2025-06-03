@@ -7,6 +7,7 @@ package csl_us
 import (
 	"testing"
 
+	"github.com/moov-io/watchman/pkg/search"
 	"github.com/stretchr/testify/require"
 )
 
@@ -78,6 +79,62 @@ func TestSplitNameIntoAlts(t *testing.T) {
 
 			require.Equal(t, tc.name, name)
 			require.ElementsMatch(t, tc.altNames, alts)
+		})
+	}
+}
+
+func TestMapAddresses(t *testing.T) {
+	cases := []struct {
+		input    string
+		expected []search.Address
+	}{
+		{
+			input: "P.O. Box 1114, Islamabad, PK",
+			expected: []search.Address{
+				{
+					Line1:   "P.O. Box 1114",
+					City:    "Islamabad",
+					Country: "Pakistan",
+				},
+			},
+		},
+		{
+			input: "29-M, Civic Centre, Model Town Ext., Lahore, 43700, PK; Office No. 610, 6th Floor, Progressive Centre, 30-A, Block No. 6, P.E.C.H.S., Karachi, PK; P.O. Box 245221, Riyadh 11312, Kingdom of Saudi Arabia, Riyadh, SA; P.O. Box 97, Abu Dhabi, AE",
+			expected: []search.Address{
+				{
+					Line1:      "29-M",
+					Line2:      "Civic Centre Model Town Ext.",
+					City:       "Lahore",
+					PostalCode: "43700",
+					Country:    "Pakistan",
+				},
+				{
+					Line1:   "Office No. 610",
+					Line2:   "6th Floor Progressive Centre 30-A Block No. 6",
+					City:    "Karachi",
+					Country: "Pakistan",
+				},
+				{
+					Line1:   "P.O. Box 245221",
+					Line2:   "Riyadh 11312",
+					City:    "Riyadh",
+					Country: "Saudi Arabia",
+				},
+				{
+					Line1:   "P.O. Box 97",
+					City:    "Abu Dhabi",
+					Country: "United Arab Emirates",
+				},
+			},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.input, func(t *testing.T) {
+			got := mapAddresses(SanctionsEntry{
+				Addresses: tc.input,
+			})
+
+			require.ElementsMatch(t, tc.expected, got)
 		})
 	}
 }

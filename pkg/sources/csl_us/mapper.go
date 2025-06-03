@@ -117,6 +117,7 @@ var (
 		"bank",
 		"business",
 		"co.",
+		"commission",
 		"committee",
 		"company",
 		"corporation",
@@ -440,6 +441,7 @@ func mapAddresses(src SanctionsEntry) []search.Address {
 		// Parse address components (basic parsing, assumes comma-separated parts)
 		parts := strings.Split(addr, ",")
 		var mappedAddr search.Address
+
 		for i, part := range parts {
 			part = strings.TrimSpace(part)
 			if part == "" {
@@ -448,12 +450,17 @@ func mapAddresses(src SanctionsEntry) []search.Address {
 
 			// Basic heuristic: last part is often country, second-to-last is city or postal code
 			if i == len(parts)-1 {
+
 				mappedAddr.Country = norm.Country(part)
 			} else if i == len(parts)-2 {
 				// Check if it's a postal code (basic heuristic)
 				if len(part) <= 10 && strings.ContainsAny(part, "0123456789") {
 					mappedAddr.PostalCode = part
 				} else {
+					// Record what we thought was a city as Line1
+					if mappedAddr.City != "" && mappedAddr.Line1 == "" {
+						mappedAddr.Line1 = mappedAddr.City
+					}
 					mappedAddr.City = part
 				}
 			} else if i == len(parts)-3 && mappedAddr.PostalCode == "" {
@@ -467,6 +474,8 @@ func mapAddresses(src SanctionsEntry) []search.Address {
 				}
 			}
 		}
+
+		mappedAddr.Line2 = strings.TrimSpace(mappedAddr.Line2)
 
 		if mappedAddr.Line1 != "" && mappedAddr.Country != "" {
 			result = append(result, mappedAddr)
