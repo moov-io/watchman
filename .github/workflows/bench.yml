@@ -50,6 +50,10 @@ jobs:
         go test ./internal/postalpool/... -short -bench BenchmarkPostalPool -run BenchmarkPostalPool -benchmem >> output.txt
         go test ./internal/norm/... -short -bench Bench -run Bench -benchmem >> output.txt
 
+    - name: Log Failure
+      if: ${{ failure() }}
+      run: cat ./output.txt
+
     - name: Store benchmark result
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
       uses: benchmark-action/github-action-benchmark@v1
@@ -75,6 +79,10 @@ jobs:
       run: |
         go test ./pkg/sources/ofac/... -short -bench Benchmark -run Benchmark -benchmem > output.txt
 
+    - name: Log Failure
+      if: ${{ failure() }}
+      run: cat ./output.txt
+
     - name: Store OFAC results
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
       uses: benchmark-action/github-action-benchmark@v1
@@ -99,6 +107,10 @@ jobs:
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
       run: |
         go test ./pkg/sources/csl_us/... -short -bench Benchmark -run Benchmark -benchmem > output.txt
+
+    - name: Log Failure
+      if: ${{ failure() }}
+      run: cat ./output.txt
 
     - name: Store CSL US results
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
