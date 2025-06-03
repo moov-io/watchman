@@ -80,3 +80,9 @@ func shouldSample(chance float64) bool {
 
 	return float64(n.Int64()) < chance
 }
+
+func TestOFACTest_EntityForBenchmark(t *testing.T) {
+	found := ofactest.EntityForBenchmark(t, "29702")
+	require.NotEmpty(t, found.Name)
+	require.Empty(t, found.SourceID)
+}
