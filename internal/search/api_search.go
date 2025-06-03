@@ -151,6 +151,7 @@ func readSearchRequest(ctx context.Context, addressParsingPool *postalpool.Servi
 	req.Name = strings.TrimSpace(q.Get("name"))
 	req.Type = search.EntityType(strings.TrimSpace(strings.ToLower(q.Get("type"))))
 	req.Source = cmp.Or(search.SourceList(q.Get("source")), search.SourceAPIRequest)
+	req.SourceID = q.Get("sourceID")
 
 	switch req.Type {
 	case search.EntityPerson:

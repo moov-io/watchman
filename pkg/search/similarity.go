@@ -80,6 +80,13 @@ func DetailedSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity
 		}
 	}
 
+	if query.SourceID != "" {
+		if query.SourceID != index.SourceID {
+			out.Pieces = emptyPieces
+			return out
+		}
+	}
+
 	// Critical identifiers (highest weight)
 	var exactOverride bool
 	exactIdentifiers := compareExactIdentifiers(w, query, index, criticalIdWeight)

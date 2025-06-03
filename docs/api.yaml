@@ -54,6 +54,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: sourceID
+          in: query
+          description: Original list identifier
+          required: false
+          schema:
+            type: string
         - name: type
           in: query
           description: Type of entity to search for
