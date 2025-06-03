@@ -13,6 +13,7 @@ import (
 
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/pkg/search"
+
 	"github.com/stretchr/testify/require"
 )
 

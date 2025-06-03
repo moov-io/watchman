@@ -5,12 +5,12 @@
 package csl_us
 
 import (
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/moov-io/watchman/internal/norm"
-	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/pkg/search"
 )
 
@@ -101,7 +101,7 @@ func ToEntity(src SanctionsEntry) search.Entity[search.Value] {
 
 common:
 	// Map common fields
-	entity.Name = cleanSubsidiarySuffix(src)
+	entity.Name, _ = splitNameIntoAlts(src.Name)
 	entity.Contact = mapContactInfo(src)
 	entity.Addresses = mapAddresses(src)
 	entity.Affiliations = mapAffiliations(src)
@@ -155,13 +155,70 @@ var (
 )
 
 var (
-	subsidiaryCleaner = strings.NewReplacer(
-		"; and any successor,", "", "sub-unit,", "", "or subsidiary thereof", "",
-	)
+	// Matches primary name, optional bracketed aliases, and optional subordinate entities
+	subUnitFinder = regexp.MustCompile(`^([^[;]+?)(?:\s*\[([^\]]*)\])?(?:\s*\(([^)]*)\))?(?:(?:\s*[;,.]\s*|\s+)(?:and\s+subordinate\s+entity|and\s+its\s+sub-units\s+and\s+successors|and\s+any\s+successor,\s*sub-unit,\s*or\s*subsidiary\s+thereof|Subordinate\s+Institution\s*-\s+|Affiliated\s+Entity\s*:\s+|including\s+)(.*))?$`)
 )
 
-func cleanSubsidiarySuffix(src SanctionsEntry) string {
-	return strings.TrimSpace(subsidiaryCleaner.Replace(src.Name))
+// splitNameIntoAlts takes an input string and returns the primary name and a slice of alternate names.
+// It handles bracketed aliases (e.g., [aka ...]), parenthetical notes (e.g., (Hong Kong Entity)),
+// and various subordinate entity patterns (e.g., Subordinate Institution - ..., and any successor, sub-unit, or subsidiary thereof).
+func splitNameIntoAlts(input string) (string, []string) {
+	// Regex to match primary name, optional bracketed aliases, optional parenthetical note,
+	// and optional subordinate entities.
+	subUnitFinder := regexp.MustCompile(`^([^[;]+?)(?:\s*\[([^\]]*)\])?(?:\s*\(([^)]*)\))?(?:(?:\s*[;,.]\s*|\s+)(?:and\s+subordinate\s+entity|and\s+its\s+sub-units\s+and\s+successors|and\s+any\s+successor,\s*sub-unit,\s*or\s*subsidiary\s+thereof|Subordinate\s+Institution\s*-\s+|Affiliated\s+Entity\s*:\s+|including\s+)(.*))?$`)
+
+	matches := subUnitFinder.FindStringSubmatch(input)
+	if len(matches) == 0 {
+		// If no match, return the input as the primary name and no alternate names
+		return strings.TrimSpace(input), nil
+	}
+
+	// Extract primary name from group 1
+	name := strings.TrimSpace(matches[1])
+	altNames := []string{}
+
+	// Handle bracketed aliases (group 2)
+	if len(matches) > 2 && matches[2] != "" {
+		// Split aliases by ", aka" or ",aka" (handling optional spaces)
+		aliases := strings.Split(matches[2], ", aka")
+		if len(aliases) == 1 {
+			aliases = strings.Split(matches[2], ",aka")
+		}
+		for _, alias := range aliases {
+			// Trim "aka" prefix and whitespace
+			cleanAlias := strings.TrimSpace(alias)
+			cleanAlias = strings.TrimPrefix(cleanAlias, "aka")
+			cleanAlias = strings.TrimPrefix(cleanAlias, "and")
+			cleanAlias = strings.TrimSpace(cleanAlias)
+
+			if cleanAlias != "" {
+				altNames = append(altNames, cleanAlias)
+			}
+		}
+	}
+
+	// Handle parenthetical note (group 3)
+	if len(matches) > 3 && matches[3] != "" {
+		alt := strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(matches[3]), "and"))
+
+		if alt != "" {
+			altNames = append(altNames, alt)
+		}
+	}
+
+	// Handle subordinate entity (group 4)
+	if len(matches) > 4 && matches[4] != "" {
+		subordinate := strings.TrimSpace(matches[4])
+		subordinate = strings.TrimPrefix(subordinate, "and")
+		subordinate = strings.TrimSpace(subordinate)
+
+		if subordinate != "" {
+			// Add the entire subordinate clause as one altName
+			altNames = append(altNames, subordinate)
+		}
+	}
+
+	return name, altNames
 }
 
 // getAllNames returns all alternate names from the CSV
@@ -174,17 +231,21 @@ func getAllNames(src SanctionsEntry, entityType string) []string {
 	var out []string
 	for _, name := range names {
 		name = strings.TrimSpace(name)
+		name = strings.TrimPrefix(name, "and ")
+
 		if name != "" {
-			out = append(out, prepare.ReorderSDNName(name, strings.ToLower(entityType)))
+			out = append(out, name)
 		}
 	}
 	return out
 }
 
 func mapPerson(src SanctionsEntry) *search.Person {
+	name, alts := splitNameIntoAlts(src.Name)
+
 	person := &search.Person{
-		Name:     cleanSubsidiarySuffix(src),
-		AltNames: getAllNames(src, "individual"),
+		Name:     name,
+		AltNames: append(alts, getAllNames(src, "individual")...),
 	}
 
 	// Map gender from IDs field if available
@@ -244,9 +305,11 @@ func mapPerson(src SanctionsEntry) *search.Person {
 }
 
 func mapBusiness(src SanctionsEntry) *search.Business {
+	name, alts := splitNameIntoAlts(src.Name)
+
 	business := &search.Business{
-		Name:     cleanSubsidiarySuffix(src),
-		AltNames: getAllNames(src, "business"),
+		Name:     name,
+		AltNames: append(alts, getAllNames(src, "business")...),
 	}
 
 	// Map creation/dissolution dates
@@ -268,9 +331,11 @@ func mapBusiness(src SanctionsEntry) *search.Business {
 }
 
 func mapOrganization(src SanctionsEntry) *search.Organization {
+	name, alts := splitNameIntoAlts(src.Name)
+
 	org := &search.Organization{
-		Name:     cleanSubsidiarySuffix(src),
-		AltNames: getAllNames(src, "organization"),
+		Name:     name,
+		AltNames: append(alts, getAllNames(src, "organization")...),
 	}
 
 	// Map creation/dissolution dates
@@ -292,9 +357,11 @@ func mapOrganization(src SanctionsEntry) *search.Organization {
 }
 
 func mapAircraft(src SanctionsEntry) *search.Aircraft {
+	name, alts := splitNameIntoAlts(src.Name)
+
 	aircraft := &search.Aircraft{
-		Name:     cleanSubsidiarySuffix(src),
-		AltNames: getAllNames(src, "aircraft"),
+		Name:     name,
+		AltNames: append(alts, getAllNames(src, "aircraft")...),
 		Type:     mapAircraftType(src.VesselType), // Using VesselType for simplicity, assuming aircraft type is similar
 		Flag:     src.VesselFlag,                  // Map to country code
 	}
@@ -310,9 +377,11 @@ func mapAircraft(src SanctionsEntry) *search.Aircraft {
 }
 
 func mapVessel(src SanctionsEntry) *search.Vessel {
+	name, alts := splitNameIntoAlts(src.Name)
+
 	vessel := &search.Vessel{
-		Name:                   cleanSubsidiarySuffix(src),
-		AltNames:               getAllNames(src, "vessel"),
+		Name:                   name,
+		AltNames:               append(alts, getAllNames(src, "vessel")...),
 		Type:                   mapVesselType(src.VesselType),
 		Flag:                   src.VesselFlag,
 		CallSign:               src.CallSign,
@@ -392,7 +461,7 @@ func mapAddresses(src SanctionsEntry) []search.Address {
 			} else {
 				// Assume earlier parts are Line1 or Line2
 				if mappedAddr.Line1 == "" {
-					mappedAddr.Line1 = part
+					mappedAddr.Line1 = strings.TrimSpace(strings.TrimPrefix(part, "and"))
 				} else {
 					mappedAddr.Line2 += part + " "
 				}
