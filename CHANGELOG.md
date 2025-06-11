@@ -1,3 +1,7 @@
+## Future Releases
+
+Please refer to the [Github Releases](https://github.com/moov-io/watchman/releases) page for future updates.
+
 ## v0.52.2 (Released 2025-06-02)
 
 IMPROVEMENTS
