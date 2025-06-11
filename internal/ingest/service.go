@@ -132,15 +132,21 @@ func readColumnDef(headers []string, def ColumnDef, row []string) string {
 	var fields []string
 
 	if def.Column != "" {
-		value := strings.TrimSpace(row[slices.Index(headers, def.Column)])
-		if value != "" {
-			fields = append(fields, value)
+		idx := slices.Index(headers, def.Column)
+		if idx >= 0 && idx < len(row) {
+			value := strings.TrimSpace(row[idx])
+			if value != "" {
+				fields = append(fields, value)
+			}
 		}
 	}
 	for _, col := range def.Merge {
-		value := strings.TrimSpace(row[slices.Index(headers, col)])
-		if value != "" {
-			fields = append(fields, value)
+		idx := slices.Index(headers, col)
+		if idx >= 0 && idx < len(row) {
+			value := strings.TrimSpace(row[idx])
+			if value != "" {
+				fields = append(fields, value)
+			}
 		}
 	}
 
@@ -151,17 +157,23 @@ func readColumnArrayDef(headers []string, def ColumnArrayDef, row []string) []st
 	var fields []string
 
 	if def.Columns != "" {
-		value := strings.TrimSpace(row[slices.Index(headers, def.Columns)])
-		if value != "" {
-			fields = append(fields, value)
+		idx := slices.Index(headers, def.Columns)
+		if idx >= 0 && idx < len(row) {
+			value := strings.TrimSpace(row[idx])
+			if value != "" {
+				fields = append(fields, value)
+			}
 		}
 	}
 
 	var name string
 	for _, col := range def.Merge {
-		value := strings.TrimSpace(row[slices.Index(headers, col)])
-		if value != "" {
-			name += fmt.Sprintf(" %s", value)
+		idx := slices.Index(headers, col)
+		if idx >= 0 && idx < len(row) {
+			value := strings.TrimSpace(row[idx])
+			if value != "" {
+				name += fmt.Sprintf(" %s", value)
+			}
 		}
 	}
 
