@@ -25,6 +25,10 @@ Watchman uses a hierarchical matching approach that evaluates entity similarity 
 | Medium | Supporting Information | Addresses, dates of birth, and contextual metadata |
 | Low | Relationship Data | Connections to other entities, when available |
 
+### Using Multiple Fields
+
+Watchman is designed for searches to use multiple fields and downranks name only searches. In production usage there are many false positive matches when searching by a name or partial name.
+
 ## Advanced Name Matching
 
 ### Jaro-Winkler Algorithm
