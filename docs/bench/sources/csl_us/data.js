@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1749733117737,
+  "lastUpdate": 1749905625489,
   "repoUrl": "https://github.com/moov-io/watchman",
   "entries": {
     "moov-io/watchman CSL US Benchmarks": [
@@ -490,6 +490,76 @@ window.BENCHMARK_DATA = {
             "value": 11384,
             "unit": "allocs/op",
             "extra": "144 times\n4 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "github-action-benchmark",
+            "username": "github",
+            "email": "github@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "github-action-benchmark",
+            "username": "github",
+            "email": "github@users.noreply.github.com"
+          },
+          "id": "0d9f1a01d011c35c3f91a182b8427ccbe2a58a5a",
+          "message": "add moov-io/watchman OFAC Benchmarks (go) benchmark result for eeaf47982b5e9840b8afbdec1cba39943ec0f7b3",
+          "timestamp": "2025-06-14T12:53:40Z",
+          "url": "https://github.com/moov-io/watchman/commit/0d9f1a01d011c35c3f91a182b8427ccbe2a58a5a"
+        },
+        "date": 1749905625475,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "BenchmarkRead",
+            "value": 1976608769,
+            "unit": "ns/op\t58658072 B/op\t   47686 allocs/op",
+            "extra": "1 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRead - ns/op",
+            "value": 1976608769,
+            "unit": "ns/op",
+            "extra": "1 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRead - B/op",
+            "value": 58658072,
+            "unit": "B/op",
+            "extra": "1 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRead - allocs/op",
+            "value": 47686,
+            "unit": "allocs/op",
+            "extra": "1 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity",
+            "value": 8005326,
+            "unit": "ns/op\t 2130162 B/op\t   11383 allocs/op",
+            "extra": "148 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity - ns/op",
+            "value": 8005326,
+            "unit": "ns/op",
+            "extra": "148 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity - B/op",
+            "value": 2130162,
+            "unit": "B/op",
+            "extra": "148 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity - allocs/op",
+            "value": 11383,
+            "unit": "allocs/op",
+            "extra": "148 times\n4 procs"
           }
         ]
       }
