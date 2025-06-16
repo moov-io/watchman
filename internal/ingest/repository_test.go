@@ -50,6 +50,24 @@ func TestRepository(t *testing.T) {
 	})
 }
 
+func TestRepository_Normalize(t *testing.T) {
+	db.ForEachDatabase(t, func(db db.DB) {
+		repo := NewRepository(db)
+
+		ctx := context.Background()
+		entity := ofactest.FindEntity(t, "44525")
+
+		err := repo.Upsert(ctx, entity)
+		require.NoError(t, err)
+
+		found, err := repo.Get(ctx, entity.SourceID, entity.Source)
+		require.NoError(t, err)
+		require.NotNil(t, found)
+
+		require.NotEmpty(t, found.PreparedFields.NameFields)
+	})
+}
+
 func TestRepository_Upsert(t *testing.T) {
 	db.ForEachDatabase(t, func(db db.DB) {
 		repo := NewRepository(db)

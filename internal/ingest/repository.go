@@ -106,7 +106,7 @@ func (r *sqlRepository) queryScanEntities(ctx context.Context, qry string, args 
 			return nil, fmt.Errorf("json decode: %w", err)
 		}
 
-		out = append(out, row)
+		out = append(out, row.Normalize())
 	}
 	return out, nil
 }

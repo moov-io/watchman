@@ -6,7 +6,6 @@ import (
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/base/telemetry"
 	"github.com/moov-io/watchman/internal/api"
-	"github.com/moov-io/watchman/internal/search"
 	pubsearch "github.com/moov-io/watchman/pkg/search"
 
 	"github.com/gorilla/mux"
@@ -17,18 +16,16 @@ type Controller interface {
 	AppendRoutes(router *mux.Router) *mux.Router
 }
 
-func NewController(logger log.Logger, service Service, searchService search.Service) Controller {
+func NewController(logger log.Logger, service Service) Controller {
 	return &controller{
-		logger:        logger,
-		service:       service,
-		searchService: searchService,
+		logger:  logger,
+		service: service,
 	}
 }
 
 type controller struct {
-	logger        log.Logger
-	service       Service
-	searchService search.Service
+	logger  log.Logger
+	service Service
 }
 
 func (c *controller) AppendRoutes(router *mux.Router) *mux.Router {
@@ -66,17 +63,22 @@ func (c *controller) ingestFile(w http.ResponseWriter, r *http.Request) {
 
 	parsedFile, err := c.service.ReadEntitiesFromFile(ctx, fileType, r.Body)
 	if err != nil {
-		err = logger.Error().LogErrorf("problem reading entities from %s file: %w", fileType, err).Err()
+		err = logger.Error().LogErrorf("problem reading entities from %s file: %v", fileType, err).Err()
 		api.ErrorResponse(w, err)
 		return
 	}
 
 	logger.Info().Logf("found %d entities from %s file", len(parsedFile.Entities), parsedFile.FileType)
 
-	// Set the parsed entities in-memory
-	ingestKey := pubsearch.SourceList(parsedFile.FileType)
-	c.searchService.SetIngestedEntities(ingestKey, parsedFile.Entities)
+	// Save the the parsed entities
+	err = c.service.UpsertEntities(ctx, parsedFile.Entities)
+	if err != nil {
+		err = logger.Error().LogErrorf("problem updating %s entities: %v", fileType, err).Err()
+		api.ErrorResponse(w, err)
+		return
+	}
 
+	// Marshal the response
 	err = api.JsonResponse(w, pubsearch.IngestFileResponse{
 		FileType: parsedFile.FileType,
 		Entities: parsedFile.Entities,

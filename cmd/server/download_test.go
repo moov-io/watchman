@@ -12,7 +12,7 @@ import (
 
 	"github.com/moov-io/watchman/internal/download"
 	"github.com/moov-io/watchman/internal/fshelp"
-	"github.com/moov-io/watchman/internal/search"
+	"github.com/moov-io/watchman/internal/index"
 
 	"github.com/moov-io/base/log"
 	"github.com/stretchr/testify/require"
@@ -45,9 +45,7 @@ func TestDownloader_setupPeriodicRefreshing(t *testing.T) {
 	dl, err := download.NewDownloader(logger, conf)
 	require.NoError(t, err)
 
-	searchConfig := search.DefaultConfig()
-	searchService, err := search.NewService(logger, searchConfig)
-	require.NoError(t, err)
+	indexedLists := index.NewLists(nil) // only in-memory
 
 	go func() {
 		time.Sleep(500 * time.Millisecond)
@@ -55,7 +53,7 @@ func TestDownloader_setupPeriodicRefreshing(t *testing.T) {
 	}()
 
 	errs := make(chan error, 1)
-	err = setupPeriodicRefreshing(ctx, logger, errs, conf, dl, searchService)
+	err = setupPeriodicRefreshing(ctx, logger, errs, conf, dl, indexedLists)
 	require.NoError(t, err)
 
 	cancelFunc()

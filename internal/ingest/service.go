@@ -15,20 +15,23 @@ import (
 
 type Service interface {
 	ReadEntitiesFromFile(ctx context.Context, name string, contents io.Reader) (FileEntities, error)
+	UpsertEntities(ctx context.Context, entities []search.Entity[search.Value]) error
 }
 
-func NewService(logger log.Logger, conf Config) Service {
+func NewService(logger log.Logger, conf Config, repo Repository) Service {
 	logger.Info().Logf("found %d ingest fileTypes", len(conf.Files))
 
 	return &service{
 		logger: logger,
 		conf:   conf,
+		repo:   repo,
 	}
 }
 
 type service struct {
 	logger log.Logger
 	conf   Config
+	repo   Repository
 }
 
 type FileEntities struct {
@@ -255,4 +258,18 @@ func readAddresses(headers []string, def Addresses, row []string) (out []search.
 	}
 
 	return
+}
+
+func (s *service) UpsertEntities(ctx context.Context, entities []search.Entity[search.Value]) error {
+	if s.repo == nil {
+		return nil
+	}
+
+	for idx := range entities {
+		err := s.repo.Upsert(ctx, entities[idx])
+		if err != nil {
+			return fmt.Errorf("problem upserting %s/%s entity: %w", entities[idx].SourceID, entities[idx].Source, err)
+		}
+	}
+	return nil
 }
