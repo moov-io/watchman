@@ -30,5 +30,22 @@ func TestRepository(t *testing.T) {
 
 		// Compare objects
 		require.Equal(t, entity.Normalize(), found.Normalize())
+
+		// List
+		entities, err := repo.ListBySource(ctx, "", entity.Source, 10)
+		require.NoError(t, err)
+		require.Len(t, entities, 1)
+		require.Equal(t, entity.SourceID, entities[0].SourceID)
+
+		// List again
+		entities, err = repo.ListBySource(ctx, "12345", entity.Source, 10)
+		require.NoError(t, err)
+		require.Len(t, entities, 1)
+		require.Equal(t, entity.SourceID, entities[0].SourceID)
+
+		// Find nothing
+		entities, err = repo.ListBySource(ctx, entity.SourceID, entity.Source, 10)
+		require.NoError(t, err)
+		require.Empty(t, entities)
 	})
 }
