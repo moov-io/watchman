@@ -36,7 +36,7 @@ func New(config database.DatabaseConfig, logger log.Logger, options ...Option) (
 	data, err := database.New(ctx, logger, config)
 	for i := 0; err != nil && i < maxRetries; i++ {
 		// Check for a missing config
-		if errors.As(err, &database.ErrMissingConfig) {
+		if errors.Is(err, database.ErrMissingConfig) {
 			return nil, cancelFunc, nil
 		}
 
