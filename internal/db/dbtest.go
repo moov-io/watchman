@@ -45,6 +45,9 @@ func ForEachDatabase(t *testing.T, fn func(db DB)) {
 	if inCI && !run {
 		t.Skipf("not running ForEachDatabase on %v", runtime.GOOS)
 	}
+	if testing.Short() {
+		t.Skip("-short flag provided")
+	}
 
 	configs := make(map[string]database.DatabaseConfig)
 	configs["mysql"] = mysqlConfig()
@@ -75,6 +78,8 @@ func ForEachDatabase(t *testing.T, fn func(db DB)) {
 
 			// Reconnect
 			db, shutdown, err := New(config, logger)
+			require.NoError(t, err)
+
 			t.Cleanup(func() { shutdown() })
 
 			// Run our test

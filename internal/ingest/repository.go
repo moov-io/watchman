@@ -91,6 +91,7 @@ func (r *sqlRepository) queryScanEntities(ctx context.Context, qry string, args 
 	if err != nil {
 		return nil, fmt.Errorf("query for ingested entities: %w", err)
 	}
+	defer rows.Close()
 
 	var out []search.Entity[search.Value]
 	for rows.Next() {
@@ -108,5 +109,5 @@ func (r *sqlRepository) queryScanEntities(ctx context.Context, qry string, args 
 
 		out = append(out, row.Normalize())
 	}
-	return out, nil
+	return out, rows.Err()
 }

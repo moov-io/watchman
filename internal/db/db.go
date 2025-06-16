@@ -118,7 +118,7 @@ func (db *db) QueryContext(ctx context.Context, query string, args ...any) (*sql
 	))
 	defer span.End()
 
-	return db.db.QueryContext(ctx, query, args...)
+	return db.db.QueryContext(ctx, query, args...) //nolint:sqlclosecheck
 }
 
 func (db *db) QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row {
