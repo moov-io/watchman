@@ -8,7 +8,11 @@ import (
 
 	"github.com/moov-io/base/database"
 	"github.com/moov-io/base/log"
+	"github.com/moov-io/base/telemetry"
 	root "github.com/moov-io/watchman"
+
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type DB interface {
@@ -73,7 +77,7 @@ func New(config database.DatabaseConfig, logger log.Logger, options ...Option) (
 		onQuery: func(query string) string { return query },
 	}
 
-	for _, opt := range dbOpts {
+	for _, opt := range append(dbOpts, options...) {
 		if err := opt(out); err != nil {
 			return nil, nil, fmt.Errorf("applying options: %w", err)
 		}
@@ -98,17 +102,32 @@ func (db *db) Close() error {
 func (db *db) ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error) {
 	query = db.onQuery(query)
 
+	ctx, span := telemetry.StartSpan(ctx, "sql-exec", trace.WithAttributes(
+		attribute.String("query", query),
+	))
+	defer span.End()
+
 	return db.db.ExecContext(ctx, query, args...)
 }
 
 func (db *db) QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error) {
 	query = db.onQuery(query)
 
+	ctx, span := telemetry.StartSpan(ctx, "sql-query", trace.WithAttributes(
+		attribute.String("query", query),
+	))
+	defer span.End()
+
 	return db.db.QueryContext(ctx, query, args...)
 }
 
 func (db *db) QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row {
 	query = db.onQuery(query)
+
+	ctx, span := telemetry.StartSpan(ctx, "sql-query-row", trace.WithAttributes(
+		attribute.String("query", query),
+	))
+	defer span.End()
 
 	return db.db.QueryRowContext(ctx, query, args...)
 }
