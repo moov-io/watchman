@@ -37,7 +37,7 @@ func New(config database.DatabaseConfig, logger log.Logger, options ...Option) (
 	for i := 0; err != nil && i < maxRetries; i++ {
 		// Check for a missing config
 		if errors.As(err, &database.ErrMissingConfig) {
-			return nil, nil, nil
+			return nil, cancelFunc, nil
 		}
 
 		logger.Info().LogErrorf("attempt %d/%d to connect to database again: %v", i+1, maxRetries, err)
@@ -85,7 +85,7 @@ func New(config database.DatabaseConfig, logger log.Logger, options ...Option) (
 
 	for _, opt := range append(dbOpts, options...) {
 		if err := opt(out); err != nil {
-			return nil, nil, fmt.Errorf("applying options: %w", err)
+			return nil, cancelFunc, fmt.Errorf("applying options: %w", err)
 		}
 	}
 
