@@ -115,6 +115,15 @@ postal-server:
 build-webui:
 	cd ./cmd/ui/ && fyne package --release --icon ./assets/icon.jpeg -os web --app-version "${APP_VERSION}" && cd -
 
+.PHONY: setup
+setup:
+	docker compose up -d --force-recreate --remove-orphans
+
+.PHONY: teardown
+teardown:
+	-docker compose down --remove-orphans
+	-docker compose rm -f -v
+
 .PHONY: check
 check:
 ifeq ($(OS),Windows_NT)

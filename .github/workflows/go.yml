@@ -62,11 +62,22 @@ jobs:
         go-version: stable
       id: go
 
+    - name: Setup Containers
+      if: runner.os == 'Linux'
+      run: |
+        make setup
+
     - name: Run Tests
       run: make check
       env:
         GOTEST_FLAGS: "-short"
         SKIP_LINTERS: yes
+        RUN_DATABASE_TESTS: ${{ runner.os == 'Linux' }}
+
+    - name: Teardown Containers
+      if: runner.os == 'Linux'
+      run: |
+        make teardown
 
   sources-long:
     name: Long testing pkg/sources/
