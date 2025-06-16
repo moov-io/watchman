@@ -12,6 +12,7 @@ require (
 	github.com/dongri/phonenumber v0.1.12
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-retryablehttp v0.7.7
+	github.com/jmoiron/sqlx v1.4.0
 	github.com/knieriem/odf v0.1.0
 	github.com/moov-io/base v0.55.0
 	github.com/moov-io/iso3166 v0.2.1
@@ -94,7 +95,6 @@ require (
 	github.com/jackc/pgx/v5 v5.7.4 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jeandeaual/go-locale v0.0.0-20241217141322-fcc2cadd6f08 // indirect
-	github.com/jmoiron/sqlx v1.4.0 // indirect
 	github.com/jsummers/gobmp v0.0.0-20230614200233-a9de23ed2e25 // indirect
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/markbates/pkger v0.17.1 // indirect
@@ -108,6 +108,7 @@ require (
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.62.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
+	github.com/rickar/cal/v2 v2.1.23 // indirect
 	github.com/rymdport/portal v0.4.1 // indirect
 	github.com/sagikazarmark/locafero v0.7.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect

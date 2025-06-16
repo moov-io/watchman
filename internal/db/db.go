@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/moov-io/base/database"
@@ -70,6 +71,12 @@ func New(config database.DatabaseConfig, logger log.Logger, options ...Option) (
 	out := &db{
 		db:      data,
 		onQuery: func(query string) string { return query },
+	}
+
+	for _, opt := range dbOpts {
+		if err := opt(out); err != nil {
+			return nil, nil, fmt.Errorf("applying options: %w", err)
+		}
 	}
 
 	return out, shutdown, nil

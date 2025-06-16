@@ -10,8 +10,5 @@ func TestPing(t *testing.T) {
 	ForEachDatabase(t, func(db DB) {
 		err := db.Ping()
 		require.NoError(t, err)
-
-		err = db.Close()
-		require.NoError(t, err)
 	})
 }
