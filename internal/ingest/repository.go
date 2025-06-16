@@ -19,6 +19,9 @@ type Repository interface {
 }
 
 func NewRepository(db db.DB) Repository {
+	if db == nil {
+		return &MockRepository{}
+	}
 	return &sqlRepository{db: db}
 }
 

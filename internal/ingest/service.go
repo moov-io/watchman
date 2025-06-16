@@ -19,7 +19,7 @@ type Service interface {
 }
 
 func NewService(logger log.Logger, conf Config, repo Repository) Service {
-	logger.Info().Logf("found %d ingest fileTypes", len(conf.Files))
+	logger.Info().Logf("found %d ingest fileTypes, using %T", len(conf.Files), repo)
 
 	return &service{
 		logger: logger,

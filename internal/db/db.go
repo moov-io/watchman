@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -34,6 +35,11 @@ func New(config database.DatabaseConfig, logger log.Logger, options ...Option) (
 	// connect to the database and keep retrying
 	data, err := database.New(ctx, logger, config)
 	for i := 0; err != nil && i < maxRetries; i++ {
+		// Check for a missing config
+		if errors.As(err, &database.ErrMissingConfig) {
+			return nil, nil, nil
+		}
+
 		logger.Info().LogErrorf("attempt %d/%d to connect to database again: %v", i+1, maxRetries, err)
 
 		time.Sleep(time.Second * 5)
