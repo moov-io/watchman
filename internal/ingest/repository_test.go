@@ -49,3 +49,26 @@ func TestRepository(t *testing.T) {
 		require.Empty(t, entities)
 	})
 }
+
+func TestRepository_Upsert(t *testing.T) {
+	db.ForEachDatabase(t, func(db db.DB) {
+		repo := NewRepository(db)
+
+		ctx := context.Background()
+		entity := ofactest.FindEntity(t, "44525")
+
+		err := repo.Upsert(ctx, entity)
+		require.NoError(t, err)
+
+		entity.Name = "john doe"
+
+		err = repo.Upsert(ctx, entity)
+		require.NoError(t, err)
+
+		found, err := repo.Get(ctx, entity.SourceID, entity.Source)
+		require.NoError(t, err)
+		require.NotNil(t, found)
+
+		require.Equal(t, "john doe", found.Name)
+	})
+}

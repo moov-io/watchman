@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/moov-io/base/database"
 	"github.com/moov-io/watchman/internal/db"
 	"github.com/moov-io/watchman/pkg/search"
 )
@@ -26,9 +27,6 @@ type sqlRepository struct {
 }
 
 func (r *sqlRepository) Upsert(ctx context.Context, entity search.Entity[search.Value]) error {
-
-	// TODO(adam): impl Upsert
-
 	qry := `INSERT INTO ingested_entities (type, source, source_id, entity) VALUES (?, ?, ?, ?);`
 
 	bs, err := json.Marshal(entity)
@@ -43,6 +41,22 @@ func (r *sqlRepository) Upsert(ctx context.Context, entity search.Entity[search.
 		bs,
 	)
 	if err != nil {
+		// Update if we collide on INSERT
+		if database.UniqueViolation(err) {
+			qry := `UPDATE ingested_entities SET entity = ? WHERE source = ? AND source_id = ?;`
+
+			_, err := r.db.ExecContext(ctx, qry,
+				// SET
+				bs,
+				// WHERE
+				string(entity.Source),
+				string(entity.SourceID),
+			)
+			if err != nil {
+				return fmt.Errorf("updating ingested entity: %w", err)
+			}
+			return nil
+		}
 		return fmt.Errorf("inserting ingested entity: %w", err)
 	}
 
