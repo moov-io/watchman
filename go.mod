@@ -19,14 +19,14 @@ require (
 	github.com/openvenues/gopostal v0.0.0-20240426055609-4fe3a773f519
 	github.com/pariz/gountries v0.1.6
 	github.com/stretchr/testify v1.10.0
-	github.com/urfave/cli/v3 v3.3.3
+	github.com/urfave/cli/v3 v3.3.8
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1
 	go.opentelemetry.io/otel v1.36.0
 	go.opentelemetry.io/otel/trace v1.36.0
 	go.uber.org/automaxprocs v1.6.0
-	golang.org/x/sync v0.14.0
-	golang.org/x/text v0.25.0
+	golang.org/x/sync v0.15.0
+	golang.org/x/text v0.26.0
 )
 
 require (
