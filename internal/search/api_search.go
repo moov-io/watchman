@@ -204,10 +204,9 @@ func readSearchRequest(ctx context.Context, addressParsingPool *postalpool.Servi
 			Flag:      q.Get("flag"),
 			Built:     readDate("built"),
 			Model:     q.Get("model"),
-			// Tonnage:  // TODO(adam):
-			MMSI:     q.Get("mmsi"),
-			CallSign: q.Get("callSign"),
-			Owner:    q.Get("owner"),
+			MMSI:      q.Get("mmsi"),
+			CallSign:  q.Get("callSign"),
+			Owner:     q.Get("owner"),
 		}
 		if v := strings.TrimSpace(q.Get("tonnage")); v != "" {
 			req.Vessel.Tonnage, err = readInt(v)
@@ -223,7 +222,7 @@ func readSearchRequest(ctx context.Context, addressParsingPool *postalpool.Servi
 		}
 	}
 
-	// contact info // TODO(adam): normalize
+	// Contact Info
 	req.Contact.EmailAddresses = readStrings(q.GetAll("email"), q.GetAll("emailAddress"), q.GetAll("emailAddresses"))
 	req.Contact.PhoneNumbers = readStrings(q.GetAll("phone"), q.GetAll("phoneNumber"), q.GetAll("phoneNumbers"))
 	req.Contact.FaxNumbers = readStrings(q.GetAll("fax"), q.GetAll("faxNumber"), q.GetAll("faxNumbers"))

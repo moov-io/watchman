@@ -26,7 +26,7 @@ func TestRepository(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, found)
 
-		// Empty SourceData // TODO(adam): can we unmarshal
+		// Empty SourceData // TODO(adam): can we unmarshal?
 		entity.SourceData = make(map[string]interface{})
 		found.SourceData = make(map[string]interface{})
 
