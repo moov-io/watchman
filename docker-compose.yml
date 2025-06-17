@@ -1,17 +1,39 @@
 version: '3'
+
 services:
-  watchman:
-    image: moov/watchman:latest
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    environment:
-      INITIAL_DATA_DIRECTORY: /data/
-    volumes:
-      - ./test/testdata/:/data/
+
+  # Containers used for testing
+  mysql:
+    image: mysql:8.0.33
+    restart: always
     ports:
-      - "8084:8084"
-      - "9094:9094"
+      - "3306:3306"
+    environment:
+      - MYSQL_DATABASE=watchman
+      - MYSQL_USER=watchman
+      - MYSQL_PASSWORD=watchman
+      - MYSQL_ROOT_PASSWORD=root
+    networks:
+      - intranet
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    tmpfs: # Run this mysql in memory as its used for testing
+      - /var/lib/mysql
+
+  postgres:
+    image: postgres:17
+    restart: always
+    shm_size: 128mb
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=watchman
+      - POSTGRES_USER=watchman
+      - POSTGRES_PASSWORD=watchman
+    networks:
+    - intranet
 
 networks:
   intranet: {}

@@ -15,11 +15,11 @@ import (
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/base/telemetry"
 	"github.com/moov-io/watchman/internal/download"
-	"github.com/moov-io/watchman/internal/search"
+	"github.com/moov-io/watchman/internal/index"
 )
 
-func setupPeriodicRefreshing(ctx context.Context, logger log.Logger, errs chan error, conf download.Config, downloader download.Downloader, searchService search.Service) error {
-	err := refreshAllSources(logger, downloader, searchService)
+func setupPeriodicRefreshing(ctx context.Context, logger log.Logger, errs chan error, conf download.Config, downloader download.Downloader, indexedLists index.Lists) error {
+	err := refreshAllSources(logger, downloader, indexedLists)
 	if err != nil {
 		return err
 	}
@@ -36,7 +36,7 @@ func setupPeriodicRefreshing(ctx context.Context, logger log.Logger, errs chan e
 				return
 
 			case <-ticker.C:
-				err := refreshAllSources(logger, downloader, searchService)
+				err := refreshAllSources(logger, downloader, indexedLists)
 				if err != nil {
 					errs <- err
 				}
@@ -62,7 +62,7 @@ func getRefreshInterval(conf download.Config) time.Duration {
 	return cmp.Or(conf.RefreshInterval, defaultRefreshInterval)
 }
 
-func refreshAllSources(logger log.Logger, downloader download.Downloader, searchService search.Service) error {
+func refreshAllSources(logger log.Logger, downloader download.Downloader, indexedLists index.Lists) error {
 	ctx, span := telemetry.StartSpan(context.Background(), "refresh-all-sources")
 	defer span.End()
 
@@ -74,8 +74,8 @@ func refreshAllSources(logger log.Logger, downloader download.Downloader, search
 	logger.Info().Logf("data refreshed - %v entities from %v lists took %v (using %.2fGB)",
 		len(stats.Entities), len(stats.Lists), stats.EndedAt.Sub(stats.StartedAt), getCurrentMemoryUsed())
 
-	// Replace in-mem entities for search.Service
-	searchService.UpdateEntities(stats)
+	// Replace in-mem entities
+	indexedLists.Update(stats)
 
 	return nil
 }

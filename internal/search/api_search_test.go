@@ -12,6 +12,7 @@ import (
 
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/internal/api"
+	"github.com/moov-io/watchman/internal/index"
 	"github.com/moov-io/watchman/internal/ofactest"
 	"github.com/moov-io/watchman/pkg/search"
 
@@ -46,15 +47,17 @@ func testAPI(tb testing.TB) testSetup {
 
 	logger := log.NewTestLogger()
 
+	indexedLists := index.NewLists(nil) // only in-mem
+
 	searchConfig := DefaultConfig()
-	service, err := NewService(logger, searchConfig)
+	service, err := NewService(logger, searchConfig, indexedLists)
 	require.NoError(tb, err)
 
 	dl := ofactest.GetDownloader(tb)
 	stats, err := dl.RefreshAll(context.Background())
 	require.NoError(tb, err)
 
-	service.UpdateEntities(stats)
+	indexedLists.Update(stats)
 
 	controller := NewController(logger, service, nil)
 

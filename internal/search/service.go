@@ -8,12 +8,11 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
-	"github.com/moov-io/watchman"
 	"github.com/moov-io/watchman/internal/concurrencychamp"
 	"github.com/moov-io/watchman/internal/download"
+	"github.com/moov-io/watchman/internal/index"
 	"github.com/moov-io/watchman/internal/indices"
 	"github.com/moov-io/watchman/internal/largest"
 	"github.com/moov-io/watchman/internal/minmaxmed"
@@ -28,25 +27,20 @@ import (
 type Service interface {
 	LatestStats() download.Stats
 
-	SetIngestedEntities(ingestKey search.SourceList, entities []search.Entity[search.Value])
-	UpdateEntities(stats download.Stats)
-
 	Search(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error)
 }
 
-func NewService(logger log.Logger, config Config) (Service, error) {
+func NewService(logger log.Logger, config Config, indexedLists index.Lists) (Service, error) {
 	cm, err := concurrencychamp.NewConcurrencyManager(config.Goroutines.Default, config.Goroutines.Min, config.Goroutines.Max)
 	if err != nil {
 		return nil, fmt.Errorf("creating search service: %w", err)
 	}
 
-	ingestedFiles := make(map[search.SourceList][]search.Entity[search.Value])
-
 	return &service{
-		logger:        logger,
-		config:        config,
-		ingestedFiles: ingestedFiles,
-		cm:            cm,
+		logger:       logger,
+		config:       config,
+		indexedLists: indexedLists,
+		cm:           cm,
 	}, nil
 }
 
@@ -54,41 +48,13 @@ type service struct {
 	logger log.Logger
 	config Config
 
-	sync.RWMutex  // protects latestStats and ingestedFiles
-	ingestedFiles map[search.SourceList][]search.Entity[search.Value]
-	latestStats   download.Stats
+	indexedLists index.Lists
 
 	cm *concurrencychamp.ConcurrencyManager
 }
 
 func (s *service) LatestStats() download.Stats {
-	// Grab a read-lock over our data
-	s.RLock()
-	defer s.RUnlock()
-
-	// Only bring over what fields we need
-	out := download.Stats{
-		Lists:      s.latestStats.Lists,
-		ListHashes: s.latestStats.ListHashes,
-		StartedAt:  s.latestStats.StartedAt,
-		EndedAt:    s.latestStats.EndedAt,
-		Version:    watchman.Version,
-	}
-	return out
-}
-
-func (s *service) SetIngestedEntities(ingestKey search.SourceList, entities []search.Entity[search.Value]) {
-	s.Lock()
-	defer s.Unlock()
-
-	s.ingestedFiles[ingestKey] = entities
-}
-
-func (s *service) UpdateEntities(stats download.Stats) {
-	s.Lock()
-	defer s.Unlock()
-
-	s.latestStats = stats
+	return s.indexedLists.LatestStats()
 }
 
 func (s *service) Search(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error) {
@@ -96,10 +62,6 @@ func (s *service) Search(ctx context.Context, query search.Entity[search.Value],
 		attribute.String("entity.type", string(query.Type)),
 	))
 	defer span.End()
-
-	// Grab a read-lock over our data
-	s.RLock()
-	defer s.RUnlock()
 
 	out, err := s.performSearch(ctx, query, opts)
 	if err != nil {
@@ -143,14 +105,10 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	}
 	start := time.Now()
 
-	// Grab a read-lock over the current set of entities
-	s.RLock()
-	defer s.RUnlock()
-
 	// Check if the query is targeting ingested files
-	searchEntities := s.latestStats.Entities
-	if entities, found := s.ingestedFiles[query.Source]; found {
-		searchEntities = entities
+	searchEntities, err := s.indexedLists.GetEntities(ctx, query.Source)
+	if err != nil {
+		return nil, fmt.Errorf("getting indexed entities: %w", err)
 	}
 
 	indices.ProcessSliceFn(searchEntities, goroutineCount, func(index search.Entity[search.Value]) {

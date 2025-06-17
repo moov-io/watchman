@@ -3,7 +3,6 @@ package search
 import (
 	"context"
 	"encoding/base64"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/moov-io/watchman/internal/download"
 	"github.com/moov-io/watchman/internal/fshelp"
+	"github.com/moov-io/watchman/internal/index"
 	"github.com/moov-io/watchman/pkg/search"
 	"github.com/moov-io/watchman/pkg/sources/ofac"
 
@@ -47,6 +47,7 @@ func TestService_Search(t *testing.T) {
 				{Currency: "XBT", Address: "12VrYZgS1nmf9KHHped24xBb1aLLRpV2cT"},
 			},
 		}
+
 		results, err := svc.Search(ctx, query.Normalize(), opts)
 		require.NoError(t, err)
 
@@ -55,9 +56,8 @@ func TestService_Search(t *testing.T) {
 			t.Logf("match: %.2f", results[0].Match)
 			t.Logf("%#v", results[0].Entity)
 
-			bs, err := base64.StdEncoding.DecodeString(results[0].Debug)
+			_, err := base64.StdEncoding.DecodeString(results[0].Debug)
 			require.NoError(t, err)
-			fmt.Println(string(bs))
 		}
 		require.Greater(t, len(results), 0)
 
@@ -85,11 +85,13 @@ func testService(tb testing.TB) Service {
 
 	logger := log.NewTestLogger()
 
+	indexedLists := index.NewLists(nil) // only in-mem
+
 	searchConfig := DefaultConfig()
-	svc, err := NewService(logger, searchConfig)
+	svc, err := NewService(logger, searchConfig, indexedLists)
 	require.NoError(tb, err)
 
-	svc.UpdateEntities(download.Stats{
+	indexedLists.Update(download.Stats{
 		Entities: entities,
 	})
 

@@ -13,6 +13,7 @@ import (
 	"github.com/moov-io/watchman/internal/webui"
 
 	"github.com/moov-io/base/config"
+	"github.com/moov-io/base/database"
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/base/telemetry"
 )
@@ -24,6 +25,8 @@ type GlobalConfig struct {
 type Config struct {
 	Servers   ServerConfig
 	Telemetry telemetry.Config
+
+	Database database.DatabaseConfig
 
 	Webui webui.Config
 

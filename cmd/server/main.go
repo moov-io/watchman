@@ -20,7 +20,9 @@ import (
 	"github.com/moov-io/base/telemetry"
 	"github.com/moov-io/watchman"
 	"github.com/moov-io/watchman/internal/config"
+	"github.com/moov-io/watchman/internal/db"
 	"github.com/moov-io/watchman/internal/download"
+	"github.com/moov-io/watchman/internal/index"
 	"github.com/moov-io/watchman/internal/ingest"
 	"github.com/moov-io/watchman/internal/postalpool"
 	"github.com/moov-io/watchman/internal/search"
@@ -71,13 +73,26 @@ func main() {
 	// Listen for errors
 	errs := make(chan error, 1)
 
+	// Setup database
+	database, shutdown, err := db.New(conf.Database, logger)
+	if err != nil {
+		logger.Fatal().LogErrorf("problem setting up database: %v", err)
+		os.Exit(1)
+	}
+	defer shutdown()
+
+	// Setup ingest services
+	ingestRepository := ingest.NewRepository(database)
+	ingestService := ingest.NewService(logger, conf.Ingest, ingestRepository)
+
 	// Setup search service and endpoints
-	searchService, err := search.NewService(logger, conf.Search)
+	indexedLists := index.NewLists(ingestRepository)
+	searchService, err := search.NewService(logger, conf.Search, indexedLists)
 	if err != nil {
 		logger.Fatal().LogErrorf("problem setting up search service: %v", err)
 		os.Exit(1)
 	}
-	err = setupPeriodicRefreshing(ctx, logger, errs, conf.Download, downloader, searchService)
+	err = setupPeriodicRefreshing(ctx, logger, errs, conf.Download, downloader, indexedLists)
 	if err != nil {
 		logger.Fatal().LogErrorf("problem during initial download: %v", err)
 		os.Exit(1)
@@ -94,8 +109,7 @@ func main() {
 	searchController := search.NewController(logger, searchService, addressParsingPool)
 	searchController.AppendRoutes(router)
 
-	ingestService := ingest.NewService(logger, conf.Ingest)
-	ingestController := ingest.NewController(logger, ingestService, searchService)
+	ingestController := ingest.NewController(logger, ingestService)
 	ingestController.AppendRoutes(router)
 
 	// Add the Webui last
