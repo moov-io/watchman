@@ -156,31 +156,31 @@ func readSearchRequest(ctx context.Context, addressParsingPool *postalpool.Servi
 	switch req.Type {
 	case search.EntityPerson:
 		req.Person = &search.Person{
-			Name:      req.Name,
-			AltNames:  q.GetAll("altNames"),
-			Gender:    search.Gender(prepare.NormalizeGender(q.Get("gender"))),
-			BirthDate: readDate(q.Get("birthDate")),
-			DeathDate: readDate(q.Get("deathDate")),
-			Titles:    q.GetAll("titles"),
-			// GovernmentIDs []GovernmentID `json:"governmentIDs"` // TODO(adam):
+			Name:          req.Name,
+			AltNames:      q.GetAll("altNames"),
+			Gender:        search.Gender(prepare.NormalizeGender(q.Get("gender"))),
+			BirthDate:     readDate(q.Get("birthDate")),
+			DeathDate:     readDate(q.Get("deathDate")),
+			Titles:        q.GetAll("titles"),
+			GovernmentIDs: readGovernmentIDs(q),
 		}
 
 	case search.EntityBusiness:
 		req.Business = &search.Business{
-			Name:      req.Name,
-			AltNames:  q.GetAll("altNames"),
-			Created:   readDate(q.Get("created")),
-			Dissolved: readDate(q.Get("dissolved")),
-			// Identifier []Identifier `json:"identifier"`
+			Name:          req.Name,
+			AltNames:      q.GetAll("altNames"),
+			Created:       readDate(q.Get("created")),
+			Dissolved:     readDate(q.Get("dissolved")),
+			GovernmentIDs: readGovernmentIDs(q),
 		}
 
 	case search.EntityOrganization:
 		req.Organization = &search.Organization{
-			Name:      req.Name,
-			AltNames:  q.GetAll("altNames"),
-			Created:   readDate(q.Get("created")),
-			Dissolved: readDate(q.Get("dissolved")),
-			// Identifier []Identifier `json:"identifier"`
+			Name:          req.Name,
+			AltNames:      q.GetAll("altNames"),
+			Created:       readDate(q.Get("created")),
+			Dissolved:     readDate(q.Get("dissolved")),
+			GovernmentIDs: readGovernmentIDs(q),
 		}
 
 	case search.EntityAircraft:
@@ -275,6 +275,27 @@ func readStrings(inputs ...[]string) []string {
 		for _, item := range items {
 			out = append(out, strings.TrimSpace(item))
 		}
+	}
+	return out
+}
+
+func readGovernmentIDs(q *api.QueryParams) []search.GovernmentID {
+	queryKeys := q.WithPrefix("gov_")
+
+	var out []search.GovernmentID
+	for idx := range queryKeys {
+		parts := strings.Split(q.Get(queryKeys[idx]), ":")
+		if len(parts) <= 1 {
+			continue
+		}
+
+		g := search.GovernmentID{
+			Type:       search.GovernmentIDType(strings.TrimPrefix(queryKeys[idx], "gov_")),
+			Country:    parts[0],
+			Identifier: parts[1],
+		}
+
+		out = append(out, g)
 	}
 	return out
 }

@@ -214,7 +214,7 @@ func setPersonParameters(q url.Values, entity Entity[Value]) {
 		q.Add("titles", title)
 	}
 
-	// TODO(adam): GovernmentIDs
+	setGovernmentIDs(q, entity.Person.GovernmentIDs)
 }
 
 func setBusinessParameters(q url.Values, entity Entity[Value]) {
@@ -232,7 +232,7 @@ func setBusinessParameters(q url.Values, entity Entity[Value]) {
 		q.Set("created", entity.Business.Created.Format(yyyymmdd))
 	}
 
-	// TODO(adam): GovernmentIDs
+	setGovernmentIDs(q, entity.Business.GovernmentIDs)
 }
 
 func setOrganizationParameters(q url.Values, entity Entity[Value]) {
@@ -250,7 +250,7 @@ func setOrganizationParameters(q url.Values, entity Entity[Value]) {
 		q.Set("created", entity.Organization.Created.Format(yyyymmdd))
 	}
 
-	// TODO(adam): GovernmentIDs
+	setGovernmentIDs(q, entity.Organization.GovernmentIDs)
 }
 
 func setAircraftParameters(q url.Values, entity Entity[Value]) {
@@ -322,6 +322,15 @@ func setVesselParameters(q url.Values, entity Entity[Value]) {
 	// TODO(adam): GrossRegisteredTonnage
 	if entity.Vessel.Owner != "" {
 		q.Set("owner", entity.Vessel.Owner)
+	}
+}
+
+func setGovernmentIDs(q url.Values, ids []GovernmentID) {
+	for _, id := range ids {
+		key := fmt.Sprintf("gov_%s", string(id.Type))
+		value := fmt.Sprintf("%s:%s", id.Country, id.Identifier)
+
+		q.Add(key, value)
 	}
 }
 

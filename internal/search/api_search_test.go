@@ -151,6 +151,25 @@ func TestAPI_readSearchRequest(t *testing.T) {
 		require.Len(t, query.Addresses, 1)
 		require.Equal(t, expected, query.Addresses[0])
 	})
+
+	t.Run("government id (US Passport)", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?type=person&gov_passport=US:123456789", nil)
+		q := &api.QueryParams{Values: req.URL.Query()}
+
+		query, err := readSearchRequest(ctx, nil, q)
+		require.NoError(t, err)
+		require.NotNil(t, query.Person)
+
+		govIDs := query.Person.GovernmentIDs
+		require.Len(t, govIDs, 1)
+
+		expected := search.GovernmentID{
+			Type:       search.GovernmentIDPassport,
+			Country:    "US",
+			Identifier: "123456789",
+		}
+		require.Equal(t, expected, govIDs[0])
+	})
 }
 
 func TestAPI_Search(t *testing.T) {

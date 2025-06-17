@@ -3,12 +3,26 @@ package api
 import (
 	"net/url"
 	"slices"
+	"strings"
 )
 
 type QueryParams struct {
 	url.Values
 
 	valuesRead []string
+}
+
+func (q *QueryParams) WithPrefix(prefix string) []string {
+	var out []string
+
+	for key := range q.Values {
+		if strings.HasPrefix(key, prefix) {
+			out = append(out, key)
+		}
+	}
+	slices.Sort(out)
+
+	return out
 }
 
 func (q *QueryParams) Get(name string) string {
