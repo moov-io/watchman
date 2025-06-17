@@ -6,6 +6,7 @@ import (
 
 	"github.com/moov-io/watchman/internal/db"
 	"github.com/moov-io/watchman/internal/ofactest"
+	"github.com/moov-io/watchman/pkg/search"
 
 	"github.com/stretchr/testify/require"
 )
@@ -16,8 +17,9 @@ func TestRepository(t *testing.T) {
 
 		ctx := context.Background()
 		entity := ofactest.FindEntity(t, "44525")
+		entities := []search.Entity[search.Value]{entity}
 
-		err := repo.Upsert(ctx, entity)
+		err := repo.Upsert(ctx, "fincen-person", entities)
 		require.NoError(t, err)
 
 		found, err := repo.Get(ctx, entity.SourceID, entity.Source)
@@ -32,7 +34,7 @@ func TestRepository(t *testing.T) {
 		require.Equal(t, entity.Normalize(), found.Normalize())
 
 		// List
-		entities, err := repo.ListBySource(ctx, "", entity.Source, 10)
+		entities, err = repo.ListBySource(ctx, "", entity.Source, 10)
 		require.NoError(t, err)
 		require.Len(t, entities, 1)
 		require.Equal(t, entity.SourceID, entities[0].SourceID)
@@ -56,8 +58,9 @@ func TestRepository_Normalize(t *testing.T) {
 
 		ctx := context.Background()
 		entity := ofactest.FindEntity(t, "44525")
+		entities := []search.Entity[search.Value]{entity}
 
-		err := repo.Upsert(ctx, entity)
+		err := repo.Upsert(ctx, "fincen-person", entities)
 		require.NoError(t, err)
 
 		found, err := repo.Get(ctx, entity.SourceID, entity.Source)
@@ -74,13 +77,17 @@ func TestRepository_Upsert(t *testing.T) {
 
 		ctx := context.Background()
 		entity := ofactest.FindEntity(t, "44525")
+		entity2 := ofactest.FindEntity(t, "48727")
+		entities := []search.Entity[search.Value]{entity, entity2}
 
-		err := repo.Upsert(ctx, entity)
+		err := repo.Upsert(ctx, "fincen-person", entities)
 		require.NoError(t, err)
 
-		entity.Name = "john doe"
+		// Remove entity2 from the upsert list
+		entities = []search.Entity[search.Value]{entity}
+		entities[0].Name = "john doe"
 
-		err = repo.Upsert(ctx, entity)
+		err = repo.Upsert(ctx, "fincen-person", entities)
 		require.NoError(t, err)
 
 		found, err := repo.Get(ctx, entity.SourceID, entity.Source)

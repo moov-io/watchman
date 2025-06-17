@@ -71,7 +71,7 @@ func (c *controller) ingestFile(w http.ResponseWriter, r *http.Request) {
 	logger.Info().Logf("found %d entities from %s file", len(parsedFile.Entities), parsedFile.FileType)
 
 	// Save the parsed entities
-	err = c.service.UpsertEntities(ctx, parsedFile.Entities)
+	err = c.service.ReplaceEntities(ctx, parsedFile.FileType, parsedFile.Entities)
 	if err != nil {
 		err = logger.Error().LogErrorf("problem updating %s entities: %v", fileType, err).Err()
 		api.ErrorResponse(w, err)

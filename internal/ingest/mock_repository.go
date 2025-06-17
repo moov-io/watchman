@@ -10,7 +10,9 @@ type MockRepository struct {
 	Err error
 }
 
-func (r *MockRepository) Upsert(ctx context.Context, entity search.Entity[search.Value]) error {
+var _ Repository = (&MockRepository{})
+
+func (r *MockRepository) Upsert(ctx context.Context, fileType string, entities []search.Entity[search.Value]) error {
 	return r.Err
 }
 

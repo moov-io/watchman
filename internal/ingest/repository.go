@@ -13,7 +13,7 @@ import (
 )
 
 type Repository interface {
-	Upsert(ctx context.Context, entity search.Entity[search.Value]) error
+	Upsert(ctx context.Context, fileType string, entities []search.Entity[search.Value]) error
 	Get(ctx context.Context, sourceID string, source search.SourceList) (*search.Entity[search.Value], error)
 	ListBySource(ctx context.Context, lastSourceID string, source search.SourceList, limit int) ([]search.Entity[search.Value], error)
 }
@@ -29,7 +29,34 @@ type sqlRepository struct {
 	db db.DB
 }
 
-func (r *sqlRepository) Upsert(ctx context.Context, entity search.Entity[search.Value]) error {
+func (r *sqlRepository) Upsert(ctx context.Context, fileType string, entities []search.Entity[search.Value]) error {
+	// Delete the existing rows
+	err := r.deleteEntities(ctx, fileType)
+	if err != nil {
+		return err
+	}
+
+	for idx := range entities {
+		err = r.upsertEntity(ctx, entities[idx])
+		if err != nil {
+			return fmt.Errorf("upserting (%s) %s/%s entity: %w", fileType, entities[idx].Source, entities[idx].SourceID, err)
+		}
+	}
+
+	return nil
+}
+
+func (r *sqlRepository) deleteEntities(ctx context.Context, fileType string) error {
+	qry := "DELETE FROM ingested_entities WHERE source = ?;"
+
+	_, err := r.db.ExecContext(ctx, qry, fileType)
+	if err != nil {
+		return fmt.Errorf("deleting %s entities: %w", fileType, err)
+	}
+	return nil
+}
+
+func (r *sqlRepository) upsertEntity(ctx context.Context, entity search.Entity[search.Value]) error {
 	qry := `INSERT INTO ingested_entities (type, source, source_id, entity) VALUES (?, ?, ?, ?);`
 
 	bs, err := json.Marshal(entity)
