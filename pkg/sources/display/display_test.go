@@ -35,7 +35,7 @@ func TestDetailsURL(t *testing.T) {
 		},
 		{
 			Entity:   apiRequest,
-			Expected: "/v2/search?altNames=BURTON+BURGESS&birthDate=1963-07-28&name=Elvis+Angus+LOGAN+MOREY&type=person",
+			Expected: "/v2/search?altNames=BURTON+BURGESS&birthDate=1963-07-28&gov_passport=Belize%3AP0017003&gov_ssn=United+States%3A561-77-9011&name=Elvis+Angus+LOGAN+MOREY&type=person",
 		},
 	}
 	for _, tc := range cases {
