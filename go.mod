@@ -11,7 +11,7 @@ require (
 	github.com/bbalet/stopwords v1.0.0
 	github.com/dongri/phonenumber v0.1.12
 	github.com/gorilla/mux v1.8.1
-	github.com/hashicorp/go-retryablehttp v0.7.7
+	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/knieriem/odf v0.1.0
 	github.com/moov-io/base v0.56.1-0.20250616204717-6b97ae0b1981
