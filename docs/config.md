@@ -23,6 +23,22 @@ Watchman:
   Telemetry:
     ServiceName: "watchman"
 
+  # Database:
+  #   DatabaseName: "watchman"
+  #   MySQL:
+  #     Address: "tcp(mysql:3306)"
+  #     User: "watchman"
+  #     Password: "watchman"
+  #   Postgres:
+  #     Address: "postgres:5432"
+  #     User: "watchman"
+  #     Password: "watchman"
+  #     Connections:
+  #       MaxOpen: 50
+  #       MaxIdle: 50
+  #       MaxLifetime: "60s"
+  #       MaxIdleTime: "60s"
+
   Download:
     RefreshInterval: "12h"
     InitialDataDirectory: ""
