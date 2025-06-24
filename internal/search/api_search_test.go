@@ -90,6 +90,17 @@ func TestAPI_readSearchRequest(t *testing.T) {
 
 	})
 
+	t.Run("name without type", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?name=adam", nil)
+		q := &api.QueryParams{Values: req.URL.Query()}
+
+		query, err := readSearchRequest(ctx, nil, q)
+		require.NoError(t, err)
+
+		require.Equal(t, "adam", query.Name)
+		require.Empty(t, query.Type)
+	})
+
 	t.Run("contact info", func(t *testing.T) {
 		address := "/v2/search?type=business&emailAddress=a@corp.com&phone=1234567890"
 		address += "&faxNumber=3334445566&email=b@corp.com&phone=9876543210"

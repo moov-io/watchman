@@ -60,7 +60,8 @@ func DebugSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]
 }
 
 var (
-	emptyPieces = make([]ScorePiece, 9)
+	emptyPieces     = make([]ScorePiece, 9)
+	emptyEntityType = EntityType("")
 )
 
 // DetailedSimilarity returns the scoring details of each query piece against the index Entity.
@@ -73,15 +74,21 @@ func DetailedSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity
 		Pieces: make([]ScorePiece, 0, 9),
 	}
 
+	// Quick filters
 	if query.Source != sourceEmpty && query.Source != SourceAPIRequest {
 		if query.Source != index.Source {
 			out.Pieces = emptyPieces
 			return out
 		}
 	}
-
 	if query.SourceID != "" {
 		if query.SourceID != index.SourceID {
+			out.Pieces = emptyPieces
+			return out
+		}
+	}
+	if query.Type != emptyEntityType {
+		if query.Type != index.Type {
 			out.Pieces = emptyPieces
 			return out
 		}
