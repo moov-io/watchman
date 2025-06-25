@@ -59,7 +59,12 @@ func (s *service) LatestStats() download.Stats {
 
 func (s *service) Search(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error) {
 	ctx, span := telemetry.StartSpan(ctx, "search", trace.WithAttributes(
-		attribute.String("entity.type", string(query.Type)),
+		attribute.String("query.type", string(query.Type)),
+		attribute.String("query.source", string(query.Source)),
+		attribute.String("query.source_id", string(query.SourceID)),
+		attribute.String("request_id", opts.RequestID),
+		attribute.Bool("query.debug", opts.Debug),
+		attribute.StringSlice("query.debug_source_ids", opts.DebugSourceIDs),
 	))
 	defer span.End()
 

@@ -88,7 +88,6 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 
 	span.SetAttributes(
 		attribute.String("request_id", opts.RequestID),
-		attribute.String("entity.type", string(req.Type)),
 	)
 
 	// Check we don't have extra query params
