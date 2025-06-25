@@ -40,7 +40,7 @@ func (c *MockClient) ListInfo(ctx context.Context) (ListInfoResponse, error) {
 
 func (c *MockClient) SearchByEntity(ctx context.Context, query Entity[Value], opts SearchOpts) (SearchResponse, error) {
 	err := cmp.Or(c.SearchErr, c.Err)
-	if c.Err != nil {
+	if err != nil {
 		var out SearchResponse
 		return out, err
 	}
