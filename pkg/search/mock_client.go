@@ -11,7 +11,12 @@ import (
 type MockClient struct {
 	Err error
 
-	ListInfoResponse ListInfoResponse
+	ListInfoResponse   ListInfoResponse
+	IngestFileResponse IngestFileResponse
+
+	ListInfoErr   error
+	SearchErr     error
+	IngestFileErr error
 
 	mu       sync.RWMutex
 	Index    []Entity[Value]
@@ -25,15 +30,19 @@ func NewMockClient() *MockClient {
 }
 
 func (c *MockClient) ListInfo(ctx context.Context) (ListInfoResponse, error) {
-	if c.Err != nil {
-		return ListInfoResponse{}, c.Err
+	err := cmp.Or(c.ListInfoErr, c.Err)
+	if err != nil {
+		var out ListInfoResponse
+		return out, err
 	}
 	return c.ListInfoResponse, nil
 }
 
 func (c *MockClient) SearchByEntity(ctx context.Context, query Entity[Value], opts SearchOpts) (SearchResponse, error) {
+	err := cmp.Or(c.SearchErr, c.Err)
 	if c.Err != nil {
-		return SearchResponse{}, c.Err
+		var out SearchResponse
+		return out, err
 	}
 
 	// Make sure to prepare the Query
@@ -70,7 +79,12 @@ func (c *MockClient) SearchByEntity(ctx context.Context, query Entity[Value], op
 }
 
 func (c *MockClient) IngestFile(ctx context.Context, fileType string, file io.Reader) (IngestFileResponse, error) {
-	return IngestFileResponse{}, nil
+	err := cmp.Or(c.IngestFileErr, c.Err)
+	if err != nil {
+		var out IngestFileResponse
+		return out, err
+	}
+	return c.IngestFileResponse, nil
 }
 
 func (c *MockClient) Normalize() {
