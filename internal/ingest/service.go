@@ -40,18 +40,33 @@ type FileEntities struct {
 }
 
 func (s *service) ReadEntitiesFromFile(ctx context.Context, name string, contents io.Reader) (FileEntities, error) {
+	var out FileEntities
+	var err error
+
 	for fileType, schema := range s.conf.Files {
 		if strings.EqualFold(name, fileType) {
 			// Process the file according to the schema type
 			switch Format(strings.ToLower(string(schema.Format))) {
 			case FormatCSV:
-				return s.readEntitiesFromCSVFile(ctx, fileType, schema, contents)
+				out, err = s.readEntitiesFromCSVFile(ctx, fileType, schema, contents)
+				break
+
 			default:
-				return FileEntities{}, fmt.Errorf("unknown format %v", schema.Format)
+				return out, fmt.Errorf("unknown format %v", schema.Format)
 			}
 		}
 	}
-	return FileEntities{}, fmt.Errorf("schema %s not found", name)
+	if err != nil {
+		return out, err
+	}
+
+	// Merge the entities
+	out.Entities = search.Merge(out.Entities)
+
+	if len(out.Entities) == 0 {
+		return out, fmt.Errorf("schema %s not found", name)
+	}
+	return out, nil
 }
 
 func (s *service) readEntitiesFromCSVFile(ctx context.Context, name string, schema File, contents io.Reader) (FileEntities, error) {

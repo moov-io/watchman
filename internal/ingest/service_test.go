@@ -80,7 +80,8 @@ func TestService_ReadEntitiesFromFile_FincenBusiness(t *testing.T) {
 				Source:   search.SourceList("fincen-business"),
 				SourceID: "654321",
 				Business: &search.Business{
-					Name: "Anvil Investments LLC",
+					Name:     "Anvil Investments LLC",
+					AltNames: []string{"Best Investments Firm"},
 					GovernmentIDs: []search.GovernmentID{
 						{
 							Identifier: "992288844",
@@ -95,14 +96,32 @@ func TestService_ReadEntitiesFromFile_FincenBusiness(t *testing.T) {
 						PostalCode: "12946",
 						Country:    "US",
 					},
+					{
+						Line1:      "81 This Way",
+						City:       "Othertown",
+						State:      "NY",
+						PostalCode: "12946",
+						Country:    "US",
+					},
 				},
 				PreparedFields: search.PreparedFields{
-					Name:       "anvil investments llc",
-					NameFields: []string{"anvil", "investments", "llc"},
+					Name:          "anvil investments llc",
+					NameFields:    []string{"anvil", "investments", "llc"},
+					AltNames:      []string{"best investments firm"},
+					AltNameFields: [][]string{{"best", "investments", "firm"}},
 					Addresses: []search.PreparedAddress{
 						{
 							Line1:       "79 other way",
 							Line1Fields: []string{"79", "other", "way"},
+							City:        "othertown",
+							CityFields:  []string{"othertown"},
+							PostalCode:  "12946",
+							State:       "ny",
+							Country:     "united states",
+						},
+						{
+							Line1:       "81 this way",
+							Line1Fields: []string{"81", "this", "way"},
 							City:        "othertown",
 							CityFields:  []string{"othertown"},
 							PostalCode:  "12946",
@@ -147,7 +166,7 @@ func TestService_ReadEntitiesFromFile_FincenPerson(t *testing.T) {
 				SourceID: "123456",
 				Person: &search.Person{
 					Name:      "John Jr K Doe1",
-					AltNames:  []string{"Johnny K Doe"},
+					AltNames:  []string{"Johnathon Doe1", "Johnny K Doe"},
 					BirthDate: ptr(time.Date(1988, time.February, 8, 0, 0, 0, 0, time.UTC)),
 					GovernmentIDs: []search.GovernmentID{
 						{
@@ -163,16 +182,32 @@ func TestService_ReadEntitiesFromFile_FincenPerson(t *testing.T) {
 						PostalCode: "90210",
 						Country:    "US",
 					},
+					{
+						Line1:      "441 Northfield Road",
+						City:       "Anytown",
+						State:      "CA",
+						PostalCode: "90210",
+						Country:    "US",
+					},
 				},
 				PreparedFields: search.PreparedFields{
 					Name:          "john jr k doe1",
-					AltNames:      []string{"johnny k doe"},
+					AltNames:      []string{"johnathon doe1", "johnny k doe"},
 					NameFields:    []string{"john", "jr", "k", "doe"},
-					AltNameFields: [][]string{{"johnny", "k", "doe"}},
+					AltNameFields: [][]string{{"johnathon", "doe"}, {"johnny", "k", "doe"}},
 					Addresses: []search.PreparedAddress{
 						{
 							Line1:       "193 southfield lane",
 							Line1Fields: []string{"193", "southfield", "lane"},
+							City:        "anytown",
+							CityFields:  []string{"anytown"},
+							PostalCode:  "90210",
+							State:       "ca",
+							Country:     "united states",
+						},
+						{
+							Line1:       "441 northfield road",
+							Line1Fields: []string{"441", "northfield", "road"},
 							City:        "anytown",
 							CityFields:  []string{"anytown"},
 							PostalCode:  "90210",
