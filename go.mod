@@ -7,6 +7,7 @@ toolchain go1.24.4
 require (
 	fyne.io/fyne/v2 v2.6.1
 	github.com/abadojack/whatlanggo v1.0.1
+	github.com/adamdecaf/merge v0.1.1
 	github.com/antchfx/htmlquery v1.3.4
 	github.com/bbalet/stopwords v1.0.0
 	github.com/dongri/phonenumber v0.1.12
@@ -90,6 +91,7 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
+	github.com/igrmk/treemap/v2 v2.0.1 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/pgx/v5 v5.7.4 // indirect
@@ -138,6 +140,7 @@ require (
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.38.0 // indirect
+	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b // indirect
 	golang.org/x/image v0.24.0 // indirect
 	golang.org/x/net v0.40.0 // indirect
 	golang.org/x/oauth2 v0.29.0 // indirect
