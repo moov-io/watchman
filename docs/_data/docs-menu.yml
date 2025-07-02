@@ -28,6 +28,8 @@
       link: /pipeline/
     - name: Indexing
       link: /indexing/
+    - name: Record linkage
+      link: /record-linkage/
     - name: Geocoding
       link: /geocoding/
     - name: File Dataset Ingestion

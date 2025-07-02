@@ -27,6 +27,10 @@ type corpus struct {
 
 	// cryptoKeys maps "CURRENCY:address" (upper currency) -> entity indices.
 	cryptoKeys map[string][]int
+
+	// blockKeys maps PII-safe composite blocking keys and their segment
+	// prefixes (see internal/linksim) to entity indices.
+	blockKeys map[string][]int
 }
 
 // buildCorpus constructs partitions and inverted indexes from the entity list.
@@ -39,6 +43,7 @@ func buildCorpus(entities []search.Entity[search.Value], tfidfIndex *tfidf.Index
 		nameTokens:   make(map[string][]int),
 		exactNames:   make(map[string][]int),
 		cryptoKeys:   make(map[string][]int),
+		blockKeys:    make(map[string][]int),
 	}
 
 	tfidfEnabled := tfidfIndex != nil && tfidfIndex.Enabled()
@@ -113,6 +118,8 @@ func buildCorpus(entities []search.Entity[search.Value], tfidfIndex *tfidf.Index
 				c.cryptoKeys[key] = append(c.cryptoKeys[key], i)
 			}
 		}
+
+		c.indexBlockingKeys(*e, i)
 	}
 
 	return c
@@ -177,10 +184,13 @@ type CandidateOpts struct {
 //
 // Strategy (never reduces recall below a full partition scan):
 //  1. Restrict to source/type partition.
-//  2. Exact crypto address hits short-circuit to those entities.
+//  2. Exact crypto address and government-ID blocking-key hits short-circuit
+//     to those entities (merged with name-token hits when the query has a name).
 //  3. Name-token inverted index: union of postings for query name tokens,
 //     intersected with the partition. If empty or too large, use full partition.
-//  4. Identifier-only / empty-name queries use the full partition.
+//  4. Address-only queries use hashed ADDR prefix blocks when they prune the
+//     partition; otherwise fall through.
+//  5. Identifier-only / empty-name queries use the full partition.
 func (c *corpus) selectCandidates(query search.Entity[search.Value], opts CandidateOpts) []search.Entity[search.Value] {
 	if c == nil || len(c.entities) == 0 {
 		return nil
@@ -200,35 +210,33 @@ func (c *corpus) selectCandidates(query search.Entity[search.Value], opts Candid
 		return nil
 	}
 
-	// Crypto exact-address fast path
+	// Exact identifier fast path (crypto addresses, government-ID blocking keys)
+	var idHits []int
 	if len(query.CryptoAddresses) > 0 {
-		var hits []int
-		for _, addr := range query.CryptoAddresses {
-			key := cryptoKey(addr.Currency, addr.Address)
-			for _, idx := range c.cryptoKeys[key] {
-				// partition is sorted ascending (built by appending increasing indices)
-				if _, found := slices.BinarySearch(partition, idx); found {
-					hits = append(hits, idx)
-				}
-			}
+		idHits = append(idHits, c.cryptoHits(query, partition)...)
+	}
+	idHits = append(idHits, c.governmentIDHits(query, partition)...)
+	if len(idHits) > 0 {
+		// Merge name candidates only when the query has name tokens.
+		// Otherwise nameCandidateIndices returns the full partition and would
+		// defeat the exact-identifier fast path.
+		if len(query.PreparedFields.NameFields) > 0 {
+			idHits = append(idHits, c.nameCandidateIndices(query, partition, opts)...)
 		}
-		if len(hits) > 0 {
-			// Merge name candidates only when the query has name tokens.
-			// Otherwise nameCandidateIndices returns the full partition and would
-			// defeat the crypto exact-address fast path.
-			if len(query.PreparedFields.NameFields) > 0 {
-				hits = append(hits, c.nameCandidateIndices(query, partition, opts)...)
-			}
-			slices.Sort(hits)
-			hits = slices.Compact(hits)
-			return c.materialize(hits)
-		}
+		slices.Sort(idHits)
+		idHits = slices.Compact(idHits)
+		return c.materialize(idHits)
 	}
 
 	// Name-based candidates
 	if len(query.PreparedFields.NameFields) > 0 {
 		idxs := c.nameCandidateIndices(query, partition, opts)
 		return c.materialize(idxs)
+	}
+
+	// Address prefix blocking for address-only queries
+	if addr := c.addressHits(query, partition, opts); len(addr) > 0 {
+		return c.materialize(addr)
 	}
 
 	// Exact prepared name shortcut (name set but fields empty after stopwords)

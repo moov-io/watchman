@@ -51,6 +51,7 @@ On every list refresh Watchman builds:
 | **Name-token inverted index** | Union of entities whose prepared primary, alt, or former names contain a query token (one posting per token per entity) |
 | **Exact prepared-name map** | Fast path when the full prepared name matches exactly |
 | **Crypto address map** | Exact `CURRENCY:address` lookup for crypto-only (or crypto+name) queries |
+| **Blocking keys** | Hashed `GOVID:` / `ADDR:` prefix postings for identifier and address-only queries (see [Record linkage](/watchman/record-linkage/)) |
 | **TF-IDF term weights** (optional) | Precomputed per-entity weights so search does not recompute IDF on every comparison |
 
 **Tips for faster queries**

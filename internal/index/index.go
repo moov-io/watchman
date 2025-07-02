@@ -17,8 +17,9 @@ import (
 type Lists interface {
 	GetEntities(ctx context.Context, source search.SourceList) ([]search.Entity[search.Value], error)
 	// SelectCandidates returns the subset of entities that should be scored for the query.
-	// It applies source/type partitioning and name/crypto inverted indexes, with safe
-	// fallbacks that never reduce recall below a full partition scan.
+	// It applies source/type partitioning, name/crypto inverted indexes, and hashed
+	// government-ID / address blocking keys, with safe fallbacks that never reduce
+	// recall below a full partition scan.
 	SelectCandidates(ctx context.Context, query search.Entity[search.Value]) ([]search.Entity[search.Value], error)
 	Update(latest download.Stats)
 	LatestStats() download.Stats
