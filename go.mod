@@ -15,7 +15,7 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/knieriem/odf v0.1.0
-	github.com/moov-io/base v0.56.1-0.20250616204717-6b97ae0b1981
+	github.com/moov-io/base v0.57.0
 	github.com/moov-io/iso3166 v0.2.1
 	github.com/openvenues/gopostal v0.0.0-20240426055609-4fe3a773f519
 	github.com/pariz/gountries v0.1.6
