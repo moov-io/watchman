@@ -15,14 +15,14 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/knieriem/odf v0.1.0
-	github.com/moov-io/base v0.56.1-0.20250616204717-6b97ae0b1981
+	github.com/moov-io/base v0.57.0
 	github.com/moov-io/iso3166 v0.2.1
 	github.com/openvenues/gopostal v0.0.0-20240426055609-4fe3a773f519
 	github.com/pariz/gountries v0.1.6
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v3 v3.3.8
 	github.com/vmihailenco/msgpack/v5 v5.4.1
-	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1
+	github.com/xrash/smetrics v0.0.0-20250705151800-55b8f293f342
 	go.opentelemetry.io/otel v1.37.0
 	go.opentelemetry.io/otel/trace v1.37.0
 	go.uber.org/automaxprocs v1.6.0
