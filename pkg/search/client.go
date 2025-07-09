@@ -15,9 +15,52 @@ import (
 	"github.com/hashicorp/go-retryablehttp"
 )
 
+// Client defines the interface for interacting with the Watchman service.
 type Client interface {
+	// ListInfo retrieves the available data lists from a Watchman service.
 	ListInfo(ctx context.Context) (ListInfoResponse, error)
+
+	// SearchByEntity performs a search for entities (e.g., individuals, businesses) based
+	// on the provided query and search options.
+	//
+	// The query parameter specifies the entity fields to search for - populated fields are compared.
+	//
+	// The opts parameter allows customization of the search behavior, such as filters or limits.
+	//
+	// The method returns a SearchResponse containing the search results or an error if the
+	// request fails.
+	//
+	// Example:
+	//   ctx := context.Background()
+	//   query := search.Entity[search.Value]{...}
+	//   opts := SearchOpts{Limit: 10}
+	//
+	//   resp, err := client.SearchByEntity(ctx, query, opts)
+	//   if err != nil {
+	//       log.Fatal(err)
+	//   }
 	SearchByEntity(ctx context.Context, entity Entity[Value], opts SearchOpts) (SearchResponse, error)
+
+	// IngestFile uploads a file to the Watchman service for updating a data set.
+	//
+	// The fileType parameter specifies the type (dataset name) of file being uploaded (e.g., fincen-person).
+	// This aligns with a schema defined under Watchman.Ingest.Files in the yaml config.
+	// Currently only CSV files are supported.
+	//
+	// The file parameter is an io.Reader containing the file data. The method returns an
+	// IngestFileResponse with details about the ingestion process or an error if the request fails.
+	//
+	// Example:
+	//   file, err := os.Open("sanctions.csv")
+	//   if err != nil {
+	//       log.Fatal(err)
+	//   }
+	//   defer file.Close()
+	//
+	//   resp, err := client.IngestFile(ctx, "fincen-person", file)
+	//   if err != nil {
+	//       log.Fatal(err)
+	//   }
 	IngestFile(ctx context.Context, fileType string, file io.Reader) (IngestFileResponse, error)
 }
 
@@ -52,6 +95,7 @@ type ListInfoResponse struct {
 	Version string `json:"version"`
 }
 
+// ListInfo retrieves the available data lists from a Watchman service.
 func (c *client) ListInfo(ctx context.Context) (ListInfoResponse, error) {
 	addr := c.baseAddress + "/v2/listinfo"
 
@@ -106,6 +150,13 @@ type SearchOpts struct {
 	Debug    bool
 }
 
+// SearchByEntity searches for entities (e.g., individuals, businesses) using the provided query fields and
+// search options via a GET request to /v2/search.
+//
+// The entity parameter specifies the fields to search for, where populated fields are matched against the Watchman instance.
+// The opts parameter customizes the search with options like limit (result count), minimum match score (MinMatch), or debug mode.
+//
+// The method returns a SearchResponse containing the query and matching entities or an error if the request, URL construction, or JSON decoding fails.
 func (c *client) SearchByEntity(ctx context.Context, entity Entity[Value], opts SearchOpts) (SearchResponse, error) {
 	var out SearchResponse
 
@@ -366,6 +417,14 @@ type IngestFileResponse struct {
 	Entities []Entity[Value] `json:"entities"`
 }
 
+// IngestFile uploads a CSV file to the Watchman service to update a dataset via a POST request to /v2/ingest/{fileType}.
+//
+// The fileType parameter specifies the dataset name (e.g., "fincen-person") as defined in the
+// Watchman.Ingest.Files YAML configuration. The file parameter is an io.Reader containing the
+// CSV file data.
+//
+// The method returns an IngestFileResponse with the file type and ingested entities
+// or an error if the request, URL construction, or JSON decoding fails.
 func (c *client) IngestFile(ctx context.Context, fileType string, file io.Reader) (IngestFileResponse, error) {
 	var out IngestFileResponse
 
