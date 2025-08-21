@@ -75,7 +75,7 @@ require (
 	github.com/go-sql-driver/mysql v1.9.2 // indirect
 	github.com/go-text/render v0.2.0 // indirect
 	github.com/go-text/typesetting v0.2.1 // indirect
-	github.com/go-viper/mapstructure/v2 v2.3.0 // indirect
+	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/gobuffalo/here v0.6.7 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/golang-migrate/migrate/v4 v4.18.3 // indirect
