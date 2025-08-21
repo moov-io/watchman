@@ -49,7 +49,7 @@ func (e *Entity[T]) merge(other *Entity[T]) Entity[T] {
 	default:
 		// both populated or both empty
 		out.Name = e.Name
-		altNames = append(altNames, other.Name)
+		altNames = mergeStrings(altNames, []string{other.Name})
 	}
 
 	// Merge Basic fields
@@ -119,10 +119,10 @@ func (e *Entity[T]) merge(other *Entity[T]) Entity[T] {
 	}
 
 	// Merge Contact
-	out.Contact.EmailAddresses = append(e.Contact.EmailAddresses, other.Contact.EmailAddresses...)
-	out.Contact.PhoneNumbers = append(e.Contact.PhoneNumbers, other.Contact.PhoneNumbers...)
-	out.Contact.FaxNumbers = append(e.Contact.FaxNumbers, other.Contact.FaxNumbers...)
-	out.Contact.Websites = append(e.Contact.Websites, other.Contact.Websites...)
+	out.Contact.EmailAddresses = mergeStrings(e.Contact.EmailAddresses, other.Contact.EmailAddresses)
+	out.Contact.PhoneNumbers = mergeStrings(e.Contact.PhoneNumbers, other.Contact.PhoneNumbers)
+	out.Contact.FaxNumbers = mergeStrings(e.Contact.FaxNumbers, other.Contact.FaxNumbers)
+	out.Contact.Websites = mergeStrings(e.Contact.Websites, other.Contact.Websites)
 
 	out.Addresses = mergeAddresses(e.Addresses, other.Addresses)
 	out.CryptoAddresses = mergeCryptoAddresses(e.CryptoAddresses, other.CryptoAddresses)

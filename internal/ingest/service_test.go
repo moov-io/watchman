@@ -174,6 +174,9 @@ func TestService_ReadEntitiesFromFile_FincenPerson(t *testing.T) {
 						},
 					},
 				},
+				Contact: search.ContactInfo{
+					PhoneNumbers: []string{"641-111-2345"},
+				},
 				Addresses: []search.Address{
 					{
 						Line1:      "193 Southfield Lane",
@@ -195,6 +198,9 @@ func TestService_ReadEntitiesFromFile_FincenPerson(t *testing.T) {
 					AltNames:      []string{"johnathon doe1", "johnny k doe"},
 					NameFields:    []string{"john", "jr", "k", "doe"},
 					AltNameFields: [][]string{{"johnathon", "doe"}, {"johnny", "k", "doe"}},
+					Contact: search.ContactInfo{
+						PhoneNumbers: []string{"6411112345"},
+					},
 					Addresses: []search.PreparedAddress{
 						{
 							Line1:       "193 southfield lane",
@@ -232,6 +238,9 @@ func TestService_ReadEntitiesFromFile_FincenPerson(t *testing.T) {
 						},
 					},
 				},
+				Contact: search.ContactInfo{
+					PhoneNumbers: []string{"641-111-5522"},
+				},
 				Addresses: []search.Address{
 					{
 						Line1:      "931 Southfield Lane",
@@ -246,6 +255,9 @@ func TestService_ReadEntitiesFromFile_FincenPerson(t *testing.T) {
 					AltNames:      []string{"jane l doe"},
 					NameFields:    []string{"jane", "k", "doe2"},
 					AltNameFields: [][]string{{"jane", "l", "doe"}},
+					Contact: search.ContactInfo{
+						PhoneNumbers: []string{"6411115522"},
+					},
 					Addresses: []search.PreparedAddress{
 						{
 							Line1:       "931 southfield lane",
@@ -274,6 +286,9 @@ func TestService_ReadEntitiesFromFile_FincenPerson(t *testing.T) {
 						},
 					},
 				},
+				Contact: search.ContactInfo{
+					PhoneNumbers: []string{"641-111-5432"},
+				},
 				Addresses: []search.Address{
 					{
 						Line1:      "391 Southfield Lane",
@@ -288,6 +303,9 @@ func TestService_ReadEntitiesFromFile_FincenPerson(t *testing.T) {
 					AltNames:      []string{"joseph m doe"},
 					NameFields:    []string{"jose", "k", "doe3"},
 					AltNameFields: [][]string{{"joseph", "m", "doe"}},
+					Contact: search.ContactInfo{
+						PhoneNumbers: []string{"6411115432"},
+					},
 					Addresses: []search.PreparedAddress{
 						{
 							Line1:       "391 southfield lane",

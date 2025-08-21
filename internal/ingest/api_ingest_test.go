@@ -82,6 +82,6 @@ func TestIngest_API(t *testing.T) {
 		// Sanity check the response
 		require.Equal(t, "John Jr K Doe1", searchResponse[0].Name)
 		require.Equal(t, pubsearch.SourceList("fincen-person"), searchResponse[0].Source)
-		require.InDelta(t, searchResponse[0].Match, 0.883, 0.001)
+		require.InDelta(t, searchResponse[0].Match, 0.839, 0.001)
 	})
 }

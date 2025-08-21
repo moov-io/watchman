@@ -341,6 +341,7 @@ func normalizePhoneNumbers(numbers []string) []string {
 
 	out := make([]string, len(numbers))
 	for idx := range numbers {
+		// TODO(adam): pass in Country codes to help normalize phone numbers
 		out[idx] = norm.PhoneNumber(numbers[idx])
 	}
 	return out
