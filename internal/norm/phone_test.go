@@ -20,6 +20,11 @@ func TestPhoneNumber(t *testing.T) {
 			expected: "1234567890",
 		},
 		{
+			name:     "second US number",
+			input:    "641-111-2345",
+			expected: "6411112345",
+		},
+		{
 			name:     "valid international number",
 			input:    "+44 20 7123 4567",
 			expected: "442071234567",

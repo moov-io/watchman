@@ -1,6 +1,7 @@
 package ingest
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/moov-io/base/log"
@@ -45,7 +46,7 @@ func (c *controller) ingestFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx, span := telemetry.StartSpan(r.Context(), "api-ingest-file")
+	ctx, span := telemetry.StartSpan(context.Background(), "api-ingest-file")
 	defer span.End()
 
 	span.SetAttributes(attribute.String("file_type", fileType))

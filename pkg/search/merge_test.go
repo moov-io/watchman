@@ -65,6 +65,7 @@ var (
 		},
 
 		Contact: search.ContactInfo{
+			PhoneNumbers:   []string{"123.456.7890"},
 			EmailAddresses: []string{"johnny.doe@example.com"},
 			Websites:       []string{"http://johnnydoe.com"},
 		},
