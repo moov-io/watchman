@@ -40,6 +40,7 @@ LABEL maintainer="Moov <oss@moov.io>"
 # Install runtime dependencies
 RUN apt-get update && \
     apt-get install -y \
+    tini \
     libssl3 \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
@@ -62,4 +63,6 @@ ENV LIBPOSTAL_DATA_DIR=/usr/local/share/libpostal
 
 EXPOSE 8084
 EXPOSE 9094
-ENTRYPOINT ["/bin/server"]
+
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["/bin/server"]
