@@ -27,7 +27,8 @@ func JsonResponse[T any](w http.ResponseWriter, object T) error {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 
-	err := json.NewEncoder(w).Encode(object)
+	// Encode to a buffer first to avoid writing headers before we know if encoding succeeds
+	data, err := json.Marshal(object)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 
@@ -40,5 +41,12 @@ func JsonResponse[T any](w http.ResponseWriter, object T) error {
 
 		return err
 	}
+
+	// Write the encoded JSON with newline to match json.NewEncoder behavior
+	_, err = w.Write(append(data, '\n'))
+	if err != nil {
+		return fmt.Errorf("problem writing json response: %w", err)
+	}
+
 	return nil
 }
