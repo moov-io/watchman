@@ -26,6 +26,7 @@ jobs:
           filters: |
             src:
               - go.mod
+              - go.sum
 
       - uses: dorny/paths-filter@v3
         id: go_changes
