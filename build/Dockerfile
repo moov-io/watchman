@@ -34,7 +34,7 @@ WORKDIR /src
 RUN VERSION=${VERSION} GOTAGS="-tags libpostal" make build-server postal-server
 
 # Final stage
-FROM debian:bookworm
+FROM debian:trixie
 LABEL maintainer="Moov <oss@moov.io>"
 
 # Install runtime dependencies

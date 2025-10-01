@@ -56,13 +56,13 @@ jobs:
       actions: read    # For downloading artifact
     steps:
     - name: Set up Go 1.x
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v6
       with:
         go-version: stable
       id: go
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Load Release URL File from release job
       uses: actions/download-artifact@v5
@@ -138,13 +138,13 @@ jobs:
       contents: read  # For checkout
     steps:
     - name: Set up Go 1.x
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v6
       with:
         go-version: stable
       id: go
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Clean
       run: make clean
@@ -171,13 +171,13 @@ jobs:
       contents: read  # For checkout
     steps:
     - name: Set up Go 1.x
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v6
       with:
         go-version: stable
       id: go
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Clean
       run: make clean
