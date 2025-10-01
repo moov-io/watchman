@@ -43,9 +43,14 @@ func JsonResponse[T any](w http.ResponseWriter, object T) error {
 	}
 
 	// Write the encoded JSON with newline to match json.NewEncoder behavior
-	_, err = w.Write(append(data, '\n'))
+	_, err = w.Write(data)
 	if err != nil {
 		return fmt.Errorf("problem writing json response: %w", err)
+	}
+
+	_, err = w.Write([]byte{'\n'})
+	if err != nil {
+		return fmt.Errorf("problem writing newline: %w", err)
 	}
 
 	return nil
