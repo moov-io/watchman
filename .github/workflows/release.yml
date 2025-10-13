@@ -149,6 +149,9 @@ jobs:
     - name: Clean
       run: make clean
 
+    - name: Build Web UI
+      run: make build-webui
+
     - name: Docker Hub
       run: make docker-hub
 
@@ -181,6 +184,9 @@ jobs:
 
     - name: Clean
       run: make clean
+
+    - name: Build Web UI
+      run: make build-webui
 
     - name: Docker Openshift
       run: make docker-openshift
