@@ -76,10 +76,9 @@ Government lists are downloaded (and refreshed), parsed, prepared, normalized, a
 
 We publish a [public Docker image `moov/watchman`](https://hub.docker.com/r/moov/watchman/) from Docker Hub or use this repository. No configuration is required to serve on `:8084`. We also have Docker images for [OpenShift](https://quay.io/repository/moov/watchman?tab=tags) published as `quay.io/moov/watchman`. Lastly, we offer a `moov/watchman:static` Docker image with files from 2019. This image can be useful for faster local testing or consistent results.
 
-Pull & start the Docker image:
+Start the Docker image [using a tag](https://hub.docker.com/r/moov/watchman/tags):
 ```
-docker pull moov/watchman:latest
-docker run -p 8084:8084 moov/watchman:latest
+docker run -p 8084:8084 moov/watchman
 ```
 
 Run a search for an individual or business:
