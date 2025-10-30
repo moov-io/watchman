@@ -113,11 +113,20 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v5
 
-    - name: Docker Build
+    - name: Docker Hub
       run: make docker-hub
 
-    - name: Build Image
+    - name: Push Tagged Image
+      run: |+
+          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          make release-push-tag
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Docker Static
       run: make docker-static
+
 
   openshift:
     name: Openshift Docker Build

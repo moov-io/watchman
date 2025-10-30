@@ -160,8 +160,10 @@ docker-openshift:
 docker-static:
 	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman:static -f ./build/Dockerfile.static .
 
-release-push:
+release-push-tag:
 	docker push moov/watchman:${VERSION}
+
+release-push-static:
 	docker push moov/watchman:static
 
 quay-push:

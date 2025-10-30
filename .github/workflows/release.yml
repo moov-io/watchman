@@ -157,16 +157,20 @@ jobs:
     - name: Docker Hub
       run: make docker-hub
 
-    - name: Docker Static
-      run: make docker-static
-
-    - name: Docker Push
+    - name: Push Tagged Image
       run: |+
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-          make release-push
+          make release-push-tag
       env:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Docker Static
+      run: make docker-static
+
+    - name: Docker Push Static Image
+      run:
+          make release-push-static
 
   docker-openshift:
     name: Docker Openshift
