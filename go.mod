@@ -2,7 +2,7 @@ module github.com/moov-io/watchman
 
 go 1.24.0
 
-toolchain go1.25.1
+toolchain go1.25.3
 
 require (
 	fyne.io/fyne/v2 v2.7.0
