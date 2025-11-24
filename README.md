@@ -74,7 +74,7 @@ Government lists are downloaded (and refreshed), parsed, prepared, normalized, a
 
 ### Docker
 
-We publish a [public Docker image `moov/watchman`](https://hub.docker.com/r/moov/watchman/) from Docker Hub or use this repository. No configuration is required to serve on `:8084`. We also have Docker images for [OpenShift](https://quay.io/repository/moov/watchman?tab=tags) published as `quay.io/moov/watchman`. Lastly, we offer a `moov/watchman:static` Docker image with files from 2019. This image can be useful for faster local testing or consistent results.
+We publish a [public Docker image `moov/watchman`](https://hub.docker.com/r/moov/watchman/) from Docker Hub or use this repository. No configuration is required to serve on `:8084`. We also have Docker images for [OpenShift](https://quay.io/repository/moov/watchman?tab=tags) published as `quay.io/moov/watchman`. Lastly, we offer a `moov/watchman:v2-static` Docker image with files from 2019. This image can be useful for faster local testing or consistent results.
 
 Start the Docker image [using a tag](https://hub.docker.com/r/moov/watchman/tags):
 ```

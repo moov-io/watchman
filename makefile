@@ -158,13 +158,13 @@ docker-openshift:
 	docker build --pull --build-arg VERSION=${VERSION} -t quay.io/moov/watchman:${VERSION} -f ./build/Dockerfile.openshift .
 
 docker-static:
-	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman:static -f ./build/Dockerfile.static .
+	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman:v2-static -f ./build/Dockerfile.static .
 
 release-push-tag:
 	docker push moov/watchman:${VERSION}
 
 release-push-static:
-	docker push moov/watchman:static
+	docker push moov/watchman:v2-static
 
 quay-push:
 	docker push quay.io/moov/watchman:${VERSION}
