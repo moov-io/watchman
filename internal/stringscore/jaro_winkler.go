@@ -263,7 +263,7 @@ func JaroWinklerWithFavoritism(indexedTerm, query string, favoritism float64) fl
 	for i := range scores {
 		sum += scores[i]
 	}
-	return math.Min(sum/float64(len(scores)), 1.00)
+	return sum / float64(len(scores))
 }
 
 // GenerateWordCombinations creates variations of the input words by combining short words

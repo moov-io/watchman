@@ -181,7 +181,8 @@ func TestJaroWinklerWithFavoritism(t *testing.T) {
 	delta := 0.01
 
 	score := stringscore.JaroWinklerWithFavoritism("Vladimir Putin", "PUTIN, Vladimir Vladimirovich", favoritism)
-	require.InDelta(t, score, 1.00, delta)
+	// With favoritism=1.0, score can now exceed 1.0 since we removed the cap
+	require.InDelta(t, score, 1.15, delta)
 
 	score = stringscore.JaroWinklerWithFavoritism("nicolas, maduro moros", "nicolás maduro", 0.25)
 	require.InDelta(t, score, 0.96, delta)
