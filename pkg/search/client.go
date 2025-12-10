@@ -282,6 +282,9 @@ func setBusinessParameters(q url.Values, entity Entity[Value]) {
 	if entity.Business.Created != nil {
 		q.Set("created", entity.Business.Created.Format(yyyymmdd))
 	}
+	if entity.Business.Dissolved != nil {
+		q.Set("dissolved", entity.Business.Dissolved.Format(yyyymmdd))
+	}
 
 	setGovernmentIDs(q, entity.Business.GovernmentIDs)
 }
@@ -299,6 +302,9 @@ func setOrganizationParameters(q url.Values, entity Entity[Value]) {
 	}
 	if entity.Organization.Created != nil {
 		q.Set("created", entity.Organization.Created.Format(yyyymmdd))
+	}
+	if entity.Organization.Dissolved != nil {
+		q.Set("dissolved", entity.Organization.Dissolved.Format(yyyymmdd))
 	}
 
 	setGovernmentIDs(q, entity.Organization.GovernmentIDs)
@@ -370,7 +376,9 @@ func setVesselParameters(q url.Values, entity Entity[Value]) {
 	if entity.Vessel.CallSign != "" {
 		q.Set("callSign", entity.Vessel.CallSign)
 	}
-	// TODO(adam): GrossRegisteredTonnage
+	if entity.Vessel.GrossRegisteredTonnage > 0 {
+		q.Set("grossRegisteredTonnage", strconv.Itoa(entity.Vessel.GrossRegisteredTonnage))
+	}
 	if entity.Vessel.Owner != "" {
 		q.Set("owner", entity.Vessel.Owner)
 	}
