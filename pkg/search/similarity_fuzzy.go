@@ -3,7 +3,9 @@ package search
 import (
 	"io"
 	"math"
+	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/moov-io/watchman/internal/prepare"
@@ -34,10 +36,18 @@ func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], we
 		return ScorePiece{Score: 0, Weight: 0, FieldsCompared: 0, PieceType: "name"}
 	}
 
-	// Exact match fast path
+	// Exact match fast path - apply favoritism if configured
 	if query.PreparedFields.Name == index.PreparedFields.Name {
+		score := 1.0
+		// Read favoritism from environment (same as jaro_winkler.go)
+		if envFavoritism := os.Getenv("EXACT_MATCH_FAVORITISM"); envFavoritism != "" {
+			if f, err := strconv.ParseFloat(envFavoritism, 64); err == nil && f > 0 {
+				score += f
+			}
+		}
+		// The final score will be capped at 1.0 in calculateFinalScore
 		return ScorePiece{
-			Score:          1.0,
+			Score:          score,
 			Weight:         weight,
 			Matched:        true,
 			Required:       true,

@@ -129,6 +129,11 @@ func BestPairsJaroWinkler(searchTokens []string, indexedTokens []string) float64
 func customJaroWinkler(s1 string, s2 string) float64 {
 	score := smetrics.JaroWinkler(s1, s2, boostThreshold, prefixSize)
 
+	// Apply favoritism for exact matches
+	if score >= 1.0 && exactMatchFavoritism > 0 {
+		score += exactMatchFavoritism
+	}
+
 	if lengthMetric := lengthDifferenceFactor(s1, s2); lengthMetric < lengthDifferenceCutoffFactor {
 		//If there's a big difference in matched token lengths, punish the score. Jaro-Winkler is quite permissive about
 		//different lengths
@@ -175,7 +180,14 @@ func lengthDifferenceFactor(s1 string, s2 string) float64 {
 //
 // For more details see https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance
 func JaroWinkler(s1, s2 string) float64 {
-	return JaroWinklerWithFavoritism(s1, s2, exactMatchFavoritism)
+	// Read favoritism dynamically from environment (for test compatibility)
+	favoritism := 0.0
+	if envFavoritism := os.Getenv("EXACT_MATCH_FAVORITISM"); envFavoritism != "" {
+		if f, err := strconv.ParseFloat(envFavoritism, 64); err == nil {
+			favoritism = f
+		}
+	}
+	return JaroWinklerWithFavoritism(s1, s2, favoritism)
 }
 
 var (
