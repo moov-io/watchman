@@ -4,7 +4,9 @@ import (
 	"cmp"
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/moov-io/watchman"
 	"github.com/moov-io/watchman/internal/ast"
@@ -218,30 +220,74 @@ func extractPersonFields(content fyne.CanvasObject) *search.Person {
 		return person
 	}
 
-	container, isContainer := content.(*fyne.Container)
-	if !isContainer || len(container.Objects) < 2 {
+	container, ok := content.(*fyne.Container)
+	if !ok || len(container.Objects) < 2 {
 		return person
 	}
 
-	form, isForm := container.Objects[1].(*widget.Form)
-	if !isForm {
+	form, ok := container.Objects[1].(*widget.Form)
+	if !ok || len(form.Items) == 0 {
 		return person
 	}
 
-	// Extract alt names
-	if len(form.Items) > 0 {
-		if entry, isEntry := form.Items[0].Widget.(*widget.Entry); entry.MultiLine && isEntry {
+	idx := 0
+
+	// 0: Alt Names
+	if idx < len(form.Items) {
+		if entry, ok := form.Items[idx].Widget.(*widget.Entry); ok && entry.MultiLine {
 			if entry.Text != "" {
 				person.AltNames = strings.Split(entry.Text, "\n")
 			}
 		}
+		idx++
 	}
 
-	// Extract gender
-	if len(form.Items) > 1 {
-		if select_, isSelect := form.Items[1].Widget.(*widget.Select); isSelect {
-			if select_.Selected != "" {
-				person.Gender = search.Gender(strings.ToLower(select_.Selected))
+	// 1: Gender
+	if idx < len(form.Items) {
+		if sel, ok := form.Items[idx].Widget.(*widget.Select); ok && sel.Selected != "" {
+			person.Gender = search.Gender(strings.ToLower(sel.Selected))
+		}
+		idx++
+	}
+
+	// 2: Birth Date (YYYY-MM-DD)
+	if idx < len(form.Items) {
+		if entry, ok := form.Items[idx].Widget.(*widget.Entry); ok && entry.Text != "" {
+			if t, err := time.Parse("2006-01-02", entry.Text); err == nil {
+				person.BirthDate = &t
+			}
+		}
+		idx++
+	}
+
+	// 3: Government IDs
+	if idx < len(form.Items) {
+		if entry, ok := form.Items[idx].Widget.(*widget.Entry); ok && entry.MultiLine && entry.Text != "" {
+			lines := strings.Split(entry.Text, "\n")
+			person.GovernmentIDs = make([]search.GovernmentID, 0, len(lines))
+
+			for _, line := range lines {
+				line = strings.TrimSpace(line)
+				if line == "" {
+					continue
+				}
+				parts := strings.Split(line, ":")
+				id := search.GovernmentID{}
+				switch len(parts) {
+				case 3:
+					id.Country = strings.TrimSpace(parts[2])
+					fallthrough
+				case 2:
+					id.Identifier = strings.TrimSpace(parts[1])
+					id.Type = search.GovernmentIDType(strings.TrimSpace(parts[0]))
+				case 1:
+					id.Identifier = strings.TrimSpace(parts[0])
+				default:
+					continue
+				}
+				if id.Identifier != "" {
+					person.GovernmentIDs = append(person.GovernmentIDs, id)
+				}
 			}
 		}
 	}
@@ -256,21 +302,73 @@ func extractBusinessFields(content fyne.CanvasObject) *search.Business {
 		return business
 	}
 
-	container, isContainer := content.(*fyne.Container)
-	if !isContainer || len(container.Objects) < 2 {
+	container, ok := content.(*fyne.Container)
+	if !ok || len(container.Objects) < 2 {
 		return business
 	}
 
-	form, isForm := container.Objects[1].(*widget.Form)
-	if !isForm {
+	form, ok := container.Objects[1].(*widget.Form)
+	if !ok {
 		return business
 	}
 
-	// Extract alt names
-	if len(form.Items) > 0 {
-		if entry, isEntry := form.Items[0].Widget.(*widget.Entry); entry.MultiLine && isEntry {
+	idx := 0
+
+	// Alt Names
+	if idx < len(form.Items) {
+		if entry, ok := form.Items[idx].Widget.(*widget.Entry); ok && entry.MultiLine {
 			if entry.Text != "" {
 				business.AltNames = strings.Split(entry.Text, "\n")
+			}
+		}
+		idx++
+	}
+
+	// Created Date
+	if idx < len(form.Items) {
+		if entry, ok := form.Items[idx].Widget.(*widget.Entry); ok && entry.Text != "" {
+			if t, err := time.Parse("2006-01-02", entry.Text); err == nil {
+				business.Created = &t
+			}
+		}
+		idx++
+	}
+
+	// Dissolved Date
+	if idx < len(form.Items) {
+		if entry, ok := form.Items[idx].Widget.(*widget.Entry); ok && entry.Text != "" {
+			if t, err := time.Parse("2006-01-02", entry.Text); err == nil {
+				business.Dissolved = &t
+			}
+		}
+		idx++
+	}
+
+	// Government IDs
+	if idx < len(form.Items) {
+		if entry, ok := form.Items[idx].Widget.(*widget.Entry); ok && entry.MultiLine && entry.Text != "" {
+			lines := strings.Split(entry.Text, "\n")
+			business.GovernmentIDs = make([]search.GovernmentID, 0, len(lines))
+
+			for _, line := range lines {
+				line = strings.TrimSpace(line)
+				if line == "" {
+					continue
+				}
+				parts := strings.SplitN(line, ":", 3)
+				id := search.GovernmentID{}
+				if len(parts) >= 2 {
+					id.Type = search.GovernmentIDType(strings.TrimSpace(parts[0]))
+					id.Identifier = strings.TrimSpace(parts[1])
+					if len(parts) == 3 {
+						id.Country = strings.TrimSpace(parts[2])
+					}
+				} else {
+					id.Identifier = line
+				}
+				if id.Identifier != "" {
+					business.GovernmentIDs = append(business.GovernmentIDs, id)
+				}
 			}
 		}
 	}
@@ -285,21 +383,73 @@ func extractOrganizationFields(content fyne.CanvasObject) *search.Organization {
 		return org
 	}
 
-	container, isContainer := content.(*fyne.Container)
-	if !isContainer || len(container.Objects) < 2 {
+	container, ok := content.(*fyne.Container)
+	if !ok || len(container.Objects) < 2 {
 		return org
 	}
 
-	form, isForm := container.Objects[1].(*widget.Form)
-	if !isForm {
+	form, ok := container.Objects[1].(*widget.Form)
+	if !ok || len(form.Items) == 0 {
 		return org
 	}
 
-	// Extract alt names
-	if len(form.Items) > 0 {
-		if entry, isEntry := form.Items[0].Widget.(*widget.Entry); entry.MultiLine && isEntry {
+	idx := 0
+
+	// Alt Names
+	if idx < len(form.Items) {
+		if entry, ok := form.Items[idx].Widget.(*widget.Entry); ok && entry.MultiLine {
 			if entry.Text != "" {
 				org.AltNames = strings.Split(entry.Text, "\n")
+			}
+		}
+		idx++
+	}
+
+	// Created Date
+	if idx < len(form.Items) {
+		if entry, ok := form.Items[idx].Widget.(*widget.Entry); ok && entry.Text != "" {
+			if t, err := time.Parse("2006-01-02", entry.Text); err == nil {
+				org.Created = &t
+			}
+		}
+		idx++
+	}
+
+	// Dissolved Date
+	if idx < len(form.Items) {
+		if entry, ok := form.Items[idx].Widget.(*widget.Entry); ok && entry.Text != "" {
+			if t, err := time.Parse("2006-01-02", entry.Text); err == nil {
+				org.Dissolved = &t
+			}
+		}
+		idx++
+	}
+
+	// Government IDs
+	if idx < len(form.Items) {
+		if entry, ok := form.Items[idx].Widget.(*widget.Entry); ok && entry.MultiLine && entry.Text != "" {
+			lines := strings.Split(entry.Text, "\n")
+			org.GovernmentIDs = make([]search.GovernmentID, 0, len(lines))
+
+			for _, line := range lines {
+				line = strings.TrimSpace(line)
+				if line == "" {
+					continue
+				}
+				parts := strings.SplitN(line, ":", 3)
+				id := search.GovernmentID{}
+				if len(parts) >= 2 {
+					id.Type = search.GovernmentIDType(strings.TrimSpace(parts[0]))
+					id.Identifier = strings.TrimSpace(parts[1])
+					if len(parts) == 3 {
+						id.Country = strings.TrimSpace(parts[2])
+					}
+				} else {
+					id.Identifier = line
+				}
+				if id.Identifier != "" {
+					org.GovernmentIDs = append(org.GovernmentIDs, id)
+				}
 			}
 		}
 	}
@@ -314,31 +464,74 @@ func extractAircraftFields(content fyne.CanvasObject) *search.Aircraft {
 		return aircraft
 	}
 
-	container, isContainer := content.(*fyne.Container)
-	if !isContainer || len(container.Objects) < 2 {
+	container, ok := content.(*fyne.Container)
+	if !ok || len(container.Objects) < 2 {
 		return aircraft
 	}
 
-	form, isForm := container.Objects[1].(*widget.Form)
-	if !isForm {
+	form, ok := container.Objects[1].(*widget.Form)
+	if !ok || len(form.Items) == 0 {
 		return aircraft
 	}
 
-	// Extract alt names
-	if len(form.Items) > 0 {
-		if entry, isEntry := form.Items[0].Widget.(*widget.Entry); entry.MultiLine && isEntry {
+	idx := 0
+
+	// 0: Alt Names
+	if idx < len(form.Items) {
+		if entry, ok := form.Items[idx].Widget.(*widget.Entry); ok && entry.MultiLine {
 			if entry.Text != "" {
 				aircraft.AltNames = strings.Split(entry.Text, "\n")
 			}
 		}
+		idx++
 	}
 
-	// Extract type
-	if len(form.Items) > 1 {
-		if select_, isSelect := form.Items[1].Widget.(*widget.Select); isSelect {
-			if select_.Selected != "" {
-				aircraft.Type = search.AircraftType(strings.ToLower(select_.Selected))
+	// 1: Type
+	if idx < len(form.Items) {
+		if sel, ok := form.Items[idx].Widget.(*widget.Select); ok && sel.Selected != "" {
+			aircraft.Type = search.AircraftType(strings.ToLower(sel.Selected))
+		}
+		idx++
+	}
+
+	// 2: Flag
+	if idx < len(form.Items) {
+		if entry, ok := form.Items[idx].Widget.(*widget.Entry); ok {
+			aircraft.Flag = strings.TrimSpace(entry.Text)
+		}
+		idx++
+	}
+
+	// 3: Built Date
+	if idx < len(form.Items) {
+		if entry, ok := form.Items[idx].Widget.(*widget.Entry); ok && entry.Text != "" {
+			if t, err := time.Parse("2006-01-02", entry.Text); err == nil {
+				aircraft.Built = &t
 			}
+		}
+		idx++
+	}
+
+	// 4: ICAO Code
+	if idx < len(form.Items) {
+		if entry, ok := form.Items[idx].Widget.(*widget.Entry); ok {
+			aircraft.ICAOCode = strings.TrimSpace(entry.Text)
+		}
+		idx++
+	}
+
+	// 5: Model
+	if idx < len(form.Items) {
+		if entry, ok := form.Items[idx].Widget.(*widget.Entry); ok {
+			aircraft.Model = strings.TrimSpace(entry.Text)
+		}
+		idx++
+	}
+
+	// 6: Serial Number
+	if idx < len(form.Items) {
+		if entry, ok := form.Items[idx].Widget.(*widget.Entry); ok {
+			aircraft.SerialNumber = strings.TrimSpace(entry.Text)
 		}
 	}
 
@@ -352,39 +545,94 @@ func extractVesselFields(content fyne.CanvasObject) *search.Vessel {
 		return vessel
 	}
 
-	container, isContainer := content.(*fyne.Container)
-	if !isContainer || len(container.Objects) < 2 {
+	container, ok := content.(*fyne.Container)
+	if !ok || len(container.Objects) < 2 {
 		return vessel
 	}
 
-	form, isForm := container.Objects[1].(*widget.Form)
-	if !isForm {
+	form, ok := container.Objects[1].(*widget.Form)
+	if !ok || len(form.Items) == 0 {
 		return vessel
 	}
 
-	// Extract alt names
-	if len(form.Items) > 0 {
-		if entry, isEntry := form.Items[0].Widget.(*widget.Entry); entry.MultiLine && isEntry {
+	idx := 0
+
+	// 0: Alt Names
+	if idx < len(form.Items) {
+		if entry, ok := form.Items[idx].Widget.(*widget.Entry); ok && entry.MultiLine {
 			if entry.Text != "" {
 				vessel.AltNames = strings.Split(entry.Text, "\n")
 			}
 		}
+		idx++
 	}
 
-	// Extract IMO number
-	if len(form.Items) > 1 {
-		if entry, isEntry := form.Items[1].Widget.(*widget.Entry); isEntry {
-			vessel.IMONumber = entry.Text
+	// 1: IMO Number
+	if idx < len(form.Items) {
+		if entry, ok := form.Items[idx].Widget.(*widget.Entry); ok {
+			vessel.IMONumber = strings.TrimSpace(entry.Text)
+		}
+		idx++
+	}
+
+	// 2: Type
+	if idx < len(form.Items) {
+		if sel, ok := form.Items[idx].Widget.(*widget.Select); ok && sel.Selected != "" {
+			vessel.Type = search.VesselType(strings.ToLower(sel.Selected))
+		}
+		idx++
+	}
+
+	// 3: Flag
+	if idx < len(form.Items) {
+		if entry, ok := form.Items[idx].Widget.(*widget.Entry); ok {
+			vessel.Flag = strings.TrimSpace(entry.Text)
+		}
+		idx++
+	}
+
+	// 4: MMSI
+	if idx < len(form.Items) {
+		if entry, ok := form.Items[idx].Widget.(*widget.Entry); ok {
+			vessel.MMSI = strings.TrimSpace(entry.Text)
+		}
+		idx++
+	}
+
+	// 5: Call Sign
+	if idx < len(form.Items) {
+		if entry, ok := form.Items[idx].Widget.(*widget.Entry); ok {
+			vessel.CallSign = strings.TrimSpace(entry.Text)
 		}
 	}
 
-	// Extract type
-	if len(form.Items) > 2 {
-		if select_, isSelect := form.Items[2].Widget.(*widget.Select); isSelect {
-			if select_.Selected != "" {
-				vessel.Type = search.VesselType(strings.ToLower(select_.Selected))
+	for idx < len(form.Items) {
+		w := form.Items[idx].Widget
+		text := ""
+		if entry, ok := w.(*widget.Entry); ok {
+			text = strings.TrimSpace(entry.Text)
+		}
+		label := form.Items[idx].Text
+
+		switch label {
+		case "Tonnage":
+			if i, err := strconv.Atoi(text); err == nil && i > 0 {
+				vessel.Tonnage = i
 			}
+		case "Gross Registered Tonnage":
+			if i, err := strconv.Atoi(text); err == nil && i > 0 {
+				vessel.GrossRegisteredTonnage = i
+			}
+		case "Owner":
+			vessel.Owner = text
+		case "Built Date":
+			if t, err := time.Parse("2006-01-02", text); err == nil {
+				vessel.Built = &t
+			}
+		case "Model":
+			vessel.Model = text
 		}
+		idx++
 	}
 
 	return vessel
@@ -539,6 +787,26 @@ func createVesselContent() fyne.CanvasObject {
 	callSignEntry := widget.NewEntry()
 	callSignEntry.PlaceHolder = "Call sign"
 	form.Append("Call Sign", callSignEntry)
+
+	tonnageEntry := widget.NewEntry()
+	tonnageEntry.PlaceHolder = "e.g. 85000"
+	form.Append("Tonnage", tonnageEntry)
+
+	grtEntry := widget.NewEntry()
+	grtEntry.PlaceHolder = "Gross Registered Tonnage"
+	form.Append("Gross Registered Tonnage", grtEntry)
+
+	ownerEntry := widget.NewEntry()
+	ownerEntry.PlaceHolder = "Owner name"
+	form.Append("Owner", ownerEntry)
+
+	builtDateEntry := widget.NewEntry()
+	builtDateEntry.PlaceHolder = "YYYY-MM-DD"
+	form.Append("Built Date", builtDateEntry)
+
+	modelEntry := widget.NewEntry()
+	modelEntry.PlaceHolder = "Vessel model"
+	form.Append("Model", modelEntry)
 
 	return container.NewVBox(
 		widget.NewLabelWithStyle("Vessel Fields", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
@@ -894,16 +1162,16 @@ func createVesselInfoCard(vessel search.Vessel) fyne.CanvasObject {
 		form.Append("Tonnage", wordWrappingLabel(fmt.Sprintf("%d", vessel.Tonnage)))
 	}
 
+	if vessel.GrossRegisteredTonnage > 0 {
+		form.Append("Gross Registered Tonnage", wordWrappingLabel(fmt.Sprintf("%d", vessel.GrossRegisteredTonnage)))
+	}
+
 	if vessel.MMSI != "" {
 		form.Append("MMSI", wordWrappingLabel(vessel.MMSI))
 	}
 
 	if vessel.CallSign != "" {
 		form.Append("Call Sign", wordWrappingLabel(vessel.CallSign))
-	}
-
-	if vessel.GrossRegisteredTonnage > 0 {
-		form.Append("Gross Registered Tonnage", wordWrappingLabel(fmt.Sprintf("%d", vessel.GrossRegisteredTonnage)))
 	}
 
 	if vessel.Owner != "" {
