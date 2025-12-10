@@ -235,12 +235,12 @@ func calculateFinalScore[Q any, I any](w io.Writer, pieces []ScorePiece, exactOv
 	finalScore = math.Min(finalScore, 1.0)
 
 	if w != nil {
-        debug(w, "calculateFinalScore:\n")
-        debug(w, "  exactOverride=%v\n", exactOverride)
-        debug(w, "  fields=%#v\n", fields)
-        debug(w, "  coverage=%#v\n", coverage)
-        debug(w, "  baseScore=%v\n", baseScore)
-        debug(w, "  finalScore=%.2f (overridden: %v)\n", finalScore, exactOverride)
+		debug(w, "calculateFinalScore:\n")
+		debug(w, "  exactOverride=%v\n", exactOverride)
+		debug(w, "  fields=%#v\n", fields)
+		debug(w, "  coverage=%#v\n", coverage)
+		debug(w, "  baseScore=%v\n", baseScore)
+		debug(w, "  finalScore=%.2f (overridden: %v)\n", finalScore, exactOverride)
 	}
 	if exactOverride {
 		return 1.0

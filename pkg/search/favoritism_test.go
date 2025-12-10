@@ -66,13 +66,21 @@ func TestExactMatchFavoritism(t *testing.T) {
 	t.Logf("Debug output:\n%s", debugOutput)
 
 	// Test case 2: Exact name match WITHOUT sufficient supporting fields should NOT get favoritism
-	debug.Reset()
 
 	queryNameOnly := Entity[any]{
-		Name: "JANE DOE",
+		Name: "JOHN DOE",
 		Type: EntityPerson,
 		Person: &Person{
-			Name: "JANE DOE",
+			Name: "JOHN DOE",
+		},
+		Addresses: []Address{
+			{
+				Line1:      "Oak Ave",
+				City:       "Los Angeles",
+				State:      "CA",
+				PostalCode: "90210",
+				Country:    "US",
+			},
 		},
 	}
 
@@ -96,11 +104,30 @@ func TestExactMatchFavoritism(t *testing.T) {
 	queryNameOnlyNorm := queryNameOnly.Normalize()
 	indexNameOnlyNorm := indexNameOnly.Normalize()
 
-	scoreNameOnly := DebugSimilarity(&debug, queryNameOnlyNorm, indexNameOnlyNorm)
+	t.Run("EXACT_MATCH_FAVORITISM=0.0", func(t *testing.T) {
+		debug.Reset()
+		t.Setenv("EXACT_MATCH_FAVORITISM", "0.0")
 
-	// With EXACT_MATCH_FAVORITISM=0.0 (default), exact name matches will get penalties with no favoritism boost
-	require.InDelta(t, 0.85, scoreNameOnly, 0.02, "Name-only exact match should get penalized without favoritism (default favoritism=0.0)")
+		scoreNameOnly := DebugSimilarity(&debug, queryNameOnlyNorm, indexNameOnlyNorm)
 
-	debugOutput2 := debug.String()
-	t.Logf("Name-only debug output:\n%s", debugOutput2)
+		// With EXACT_MATCH_FAVORITISM=0.0 (default), exact name matches will get penalties with no favoritism boost
+		require.InDelta(t, 0.85, scoreNameOnly, 0.02, "Name-only exact match should get penalized without favoritism (default favoritism=0.0)")
+
+		debugOutput2 := debug.String()
+		t.Logf("Name-only debug output:\n%s", debugOutput2)
+	})
+
+	t.Run("EXACT_MATCH_FAVORITISM=1.0", func(t *testing.T) {
+		debug.Reset()
+		t.Setenv("EXACT_MATCH_FAVORITISM", "1.0")
+
+		scoreNameOnly := DebugSimilarity(&debug, queryNameOnlyNorm, indexNameOnlyNorm)
+
+		// With EXACT_MATCH_FAVORITISM=0.0 (default), exact name matches will get penalties with no favoritism boost
+		require.InDelta(t, 0.85, scoreNameOnly, 0.02, "Name-only exact match should get penalized without favoritism (default favoritism=0.0)")
+
+		debugOutput2 := debug.String()
+		t.Logf("Name-only debug output:\n%s", debugOutput2)
+	})
+
 }
