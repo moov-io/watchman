@@ -16,7 +16,7 @@ jobs:
         os: [ubuntu-latest]
     steps:
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Setup Linux Dependencies
       if: runner.os == 'Linux'
@@ -43,7 +43,7 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Setup Linux Dependencies
       if: runner.os == 'Linux'
@@ -93,7 +93,7 @@ jobs:
       id: go
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
@@ -111,7 +111,7 @@ jobs:
       id: go
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Docker Hub
       run: make docker-hub
@@ -143,7 +143,7 @@ jobs:
       id: go
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Build Image
       run: make docker-openshift
