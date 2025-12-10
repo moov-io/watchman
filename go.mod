@@ -5,7 +5,7 @@ go 1.24.0
 toolchain go1.25.1
 
 require (
-	fyne.io/fyne/v2 v2.7.0
+	fyne.io/fyne/v2 v2.7.1
 	github.com/abadojack/whatlanggo v1.0.1
 	github.com/adamdecaf/merge v0.1.1
 	github.com/antchfx/htmlquery v1.3.4
