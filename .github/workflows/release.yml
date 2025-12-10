@@ -62,7 +62,7 @@ jobs:
       id: go
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Load Release URL File from release job
       uses: actions/download-artifact@v6
@@ -144,7 +144,7 @@ jobs:
       id: go
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Clean
       run: make clean
@@ -186,7 +186,7 @@ jobs:
       id: go
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Clean
       run: make clean
