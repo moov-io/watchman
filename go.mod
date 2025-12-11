@@ -7,7 +7,7 @@ toolchain go1.25.5
 require (
 	fyne.io/fyne/v2 v2.7.1
 	github.com/abadojack/whatlanggo v1.0.1
-	github.com/adamdecaf/merge v0.1.1
+	github.com/adamdecaf/merge v0.2.1
 	github.com/antchfx/htmlquery v1.3.5
 	github.com/bbalet/stopwords v1.0.0
 	github.com/dongri/phonenumber v0.1.12
@@ -141,7 +141,7 @@ require (
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/crypto v0.45.0 // indirect
-	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b // indirect
+	golang.org/x/exp v0.0.0-20251209150349-8475f28825e9 // indirect
 	golang.org/x/image v0.24.0 // indirect
 	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/oauth2 v0.31.0 // indirect

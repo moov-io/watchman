@@ -9,48 +9,51 @@ import (
 )
 
 func Merge[T Value](entities []Entity[T]) []Entity[T] {
-	// Make a copy so we're free to modify
-	out := make([]Entity[T], len(entities))
-	copy(out, entities)
+	// pre-group entities so merge doesn't have to
+	grouped := make(map[string][]Entity[T])
 
-	return merge.Slices(getMergeKey, mergeEntities, out)
+	for idx := range entities {
+		key := getMergeKey(entities[idx])
+
+		grouped[key] = append(grouped[key], entities[idx])
+	}
+
+	out := make([]Entity[T], 0, len(grouped))
+	for _, values := range grouped {
+		if len(values) == 0 {
+			continue
+		}
+
+		var acc Entity[T]
+		for idx := range values {
+			acc = acc.merge(values[idx])
+		}
+
+		out = append(out, acc.Normalize())
+	}
+	return out
 }
 
 func getMergeKey[T Value](entity Entity[T]) string {
 	return strings.ToLower(fmt.Sprintf("%s/%s/%s", entity.Source, entity.SourceID, entity.Type))
 }
 
-func mergeEntities[T Value](e1, e2 *Entity[T]) {
-	*e1 = e1.merge(e2)
-}
-
-func (e *Entity[T]) merge(other *Entity[T]) Entity[T] {
+func (e *Entity[T]) merge(other Entity[T]) Entity[T] {
 	var out Entity[T]
 
-	if e == nil && other == nil {
-		return out
-	}
 	if e == nil {
-		return *other
+		return other
 	}
-	if other == nil {
+	if other.Name == "" {
 		return *e
 	}
 
 	// Combine Name fields
 	var altNames []string
-	switch {
-	case e.Name != "" && other.Name == "":
-		out.Name = e.Name
-
-	case e.Name == "" && other.Name != "":
-		out.Name = other.Name
-
-	default:
-		// both populated or both empty
-		out.Name = e.Name
-		altNames = mergeStrings(altNames, []string{other.Name})
+	if e.Name != "" && other.Name != "" {
+		altNames = append(altNames, other.Name)
 	}
+	out.Name = cmp.Or(e.Name, other.Name)
 
 	// Merge Basic fields
 	out.Type = cmp.Or(e.Type, other.Type)
@@ -59,9 +62,12 @@ func (e *Entity[T]) merge(other *Entity[T]) Entity[T] {
 
 	// Merge type fields
 	switch {
-	case e.Person != nil && other.Person != nil:
+	case other.Person != nil:
+		if e.Person == nil {
+			e.Person = &Person{}
+		}
 		out.Person = &Person{
-			Name:          e.Name,
+			Name:          cmp.Or(e.Person.Name, other.Person.Name, e.Name),
 			AltNames:      mergeStrings(altNames, e.Person.AltNames, other.Person.AltNames),
 			Gender:        cmp.Or(e.Person.Gender, other.Person.Gender),
 			BirthDate:     cmp.Or(e.Person.BirthDate, other.Person.BirthDate),
@@ -71,27 +77,36 @@ func (e *Entity[T]) merge(other *Entity[T]) Entity[T] {
 			GovernmentIDs: mergeGovernmentIDs(e.Person.GovernmentIDs, other.Person.GovernmentIDs),
 		}
 
-	case e.Business != nil && other.Business != nil:
+	case other.Business != nil:
+		if e.Business == nil {
+			e.Business = &Business{}
+		}
 		out.Business = &Business{
-			Name:          e.Name,
+			Name:          cmp.Or(e.Business.Name, other.Business.Name, e.Name),
 			AltNames:      mergeStrings(altNames, e.Business.AltNames, other.Business.AltNames),
 			Created:       cmp.Or(e.Business.Created, other.Business.Created),
 			Dissolved:     cmp.Or(e.Business.Dissolved, other.Business.Dissolved),
 			GovernmentIDs: mergeGovernmentIDs(e.Business.GovernmentIDs, other.Business.GovernmentIDs),
 		}
 
-	case e.Organization != nil && other.Organization != nil:
+	case other.Organization != nil:
+		if e.Organization == nil {
+			e.Organization = &Organization{}
+		}
 		out.Organization = &Organization{
-			Name:          e.Name,
+			Name:          cmp.Or(e.Organization.Name, other.Organization.Name, e.Name),
 			AltNames:      mergeStrings(altNames, e.Organization.AltNames, other.Organization.AltNames),
 			Created:       cmp.Or(e.Organization.Created, other.Organization.Created),
 			Dissolved:     cmp.Or(e.Organization.Dissolved, other.Organization.Dissolved),
 			GovernmentIDs: mergeGovernmentIDs(e.Organization.GovernmentIDs, other.Organization.GovernmentIDs),
 		}
 
-	case e.Aircraft != nil && other.Aircraft != nil:
+	case other.Aircraft != nil:
+		if e.Aircraft == nil {
+			e.Aircraft = &Aircraft{}
+		}
 		out.Aircraft = &Aircraft{
-			Name:         e.Name,
+			Name:         cmp.Or(e.Aircraft.Name, other.Aircraft.Name, e.Name),
 			AltNames:     mergeStrings(altNames, e.Aircraft.AltNames, other.Aircraft.AltNames),
 			Type:         cmp.Or(e.Aircraft.Type, other.Aircraft.Type),
 			Flag:         cmp.Or(e.Aircraft.Flag, other.Aircraft.Flag),
@@ -101,9 +116,12 @@ func (e *Entity[T]) merge(other *Entity[T]) Entity[T] {
 			SerialNumber: cmp.Or(e.Aircraft.SerialNumber, other.Aircraft.SerialNumber),
 		}
 
-	case e.Vessel != nil && other.Vessel != nil:
+	case other.Vessel != nil:
+		if e.Vessel == nil {
+			e.Vessel = &Vessel{}
+		}
 		out.Vessel = &Vessel{
-			Name:                   e.Name,
+			Name:                   cmp.Or(e.Vessel.Name, other.Vessel.Name, e.Name),
 			AltNames:               mergeStrings(altNames, e.Vessel.AltNames, other.Vessel.AltNames),
 			IMONumber:              cmp.Or(e.Vessel.IMONumber, other.Vessel.IMONumber),
 			Type:                   cmp.Or(e.Vessel.Type, other.Vessel.Type),
@@ -127,7 +145,27 @@ func (e *Entity[T]) merge(other *Entity[T]) Entity[T] {
 	out.Addresses = mergeAddresses(e.Addresses, other.Addresses)
 	out.CryptoAddresses = mergeCryptoAddresses(e.CryptoAddresses, other.CryptoAddresses)
 
-	return out.Normalize()
+	out.Affiliations = mergeAffiliations(e.Affiliations, other.Affiliations)
+	out.HistoricalInfo = mergeHistoricalInfo(e.HistoricalInfo, other.HistoricalInfo)
+
+	if e.SanctionsInfo != nil || other.SanctionsInfo != nil {
+		var eInfo, otherInfo SanctionsInfo
+		if e.SanctionsInfo != nil {
+			eInfo = *e.SanctionsInfo
+		}
+		if other.SanctionsInfo != nil {
+			otherInfo = *other.SanctionsInfo
+		}
+		out.SanctionsInfo = &SanctionsInfo{
+			Programs:    mergeStrings(eInfo.Programs, otherInfo.Programs),
+			Secondary:   eInfo.Secondary || otherInfo.Secondary,
+			Description: cmp.Or(eInfo.Description, otherInfo.Description),
+		}
+	}
+
+	out.SourceData = other.SourceData
+
+	return out
 }
 
 func mergeStrings(ss ...[]string) []string {
@@ -157,7 +195,7 @@ func mergeAddresses(a1, a2 []Address) []Address {
 		func(addr Address) string {
 			return strings.ToLower(fmt.Sprintf("%s/%s", addr.Line1, addr.Line2))
 		},
-		func(a1, a2 *Address) {
+		func(a1 *Address, a2 Address) {
 			a1.Line1 = cmp.Or(a1.Line1, a2.Line1)
 			a1.Line2 = cmp.Or(a1.Line2, a2.Line2)
 			a1.City = cmp.Or(a1.City, a2.City)
@@ -176,5 +214,25 @@ func mergeCryptoAddresses(c1, c2 []CryptoAddress) []CryptoAddress {
 		},
 		nil, // don't merge, just unique
 		c1, c2,
+	)
+}
+
+func mergeAffiliations(a1, a2 []Affiliation) []Affiliation {
+	return merge.Slices(
+		func(aff Affiliation) string {
+			return strings.ToLower(fmt.Sprintf("%s/%s", aff.EntityName, aff.Type))
+		},
+		nil, // don't merge, just unique
+		a1, a2,
+	)
+}
+
+func mergeHistoricalInfo(h1, h2 []HistoricalInfo) []HistoricalInfo {
+	return merge.Slices(
+		func(h HistoricalInfo) string {
+			return strings.ToLower(fmt.Sprintf("%s/%s", h.Type, h.Value))
+		},
+		nil, // don't merge, just unique
+		h1, h2,
 	)
 }

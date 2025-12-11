@@ -5,8 +5,10 @@ import (
 	"time"
 
 	"github.com/moov-io/watchman/internal/cslustest"
+	"github.com/moov-io/watchman/internal/entitytest"
 	"github.com/moov-io/watchman/internal/ofactest"
 	"github.com/moov-io/watchman/pkg/search"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -164,49 +166,49 @@ func TestMerge__Identity(t *testing.T) {
 		entity := ofactest.FindEntity(t, "10278")
 		require.NotNil(t, entity.Person)
 
-		input := []search.Entity[search.Value]{entity}
+		got := search.Merge([]search.Entity[search.Value]{entity})
+		require.Len(t, got, 1)
 
-		got := search.Merge(input)
-		require.ElementsMatch(t, input, got)
+		entitytest.Equal(t, entity, got[0])
 	})
 
 	t.Run("business", func(t *testing.T) {
 		entity := ofactest.FindEntity(t, "12685")
 		require.NotNil(t, entity.Business)
 
-		input := []search.Entity[search.Value]{entity}
+		got := search.Merge([]search.Entity[search.Value]{entity})
+		require.Len(t, got, 1)
 
-		got := search.Merge(input)
-		require.ElementsMatch(t, input, got)
+		entitytest.Equal(t, entity, got[0])
 	})
 
 	t.Run("organization", func(t *testing.T) {
 		entity := cslustest.FindEntity(t, "18283")
 		require.NotNil(t, entity.Organization)
 
-		input := []search.Entity[search.Value]{entity}
+		got := search.Merge([]search.Entity[search.Value]{entity})
+		require.Len(t, got, 1)
 
-		got := search.Merge(input)
-		require.ElementsMatch(t, input, got)
+		entitytest.Equal(t, entity, got[0])
 	})
 
 	t.Run("aircraft", func(t *testing.T) {
 		entity := ofactest.FindEntity(t, "20540")
 		require.NotNil(t, entity.Aircraft)
 
-		input := []search.Entity[search.Value]{entity}
+		got := search.Merge([]search.Entity[search.Value]{entity})
+		require.Len(t, got, 1)
 
-		got := search.Merge(input)
-		require.ElementsMatch(t, input, got)
+		entitytest.Equal(t, entity, got[0])
 	})
 
 	t.Run("vessel", func(t *testing.T) {
 		entity := ofactest.FindEntity(t, "40716")
 		require.NotNil(t, entity.Vessel)
 
-		input := []search.Entity[search.Value]{entity}
+		got := search.Merge([]search.Entity[search.Value]{entity})
+		require.Len(t, got, 1)
 
-		got := search.Merge(input)
-		require.ElementsMatch(t, input, got)
+		entitytest.Equal(t, entity, got[0])
 	})
 }
