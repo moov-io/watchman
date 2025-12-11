@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -323,9 +324,18 @@ func TestService_ReadEntitiesFromFile_FincenPerson(t *testing.T) {
 
 		require.Len(t, parsedFile.Entities, len(expected))
 
-		require.Equal(t, expected[0], parsedFile.Entities[0])
-		require.Equal(t, expected[1], parsedFile.Entities[1])
-		require.Equal(t, expected[2], parsedFile.Entities[2])
+		for _, exp := range expected {
+			var found bool
+			for _, parsed := range parsedFile.Entities {
+				if strings.EqualFold(exp.Name, parsed.Name) {
+					found = true
+					require.Equal(t, exp, parsed, exp.Name)
+				}
+			}
+			if !found {
+				t.Fatalf("no matching parsed record for %#v", exp.Name)
+			}
+		}
 	})
 }
 

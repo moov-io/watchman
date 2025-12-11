@@ -57,7 +57,7 @@ func (s *service) ReadEntitiesFromFile(ctx context.Context, name string, content
 		}
 	}
 	if err != nil {
-		return out, err
+		return out, fmt.Errorf("reading entities from %s failed: %w", name, err)
 	}
 
 	// Merge the entities
