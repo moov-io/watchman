@@ -145,7 +145,23 @@ func (e *Entity[T]) merge(other Entity[T]) Entity[T] {
 	out.Addresses = mergeAddresses(e.Addresses, other.Addresses)
 	out.CryptoAddresses = mergeCryptoAddresses(e.CryptoAddresses, other.CryptoAddresses)
 
-	out.SanctionsInfo = cmp.Or(e.SanctionsInfo, other.SanctionsInfo)
+	out.Affiliations = mergeAffiliations(e.Affiliations, other.Affiliations)
+	out.HistoricalInfo = mergeHistoricalInfo(e.HistoricalInfo, other.HistoricalInfo)
+
+	if e.SanctionsInfo != nil || other.SanctionsInfo != nil {
+		var eInfo, otherInfo SanctionsInfo
+		if e.SanctionsInfo != nil {
+			eInfo = *e.SanctionsInfo
+		}
+		if other.SanctionsInfo != nil {
+			otherInfo = *other.SanctionsInfo
+		}
+		out.SanctionsInfo = &SanctionsInfo{
+			Programs:    mergeStrings(eInfo.Programs, otherInfo.Programs),
+			Secondary:   eInfo.Secondary || otherInfo.Secondary,
+			Description: cmp.Or(eInfo.Description, otherInfo.Description),
+		}
+	}
 
 	out.SourceData = other.SourceData
 
@@ -198,5 +214,25 @@ func mergeCryptoAddresses(c1, c2 []CryptoAddress) []CryptoAddress {
 		},
 		nil, // don't merge, just unique
 		c1, c2,
+	)
+}
+
+func mergeAffiliations(a1, a2 []Affiliation) []Affiliation {
+	return merge.Slices(
+		func(aff Affiliation) string {
+			return strings.ToLower(fmt.Sprintf("%s/%s", aff.EntityName, aff.Type))
+		},
+		nil, // don't merge, just unique
+		a1, a2,
+	)
+}
+
+func mergeHistoricalInfo(h1, h2 []HistoricalInfo) []HistoricalInfo {
+	return merge.Slices(
+		func(h HistoricalInfo) string {
+			return strings.ToLower(fmt.Sprintf("%s/%s", h.Type, h.Value))
+		},
+		nil, // don't merge, just unique
+		h1, h2,
 	)
 }
