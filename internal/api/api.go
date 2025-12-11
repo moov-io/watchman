@@ -36,7 +36,7 @@ func JsonResponse[T any](w http.ResponseWriter, object T) error {
 
 		fallbackErr := encodeError(w, err)
 		if fallbackErr != nil {
-			err = fmt.Errorf("problem rendering json marshal error: %w", fallbackErr)
+			err = fmt.Errorf("problem rendering json marshal error: %v -- original error: %v", fallbackErr, err)
 		}
 
 		return err
