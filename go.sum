@@ -653,6 +653,8 @@ github.com/abadojack/whatlanggo v1.0.1 h1:19N6YogDnf71CTHm3Mp2qhYfkRdyvbgwWdd2EP
 github.com/abadojack/whatlanggo v1.0.1/go.mod h1:66WiQbSbJBIlOZMsvbKe5m6pzQovxCH9B/K8tQB2uoc=
 github.com/adamdecaf/merge v0.1.1 h1:nUnmRTiDK+yP2F09ih8/qwX3zv2D6SJed4fUO5VLgrw=
 github.com/adamdecaf/merge v0.1.1/go.mod h1:2oBFKg0m+01A8hHqA3C5oompJ6gt1YbDOaFp0PrGzy0=
+github.com/adamdecaf/merge v0.2.1 h1:bUJkYl217UNcHWf1vefryRU84i0VNkKVbfCoN1Khq08=
+github.com/adamdecaf/merge v0.2.1/go.mod h1:I0HNGd/7LuyUOa2G/eOB+r1+s9Dvr5JfNyZl7SxNujA=
 github.com/ajstarks/deck v0.0.0-20200831202436-30c9fc6549a9/go.mod h1:JynElWSGnm/4RlzPXRlREEwqTHAN3T56Bv2ITsFT3gY=
 github.com/ajstarks/deck/generate v0.0.0-20210309230005-c3f852c02e19/go.mod h1:T13YZdzov6OU0A1+RfKZiZN9ca6VeKdBdyDV+BY97Tk=
 github.com/ajstarks/svgo v0.0.0-20180226025133-644b8db467af/go.mod h1:K08gAheRH3/J6wwsYMMT4xOr94bZjxIelGM0+d/wbFw=

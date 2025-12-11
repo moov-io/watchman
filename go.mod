@@ -7,7 +7,7 @@ toolchain go1.25.5
 require (
 	fyne.io/fyne/v2 v2.7.1
 	github.com/abadojack/whatlanggo v1.0.1
-	github.com/adamdecaf/merge v0.1.1
+	github.com/adamdecaf/merge v0.2.1
 	github.com/antchfx/htmlquery v1.3.5
 	github.com/bbalet/stopwords v1.0.0
 	github.com/dongri/phonenumber v0.1.12
