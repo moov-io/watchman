@@ -1,0 +1,3 @@
+���tracking_number,last_name,first_name,middle_name,suffix,alias_last_name,alias_first_name,alias_middle_name,alias_suffix,number,number_type,dob,street,city,state,zip,country,phone,electronic_address,electronic_address_type
+SCM-52141-AAAAA,Doe,John,,,,,,,114142145,SSN/ITIN,02/14/1992,123 Other Way,Anytown,CA,90210,US,,,
+SCM-43122-BBBBB,Doe,Jane,,,,,,,,,04/18/1945,Mytown 451,Otherthing,,,US,,,

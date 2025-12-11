@@ -80,6 +80,10 @@ func (s *service) readEntitiesFromCSVFile(ctx context.Context, name string, sche
 	if err != nil {
 		return out, fmt.Errorf("problem reading headers: %w", err)
 	}
+	for idx := range headers {
+		// Sometimes we get UTF-8 replacement characters (U+FFFD) in files which can be ignored
+		headers[idx] = strings.ReplaceAll(headers[idx], "\uFFFD", "")
+	}
 
 	for {
 		// Read each row until we run out
@@ -89,6 +93,10 @@ func (s *service) readEntitiesFromCSVFile(ctx context.Context, name string, sche
 				break
 			}
 			return out, fmt.Errorf("problem reading row: %w", err)
+		}
+		for idx := range row {
+			// ignore UTF-8 replacement characters
+			row[idx] = strings.ReplaceAll(row[idx], "\uFFFD", "")
 		}
 
 		var entity search.Entity[search.Value]

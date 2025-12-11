@@ -17,6 +17,66 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestService_MergePerson12_09_2025(t *testing.T) {
+	t.Setenv("APP_CONFIG_SECRETS", filepath.Join("testdata", "fincen-config.yml"))
+
+	db.ForEachDatabase(t, func(db db.DB) {
+		ctx := context.Background()
+		logger := log.NewTestLogger()
+
+		conf, err := config.LoadConfig(logger)
+		require.NoError(t, err)
+
+		ingestRepository := ingest.NewRepository(db)
+		svc := ingest.NewService(logger, conf.Ingest, ingestRepository)
+
+		fd, err := os.Open(filepath.Join("testdata", "Person12.09.2025.csv"))
+		require.NoError(t, err)
+		t.Cleanup(func() { fd.Close() })
+
+		parsedFile, err := svc.ReadEntitiesFromFile(ctx, "fincen-person", fd)
+		require.NoError(t, err)
+		require.Equal(t, "fincen-person", parsedFile.FileType)
+
+		require.Len(t, parsedFile.Entities, 2)
+
+		for _, entity := range parsedFile.Entities {
+			switch entity.Name {
+			case "John Doe":
+				require.Equal(t, "SCM-52141-AAAAA", entity.SourceID)
+				require.Equal(t, "John Doe", entity.Person.Name)
+				require.Empty(t, entity.Person.AltNames)
+				require.Equal(t, "1992-02-14", entity.Person.BirthDate.Format("2006-01-02"))
+
+				govIDs := []search.GovernmentID{
+					{Type: "", Country: "", Identifier: "114142145"},
+				}
+				require.ElementsMatch(t, govIDs, entity.Person.GovernmentIDs)
+
+				addresses := []search.Address{
+					{Line1: "123 Other Way", Line2: "", City: "Anytown", PostalCode: "90210", State: "CA", Country: "US"},
+				}
+				require.ElementsMatch(t, addresses, entity.Addresses)
+
+			case "Jane Doe":
+				require.Equal(t, "SCM-43122-BBBBB", entity.SourceID)
+				require.Equal(t, "Jane Doe", entity.Person.Name)
+				require.Empty(t, entity.Person.AltNames)
+				require.Equal(t, "1945-04-18", entity.Person.BirthDate.Format("2006-01-02"))
+				require.Empty(t, entity.Person.GovernmentIDs)
+
+				addresses := []search.Address{
+					{Line1: "Mytown 451", Line2: "", City: "Otherthing", PostalCode: "", State: "", Country: "US"},
+				}
+				require.ElementsMatch(t, addresses, entity.Addresses)
+
+			default:
+				t.Fatalf("unknown parsed entity: %#v", entity)
+			}
+		}
+	})
+}
+
 func TestService_ReadEntitiesFromFile_FincenBusiness(t *testing.T) {
 	t.Setenv("APP_CONFIG_SECRETS", filepath.Join("testdata", "fincen-config.yml"))
 
