@@ -1,6 +1,7 @@
 package ingest_test
 
 import (
+	"bytes"
 	"context"
 	"net/http/httptest"
 	"os"
@@ -64,12 +65,22 @@ func TestIngest_API(t *testing.T) {
 
 func TestIngest_API_Gzip(t *testing.T) {
 	setupIngestAPITest(t, func(scope ingestApiSetup) {
-		file, err := os.Open(filepath.Join("testdata", "Person12.09.2025.csv"))
+		// Replace linux line endings with windows (\r\n)
+		bs, err := os.ReadFile(filepath.Join("testdata", "Person12.09.2025.csv"))
 		require.NoError(t, err)
-		t.Cleanup(func() { file.Close() })
 
+		lines := bytes.Split(bs, []byte("\n"))
+		require.Len(t, lines, 4)
+
+		var file bytes.Buffer
+		for i := range lines {
+			file.Write(lines[i])
+			file.WriteString("\r\n")
+		}
+
+		// Make ingest API request
 		ctx := context.Background()
-		body := compress.GzipTestFile(t, file)
+		body := compress.GzipTestFile(t, &file)
 
 		ingestResponse, err := scope.client.IngestFile(ctx, "fincen-person", body)
 		require.NoError(t, err)
