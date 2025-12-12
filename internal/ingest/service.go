@@ -51,6 +51,12 @@ func (s *service) ReadEntitiesFromFile(ctx context.Context, name string, content
 			switch Format(strings.ToLower(string(schema.Format))) {
 			case FormatCSV:
 				out, err = s.readEntitiesFromCSVFile(ctx, fileType, schema, contents)
+
+				s.logger.With(log.Fields{
+					"name":      log.String(name),
+					"file_type": log.String(fileType),
+				}).Logf("read %d entities", len(out.Entities))
+
 				break
 
 			default:
@@ -64,6 +70,10 @@ func (s *service) ReadEntitiesFromFile(ctx context.Context, name string, content
 
 	// Merge the entities
 	out.Entities = search.Merge(out.Entities)
+
+	s.logger.With(log.Fields{
+		"name": log.String(name),
+	}).Logf("after merge have %d entities", len(out.Entities))
 
 	if len(out.Entities) == 0 {
 		return out, fmt.Errorf("schema %s not found", name)
