@@ -16,6 +16,14 @@ func GzipToFile(dir string, content io.Reader) (*os.File, error) {
 		return nil, fmt.Errorf("creating temp file: %w", err)
 	}
 
+	var success bool
+	defer func() {
+		if !success {
+			fd.Close()
+			os.Remove(fd.Name())
+		}
+	}()
+
 	// Write content
 	w := gzip.NewWriter(fd)
 	_, err = io.Copy(w, content)
@@ -37,6 +45,8 @@ func GzipToFile(dir string, content io.Reader) (*os.File, error) {
 		return nil, fmt.Errorf("seek reset: %w", err)
 	}
 
+	success = true
+
 	return fd, nil
 }
 
@@ -46,7 +56,10 @@ func GzipTestFile(tb testing.TB, content io.Reader) *os.File {
 	fd, err := GzipToFile(tb.TempDir(), content)
 	require.NoError(tb, err)
 
-	tb.Cleanup(func() { os.Remove(fd.Name()) })
+	tb.Cleanup(func() {
+		fd.Close()
+		os.Remove(fd.Name())
+	})
 
 	return fd
 }
