@@ -1,6 +1,8 @@
 package ingest
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
 	"encoding/csv"
 	"fmt"
@@ -49,6 +51,12 @@ func (s *service) ReadEntitiesFromFile(ctx context.Context, name string, content
 			switch Format(strings.ToLower(string(schema.Format))) {
 			case FormatCSV:
 				out, err = s.readEntitiesFromCSVFile(ctx, fileType, schema, contents)
+
+				s.logger.With(log.Fields{
+					"name":      log.String(name),
+					"file_type": log.String(fileType),
+				}).Logf("read %d entities", len(out.Entities))
+
 				break
 
 			default:
@@ -63,10 +71,32 @@ func (s *service) ReadEntitiesFromFile(ctx context.Context, name string, content
 	// Merge the entities
 	out.Entities = search.Merge(out.Entities)
 
+	s.logger.With(log.Fields{
+		"name": log.String(name),
+	}).Logf("after merge have %d entities", len(out.Entities))
+
 	if len(out.Entities) == 0 {
 		return out, fmt.Errorf("schema %s not found", name)
 	}
 	return out, nil
+}
+
+func maybeDecompressBody(r io.Reader) io.Reader {
+	header := make([]byte, 10)
+	n, err := io.ReadFull(r, header)
+	if err != nil || n < 2 {
+		if n > 0 {
+			return io.MultiReader(bytes.NewReader(header[:n]), r)
+		}
+		return r
+	}
+
+	gz, err := gzip.NewReader(io.MultiReader(bytes.NewReader(header), r))
+	if err == nil {
+		return gz
+	}
+
+	return io.MultiReader(bytes.NewReader(header), r)
 }
 
 func (s *service) readEntitiesFromCSVFile(ctx context.Context, name string, schema File, contents io.Reader) (FileEntities, error) {
@@ -74,7 +104,7 @@ func (s *service) readEntitiesFromCSVFile(ctx context.Context, name string, sche
 		FileType: name,
 	}
 
-	r := csv.NewReader(contents)
+	r := csv.NewReader(maybeDecompressBody(contents))
 
 	headers, err := r.Read()
 	if err != nil {
