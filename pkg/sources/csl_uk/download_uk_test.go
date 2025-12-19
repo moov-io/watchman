@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -81,7 +82,11 @@ func TestUKSanctionsListIndex(t *testing.T) {
 	foundURL, err := fetchLatestUKSanctionsListURL(context.Background(), logger, "")
 	require.NoError(t, err)
 
-	require.Contains(t, foundURL, "UK_Sanctions_List.ods")
+	acceptedFilenames := []string{"UK_Sanctions_List.ods", "UK-Sanctions-List.ods"}
+	foundFilename := slices.ContainsFunc(acceptedFilenames, func(needle string) bool {
+		return strings.Contains(foundURL, needle)
+	})
+	require.True(t, foundFilename)
 }
 
 func TestUKSanctionsListDownload(t *testing.T) {
