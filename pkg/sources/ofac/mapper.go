@@ -83,16 +83,24 @@ func extractCountry(remark string) string {
 	return ""
 }
 
-func GroupIntoEntities(sdns []SDN, addresses map[string][]Address, comments map[string][]SDNComments, altIds map[string][]AlternateIdentity) []search.Entity[search.Value] {
+type MappingOverride func(*search.Entity[search.Value])
+
+func WithSourceList(source search.SourceList) MappingOverride {
+	return func(entity *search.Entity[search.Value]) {
+		entity.Source = source
+	}
+}
+
+func GroupIntoEntities(sdns []SDN, addresses map[string][]Address, comments map[string][]SDNComments, altIds map[string][]AlternateIdentity, overrides ...MappingOverride) []search.Entity[search.Value] {
 	fn := func(sdn SDN) search.Entity[search.Value] {
-		return ToEntity(sdn, addresses[sdn.EntityID], comments[sdn.EntityID], altIds[sdn.EntityID])
+		return ToEntity(sdn, addresses[sdn.EntityID], comments[sdn.EntityID], altIds[sdn.EntityID], overrides...)
 	}
 
 	groups := runtime.NumCPU()
 	return indices.ProcessSlice(sdns, groups, fn)
 }
 
-func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []AlternateIdentity) search.Entity[search.Value] {
+func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []AlternateIdentity, overrides ...MappingOverride) search.Entity[search.Value] {
 	out := search.Entity[search.Value]{
 		Name:       prepare.ReorderSDNName(sdn.SDNName, sdn.SDNType),
 		Source:     search.SourceUSOFAC,
@@ -223,6 +231,10 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []Alt
 			ICAOCode:     firstValue(findMatchingRemarks(remarks, "ICAO Code")),
 		}
 
+	}
+
+	for _, fn := range overrides {
+		fn(&out)
 	}
 
 	return out.Normalize()
