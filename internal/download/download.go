@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"sync"
 	"time"
 
@@ -41,6 +42,8 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 	ctx, span := telemetry.StartSpan(ctx, "refresh-all")
 	defer span.End()
 
+	start := time.Now()
+
 	stats := Stats{
 		Lists:      make(map[string]int),
 		ListHashes: make(map[string]string),
@@ -49,8 +52,6 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 	logger := dl.logger.Info().With(log.Fields{
 		"initial_data_directory": log.String(expandInitialDir(initialDataDirectory(dl.conf))),
 	})
-	start := time.Now()
-	logger.Info().Log("starting list refresh")
 
 	g, ctx := errgroup.WithContext(ctx)
 	preparedLists := make(chan preparedList, 10)
@@ -73,12 +74,18 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 	// Create a WaitGroup to track all producers
 	var producerWg sync.WaitGroup
 
-	// Track what lists have been requested
-	var requestedLists []search.SourceList
+	// Track what lists have been requested and loaded
+	requestedLists := getIncludedLists(dl.conf.IncludedLists)
+	var listsLoaded []search.SourceList
+
+	if len(requestedLists) == 0 {
+		logger.Warn().Log("no lists have been configured!")
+	}
+	logger.Info().Logf("starting list refresh of %v", requestedLists)
 
 	// OFAC Records
-	if slices.Contains(dl.conf.IncludedLists, search.SourceUSOFAC) {
-		requestedLists = append(requestedLists, search.SourceUSOFAC)
+	if slices.Contains(requestedLists, search.SourceUSOFAC) {
+		listsLoaded = append(listsLoaded, search.SourceUSOFAC)
 
 		producerWg.Add(1)
 		g.Go(func() error {
@@ -92,8 +99,8 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 	}
 
 	// CSL Records
-	if slices.Contains(dl.conf.IncludedLists, search.SourceUSCSL) {
-		requestedLists = append(requestedLists, search.SourceUSCSL)
+	if slices.Contains(requestedLists, search.SourceUSCSL) {
+		listsLoaded = append(listsLoaded, search.SourceUSCSL)
 
 		producerWg.Add(1)
 		g.Go(func() error {
@@ -108,12 +115,12 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 
 	// Compare the configured lists against those we actually loaded.
 	// Any extra lists are an error as we don't want to silently ignore them.
-	if len(requestedLists) > len(dl.conf.IncludedLists) {
+	if len(listsLoaded) > len(requestedLists) {
 		close(preparedLists)
 
-		return stats, fmt.Errorf("loaded extra lists: %#v loaded compared to %#v configured", requestedLists, dl.conf.IncludedLists)
+		return stats, fmt.Errorf("loaded extra lists: %#v loaded compared to %#v configured", listsLoaded, requestedLists)
 	}
-	if extra := findExtraLists(dl.conf.IncludedLists, requestedLists); extra != "" {
+	if extra := findExtraLists(requestedLists, listsLoaded); extra != "" {
 		close(preparedLists)
 
 		return stats, fmt.Errorf("unknown lists: %v", extra)
@@ -139,6 +146,25 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 	stats.EndedAt = time.Now().In(time.UTC)
 
 	return stats, nil
+}
+
+func getIncludedLists(configured []search.SourceList) []search.SourceList {
+	out := make([]search.SourceList, 0, len(configured))
+	out = append(out, configured...)
+
+	fromEnvStr := strings.TrimSpace(os.Getenv("INCLUDED_LISTS"))
+	if fromEnvStr != "" {
+		for _, v := range strings.Split(fromEnvStr, ",") {
+			list := strings.ToLower(strings.TrimSpace(v))
+			if list != "" {
+				out = append(out, search.SourceList(list))
+			}
+		}
+	}
+
+	slices.Sort(out)
+
+	return slices.Compact(out)
 }
 
 func findExtraLists(config, loaded []search.SourceList) string {
