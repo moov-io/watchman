@@ -34,6 +34,22 @@ func TestSimilarityDebug_FromJSON(t *testing.T) {
 	require.InDelta(t, got, 0.690, 0.001)
 }
 
+func TestSimilarity_SourceID(t *testing.T) {
+	query := search.Entity[search.Value]{
+		SourceID: "abc",
+	}
+	index := readEntity(t, "1-index.json").Normalize()
+
+	got := search.Similarity(query, index)
+	require.InDelta(t, 0.0, got, 0.001)
+
+	// make SourceID match
+	query.SourceID = index.SourceID
+
+	got = search.Similarity(query, index)
+	require.InDelta(t, 1.0, got, 0.001)
+}
+
 func readEntity(tb testing.TB, name string) search.Entity[search.Value] {
 	tb.Helper()
 
