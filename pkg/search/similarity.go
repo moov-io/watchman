@@ -29,28 +29,43 @@ func Similarity[Q any, I any](query Entity[Q], index Entity[I]) float64 {
 // The format will evolve over time. No stability guarantee is given over what is written.
 func DebugSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]) float64 {
 	details := DetailedSimilarity(w, query, index)
-	if len(details.Pieces) != 9 {
+
+	switch len(details.Pieces) {
+	case 0:
+		// No pieces, nothing to debug in terms of pieces
+	case 1:
+		// This likely indicates an exact SourceID match short-circuit
+		// The debug output below will print the single piece at index 0
+		// and empty pieces for the rest, which is acceptable for now.
+	case 9:
+		// Full set of pieces, proceed with detailed debugging
+	default:
 		panic(fmt.Sprintf("BUG: got an unexpected amount of %d ScorePieces", len(details.Pieces))) //nolint:forbidigo
 	}
 
 	if w != nil {
-		// Critical comparisons (exact matches)
-		debug(w, "Critical pieces\n")
-		debug(w, "  exact identifiers: %#v\n", details.Pieces[0])
-		debug(w, "  crypto addresses: %#v\n", details.Pieces[1])
-		debug(w, "  gov IDs: %#v\n", details.Pieces[2])
-		debug(w, "  contact info: %#v\n", details.Pieces[3])
+		// If there's only one piece, it's likely an exact SourceID match
+		if len(details.Pieces) == 1 {
+			debug(w, "one score piece found: %#v\n", details.piece(0))
+		} else {
+			// Critical comparisons (exact matches)
+			debug(w, "Critical pieces\n")
+			debug(w, "  exact identifiers: %#v\n", details.piece(0))
+			debug(w, "  crypto addresses: %#v\n", details.piece(1))
+			debug(w, "  gov IDs: %#v\n", details.piece(2))
+			debug(w, "  contact info: %#v\n", details.piece(3))
 
-		// Name comparison (second highest weight)
-		debug(w, "name comparison\n")
-		debug(w, "  name: %#v\n", details.Pieces[4])
-		debug(w, "  titles: %#v\n", details.Pieces[5])
+			// Name comparison (second highest weight)
+			debug(w, "name comparison\n")
+			debug(w, "  name: %#v\n", details.piece(4))
+			debug(w, "  titles: %#v\n", details.piece(5))
 
-		// Supporting information (lower weight)
-		debug(w, "supporting info\n")
-		debug(w, "  dates: %#v\n", details.Pieces[6])
-		debug(w, "  addresses: %#v\n", details.Pieces[7])
-		debug(w, "  supporting into: %#v\n", details.Pieces[8])
+			// Supporting information (lower weight)
+			debug(w, "supporting info\n")
+			debug(w, "  dates: %#v\n", details.piece(6))
+			debug(w, "  addresses: %#v\n", details.piece(7))
+			debug(w, "  supporting into: %#v\n", details.piece(8))
+		}
 
 		// Final Score
 		debug(w, "finalScore=%.2f", details.FinalScore)
@@ -62,6 +77,18 @@ func DebugSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]
 var (
 	emptyPieces     = make([]ScorePiece, 9)
 	emptyEntityType = EntityType("")
+
+	exactScore = []ScorePiece{
+		{
+			Score:          1.0,
+			Weight:         criticalIdWeight,
+			Matched:        true,
+			Required:       true,
+			Exact:          true,
+			FieldsCompared: 1,
+			PieceType:      "exact",
+		},
+	}
 )
 
 // DetailedSimilarity returns the scoring details of each query piece against the index Entity.
@@ -74,6 +101,8 @@ func DetailedSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity
 		Pieces: make([]ScorePiece, 0, 9),
 	}
 
+	var exactOverride bool
+
 	// Quick filters
 	if query.Source != sourceEmpty && query.Source != SourceAPIRequest {
 		if query.Source != index.Source {
@@ -82,10 +111,13 @@ func DetailedSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity
 		}
 	}
 	if query.SourceID != "" {
-		if query.SourceID != index.SourceID {
+		if query.SourceID == index.SourceID {
+			out.FinalScore = 1.0
+			out.Pieces = exactScore
+		} else {
 			out.Pieces = emptyPieces
-			return out
 		}
+		return out
 	}
 	if query.Type != emptyEntityType {
 		if query.Type != index.Type {
@@ -95,7 +127,6 @@ func DetailedSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity
 	}
 
 	// Critical identifiers (highest weight)
-	var exactOverride bool
 	exactIdentifiers := compareExactIdentifiers(w, query, index, criticalIdWeight)
 	if exactIdentifiers.Matched && exactIdentifiers.FieldsCompared > 0 {
 		exactOverride = true
@@ -143,9 +174,7 @@ func DetailedSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity
 	)
 
 	out.FinalScore = calculateFinalScore(w, out.Pieces, exactOverride, query, index)
-	if math.IsNaN(out.FinalScore) {
-		out.FinalScore = 1.0
-	}
+
 	return out
 }
 
@@ -156,6 +185,15 @@ func DetailedSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity
 type SimilarityScore struct {
 	Pieces     []ScorePiece `json:"pieces,omitzero"`
 	FinalScore float64      `json:"finalScore,omitzero"`
+}
+
+func (ss SimilarityScore) piece(idx int) ScorePiece {
+	if idx < len(ss.Pieces) {
+		return ss.Pieces[idx]
+	}
+
+	var empty ScorePiece
+	return empty
 }
 
 // ScorePiece is a partial scoring result from one comparison function
@@ -241,6 +279,11 @@ func calculateFinalScore[Q any, I any](w io.Writer, pieces []ScorePiece, exactOv
 	if exactOverride {
 		return 1.0
 	}
+
+	if math.IsNaN(finalScore) {
+		return 1.0
+	}
+
 	return finalScore
 }
 
