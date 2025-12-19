@@ -150,6 +150,7 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	s.cm.RecordDuration(goroutineCount, diff)
 
 	span.SetAttributes(
+		attribute.Int("index.searched_entities", len(searchEntities)),
 		attribute.Int("search.goroutine_count", goroutineCount),
 		attribute.Int64("search.duration", diff.Milliseconds()),
 	)
