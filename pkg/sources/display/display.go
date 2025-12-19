@@ -20,7 +20,7 @@ func DetailsURL(entity search.Entity[search.Value]) string {
 	case search.SourceUSCSL:
 		return csl_us.DetailsURL(entity.SourceID)
 
-	case search.SourceUSOFAC:
+	case search.SourceUSOFAC, search.SourceUSNonSDN:
 		return ofac.DetailsURL(entity.SourceID)
 
 	case search.SourceAPIRequest:

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"cmp"
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -14,8 +13,6 @@ import (
 
 	"github.com/moov-io/base/telemetry"
 	"github.com/moov-io/watchman/pkg/search"
-	"github.com/moov-io/watchman/pkg/sources/csl_us"
-	"github.com/moov-io/watchman/pkg/sources/ofac"
 
 	"github.com/moov-io/base/log"
 	"golang.org/x/sync/errgroup"
@@ -86,6 +83,21 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 			err := loadOFACRecords(ctx, logger, dl.conf, preparedLists)
 			if err != nil {
 				return fmt.Errorf("loading OFAC records: %w", err)
+			}
+			return nil
+		})
+	}
+
+	// OFAC Non-SDN Records
+	if slices.Contains(dl.conf.IncludedLists, search.SourceUSNonSDN) {
+		requestedLists = append(requestedLists, search.SourceUSNonSDN)
+
+		producerWg.Add(1)
+		g.Go(func() error {
+			defer producerWg.Done()
+			err := loadUSNonSDNRecords(ctx, logger, dl.conf, preparedLists)
+			if err != nil {
+				return fmt.Errorf("loading OFAC Non-SDN records: %w", err)
 			}
 			return nil
 		})
@@ -184,91 +196,4 @@ func expandInitialDir(initialDir string) string {
 
 func initialDataDirectory(conf Config) string {
 	return cmp.Or(os.Getenv("INITIAL_DATA_DIRECTORY"), conf.InitialDataDirectory)
-}
-
-func loadOFACRecords(ctx context.Context, logger log.Logger, conf Config, responseCh chan preparedList) error {
-	ctx, span := telemetry.StartSpan(ctx, "load-ofac-records")
-	defer span.End()
-
-	start := time.Now()
-	files, err := ofac.Download(ctx, logger, initialDataDirectory(conf))
-	if err != nil {
-		return fmt.Errorf("OFAC download: %v", err)
-	}
-	defer files.Close()
-
-	span.AddEvent("finished downloading")
-
-	if len(files) == 0 {
-		return fmt.Errorf("unexpected %d OFAC files found", len(files))
-	}
-
-	logger.Debug().Logf("finished OFAC download: %v", time.Since(start))
-	start = time.Now()
-
-	res, err := ofac.Read(files)
-	if err != nil {
-		return fmt.Errorf("parsing OFAC: %w", err)
-	}
-	span.AddEvent("finished parsing")
-
-	entities := ofac.GroupIntoEntities(res.SDNs, res.Addresses, res.SDNComments, res.AlternateIdentities)
-
-	logger.Debug().Logf("finished OFAC preparation: %v", time.Since(start))
-	span.AddEvent("finished OFAC preparation")
-
-	if len(entities) == 0 && conf.ErrorOnEmptyList {
-		return errors.New("no entities parsed from US OFAC")
-	}
-
-	responseCh <- preparedList{
-		ListName: search.SourceUSOFAC,
-		Entities: entities,
-		Hash:     res.ListHash,
-	}
-	return nil
-}
-
-func loadCSLUSRecords(ctx context.Context, logger log.Logger, conf Config, responseCh chan preparedList) error {
-	ctx, span := telemetry.StartSpan(ctx, "load-us-csl-records")
-	defer span.End()
-
-	start := time.Now()
-	files, err := csl_us.Download(ctx, logger, initialDataDirectory(conf))
-	if err != nil {
-		return fmt.Errorf("US CSL download: %w", err)
-	}
-	defer files.Close()
-
-	span.AddEvent("finished downloading")
-
-	if len(files) == 0 {
-		return fmt.Errorf("unexpected %d US CSL files found", len(files))
-	}
-
-	logger.Debug().Logf("finished US CSL download: %v", time.Since(start))
-	start = time.Now()
-
-	res, err := csl_us.Read(files)
-	if err != nil {
-		return fmt.Errorf("parsing US CSL: %w", err)
-	}
-	span.AddEvent("finished parsing")
-
-	entities := csl_us.ConvertSanctionsData(res)
-
-	logger.Debug().Logf("finished US CSL preparation: %v", time.Since(start))
-	span.AddEvent("finished US CSL preparation")
-
-	if len(entities) == 0 && conf.ErrorOnEmptyList {
-		return errors.New("no entities parsed from US CSL")
-	}
-
-	responseCh <- preparedList{
-		ListName: search.SourceUSCSL,
-		Entities: entities,
-		Hash:     res.ListHash,
-	}
-
-	return nil
 }

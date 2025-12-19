@@ -40,32 +40,34 @@ func Read(files download.Files) (*Results, error) {
 	hashes := make([]string, 4)
 
 	for filename, file := range files {
-		switch strings.ToLower(filepath.Base(filename)) {
-		case "add.csv":
+		name := strings.ToLower(filepath.Base(filename))
+
+		switch name {
+		case "add.csv", "cons_add.csv":
 			hash, err := csvAddressFile(results, file)
 			if err != nil {
-				return nil, fmt.Errorf("add.csv: %v", err)
+				return nil, fmt.Errorf("%s: %v", name, err)
 			}
 			hashes[0] = hash
 
-		case "alt.csv":
+		case "alt.csv", "cons_alt.csv":
 			hash, err := csvAlternateIdentityFile(results, file)
 			if err != nil {
-				return nil, fmt.Errorf("alt.csv: %v", err)
+				return nil, fmt.Errorf("%s: %v", name, err)
 			}
 			hashes[1] = hash
 
-		case "sdn.csv":
+		case "sdn.csv", "cons_prim.csv":
 			hash, err := csvSDNFile(results, file)
 			if err != nil {
-				return nil, fmt.Errorf("sdn.csv: %v", err)
+				return nil, fmt.Errorf("%s: %v", name, err)
 			}
 			hashes[2] = hash
 
-		case "sdn_comments.csv":
+		case "sdn_comments.csv", "cons_comments.csv":
 			hash, err := csvSDNCommentsFile(results, file)
 			if err != nil {
-				return nil, fmt.Errorf("sdn_comments.csv: %v", err)
+				return nil, fmt.Errorf("%s: %v", name, err)
 			}
 			hashes[3] = hash
 
