@@ -12,9 +12,10 @@ Watchman:
   Download:
     RefreshInterval: "12h"
     InitialDataDirectory: ""
-    IncludedLists:
-      - "us_csl"
-      - "us_ofac"
+
+    # Specify which lists to download and include in Watchman results
+    # Examples: us_csl, us_ofac, us_non_sdn
+    IncludedLists: []
 
   Search:
     # Tune these settings based on your available resources (CPUs, etc).

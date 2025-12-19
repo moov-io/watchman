@@ -42,6 +42,9 @@ Watchman:
   Download:
     RefreshInterval: "12h"
     InitialDataDirectory: ""
+
+    # Specify which lists to download and include in Watchman results
+    # Examples: us_csl, us_ofac, us_non_sdn
     IncludedLists:
       - "us_csl"
       - "us_ofac"
@@ -71,46 +74,55 @@ PostalPool is an experiment for improving address parsing. It's optional configu
     CGOSelfInstances: 1
 ```
 
+### Included Lists
+
+| List ID      | Name                                       | Source                                                   |
+|--------------|--------------------------------------------|----------------------------------------------------------|
+| `us_ofac`    | US Office of Foreign Assets Control (OFAC) | [URL](https://ofac.treasury.gov/sanctions-list-service)  |
+| `us_non_sdn` | US Office of Foreign Assets Control (OFAC) | [URL](https://ofac.treasury.gov/sanctions-list-service)  |
+| `us_csl`     | Consolidated Screening List (CSL)          | [URL](https://www.trade.gov/consolidated-screening-list) |
+
 ### Environment Variables
 
-| Environmental Variable | Description | Default |
-|-----|-----|-----|
-| `DATA_REFRESH_INTERVAL` | Interval for data redownload and reparse. `off` disables this refreshing. | 12h |
-| `INITIAL_DATA_DIRECTORY` | Directory filepath with initial files to use instead of downloading. Periodic downloads will replace the initial files. | Empty |
-| `HTTPS_CERT_FILE` | Filepath containing a certificate (or intermediate chain) to be served by the HTTP server. Requires all traffic be over secure HTTP. | Empty |
-| `HTTPS_KEY_FILE`  | Filepath of a private key matching the leaf certificate from `HTTPS_CERT_FILE`. | Empty |
-| `LOG_FORMAT` | Format for logging lines to be written as. | Options: `json`, `plain` - Default: `plain` |
-| `LOG_LEVEL` | Level of logging to emit. | Options: `trace`, `info` - Default: `info` |
+| Environmental Variable   | Description                                                                                                                          | Default                                     |
+|--------------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------|
+| `INCLUDED_LISTS`         | Comma separated list of lists to include.                                                                                            | Empty                                       |
+| `DATA_REFRESH_INTERVAL`  | Interval for data redownload and reparse. `off` disables this refreshing.                                                            | 12h                                         |
+| `INITIAL_DATA_DIRECTORY` | Directory filepath with initial files to use instead of downloading. Periodic downloads will replace the initial files.              | Empty                                       |
+| `HTTPS_CERT_FILE`        | Filepath containing a certificate (or intermediate chain) to be served by the HTTP server. Requires all traffic be over secure HTTP. | Empty                                       |
+| `HTTPS_KEY_FILE`         | Filepath of a private key matching the leaf certificate from `HTTPS_CERT_FILE`.                                                      | Empty                                       |
+| `LOG_FORMAT`             | Format for logging lines to be written as.                                                                                           | Options: `json`, `plain` - Default: `plain` |
+| `LOG_LEVEL`              | Level of logging to emit.                                                                                                            | Options: `trace`, `info` - Default: `info`  |
 
 ### Similarity Configuration
 
-| Environmental Variable | Description | Default |
-|-----|-----|-----|
-| `SEARCH_GOROUTINE_COUNT` | Set a fixed number of goroutines used for each search. Default is to dynamically optimize for faster results. | Empty |
-| `KEEP_STOPWORDS` | Boolean to keep stopwords in names. | `false` |
-| `JARO_WINKLER_BOOST_THRESHOLD` | Jaro-Winkler boost threshold. | 0.7 |
-| `JARO_WINKLER_PREFIX_SIZE` | Jaro-Winkler prefix size. | 4 |
-| `LENGTH_DIFFERENCE_CUTOFF_FACTOR` | Minimum ratio for the length of two matching tokens, before they score is penalised. | 0.9       |
-| `LENGTH_DIFFERENCE_PENALTY_WEIGHT` | Weight of penalty applied to scores when two matching tokens have different lengths. | 0.3    |
-| `DIFFERENT_LETTER_PENALTY_WEIGHT` | Weight of penalty applied to scores when two matching tokens begin with different letters. | 0.9   |
-| `UNMATCHED_INDEX_TOKEN_WEIGHT` | Weight of penalty applied to scores when part of the indexed name isn't matched. | 0.15    |
-| `ADJACENT_SIMILARITY_POSITIONS` | How many nearby words to search for highest max similarly score. | 3 |
-| `EXACT_MATCH_FAVORITISM` | Extra weighting assigned to exact matches. | 0.0 |
-| `DISABLE_PHONETIC_FILTERING` | Force scoring search terms against every indexed record. | `false` |
+| Environmental Variable             | Description                                                                                                   | Default |
+|------------------------------------|---------------------------------------------------------------------------------------------------------------|---------|
+| `SEARCH_GOROUTINE_COUNT`           | Set a fixed number of goroutines used for each search. Default is to dynamically optimize for faster results. | Empty   |
+| `KEEP_STOPWORDS`                   | Boolean to keep stopwords in names.                                                                           | `false` |
+| `JARO_WINKLER_BOOST_THRESHOLD`     | Jaro-Winkler boost threshold.                                                                                 | 0.7     |
+| `JARO_WINKLER_PREFIX_SIZE`         | Jaro-Winkler prefix size.                                                                                     | 4       |
+| `LENGTH_DIFFERENCE_CUTOFF_FACTOR`  | Minimum ratio for the length of two matching tokens, before they score is penalised.                          | 0.9     |
+| `LENGTH_DIFFERENCE_PENALTY_WEIGHT` | Weight of penalty applied to scores when two matching tokens have different lengths.                          | 0.3     |
+| `DIFFERENT_LETTER_PENALTY_WEIGHT`  | Weight of penalty applied to scores when two matching tokens begin with different letters.                    | 0.9     |
+| `UNMATCHED_INDEX_TOKEN_WEIGHT`     | Weight of penalty applied to scores when part of the indexed name isn't matched.                              | 0.15    |
+| `ADJACENT_SIMILARITY_POSITIONS`    | How many nearby words to search for highest max similarly score.                                              | 3       |
+| `EXACT_MATCH_FAVORITISM`           | Extra weighting assigned to exact matches.                                                                    | 0.0     |
+| `DISABLE_PHONETIC_FILTERING`       | Force scoring search terms against every indexed record.                                                      | `false` |
 
 #### Source List Configuration
 
-| Environmental Variable | Description | Default |
-|-----|-----|-----|
-| `DOWNLOAD_TIMEOUT` | Duration of time allowed for a list to fully download. | `45s` |
-| `OFAC_DOWNLOAD_TEMPLATE` | HTTP address for downloading raw OFAC files. | `https://sanctionslistservice.ofac.treas.gov/api/PublicationPreview/exports/%s` |
-| `EU_CSL_TOKEN` | Token used to download the EU Consolidated Screening List | `<valid-token>` |
-| `EU_CSL_DOWNLOAD_URL` | Use an alternate URL for downloading EU Consolidated Screening List | Subresource of `webgate.ec.europa.eu` |
-| `UK_CSL_DOWNLOAD_URL` | Use an alternate URL for downloading UK Consolidated Screening List | Subresource of `www.gov.uk` |
-| `UK_SANCTIONS_LIST_URL` | Use an alternate URL for downloading UK Sanctions List | Subresource of `www.gov.uk` |
-| `WITH_UK_SANCTIONS_LIST` | Download and parse the UK Sanctions List on startup. | Default: `false` |
-| `US_CSL_DOWNLOAD_URL` | Use an alternate URL for downloading US Consolidated Screening List | Subresource of `api.trade.gov` |
-| `CSL_DOWNLOAD_TEMPLATE` | Same as `US_CSL_DOWNLOAD_URL` | |
+| Environmental Variable   | Description                                                         | Default                                                                         |
+|--------------------------|---------------------------------------------------------------------|---------------------------------------------------------------------------------|
+| `DOWNLOAD_TIMEOUT`       | Duration of time allowed for a list to fully download.              | `45s`                                                                           |
+| `OFAC_DOWNLOAD_TEMPLATE` | HTTP address for downloading raw OFAC files.                        | `https://sanctionslistservice.ofac.treas.gov/api/PublicationPreview/exports/%s` |
+| `EU_CSL_TOKEN`           | Token used to download the EU Consolidated Screening List           | `<valid-token>`                                                                 |
+| `EU_CSL_DOWNLOAD_URL`    | Use an alternate URL for downloading EU Consolidated Screening List | Subresource of `webgate.ec.europa.eu`                                           |
+| `UK_CSL_DOWNLOAD_URL`    | Use an alternate URL for downloading UK Consolidated Screening List | Subresource of `www.gov.uk`                                                     |
+| `UK_SANCTIONS_LIST_URL`  | Use an alternate URL for downloading UK Sanctions List              | Subresource of `www.gov.uk`                                                     |
+| `WITH_UK_SANCTIONS_LIST` | Download and parse the UK Sanctions List on startup.                | Default: `false`                                                                |
+| `US_CSL_DOWNLOAD_URL`    | Use an alternate URL for downloading US Consolidated Screening List | Subresource of `api.trade.gov`                                                  |
+| `CSL_DOWNLOAD_TEMPLATE`  | Same as `US_CSL_DOWNLOAD_URL`                                       |                                                                                 |
 
 ## Data persistence
 
