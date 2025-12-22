@@ -96,8 +96,8 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 	}
 
 	// OFAC Non-SDN Records
-	if slices.Contains(dl.conf.IncludedLists, search.SourceUSNonSDN) {
-		requestedLists = append(requestedLists, search.SourceUSNonSDN)
+	if slices.Contains(requestedLists, search.SourceUSNonSDN) {
+		listsLoaded = append(listsLoaded, search.SourceUSNonSDN)
 
 		producerWg.Add(1)
 		g.Go(func() error {
