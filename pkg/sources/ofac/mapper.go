@@ -78,17 +78,17 @@ func parseTime(acceptedLayouts []string, value string) (time.Time, error) {
 func extractCountry(remark string) string {
 	groups := countryParenRegex.FindAllStringSubmatch(remark, 10)
 
-	// Look right to left
-	for i := len(groups); i > 0; i-- {
-		matches := groups[i-1]
-
-		for k := len(matches); k > 0; k-- {
-			country := norm.Country(matches[k-1])
+	// Look right to left for matches
+	for i := len(groups) - 1; i >= 0; i-- {
+		matches := groups[i]
+		if len(matches) > 1 {
+			country := norm.Country(matches[1])
 			if country != "" {
 				return country
 			}
 		}
 	}
+
 	return ""
 }
 
@@ -389,7 +389,7 @@ func parseGovernmentIDs(remarks []string) []search.GovernmentID {
 
 		for re, base := range baseGovernmentIDs {
 			if matches := re.FindStringSubmatch(r); len(matches) > 1 {
-				identifier := strings.TrimRight(matches[1], ".;,")
+				identifier := strings.TrimSpace(strings.TrimRight(matches[1], ".;,"))
 
 				lastOfNameIdx := strings.Index(r, identifier)
 				var name string
