@@ -81,6 +81,7 @@ func TestParseGovernmentIDs(t *testing.T) {
 			},
 			want: []search.GovernmentID{
 				{
+					Name:       "Passport",
 					Type:       search.GovernmentIDPassport,
 					Country:    "Iran",
 					Identifier: "A123456",
@@ -94,6 +95,7 @@ func TestParseGovernmentIDs(t *testing.T) {
 			},
 			want: []search.GovernmentID{
 				{
+					Name:       "Driver's License",
 					Type:       search.GovernmentIDDriversLicense,
 					Country:    "Moldova",
 					Identifier: "04900377",
@@ -108,11 +110,13 @@ func TestParseGovernmentIDs(t *testing.T) {
 			},
 			want: []search.GovernmentID{
 				{
+					Name:       "Passport",
 					Type:       search.GovernmentIDPassport,
 					Country:    "Iran",
 					Identifier: "A123456",
 				},
 				{
+					Name:       "Driver's License",
 					Type:       search.GovernmentIDDriversLicense,
 					Country:    "Moldova",
 					Identifier: "04900377",
@@ -128,16 +132,19 @@ func TestParseGovernmentIDs(t *testing.T) {
 			},
 			want: []search.GovernmentID{
 				{
+					Name:       "Driver License",
 					Type:       search.GovernmentIDDriversLicense,
 					Country:    "United States",
 					Identifier: "M600161650080",
 				},
 				{
+					Name:       "Drivers License",
 					Type:       search.GovernmentIDDriversLicense,
 					Country:    "Canada",
-					Identifier: "12345",
+					Identifier: "B-12345",
 				},
 				{
+					Name:       "Driver's License Number",
 					Type:       search.GovernmentIDDriversLicense,
 					Country:    "Mexico",
 					Identifier: "987654321",
@@ -149,7 +156,7 @@ func TestParseGovernmentIDs(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := parseGovernmentIDs(tt.remarks)
-			require.Equal(t, tt.want, got)
+			require.ElementsMatch(t, tt.want, got)
 		})
 	}
 }

@@ -89,6 +89,7 @@ func TestMapIDTypeFromCSV(t *testing.T) {
 	require.Len(t, ids, 1, "expected 1 government ID")
 
 	want := search.GovernmentID{
+		Name:       "Passport",
 		Type:       search.GovernmentIDPassport,
 		Country:    "Turkey",
 		Identifier: "U00242309",

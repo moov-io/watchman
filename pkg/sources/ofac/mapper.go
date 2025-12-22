@@ -76,9 +76,18 @@ func parseTime(acceptedLayouts []string, value string) (time.Time, error) {
 }
 
 func extractCountry(remark string) string {
-	matches := countryParenRegex.FindStringSubmatch(remark)
-	if len(matches) > 1 {
-		return matches[1]
+	groups := countryParenRegex.FindAllStringSubmatch(remark, 10)
+
+	// Look right to left
+	for i := len(groups); i > 0; i-- {
+		matches := groups[i-1]
+
+		for k := len(matches); k > 0; k-- {
+			country := norm.Country(matches[k-1])
+			if country != "" {
+				return country
+			}
+		}
 	}
 	return ""
 }
@@ -311,7 +320,7 @@ var (
 	governmentIDDiplomaticPassRegex = regexp.MustCompile(`(?i)Diplomatic\s+Passport\s+([A-Z0-9]+)`)
 
 	// Drivers Licenses
-	governmentIDDriversLicenseRegex = regexp.MustCompile(`(?i)Driver'?s?\s+License\s+(?:No\.|Number)?\s*(?:[A-Z]-)?([A-Z0-9]+)`)
+	governmentIDDriversLicenseRegex = regexp.MustCompile(`(?i)Driver'?s?\s+License\s+(?:No\.|Number)?\s*([A-Z0-9\-]+)`)
 
 	// National IDs
 	governmentIDNationalRegex   = regexp.MustCompile(`(?i)National\s+ID\s+(?:No\.|Number)?\s*([A-Z0-9-]+)`)
@@ -372,23 +381,27 @@ func parseGovernmentIDs(remarks []string) []search.GovernmentID {
 
 	for _, r := range remarks {
 		// Extract country first
-		countryRaw := extractCountry(r)
-		country := norm.Country(countryRaw)
+		country := extractCountry(r)
 
-		// Remove the country from the remark for cleaner ID extraction
-		remarkWithoutCountry := r
-		if countryRaw != "" {
-			remarkWithoutCountry = strings.TrimSpace(strings.ReplaceAll(r, "("+countryRaw+")", ""))
-		}
-
-		for re, idType := range idPatterns {
-			if matches := re.FindStringSubmatch(remarkWithoutCountry); len(matches) > 1 {
+		for re, base := range baseGovernmentIDs {
+			if matches := re.FindStringSubmatch(r); len(matches) > 1 {
 				identifier := strings.TrimRight(matches[1], ".;,")
 
+				lastOfNameIdx := strings.Index(r, identifier)
+				var name string
+				if lastOfNameIdx > 0 {
+					name = r[:lastOfNameIdx]
+					name = strings.ReplaceAll(name, "alt.", "")
+					name = strings.ReplaceAll(name, "No.", "")
+					name = strings.ReplaceAll(name, "#", "")
+					name = strings.TrimSpace(name)
+				}
+
 				ids = append(ids, search.GovernmentID{
-					Type:       idType,
-					Country:    country, // Use the extracted and normalized country
-					Identifier: identifier,
+					Name:       cmp.Or(name, base.Name),
+					Type:       cmp.Or(base.Type),
+					Country:    cmp.Or(country, base.Country), // Use the extracted and normalized country
+					Identifier: cmp.Or(identifier, base.Identifier),
 				})
 			}
 		}
