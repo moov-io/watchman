@@ -346,6 +346,9 @@ var (
 	governmentIDLegalEntityNumberRegex    = regexp.MustCompile(`(?i)Legal\s+Entity\s+Number\s+([A-Za-z0-9\-\.]+)`)
 	governmentIDCommercialRegistryRegex   = regexp.MustCompile(`(?i)Commercial\s+Registry\s+(?:No\.|Number)?\s*([A-Z0-9-./]+)`)
 
+	chinaISINRegex = regexp.MustCompile(`(?i)ISIN\s+([A-Z0-9]{12})`)                                 // International Securities Identification Numbers
+	chinaUSCCRegex = regexp.MustCompile(`(?i)Social\s+Credit\s+Code\s+\(USCC\)\s+([A-Z0-9]{15,30})`) // Unified Social Credit Code
+
 	// Birth Certificates
 	governmentIDBirthCertRegex = regexp.MustCompile(`(?i)Birth\s+Certificate\s+(?:No\.|Number)?\s*([A-Z0-9]+)`)
 
@@ -353,31 +356,32 @@ var (
 	governmentIDRefugeeRegex = regexp.MustCompile(`(?i)Refugee\s+ID\s+(?:Card)?\s*([A-Z0-9]+)`)
 )
 
+var (
+	baseGovernmentIDs = map[*regexp.Regexp]search.GovernmentID{
+		governmentIDPassportRegex:             {Type: search.GovernmentIDPassport},
+		governmentIDDriversLicenseRegex:       {Type: search.GovernmentIDDriversLicense},
+		governmentIDDiplomaticPassRegex:       {Type: search.GovernmentIDDiplomaticPass},
+		governmentIDNationalRegex:             {Type: search.GovernmentIDNational},
+		governmentIDPersonalIDRegex:           {Type: search.GovernmentIDPersonalID},
+		governmentIDTaxRegex:                  {Type: search.GovernmentIDTax},
+		governmentIDCUITRegex:                 {Type: search.GovernmentIDCUIT},
+		governmentIDSSNRegex:                  {Type: search.GovernmentIDSSN},
+		governmentIDCedulaRegex:               {Type: search.GovernmentIDCedula},
+		governmentIDCURPRegex:                 {Type: search.GovernmentIDCURP},
+		governmentIDElectoralRegex:            {Type: search.GovernmentIDElectoral},
+		governmentIDBusinessRegistrationRegex: {Type: search.GovernmentIDBusinessRegisration},
+		governmentIDCompanyNumberRegex:        {Type: search.GovernmentIDBusinessRegisration},
+		governmentIDLegalEntityNumberRegex:    {Type: search.GovernmentIDBusinessRegisration},
+		governmentIDCommercialRegistryRegex:   {Type: search.GovernmentIDCommercialRegistry},
+		chinaISINRegex:                        {Type: search.GovernmentIDBusinessRegisration, Country: "China"},
+		chinaUSCCRegex:                        {Type: search.GovernmentIDBusinessRegisration},
+		governmentIDBirthCertRegex:            {Type: search.GovernmentIDBirthCert},
+		governmentIDRefugeeRegex:              {Type: search.GovernmentIDRefugee},
+	}
+)
+
 func parseGovernmentIDs(remarks []string) []search.GovernmentID {
 	var ids []search.GovernmentID
-
-	// Map of regex patterns to GovernmentIDType
-	idPatterns := map[*regexp.Regexp]search.GovernmentIDType{
-		governmentIDPassportRegex:             search.GovernmentIDPassport,
-		governmentIDDriversLicenseRegex:       search.GovernmentIDDriversLicense,
-		governmentIDPassportRegex:             search.GovernmentIDPassport,
-		governmentIDDiplomaticPassRegex:       search.GovernmentIDDiplomaticPass,
-		governmentIDDriversLicenseRegex:       search.GovernmentIDDriversLicense,
-		governmentIDNationalRegex:             search.GovernmentIDNational,
-		governmentIDPersonalIDRegex:           search.GovernmentIDPersonalID,
-		governmentIDTaxRegex:                  search.GovernmentIDTax,
-		governmentIDCUITRegex:                 search.GovernmentIDCUIT,
-		governmentIDSSNRegex:                  search.GovernmentIDSSN,
-		governmentIDCedulaRegex:               search.GovernmentIDCedula,
-		governmentIDCURPRegex:                 search.GovernmentIDCURP,
-		governmentIDElectoralRegex:            search.GovernmentIDElectoral,
-		governmentIDBusinessRegistrationRegex: search.GovernmentIDBusinessRegisration,
-		governmentIDCompanyNumberRegex:        search.GovernmentIDBusinessRegisration,
-		governmentIDLegalEntityNumberRegex:    search.GovernmentIDBusinessRegisration,
-		governmentIDCommercialRegistryRegex:   search.GovernmentIDCommercialRegistry,
-		governmentIDBirthCertRegex:            search.GovernmentIDBirthCert,
-		governmentIDRefugeeRegex:              search.GovernmentIDRefugee,
-	}
 
 	for _, r := range remarks {
 		// Extract country first
