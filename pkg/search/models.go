@@ -106,8 +106,9 @@ type ContactInfo struct {
 // 12803,"TIDEWATER MIDDLE EAST CO.",-0- ,"SDGT] [NPWMD] [IRGC] [IFSR] [IFCA",-0- ,-0- ,-0- ,-0- ,-0- ,-0- ,-0- ,"  alt. Email Address info@tidewaterco.ir; IFCA Determination - Port Operator; Additional Sanctions Information - Subject to Secondary Sanctions; Business Registration Document # 18745 (Iran);   Alt. Fax: 982188708911."
 
 type GovernmentID struct {
+	Name       string           `json:"name"`
 	Type       GovernmentIDType `json:"type"`
-	Country    string           `json:"country"` // ISO-3166 // TODO(adam):
+	Country    string           `json:"country"` // ISO-3166
 	Identifier string           `json:"identifier"`
 }
 

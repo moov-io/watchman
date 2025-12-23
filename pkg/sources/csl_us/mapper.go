@@ -559,6 +559,7 @@ func mapGovernmentIDs(src SanctionsEntry) []search.GovernmentID {
 		}
 
 		govID := search.GovernmentID{
+			Name:       idType,
 			Type:       mapIDType(idType),
 			Country:    country,
 			Identifier: identifier,

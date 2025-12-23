@@ -45,16 +45,19 @@ func TestMapperPerson__FromSource(t *testing.T) {
 
 		expectedGovernmentIDs := []search.GovernmentID{
 			{
+				Name:       "Passport",
 				Type:       search.GovernmentIDPassport,
 				Country:    "Russia",
 				Identifier: "2018278055",
 			},
 			{
+				Name:       "Passport",
 				Type:       search.GovernmentIDPassport,
 				Country:    "Russia",
 				Identifier: "2006801524",
 			},
 			{
+				Name:       "Tax ID",
 				Type:       search.GovernmentIDTax,
 				Country:    "Russia",
 				Identifier: "366110340670",

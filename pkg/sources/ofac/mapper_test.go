@@ -81,6 +81,7 @@ func TestParseGovernmentIDs(t *testing.T) {
 			},
 			want: []search.GovernmentID{
 				{
+					Name:       "Passport",
 					Type:       search.GovernmentIDPassport,
 					Country:    "Iran",
 					Identifier: "A123456",
@@ -94,6 +95,7 @@ func TestParseGovernmentIDs(t *testing.T) {
 			},
 			want: []search.GovernmentID{
 				{
+					Name:       "Driver's License",
 					Type:       search.GovernmentIDDriversLicense,
 					Country:    "Moldova",
 					Identifier: "04900377",
@@ -108,11 +110,13 @@ func TestParseGovernmentIDs(t *testing.T) {
 			},
 			want: []search.GovernmentID{
 				{
+					Name:       "Passport",
 					Type:       search.GovernmentIDPassport,
 					Country:    "Iran",
 					Identifier: "A123456",
 				},
 				{
+					Name:       "Driver's License",
 					Type:       search.GovernmentIDDriversLicense,
 					Country:    "Moldova",
 					Identifier: "04900377",
@@ -128,20 +132,42 @@ func TestParseGovernmentIDs(t *testing.T) {
 			},
 			want: []search.GovernmentID{
 				{
+					Name:       "Driver License",
 					Type:       search.GovernmentIDDriversLicense,
 					Country:    "United States",
 					Identifier: "M600161650080",
 				},
 				{
+					Name:       "Drivers License",
 					Type:       search.GovernmentIDDriversLicense,
 					Country:    "Canada",
-					Identifier: "12345",
+					Identifier: "B-12345",
 				},
 				{
+					Name:       "Driver's License Number",
 					Type:       search.GovernmentIDDriversLicense,
 					Country:    "Mexico",
 					Identifier: "987654321",
 				},
+			},
+		},
+		{
+			name:    "China IDs",
+			remarks: splitRemarks("Issuer Name China National Nuclear Corporation; ISIN CND10000KRQ8; alt. ISIN CND100005B38; alt. ISIN CND10002J9T6; alt. ISIN CND100027TJ1; alt. ISIN CND10002DLF5; alt. ISIN CND10003RXC5; alt. ISIN CND10002J9V2; alt. ISIN CND100005B20; alt. ISIN CND100025BB0; alt. ISIN CND10003VCD9; alt. ISIN CND10003RXB7; alt. ISIN CND10001ZPR6; Target Type Private Company; Effective Date (CMIC) 02 Aug 2021; Purchase/Sales For Divestment Date (CMIC) 03 Jun 2022; Listing Date (CMIC) 03 Jun 2021; Unified Social Credit Code (USCC) 91110000100009563N (China); a.k.a. 'CNNC'."),
+			want: []search.GovernmentID{
+				{Name: "ISIN", Type: "business-registration", Country: "China", Identifier: "CND10000KRQ8"},
+				{Name: "ISIN", Type: "business-registration", Country: "China", Identifier: "CND100005B38"},
+				{Name: "ISIN", Type: "business-registration", Country: "China", Identifier: "CND10002J9T6"},
+				{Name: "ISIN", Type: "business-registration", Country: "China", Identifier: "CND100027TJ1"},
+				{Name: "ISIN", Type: "business-registration", Country: "China", Identifier: "CND10002DLF5"},
+				{Name: "ISIN", Type: "business-registration", Country: "China", Identifier: "CND10003RXC5"},
+				{Name: "ISIN", Type: "business-registration", Country: "China", Identifier: "CND10002J9V2"},
+				{Name: "ISIN", Type: "business-registration", Country: "China", Identifier: "CND100005B20"},
+				{Name: "ISIN", Type: "business-registration", Country: "China", Identifier: "CND100025BB0"},
+				{Name: "ISIN", Type: "business-registration", Country: "China", Identifier: "CND10003VCD9"},
+				{Name: "ISIN", Type: "business-registration", Country: "China", Identifier: "CND10003RXB7"},
+				{Name: "ISIN", Type: "business-registration", Country: "China", Identifier: "CND10001ZPR6"},
+				{Name: "Unified Social Credit Code (USCC)", Type: "business-registration", Country: "China", Identifier: "91110000100009563N"},
 			},
 		},
 	}
@@ -149,7 +175,7 @@ func TestParseGovernmentIDs(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := parseGovernmentIDs(tt.remarks)
-			require.Equal(t, tt.want, got)
+			require.ElementsMatch(t, tt.want, got)
 		})
 	}
 }

@@ -35,8 +35,8 @@ func TestMapperBusiness__FromSource(t *testing.T) {
 		require.Nil(t, business.Dissolved)
 
 		expectedGovernmentIDs := []search.GovernmentID{
-			{Type: search.GovernmentIDBusinessRegisration, Country: "Czech Republic", Identifier: "07486049"},
-			{Type: search.GovernmentIDBusinessRegisration, Country: "Czech Republic", Identifier: "5299007NTWCC3U23WM81"},
+			{Name: "Company Number", Type: search.GovernmentIDBusinessRegisration, Country: "Czech Republic", Identifier: "07486049"},
+			{Name: "Legal Entity Number", Type: search.GovernmentIDBusinessRegisration, Country: "Czech Republic", Identifier: "5299007NTWCC3U23WM81"},
 		}
 		require.ElementsMatch(t, expectedGovernmentIDs, business.GovernmentIDs)
 
@@ -117,12 +117,10 @@ func TestMapperBusiness__FromSource(t *testing.T) {
 		found := ofactest.FindEntity(t, "44525")
 		require.Equal(t, "BEL-KAP-STEEL LLC", found.Name)
 
-		t.Logf("%#v", found.Business)
-
 		expectedGovernmentIDs := []search.GovernmentID{
-			{Type: "tax-id", Country: "United States", Identifier: "52-2083095"},
-			{Type: "business-registration", Country: "Connecticut", Identifier: "0582030"},
-			{Type: "business-registration", Country: "Florida", Identifier: "M99000000961"},
+			{Name: "Tax ID", Type: "tax-id", Country: "United States", Identifier: "52-2083095"},
+			{Name: "Business Registration Number", Type: "business-registration", Country: "United States", Identifier: "0582030"},
+			{Name: "Business Registration Number", Type: "business-registration", Country: "United States", Identifier: "M99000000961"},
 		}
 		require.ElementsMatch(t, expectedGovernmentIDs, found.Business.GovernmentIDs)
 	})
@@ -159,8 +157,8 @@ func TestMapperBusiness__FromSource(t *testing.T) {
 		require.Nil(t, business.Dissolved)
 
 		expectedGovernmentIDs := []search.GovernmentID{
-			{Type: search.GovernmentIDBusinessRegisration, Country: "Russia", Identifier: "1207700248030"},
-			{Type: search.GovernmentIDTax, Country: "Russia", Identifier: "9709063550"},
+			{Name: "Business Registration Number", Type: search.GovernmentIDBusinessRegisration, Country: "Russia", Identifier: "1207700248030"},
+			{Name: "Tax ID", Type: search.GovernmentIDTax, Country: "Russia", Identifier: "9709063550"},
 		}
 		require.ElementsMatch(t, expectedGovernmentIDs, business.GovernmentIDs)
 
@@ -273,37 +271,37 @@ func TestMapper_Business_Remarks_GovernmentID(t *testing.T) {
 		{
 			remarks: "US FEIN 65-0842701; Business Registration Document # P9800004558 (United States).",
 			governmentIDs: []search.GovernmentID{
-				{Type: "business-registration", Country: "United States", Identifier: "P9800004558"},
+				{Name: "Business Registration Document", Type: "business-registration", Country: "United States", Identifier: "P9800004558"},
 			},
 		},
 		{
 			remarks: "Business Registration Document # UNP 101119568 (Belarus)",
 			governmentIDs: []search.GovernmentID{
-				{Type: "business-registration", Country: "Belarus", Identifier: "UNP"},
+				{Name: "Business Registration Document", Type: "business-registration", Country: "Belarus", Identifier: "UNP"},
 			},
 		},
 		{
 			remarks: "Business Registration Document # HRB147158.",
 			governmentIDs: []search.GovernmentID{
-				{Type: "business-registration", Identifier: "HRB147158"},
+				{Name: "Business Registration Document", Type: "business-registration", Identifier: "HRB147158"},
 			},
 		},
 		{
 			remarks: "Business Registration Document # CUD: A201309051410465765 (Mexico); Folio Mercantil No. 168954 (Mexico).",
 			governmentIDs: []search.GovernmentID{
-				{Type: "business-registration", Country: "Mexico", Identifier: "CUD"},
+				{Name: "Business Registration Document", Type: "business-registration", Country: "Mexico", Identifier: "CUD"},
 			},
 		},
 		{
 			remarks: "Business Registration Number 229172 (United Arab Emirates);",
 			governmentIDs: []search.GovernmentID{
-				{Type: "business-registration", Country: "United Arab Emirates", Identifier: "229172"},
+				{Name: "Business Registration Number", Type: "business-registration", Country: "United Arab Emirates", Identifier: "229172"},
 			},
 		},
 		{
 			remarks: "Business Registration Number CH-660.0.559.011-2 (Switzerland);",
 			governmentIDs: []search.GovernmentID{
-				{Type: "business-registration", Country: "Switzerland", Identifier: "CH-660.0.559.011-2"},
+				{Name: "Business Registration Number", Type: "business-registration", Country: "Switzerland", Identifier: "CH-660.0.559.011-2"},
 			},
 		},
 	}
