@@ -38,15 +38,15 @@ type SenzingRecord struct {
 	AddrFull       string `json:"ADDR_FULL,omitempty"`
 
 	// Government identifiers
-	SSN                   string `json:"SSN,omitempty"`
-	PassportNumber        string `json:"PASSPORT_NUMBER,omitempty"`
-	PassportCountry       string `json:"PASSPORT_COUNTRY,omitempty"`
-	TaxID                 string `json:"TAX_ID_NUMBER,omitempty"`
-	TaxIDCountry          string `json:"TAX_ID_COUNTRY,omitempty"`
-	NationalID            string `json:"NATIONAL_ID_NUMBER,omitempty"`
-	NationalIDCountry     string `json:"NATIONAL_ID_COUNTRY,omitempty"`
-	DriversLicenseNumber  string `json:"DRIVERS_LICENSE_NUMBER,omitempty"`
-	DriversLicenseState   string `json:"DRIVERS_LICENSE_STATE,omitempty"`
+	SSN                  string `json:"SSN,omitempty"`
+	PassportNumber       string `json:"PASSPORT_NUMBER,omitempty"`
+	PassportCountry      string `json:"PASSPORT_COUNTRY,omitempty"`
+	TaxID                string `json:"TAX_ID_NUMBER,omitempty"`
+	TaxIDCountry         string `json:"TAX_ID_COUNTRY,omitempty"`
+	NationalID           string `json:"NATIONAL_ID_NUMBER,omitempty"`
+	NationalIDCountry    string `json:"NATIONAL_ID_COUNTRY,omitempty"`
+	DriversLicenseNumber string `json:"DRIVERS_LICENSE_NUMBER,omitempty"`
+	DriversLicenseState  string `json:"DRIVERS_LICENSE_STATE,omitempty"`
 
 	// Contact information
 	PhoneNumber string `json:"PHONE_NUMBER,omitempty"`
@@ -78,44 +78,44 @@ const (
 
 // Feature field name constants used in the FEATURES array
 const (
-	FieldRecordType          = "RECORD_TYPE"
-	FieldNameFirst           = "NAME_FIRST"
-	FieldNameMiddle          = "NAME_MIDDLE"
-	FieldNameLast            = "NAME_LAST"
-	FieldNameFull            = "NAME_FULL"
-	FieldNamePrefix          = "NAME_PREFIX"
-	FieldNameSuffix          = "NAME_SUFFIX"
-	FieldNameOrg             = "NAME_ORG"
-	FieldAddrLine1           = "ADDR_LINE1"
-	FieldAddrLine2           = "ADDR_LINE2"
-	FieldAddrLine3           = "ADDR_LINE3"
-	FieldAddrCity            = "ADDR_CITY"
-	FieldAddrState           = "ADDR_STATE"
-	FieldAddrPostalCode      = "ADDR_POSTAL_CODE"
-	FieldAddrCountry         = "ADDR_COUNTRY"
-	FieldAddrFull            = "ADDR_FULL"
-	FieldSSN                 = "SSN"
-	FieldPassportNumber      = "PASSPORT_NUMBER"
-	FieldPassportCountry     = "PASSPORT_COUNTRY"
-	FieldTaxIDNumber         = "TAX_ID_NUMBER"
-	FieldTaxIDCountry        = "TAX_ID_COUNTRY"
-	FieldNationalIDNumber    = "NATIONAL_ID_NUMBER"
-	FieldNationalIDCountry   = "NATIONAL_ID_COUNTRY"
-	FieldDriversLicNumber    = "DRIVERS_LICENSE_NUMBER"
-	FieldDriversLicState     = "DRIVERS_LICENSE_STATE"
-	FieldPhoneNumber         = "PHONE_NUMBER"
-	FieldPhoneType           = "PHONE_TYPE"
-	FieldEmail               = "EMAIL_ADDRESS"
-	FieldWebsite             = "WEBSITE_ADDRESS"
-	FieldDateOfBirth         = "DATE_OF_BIRTH"
-	FieldDateOfDeath         = "DATE_OF_DEATH"
-	FieldGender              = "GENDER"
-	FieldNationality         = "NATIONALITY"
-	FieldRelAnchorDomain     = "REL_ANCHOR_DOMAIN"
-	FieldRelAnchorKey        = "REL_ANCHOR_KEY"
-	FieldRelPointerDomain    = "REL_POINTER_DOMAIN"
-	FieldRelPointerKey       = "REL_POINTER_KEY"
-	FieldRelPointerRole      = "REL_POINTER_ROLE"
+	FieldRecordType        = "RECORD_TYPE"
+	FieldNameFirst         = "NAME_FIRST"
+	FieldNameMiddle        = "NAME_MIDDLE"
+	FieldNameLast          = "NAME_LAST"
+	FieldNameFull          = "NAME_FULL"
+	FieldNamePrefix        = "NAME_PREFIX"
+	FieldNameSuffix        = "NAME_SUFFIX"
+	FieldNameOrg           = "NAME_ORG"
+	FieldAddrLine1         = "ADDR_LINE1"
+	FieldAddrLine2         = "ADDR_LINE2"
+	FieldAddrLine3         = "ADDR_LINE3"
+	FieldAddrCity          = "ADDR_CITY"
+	FieldAddrState         = "ADDR_STATE"
+	FieldAddrPostalCode    = "ADDR_POSTAL_CODE"
+	FieldAddrCountry       = "ADDR_COUNTRY"
+	FieldAddrFull          = "ADDR_FULL"
+	FieldSSN               = "SSN"
+	FieldPassportNumber    = "PASSPORT_NUMBER"
+	FieldPassportCountry   = "PASSPORT_COUNTRY"
+	FieldTaxIDNumber       = "TAX_ID_NUMBER"
+	FieldTaxIDCountry      = "TAX_ID_COUNTRY"
+	FieldNationalIDNumber  = "NATIONAL_ID_NUMBER"
+	FieldNationalIDCountry = "NATIONAL_ID_COUNTRY"
+	FieldDriversLicNumber  = "DRIVERS_LICENSE_NUMBER"
+	FieldDriversLicState   = "DRIVERS_LICENSE_STATE"
+	FieldPhoneNumber       = "PHONE_NUMBER"
+	FieldPhoneType         = "PHONE_TYPE"
+	FieldEmail             = "EMAIL_ADDRESS"
+	FieldWebsite           = "WEBSITE_ADDRESS"
+	FieldDateOfBirth       = "DATE_OF_BIRTH"
+	FieldDateOfDeath       = "DATE_OF_DEATH"
+	FieldGender            = "GENDER"
+	FieldNationality       = "NATIONALITY"
+	FieldRelAnchorDomain   = "REL_ANCHOR_DOMAIN"
+	FieldRelAnchorKey      = "REL_ANCHOR_KEY"
+	FieldRelPointerDomain  = "REL_POINTER_DOMAIN"
+	FieldRelPointerKey     = "REL_POINTER_KEY"
+	FieldRelPointerRole    = "REL_POINTER_ROLE"
 )
 
 // ExportOptions controls how entities are exported to Senzing format
