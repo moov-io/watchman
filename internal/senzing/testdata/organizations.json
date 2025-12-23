@@ -1,0 +1,29 @@
+[
+  {
+    "DATA_SOURCE": "TEST",
+    "RECORD_ID": "2001",
+    "RECORD_TYPE": "ORGANIZATION",
+    "NAME_ORG": "Acme Corporation",
+    "TAX_ID_NUMBER": "12-3456789",
+    "TAX_ID_COUNTRY": "US",
+    "ADDR_LINE1": "100 Corporate Blvd",
+    "ADDR_CITY": "San Francisco",
+    "ADDR_STATE": "CA",
+    "ADDR_POSTAL_CODE": "94102",
+    "ADDR_COUNTRY": "US",
+    "PHONE_NUMBER": "415-555-0100",
+    "EMAIL_ADDRESS": "info@acme.com",
+    "WEBSITE_ADDRESS": "https://www.acme.com"
+  },
+  {
+    "DATA_SOURCE": "TEST",
+    "RECORD_ID": "2002",
+    "RECORD_TYPE": "ORGANIZATION",
+    "NAME_ORG": "Global Trading Ltd",
+    "NATIONAL_ID_NUMBER": "GB123456",
+    "NATIONAL_ID_COUNTRY": "GB",
+    "ADDR_LINE1": "10 Downing Street",
+    "ADDR_CITY": "London",
+    "ADDR_COUNTRY": "GB"
+  }
+]
