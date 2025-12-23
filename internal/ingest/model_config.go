@@ -2,6 +2,10 @@ package ingest
 
 type Config struct {
 	Files map[string]File
+
+	// PaginationLimit controls the batch size when listing entities from the database.
+	// Defaults to 1000 if not set.
+	PaginationLimit int
 }
 
 type File struct {

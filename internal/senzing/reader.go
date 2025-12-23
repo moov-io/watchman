@@ -2,7 +2,6 @@ package senzing
 
 import (
 	"bufio"
-	"bytes"
 	"cmp"
 	"encoding/json"
 	"fmt"
@@ -16,38 +15,70 @@ import (
 // ReadEntities reads Senzing-formatted records and converts them to Watchman entities.
 // Supports both JSON Lines (.jsonl) and JSON Array (.json) formats.
 // The format is auto-detected based on the first non-whitespace character.
+// Uses streaming to handle large files without loading everything into memory.
 func ReadEntities(r io.Reader, sourceList search.SourceList) ([]search.Entity[search.Value], error) {
-	buf, err := io.ReadAll(r)
-	if err != nil {
-		return nil, fmt.Errorf("reading senzing input: %w", err)
+	br := bufio.NewReader(r)
+
+	// Find the first non-whitespace character to detect format
+	var firstChar byte
+	var err error
+	for {
+		firstChar, err = br.ReadByte()
+		if err != nil {
+			if err == io.EOF {
+				return nil, nil // Empty input
+			}
+			return nil, fmt.Errorf("reading senzing input: %w", err)
+		}
+		if firstChar != ' ' && firstChar != '\n' && firstChar != '\r' && firstChar != '\t' {
+			break
+		}
 	}
 
-	trimmed := bytes.TrimSpace(buf)
-	if len(trimmed) == 0 {
-		return nil, nil
+	// Put the character back into the stream
+	if err := br.UnreadByte(); err != nil {
+		return nil, fmt.Errorf("unreading byte: %w", err)
 	}
 
 	// Detect format: JSON Array starts with '[', JSON Lines starts with '{'
-	if trimmed[0] == '[' {
-		return readJSONArray(trimmed, sourceList)
+	if firstChar == '[' {
+		return readJSONArray(br, sourceList)
 	}
-	return readJSONLines(bytes.NewReader(buf), sourceList)
+	return readJSONLines(br, sourceList)
 }
 
-func readJSONArray(data []byte, sourceList search.SourceList) ([]search.Entity[search.Value], error) {
-	var records []SenzingRecord
-	if err := json.Unmarshal(data, &records); err != nil {
+func readJSONArray(r io.Reader, sourceList search.SourceList) ([]search.Entity[search.Value], error) {
+	var entities []search.Entity[search.Value]
+	decoder := json.NewDecoder(r)
+
+	// Read opening bracket
+	token, err := decoder.Token()
+	if err != nil {
 		return nil, fmt.Errorf("parsing senzing json array: %w", err)
 	}
+	if delim, ok := token.(json.Delim); !ok || delim != '[' {
+		return nil, fmt.Errorf("expected JSON array, got %v", token)
+	}
 
-	entities := make([]search.Entity[search.Value], 0, len(records))
-	for _, rec := range records {
+	// Read array elements
+	for decoder.More() {
+		var rec SenzingRecord
+		if err := decoder.Decode(&rec); err != nil {
+			return nil, fmt.Errorf("parsing senzing record: %w", err)
+		}
+
 		entity, err := ToWatchmanEntity(rec, sourceList)
 		if err != nil {
 			return nil, fmt.Errorf("converting record %s: %w", rec.RecordID, err)
 		}
 		entities = append(entities, entity)
 	}
+
+	// Read closing bracket
+	if _, err := decoder.Token(); err != nil {
+		return nil, fmt.Errorf("parsing senzing json array end: %w", err)
+	}
+
 	return entities, nil
 }
 
@@ -62,13 +93,13 @@ func readJSONLines(r io.Reader, sourceList search.SourceList) ([]search.Entity[s
 	lineNum := 0
 	for scanner.Scan() {
 		lineNum++
-		line := bytes.TrimSpace(scanner.Bytes())
-		if len(line) == 0 {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
 			continue
 		}
 
 		var rec SenzingRecord
-		if err := json.Unmarshal(line, &rec); err != nil {
+		if err := json.Unmarshal([]byte(line), &rec); err != nil {
 			return nil, fmt.Errorf("parsing line %d: %w", lineNum, err)
 		}
 
@@ -104,43 +135,17 @@ func ToWatchmanEntity(rec SenzingRecord, sourceList search.SourceList) (search.E
 
 	switch recordType {
 	case RecordTypePerson, "INDIVIDUAL":
-		entity.Type = search.EntityPerson
-		entity.Name = buildPersonName(normalized)
-		entity.Person = &search.Person{
-			Name:          entity.Name,
-			Gender:        parseGender(normalized.Gender),
-			BirthDate:     parseDate(normalized.DateOfBirth),
-			DeathDate:     parseDate(normalized.DateOfDeath),
-			GovernmentIDs: extractGovernmentIDs(normalized),
-		}
+		populatePersonEntity(&entity, normalized)
 
 	case RecordTypeOrganization, "BUSINESS", "COMPANY":
-		entity.Type = search.EntityBusiness
-		entity.Name = cmp.Or(normalized.NameOrg, normalized.NameFull, buildPersonName(normalized))
-		entity.Business = &search.Business{
-			Name:          entity.Name,
-			GovernmentIDs: extractGovernmentIDs(normalized),
-		}
+		populateBusinessEntity(&entity, normalized)
 
 	default:
 		// Default: if NAME_ORG is set, treat as business; otherwise as person
 		if normalized.NameOrg != "" {
-			entity.Type = search.EntityBusiness
-			entity.Name = normalized.NameOrg
-			entity.Business = &search.Business{
-				Name:          entity.Name,
-				GovernmentIDs: extractGovernmentIDs(normalized),
-			}
+			populateBusinessEntity(&entity, normalized)
 		} else {
-			entity.Type = search.EntityPerson
-			entity.Name = buildPersonName(normalized)
-			entity.Person = &search.Person{
-				Name:          entity.Name,
-				Gender:        parseGender(normalized.Gender),
-				BirthDate:     parseDate(normalized.DateOfBirth),
-				DeathDate:     parseDate(normalized.DateOfDeath),
-				GovernmentIDs: extractGovernmentIDs(normalized),
-			}
+			populatePersonEntity(&entity, normalized)
 		}
 	}
 
@@ -151,6 +156,27 @@ func ToWatchmanEntity(rec SenzingRecord, sourceList search.SourceList) (search.E
 	entity.Contact = extractContactInfo(normalized)
 
 	return entity.Normalize(), nil
+}
+
+func populatePersonEntity(entity *search.Entity[search.Value], rec SenzingRecord) {
+	entity.Type = search.EntityPerson
+	entity.Name = buildPersonName(rec)
+	entity.Person = &search.Person{
+		Name:          entity.Name,
+		Gender:        parseGender(rec.Gender),
+		BirthDate:     parseDate(rec.DateOfBirth),
+		DeathDate:     parseDate(rec.DateOfDeath),
+		GovernmentIDs: extractGovernmentIDs(rec),
+	}
+}
+
+func populateBusinessEntity(entity *search.Entity[search.Value], rec SenzingRecord) {
+	entity.Type = search.EntityBusiness
+	entity.Name = cmp.Or(rec.NameOrg, rec.NameFull, buildPersonName(rec))
+	entity.Business = &search.Business{
+		Name:          entity.Name,
+		GovernmentIDs: extractGovernmentIDs(rec),
+	}
 }
 
 // normalizeRecord flattens FEATURES array into direct fields on the record

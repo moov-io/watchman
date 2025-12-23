@@ -348,6 +348,8 @@ func (s *service) readEntitiesFromSenzingFile(ctx context.Context, name string, 
 	return out, nil
 }
 
+const defaultPaginationLimit = 1000
+
 func (s *service) GetEntitiesBySource(ctx context.Context, source string) ([]search.Entity[search.Value], error) {
 	if s.repo == nil {
 		return nil, fmt.Errorf("no repository configured")
@@ -355,7 +357,10 @@ func (s *service) GetEntitiesBySource(ctx context.Context, source string) ([]sea
 
 	var allEntities []search.Entity[search.Value]
 	lastSourceID := ""
-	limit := 1000
+	limit := s.conf.PaginationLimit
+	if limit <= 0 {
+		limit = defaultPaginationLimit
+	}
 
 	for {
 		entities, err := s.repo.ListBySource(ctx, lastSourceID, search.SourceList(source), limit)
