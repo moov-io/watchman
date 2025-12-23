@@ -116,17 +116,20 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 		return nil, fmt.Errorf("getting indexed entities: %w", err)
 	}
 
+	// Get TF-IDF index for weighted name matching
+	tfidfIndex := s.indexedLists.GetTFIDFIndex()
+
 	indices.ProcessSliceFn(searchEntities, goroutineCount, func(index search.Entity[search.Value]) {
 		start := time.Now()
 
 		var score float64
 		if !opts.Debug {
-			score = search.Similarity(query, index)
+			score = search.SimilarityWithTFIDF(query, index, tfidfIndex)
 		} else {
 			var buf bytes.Buffer
 			buf.Grow(1700) // approximate size of debug logs
 
-			scores := search.DetailedSimilarity(&buf, query, index)
+			scores := search.DetailedSimilarityWithTFIDF(&buf, query, index, tfidfIndex)
 			score = scores.FinalScore
 
 			// Add debug buffer to be stored

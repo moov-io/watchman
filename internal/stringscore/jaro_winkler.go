@@ -364,3 +364,173 @@ func BestPairCombinationJaroWinkler(searchTokens []string, indexedTokens []strin
 
 	return maxScore
 }
+
+// BestPairsJaroWinklerWeighted compares a search query to an indexed term using TF-IDF weights.
+// The algorithm is similar to BestPairsJaroWinkler but uses TF-IDF weights instead of character
+// length to weight the importance of each matched term pair.
+//
+// searchWeights and indexWeights should have the same length as their corresponding token slices.
+// If weights are nil or have different lengths, falls back to unweighted scoring.
+func BestPairsJaroWinklerWeighted(searchTokens []string, indexedTokens []string, searchWeights []float64, indexWeights []float64) float64 {
+	// Validate weights - fall back to unweighted if invalid
+	if len(searchWeights) != len(searchTokens) || len(indexWeights) != len(indexedTokens) {
+		return BestPairsJaroWinkler(searchTokens, indexedTokens)
+	}
+
+	type Score struct {
+		score          float64
+		searchTokenIdx int
+		indexTokenIdx  int
+	}
+
+	disablePhoneticFiltering := strx.Yes(os.Getenv("DISABLE_PHONETIC_FILTERING"))
+
+	// Compare each search token to each indexed token
+	scoresCapacity := (len(searchTokens) + len(indexedTokens))
+	if !disablePhoneticFiltering {
+		scoresCapacity /= 5
+	}
+	scores := make([]Score, 0, scoresCapacity)
+	for searchIdx, searchToken := range searchTokens {
+		for indexIdx, indexedToken := range indexedTokens {
+			if disablePhoneticFiltering || firstCharacterSoundexMatch(indexedToken, searchToken) {
+				scores = append(scores, Score{
+					score:          customJaroWinkler(indexedToken, searchToken),
+					searchTokenIdx: searchIdx,
+					indexTokenIdx:  indexIdx,
+				})
+			}
+		}
+	}
+	sort.Slice(scores[:], func(i, j int) bool {
+		return scores[i].score > scores[j].score
+	})
+
+	// Pick the highest score for each search term, where the indexed token hasn't yet been matched
+	matchedSearchTokens := make([]bool, len(searchTokens))
+	matchedIndexTokens := make([]bool, len(indexedTokens))
+	var totalWeightedScores float64
+	var totalWeight float64
+
+	for _, score := range scores {
+		if !matchedSearchTokens[score.searchTokenIdx] && !matchedIndexTokens[score.indexTokenIdx] {
+			// Use TF-IDF weight instead of character length
+			// Average the weights of both tokens in the pair
+			pairWeight := (searchWeights[score.searchTokenIdx] + indexWeights[score.indexTokenIdx]) / 2.0
+			totalWeightedScores += score.score * pairWeight
+			totalWeight += pairWeight
+
+			matchedSearchTokens[score.searchTokenIdx] = true
+			matchedIndexTokens[score.indexTokenIdx] = true
+		}
+	}
+
+	if totalWeight == 0 {
+		return 0.0
+	}
+
+	weightedAverageScore := totalWeightedScores / totalWeight
+
+	// Apply penalty for unmatched index tokens, weighted by their TF-IDF importance
+	var matchedWeight, totalIndexWeight float64
+	for i := range indexedTokens {
+		totalIndexWeight += indexWeights[i]
+		if matchedIndexTokens[i] {
+			matchedWeight += indexWeights[i]
+		}
+	}
+
+	if totalIndexWeight > 0 {
+		matchedFraction := matchedWeight / totalIndexWeight
+		return weightedAverageScore * scalingFactor(matchedFraction, unmatchedIndexPenaltyWeight)
+	}
+
+	return weightedAverageScore
+}
+
+// BestPairCombinationJaroWinklerWeighted is like BestPairCombinationJaroWinkler but uses TF-IDF weights.
+func BestPairCombinationJaroWinklerWeighted(searchTokens []string, indexedTokens []string, searchWeights []float64, indexWeights []float64) float64 {
+	// Generate variations with different word combinations
+	searchCombinations := GenerateWordCombinations(searchTokens)
+	indexedCombinations := GenerateWordCombinations(indexedTokens)
+
+	// For weighted scoring, we need to handle weight combinations too
+	// When tokens are combined, we sum their weights
+	searchWeightCombinations := generateWeightCombinations(searchTokens, searchWeights)
+	indexWeightCombinations := generateWeightCombinations(indexedTokens, indexWeights)
+
+	// Try all combinations and take the highest score
+	var maxScore float64
+	for si, searchVariation := range searchCombinations {
+		for ii, indexedVariation := range indexedCombinations {
+			score := BestPairsJaroWinklerWeighted(searchVariation, indexedVariation,
+				searchWeightCombinations[si], indexWeightCombinations[ii])
+			if score > maxScore {
+				maxScore = score
+			}
+		}
+	}
+
+	return maxScore
+}
+
+// generateWeightCombinations generates weight arrays corresponding to GenerateWordCombinations output.
+// When tokens are combined, their weights are summed.
+func generateWeightCombinations(tokens []string, weights []float64) [][]float64 {
+	if len(tokens) <= 1 || len(weights) != len(tokens) {
+		return [][]float64{weights}
+	}
+
+	result := make([][]float64, 0, 3)
+	result = append(result, weights)
+
+	// Forward combinations
+	combinedForward := make([]float64, 0, len(tokens))
+	skipNext := false
+	for i := 0; i < len(tokens); i++ {
+		if skipNext {
+			skipNext = false
+			continue
+		}
+		if i < len(tokens)-1 && len(tokens[i]) <= 3 {
+			combinedForward = append(combinedForward, weights[i]+weights[i+1])
+			skipNext = true
+		} else {
+			combinedForward = append(combinedForward, weights[i])
+		}
+	}
+	if len(combinedForward) < len(tokens) {
+		result = append(result, combinedForward)
+	}
+
+	// Backward combinations
+	if len(combinedForward) < len(tokens) {
+		combinedBackward := make([]float64, 0, len(tokens))
+		for i := 0; i < len(tokens); i++ {
+			if i > 0 && len(tokens[i]) <= 3 {
+				if len(combinedBackward) > 0 {
+					combinedBackward[len(combinedBackward)-1] += weights[i]
+				}
+			} else {
+				combinedBackward = append(combinedBackward, weights[i])
+			}
+		}
+		if len(combinedBackward) < len(tokens) && !floatSlicesEqual(combinedBackward, combinedForward) {
+			result = append(result, combinedBackward)
+		}
+	}
+
+	return result
+}
+
+func floatSlicesEqual(a, b []float64) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}

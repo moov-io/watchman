@@ -12,10 +12,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/moov-io/base/log"
 	"github.com/moov-io/base/telemetry"
+	"github.com/moov-io/watchman/internal/tfidf"
 	"github.com/moov-io/watchman/pkg/search"
 
-	"github.com/moov-io/base/log"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -189,9 +190,52 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 
 	logger.Info().Logf("finished all lists: %v", time.Since(start))
 
+	// Build TF-IDF index from all entity names
+	stats.TFIDFIndex = buildTFIDFIndex(logger, stats.Entities)
+
 	stats.EndedAt = time.Now().In(time.UTC)
 
 	return stats, nil
+}
+
+// buildTFIDFIndex creates a TF-IDF index from all entity names.
+// It extracts NameFields and AltNameFields from each entity's PreparedFields.
+func buildTFIDFIndex(logger log.Logger, entities []search.Entity[search.Value]) *tfidf.Index {
+	cfg := tfidf.ConfigFromEnvironment()
+	idx := tfidf.NewIndex(cfg)
+
+	if !cfg.Enabled {
+		logger.Info().Log("TF-IDF indexing disabled")
+		return idx
+	}
+
+	start := time.Now()
+
+	// Collect all name terms as documents
+	// Each entity's name (and alt names) is treated as a separate document
+	var documents [][]string
+
+	for i := range entities {
+		// Add primary name fields
+		if len(entities[i].PreparedFields.NameFields) > 0 {
+			documents = append(documents, entities[i].PreparedFields.NameFields)
+		}
+
+		// Add alternate name fields
+		for _, altFields := range entities[i].PreparedFields.AltNameFields {
+			if len(altFields) > 0 {
+				documents = append(documents, altFields)
+			}
+		}
+	}
+
+	idx.Build(documents)
+
+	stats := idx.Stats()
+	logger.Info().Logf("built TF-IDF index: %d documents, %d unique terms in %v",
+		stats.TotalDocuments, stats.UniqueTerms, time.Since(start))
+
+	return idx
 }
 
 func getIncludedLists(conf Config) []search.SourceList {
