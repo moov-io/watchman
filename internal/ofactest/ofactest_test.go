@@ -30,7 +30,7 @@ func TestOFACTest_Sample(t *testing.T) {
 			IncludedLists: []search.SourceList{
 				search.SourceUSOFAC,
 			},
-		})
+		}, nil)
 	} else {
 		// Use a mock downloader with OFAC files from ./pkg/sources/ofac/testdata/
 		dl = ofactest.GetDownloader(t)

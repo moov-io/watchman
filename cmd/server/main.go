@@ -22,6 +22,7 @@ import (
 	"github.com/moov-io/watchman/internal/config"
 	"github.com/moov-io/watchman/internal/db"
 	"github.com/moov-io/watchman/internal/download"
+	"github.com/moov-io/watchman/internal/geocoding"
 	"github.com/moov-io/watchman/internal/index"
 	"github.com/moov-io/watchman/internal/ingest"
 	"github.com/moov-io/watchman/internal/postalpool"
@@ -56,12 +57,6 @@ func main() {
 	}
 	defer telemetryShutdownFunc()
 
-	downloader, err := download.NewDownloader(logger, conf.Download)
-	if err != nil {
-		logger.Fatal().LogErrorf("problem setting up downloader: %v", err)
-		os.Exit(1)
-	}
-
 	// Setup signal listener
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
@@ -80,6 +75,19 @@ func main() {
 		os.Exit(1)
 	}
 	defer shutdown()
+
+	// Setup geocoding service (optional)
+	geocodingService, err := geocoding.NewService(logger, conf.Geocoding, database)
+	if err != nil {
+		logger.Fatal().LogErrorf("problem setting up geocoding service: %v", err)
+		os.Exit(1)
+	}
+
+	downloader, err := download.NewDownloader(logger, conf.Download, geocodingService)
+	if err != nil {
+		logger.Fatal().LogErrorf("problem setting up downloader: %v", err)
+		os.Exit(1)
+	}
 
 	// Setup ingest services
 	ingestRepository := ingest.NewRepository(database)

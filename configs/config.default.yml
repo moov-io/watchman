@@ -33,3 +33,18 @@ Watchman:
     RequestTimeout: "10s"
     BinaryPath: "" # POSTAL_SERVER_BIN_PATH is set in Dockerfile
     CGOSelfInstances: 1
+
+  Geocoding:
+    Enabled: false
+    Provider:
+      Name: "opencage"    # opencage, google, or nominatim
+      APIKey: ""          # Can be set via GEOCODING_API_KEY env var
+      BaseURL: ""         # Optional: override for self-hosted Nominatim
+      Timeout: "10s"
+    RateLimit:
+      RequestsPerSecond: 1  # Free tier: 1/sec, Paid: up to 40/sec
+      Burst: 5
+    Cache:
+      L1MaxSize: 10000      # In-memory LRU cache size
+      L1TTL: "24h"          # TTL for L1 cache entries
+      L2Enabled: true       # Persist to database (requires Database config)

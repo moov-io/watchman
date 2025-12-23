@@ -7,6 +7,7 @@ package config
 import (
 	watchman "github.com/moov-io/watchman"
 	"github.com/moov-io/watchman/internal/download"
+	"github.com/moov-io/watchman/internal/geocoding"
 	"github.com/moov-io/watchman/internal/ingest"
 	"github.com/moov-io/watchman/internal/postalpool"
 	"github.com/moov-io/watchman/internal/search"
@@ -33,6 +34,7 @@ type Config struct {
 	Download   download.Config
 	Search     search.Config
 	PostalPool postalpool.Config
+	Geocoding  geocoding.Config
 
 	Ingest ingest.Config
 }

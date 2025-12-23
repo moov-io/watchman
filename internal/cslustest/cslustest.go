@@ -33,7 +33,7 @@ func FindEntity(tb testing.TB, entityID string) search.Entity[search.Value] {
 		}
 		conf.IncludedLists = append(conf.IncludedLists, search.SourceUSCSL)
 
-		dl, err := download.NewDownloader(logger, conf)
+		dl, err := download.NewDownloader(logger, conf, nil)
 		require.NoError(tb, err)
 
 		cslusDownloader = dl

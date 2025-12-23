@@ -19,20 +19,28 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// GeocodingService defines the interface for geocoding addresses.
+// This is used to decouple the download package from the geocoding implementation.
+type GeocodingService interface {
+	GeocodeAddresses(ctx context.Context, addresses []search.Address) []search.Address
+}
+
 type Downloader interface {
 	RefreshAll(ctx context.Context) (Stats, error)
 }
 
-func NewDownloader(logger log.Logger, conf Config) (Downloader, error) {
+func NewDownloader(logger log.Logger, conf Config, geocoder GeocodingService) (Downloader, error) {
 	return &downloader{
-		logger: logger,
-		conf:   conf,
+		logger:   logger,
+		conf:     conf,
+		geocoder: geocoder,
 	}, nil
 }
 
 type downloader struct {
-	logger log.Logger
-	conf   Config
+	logger   log.Logger
+	conf     Config
+	geocoder GeocodingService
 }
 
 func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
@@ -59,12 +67,19 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 		defer close(resultsDone)
 
 		for list := range preparedLists {
-			logger.Info().Logf("adding %d entities from %v", len(list.Entities), list.ListName)
+			entities := list.Entities
 
-			stats.Lists[string(list.ListName)] = len(list.Entities)
+			// Apply geocoding to entities if service is available
+			if dl.geocoder != nil {
+				entities = dl.geocodeEntities(ctx, entities)
+			}
+
+			logger.Info().Logf("adding %d entities from %v", len(entities), list.ListName)
+
+			stats.Lists[string(list.ListName)] = len(entities)
 			stats.ListHashes[string(list.ListName)] = list.Hash
 
-			stats.Entities = append(stats.Entities, list.Entities...)
+			stats.Entities = append(stats.Entities, entities...)
 		}
 	}()
 
@@ -222,4 +237,19 @@ func expandInitialDir(initialDir string) string {
 
 func initialDataDirectory(conf Config) string {
 	return cmp.Or(os.Getenv("INITIAL_DATA_DIRECTORY"), conf.InitialDataDirectory)
+}
+
+// geocodeEntities applies geocoding to all addresses in the given entities.
+func (dl *downloader) geocodeEntities(ctx context.Context, entities []search.Entity[search.Value]) []search.Entity[search.Value] {
+	if dl.geocoder == nil {
+		return entities
+	}
+
+	for i := range entities {
+		if len(entities[i].Addresses) > 0 {
+			entities[i].Addresses = dl.geocoder.GeocodeAddresses(ctx, entities[i].Addresses)
+		}
+	}
+
+	return entities
 }
