@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/moov-io/watchman"
 	"github.com/moov-io/watchman/pkg/search"
 )
 
@@ -70,18 +71,23 @@ func (g *OpenCageGeocoder) Geocode(ctx context.Context, addr search.Address) (*C
 		return nil, nil
 	}
 
-	reqURL := fmt.Sprintf("%s?key=%s&q=%s&no_annotations=1&limit=1",
-		g.baseURL,
-		url.QueryEscape(g.apiKey),
-		url.QueryEscape(query),
-	)
+	u, err := url.Parse(g.baseURL)
+	if err != nil {
+		return nil, fmt.Errorf("parsing base url: %w", err)
+	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, reqURL, nil)
+	q := u.Query()
+	q.Set("key", g.apiKey)
+	q.Set("q", query)
+	q.Set("no_annotations", "1")
+	q.Set("limit", "1")
+	u.RawQuery = q.Encode()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, fmt.Errorf("creating request: %w", err)
 	}
-
-	req.Header.Set("User-Agent", "moov-io/watchman")
+	req.Header.Set("User-Agent", fmt.Sprintf("moov-io/watchman:%s", watchman.Version))
 
 	resp, err := g.client.Do(req)
 	if err != nil {

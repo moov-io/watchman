@@ -1,9 +1,11 @@
 package geocoding
 
 import (
+	"cmp"
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/moov-io/watchman/pkg/search"
@@ -18,7 +20,7 @@ func TestOpenCageGeocoder_Success(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{
 			"results": [{
-				"geometry": {"lat": 40.7128, "lng": -74.0060},
+				"geometry": {"lat": 40.8097987, "lng": -72.6426519},
 				"confidence": 9
 			}],
 			"status": {"code": 200, "message": "OK"}
@@ -26,10 +28,18 @@ func TestOpenCageGeocoder_Success(t *testing.T) {
 	}))
 	defer server.Close()
 
-	geocoder, err := NewOpenCageGeocoder(ProviderConfig{
-		APIKey:  "test-key",
-		BaseURL: server.URL,
-	})
+	var apiKey string
+	if !testing.Short() {
+		apiKey = os.Getenv("OPENCAGE_API_KEY")
+	}
+	conf := ProviderConfig{
+		APIKey: cmp.Or(apiKey, "test-key"),
+	}
+	if apiKey == "" {
+		conf.BaseURL = server.URL
+	}
+
+	geocoder, err := NewOpenCageGeocoder(conf)
 	require.NoError(t, err)
 
 	addr := search.Address{
@@ -42,8 +52,9 @@ func TestOpenCageGeocoder_Success(t *testing.T) {
 	coords, err := geocoder.Geocode(context.Background(), addr)
 	require.NoError(t, err)
 	require.NotNil(t, coords)
-	require.Equal(t, 40.7128, coords.Latitude)
-	require.Equal(t, -74.0060, coords.Longitude)
+
+	require.InDelta(t, 40.8097987, coords.Latitude, 0.001)
+	require.InDelta(t, -72.6426519, coords.Longitude, 0.001)
 	require.Equal(t, "rooftop", coords.Accuracy)
 }
 

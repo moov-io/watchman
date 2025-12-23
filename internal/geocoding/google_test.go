@@ -1,12 +1,15 @@
 package geocoding
 
 import (
+	"cmp"
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/moov-io/watchman/pkg/search"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -19,7 +22,7 @@ func TestGoogleGeocoder_Success(t *testing.T) {
 		w.Write([]byte(`{
 			"results": [{
 				"geometry": {
-					"location": {"lat": 40.7128, "lng": -74.0060},
+					"location": {"lat": 40.762363, "lng": -73.8313912},
 					"location_type": "ROOFTOP"
 				}
 			}],
@@ -28,10 +31,18 @@ func TestGoogleGeocoder_Success(t *testing.T) {
 	}))
 	defer server.Close()
 
-	geocoder, err := NewGoogleGeocoder(ProviderConfig{
-		APIKey:  "test-key",
-		BaseURL: server.URL,
-	})
+	var apiKey string
+	if !testing.Short() {
+		apiKey = os.Getenv("GOOGLE_MAPS_API_KEY")
+	}
+	conf := ProviderConfig{
+		APIKey: cmp.Or(apiKey, "test-key"),
+	}
+	if apiKey == "" {
+		conf.BaseURL = server.URL
+	}
+
+	geocoder, err := NewGoogleGeocoder(conf)
 	require.NoError(t, err)
 
 	addr := search.Address{
@@ -44,8 +55,9 @@ func TestGoogleGeocoder_Success(t *testing.T) {
 	coords, err := geocoder.Geocode(context.Background(), addr)
 	require.NoError(t, err)
 	require.NotNil(t, coords)
-	require.Equal(t, 40.7128, coords.Latitude)
-	require.Equal(t, -74.0060, coords.Longitude)
+
+	require.InDelta(t, 40.762363, coords.Latitude, 0.001)
+	require.InDelta(t, -73.8313912, coords.Longitude, 0.001)
 	require.Equal(t, "rooftop", coords.Accuracy)
 }
 

@@ -68,13 +68,17 @@ func (g *GoogleGeocoder) Geocode(ctx context.Context, addr search.Address) (*Coo
 		return nil, nil
 	}
 
-	reqURL := fmt.Sprintf("%s?key=%s&address=%s",
-		g.baseURL,
-		url.QueryEscape(g.apiKey),
-		url.QueryEscape(query),
-	)
+	u, err := url.Parse(g.baseURL)
+	if err != nil {
+		return nil, fmt.Errorf("parsing base url: %w", err)
+	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, reqURL, nil)
+	q := u.Query()
+	q.Set("key", g.apiKey)
+	q.Set("address", query)
+	u.RawQuery = q.Encode()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, fmt.Errorf("creating request: %w", err)
 	}

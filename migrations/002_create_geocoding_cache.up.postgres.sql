@@ -1,7 +1,7 @@
 -- Geocoding cache table for persistent storage of geocoding results.
 -- This reduces API calls to geocoding providers by caching results.
 CREATE TABLE geocoding_cache (
-    cache_key  VARCHAR(512) NOT NULL PRIMARY KEY,
+    cache_key  VARCHAR(64) NOT NULL,
     latitude   DOUBLE PRECISION NOT NULL,
     longitude  DOUBLE PRECISION NOT NULL,
     accuracy   VARCHAR(20) NOT NULL DEFAULT 'unknown',

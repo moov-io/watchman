@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/moov-io/watchman"
 	"github.com/moov-io/watchman/pkg/search"
 )
 
@@ -59,18 +60,24 @@ func (g *NominatimGeocoder) Geocode(ctx context.Context, addr search.Address) (*
 		return nil, nil
 	}
 
-	reqURL := fmt.Sprintf("%s?format=json&q=%s&limit=1",
-		g.baseURL,
-		url.QueryEscape(query),
-	)
+	u, err := url.Parse(g.baseURL)
+	if err != nil {
+		return nil, fmt.Errorf("parsing base url: %w", err)
+	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, reqURL, nil)
+	q := u.Query()
+	q.Set("format", "json")
+	q.Set("q", query)
+	q.Set("limit", "1")
+	u.RawQuery = q.Encode()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, fmt.Errorf("creating request: %w", err)
 	}
 
 	// Nominatim requires a descriptive User-Agent
-	req.Header.Set("User-Agent", "moov-io/watchman (https://github.com/moov-io/watchman)")
+	req.Header.Set("User-Agent", fmt.Sprintf("moov-io/watchman:%s", watchman.Version))
 
 	resp, err := g.client.Do(req)
 	if err != nil {

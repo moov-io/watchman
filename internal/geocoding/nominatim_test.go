@@ -10,6 +10,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const useMockNominatim = true
+
+func pickNominatimBaseURL(server *httptest.Server) string {
+	if useMockNominatim {
+		return server.URL
+	}
+	return nominatimBaseURL
+}
+
 func TestNominatimGeocoder_Success(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		require.Contains(t, r.URL.RawQuery, "format=json")
@@ -21,35 +30,28 @@ func TestNominatimGeocoder_Success(t *testing.T) {
 		require.Contains(t, userAgent, "moov-io/watchman")
 
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`[{
-			"lat": "40.7128",
-			"lon": "-74.0060",
-			"display_name": "123 Main St, New York, NY, USA",
-			"class": "building",
-			"type": "house",
-			"importance": 0.9
-		}]`))
+		w.Write([]byte(`[{"place_id":421093542,"licence":"Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright","osm_type":"relation","osm_id":19761182,"lat":"38.8976387","lon":"-77.0365528","class":"office","type":"government","place_rank":30,"importance":0.6863355973183977,"addresstype":"office","name":"White House","display_name":"White House, 1600, Pennsylvania Avenue Northwest, Downtown, Ward 2, Washington, District of Columbia, 20500, United States","boundingbox":["38.8974904","38.8977959","-77.0368541","-77.0362517"]}]`))
 	}))
 	defer server.Close()
 
 	geocoder, err := NewNominatimGeocoder(ProviderConfig{
-		BaseURL: server.URL,
+		BaseURL: pickNominatimBaseURL(server),
 	})
 	require.NoError(t, err)
 
 	addr := search.Address{
-		Line1:   "123 Main St",
-		City:    "New York",
-		State:   "NY",
+		Line1:   "1600 Pennsylvania Avenue NW",
+		City:    "Washington",
+		State:   "DC",
 		Country: "US",
 	}
 
 	coords, err := geocoder.Geocode(context.Background(), addr)
 	require.NoError(t, err)
 	require.NotNil(t, coords)
-	require.Equal(t, 40.7128, coords.Latitude)
-	require.Equal(t, -74.0060, coords.Longitude)
-	require.Equal(t, "rooftop", coords.Accuracy)
+	require.InDelta(t, 38.8976387, coords.Latitude, 0.001)
+	require.InDelta(t, -77.0365528, coords.Longitude, 0.001)
+	require.Equal(t, "approximate", coords.Accuracy)
 }
 
 func TestNominatimGeocoder_NoResults(t *testing.T) {
@@ -60,7 +62,7 @@ func TestNominatimGeocoder_NoResults(t *testing.T) {
 	defer server.Close()
 
 	geocoder, err := NewNominatimGeocoder(ProviderConfig{
-		BaseURL: server.URL,
+		BaseURL: pickNominatimBaseURL(server),
 	})
 	require.NoError(t, err)
 
@@ -76,7 +78,7 @@ func TestNominatimGeocoder_HTTPError(t *testing.T) {
 	defer server.Close()
 
 	geocoder, err := NewNominatimGeocoder(ProviderConfig{
-		BaseURL: server.URL,
+		BaseURL: pickNominatimBaseURL(server),
 	})
 	require.NoError(t, err)
 

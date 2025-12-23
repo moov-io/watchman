@@ -2,6 +2,8 @@ package geocoding
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"sync"
 	"time"
@@ -182,23 +184,34 @@ func (s *Service) GeocodeAddresses(ctx context.Context, addresses []search.Addre
 
 // addressCacheKey generates a normalized cache key for an address.
 func (s *Service) addressCacheKey(addr search.Address) string {
-	return fmt.Sprintf("%s|%s|%s|%s|%s|%s",
+	return hash(fmt.Appendf(nil, "%s|%s|%s|%s|%s|%s",
 		addr.Line1, addr.Line2, addr.City,
-		addr.PostalCode, addr.State, addr.Country)
+		addr.PostalCode, addr.State, addr.Country))
+}
+
+func hash(input []byte) string {
+	h := sha256.Sum256(input)
+	return hex.EncodeToString(h[:])
 }
 
 // checkL1Cache returns cached coordinates if present and not expired.
 func (s *Service) checkL1Cache(key string) *Coordinates {
 	s.mu.RLock()
-	defer s.mu.RUnlock()
 
 	if entry, ok := s.l1Cache.Get(key); ok {
 		if time.Since(entry.timestamp) < s.l1TTL {
+			s.mu.RUnlock()
+
 			return entry.coords
 		}
 		// TTL expired, remove from cache
+		s.mu.RUnlock()
+
+		s.mu.Lock()
 		s.l1Cache.Remove(key)
+		s.mu.Unlock()
 	}
+
 	return nil
 }
 
