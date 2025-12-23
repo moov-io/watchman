@@ -13,6 +13,12 @@ type Format string
 
 var (
 	FormatCSV Format = "csv"
+
+	// Senzing entity format support
+	// Reference: https://www.senzing.com/docs/entity_specification/index.html
+	FormatSenzing      Format = "senzing"       // auto-detect JSON Lines or JSON Array
+	FormatSenzingJSON  Format = "senzing-json"  // JSON Array format
+	FormatSenzingJSONL Format = "senzing-jsonl" // JSON Lines format
 )
 
 type Mapping struct {

@@ -12,12 +12,14 @@ import (
 	"time"
 
 	"github.com/moov-io/base/log"
+	"github.com/moov-io/watchman/internal/senzing"
 	"github.com/moov-io/watchman/pkg/search"
 )
 
 type Service interface {
 	ReadEntitiesFromFile(ctx context.Context, name string, contents io.Reader) (FileEntities, error)
 	ReplaceEntities(ctx context.Context, fileType string, entities []search.Entity[search.Value]) error
+	GetEntitiesBySource(ctx context.Context, source string) ([]search.Entity[search.Value], error)
 }
 
 func NewService(logger log.Logger, conf Config, repo Repository) Service {
@@ -52,15 +54,18 @@ func (s *service) ReadEntitiesFromFile(ctx context.Context, name string, content
 			case FormatCSV:
 				out, err = s.readEntitiesFromCSVFile(ctx, fileType, schema, contents)
 
+			case FormatSenzing, FormatSenzingJSON, FormatSenzingJSONL:
+				out, err = s.readEntitiesFromSenzingFile(ctx, fileType, contents)
+
+			default:
+				return out, fmt.Errorf("unknown format %v", schema.Format)
+			}
+
+			if err == nil {
 				s.logger.With(log.Fields{
 					"name":      log.String(name),
 					"file_type": log.String(fileType),
 				}).Logf("read %d entities", len(out.Entities))
-
-				break
-
-			default:
-				return out, fmt.Errorf("unknown format %v", schema.Format)
 			}
 		}
 	}
@@ -324,4 +329,51 @@ func (s *service) ReplaceEntities(ctx context.Context, fileType string, entities
 	}
 
 	return nil
+}
+
+func (s *service) readEntitiesFromSenzingFile(ctx context.Context, name string, contents io.Reader) (FileEntities, error) {
+	out := FileEntities{
+		FileType: name,
+	}
+
+	sourceList := search.SourceList(name)
+
+	entities, err := senzing.ReadEntities(maybeDecompressBody(contents), sourceList)
+	if err != nil {
+		return out, fmt.Errorf("reading senzing entities: %w", err)
+	}
+
+	out.Entities = entities
+
+	return out, nil
+}
+
+func (s *service) GetEntitiesBySource(ctx context.Context, source string) ([]search.Entity[search.Value], error) {
+	if s.repo == nil {
+		return nil, fmt.Errorf("no repository configured")
+	}
+
+	var allEntities []search.Entity[search.Value]
+	lastSourceID := ""
+	limit := 1000
+
+	for {
+		entities, err := s.repo.ListBySource(ctx, lastSourceID, search.SourceList(source), limit)
+		if err != nil {
+			return nil, fmt.Errorf("listing entities by source %s: %w", source, err)
+		}
+
+		if len(entities) == 0 {
+			break
+		}
+
+		allEntities = append(allEntities, entities...)
+		lastSourceID = entities[len(entities)-1].SourceID
+
+		if len(entities) < limit {
+			break
+		}
+	}
+
+	return allEntities, nil
 }
