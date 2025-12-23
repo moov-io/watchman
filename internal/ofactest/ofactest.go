@@ -40,7 +40,7 @@ func GetDownloader(tb testing.TB) download.Downloader {
 		}
 		conf.IncludedLists = append(conf.IncludedLists, search.SourceUSOFAC)
 
-		dl, err := download.NewDownloader(logger, conf)
+		dl, err := download.NewDownloader(logger, conf, nil)
 		require.NoError(tb, err)
 
 		ofacDownloader = dl

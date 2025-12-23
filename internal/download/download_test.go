@@ -22,7 +22,7 @@ func TestDownloader_RefreshAll_InitialDir(t *testing.T) {
 		},
 	}
 
-	dl, err := download.NewDownloader(logger, conf)
+	dl, err := download.NewDownloader(logger, conf, nil)
 	require.NoError(t, err)
 	require.NotNil(t, dl)
 

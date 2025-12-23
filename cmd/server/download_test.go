@@ -42,7 +42,7 @@ func TestDownloader_setupPeriodicRefreshing(t *testing.T) {
 		InitialDataDirectory: filepath.Join(pkg, "ofac", "testdata"),
 	}
 
-	dl, err := download.NewDownloader(logger, conf)
+	dl, err := download.NewDownloader(logger, conf, nil)
 	require.NoError(t, err)
 
 	indexedLists := index.NewLists(nil) // only in-memory
