@@ -117,7 +117,7 @@ jobs:
       run: make docker-hub
 
     - name: Push Tagged Image
-      if: github.repository == 'moov-io/watchman'
+      if: ${{ env.DOCKER_USERNAME }} != ""
       run: |+
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
           make release-push-tag
