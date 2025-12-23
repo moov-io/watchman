@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/moov-io/base/log"
-	"github.com/moov-io/watchman/internal/senzing"
 	"github.com/moov-io/watchman/pkg/search"
+	"github.com/moov-io/watchman/pkg/sources/senzing"
 )
 
 type Service interface {

@@ -34,4 +34,11 @@ type Config struct {
 	ErrorOnEmptyList bool
 
 	IncludedLists []search.SourceList // us_ofac, eu_csl, etc...
+
+	Senzing []SenzingList
+}
+
+type SenzingList struct {
+	SourceList search.SourceList
+	Location   string
 }
