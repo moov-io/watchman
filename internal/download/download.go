@@ -245,11 +245,20 @@ func (dl *downloader) geocodeEntities(ctx context.Context, entities []search.Ent
 		return entities
 	}
 
+	var wg sync.WaitGroup
+	wg.Add(len(entities))
+
 	for i := range entities {
-		if len(entities[i].Addresses) > 0 {
-			entities[i].Addresses = dl.geocoder.GeocodeAddresses(ctx, entities[i].Addresses)
-		}
+		go func(i int) {
+			defer wg.Done()
+
+			if len(entities[i].Addresses) > 0 {
+				entities[i].Addresses = dl.geocoder.GeocodeAddresses(ctx, entities[i].Addresses)
+			}
+		}(i)
 	}
+
+	wg.Wait()
 
 	return entities
 }
