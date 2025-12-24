@@ -8,6 +8,7 @@ import (
 
 	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/internal/stringscore"
+	"github.com/moov-io/watchman/internal/tfidf"
 )
 
 const (
@@ -29,6 +30,10 @@ type nameMatch struct {
 }
 
 func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) ScorePiece {
+	return compareNameWithTFIDF(w, query, index, weight, nil)
+}
+
+func compareNameWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64, tfidfIndex *tfidf.Index) ScorePiece {
 	// Early return for empty query
 	if query.PreparedFields.Name == "" {
 		return ScorePiece{Score: 0, Weight: 0, FieldsCompared: 0, PieceType: "name"}
@@ -48,11 +53,11 @@ func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], we
 	}
 
 	// Check primary name
-	bestMatch := compareNameTerms(query.PreparedFields.NameFields, index.PreparedFields.NameFields)
+	bestMatch := compareNameTermsWithTFIDF(query.PreparedFields.NameFields, index.PreparedFields.NameFields, tfidfIndex)
 
 	// Check alternate names
 	for idx := range index.PreparedFields.AltNameFields {
-		altMatch := compareNameTerms(query.PreparedFields.NameFields, index.PreparedFields.AltNameFields[idx])
+		altMatch := compareNameTermsWithTFIDF(query.PreparedFields.NameFields, index.PreparedFields.AltNameFields[idx], tfidfIndex)
 		if altMatch.score > bestMatch.score {
 			bestMatch = altMatch
 		}
@@ -63,7 +68,7 @@ func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], we
 		if strings.EqualFold(hist.Type, "Former Name") {
 			indexHistoricalTerms := strings.Fields(prepare.LowerAndRemovePunctuation(hist.Value))
 
-			histMatch := compareNameTerms(query.PreparedFields.NameFields, indexHistoricalTerms)
+			histMatch := compareNameTermsWithTFIDF(query.PreparedFields.NameFields, indexHistoricalTerms, tfidfIndex)
 			histMatch.score *= 0.95 // Apply penalty for historical names
 			histMatch.isHistorical = true
 			if histMatch.score > bestMatch.score {
@@ -91,9 +96,22 @@ func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], we
 
 // compareNameFields performs detailed term-by-term comparison
 func compareNameTerms(queryTerms, indexTerms []string) nameMatch {
+	return compareNameTermsWithTFIDF(queryTerms, indexTerms, nil)
+}
+
+// compareNameTermsWithTFIDF performs term-by-term comparison with optional TF-IDF weighting.
+// When tfidfIndex is nil or disabled, falls back to unweighted comparison.
+func compareNameTermsWithTFIDF(queryTerms, indexTerms []string, tfidfIndex *tfidf.Index) nameMatch {
 	var score float64
 	if len(indexTerms) > 0 {
-		score = stringscore.BestPairCombinationJaroWinkler(queryTerms, indexTerms)
+		// Use TF-IDF weighted scoring if enabled
+		if tfidfIndex != nil && tfidfIndex.Enabled() {
+			queryWeights := tfidfIndex.GetWeights(queryTerms)
+			indexWeights := tfidfIndex.GetWeights(indexTerms)
+			score = stringscore.BestPairCombinationJaroWinklerWeighted(queryTerms, indexTerms, queryWeights, indexWeights)
+		} else {
+			score = stringscore.BestPairCombinationJaroWinkler(queryTerms, indexTerms)
+		}
 	}
 
 	matchingTerms := 0

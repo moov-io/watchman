@@ -8,6 +8,7 @@ import (
 	"github.com/moov-io/watchman"
 	"github.com/moov-io/watchman/internal/download"
 	"github.com/moov-io/watchman/internal/ingest"
+	"github.com/moov-io/watchman/internal/tfidf"
 	"github.com/moov-io/watchman/pkg/search"
 )
 
@@ -15,6 +16,7 @@ type Lists interface {
 	GetEntities(ctx context.Context, source search.SourceList) ([]search.Entity[search.Value], error)
 	Update(latest download.Stats)
 	LatestStats() download.Stats
+	GetTFIDFIndex() *tfidf.Index
 }
 
 func NewLists(ingestRepository ingest.Repository) Lists {
@@ -75,4 +77,11 @@ func (l *lists) Update(latest download.Stats) {
 	defer l.mu.Unlock()
 
 	l.latestStats = latest
+}
+
+func (l *lists) GetTFIDFIndex() *tfidf.Index {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+
+	return l.latestStats.TFIDFIndex
 }

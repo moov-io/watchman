@@ -110,6 +110,19 @@ PostalPool is an experiment for improving address parsing. It's optional configu
 | `LOG_FORMAT`             | Format for logging lines to be written as.                                                                                           | Options: `json`, `plain` - Default: `plain` |
 | `LOG_LEVEL`              | Level of logging to emit.                                                                                                            | Options: `trace`, `info` - Default: `info`  |
 
+### TF-IDF Configuration
+
+[TF-IDF](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) (Term Frequency–Inverse Document Frequency) is a technique used to measure the importance of a word in a corpus. Less frequent words are more important.
+
+By default Watchman does not employ TF-IDF, but it can be enabled and configured with the following environmental variables.
+
+| Environmental Variable | Description                                                                                                    | Default |
+|------------------------|----------------------------------------------------------------------------------------------------------------|---------|
+| `TFIDF_ENABLED`        | Enabled controls whether TF-IDF weighting is applied to name matching.                                         | `false` |
+| `TFIDF_SMOOTHING`      | SmoothingFactor (k) in the IDF formula: `log((N+k)/(df+k))`. Prevents division by zero and smooths IDF values. | 1.0     |
+| `TFIDF_MIN_IDF`        | MinIDF is the floor for IDF values. Prevents very common terms from having zero or negative weight.            | 0.1     |
+| `TFIDF_MAX_IDF`        | MaxIDF is the ceiling for IDF values. Prevents single-occurrence terms from dominating the score.              | 10.0    |
+
 ### Similarity Configuration
 
 | Environmental Variable             | Description                                                                                                   | Default |

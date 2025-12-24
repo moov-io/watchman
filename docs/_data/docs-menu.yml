@@ -20,6 +20,8 @@
       link: /search/
     - name: Data Preparation Pipeline
       link: /pipeline/
+    - name: Indexing
+      link: /indexing/
     - name: Geocoding
       link: /geocoding/
     - name: File Dataset Ingestion

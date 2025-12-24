@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"math"
+
+	"github.com/moov-io/watchman/internal/tfidf"
 )
 
 const (
@@ -20,7 +22,13 @@ const (
 
 // Similarity calculates a match score between a query and an index entity.
 func Similarity[Q any, I any](query Entity[Q], index Entity[I]) float64 {
-	return DebugSimilarity(nil, query, index)
+	return SimilarityWithTFIDF(query, index, nil)
+}
+
+// SimilarityWithTFIDF calculates a match score with optional TF-IDF weighting for name matching.
+// When tfidfIndex is nil or disabled, falls back to standard scoring.
+func SimilarityWithTFIDF[Q any, I any](query Entity[Q], index Entity[I], tfidfIndex *tfidf.Index) float64 {
+	return DebugSimilarityWithTFIDF(nil, query, index, tfidfIndex)
 }
 
 // DebugSimilarity does the same as Similarity, but logs debug info to w.
@@ -28,7 +36,12 @@ func Similarity[Q any, I any](query Entity[Q], index Entity[I]) float64 {
 // The format written to w is not machine readable and is intended for humans to read.
 // The format will evolve over time. No stability guarantee is given over what is written.
 func DebugSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]) float64 {
-	details := DetailedSimilarity(w, query, index)
+	return DebugSimilarityWithTFIDF(w, query, index, nil)
+}
+
+// DebugSimilarityWithTFIDF does the same as DebugSimilarity, with optional TF-IDF weighting.
+func DebugSimilarityWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], tfidfIndex *tfidf.Index) float64 {
+	details := DetailedSimilarityWithTFIDF(w, query, index, tfidfIndex)
 
 	switch len(details.Pieces) {
 	case 0:
@@ -97,6 +110,11 @@ var (
 // The fields returned in SimilarityScore may change as the general similarity algorithm and scoring methodologies evolve.
 // There is no API stability guarantee for SimilarityScore.
 func DetailedSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]) SimilarityScore {
+	return DetailedSimilarityWithTFIDF(w, query, index, nil)
+}
+
+// DetailedSimilarityWithTFIDF returns scoring details with optional TF-IDF weighting for name matching.
+func DetailedSimilarityWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], tfidfIndex *tfidf.Index) SimilarityScore {
 	out := SimilarityScore{
 		Pieces: make([]ScorePiece, 0, 9),
 	}
@@ -160,9 +178,9 @@ func DetailedSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity
 	}
 	out.Pieces = append(out.Pieces, exactIdentifiers, exactCryptoAddresses, exactGovernmentIDs, exactContactInfo)
 
-	// Name comparison (second highest weight)
+	// Name comparison (second highest weight) - use TF-IDF if provided
 	out.Pieces = append(out.Pieces,
-		compareName(w, query, index, nameWeight),
+		compareNameWithTFIDF(w, query, index, nameWeight, tfidfIndex),
 		compareEntityTitlesFuzzy(w, query, index, nameWeight),
 	)
 
