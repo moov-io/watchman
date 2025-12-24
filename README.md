@@ -32,6 +32,7 @@ Moov Watchman is a high-performance sanctions screening and compliance tool that
 
 ## Key Features
 
+- **Geocoding**: Using one of the supported providers.
 - **Senzing Support**: Import data files in [senzing format](https://www.senzing.com/docs/entity_specification/) and get search responses as senzing entities.
 - **Comprehensive Coverage**: Integrates multiple global watchlists in one unified system
 - **High-Performance Search**: Optimized for speed and accuracy using advanced matching algorithms

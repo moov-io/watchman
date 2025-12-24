@@ -57,6 +57,22 @@ Watchman:
       Default: 10
       Min: 1
       Max: 25
+
+  Geocoding:
+    Enabled: false
+    Provider:
+      # Specify the provider name, which can be one of "opencage", "google", or "nominatim"
+      Name: ""
+      ApiKey: ""  # Can also set GEOCODING_API_KEY
+      BaseURL: "" # Useful for self-hosted Nominatim instances.
+      Timeout: "10s"
+    RateLimit:
+      RequestsPerSecond: 1.5 # req/s
+      Burst: 5
+    Cache:
+      L1MaxSize: 10000
+      L1TTL: "24h"     # time-to-live for L1 cache entries.
+      L2Enabled: false # Uses the database connection for a persistent cache.
 ```
 
 #### PostalPool
