@@ -522,15 +522,3 @@ func generateWeightCombinations(tokens []string, weights []float64) [][]float64 
 
 	return result
 }
-
-func floatSlicesEqual(a, b []float64) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
-}
