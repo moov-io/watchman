@@ -26,7 +26,7 @@ type Config struct {
 
 	// MaxIDF is the ceiling for IDF values. Prevents single-occurrence
 	// terms from dominating the score.
-	// Default: 5.0
+	// Default: 10.0
 	MaxIDF float64
 }
 
@@ -36,7 +36,7 @@ func DefaultConfig() Config {
 		Enabled:         false,
 		SmoothingFactor: 1.0,
 		MinIDF:          0.1,
-		MaxIDF:          5.0,
+		MaxIDF:          10.0,
 	}
 }
 
@@ -46,7 +46,7 @@ func DefaultConfig() Config {
 //   - TFIDF_ENABLED: Enable/disable TF-IDF (default: false)
 //   - TFIDF_SMOOTHING: Smoothing factor (default: 1.0)
 //   - TFIDF_MIN_IDF: Minimum IDF value (default: 0.1)
-//   - TFIDF_MAX_IDF: Maximum IDF value (default: 5.0)
+//   - TFIDF_MAX_IDF: Maximum IDF value (default: 10.0)
 func ConfigFromEnvironment() Config {
 	cfg := DefaultConfig()
 

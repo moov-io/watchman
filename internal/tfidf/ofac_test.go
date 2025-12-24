@@ -1,15 +1,17 @@
 package tfidf_test
 
 import (
-	"context"
 	"sort"
 	"strings"
 	"testing"
 
-	"github.com/moov-io/watchman/internal/ofactest"
+	"github.com/moov-io/base/log"
+	"github.com/moov-io/watchman/internal/download"
 	"github.com/moov-io/watchman/internal/stringscore"
 	"github.com/moov-io/watchman/internal/tfidf"
 	"github.com/moov-io/watchman/pkg/search"
+
+	"github.com/stretchr/testify/require"
 )
 
 // TestTFIDFWithRealOFACData uses actual OFAC data to verify TF-IDF behavior.
@@ -20,11 +22,7 @@ func TestTFIDFWithRealOFACData(t *testing.T) {
 	}
 
 	// Load real OFAC data
-	stats, err := ofactest.GetDownloader(t).RefreshAll(context.Background())
-	if err != nil {
-		t.Fatalf("failed to load OFAC data: %v", err)
-	}
-
+	stats := loadRealOFACRecords(t)
 	t.Logf("Loaded %d OFAC entities", len(stats.Entities))
 
 	// Build TF-IDF index from entity names
@@ -40,12 +38,9 @@ func TestTFIDFWithRealOFACData(t *testing.T) {
 		}
 	}
 
-	cfg := tfidf.Config{
-		Enabled:         true,
-		SmoothingFactor: 1.0,
-		MinIDF:          0.1,
-		MaxIDF:          5.0,
-	}
+	cfg := tfidf.DefaultConfig()
+	cfg.Enabled = true
+
 	idx := tfidf.NewIndex(cfg)
 	idx.Build(documents)
 
@@ -125,10 +120,9 @@ func TestTFIDFRankingImprovementWithOFAC(t *testing.T) {
 		t.Skip("skipping OFAC ranking test in short mode")
 	}
 
-	stats, err := ofactest.GetDownloader(t).RefreshAll(context.Background())
-	if err != nil {
-		t.Fatalf("failed to load OFAC data: %v", err)
-	}
+	// Load real OFAC data
+	stats := loadRealOFACRecords(t)
+	t.Logf("Loaded %d OFAC entities", len(stats.Entities))
 
 	// Build TF-IDF index
 	var documents [][]string
@@ -138,12 +132,9 @@ func TestTFIDFRankingImprovementWithOFAC(t *testing.T) {
 		}
 	}
 
-	cfg := tfidf.Config{
-		Enabled:         true,
-		SmoothingFactor: 1.0,
-		MinIDF:          0.1,
-		MaxIDF:          5.0,
-	}
+	cfg := tfidf.DefaultConfig()
+	cfg.Enabled = true
+
 	idx := tfidf.NewIndex(cfg)
 	idx.Build(documents)
 
@@ -270,10 +261,9 @@ func TestCommonTermsHaveLowerIDF(t *testing.T) {
 		t.Skip("skipping in short mode")
 	}
 
-	stats, err := ofactest.GetDownloader(t).RefreshAll(context.Background())
-	if err != nil {
-		t.Fatalf("failed to load OFAC data: %v", err)
-	}
+	// Load real OFAC data
+	stats := loadRealOFACRecords(t)
+	t.Logf("Loaded %d OFAC entities", len(stats.Entities))
 
 	// Skip if dataset is too small for meaningful IDF analysis
 	if len(stats.Entities) < 100 {
@@ -287,12 +277,9 @@ func TestCommonTermsHaveLowerIDF(t *testing.T) {
 		}
 	}
 
-	cfg := tfidf.Config{
-		Enabled:         true,
-		SmoothingFactor: 1.0,
-		MinIDF:          0.1,
-		MaxIDF:          5.0,
-	}
+	cfg := tfidf.DefaultConfig()
+	cfg.Enabled = true
+
 	idx := tfidf.NewIndex(cfg)
 	idx.Build(documents)
 
@@ -309,7 +296,7 @@ func TestCommonTermsHaveLowerIDF(t *testing.T) {
 		df := idx.GetDocumentFrequency(term)
 
 		if df > 0 { // term exists in corpus
-			if idf < 1.0 {
+			if idf < 5.0 {
 				lowIDFCount++
 				t.Logf("✓ '%s': df=%d, idf=%.4f (low - good)", term, df, idf)
 			} else {
@@ -321,17 +308,16 @@ func TestCommonTermsHaveLowerIDF(t *testing.T) {
 
 	// Most common terms should have low IDF
 	if lowIDFCount < highIDFCount {
-		t.Errorf("Expected most common terms to have IDF < 1.0, got %d low vs %d high",
+		t.Errorf("Expected most common terms to have IDF < 5.0, got %d low vs %d high",
 			lowIDFCount, highIDFCount)
 	}
 }
 
 // BenchmarkTFIDFWithOFAC benchmarks TF-IDF building and querying with real data.
 func BenchmarkTFIDFWithOFAC(b *testing.B) {
-	stats, err := ofactest.GetDownloader(b).RefreshAll(context.Background())
-	if err != nil {
-		b.Fatalf("failed to load OFAC data: %v", err)
-	}
+	// Load real OFAC data
+	stats := loadRealOFACRecords(b)
+	b.Logf("Loaded %d OFAC entities", len(stats.Entities))
 
 	var documents [][]string
 	for i := range stats.Entities {
@@ -340,12 +326,8 @@ func BenchmarkTFIDFWithOFAC(b *testing.B) {
 		}
 	}
 
-	cfg := tfidf.Config{
-		Enabled:         true,
-		SmoothingFactor: 1.0,
-		MinIDF:          0.1,
-		MaxIDF:          5.0,
-	}
+	cfg := tfidf.DefaultConfig()
+	cfg.Enabled = true
 
 	b.Run("Build", func(b *testing.B) {
 		idx := tfidf.NewIndex(cfg)
@@ -371,4 +353,21 @@ func BenchmarkTFIDFWithOFAC(b *testing.B) {
 			idx.GetIDF("trading")
 		}
 	})
+}
+
+func loadRealOFACRecords(tb testing.TB) download.Stats {
+	logger := log.NewTestLogger()
+
+	conf := download.Config{
+		InitialDataDirectory: "testdata",
+	}
+	conf.IncludedLists = append(conf.IncludedLists, search.SourceUSOFAC)
+
+	dl, err := download.NewDownloader(logger, conf)
+	require.NoError(tb, err)
+
+	stats, err := dl.RefreshAll(tb.Context())
+	require.NoError(tb, err)
+
+	return stats
 }

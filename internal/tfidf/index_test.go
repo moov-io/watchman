@@ -73,6 +73,7 @@ func TestBuildAndGetIDF(t *testing.T) {
 func TestGetIDFUnknownTerm(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.MaxIDF = 5.0
+
 	idx := NewIndex(cfg)
 
 	documents := [][]string{
@@ -299,7 +300,7 @@ func TestDefaultConfig(t *testing.T) {
 	if cfg.MinIDF != 0.1 {
 		t.Errorf("expected MinIDF=0.1, got %f", cfg.MinIDF)
 	}
-	if cfg.MaxIDF != 5.0 {
+	if cfg.MaxIDF != 10.0 {
 		t.Errorf("expected MaxIDF=5.0, got %f", cfg.MaxIDF)
 	}
 }
