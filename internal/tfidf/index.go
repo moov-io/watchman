@@ -18,8 +18,8 @@ type Index struct {
 
 // Stats contains statistics about the TF-IDF index.
 type Stats struct {
-	TotalDocuments int `json:"totalDocuments"`
-	UniqueTerms    int `json:"uniqueTerms"`
+	TotalDocuments int  `json:"totalDocuments"`
+	UniqueTerms    int  `json:"uniqueTerms"`
 	Enabled        bool `json:"enabled"`
 }
 
