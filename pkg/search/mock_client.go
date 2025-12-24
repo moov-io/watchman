@@ -13,10 +13,12 @@ type MockClient struct {
 
 	ListInfoResponse   ListInfoResponse
 	IngestFileResponse IngestFileResponse
+	ExportFileResponse []Entity[Value]
 
 	ListInfoErr   error
 	SearchErr     error
 	IngestFileErr error
+	ExportFileErr error
 
 	mu       sync.RWMutex
 	Index    []Entity[Value]
@@ -85,6 +87,14 @@ func (c *MockClient) IngestFile(ctx context.Context, fileType string, file io.Re
 		return out, err
 	}
 	return c.IngestFileResponse, nil
+}
+
+func (c *MockClient) ExportFile(ctx context.Context, fileType string) ([]Entity[Value], error) {
+	err := cmp.Or(c.ExportFileErr, c.Err)
+	if err != nil {
+		return nil, err
+	}
+	return c.ExportFileResponse, nil
 }
 
 func (c *MockClient) Normalize() {

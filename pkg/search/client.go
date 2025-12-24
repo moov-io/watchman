@@ -62,6 +62,12 @@ type Client interface {
 	//       log.Fatal(err)
 	//   }
 	IngestFile(ctx context.Context, fileType string, file io.Reader) (IngestFileResponse, error)
+
+	// ExportFile retrieves a set of entities from Watchman that have been ingested.
+	//
+	// The fileType parameter specifies the dataset name (e.g., "fincen-person") as defined in the
+	// Watchman.Ingest.Files YAML configuration.
+	ExportFile(ctx context.Context, fileType string) ([]Entity[Value], error)
 }
 
 func NewClient(httpClient *http.Client, baseAddress string) Client {
@@ -459,6 +465,40 @@ func (c *client) IngestFile(ctx context.Context, fileType string, file io.Reader
 	err = json.NewDecoder(resp.Body).Decode(&out)
 	if err != nil {
 		return out, fmt.Errorf("decoding ingest file response: %w", err)
+	}
+	return out, nil
+}
+
+// ExportFile retrieves a set of entities from Watchman that have been ingested.
+//
+// The fileType parameter specifies the dataset name (e.g., "fincen-person") as defined in the
+// Watchman.Ingest.Files YAML configuration.
+func (c *client) ExportFile(ctx context.Context, fileType string) ([]Entity[Value], error) {
+	var out []Entity[Value]
+
+	// Build the URL
+	addr, err := url.Parse(c.baseAddress + fmt.Sprintf("/v2/export/%s", fileType))
+	if err != nil {
+		return out, fmt.Errorf("problem creating baseAddress: %w", err)
+	}
+
+	// Make the request
+	req, err := retryablehttp.NewRequest("GET", addr.String(), nil)
+	if err != nil {
+		return out, fmt.Errorf("creating export file request: %w", err)
+	}
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return out, fmt.Errorf("export file: %w", err)
+	}
+	if resp != nil && resp.Body != nil {
+		defer resp.Body.Close()
+	}
+
+	err = json.NewDecoder(resp.Body).Decode(&out)
+	if err != nil {
+		return out, fmt.Errorf("decoding export file response: %w", err)
 	}
 	return out, nil
 }

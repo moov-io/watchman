@@ -150,5 +150,10 @@ func TestClient_IngestFile(t *testing.T) {
 
 		require.Equal(t, "fincen-person", response.FileType)
 		require.Len(t, response.Entities, 3)
+
+		// Export that file
+		exported, err := scope.client.ExportFile(ctx, "fincen-person")
+		require.NoError(t, err)
+		require.Len(t, exported, 3)
 	})
 }
