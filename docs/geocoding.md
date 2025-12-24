@@ -8,7 +8,7 @@ menubar: docs-menu
 
 ## Geocoding
 
-Watchman supports various geocoding providers to populate the `Latitude` and `Longitude` fields of every entity's address.
+Watchman added support in `v0.57.0` for various geocoding providers that populate the `Latitude` and `Longitude` fields of every entity's address.
 
 ### Providers
 
