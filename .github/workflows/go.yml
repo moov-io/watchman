@@ -126,8 +126,8 @@ jobs:
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Docker Static
+      if: github.repository_owner == 'moov-io' && github.ref == 'refs/heads/master'
       run: make docker-static
-
 
   openshift:
     name: Openshift Docker Build
