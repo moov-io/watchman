@@ -33,3 +33,25 @@ func TestClient_GetFiles_InitialDir(t *testing.T) {
 	require.NotNil(t, files["alt.csv"])
 	require.NotNil(t, files["sdn_comments.csv"])
 }
+
+func TestClient_DownloadFile(t *testing.T) {
+	logger := log.NewTestLogger()
+
+	dl := download.New(logger, nil)
+	require.NotNil(t, dl)
+
+	namesAndSources := map[string]string{
+		"client": "file://client.go",
+		"test":   "file://client_test.go",
+	}
+
+	files, err := dl.GetFiles(context.Background(), "", namesAndSources)
+	require.NoError(t, err)
+	require.Len(t, files, 2)
+
+	require.NotNil(t, files["client"])
+	require.NotNil(t, files["test"])
+
+	require.NoError(t, files["client"].Close())
+	require.NoError(t, files["test"].Close())
+}

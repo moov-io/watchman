@@ -7,8 +7,8 @@ import (
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/base/telemetry"
 	"github.com/moov-io/watchman/internal/api"
-	"github.com/moov-io/watchman/internal/senzing"
 	pubsearch "github.com/moov-io/watchman/pkg/search"
+	"github.com/moov-io/watchman/pkg/sources/senzing"
 
 	"github.com/gorilla/mux"
 	"go.opentelemetry.io/otel/attribute"
@@ -38,10 +38,10 @@ func (c *controller) AppendRoutes(router *mux.Router) *mux.Router {
 		HandlerFunc(c.ingestFile)
 
 	router.
-		Name("export-senzing").
+		Name("export-file").
 		Methods("GET").
-		Path("/v2/export/{fileType}/senzing").
-		HandlerFunc(c.exportSenzing)
+		Path("/v2/export/{fileType}").
+		HandlerFunc(c.exportFile)
 
 	return router
 }
@@ -96,58 +96,60 @@ func (c *controller) ingestFile(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (c *controller) exportSenzing(w http.ResponseWriter, r *http.Request) {
+func (c *controller) exportFile(w http.ResponseWriter, r *http.Request) {
+	ctx, span := telemetry.StartSpan(context.Background(), "api-export-senzing")
+	defer span.End()
+
 	fileType := api.CleanUserInput(mux.Vars(r)["fileType"])
 	if fileType == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	// Get format from query parameter (default: jsonl)
-	format := r.URL.Query().Get("format")
-	if format == "" {
-		format = "jsonl"
-	}
-
-	ctx, span := telemetry.StartSpan(context.Background(), "api-export-senzing")
-	defer span.End()
+	queryParams := api.NewQueryParams(r.URL)
+	outputFormat, subformat := api.ChooseEntityFormat(r.Header, queryParams.Get("format"))
 
 	span.SetAttributes(
 		attribute.String("file_type", fileType),
-		attribute.String("format", format),
+		attribute.String("output_format", string(outputFormat)),
 	)
 
 	logger := c.logger.With(log.Fields{
-		"file_type": log.String(fileType),
-		"format":    log.String(format),
+		"file_type":     log.String(fileType),
+		"output_format": log.String(string(outputFormat)),
 	})
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
-	// Set content type based on format
-	switch format {
-	case "jsonl", "json-lines", "ndjson":
-		w.Header().Set("Content-Type", "application/x-ndjson")
-	default:
-		w.Header().Set("Content-Type", "application/json")
-	}
-
+	// Read the entities
 	entities, err := c.service.GetEntitiesBySource(ctx, fileType)
 	if err != nil {
 		err = logger.Error().LogErrorf("problem getting entities for export: %v", err).Err()
+		span.RecordError(err)
+
 		api.ErrorResponse(w, err)
 		return
 	}
-
 	logger.Info().Logf("exporting %d entities to senzing format", len(entities))
 
-	opts := senzing.ExportOptions{
-		DataSource: fileType,
-		Format:     format,
-	}
+	switch outputFormat {
+	case api.EntityWatchman:
+		err = api.JsonResponse(w, entities)
 
-	if err := senzing.WriteEntities(w, entities, opts); err != nil {
+	case api.EntitySenzing:
+		// TODO(adam): api.JsonResponse sets these headers
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Content-Type", "application/x-ndjson")
+
+		opts := senzing.ExportOptions{
+			DataSource: fileType,
+			Format:     subformat,
+		}
+		err = senzing.WriteEntities(w, entities, opts)
+	}
+	if err != nil {
+		err = logger.Error().LogErrorf("problem rendering export response into %v", outputFormat).Err()
 		span.RecordError(err)
-		logger.Error().LogErrorf("problem writing senzing export: %v", err)
+
+		api.ErrorResponse(w, err)
+		return
 	}
 }

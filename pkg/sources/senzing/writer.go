@@ -20,6 +20,23 @@ func WriteEntities(w io.Writer, entities []search.Entity[search.Value], opts Exp
 		records = append(records, rec)
 	}
 
+	return writeSenzingRecords(w, records, opts)
+}
+
+// WriteEntities exports a Watchman SearchedEntity to Senzing format.
+// Supports both JSON Lines ("jsonl") and JSON Array ("json") output formats.
+func WriteSearchedEntities(w io.Writer, entities []search.SearchedEntity[search.Value], opts ExportOptions) error {
+	records := make([]SenzingRecord, 0, len(entities))
+
+	for _, entity := range entities {
+		rec := FromWatchmanEntity(entity.Entity, opts.DataSource)
+		records = append(records, rec)
+	}
+
+	return writeSenzingRecords(w, records, opts)
+}
+
+func writeSenzingRecords(w io.Writer, records []SenzingRecord, opts ExportOptions) error {
 	format := strings.ToLower(opts.Format)
 	switch format {
 	case "jsonl", "json-lines", "ndjson":

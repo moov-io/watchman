@@ -169,6 +169,12 @@ func (dl *Downloader) createDownloadLogger(filename, downloadURL string) log.Log
 }
 
 func (dl *Downloader) retryDownload(ctx context.Context, downloadURL string) (io.ReadCloser, error) {
+	// Support file URIs
+	fileURI, found := strings.CutPrefix(downloadURL, "file://")
+	if found {
+		return os.Open(fileURI)
+	}
+
 	// Allow a couple retries for various sources (some are flakey)
 	for i := 0; i < 3; i++ {
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, nil)

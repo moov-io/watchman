@@ -22,6 +22,18 @@ Watchman provides multiple search endpoints and parameters to help you find the 
 GET /v2/search?type=person&name=nicolas+maduro&limit=1
 ```
 
+### Senzing Formatting
+
+Set the `Accept` header or `format` query parameter to receive responses in [senzing format](https://www.senzing.com/docs/entity_specification/). To receive responses as JSON Lines specify the subformat as seen below.
+
+```
+Accept: senzing       # Array of objects [{...}, {...}]
+
+Accept: senzing/jsonl # One object per line {...}\n{...}
+```
+
+The `format` query parameter accepts this as well, `?format=senzing` or `?format=senzing/jsonl`.
+
 ### Entity Types
 
 The API requires specifying an entity type:

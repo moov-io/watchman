@@ -12,6 +12,12 @@ type QueryParams struct {
 	valuesRead []string
 }
 
+func NewQueryParams(u *url.URL) *QueryParams {
+	return &QueryParams{
+		Values: u.Query(),
+	}
+}
+
 func (q *QueryParams) WithPrefix(prefix string) []string {
 	var out []string
 

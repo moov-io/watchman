@@ -87,7 +87,7 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 	var producerWg sync.WaitGroup
 
 	// Track what lists have been requested and loaded
-	requestedLists := getIncludedLists(dl.conf.IncludedLists)
+	requestedLists := getIncludedLists(dl.conf)
 	var listsLoaded []search.SourceList
 
 	if len(requestedLists) == 0 {
@@ -102,6 +102,7 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 		producerWg.Add(1)
 		g.Go(func() error {
 			defer producerWg.Done()
+
 			err := loadOFACRecords(ctx, logger, dl.conf, preparedLists)
 			if err != nil {
 				return fmt.Errorf("loading OFAC records: %w", err)
@@ -117,6 +118,7 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 		producerWg.Add(1)
 		g.Go(func() error {
 			defer producerWg.Done()
+
 			err := loadUSNonSDNRecords(ctx, logger, dl.conf, preparedLists)
 			if err != nil {
 				return fmt.Errorf("loading OFAC Non-SDN records: %w", err)
@@ -132,6 +134,7 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 		producerWg.Add(1)
 		g.Go(func() error {
 			defer producerWg.Done()
+
 			err := loadCSLUSRecords(ctx, logger, dl.conf, preparedLists)
 			if err != nil {
 				return fmt.Errorf("loading US CSL records: %w", err)
@@ -139,6 +142,22 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 			return nil
 		})
 	}
+
+	// Senzing lists
+	for idx := range dl.conf.Senzing {
+		listsLoaded = append(listsLoaded, dl.conf.Senzing[idx].SourceList)
+	}
+
+	producerWg.Add(1)
+	g.Go(func() error {
+		defer producerWg.Done()
+
+		err := loadSenzingRecords(ctx, logger, dl.conf, preparedLists)
+		if err != nil {
+			return fmt.Errorf("loading senzing lists: %w", err)
+		}
+		return nil
+	})
 
 	// Compare the configured lists against those we actually loaded.
 	// Any extra lists are an error as we don't want to silently ignore them.
@@ -175,9 +194,9 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 	return stats, nil
 }
 
-func getIncludedLists(configured []search.SourceList) []search.SourceList {
-	out := make([]search.SourceList, 0, len(configured))
-	out = append(out, configured...)
+func getIncludedLists(conf Config) []search.SourceList {
+	out := make([]search.SourceList, 0, len(conf.IncludedLists))
+	out = append(out, conf.IncludedLists...)
 
 	fromEnvStr := strings.TrimSpace(os.Getenv("INCLUDED_LISTS"))
 	if fromEnvStr != "" {
@@ -189,8 +208,13 @@ func getIncludedLists(configured []search.SourceList) []search.SourceList {
 		}
 	}
 
-	slices.Sort(out)
+	// Now add Senzing
+	for i := range conf.Senzing {
+		out = append(out, conf.Senzing[i].SourceList)
+	}
 
+	// Sort and remove duplicates
+	slices.Sort(out)
 	return slices.Compact(out)
 }
 
