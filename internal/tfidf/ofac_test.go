@@ -363,7 +363,7 @@ func loadRealOFACRecords(tb testing.TB) download.Stats {
 	}
 	conf.IncludedLists = append(conf.IncludedLists, search.SourceUSOFAC)
 
-	dl, err := download.NewDownloader(logger, conf)
+	dl, err := download.NewDownloader(logger, conf, nil)
 	require.NoError(tb, err)
 
 	stats, err := dl.RefreshAll(tb.Context())
