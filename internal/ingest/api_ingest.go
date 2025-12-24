@@ -137,7 +137,7 @@ func (c *controller) exportFile(w http.ResponseWriter, r *http.Request) {
 	case api.EntitySenzing:
 		// TODO(adam): api.JsonResponse sets these headers
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Type", "application/x-ndjson")
 
 		opts := senzing.ExportOptions{
 			DataSource: fileType,

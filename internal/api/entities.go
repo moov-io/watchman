@@ -28,10 +28,12 @@ func ChooseEntityFormat(headers http.Header, queryParam string) (EntityFormat, s
 }
 
 func findSenzingFormat(input string) (EntityFormat, string) {
-	parts := strings.Fields(input)
+	parts := strings.Split(input, ",")
 
 	for _, part := range parts {
-		remainder, found := strings.CutPrefix(part, "senzing")
+		mediaType := strings.TrimSpace(strings.Split(part, ";")[0])
+
+		remainder, found := strings.CutPrefix(mediaType, "senzing")
 		if found {
 			return EntitySenzing, strings.TrimPrefix(remainder, "/")
 		}

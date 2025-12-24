@@ -24,7 +24,7 @@ GET /v2/search?type=person&name=nicolas+maduro&limit=1
 
 ### Senzing Formatting
 
-Set the `Accept` header or `format` query parameter to receive responses in [senzing format](https://www.senzing.coma/docs/entity_specification/). To receive responses as JSON Lines specify the subformat as seen below.
+Set the `Accept` header or `format` query parameter to receive responses in [senzing format](https://www.senzing.com/docs/entity_specification/). To receive responses as JSON Lines specify the subformat as seen below.
 
 ```
 Accept: senzing       # Array of objects [{...}, {...}]

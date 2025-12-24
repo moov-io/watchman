@@ -45,7 +45,7 @@ The response is a JSON object containing the parsed entities and the file type. 
 
 #### Senzing Formatting
 
-Set the `Accept` header or `format` query parameter to receive responses in [senzing format](https://www.senzing.coma/docs/entity_specification/). To receive responses as JSON Lines specify the subformat as seen below.
+Set the `Accept` header or `format` query parameter to receive responses in [senzing format](https://www.senzing.com/docs/entity_specification/). To receive responses as JSON Lines specify the subformat as seen below.
 
 ```
 Accept: senzing       # Array of objects [{...}, {...}]

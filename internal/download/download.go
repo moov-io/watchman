@@ -208,17 +208,14 @@ func getIncludedLists(conf Config) []search.SourceList {
 		}
 	}
 
-	// Remove duplicates from preconfigured lists
-	slices.Sort(out)
-	out = slices.Compact(out)
-
 	// Now add Senzing
 	for i := range conf.Senzing {
 		out = append(out, conf.Senzing[i].SourceList)
 	}
-	slices.Sort(out)
 
-	return out
+	// Sort and remove duplicates
+	slices.Sort(out)
+	return slices.Compact(out)
 }
 
 func findExtraLists(config, loaded []search.SourceList) string {
