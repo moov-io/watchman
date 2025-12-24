@@ -18,7 +18,16 @@ The parsed entities are included in Watchman's memory for search, but kept as a 
 
 ### Request Body
 
-- A CSV file containing entity data, with headers matching the schema defined in the Watchman configuration.
+Watchman will expect a CSV file containing entity data, with headers matching the schema defined in the Watchman configuration.
+
+Senzing files can be ingested as well by specifying their format in the yaml config.
+
+```yaml
+  Ingest:
+    Files:
+      "senzing-persons":
+        Format: "senzing"
+```
 
 ### Response
 
@@ -33,6 +42,18 @@ The response is a JSON object containing the parsed entities and the file type. 
 
 - `fileType`: The type of file ingested (e.g., fincen-business)
 - `entities`: An array of parsed entities, each containing fields like name, type, sourceID, and additional fields based on the entity type (e.g., person or business).
+
+#### Senzing Formatting
+
+Set the `Accept` header or `format` query parameter to receive responses in [senzing format](https://www.senzing.coma/docs/entity_specification/). To receive responses as JSON Lines specify the subformat as seen below.
+
+```
+Accept: senzing       # Array of objects [{...}, {...}]
+
+Accept: senzing/jsonl # One object per line {...}\n{...}
+```
+
+The `format` query parameter accepts this as well, `?format=senzing` or `?format=senzing/jsonl`.
 
 ### YAML Configuration
 
