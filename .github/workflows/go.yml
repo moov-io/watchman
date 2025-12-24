@@ -117,7 +117,7 @@ jobs:
       run: make docker-hub
 
     - name: Push Tagged Image
-      if: ${{ env.DOCKER_USERNAME }} != ""
+      if: github.repository_owner == 'moov-io' && github.ref == 'refs/heads/master'
       run: |+
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
           make release-push-tag
