@@ -18,6 +18,7 @@ import (
 	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/pkg/address"
 	"github.com/moov-io/watchman/pkg/search"
+	"github.com/moov-io/watchman/pkg/sources/senzing"
 
 	"github.com/gorilla/mux"
 	"go.opentelemetry.io/otel/attribute"
@@ -67,8 +68,7 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 	ctx, span := telemetry.StartSpan(r.Context(), "api-search")
 	defer span.End()
 
-	queryParams := &api.QueryParams{Values: r.URL.Query()}
-
+	queryParams := api.NewQueryParams(r.URL)
 	debug := strx.Yes(queryParams.Get("debug"))
 
 	req, err := readSearchRequest(ctx, c.addressParsingPool, queryParams)
@@ -86,8 +86,10 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 		DebugSourceIDs: strings.Split(queryParams.Get("debugSourceIDs"), ","),
 	}
 
+	outputFormat, subformat := api.ChooseEntityFormat(r.Header, queryParams.Get("format"))
 	span.SetAttributes(
 		attribute.String("request_id", opts.RequestID),
+		attribute.String("output_format", string(outputFormat)),
 	)
 
 	// Check we don't have extra query params
@@ -105,12 +107,30 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = api.JsonResponse(w, search.SearchResponse{
-		Query:    req,
-		Entities: entities,
-	})
+	// Render the response
+	switch outputFormat {
+	case api.EntityWatchman:
+		err = api.JsonResponse(w, search.SearchResponse{
+			Query:    req,
+			Entities: entities,
+		})
+
+	case api.EntitySenzing:
+		// TODO(adam): api.JsonResponse sets these headers
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Content-Type", "application/json")
+
+		opts := senzing.ExportOptions{
+			Format: subformat,
+		}
+		err = senzing.WriteSearchedEntities(w, entities, opts)
+	}
 	if err != nil {
+		err = c.logger.Error().LogErrorf("problem rendering search response into %v", outputFormat).Err()
 		span.RecordError(err)
+
+		api.ErrorResponse(w, err)
+		return
 	}
 }
 
