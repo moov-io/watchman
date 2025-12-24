@@ -24,5 +24,5 @@ During name searches, TF-IDF weighting is optionally applied to boost the contri
 in similarity scoring, improving match precision for fuzzy name matching against global sanctions and watchlists
 without overemphasizing ubiquitous words.
 
-The feature is opt-in via [configuration, with tunable parameters](/watchman/config/) like smoothing and IDF bounds
-to adapt to corpus size and growth.
+The feature is opt-in via [configuration, with tunable parameters](/watchman/config/#tf-idf-configuration) like
+smoothing and IDF bounds to adapt to corpus size and growth.
