@@ -3,6 +3,8 @@ package ingest_test
 import (
 	"bytes"
 	"context"
+	"io"
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
@@ -16,6 +18,7 @@ import (
 	"github.com/moov-io/watchman/internal/ingest"
 	"github.com/moov-io/watchman/internal/search"
 	pubsearch "github.com/moov-io/watchman/pkg/search"
+	"github.com/moov-io/watchman/pkg/sources/senzing"
 
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/require"
@@ -117,8 +120,47 @@ func TestIngest_API_Gzip(t *testing.T) {
 	})
 }
 
+func TestAPI_Senzing(t *testing.T) {
+	setupIngestAPITest(t, func(scope ingestApiSetup) {
+		file, err := os.Open(filepath.Join("testdata", "fincen-person.csv"))
+		require.NoError(t, err)
+		t.Cleanup(func() { file.Close() })
+
+		ctx := context.Background()
+		ingestResponse, err := scope.client.IngestFile(ctx, "fincen-person", file)
+		require.NoError(t, err)
+
+		require.Equal(t, "fincen-person", ingestResponse.FileType)
+		require.Len(t, ingestResponse.Entities, 3)
+
+		// Export the data
+		req, err := http.NewRequest("GET", scope.server.URL+"/v2/export/fincen-person", nil)
+		require.NoError(t, err)
+
+		req.Header.Set("Accept", "senzing/jsonl")
+
+		resp, err := http.DefaultClient.Do(req)
+		require.NoError(t, err)
+
+		if resp != nil && resp.Body != nil {
+			defer resp.Body.Close()
+		}
+
+		bs, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+
+		// Make sure the response is JSON Lines
+		require.True(t, bytes.HasPrefix(bs, []byte("{")))
+
+		entities, err := senzing.ReadEntities(bytes.NewReader(bs), pubsearch.SourceList("senzing"))
+		require.NoError(t, err)
+		require.Len(t, entities, 3)
+	})
+}
+
 type ingestApiSetup struct {
 	client pubsearch.Client
+	server *httptest.Server
 
 	searchService search.Service
 }
@@ -146,14 +188,15 @@ func setupIngestAPITest(t *testing.T, fn func(ingestApiSetup)) {
 		router := mux.NewRouter()
 		controller.AppendRoutes(router)
 
-		svc := httptest.NewServer(router)
-		t.Cleanup(func() { svc.Close() })
+		server := httptest.NewServer(router)
+		t.Cleanup(func() { server.Close() })
 
 		// Setup our client
-		client := pubsearch.NewClient(nil, svc.URL)
+		client := pubsearch.NewClient(nil, server.URL)
 
 		fn(ingestApiSetup{
 			client:        client,
+			server:        server,
 			searchService: searchService,
 		})
 	})

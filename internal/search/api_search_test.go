@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 	"github.com/moov-io/watchman/internal/index"
 	"github.com/moov-io/watchman/internal/ofactest"
 	"github.com/moov-io/watchman/pkg/search"
+	"github.com/moov-io/watchman/pkg/sources/senzing"
 
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/require"
@@ -234,6 +236,68 @@ func TestAPI_Search(t *testing.T) {
 		if testing.Verbose() {
 			fmt.Println(string(raw))
 		}
+	})
+}
+
+func TestAPI_Senzing(t *testing.T) {
+	env := testAPI(t)
+
+	t.Run("json/query", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=2&format=senzing", nil)
+
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+
+		// Make sure the response is a JSON object
+		require.True(t, strings.HasPrefix(w.Body.String(), "["))
+
+		entities, err := senzing.ReadEntities(w.Body, search.SourceList("senzing"))
+		require.NoError(t, err)
+		require.Len(t, entities, 2)
+	})
+
+	t.Run("json/header", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=2", nil)
+		req.Header.Set("Accept", "senzing")
+
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+
+		// Make sure the response is a JSON object
+		require.True(t, strings.HasPrefix(w.Body.String(), "["))
+
+		entities, err := senzing.ReadEntities(w.Body, search.SourceList("senzing"))
+		require.NoError(t, err)
+		require.Len(t, entities, 2)
+	})
+
+	t.Run("jsonl/query", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=2&format=senzing/jsonl", nil)
+
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+
+		// Make sure the response is JSON Lines
+		require.True(t, strings.HasPrefix(w.Body.String(), "{"))
+
+		entities, err := senzing.ReadEntities(w.Body, search.SourceList("senzing"))
+		require.NoError(t, err)
+		require.Len(t, entities, 2)
+	})
+
+	t.Run("jsonl/header", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=2", nil)
+		req.Header.Set("Accept", "senzing/jsonl")
+
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+
+		// Make sure the response is JSON Lines
+		require.True(t, strings.HasPrefix(w.Body.String(), "{"))
+
+		entities, err := senzing.ReadEntities(w.Body, search.SourceList("senzing"))
+		require.NoError(t, err)
+		require.Len(t, entities, 2)
 	})
 }
 
