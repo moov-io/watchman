@@ -10,6 +10,8 @@ menubar: docs-menu
 
 Watchman added support in `v0.57.0` for various geocoding providers that populate the `Latitude` and `Longitude` fields of every entity's address.
 
+Refer to the [file configuration](/watchman/config/#file) section for more information.
+
 ### Providers
 
 The supported providers are listed below. If you'd like to contribute or recommend a new provider [open an issue](https://github.com/moov-io/watchman/issues/new).
