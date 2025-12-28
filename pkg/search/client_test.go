@@ -50,7 +50,7 @@ func testAPI(tb testing.TB) testSetup {
 	conf, err := config.LoadConfig(logger)
 	require.NoError(tb, err)
 
-	var ingestRepository ingest.Repository = nil
+	ingestRepository := &ingest.MockRepository{}
 	ingestService := ingest.NewService(logger, conf.Ingest, ingestRepository)
 
 	searchController := search.NewController(logger, searchService, nil)
