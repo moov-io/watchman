@@ -160,6 +160,21 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 		return nil
 	})
 
+	// OpenSanctions PEP Records
+	if slices.Contains(requestedLists, search.SourceOpenSanctionsPEP) {
+		listsLoaded = append(listsLoaded, search.SourceOpenSanctionsPEP)
+
+		producerWg.Add(1)
+		g.Go(func() error {
+			defer producerWg.Done()
+			err := loadOpenSanctionsPEPRecords(ctx, logger, dl.conf, preparedLists)
+			if err != nil {
+				return fmt.Errorf("loading OpenSanctions PEP records: %w", err)
+			}
+			return nil
+		})
+	}
+
 	// Compare the configured lists against those we actually loaded.
 	// Any extra lists are an error as we don't want to silently ignore them.
 	if len(listsLoaded) > len(requestedLists) {
