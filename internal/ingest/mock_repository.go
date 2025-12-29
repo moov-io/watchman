@@ -2,6 +2,7 @@ package ingest
 
 import (
 	"context"
+	"slices"
 	"sync"
 
 	"github.com/moov-io/watchman/pkg/search"
@@ -27,7 +28,7 @@ func (r *MockRepository) Upsert(ctx context.Context, fileType string, entities [
 	if r.entities == nil {
 		r.entities = make(map[string][]search.Entity[search.Value])
 	}
-	r.entities[fileType] = entities
+	r.entities[fileType] = slices.Clone(entities)
 
 	return nil
 }
@@ -44,9 +45,10 @@ func (r *MockRepository) Get(ctx context.Context, sourceID string, source search
 		return nil, nil
 	}
 
-	for _, entity := range r.entities[string(source)] {
-		if entity.SourceID == sourceID {
-			return &entity, nil
+	entities := r.entities[string(source)]
+	for i := range entities {
+		if entities[i].SourceID == sourceID {
+			return &entities[i], nil
 		}
 	}
 
@@ -87,5 +89,5 @@ func (r *MockRepository) ListBySource(ctx context.Context, lastSourceID string, 
 		endIdx = len(entities)
 	}
 
-	return entities[startIdx:endIdx], nil
+	return slices.Clone(entities[startIdx:endIdx]), nil
 }
