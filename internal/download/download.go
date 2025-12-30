@@ -144,6 +144,22 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 		})
 	}
 
+	// FinCEN 311 Records
+	if slices.Contains(requestedLists, search.SourceUSFinCEN311) {
+		listsLoaded = append(listsLoaded, search.SourceUSFinCEN311)
+
+		producerWg.Add(1)
+		g.Go(func() error {
+			defer producerWg.Done()
+
+			err := loadFinCEN311Records(ctx, logger, dl.conf, preparedLists)
+			if err != nil {
+				return fmt.Errorf("loading FinCEN 311 records: %w", err)
+			}
+			return nil
+		})
+	}
+
 	// Senzing lists
 	for idx := range dl.conf.Senzing {
 		listsLoaded = append(listsLoaded, dl.conf.Senzing[idx].SourceList)
