@@ -49,6 +49,18 @@ Watchman:
       - "us_csl"
       - "us_ofac"
 
+    # Include any senzing formatted OpenSanctions lists
+    # OpenSanctions:
+    #   ApiKey: "secret"
+    #   Lists:
+    #     - SourceList: opensanctions_peps
+    #       Location: https://data.opensanctions.org/datasets/latest/us_congress/senzing.json
+
+    # Include any senzing formatted lists in Watchman's corpus
+    # Senzing:
+    #   - SourceList: "senzing-persons"
+    #     Location: "file://pkg/sources/senzing/testdata/persons.jsonl"
+
   Search:
     # Tune these settings based on your available resources (CPUs, etc).
     # Watchman will dynamically find an optimal goroutine count for faster responses.
@@ -92,12 +104,12 @@ PostalPool is an experiment for improving address parsing. It's optional configu
 
 ### Included Lists
 
-| List ID             | Name                                       | Source                                                   |
-|---------------------|--------------------------------------------|----------------------------------------------------------|
-| `us_ofac`           | US Office of Foreign Assets Control (OFAC) | [URL](https://ofac.treasury.gov/sanctions-list-service)  |
-| `us_non_sdn`        | US Office of Foreign Assets Control (OFAC) | [URL](https://ofac.treasury.gov/sanctions-list-service)  |
-| `us_csl`            | Consolidated Screening List (CSL)          | [URL](https://www.trade.gov/consolidated-screening-list) |
-| `opensanctions_pep` | OpenSanctions Politically Exposed Persons  | [URL](https://www.opensanctions.org/datasets/peps/)      |
+| List ID           | Name                                       | Source                                                   |
+|-------------------|--------------------------------------------|----------------------------------------------------------|
+| `us_ofac`         | US Office of Foreign Assets Control (OFAC) | [URL](https://ofac.treasury.gov/sanctions-list-service)  |
+| `us_non_sdn`      | US Office of Foreign Assets Control (OFAC) | [URL](https://ofac.treasury.gov/sanctions-list-service)  |
+| `us_csl`          | Consolidated Screening List (CSL)          | [URL](https://www.trade.gov/consolidated-screening-list) |
+| `opensanctions_*` | OpenSanctions Datasets                     | [URL](https://www.opensanctions.org/datasets/)           |
 
 ### Environment Variables
 
@@ -171,9 +183,9 @@ By default Watchman does not employ TF-IDF, but it can be enabled and configured
 
 ##### Open Sanctions
 
-| Environmental Variable       | Description                                                                                          | Default                                                            |
-|------------------------------|------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------|
-| `OPENSANCTIONS_API_KEY`      | API key for OpenSanctions authenticated access. Required when an `opensanctions_*` list is included. | Empty                                                              |
+| Environmental Variable  | Description                                                                                           | Default |
+|-------------------------|-------------------------------------------------------------------------------------------------------|---------|
+| `OPENSANCTIONS_API_KEY` | API key for OpenSanctions authenticated access. Suggested when an `opensanctions_*` list is included. | Empty   |
 
 ## Data persistence
 
