@@ -142,19 +142,38 @@ By default Watchman does not employ TF-IDF, but it can be enabled and configured
 
 #### Source List Configuration
 
+| Environmental Variable | Description                                            | Default |
+|------------------------|--------------------------------------------------------|---------|
+| `DOWNLOAD_TIMEOUT`     | Duration of time allowed for a list to fully download. | `45s`   |
+
+##### United States
+
 | Environmental Variable   | Description                                                         | Default                                                                         |
 |--------------------------|---------------------------------------------------------------------|---------------------------------------------------------------------------------|
-| `DOWNLOAD_TIMEOUT`       | Duration of time allowed for a list to fully download.              | `45s`                                                                           |
 | `OFAC_DOWNLOAD_TEMPLATE` | HTTP address for downloading raw OFAC files.                        | `https://sanctionslistservice.ofac.treas.gov/api/PublicationPreview/exports/%s` |
-| `EU_CSL_TOKEN`           | Token used to download the EU Consolidated Screening List           | `<valid-token>`                                                                 |
-| `EU_CSL_DOWNLOAD_URL`    | Use an alternate URL for downloading EU Consolidated Screening List | Subresource of `webgate.ec.europa.eu`                                           |
-| `UK_CSL_DOWNLOAD_URL`    | Use an alternate URL for downloading UK Consolidated Screening List | Subresource of `www.gov.uk`                                                     |
-| `UK_SANCTIONS_LIST_URL`      | Use an alternate URL for downloading UK Sanctions List              | Subresource of `www.gov.uk`                                                     |
-| `WITH_UK_SANCTIONS_LIST`     | Download and parse the UK Sanctions List on startup.                | Default: `false`                                                                |
-| `US_CSL_DOWNLOAD_URL`        | Use an alternate URL for downloading US Consolidated Screening List | Subresource of `api.trade.gov`                                                  |
-| `CSL_DOWNLOAD_TEMPLATE`      | Same as `US_CSL_DOWNLOAD_URL`                                       |                                                                                 |
-| `OPENSANCTIONS_API_KEY`      | API key for OpenSanctions authenticated access (optional)           | Empty                                                                           |
-| `OPENSANCTIONS_DOWNLOAD_URL` | Use an alternate URL for downloading OpenSanctions PEP list         | `https://data.opensanctions.org/datasets/latest/peps/senzing.json`              |
+| `US_CSL_DOWNLOAD_URL`    | Use an alternate URL for downloading US Consolidated Screening List | Subresource of `api.trade.gov`                                                  |
+| `CSL_DOWNLOAD_TEMPLATE`  | Same as `US_CSL_DOWNLOAD_URL`                                       |                                                                                 |
+
+##### European Union
+
+| Environmental Variable | Description                                                         | Default                               |
+|------------------------|---------------------------------------------------------------------|---------------------------------------|
+| `EU_CSL_TOKEN`         | Token used to download the EU Consolidated Screening List           | `<valid-token>`                       |
+| `EU_CSL_DOWNLOAD_URL`  | Use an alternate URL for downloading EU Consolidated Screening List | Subresource of `webgate.ec.europa.eu` |
+
+##### United Kingdom
+
+| Environmental Variable   | Description                                                         | Default                     |
+|--------------------------|---------------------------------------------------------------------|-----------------------------|
+| `UK_CSL_DOWNLOAD_URL`    | Use an alternate URL for downloading UK Consolidated Screening List | Subresource of `www.gov.uk` |
+| `UK_SANCTIONS_LIST_URL`  | Use an alternate URL for downloading UK Sanctions List              | Subresource of `www.gov.uk` |
+| `WITH_UK_SANCTIONS_LIST` | Download and parse the UK Sanctions List on startup.                | Default: `false`            |
+
+##### Open Sanctions
+
+| Environmental Variable       | Description                                                                                          | Default                                                            |
+|------------------------------|------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------|
+| `OPENSANCTIONS_API_KEY`      | API key for OpenSanctions authenticated access. Required when an `opensanctions_*` list is included. | Empty                                                              |
 
 ## Data persistence
 
