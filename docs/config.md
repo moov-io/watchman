@@ -44,7 +44,7 @@ Watchman:
     InitialDataDirectory: ""
 
     # Specify which lists to download and include in Watchman results
-    # Examples: us_csl, us_ofac, us_non_sdn
+    # Examples: us_csl, us_fincen_311, us_non_sdn, us_ofac, etc...
     IncludedLists:
       - "us_csl"
       - "us_ofac"
@@ -104,12 +104,13 @@ PostalPool is an experiment for improving address parsing. It's optional configu
 
 ### Included Lists
 
-| List ID           | Name                                       | Source                                                   |
-|-------------------|--------------------------------------------|----------------------------------------------------------|
-| `us_ofac`         | US Office of Foreign Assets Control (OFAC) | [URL](https://ofac.treasury.gov/sanctions-list-service)  |
-| `us_non_sdn`      | US Office of Foreign Assets Control (OFAC) | [URL](https://ofac.treasury.gov/sanctions-list-service)  |
-| `us_csl`          | Consolidated Screening List (CSL)          | [URL](https://www.trade.gov/consolidated-screening-list) |
-| `opensanctions_*` | OpenSanctions Datasets                     | [URL](https://www.opensanctions.org/datasets/)           |
+| List ID           | Name                                       | Source                                                                                   |
+|-------------------|--------------------------------------------|------------------------------------------------------------------------------------------|
+| `us_csl`          | Consolidated Screening List (CSL)          | [URL](https://www.trade.gov/consolidated-screening-list)                                 |
+| `us_fincen_311`   | US FinCEN 311 Actions                      | [URL](https://home.treasury.gov/policy-issues/terrorism-and-illicit-finance/311-actions) |
+| `us_non_sdn`      | US Office of Foreign Assets Control (OFAC) | [URL](https://ofac.treasury.gov/sanctions-list-service)                                  |
+| `us_ofac`         | US Office of Foreign Assets Control (OFAC) | [URL](https://ofac.treasury.gov/sanctions-list-service)                                  |
+| `opensanctions_*` | OpenSanctions Datasets                     | [URL](https://www.opensanctions.org/datasets/)                                           |
 
 ### Environment Variables
 
