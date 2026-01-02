@@ -2,6 +2,7 @@ package display
 
 import (
 	"net/url"
+	"strings"
 
 	"github.com/moov-io/watchman/pkg/search"
 	"github.com/moov-io/watchman/pkg/sources/csl_us"
@@ -24,12 +25,15 @@ func DetailsURL(entity search.Entity[search.Value]) string {
 	case search.SourceUSOFAC, search.SourceUSNonSDN:
 		return ofac.DetailsURL(entity.SourceID)
 
-	case search.SourceOpenSanctionsPEP:
-		return opensanctions.DetailsURL(entity.SourceID)
-
 	case search.SourceAPIRequest:
 		// do nothing
 	}
+
+	// Shortcut for open sanctions
+	if strings.HasPrefix(string(entity.Source), "opensanctions_") {
+		return opensanctions.DetailsURL(entity.SourceID)
+	}
+
 	// Format the entity as a Watchman search URL
 	u, _ := url.Parse("/v2/search")
 

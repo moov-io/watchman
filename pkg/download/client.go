@@ -41,13 +41,23 @@ func DefaultHTTPClient() (*http.Client, error) {
 	}, nil
 }
 
-func New(logger log.Logger, httpClient *http.Client) *Downloader {
+type Option func(dl *Downloader)
+
+func WithAdditionalHeaders(headers map[string]string) Option {
+	return func(dl *Downloader) {
+		dl.withAdditionalHeaders(headers)
+	}
+}
+
+// New returns a Downloader configured with the provided options
+func New(logger log.Logger, httpClient *http.Client, options ...Option) *Downloader {
 	if httpClient == nil {
 		httpClient, _ = DefaultHTTPClient()
 	}
 	return &Downloader{
-		HTTP:   httpClient,
-		Logger: logger,
+		HTTP:              httpClient,
+		Logger:            logger,
+		additionalHeaders: make(map[string]string),
 	}
 }
 
@@ -59,6 +69,21 @@ func New(logger log.Logger, httpClient *http.Client) *Downloader {
 type Downloader struct {
 	HTTP   *http.Client
 	Logger log.Logger
+
+	additionalHeaders map[string]string
+}
+
+func (dl *Downloader) withAdditionalHeaders(additional map[string]string) {
+	if dl != nil && dl.additionalHeaders == nil {
+		dl.additionalHeaders = make(map[string]string)
+	}
+	if additional == nil {
+		return
+	}
+
+	for k, v := range additional {
+		dl.additionalHeaders[k] = v
+	}
 }
 
 const (
@@ -185,6 +210,14 @@ func (dl *Downloader) retryDownload(ctx context.Context, downloadURL string) (io
 		// in order to get passed europes 406 (Not Accepted)
 		req.Header.Set("accept-language", "en-US,en;q=0.9")
 
+		// Apply any additional headers
+		if dl.additionalHeaders != nil {
+			for k, v := range dl.additionalHeaders {
+				req.Header.Set(k, v)
+			}
+		}
+
+		// Make the request
 		resp, err := dl.HTTP.Do(req)
 
 		if err != nil {

@@ -63,8 +63,6 @@ var (
 	SourceUSOFAC   SourceList = "us_ofac"
 	SourceUSNonSDN SourceList = "us_non_sdn"
 
-	SourceOpenSanctionsPEP SourceList = "opensanctions_pep"
-
 	sourceEmpty SourceList = ""
 )
 

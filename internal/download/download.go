@@ -144,11 +144,25 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 		})
 	}
 
-	// Senzing lists
-	for idx := range dl.conf.Senzing {
-		listsLoaded = append(listsLoaded, dl.conf.Senzing[idx].SourceList)
+	// OpenSanctions lists
+	for _, list := range dl.conf.OpenSanctions.Lists {
+		listsLoaded = append(listsLoaded, list.SourceList)
 	}
+	producerWg.Add(1)
+	g.Go(func() error {
+		defer producerWg.Done()
 
+		err := loadOpensanctionsRecords(ctx, logger, dl.conf, preparedLists)
+		if err != nil {
+			return fmt.Errorf("loading opensanctions lists: %w", err)
+		}
+		return nil
+	})
+
+	// Senzing lists
+	for _, list := range dl.conf.Senzing {
+		listsLoaded = append(listsLoaded, list.SourceList)
+	}
 	producerWg.Add(1)
 	g.Go(func() error {
 		defer producerWg.Done()
@@ -159,21 +173,6 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 		}
 		return nil
 	})
-
-	// OpenSanctions PEP Records
-	if slices.Contains(requestedLists, search.SourceOpenSanctionsPEP) {
-		listsLoaded = append(listsLoaded, search.SourceOpenSanctionsPEP)
-
-		producerWg.Add(1)
-		g.Go(func() error {
-			defer producerWg.Done()
-			err := loadOpenSanctionsPEPRecords(ctx, logger, dl.conf, preparedLists)
-			if err != nil {
-				return fmt.Errorf("loading OpenSanctions PEP records: %w", err)
-			}
-			return nil
-		})
-	}
 
 	// Compare the configured lists against those we actually loaded.
 	// Any extra lists are an error as we don't want to silently ignore them.
@@ -267,9 +266,12 @@ func getIncludedLists(conf Config) []search.SourceList {
 		}
 	}
 
-	// Now add Senzing
-	for i := range conf.Senzing {
-		out = append(out, conf.Senzing[i].SourceList)
+	// Now add senzing lists
+	for _, list := range conf.OpenSanctions.Lists {
+		out = append(out, list.SourceList)
+	}
+	for _, list := range conf.Senzing {
+		out = append(out, list.SourceList)
 	}
 
 	// Sort and remove duplicates

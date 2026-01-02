@@ -3,6 +3,7 @@ package senzing
 // SenzingRecord represents a single record in Senzing Entity Resolution format.
 // Senzing supports both a FEATURES array format and flat field format.
 // This implementation supports both for maximum compatibility.
+// Additionally, supports array-based formats for names, dates, countries, etc., as seen in some data sources.
 //
 // Reference: https://www.senzing.com/docs/entity_specification/index.html
 type SenzingRecord struct {
@@ -15,6 +16,18 @@ type SenzingRecord struct {
 
 	// Record type
 	RecordType string `json:"RECORD_TYPE,omitempty"` // PERSON or ORGANIZATION
+
+	// Array formats (alternative to flat fields)
+	Names         []NameEntry         `json:"NAMES,omitempty"`
+	Dates         []DateEntry         `json:"DATES,omitempty"`
+	Countries     []CountryEntry      `json:"COUNTRIES,omitempty"`
+	Identifiers   []IdentifierEntry   `json:"IDENTIFIERS,omitempty"`
+	Relationships []RelationshipEntry `json:"RELATIONSHIPS,omitempty"`
+	Risks         []RiskEntry         `json:"RISKS,omitempty"`
+
+	// Other fields
+	LastChange string `json:"LAST_CHANGE,omitempty"`
+	URL        string `json:"URL,omitempty"`
 
 	// Person name fields (flat format)
 	NameFirst  string `json:"NAME_FIRST,omitempty"`
@@ -69,6 +82,22 @@ type SenzingRecord struct {
 	RelPointerKey    string `json:"REL_POINTER_KEY,omitempty"`
 	RelPointerRole   string `json:"REL_POINTER_ROLE,omitempty"`
 }
+
+// Helper structs for array formats
+type NameEntry struct {
+	NameType string `json:"NAME_TYPE"`
+	NameFull string `json:"NAME_FULL"`
+}
+
+type DateEntry map[string]string // e.g., {"DATE_OF_BIRTH": "1980"}
+
+type CountryEntry map[string]string // e.g., {"NATIONALITY": "us"}
+
+type IdentifierEntry map[string]string // e.g., {"TRUSTED_ID_TYPE": "WIKIDATA", "TRUSTED_ID_NUMBER": "Q104648170"}
+
+type RelationshipEntry map[string]string // e.g., {"REL_POINTER_ROLE": "Occupancy", ...}
+
+type RiskEntry map[string]string // e.g., {"TOPIC": "role.pep"}
 
 // Senzing record type constants
 const (

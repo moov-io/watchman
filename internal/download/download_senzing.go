@@ -14,15 +14,30 @@ import (
 	"github.com/moov-io/watchman/pkg/sources/senzing"
 )
 
-func loadSenzingRecords(ctx context.Context, logger log.Logger, conf Config, responseCh chan preparedList) error {
+func loadSenzingRecords(ctx context.Context, logger log.Logger, config Config, responseCh chan preparedList) error {
+	params := senzingDownload{
+		lists:  config.Senzing,
+		config: config,
+	}
+	return prepareSenzingRecords(ctx, logger, params, responseCh)
+}
+
+type senzingDownload struct {
+	lists  []SenzingList
+	config Config
+
+	downloadOptions []download.Option
+}
+
+func prepareSenzingRecords(ctx context.Context, logger log.Logger, params senzingDownload, responseCh chan preparedList) error {
 	locations := make(map[string]string)
 
-	for _, loc := range conf.Senzing {
+	for _, loc := range params.lists {
 		locations[string(loc.SourceList)] = loc.Location
 	}
 
-	dl := download.New(logger, nil)
-	initialDir := initialDataDirectory(conf)
+	dl := download.New(logger, nil, params.downloadOptions...)
+	initialDir := initialDataDirectory(params.config)
 
 	files, err := dl.GetFiles(ctx, initialDir, locations)
 	if err != nil {
@@ -40,7 +55,7 @@ func loadSenzingRecords(ctx context.Context, logger log.Logger, conf Config, res
 			return fmt.Errorf("parsing %s failed: %w", source, err)
 		}
 
-		if len(entities) == 0 && conf.ErrorOnEmptyList {
+		if len(entities) == 0 && params.config.ErrorOnEmptyList {
 			return fmt.Errorf("no entities parsed from senzing lists: %#v", source)
 		}
 
