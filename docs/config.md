@@ -123,6 +123,36 @@ By default Watchman does not employ TF-IDF, but it can be enabled and configured
 | `TFIDF_MIN_IDF`        | MinIDF is the floor for IDF values. Prevents very common terms from having zero or negative weight.            | 0.1     |
 | `TFIDF_MAX_IDF`        | MaxIDF is the ceiling for IDF values. Prevents single-occurrence terms from dominating the score.              | 10.0    |
 
+### Cross-Script Embeddings Configuration
+
+Watchman can use neural network embeddings to match names across different writing systems (Arabic, Cyrillic, Chinese, etc.). This feature requires building with `-tags embeddings` and downloading the ONNX model.
+
+See [Cross-Script Name Matching](cross-script-matching.md) for detailed setup instructions.
+
+| Environmental Variable            | Description                                                       | Default |
+|-----------------------------------|-------------------------------------------------------------------|---------|
+| `EMBEDDINGS_ENABLED`              | Enable embedding-based cross-script search.                       | `false` |
+| `EMBEDDINGS_MODEL_PATH`           | Path to directory containing ONNX model and tokenizer files.      | Empty   |
+| `EMBEDDINGS_CACHE_SIZE`           | Number of embedding vectors to cache in memory.                   | `10000` |
+| `EMBEDDINGS_CROSS_SCRIPT_ONLY`    | Only use embeddings for non-Latin queries (recommended).          | `true`  |
+| `EMBEDDINGS_SIMILARITY_THRESHOLD` | Minimum similarity score (0.0-1.0) for results.                   | `0.7`   |
+| `EMBEDDINGS_BATCH_SIZE`           | Batch size for encoding multiple texts.                           | `32`    |
+| `EMBEDDINGS_INDEX_BUILD_TIMEOUT`  | Maximum time allowed for building the embedding index.            | `5m`    |
+
+YAML configuration:
+
+```yaml
+  Search:
+    Embeddings:
+      Enabled: true
+      ModelPath: "/path/to/models/multilingual-minilm"
+      CacheSize: 10000
+      CrossScriptOnly: true
+      SimilarityThreshold: 0.7
+      BatchSize: 32
+      IndexBuildTimeout: "5m"
+```
+
 ### Similarity Configuration
 
 | Environmental Variable             | Description                                                                                                   | Default |

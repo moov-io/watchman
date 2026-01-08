@@ -16,10 +16,11 @@ import (
 	"github.com/moov-io/base/telemetry"
 	"github.com/moov-io/watchman/internal/download"
 	"github.com/moov-io/watchman/internal/index"
+	"github.com/moov-io/watchman/internal/search"
 )
 
-func setupPeriodicRefreshing(ctx context.Context, logger log.Logger, errs chan error, conf download.Config, downloader download.Downloader, indexedLists index.Lists) error {
-	err := refreshAllSources(logger, downloader, indexedLists)
+func setupPeriodicRefreshing(ctx context.Context, logger log.Logger, errs chan error, conf download.Config, downloader download.Downloader, indexedLists index.Lists, searchService search.Service) error {
+	err := refreshAllSources(ctx, logger, downloader, indexedLists, searchService)
 	if err != nil {
 		return err
 	}
@@ -36,7 +37,7 @@ func setupPeriodicRefreshing(ctx context.Context, logger log.Logger, errs chan e
 				return
 
 			case <-ticker.C:
-				err := refreshAllSources(logger, downloader, indexedLists)
+				err := refreshAllSources(ctx, logger, downloader, indexedLists, searchService)
 				if err != nil {
 					errs <- err
 				}
@@ -62,8 +63,8 @@ func getRefreshInterval(conf download.Config) time.Duration {
 	return cmp.Or(conf.RefreshInterval, defaultRefreshInterval)
 }
 
-func refreshAllSources(logger log.Logger, downloader download.Downloader, indexedLists index.Lists) error {
-	ctx, span := telemetry.StartSpan(context.Background(), "refresh-all-sources")
+func refreshAllSources(ctx context.Context, logger log.Logger, downloader download.Downloader, indexedLists index.Lists, searchService search.Service) error {
+	ctx, span := telemetry.StartSpan(ctx, "refresh-all-sources")
 	defer span.End()
 
 	stats, err := downloader.RefreshAll(ctx)
@@ -76,6 +77,13 @@ func refreshAllSources(logger log.Logger, downloader download.Downloader, indexe
 
 	// Replace in-mem entities
 	indexedLists.Update(stats)
+
+	// Rebuild embedding index if enabled
+	if searchService != nil {
+		if err := searchService.RebuildEmbeddingIndex(ctx); err != nil {
+			logger.Warn().Logf("failed to rebuild embedding index: %v", err)
+		}
+	}
 
 	return nil
 }

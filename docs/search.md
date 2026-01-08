@@ -176,6 +176,30 @@ Parameters:
 - `debug`: Include detailed scoring information when set to "true"
 
 
+## Cross-Script Name Matching
+
+Watchman supports searching for names written in non-Latin scripts (Arabic, Cyrillic, Chinese, etc.) against Latin names in sanctions lists using neural network embeddings.
+
+```bash
+# Arabic query finds "Mohamed Ali" in OFAC list
+curl -X POST http://localhost:8084/v2/search \
+  -H "Content-Type: application/json" \
+  -d '{"name": "محمد علي", "type": "person"}'
+```
+
+| Script | Example Query | Matches | Score |
+|--------|---------------|---------|-------|
+| Arabic | محمد علي | Mohamed Ali | 97% |
+| Cyrillic | Владимир Путин | Vladimir Putin | 99.8% |
+| Chinese | 金正恩 | Kim Jong Un | 79% |
+
+This feature requires:
+1. Building with `-tags embeddings`
+2. Downloading the ONNX model (~450MB)
+3. Enabling via `EMBEDDINGS_ENABLED=true`
+
+For detailed setup instructions, see [Cross-Script Name Matching](cross-script-matching.md).
+
 ## Best Practices
 
 1. **Use specific IDs when available**
