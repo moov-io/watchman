@@ -18,6 +18,8 @@
   items:
     - name: Search options
       link: /search/
+    - name: Cross-Script Matching
+      link: /cross-script-matching/
     - name: Data Preparation Pipeline
       link: /pipeline/
     - name: Indexing
