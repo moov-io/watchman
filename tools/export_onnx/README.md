@@ -8,16 +8,33 @@ The embedding model enables **cross-script name matching** - finding that "مح�
 
 ## Usage
 
-### 1. Install Dependencies
+### Option 1: Docker (Recommended)
+
+The easiest way to get the model is using Docker:
+
+```bash
+cd tools/export_onnx
+docker build -t watchman-onnx-export .
+docker run --rm -v $(pwd)/../../models/multilingual-minilm:/output watchman-onnx-export
+```
+
+This builds an image with the model pre-exported (~510MB) and copies it to your local directory.
+
+### Option 2: Manual Setup
+
+If you prefer to run the export locally:
 
 ```bash
 cd tools/export_onnx
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+python export_model.py --output ../../models/multilingual-minilm --verify
 ```
 
-### 2. Export Model
+**Note:** The `requirements.txt` has pinned versions to ensure compatibility. If you encounter issues, make sure you're using Python 3.10+.
+
+### Export Options
 
 ```bash
 python export_model.py --output ../../models/multilingual-minilm --verify

@@ -1,5 +1,7 @@
-sentence-transformers>=3.0.0
-optimum[exporters]>=1.17.0
-onnxruntime>=1.16.0
-numpy>=1.24.0
-torch>=2.0.0
+# Pinned versions for compatibility
+# torch 2.5+ breaks optimum exporters, so we pin to <2.5
+sentence-transformers>=3.0.0,<6.0.0
+optimum[exporters]>=1.17.0,<1.25.0
+onnxruntime>=1.16.0,<2.0.0
+numpy>=1.24.0,<3.0.0
+torch>=2.0.0,<2.5.0

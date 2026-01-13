@@ -30,9 +30,8 @@ def export_model(model_name: str, output_dir: str, opset: int = 14):
     # Use optimum for ONNX export (handles sentence-transformers properly)
     try:
         from optimum.exporters.onnx import main_export
-        from optimum.exporters.onnx.model_configs import SentenceTransformersOnnxConfig
     except ImportError:
-        print("Error: optimum not installed. Run: pip install optimum[exporters]")
+        print("Error: optimum not installed. Run: pip install 'optimum[exporters]>=1.17.0,<1.25.0'")
         sys.exit(1)
 
     # Export model
