@@ -2,7 +2,9 @@
 
 package embeddings
 
-import "time"
+import (
+	"time"
+)
 
 // Config holds configuration for the embeddings service.
 type Config struct {

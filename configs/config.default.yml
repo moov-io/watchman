@@ -29,6 +29,14 @@ Watchman:
       Default: 10
       Min: 1
       Max: 25
+    Embeddings:
+      Enabled: false
+      ModelPath: "./models/multilingual-minilm"
+      CacheSize: 10000
+      CrossScriptOnly: false # Hybrid approach: embeddings for cross-script only
+      SimilarityThreshold: 0.70
+      BatchSize: 32
+      IndexBuildTimeout: "10m"
 
   PostalPool:
     Enabled: false

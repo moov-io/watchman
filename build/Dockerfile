@@ -1,16 +1,10 @@
 # Backend build stage
-FROM golang:1.25-bookworm AS backend
+FROM ghcr.io/knights-analytics/hugot AS backend
 ARG VERSION
 WORKDIR /src
 
 # Install system dependencies first
-RUN apt-get update && apt-get install -y \
-    curl \
-    autoconf \
-    automake \
-    libtool \
-    pkg-config \
-    git
+RUN yum makecache && yum install -y autoconf automake libtool pkgconfig git
 
 # Clone and build libpostal (rarely changes)
 RUN git clone https://github.com/openvenues/libpostal.git /src/libpostal
@@ -31,7 +25,12 @@ RUN go mod download
 # Now copy the rest of the source code (frequently changes)
 COPY . /src/
 WORKDIR /src
-RUN VERSION=${VERSION} GOTAGS="-tags libpostal" make build-server postal-server
+
+ENV PKG_CONFIG_PATH=/src/libpostal/
+RUN VERSION=${VERSION} GOTAGS="-tags libpostal,embeddings,ORT" make build-server postal-server
+
+# Pull Models
+FROM moov/watchman-onnx-export AS models
 
 # Final stage
 FROM debian:trixie
@@ -56,6 +55,9 @@ RUN ldconfig
 COPY --from=backend /src/bin/server /bin/server
 COPY --from=backend /src/bin/postal-server /bin/postal-server
 ENV POSTAL_SERVER_BIN_PATH=/bin/postal-server
+
+# Copy model files
+COPY --from=models /model/* ./models/multilingual-minilm/
 
 # Set environment variables
 ENV LD_LIBRARY_PATH=/usr/local/lib
