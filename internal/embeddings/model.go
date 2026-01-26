@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/knights-analytics/hugot"
+	"github.com/knights-analytics/hugot/options"
 	"github.com/knights-analytics/hugot/pipelines"
 )
 
@@ -40,7 +41,12 @@ func loadModel(ctx context.Context, config Config) (*model, error) {
 	var backend string
 
 	// Try ONNX Runtime (faster, but requires ORT build tag and library)
-	session, err = hugot.NewORTSession()
+	var opts []options.WithOption
+	onnxLibraryPath := os.Getenv("ONNX_LIBRARY_PATH")
+	if onnxLibraryPath != "" {
+		opts = append(opts, options.WithOnnxLibraryPath(onnxLibraryPath))
+	}
+	session, err = hugot.NewORTSession(opts...)
 	if err != nil {
 		// Fall back to native Go backend
 		session, err = hugot.NewGoSession()
