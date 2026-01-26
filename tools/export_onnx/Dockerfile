@@ -9,8 +9,7 @@
 #
 # The exported model will be in ./models/
 
-# Force x86_64 platform for consistent builds (torch packages are x86_64 only)
-FROM --platform=linux/amd64 python:3.12-slim AS builder
+FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
@@ -24,10 +23,7 @@ COPY requirements.txt .
 
 # Install CPU-only torch AND torchvision together for compatibility
 # The ONNX export doesn't need GPU
-RUN pip install --no-cache-dir \
-    --index-url https://download.pytorch.org/whl/cpu \
-    torch==2.4.1+cpu \
-    torchvision==0.19.1+cpu \
+RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch torchvision \
     && pip install --no-cache-dir -r requirements.txt
 
 # Copy export script
@@ -42,7 +38,7 @@ RUN test -f /model/model.onnx && \
     echo "Model export verified successfully"
 
 # Final stage: minimal image with just the model
-FROM --platform=linux/amd64 alpine:3.20
+FROM alpine:3.20
 
 WORKDIR /model
 
