@@ -26,9 +26,11 @@ func setupPeriodicRefreshing(ctx context.Context, logger log.Logger, errs chan e
 
 	// Setup periodic refreshing
 	ticker := time.NewTicker(getRefreshInterval(conf))
-	defer ticker.Stop()
+	// NOTE: ticker.Stop() is called inside the goroutine on context cancellation
+	// Do NOT use defer here - it would stop the ticker immediately when this function returns
 
 	go func() {
+		defer ticker.Stop() // Stop ticker when goroutine exits
 		for {
 			select {
 			case <-ctx.Done():
