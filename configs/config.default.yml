@@ -30,10 +30,24 @@ Watchman:
       Min: 1
       Max: 25
     Embeddings:
-      Enabled: false
-      ModelPath: "./models/multilingual-minilm"
+      Enabled: false                            # Opt-in feature
+      Provider:
+        Name: ""                                # ollama, openai, openrouter, azure
+        BaseURL: ""                             # API endpoint (required when enabled)
+        APIKey: ""                              # Can be set via EMBEDDINGS_API_KEY env var
+        Model: ""                               # Required: e.g., "text-embedding-3-small" (OpenAI) or "multilingual-e5-large" (Ollama)
+        Dimension: 0                            # Required: must match model (e.g., 1536 for OpenAI, 1024 for e5-large)
+        NormalizeVectors: true                  # L2 normalize if API doesn't
+        Timeout: "30s"
+        RateLimit:
+          RequestsPerSecond: 10
+          Burst: 20
+        Retry:
+          MaxRetries: 3
+          InitialBackoff: "1s"
+          MaxBackoff: "30s"
       CacheSize: 10000
-      CrossScriptOnly: false # Hybrid approach: embeddings for cross-script only
+      CrossScriptOnly: true   # Hybrid approach: embeddings for cross-script only
       SimilarityThreshold: 0.70
       BatchSize: 32
       IndexBuildTimeout: "10m"

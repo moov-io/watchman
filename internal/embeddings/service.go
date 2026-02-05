@@ -25,10 +25,10 @@ type SearchResult struct {
 // (Arabic, Cyrillic, Chinese, etc.) and Latin text.
 type Service interface {
 	// Encode converts text to a normalized embedding vector.
-	// The returned vector has 384 dimensions and is L2-normalized.
+	// The returned vector has dimensions matching the configured provider.
 	Encode(ctx context.Context, text string) ([]float32, error)
 
-	// EncodeBatch encodes multiple texts efficiently in a single inference call.
+	// EncodeBatch encodes multiple texts efficiently in a single API call.
 	EncodeBatch(ctx context.Context, texts []string) ([][]float32, error)
 
 	// BuildIndex creates a searchable index from entity names.
@@ -60,9 +60,9 @@ type service struct {
 	logger log.Logger
 	config Config
 
-	model *model
-	index *vectorIndex
-	cache *embeddingCache
+	provider EmbeddingProvider
+	index    *vectorIndex
+	cache    *embeddingCache
 
 	mu sync.RWMutex
 }
@@ -74,25 +74,29 @@ func NewService(logger log.Logger, config Config) (Service, error) {
 		return nil, nil
 	}
 
+	// Apply environment variable overrides
+	config.LoadFromEnv()
+
 	if err := config.Validate(); err != nil {
 		return nil, fmt.Errorf("embeddings: invalid config: %w", err)
 	}
 
 	ctx, span := telemetry.StartSpan(context.Background(), "embeddings-setup", trace.WithAttributes(
-		attribute.String("model_path", config.ModelPath),
+		attribute.String("provider", config.Provider.Name),
+		attribute.String("model", config.Provider.Model),
+		attribute.Int("dimension", config.Provider.Dimension),
 		attribute.Int("cache_size", config.CacheSize),
 		attribute.Bool("cross_script_only", config.CrossScriptOnly),
 	))
 	defer span.End()
 
-	logger.Info().Logf("embeddings: loading model from %s", config.ModelPath)
-
-	// Load ONNX model
-	m, err := loadModel(ctx, config)
+	// Create provider based on configuration
+	provider, err := createProvider(config.Provider)
 	if err != nil {
-		return nil, fmt.Errorf("embeddings: failed to load model: %w", err)
+		return nil, fmt.Errorf("embeddings: failed to create provider: %w", err)
 	}
-	logger.Info().Logf("embeddings: using %s backend", m.backend)
+
+	logger.Info().Logf("embeddings: using %s provider", provider.Name())
 
 	// Create cache
 	cache, err := newCache(config.CacheSize)
@@ -100,16 +104,31 @@ func NewService(logger log.Logger, config Config) (Service, error) {
 		return nil, fmt.Errorf("embeddings: failed to create cache: %w", err)
 	}
 
-	logger.Info().Logf("embeddings: service initialized (cache_size=%d, cross_script_only=%v)",
-		config.CacheSize, config.CrossScriptOnly)
+	logger.Info().Logf("embeddings: service initialized (provider=%s, dimension=%d, cache_size=%d, cross_script_only=%v)",
+		provider.Name(), provider.Dimension(), config.CacheSize, config.CrossScriptOnly)
+
+	_ = ctx // silence unused variable warning
 
 	return &service{
-		logger: logger,
-		config: config,
-		model:  m,
-		index:  newVectorIndex(m.dimension),
-		cache:  cache,
+		logger:   logger,
+		config:   config,
+		provider: provider,
+		index:    newVectorIndex(provider.Dimension()),
+		cache:    cache,
 	}, nil
+}
+
+// createProvider creates an embedding provider based on configuration.
+func createProvider(config ProviderConfig) (EmbeddingProvider, error) {
+	switch config.Name {
+	case "openai", "ollama", "openrouter", "azure", "":
+		// All use OpenAI-compatible API format
+		return NewOpenAIProvider(config)
+	case "mock":
+		return NewMockProvider(config.Dimension), nil
+	default:
+		return nil, fmt.Errorf("unknown provider: %s", config.Name)
+	}
 }
 
 // Encode converts text to a normalized embedding vector.
@@ -125,10 +144,19 @@ func (s *service) Encode(ctx context.Context, text string) ([]float32, error) {
 
 	span.SetAttributes(attribute.Bool("cache_hit", false))
 
-	// Encode with model
-	embeddings, err := s.model.encode([]string{text})
+	// Encode with provider
+	embeddings, err := s.provider.Embed(ctx, []string{text})
 	if err != nil {
 		return nil, err
+	}
+	if len(embeddings) == 0 {
+		return nil, ErrInvalidResponse
+	}
+
+	// Validate dimension
+	if len(embeddings[0]) != s.provider.Dimension() {
+		return nil, fmt.Errorf("%w: got %d, expected %d",
+			ErrDimensionMismatch, len(embeddings[0]), s.provider.Dimension())
 	}
 
 	// Cache the result
@@ -165,7 +193,7 @@ func (s *service) EncodeBatch(ctx context.Context, texts []string) ([][]float32,
 
 	// Encode uncached texts
 	if len(uncachedTexts) > 0 {
-		embeddings, err := s.model.encode(uncachedTexts)
+		embeddings, err := s.provider.Embed(ctx, uncachedTexts)
 		if err != nil {
 			return nil, err
 		}
@@ -218,7 +246,7 @@ func (s *service) BuildIndex(ctx context.Context, names []string, ids []string) 
 		}
 
 		batch := names[i:end]
-		embeddings, err := s.model.encode(batch)
+		embeddings, err := s.provider.Embed(ctx, batch)
 		if err != nil {
 			return fmt.Errorf("embeddings: failed to encode batch %d: %w", i/batchSize, err)
 		}
@@ -233,7 +261,7 @@ func (s *service) BuildIndex(ctx context.Context, names []string, ids []string) 
 
 	// Build the index
 	s.mu.Lock()
-	s.index = newVectorIndex(s.model.dimension)
+	s.index = newVectorIndex(s.provider.Dimension())
 	s.index.Add(allEmbeddings, ids, names)
 	s.mu.Unlock()
 
@@ -310,7 +338,7 @@ func (s *service) IndexSize() int {
 // Shutdown releases resources held by the service.
 func (s *service) Shutdown() {
 	s.logger.Info().Log("embeddings: shutting down")
-	if s.model != nil {
-		s.model.close()
+	if s.provider != nil {
+		s.provider.Close()
 	}
 }

@@ -47,6 +47,3 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .eggs/
-
-# ONNX models (large files)
-models/

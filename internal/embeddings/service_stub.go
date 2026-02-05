@@ -12,13 +12,40 @@ import (
 // Config holds configuration for the embeddings service.
 // This is a stub when embeddings build tag is not set.
 type Config struct {
-	Enabled             bool          `json:"enabled"`
-	ModelPath           string        `json:"modelPath"`
-	CacheSize           int           `json:"cacheSize"`
-	CrossScriptOnly     bool          `json:"crossScriptOnly"`
-	SimilarityThreshold float64       `json:"similarityThreshold"`
-	BatchSize           int           `json:"batchSize"`
-	IndexBuildTimeout   time.Duration `json:"indexBuildTimeout"`
+	Enabled             bool           `json:"enabled"`
+	Provider            ProviderConfig `json:"provider"`
+	CacheSize           int            `json:"cacheSize"`
+	CrossScriptOnly     bool           `json:"crossScriptOnly"`
+	SimilarityThreshold float64        `json:"similarityThreshold"`
+	BatchSize           int            `json:"batchSize"`
+	IndexBuildTimeout   time.Duration  `json:"indexBuildTimeout"`
+}
+
+// ProviderConfig holds settings for an embedding provider.
+type ProviderConfig struct {
+	Name             string            `json:"name"`
+	BaseURL          string            `json:"baseURL"`
+	APIKey           string            `json:"apiKey,omitempty"`
+	Model            string            `json:"model"`
+	Dimension        int               `json:"dimension"`
+	NormalizeVectors bool              `json:"normalizeVectors"`
+	Timeout          time.Duration     `json:"timeout"`
+	RateLimit        RateLimitConfig   `json:"rateLimit"`
+	Retry            RetryConfig       `json:"retry"`
+	Headers          map[string]string `json:"headers,omitempty"`
+}
+
+// RateLimitConfig controls the rate of API requests.
+type RateLimitConfig struct {
+	RequestsPerSecond float64 `json:"requestsPerSecond"`
+	Burst             int     `json:"burst"`
+}
+
+// RetryConfig controls retry behavior for failed requests.
+type RetryConfig struct {
+	MaxRetries     int           `json:"maxRetries"`
+	InitialBackoff time.Duration `json:"initialBackoff"`
+	MaxBackoff     time.Duration `json:"maxBackoff"`
 }
 
 // DefaultConfig returns a Config with embeddings disabled.

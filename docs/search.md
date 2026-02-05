@@ -195,7 +195,7 @@ curl -X POST http://localhost:8084/v2/search \
 
 This feature requires:
 1. Building with `-tags embeddings`
-2. Downloading the ONNX model (~450MB)
+2. Running an embeddings provider (Ollama, OpenAI, etc.)
 3. Enabling via `EMBEDDINGS_ENABLED=true`
 
 For detailed setup instructions, see [Cross-Script Name Matching](cross-script-matching.md).

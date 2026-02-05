@@ -5,7 +5,6 @@ package embeddings
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -327,25 +326,23 @@ func percentile(durations []time.Duration, p int) time.Duration {
 func createAccuracyTestService(t *testing.T) Service {
 	t.Helper()
 
-	modelPath := getModelPath()
-	if _, err := os.Stat(modelPath); os.IsNotExist(err) {
-		t.Skipf("Model not found at %s, skipping accuracy test", modelPath)
-	}
-
 	logger := log.NewTestLogger()
-	config := Config{
-		Enabled:             true,
-		ModelPath:           modelPath,
-		CacheSize:           1000,
-		CrossScriptOnly:     true,
-		SimilarityThreshold: 0.5,
-		BatchSize:           32,
-		IndexBuildTimeout:   10 * time.Minute,
-	}
+	config := getTestConfig()
+	config.CacheSize = 1000
+	config.SimilarityThreshold = 0.5
 
 	service, err := NewService(logger, config)
-	require.NoError(t, err)
+	if err != nil {
+		t.Skipf("Could not create embeddings service (provider may be unavailable): %v", err)
+	}
 	require.NotNil(t, service)
+
+	// Warm up with a single encode to check provider is working
+	ctx := context.Background()
+	_, err = service.Encode(ctx, "test")
+	if err != nil {
+		t.Skipf("Provider not responding: %v", err)
+	}
 
 	return service
 }
@@ -500,32 +497,24 @@ func BenchmarkSearchLargeIndex(b *testing.B) {
 func createBenchmarkService(b *testing.B) Service {
 	b.Helper()
 
-	modelPath := getModelPath()
-	if _, err := os.Stat(modelPath); os.IsNotExist(err) {
-		b.Skipf("Model not found at %s, skipping benchmark", modelPath)
-		return nil
-	}
-
 	logger := log.NewNopLogger()
-	config := Config{
-		Enabled:             true,
-		ModelPath:           modelPath,
-		CacheSize:           1000,
-		CrossScriptOnly:     true,
-		SimilarityThreshold: 0.5,
-		BatchSize:           32,
-		IndexBuildTimeout:   10 * time.Minute,
-	}
+	config := getTestConfig()
+	config.CacheSize = 1000
+	config.SimilarityThreshold = 0.5
 
 	ctx := context.Background()
 	service, err := NewService(logger, config)
 	if err != nil {
-		b.Fatalf("Failed to create service: %v", err)
+		b.Skipf("Could not create embeddings service (provider may be unavailable): %v", err)
 		return nil
 	}
 
 	// Warm up
-	_, _ = service.Encode(ctx, "warmup")
+	_, err = service.Encode(ctx, "warmup")
+	if err != nil {
+		b.Skipf("Provider not responding: %v", err)
+		return nil
+	}
 
 	return service
 }

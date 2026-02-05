@@ -149,13 +149,7 @@ else
 	GOOS=${PLATFORM} go build -o bin/watchman-${PLATFORM}-amd64 github.com/moov-io/watchman/cmd/server
 endif
 
-docker: clean docker-onnx-export docker-hub docker-openshift docker-static
-
-docker-onnx-export:
-	cd tools/export_onnx/ && docker build --pull -t moov/watchman-onnx-export . && cd -
-
-docker-onnx-export-push:
-	docker push moov/watchman-onnx-export
+docker: clean docker-hub docker-openshift docker-static
 
 docker-hub:
 	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman:${VERSION} -f ./build/Dockerfile .

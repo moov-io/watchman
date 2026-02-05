@@ -19,7 +19,7 @@ But they're the same name.
 
 ## How it works
 
-We use a neural network that converts text into 384-dimensional vectors. The key insight: similar names get similar vectors, regardless of script.
+We use a neural network (via API) that converts text into vectors. The key insight: similar names get similar vectors, regardless of script.
 
 ```
 "Mohamed Ali"  → [0.12, -0.45, 0.78, ...]
@@ -37,18 +37,16 @@ We don't use embeddings for everything — that would be slow. Instead:
 
 Set `crossScriptOnly: true` (the default) to get this behavior.
 
-## How well does it work?
+## Supported Providers
 
-| Script | Example | Score |
-|--------|---------|-------|
-| Arabic → Latin | محمد علي → Mohamed Ali | 97% |
-| Cyrillic → Latin | Владимир Путин → Vladimir Putin | 99.8% |
-| Chinese → Latin | 金正恩 → Kim Jong Un | 79% |
-| Hebrew → Latin | דוד → David | 96% |
+Watchman supports any OpenAI-compatible embeddings API:
 
-Cyrillic and Arabic work great (transliteration is straightforward). Chinese is harder (characters ≠ sounds), but still useful.
-
-**Speed:** First query ~180ms (model warm-up), then ~5µs from cache. Search over 1000 names takes ~360µs.
+| Provider | Base URL | Notes |
+|----------|----------|-------|
+| **Ollama** (local) | `http://localhost:11434/v1` | Free, runs locally |
+| **OpenAI** | `https://api.openai.com/v1` | Best quality, paid |
+| **OpenRouter** | `https://openrouter.ai/api/v1` | Many models, paid |
+| **Azure OpenAI** | `https://{resource}.openai.azure.com/...` | Enterprise |
 
 ## Setup
 
@@ -60,24 +58,35 @@ go build -tags embeddings ./cmd/server
 
 Without `-tags embeddings`, the feature is compiled out entirely.
 
-### 2. Get the model
+### 2. Choose a provider
 
-We use `paraphrase-multilingual-MiniLM-L12-v2` in ONNX format (~450MB).
-
+**Option A: Ollama (free, local)**
 ```bash
-cd tools/export_onnx
-python3 -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-python export_model.py
+# Install Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Pull the model
+ollama pull nomic-embed-text
 ```
 
-This creates `models/multilingual-minilm/`.
+**Option B: OpenAI (paid, best quality)**
+```bash
+export EMBEDDINGS_API_KEY=sk-your-key-here
+```
 
 ### 3. Run
 
 ```bash
 export EMBEDDINGS_ENABLED=true
-export EMBEDDINGS_MODEL_PATH=./models/multilingual-minilm
+# For Ollama (default):
+export EMBEDDINGS_BASE_URL=http://localhost:11434/v1
+export EMBEDDINGS_MODEL=nomic-embed-text
+
+# For OpenAI:
+# export EMBEDDINGS_BASE_URL=https://api.openai.com/v1
+# export EMBEDDINGS_MODEL=text-embedding-3-small
+# export EMBEDDINGS_DIMENSION=1536
+
 ./watchman
 ```
 
@@ -86,10 +95,24 @@ export EMBEDDINGS_MODEL_PATH=./models/multilingual-minilm
 | Env Variable | Default | What it does |
 |--------------|---------|--------------|
 | `EMBEDDINGS_ENABLED` | `false` | Turn on/off |
-| `EMBEDDINGS_MODEL_PATH` | — | Where's the ONNX model |
+| `EMBEDDINGS_BASE_URL` | — | API endpoint (required) |
+| `EMBEDDINGS_API_KEY` | — | API key (optional for Ollama) |
+| `EMBEDDINGS_MODEL` | — | Model name (required) |
+| `EMBEDDINGS_DIMENSION` | — | Vector dimension (required, must match model) |
 | `EMBEDDINGS_CROSS_SCRIPT_ONLY` | `true` | Only use for non-Latin queries |
 | `EMBEDDINGS_SIMILARITY_THRESHOLD` | `0.7` | Min score to return a match |
 | `EMBEDDINGS_CACHE_SIZE` | `10000` | How many vectors to cache |
+
+### Recommended models
+
+Cross-script name matching quality varies significantly between models. Choose based on your accuracy requirements:
+
+| Model | Provider | Dimension | Cross-script Quality | Notes |
+|-------|----------|-----------|---------------------|-------|
+| `text-embedding-3-small` | OpenAI | 1536 | Best | Recommended for production |
+| `text-embedding-3-large` | OpenAI | 3072 | Best | Higher accuracy, slower |
+| `multilingual-e5-large` | Ollama | 1024 | Good | Best open-source option |
+| `nomic-embed-text` | Ollama | 768 | Limited | General-purpose, not optimized for names |
 
 ## API
 
@@ -107,11 +130,8 @@ curl -X POST http://localhost:8084/v2/search \
 # Unit tests
 go test -tags embeddings ./internal/embeddings/...
 
-# Integration tests (needs the model)
+# Integration tests (needs running provider like Ollama)
 go test -tags "embeddings integration" ./internal/embeddings/... -v
-
-# Cross-script e2e
-go test -tags "embeddings integration" ./internal/search/... -run TestCrossScript -v
 ```
 
 ## Code structure
@@ -121,14 +141,17 @@ All the embeddings code lives in `internal/embeddings/`:
 | File | What it does |
 |------|--------------|
 | `service.go` | Main interface: Encode, Search, BuildIndex |
-| `model.go` | Loads ONNX model via hugot library |
-| `index.go` | Vector similarity search (brute-force, good enough for <100k items) |
+| `provider.go` | EmbeddingProvider interface |
+| `provider_openai.go` | OpenAI-compatible API client |
+| `provider_mock.go` | Mock provider for testing |
+| `index.go` | Vector similarity search (brute-force) |
 | `cache.go` | LRU cache for embeddings |
 | `script_detect.go` | Detects if text is Latin/Arabic/Cyrillic/etc. |
+| `normalize.go` | L2 normalization for cosine similarity |
 
 ## Known limitations
 
-- Model is ~450MB (has to be downloaded separately)
-- First query is slow (~180ms) while model warms up
+- First query is slower (API round-trip + model warm-up)
 - Very short names (1-2 chars) don't work well
+- Quality depends heavily on the model used
 - Some rare scripts may have lower accuracy
