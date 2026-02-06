@@ -149,22 +149,38 @@ else
 	GOOS=${PLATFORM} go build -o bin/watchman-${PLATFORM}-amd64 github.com/moov-io/watchman/cmd/server
 endif
 
-docker: clean docker-hub docker-openshift docker-static
+docker: clean docker-hub docker-openshift
 
 docker-hub:
-	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman:${VERSION} -f ./build/Dockerfile .
+	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman:${VERSION}.${ARCH} -f ./build/Dockerfile .
+
+docker-hub-push:
+	docker push moov/watchman:${VERSION}.${ARCH}
+
+docker-hub-manifest:
+ifeq ($(shell docker manifest inspect moov/watchman:${VERSION} > /dev/null ; echo $$?), 0)
+	$(error docker tag already exists)
+else
+	docker manifest create moov/watchman:${VERSION} moov/watchman:${VERSION}.arm64 moov/watchman:${VERSION}.amd64
+	docker manifest push moov/watchman:${VERSION}
+endif
 
 docker-openshift:
-	docker build --pull --build-arg VERSION=${VERSION} -t quay.io/moov/watchman:${VERSION} -f ./build/Dockerfile.openshift .
+	docker build --pull --build-arg VERSION=${VERSION} -t quay.io/moov/watchman:${VERSION}.${ARCH} -f ./build/Dockerfile.openshift .
+
+docker-openshift-push:
+	docker push quay.io/moov/watchman:${VERSION}.${ARCH}
+
+docker-openshift-manifest:
+ifeq ($(shell docker manifest inspect quay.io/moov/watchman:${VERSION} > /dev/null ; echo $$?), 0)
+	$(error docker tag already exists)
+else
+	docker manifest create quay.io/moov/watchman:${VERSION} quay.io/moov/watchman:${VERSION}.arm64 quay.io/moov/watchman:${VERSION}.amd64
+	docker manifest push quay.io/moov/watchman:${VERSION}
+endif
 
 docker-static:
-	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman:v2-static -f ./build/Dockerfile.static .
+	docker build --pull --build-arg VERSION=${VERSION} --build-arg ARCH=${ARCH} -t moov/watchman:v2-static.${ARCH} -f ./build/Dockerfile.static .
 
-release-push-tag:
-	docker push moov/watchman:${VERSION}
-
-release-push-static:
-	docker push moov/watchman:v2-static
-
-quay-push:
-	docker push quay.io/moov/watchman:${VERSION}
+docker-static-push:
+	docker push moov/watchman:v2-static.${ARCH}

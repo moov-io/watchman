@@ -21,12 +21,13 @@ jobs:
       - uses: actions/checkout@v6
 
       - uses: dorny/paths-filter@v3
-        id: gomod_changes
+        id: go_build_changes
         with:
           filters: |
             src:
               - go.mod
               - go.sum
+              - .github/workflows/*
 
       - uses: dorny/paths-filter@v3
         id: go_changes
