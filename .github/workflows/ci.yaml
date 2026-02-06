@@ -40,7 +40,7 @@ jobs:
 
   go:
     needs: detect_changes
-    if: ${{ needs.detect_changes.outputs.gomod_changes == 'true' || needs.detect_changes.outputs.go_changes == 'true' }}
+    if: ${{ needs.detect_changes.outputs.go_build_changes == 'true' || needs.detect_changes.outputs.go_changes == 'true' }}
     uses: ./.github/workflows/go.yml
     name: Go Tests
     secrets: inherit
