@@ -1,16 +1,10 @@
 # Backend build stage
-FROM golang:1.25-bookworm AS backend
+FROM golang:1.24-bookworm AS backend
 ARG VERSION
 WORKDIR /src
 
 # Install system dependencies first
-RUN apt-get update && apt-get install -y \
-    curl \
-    autoconf \
-    automake \
-    libtool \
-    pkg-config \
-    git
+RUN apt-get update && apt-get install -y autoconf automake libtool pkg-config git
 
 # Clone and build libpostal (rarely changes)
 RUN git clone https://github.com/openvenues/libpostal.git /src/libpostal
@@ -31,6 +25,8 @@ RUN go mod download
 # Now copy the rest of the source code (frequently changes)
 COPY . /src/
 WORKDIR /src
+
+ENV PKG_CONFIG_PATH=/src/libpostal/
 RUN VERSION=${VERSION} GOTAGS="-tags libpostal" make build-server postal-server
 
 # Final stage
