@@ -50,15 +50,7 @@ Watchman supports any OpenAI-compatible embeddings API:
 
 ## Setup
 
-### 1. Build with embeddings support
-
-```bash
-go build -tags embeddings ./cmd/server
-```
-
-Without `-tags embeddings`, the feature is compiled out entirely.
-
-### 2. Choose a provider
+### Choose a provider
 
 **Option A: Ollama (free, local)**
 ```bash
@@ -71,10 +63,10 @@ ollama pull nomic-embed-text
 
 **Option B: OpenAI (paid, best quality)**
 ```bash
-export EMBEDDINGS_API_KEY=sk-your-key-here
+export EMBEDDINGS_API_KEY=ollama
 ```
 
-### 3. Run
+### Run
 
 ```bash
 export EMBEDDINGS_ENABLED=true
@@ -128,26 +120,11 @@ curl -X POST http://localhost:8084/v2/search \
 
 ```bash
 # Unit tests
-go test -tags embeddings ./internal/embeddings/...
+go test ./internal/embeddings/...
 
 # Integration tests (needs running provider like Ollama)
-go test -tags "embeddings integration" ./internal/embeddings/... -v
+go test -tags integration ./internal/embeddings/... -v
 ```
-
-## Code structure
-
-All the embeddings code lives in `internal/embeddings/`:
-
-| File | What it does |
-|------|--------------|
-| `service.go` | Main interface: Encode, Search, BuildIndex |
-| `provider.go` | EmbeddingProvider interface |
-| `provider_openai.go` | OpenAI-compatible API client |
-| `provider_mock.go` | Mock provider for testing |
-| `index.go` | Vector similarity search (brute-force) |
-| `cache.go` | LRU cache for embeddings |
-| `script_detect.go` | Detects if text is Latin/Arabic/Cyrillic/etc. |
-| `normalize.go` | L2 normalization for cosine similarity |
 
 ## Known limitations
 

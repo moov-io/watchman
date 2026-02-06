@@ -1,12 +1,10 @@
-//go:build embeddings
-
 package embeddings
 
 import "math"
 
 // normalizeL2 applies L2 normalization to a vector.
 // After normalization, dot product equals cosine similarity.
-func normalizeL2(vec []float32) []float32 {
+func normalizeL2(vec []float64) []float64 {
 	var norm float64
 	for _, v := range vec {
 		norm += float64(v) * float64(v)
@@ -17,16 +15,16 @@ func normalizeL2(vec []float32) []float32 {
 		return vec
 	}
 
-	result := make([]float32, len(vec))
+	result := make([]float64, len(vec))
 	for i, v := range vec {
-		result[i] = float32(float64(v) / norm)
+		result[i] = float64(float64(v) / norm)
 	}
 	return result
 }
 
 // normalizeL2Batch applies L2 normalization to a batch of vectors.
-func normalizeL2Batch(vecs [][]float32) [][]float32 {
-	result := make([][]float32, len(vecs))
+func normalizeL2Batch(vecs [][]float64) [][]float64 {
+	result := make([][]float64, len(vecs))
 	for i, vec := range vecs {
 		result[i] = normalizeL2(vec)
 	}
@@ -35,7 +33,7 @@ func normalizeL2Batch(vecs [][]float32) [][]float32 {
 
 // dotProduct computes the dot product of two vectors.
 // For L2-normalized vectors, this equals cosine similarity.
-func dotProduct(a, b []float32) float64 {
+func dotProduct(a, b []float64) float64 {
 	var sum float64
 	for i := range a {
 		sum += float64(a[i]) * float64(b[i])

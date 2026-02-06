@@ -1,5 +1,3 @@
-//go:build embeddings
-
 package embeddings
 
 import (
@@ -9,7 +7,7 @@ import (
 // embeddingCache provides an LRU cache for embedding vectors.
 // This reduces inference latency for repeated queries.
 type embeddingCache struct {
-	cache    *lru.Cache[string, []float32]
+	cache    *lru.Cache[string, []float64]
 	capacity int
 }
 
@@ -19,7 +17,7 @@ func newCache(size int) (*embeddingCache, error) {
 		size = 1000 // Default size
 	}
 
-	c, err := lru.New[string, []float32](size)
+	c, err := lru.New[string, []float64](size)
 	if err != nil {
 		return nil, err
 	}
@@ -32,14 +30,14 @@ func newCache(size int) (*embeddingCache, error) {
 
 // Get retrieves an embedding from the cache.
 // Returns the embedding and true if found, nil and false otherwise.
-func (c *embeddingCache) Get(text string) ([]float32, bool) {
+func (c *embeddingCache) Get(text string) ([]float64, bool) {
 	return c.cache.Get(text)
 }
 
 // Put adds an embedding to the cache.
-func (c *embeddingCache) Put(text string, embedding []float32) {
+func (c *embeddingCache) Put(text string, embedding []float64) {
 	// Make a copy to avoid external modifications
-	emb := make([]float32, len(embedding))
+	emb := make([]float64, len(embedding))
 	copy(emb, embedding)
 	c.cache.Add(text, emb)
 }

@@ -1,5 +1,3 @@
-//go:build embeddings
-
 package embeddings
 
 import (
@@ -121,6 +119,7 @@ func DefaultConfig() Config {
 	return Config{
 		Enabled: false, // Opt-in feature, requires explicit model configuration
 		Provider: ProviderConfig{
+			Name: "mock",
 			// Model and Dimension intentionally left empty - must be configured
 			NormalizeVectors: true,
 			Timeout:          30 * time.Second,

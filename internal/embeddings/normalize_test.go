@@ -1,5 +1,3 @@
-//go:build embeddings
-
 package embeddings
 
 import (
@@ -10,32 +8,32 @@ import (
 func TestNormalizeL2_Comprehensive(t *testing.T) {
 	tests := []struct {
 		name     string
-		input    []float32
+		input    []float64
 		wantNorm float64 // expected L2 norm of result (should be 1.0 for non-zero)
 	}{
 		{
 			name:     "simple vector",
-			input:    []float32{3, 4},
+			input:    []float64{3, 4},
 			wantNorm: 1.0,
 		},
 		{
 			name:     "already normalized",
-			input:    []float32{1, 0, 0},
+			input:    []float64{1, 0, 0},
 			wantNorm: 1.0,
 		},
 		{
 			name:     "negative values",
-			input:    []float32{-3, 4},
+			input:    []float64{-3, 4},
 			wantNorm: 1.0,
 		},
 		{
 			name:     "larger vector",
-			input:    []float32{1, 2, 3, 4, 5},
+			input:    []float64{1, 2, 3, 4, 5},
 			wantNorm: 1.0,
 		},
 		{
 			name:     "zero vector",
-			input:    []float32{0, 0, 0},
+			input:    []float64{0, 0, 0},
 			wantNorm: 0.0,
 		},
 	}
@@ -64,7 +62,7 @@ func TestNormalizeL2_Comprehensive(t *testing.T) {
 }
 
 func TestNormalizeL2_PreservesDirection(t *testing.T) {
-	input := []float32{3, 4}
+	input := []float64{3, 4}
 	result := normalizeL2(input)
 
 	// For [3, 4], normalized should be [0.6, 0.8]
@@ -77,7 +75,7 @@ func TestNormalizeL2_PreservesDirection(t *testing.T) {
 }
 
 func TestNormalizeL2Batch(t *testing.T) {
-	input := [][]float32{
+	input := [][]float64{
 		{3, 4},
 		{1, 0},
 		{0, 5},
@@ -106,32 +104,32 @@ func TestNormalizeL2Batch(t *testing.T) {
 func TestDotProduct_Comprehensive(t *testing.T) {
 	tests := []struct {
 		name string
-		a    []float32
-		b    []float32
+		a    []float64
+		b    []float64
 		want float64
 	}{
 		{
 			name: "orthogonal vectors",
-			a:    []float32{1, 0},
-			b:    []float32{0, 1},
+			a:    []float64{1, 0},
+			b:    []float64{0, 1},
 			want: 0.0,
 		},
 		{
 			name: "same vector",
-			a:    []float32{1, 0},
-			b:    []float32{1, 0},
+			a:    []float64{1, 0},
+			b:    []float64{1, 0},
 			want: 1.0,
 		},
 		{
 			name: "opposite vectors",
-			a:    []float32{1, 0},
-			b:    []float32{-1, 0},
+			a:    []float64{1, 0},
+			b:    []float64{-1, 0},
 			want: -1.0,
 		},
 		{
 			name: "normalized similar",
-			a:    normalizeL2([]float32{1, 1}),
-			b:    normalizeL2([]float32{1, 2}),
+			a:    normalizeL2([]float64{1, 1}),
+			b:    normalizeL2([]float64{1, 2}),
 			want: 0.9486832980505138, // cos(angle between [1,1] and [1,2])
 		},
 	}
@@ -148,8 +146,8 @@ func TestDotProduct_Comprehensive(t *testing.T) {
 
 func TestDotProduct_CosineSimilarity(t *testing.T) {
 	// For normalized vectors, dot product equals cosine similarity
-	a := normalizeL2([]float32{1, 2, 3})
-	b := normalizeL2([]float32{4, 5, 6})
+	a := normalizeL2([]float64{1, 2, 3})
+	b := normalizeL2([]float64{4, 5, 6})
 
 	similarity := dotProduct(a, b)
 
@@ -165,9 +163,9 @@ func TestDotProduct_CosineSimilarity(t *testing.T) {
 }
 
 func BenchmarkNormalizeL2(b *testing.B) {
-	vec := make([]float32, 768) // Common embedding dimension
+	vec := make([]float64, 768) // Common embedding dimension
 	for i := range vec {
-		vec[i] = float32(i) * 0.001
+		vec[i] = float64(i) * 0.001
 	}
 
 	b.ResetTimer()
@@ -177,11 +175,11 @@ func BenchmarkNormalizeL2(b *testing.B) {
 }
 
 func BenchmarkDotProduct(b *testing.B) {
-	vec1 := make([]float32, 768)
-	vec2 := make([]float32, 768)
+	vec1 := make([]float64, 768)
+	vec2 := make([]float64, 768)
 	for i := range vec1 {
-		vec1[i] = float32(i) * 0.001
-		vec2[i] = float32(i) * 0.002
+		vec1[i] = float64(i) * 0.001
+		vec2[i] = float64(i) * 0.002
 	}
 
 	b.ResetTimer()

@@ -139,7 +139,7 @@ By default Watchman does not employ TF-IDF, but it can be enabled and configured
 
 ### Cross-Script Embeddings Configuration
 
-Watchman can use neural network embeddings to match names across different writing systems (Arabic, Cyrillic, Chinese, etc.). This feature requires building with `-tags embeddings` and configuring an embeddings API provider (Ollama, OpenAI, OpenRouter, etc.).
+Watchman can use neural network embeddings to match names across different writing systems (Arabic, Cyrillic, Chinese, etc.). This feature requires configuring an embeddings API provider (Ollama, OpenAI, OpenRouter, etc.).
 
 See [Cross-Script Name Matching](cross-script-matching.md) for detailed setup instructions.
 
@@ -166,8 +166,8 @@ YAML configuration (example with OpenAI):
         Name: "openai"
         BaseURL: "https://api.openai.com/v1"
         APIKey: "${OPENAI_API_KEY}"
-        Model: "text-embedding-3-small"  # Required - no default
-        Dimension: 1536                   # Required - must match model
+        Model: "text-embedding-3-small" # Required - no default
+        Dimension: 1536                 # Required - must work with model
       CacheSize: 10000
       CrossScriptOnly: true
       SimilarityThreshold: 0.7

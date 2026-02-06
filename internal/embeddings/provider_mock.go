@@ -1,5 +1,3 @@
-//go:build embeddings
-
 package embeddings
 
 import (
@@ -49,7 +47,7 @@ func NewMockProvider(dimension int, opts ...MockProviderOption) *MockProvider {
 }
 
 // Embed generates deterministic embeddings based on text hash.
-func (m *MockProvider) Embed(ctx context.Context, texts []string) ([][]float32, error) {
+func (m *MockProvider) Embed(ctx context.Context, texts []string) ([][]float64, error) {
 	count := atomic.AddInt32(&m.callCount, 1)
 	if m.failAfter > 0 && count > m.failAfter {
 		return nil, ErrProviderFailure
@@ -63,7 +61,7 @@ func (m *MockProvider) Embed(ctx context.Context, texts []string) ([][]float32, 
 		}
 	}
 
-	result := make([][]float32, len(texts))
+	result := make([][]float64, len(texts))
 	for i, text := range texts {
 		result[i] = m.deterministicEmbedding(text)
 	}
@@ -71,9 +69,9 @@ func (m *MockProvider) Embed(ctx context.Context, texts []string) ([][]float32, 
 }
 
 // deterministicEmbedding generates a consistent, normalized embedding from text hash.
-func (m *MockProvider) deterministicEmbedding(text string) []float32 {
+func (m *MockProvider) deterministicEmbedding(text string) []float64 {
 	hash := sha256.Sum256([]byte(text))
-	vec := make([]float32, m.dimension)
+	vec := make([]float64, m.dimension)
 
 	// Use hash bytes to seed each dimension
 	for i := 0; i < m.dimension; i++ {
@@ -87,7 +85,7 @@ func (m *MockProvider) deterministicEmbedding(text string) []float32 {
 			hash[(idx+3)%32],
 		})
 		// Map to [-1, 1] range
-		vec[i] = float32(val)/float32(math.MaxUint32)*2 - 1
+		vec[i] = float64(val)/float64(math.MaxUint32)*2 - 1
 	}
 
 	return normalizeL2(vec)

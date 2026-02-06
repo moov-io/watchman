@@ -1,5 +1,3 @@
-//go:build embeddings
-
 package embeddings
 
 import (
@@ -12,7 +10,7 @@ func TestVectorIndex_AddAndSearch(t *testing.T) {
 	idx := newVectorIndex(3)
 
 	// Add some test vectors (normalized)
-	vectors := [][]float32{
+	vectors := [][]float64{
 		{1, 0, 0},     // vec0
 		{0, 1, 0},     // vec1
 		{0, 0, 1},     // vec2
@@ -26,7 +24,7 @@ func TestVectorIndex_AddAndSearch(t *testing.T) {
 	require.Equal(t, 4, idx.Size())
 
 	// Search for similar vectors
-	query := []float32{1, 0, 0} // Should be most similar to vec0
+	query := []float64{1, 0, 0} // Should be most similar to vec0
 	results := idx.Search(query, 2)
 
 	require.Len(t, results, 2)
@@ -39,7 +37,7 @@ func TestVectorIndex_SearchTopK(t *testing.T) {
 	idx := newVectorIndex(2)
 
 	// Add vectors
-	vectors := [][]float32{
+	vectors := [][]float64{
 		{1, 0},
 		{0.9, 0.1},
 		{0.8, 0.2},
@@ -52,7 +50,7 @@ func TestVectorIndex_SearchTopK(t *testing.T) {
 	idx.Add(vectors, ids, names)
 
 	// Request k=3
-	query := []float32{1, 0}
+	query := []float64{1, 0}
 	results := idx.Search(query, 3)
 
 	require.Len(t, results, 3)
@@ -64,7 +62,7 @@ func TestVectorIndex_SearchTopK(t *testing.T) {
 func TestVectorIndex_EmptyIndex(t *testing.T) {
 	idx := newVectorIndex(3)
 
-	query := []float32{1, 0, 0}
+	query := []float64{1, 0, 0}
 	results := idx.Search(query, 5)
 
 	require.Empty(t, results)
@@ -73,14 +71,14 @@ func TestVectorIndex_EmptyIndex(t *testing.T) {
 func TestVectorIndex_SearchKLargerThanIndex(t *testing.T) {
 	idx := newVectorIndex(2)
 
-	vectors := [][]float32{{1, 0}, {0, 1}}
+	vectors := [][]float64{{1, 0}, {0, 1}}
 	ids := []string{"a", "b"}
 	names := []string{"A", "B"}
 
 	idx.Add(vectors, ids, names)
 
 	// Request more than available
-	results := idx.Search([]float32{1, 0}, 10)
+	results := idx.Search([]float64{1, 0}, 10)
 
 	require.Len(t, results, 2) // Should return all available
 }
@@ -88,7 +86,7 @@ func TestVectorIndex_SearchKLargerThanIndex(t *testing.T) {
 func TestVectorIndex_Clear(t *testing.T) {
 	idx := newVectorIndex(2)
 
-	vectors := [][]float32{{1, 0}, {0, 1}}
+	vectors := [][]float64{{1, 0}, {0, 1}}
 	idx.Add(vectors, []string{"a", "b"}, []string{"A", "B"})
 
 	require.Equal(t, 2, idx.Size())
@@ -101,12 +99,12 @@ func TestVectorIndex_Clear(t *testing.T) {
 func TestVectorIndex_GetVector(t *testing.T) {
 	idx := newVectorIndex(2)
 
-	vectors := [][]float32{{1, 0}, {0, 1}}
+	vectors := [][]float64{{1, 0}, {0, 1}}
 	idx.Add(vectors, []string{"a", "b"}, []string{"A", "B"})
 
 	vec := idx.GetVector("a")
 	require.NotNil(t, vec)
-	require.Equal(t, []float32{1, 0}, vec)
+	require.Equal(t, []float64{1, 0}, vec)
 
 	vec = idx.GetVector("nonexistent")
 	require.Nil(t, vec)
@@ -115,14 +113,14 @@ func TestVectorIndex_GetVector(t *testing.T) {
 func TestDotProduct(t *testing.T) {
 	tests := []struct {
 		name     string
-		a        []float32
-		b        []float32
+		a        []float64
+		b        []float64
 		expected float64
 	}{
-		{"orthogonal vectors", []float32{1, 0}, []float32{0, 1}, 0.0},
-		{"identical vectors", []float32{1, 0}, []float32{1, 0}, 1.0},
-		{"opposite vectors", []float32{1, 0}, []float32{-1, 0}, -1.0},
-		{"partial overlap", []float32{0.7, 0.7}, []float32{1, 0}, 0.7},
+		{"orthogonal vectors", []float64{1, 0}, []float64{0, 1}, 0.0},
+		{"identical vectors", []float64{1, 0}, []float64{1, 0}, 1.0},
+		{"opposite vectors", []float64{1, 0}, []float64{-1, 0}, -1.0},
+		{"partial overlap", []float64{0.7, 0.7}, []float64{1, 0}, 0.7},
 	}
 
 	for _, tc := range tests {
@@ -134,7 +132,7 @@ func TestDotProduct(t *testing.T) {
 }
 
 func TestNormalizeL2(t *testing.T) {
-	vec := []float32{3, 4} // 3-4-5 triangle
+	vec := []float64{3, 4} // 3-4-5 triangle
 	normalized := normalizeL2(vec)
 
 	// Check magnitude is 1
@@ -150,7 +148,7 @@ func TestNormalizeL2(t *testing.T) {
 }
 
 func TestNormalizeL2_ZeroVector(t *testing.T) {
-	vec := []float32{0, 0, 0}
+	vec := []float64{0, 0, 0}
 	normalized := normalizeL2(vec)
 
 	// Should return unchanged (avoid division by zero)

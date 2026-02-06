@@ -1,5 +1,3 @@
-//go:build embeddings && integration
-
 package embeddings
 
 import (

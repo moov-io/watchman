@@ -1,5 +1,3 @@
-//go:build embeddings
-
 package embeddings
 
 import "errors"

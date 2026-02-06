@@ -1,5 +1,3 @@
-//go:build embeddings
-
 package embeddings
 
 import (
@@ -26,10 +24,10 @@ type SearchResult struct {
 type Service interface {
 	// Encode converts text to a normalized embedding vector.
 	// The returned vector has dimensions matching the configured provider.
-	Encode(ctx context.Context, text string) ([]float32, error)
+	Encode(ctx context.Context, text string) ([]float64, error)
 
 	// EncodeBatch encodes multiple texts efficiently in a single API call.
-	EncodeBatch(ctx context.Context, texts []string) ([][]float32, error)
+	EncodeBatch(ctx context.Context, texts []string) ([][]float64, error)
 
 	// BuildIndex creates a searchable index from entity names.
 	// This must be called before Search() can be used.
@@ -123,7 +121,7 @@ func createProvider(config ProviderConfig) (EmbeddingProvider, error) {
 	switch config.Name {
 	case "openai", "ollama", "openrouter", "azure", "":
 		// All use OpenAI-compatible API format
-		return NewOpenAIProvider(config)
+		return NewOpenRouterProvider(config)
 	case "mock":
 		return NewMockProvider(config.Dimension), nil
 	default:
@@ -132,7 +130,7 @@ func createProvider(config ProviderConfig) (EmbeddingProvider, error) {
 }
 
 // Encode converts text to a normalized embedding vector.
-func (s *service) Encode(ctx context.Context, text string) ([]float32, error) {
+func (s *service) Encode(ctx context.Context, text string) ([]float64, error) {
 	_, span := telemetry.StartSpan(ctx, "embeddings-encode")
 	defer span.End()
 
@@ -166,14 +164,14 @@ func (s *service) Encode(ctx context.Context, text string) ([]float32, error) {
 }
 
 // EncodeBatch encodes multiple texts efficiently.
-func (s *service) EncodeBatch(ctx context.Context, texts []string) ([][]float32, error) {
+func (s *service) EncodeBatch(ctx context.Context, texts []string) ([][]float64, error) {
 	_, span := telemetry.StartSpan(ctx, "embeddings-encode-batch", trace.WithAttributes(
 		attribute.Int("batch_size", len(texts)),
 	))
 	defer span.End()
 
 	// Check cache for all texts
-	result := make([][]float32, len(texts))
+	result := make([][]float64, len(texts))
 	uncachedIndices := make([]int, 0, len(texts))
 	uncachedTexts := make([]string, 0, len(texts))
 
@@ -230,7 +228,7 @@ func (s *service) BuildIndex(ctx context.Context, names []string, ids []string) 
 
 	// Encode all names in batches
 	batchSize := s.config.BatchSize
-	allEmbeddings := make([][]float32, 0, len(names))
+	allEmbeddings := make([][]float64, 0, len(names))
 
 	for i := 0; i < len(names); i += batchSize {
 		// Check for context cancellation

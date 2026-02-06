@@ -1,5 +1,3 @@
-//go:build embeddings
-
 package embeddings
 
 import (
@@ -14,7 +12,7 @@ import (
 // For larger datasets, consider using a more sophisticated index like HNSW.
 type vectorIndex struct {
 	mu      sync.RWMutex
-	vectors [][]float32
+	vectors [][]float64
 	ids     []string
 	names   []string
 	dim     int
@@ -24,14 +22,14 @@ type vectorIndex struct {
 func newVectorIndex(dim int) *vectorIndex {
 	return &vectorIndex{
 		dim:     dim,
-		vectors: make([][]float32, 0),
+		vectors: make([][]float64, 0),
 		ids:     make([]string, 0),
 		names:   make([]string, 0),
 	}
 }
 
 // Add adds vectors to the index with their corresponding IDs and names.
-func (idx *vectorIndex) Add(vectors [][]float32, ids, names []string) {
+func (idx *vectorIndex) Add(vectors [][]float64, ids, names []string) {
 	idx.mu.Lock()
 	defer idx.mu.Unlock()
 
@@ -42,7 +40,7 @@ func (idx *vectorIndex) Add(vectors [][]float32, ids, names []string) {
 
 // Search finds the k most similar vectors to the query.
 // Returns results sorted by similarity score (highest first).
-func (idx *vectorIndex) Search(query []float32, k int) []SearchResult {
+func (idx *vectorIndex) Search(query []float64, k int) []SearchResult {
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()
 
@@ -99,14 +97,14 @@ func (idx *vectorIndex) Clear() {
 	idx.mu.Lock()
 	defer idx.mu.Unlock()
 
-	idx.vectors = make([][]float32, 0)
+	idx.vectors = make([][]float64, 0)
 	idx.ids = make([]string, 0)
 	idx.names = make([]string, 0)
 }
 
 // GetVector returns the embedding vector for a given ID.
 // Returns nil if the ID is not found.
-func (idx *vectorIndex) GetVector(id string) []float32 {
+func (idx *vectorIndex) GetVector(id string) []float64 {
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()
 

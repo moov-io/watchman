@@ -27,7 +27,7 @@ COPY . /src/
 WORKDIR /src
 
 ENV PKG_CONFIG_PATH=/src/libpostal/
-RUN VERSION=${VERSION} GOTAGS="-tags libpostal,embeddings" make build-server postal-server
+RUN VERSION=${VERSION} GOTAGS="-tags libpostal" make build-server postal-server
 
 # Final stage
 FROM debian:trixie

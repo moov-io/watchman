@@ -15,7 +15,8 @@ Watchman:
 
     # Specify which lists to download and include in Watchman results
     # Examples: us_csl, us_ofac, us_non_sdn, us_fincen_311
-    IncludedLists: []
+    IncludedLists:
+      - us_ofac
 
     # Include any senzing formatted OpenSanctions lists
     # OpenSanctions:
@@ -37,18 +38,18 @@ Watchman:
       Min: 1
       Max: 25
     Embeddings:
-      Enabled: false                            # Opt-in feature
+      Enabled: false # Opt-in feature
       Provider:
-        Name: ""                                # ollama, openai, openrouter, azure
-        BaseURL: ""                             # API endpoint (required when enabled)
-        APIKey: ""                              # Can be set via EMBEDDINGS_API_KEY env var
-        Model: ""                               # Required: e.g., "text-embedding-3-small" (OpenAI) or "multilingual-e5-large" (Ollama)
-        Dimension: 0                            # Required: must match model (e.g., 1536 for OpenAI, 1024 for e5-large)
-        NormalizeVectors: true                  # L2 normalize if API doesn't
+        # Name: "ollama"                                         # ollama, openai, openrouter, azure
+        # BaseURL: "http://localhost:11434/v1"                   # API endpoint (required when enabled)
+        # APIKey: "ollama"                                       # Can be set via EMBEDDINGS_API_KEY env var
+        # Model: "koill/sentence-transformers:all-minilm-l12-v2" # Required: e.g., "text-embedding-3-small" (OpenAI)
+        # Dimension: 384                                         # Required: must match model (e.g., 1536 for OpenAI, 1024 for e5-large)
+        # NormalizeVectors: true                                 # L2 normalize if API doesn't
         Timeout: "30s"
         RateLimit:
-          RequestsPerSecond: 10
-          Burst: 20
+          RequestsPerSecond: 5000
+          Burst: 10000
         Retry:
           MaxRetries: 3
           InitialBackoff: "1s"
