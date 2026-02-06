@@ -113,8 +113,8 @@ jobs:
             platform: linux/amd64
             runner: ubuntu-latest
           - arch: arm64
-            platform: linux/arm64
-            runner: ubuntu-24.04-arm64
+            platform: darwin/arm64
+            runner: macos-latest
     steps:
     - name: Set up Go 1.x
       uses: actions/setup-go@v6
@@ -140,8 +140,8 @@ jobs:
             platform: linux/amd64
             runner: ubuntu-latest
           - arch: arm64
-            platform: linux/arm64
-            runner: ubuntu-24.04-arm64
+            platform: darwin/arm64
+            runner: macos-latest
     steps:
     - name: Set up Go 1.x
       uses: actions/setup-go@v6
