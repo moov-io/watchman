@@ -43,10 +43,11 @@ Moov Watchman is a high-performance sanctions screening and compliance tool that
 
 Watchman integrates the following lists to help you maintain global compliance:
 
-| Source | List |
-|--------|------|
-| US Treasury | [Office of Foreign Assets Control (OFAC)](https://ofac.treasury.gov/sanctions-list-service) |
-| US Government | [Consolidated Screening List (CSL)](https://www.trade.gov/consolidated-screening-list) |
+| Source        | List                                                                                                                                                                                    |
+|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| OpenSanctions | [Any senzing dataset from OpenSanctions](https://www.opensanctions.org/datasets/)                                                                                                       |
+| US Treasury   | [Office of Foreign Assets Control (OFAC)](https://ofac.treasury.gov/sanctions-list-service) and Non-SDN list                                                                            |
+| US Government | [Consolidated Screening List (CSL)](https://www.trade.gov/consolidated-screening-list), [FinCEN 311](https://home.treasury.gov/policy-issues/terrorism-and-illicit-finance/311-actions) |
 
 ### Future Lists
 

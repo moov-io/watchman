@@ -2,10 +2,12 @@ package display
 
 import (
 	"net/url"
+	"strings"
 
 	"github.com/moov-io/watchman/pkg/search"
 	"github.com/moov-io/watchman/pkg/sources/csl_us"
 	"github.com/moov-io/watchman/pkg/sources/ofac"
+	"github.com/moov-io/watchman/pkg/sources/opensanctions"
 )
 
 // DetailsURL returns a URL where you can view the entity on the source's website
@@ -26,6 +28,12 @@ func DetailsURL(entity search.Entity[search.Value]) string {
 	case search.SourceAPIRequest:
 		// do nothing
 	}
+
+	// Shortcut for open sanctions
+	if strings.HasPrefix(string(entity.Source), "opensanctions_") {
+		return opensanctions.DetailsURL(entity.SourceID)
+	}
+
 	// Format the entity as a Watchman search URL
 	u, _ := url.Parse("/v2/search")
 

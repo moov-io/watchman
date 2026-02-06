@@ -14,8 +14,15 @@ Watchman:
     InitialDataDirectory: ""
 
     # Specify which lists to download and include in Watchman results
-    # Examples: us_csl, us_ofac, us_non_sdn
+    # Examples: us_csl, us_ofac, us_non_sdn, us_fincen_311
     IncludedLists: []
+
+    # Include any senzing formatted OpenSanctions lists
+    # OpenSanctions:
+    #   ApiKey: "secret"
+    #   Lists:
+    #     - SourceList: opensanctions_peps
+    #       Location: https://data.opensanctions.org/datasets/latest/us_congress/senzing.json
 
     # Include any senzing formatted lists in Watchman's corpus
     # Senzing:

@@ -120,7 +120,7 @@ func readJSONLines(r io.Reader, sourceList search.SourceList) ([]search.Entity[s
 // ToWatchmanEntity converts a SenzingRecord to a Watchman Entity.
 // Handles both FEATURES array format and flat field format.
 func ToWatchmanEntity(rec SenzingRecord, sourceList search.SourceList) (search.Entity[search.Value], error) {
-	// Normalize the record (flatten FEATURES if present)
+	// Normalize the record (flatten FEATURES and arrays if present)
 	normalized := normalizeRecord(rec)
 
 	var entity search.Entity[search.Value]
@@ -179,14 +179,16 @@ func populateBusinessEntity(entity *search.Entity[search.Value], rec SenzingReco
 	}
 }
 
-// normalizeRecord flattens FEATURES array into direct fields on the record
+// normalizeRecord flattens FEATURES array and other array formats into direct fields on the record
 func normalizeRecord(rec SenzingRecord) SenzingRecord {
 	out := rec
 
+	// Flatten FEATURES if present
 	for _, feature := range rec.Features {
 		for key, val := range feature {
 			strVal, ok := val.(string)
 			if !ok {
+				// Skip non-string values gracefully
 				continue
 			}
 
@@ -257,8 +259,59 @@ func normalizeRecord(rec SenzingRecord) SenzingRecord {
 				out.Gender = strVal
 			case FieldNationality:
 				out.Nationality = strVal
+			case FieldRelAnchorDomain:
+				out.RelAnchorDomain = strVal
+			case FieldRelAnchorKey:
+				out.RelAnchorKey = strVal
+			case FieldRelPointerDomain:
+				out.RelPointerDomain = strVal
+			case FieldRelPointerKey:
+				out.RelPointerKey = strVal
+			case FieldRelPointerRole:
+				out.RelPointerRole = strVal
 			}
 		}
+	}
+
+	// Flatten array formats if flat fields are empty
+	if out.NameFull == "" && len(rec.Names) > 0 {
+		for _, name := range rec.Names {
+			if strings.ToUpper(name.NameType) == "PRIMARY" {
+				out.NameFull = name.NameFull
+				break
+			}
+		}
+		if out.NameFull == "" {
+			// Fallback to first name if no primary
+			out.NameFull = rec.Names[0].NameFull
+		}
+	}
+
+	if out.DateOfBirth == "" && len(rec.Dates) > 0 {
+		for _, date := range rec.Dates {
+			if birth, ok := date["DATE_OF_BIRTH"]; ok && birth != "" {
+				out.DateOfBirth = birth
+				break
+			}
+		}
+	}
+
+	if out.Nationality == "" && len(rec.Countries) > 0 {
+		for _, country := range rec.Countries {
+			if nat, ok := country["NATIONALITY"]; ok && nat != "" {
+				out.Nationality = nat
+				break
+			}
+		}
+	}
+
+	if out.RelPointerRole == "" && len(rec.Relationships) > 0 {
+		// Take first relationship
+		rel := rec.Relationships[0]
+		out.RelPointerRole = rel["REL_POINTER_ROLE"]
+		out.RelPointerDomain = rel["REL_POINTER_DOMAIN"]
+		out.RelPointerKey = rel["REL_POINTER_KEY"]
+		// Add more if needed
 	}
 
 	return out
@@ -269,24 +322,27 @@ func buildPersonName(rec SenzingRecord) string {
 		return rec.NameFull
 	}
 
-	var parts []string
+	var sb strings.Builder
 	if rec.NamePrefix != "" {
-		parts = append(parts, rec.NamePrefix)
+		sb.WriteString(rec.NamePrefix)
+		sb.WriteRune(' ')
 	}
 	if rec.NameFirst != "" {
-		parts = append(parts, rec.NameFirst)
+		sb.WriteString(rec.NameFirst)
+		sb.WriteRune(' ')
 	}
 	if rec.NameMiddle != "" {
-		parts = append(parts, rec.NameMiddle)
+		sb.WriteString(rec.NameMiddle)
+		sb.WriteRune(' ')
 	}
 	if rec.NameLast != "" {
-		parts = append(parts, rec.NameLast)
+		sb.WriteString(rec.NameLast)
+		sb.WriteRune(' ')
 	}
 	if rec.NameSuffix != "" {
-		parts = append(parts, rec.NameSuffix)
+		sb.WriteString(rec.NameSuffix)
 	}
-
-	return strings.Join(parts, " ")
+	return strings.TrimSpace(sb.String())
 }
 
 func parseDate(dateStr string) *time.Time {
@@ -295,6 +351,7 @@ func parseDate(dateStr string) *time.Time {
 	}
 
 	// Senzing typically uses YYYY-MM-DD, YYYYMMDD, or various date formats
+	// Also handle partial dates like "1980"
 	formats := []string{
 		"2006-01-02",
 		"20060102",
@@ -303,6 +360,7 @@ func parseDate(dateStr string) *time.Time {
 		"1/2/2006",
 		"Jan 2, 2006",
 		"January 2, 2006",
+		"2006", // year only
 	}
 
 	for _, format := range formats {
@@ -362,6 +420,30 @@ func extractGovernmentIDs(rec SenzingRecord) []search.GovernmentID {
 		})
 	}
 
+	// Add from Identifiers array
+	for _, idEntry := range rec.Identifiers {
+		idType, ok := idEntry["TRUSTED_ID_TYPE"]
+		if !ok {
+			continue
+		}
+		idNum, ok := idEntry["TRUSTED_ID_NUMBER"]
+		if !ok || idNum == "" {
+			continue
+		}
+		// Map to GovernmentID type; use string as is or map to existing
+		var mappedType string
+		switch strings.ToUpper(idType) {
+		case "WIKIDATA":
+			mappedType = "WIKIDATA" // Assume search.GovernmentIDType is string; add custom if needed
+		default:
+			mappedType = idType
+		}
+		ids = append(ids, search.GovernmentID{
+			Type:       search.GovernmentIDType(mappedType),
+			Identifier: idNum,
+		})
+	}
+
 	return ids
 }
 
@@ -411,6 +493,9 @@ func extractContactInfo(rec SenzingRecord) search.ContactInfo {
 	}
 	if rec.Website != "" {
 		info.Websites = []string{rec.Website}
+	}
+	if rec.URL != "" {
+		info.Websites = append(info.Websites, rec.URL)
 	}
 
 	return info

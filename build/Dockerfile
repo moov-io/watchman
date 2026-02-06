@@ -11,7 +11,7 @@ RUN git clone https://github.com/openvenues/libpostal.git /src/libpostal
 WORKDIR /src/libpostal
 RUN ./bootstrap.sh && \
     ./configure && \
-    make -j$(nproc) && \
+    make -j4 && \
     make install && \
     ldconfig
 

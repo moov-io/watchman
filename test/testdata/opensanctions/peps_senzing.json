@@ -1,0 +1,32 @@
+[
+  {
+    "DATA_SOURCE": "OPENSANCTIONS_PEP",
+    "RECORD_ID": "Q123456",
+    "RECORD_TYPE": "PERSON",
+    "NAME_FIRST": "John",
+    "NAME_LAST": "Smith",
+    "DATE_OF_BIRTH": "1965-03-15",
+    "NATIONALITY": "US",
+    "ADDR_CITY": "Washington",
+    "ADDR_STATE": "DC",
+    "ADDR_COUNTRY": "United States"
+  },
+  {
+    "DATA_SOURCE": "OPENSANCTIONS_PEP",
+    "RECORD_ID": "Q789012",
+    "RECORD_TYPE": "PERSON",
+    "NAME_FULL": "Maria Garcia Lopez",
+    "DATE_OF_BIRTH": "1970-07-22",
+    "NATIONALITY": "ES",
+    "ADDR_CITY": "Madrid",
+    "ADDR_COUNTRY": "Spain"
+  },
+  {
+    "DATA_SOURCE": "OPENSANCTIONS_PEP",
+    "RECORD_ID": "Q345678",
+    "RECORD_TYPE": "ORGANIZATION",
+    "NAME_ORG": "Ministry of Finance",
+    "ADDR_CITY": "Berlin",
+    "ADDR_COUNTRY": "Germany"
+  }
+]

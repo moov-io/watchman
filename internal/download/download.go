@@ -144,11 +144,41 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 		})
 	}
 
-	// Senzing lists
-	for idx := range dl.conf.Senzing {
-		listsLoaded = append(listsLoaded, dl.conf.Senzing[idx].SourceList)
+	// FinCEN 311 Records
+	if slices.Contains(requestedLists, search.SourceUSFinCEN311) {
+		listsLoaded = append(listsLoaded, search.SourceUSFinCEN311)
+
+		producerWg.Add(1)
+		g.Go(func() error {
+			defer producerWg.Done()
+
+			err := loadFinCEN311Records(ctx, logger, dl.conf, preparedLists)
+			if err != nil {
+				return fmt.Errorf("loading FinCEN 311 records: %w", err)
+			}
+			return nil
+		})
 	}
 
+	// OpenSanctions lists
+	for _, list := range dl.conf.OpenSanctions.Lists {
+		listsLoaded = append(listsLoaded, list.SourceList)
+	}
+	producerWg.Add(1)
+	g.Go(func() error {
+		defer producerWg.Done()
+
+		err := loadOpensanctionsRecords(ctx, logger, dl.conf, preparedLists)
+		if err != nil {
+			return fmt.Errorf("loading opensanctions lists: %w", err)
+		}
+		return nil
+	})
+
+	// Senzing lists
+	for _, list := range dl.conf.Senzing {
+		listsLoaded = append(listsLoaded, list.SourceList)
+	}
 	producerWg.Add(1)
 	g.Go(func() error {
 		defer producerWg.Done()
@@ -252,9 +282,12 @@ func getIncludedLists(conf Config) []search.SourceList {
 		}
 	}
 
-	// Now add Senzing
-	for i := range conf.Senzing {
-		out = append(out, conf.Senzing[i].SourceList)
+	// Now add senzing lists
+	for _, list := range conf.OpenSanctions.Lists {
+		out = append(out, list.SourceList)
+	}
+	for _, list := range conf.Senzing {
+		out = append(out, list.SourceList)
 	}
 
 	// Sort and remove duplicates

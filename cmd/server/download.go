@@ -26,10 +26,13 @@ func setupPeriodicRefreshing(ctx context.Context, logger log.Logger, errs chan e
 	}
 
 	// Setup periodic refreshing
-	ticker := time.NewTicker(getRefreshInterval(conf))
-	defer ticker.Stop()
+	refreshEvery := getRefreshInterval(conf)
+	ticker := time.NewTicker(refreshEvery)
+	logger.Info().Logf("refreshing data every %v", refreshEvery)
 
 	go func() {
+		defer ticker.Stop() // stop ticker only when we're shutdown
+
 		for {
 			select {
 			case <-ctx.Done():

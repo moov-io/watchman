@@ -131,11 +131,20 @@ jobs:
         asset_content_type: application/octet-stream
 
   docker-hub:
-    name: Docker Hub
+    name: Docker Hub (${{ matrix.platform }})
     needs: [tests, create_release]
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     permissions:
-      contents: read  # For checkout
+      contents: read
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            platform: linux/amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            platform: linux/arm64
+            runner: ubuntu-24.04-arm
     steps:
     - name: Set up Go 1.x
       uses: actions/setup-go@v6
@@ -161,34 +170,64 @@ jobs:
         make setup-webui
         make build-webui
 
-    - name: Docker ONNX Export
+    - name: Docker Hub
+      run: make docker-hub
+      env:
+        ARCH: ${{ matrix.arch }}
+
+    - name: Login to Docker Hub
       if: ${{ env.DOCKER_USERNAME }} != ""
-      run: |
-        make docker-onnx-export
-        make docker-onnx-export-push
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Docker Build
-      run: |
-        make docker-hub
-
-    - name: Push Tagged Image
+    - name: Docker Hub Push
       if: ${{ env.DOCKER_USERNAME }} != ""
-      run: |+
-        make release-push-tag
+      run: make docker-hub-push
 
-    - name: Docker Static
-      run: make docker-static
-
-    - name: Docker Push Static Image
-      run: |
-        make release-push-static
-
-  docker-openshift:
-    name: Docker Openshift
-    needs: [tests, create_release]
+  docker-hub-manifest:
+    name: Docker Hub Manifest
+    needs: [docker-hub]
     runs-on: ubuntu-latest
     permissions:
-      contents: read  # For checkout
+      contents: read
+    steps:
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v6
+      with:
+        go-version: stable
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v6
+
+    - name: Login to Docker Hub
+      if: ${{ env.DOCKER_USERNAME }} != ""
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Docker Manifest
+      if: ${{ env.DOCKER_USERNAME }} != ""
+      run: make docker-hub-manifest
+
+  docker-openshift:
+    name: Docker Openshift (${{ matrix.platform }})
+    needs: [tests, create_release]
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            platform: linux/amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            platform: linux/arm64
+            runner: ubuntu-24.04-arm
     steps:
     - name: Set up Go 1.x
       uses: actions/setup-go@v6
@@ -209,11 +248,41 @@ jobs:
 
     - name: Docker Openshift
       run: make docker-openshift
+      env:
+        ARCH: ${{ matrix.arch }}
 
     - name: Quay.io Push
+      if: ${{ env.DOCKER_USERNAME }} != ""
       run: |+
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin quay.io
-          make quay-push
+          make docker-openshift-push
       env:
         DOCKER_USERNAME: ${{ secrets.QUAY_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
+
+  docker-openshift-manifest:
+    name: Docker Openshift Manifest
+    needs: [docker-openshift]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v6
+      with:
+        go-version: stable
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v6
+
+    - name: Login to Docker Hub
+      if: ${{ env.DOCKER_USERNAME }} != ""
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Docker Manifest
+      if: ${{ env.DOCKER_USERNAME }} != ""
+      run: make docker-openshift-manifest
