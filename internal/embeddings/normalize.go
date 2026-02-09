@@ -33,10 +33,24 @@ func normalizeL2Batch(vecs [][]float64) [][]float64 {
 
 // dotProduct computes the dot product of two vectors.
 // For L2-normalized vectors, this equals cosine similarity.
+// Optimized with loop unrolling for better performance.
 func dotProduct(a, b []float64) float64 {
-	var sum float64
-	for i := range a {
-		sum += float64(a[i]) * float64(b[i])
+	if len(a) != len(b) {
+		return 0
 	}
+
+	var sum float64
+
+	// Process 4 elements at a time (manual unrolling for better CPU pipelining)
+	i := 0
+	for ; i+3 < len(a); i += 4 {
+		sum += a[i]*b[i] + a[i+1]*b[i+1] + a[i+2]*b[i+2] + a[i+3]*b[i+3]
+	}
+
+	// Handle remainder
+	for ; i < len(a); i++ {
+		sum += a[i] * b[i]
+	}
+
 	return sum
 }
