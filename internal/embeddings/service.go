@@ -227,34 +227,65 @@ func (s *service) BuildIndex(ctx context.Context, names []string, ids []string) 
 
 	s.logger.Info().Logf("embeddings: building index for %d entities", len(names))
 
-	// Encode all names in batches
-	batchSize := s.config.BatchSize
-	allEmbeddings := make([][]float64, 0, len(names))
+	// Check cache for all names first
+	allEmbeddings := make([][]float64, len(names))
+	uncachedIndices := make([]int, 0)
+	uncachedNames := make([]string, 0)
 
-	for i := 0; i < len(names); i += batchSize {
-		// Check for context cancellation
-		select {
-		case <-ctx.Done():
-			return fmt.Errorf("embeddings: build index cancelled: %w", ctx.Err())
-		default:
+	for i, name := range names {
+		if emb, ok := s.cache.Get(ctx, name); ok {
+			allEmbeddings[i] = emb
+		} else {
+			uncachedIndices = append(uncachedIndices, i)
+			uncachedNames = append(uncachedNames, name)
 		}
+	}
 
-		end := i + batchSize
-		if end > len(names) {
-			end = len(names)
-		}
+	cacheHits := len(names) - len(uncachedNames)
+	span.SetAttributes(
+		attribute.Int("cache_hits", cacheHits),
+		attribute.Int("cache_misses", len(uncachedNames)),
+	)
 
-		batch := names[i:end]
-		embeddings, err := s.provider.Embed(ctx, batch)
-		if err != nil {
-			return fmt.Errorf("embeddings: failed to encode batch %d: %w", i/batchSize, err)
-		}
+	if cacheHits > 0 {
+		s.logger.Info().Logf("embeddings: cache hits: %d/%d (%.1f%%)",
+			cacheHits, len(names), float64(cacheHits)/float64(len(names))*100)
+	}
 
-		allEmbeddings = append(allEmbeddings, embeddings...)
+	// Encode uncached names in batches
+	if len(uncachedNames) > 0 {
+		batchSize := s.config.BatchSize
 
-		// Log progress for large indexes
-		if len(names) > 1000 && (i+batchSize)%(batchSize*10) == 0 {
-			s.logger.Info().Logf("embeddings: indexed %d/%d entities", i+batchSize, len(names))
+		for i := 0; i < len(uncachedNames); i += batchSize {
+			// Check for context cancellation
+			select {
+			case <-ctx.Done():
+				return fmt.Errorf("embeddings: build index cancelled: %w", ctx.Err())
+			default:
+			}
+
+			end := i + batchSize
+			if end > len(uncachedNames) {
+				end = len(uncachedNames)
+			}
+
+			batch := uncachedNames[i:end]
+			embeddings, err := s.provider.Embed(ctx, batch)
+			if err != nil {
+				return fmt.Errorf("embeddings: failed to encode batch %d: %w", i/batchSize, err)
+			}
+
+			// Fill in results and cache
+			for j, emb := range embeddings {
+				originalIdx := uncachedIndices[i+j]
+				allEmbeddings[originalIdx] = emb
+				s.cache.Put(ctx, uncachedNames[i+j], emb)
+			}
+
+			// Log progress for large indexes
+			if len(uncachedNames) > 1000 && (i+batchSize)%(batchSize*10) == 0 {
+				s.logger.Info().Logf("embeddings: encoded %d/%d uncached entities", i+batchSize, len(uncachedNames))
+			}
 		}
 	}
 
@@ -264,7 +295,8 @@ func (s *service) BuildIndex(ctx context.Context, names []string, ids []string) 
 	s.index.Add(allEmbeddings, ids, names)
 	s.mu.Unlock()
 
-	s.logger.Info().Logf("embeddings: index built with %d entities", len(names))
+	s.logger.Info().Logf("embeddings: index built with %d entities (%d from cache, %d newly encoded)",
+		len(names), cacheHits, len(uncachedNames))
 
 	return nil
 }
