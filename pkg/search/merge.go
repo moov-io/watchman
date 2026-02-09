@@ -169,29 +169,45 @@ func (e *Entity[T]) merge(other Entity[T]) Entity[T] {
 }
 
 func mergeStrings(ss ...[]string) []string {
-	return merge.Slices(
+	out := merge.Slices(
 		func(s string) string {
 			return strings.ToLower(s)
 		},
-		nil, // don't merge, just unique
+		func(acc *string, s string) {
+			if acc == nil {
+				*acc = s
+			}
+		},
 		ss...,
 	)
+
+	if len(out) == 0 {
+		return nil
+	}
+
+	return out
 }
 
 func mergeGovernmentIDs(ids1, ids2 []GovernmentID) []GovernmentID {
-	return merge.Slices(
+	out := merge.Slices(
 		func(id GovernmentID) string {
 			return strings.ToLower(fmt.Sprintf("%s/%s/%s", id.Country, id.Type, id.Identifier))
 		},
 		nil, // don't merge, just unique
 		ids1, ids2,
 	)
+
+	if len(out) == 0 {
+		return nil
+	}
+
+	return out
 }
 
 func mergeAddresses(a1, a2 []Address) []Address {
 	// We're assuming that within two entities Line1 + Line2 is unique enough to be a unique address.
 	// We want different Line1's and Line2's to be different addresses
-	return merge.Slices(
+	out := merge.Slices(
 		func(addr Address) string {
 			return strings.ToLower(fmt.Sprintf("%s/%s", addr.Line1, addr.Line2))
 		},
@@ -205,34 +221,58 @@ func mergeAddresses(a1, a2 []Address) []Address {
 		},
 		a1, a2,
 	)
+
+	if len(out) == 0 {
+		return nil
+	}
+
+	return out
 }
 
 func mergeCryptoAddresses(c1, c2 []CryptoAddress) []CryptoAddress {
-	return merge.Slices(
+	out := merge.Slices(
 		func(addr CryptoAddress) string {
 			return strings.ToLower(fmt.Sprintf("%s/%s", addr.Currency, addr.Address))
 		},
 		nil, // don't merge, just unique
 		c1, c2,
 	)
+
+	if len(out) == 0 {
+		return nil
+	}
+
+	return out
 }
 
 func mergeAffiliations(a1, a2 []Affiliation) []Affiliation {
-	return merge.Slices(
+	out := merge.Slices(
 		func(aff Affiliation) string {
 			return strings.ToLower(fmt.Sprintf("%s/%s", aff.EntityName, aff.Type))
 		},
 		nil, // don't merge, just unique
 		a1, a2,
 	)
+
+	if len(out) == 0 {
+		return nil
+	}
+
+	return out
 }
 
 func mergeHistoricalInfo(h1, h2 []HistoricalInfo) []HistoricalInfo {
-	return merge.Slices(
+	out := merge.Slices(
 		func(h HistoricalInfo) string {
 			return strings.ToLower(fmt.Sprintf("%s/%s", h.Type, h.Value))
 		},
 		nil, // don't merge, just unique
 		h1, h2,
 	)
+
+	if len(out) == 0 {
+		return nil
+	}
+
+	return out
 }
