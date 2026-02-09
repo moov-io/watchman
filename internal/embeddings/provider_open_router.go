@@ -8,6 +8,7 @@ import (
 
 	openrouter "github.com/OpenRouterTeam/go-sdk"
 	"github.com/OpenRouterTeam/go-sdk/models/operations"
+	"github.com/ccoveille/go-safecast/v2"
 	"github.com/moov-io/base/telemetry"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -63,6 +64,9 @@ func NewOpenRouterProvider(config ProviderConfig) (*OpenRouterProvider, error) {
 	}
 	if config.BaseURL != "" {
 		args = append(args, openrouter.WithServerURL(config.BaseURL))
+	}
+	if timeout > time.Second {
+		args = append(args, openrouter.WithTimeout(timeout))
 	}
 
 	return &OpenRouterProvider{
@@ -161,11 +165,16 @@ func (p *OpenRouterProvider) calculateBackoff(attempt int) time.Duration {
 		maxBackoff = 30 * time.Second
 	}
 
-	backoff := initial * time.Duration(1<<uint(attempt-1))
-	if backoff > maxBackoff {
-		backoff = maxBackoff
+	shift, err := safecast.Convert[uint](attempt - 1)
+	if err == nil {
+		backoff := initial * time.Duration(1<<shift)
+		if backoff > maxBackoff {
+			backoff = maxBackoff
+		}
+		return backoff
 	}
-	return backoff
+
+	return initial
 }
 
 // Dimension returns the embedding dimension for this provider.

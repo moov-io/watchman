@@ -11,6 +11,7 @@ require (
 	github.com/adamdecaf/merge v0.2.1
 	github.com/antchfx/htmlquery v1.3.5
 	github.com/bbalet/stopwords v1.0.0
+	github.com/ccoveille/go-safecast/v2 v2.0.0
 	github.com/dongri/phonenumber v0.1.12
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-retryablehttp v0.7.8

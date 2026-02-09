@@ -7,6 +7,8 @@ import (
 	"math"
 	"sync/atomic"
 	"time"
+
+	"github.com/ccoveille/go-safecast/v2"
 )
 
 // MockProvider generates deterministic embeddings for testing.
@@ -31,7 +33,10 @@ func WithMockDelay(delay time.Duration) MockProviderOption {
 // WithMockFailAfter causes the mock to fail after N successful calls.
 func WithMockFailAfter(n int) MockProviderOption {
 	return func(m *MockProvider) {
-		m.failAfter = int32(n)
+		i, err := safecast.Convert[int32](n)
+		if err == nil {
+			m.failAfter = i
+		}
 	}
 }
 

@@ -6,6 +6,13 @@ Watchman:
   Telemetry:
     ServiceName: "watchman"
 
+  # Database:
+  #   Postgres:
+  #     Address: "127.0.0.1:5432"
+  #     User: "watchman"
+  #     Password: "watchman"
+  #   DatabaseName: "watchman"
+
   Webui:
     BasePath: "/"
 

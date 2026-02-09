@@ -131,6 +131,8 @@ func ContainsScript(text string, script Script) bool {
 		rangeTable = unicode.Hebrew
 	case ScriptGreek:
 		rangeTable = unicode.Greek
+	case ScriptUnknown:
+		return true
 	default:
 		return false
 	}

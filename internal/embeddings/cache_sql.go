@@ -19,7 +19,7 @@ type sqlRepository struct {
 }
 
 func newSqlRepository(ctx context.Context, config Config, database db.DB) (*sqlRepository, error) {
-	table := fmt.Sprintf("cache_%s_dim%d", config.Provider.Model, config.Provider.Dimension)
+	table := createTableName(config)
 
 	ctx, span := telemetry.StartSpan(ctx, "embeddings-cache-sql", trace.WithAttributes(
 		attribute.String("table", table),
@@ -28,7 +28,9 @@ func newSqlRepository(ctx context.Context, config Config, database db.DB) (*sqlR
 
 	err := setupTable(ctx, table, database)
 	if err != nil {
-		return nil, fmt.Errorf("creating %s failed: %w", table, err)
+		err = fmt.Errorf("creating %s failed: %w", table, err)
+		span.RecordError(err)
+		return nil, err
 	}
 
 	return &sqlRepository{
@@ -41,7 +43,17 @@ const (
 	maxDataSize = 512
 )
 
+func createTableName(config Config) string {
+	table := fmt.Sprintf("cache_%s_dim%d", config.Provider.Model, config.Provider.Dimension)
+
+	return strings.ReplaceAll(table, "-", "_")
+}
+
 func setupTable(ctx context.Context, table string, database db.DB) error {
+	if database == nil {
+		return fmt.Errorf("missing database: %v", database)
+	}
+
 	var create string
 
 	switch database.Dialect() {
