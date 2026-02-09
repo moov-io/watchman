@@ -44,13 +44,13 @@ Set `crossScriptOnly: true` (the default) to get this behavior.
 
 Watchman supports any OpenAI-compatible embeddings API:
 
-| Provider           | Base URL                                              | Notes              |
-|--------------------|-------------------------------------------------------|--------------------|
-| **Chutes**         | `https://chutes-qwen-qwen3-embedding-8b.chutes.ai/v1` | Many models, paid  |
-| **Ollama** (local) | `http://localhost:11434/v1`                           | Free, runs locally |
-| **OpenAI**         | `https://api.openai.com/v1`                           | High quality, paid |
-| **OpenRouter**     | `https://openrouter.ai/api/v1`                        | Many models, paid  |
-| **Azure OpenAI**   | `https://{resource}.openai.azure.com/...`             | Enterprise         |
+| Provider           | Base URL                                                               | Notes              |
+|--------------------|------------------------------------------------------------------------|--------------------|
+| **Chutes**         | [`https://{model}.chutes.ai/v1`](https://chutes.ai/app?type=embedding) | Many models, paid  |
+| **Ollama** (local) | `http://localhost:11434/v1`                                            | Free, runs locally |
+| **OpenAI**         | `https://api.openai.com/v1`                                            | High quality, paid |
+| **OpenRouter**     | `https://openrouter.ai/api/v1`                                         | Many models, paid  |
+| **Azure OpenAI**   | `https://{resource}.openai.azure.com/...`                              | Enterprise         |
 
 ## Setup
 
@@ -58,11 +58,13 @@ Watchman supports any OpenAI-compatible embeddings API:
 
 **Option A: Ollama (local, open-source models)**
 
+Install or [Download Ollama](https://ollama.com/download)
 ```bash
-# Install Ollama
 curl -fsSL https://ollama.com/install.sh | sh
+```
 
-# Pull the model
+Pull the model
+```
 ollama pull qwen3-embedding
 ```
 

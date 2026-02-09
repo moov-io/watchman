@@ -81,7 +81,7 @@ func (p *OpenRouterProvider) Embed(ctx context.Context, texts []string) ([][]flo
 		return nil, nil
 	}
 
-	ctx, span := telemetry.StartSpan(ctx, "openai-embed", trace.WithAttributes(
+	ctx, span := telemetry.StartSpan(ctx, "generate-embeddings", trace.WithAttributes(
 		attribute.String("provider", p.Name()),
 		attribute.Int("batch_size", len(texts)),
 	))
@@ -176,17 +176,14 @@ func (p *OpenRouterProvider) calculateBackoff(attempt int) time.Duration {
 	return initial
 }
 
-// Dimension returns the embedding dimension for this provider.
 func (p *OpenRouterProvider) Dimension() int {
 	return p.dimension
 }
 
-// Name returns the provider name for logging/telemetry.
 func (p *OpenRouterProvider) Name() string {
-	return fmt.Sprintf("openai-compatible(%s)", p.config.Model)
+	return fmt.Sprintf("%s(%s)", p.config.Name, p.config.Model)
 }
 
-// Close releases any resources held by the provider.
 func (p *OpenRouterProvider) Close() error {
-	return nil // HTTP client doesn't need explicit cleanup
+	return nil
 }
