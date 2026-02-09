@@ -10,6 +10,9 @@ import (
 
 // vectorIndex provides approximate nearest neighbor search for embeddings.
 // Optimized for ~50k entries with multi-core parallel search.
+//
+// TODO(adam): look at Hierarchical Navigable Small World Graphs (HNSW)
+// https://github.com/fogfish/hnsw
 type vectorIndex struct {
 	mu         sync.RWMutex
 	vectorData []float64 // Flat array: all vectors concatenated for cache efficiency
