@@ -12,7 +12,6 @@ import (
 )
 
 // AccuracyBenchmark runs comprehensive accuracy measurements
-// Run with: go test -tags "embeddings integration" -run TestAccuracy -v
 func TestAccuracyBenchmark(t *testing.T) {
 	service := createAccuracyTestService(t)
 	defer service.Shutdown()

@@ -7,6 +7,7 @@ package main
 import (
 	"cmp"
 	"context"
+	"fmt"
 	"os"
 	"runtime"
 	"strings"
@@ -84,7 +85,7 @@ func refreshAllSources(ctx context.Context, logger log.Logger, downloader downlo
 	// Rebuild embedding index if enabled
 	if searchService != nil {
 		if err := searchService.RebuildEmbeddingIndex(ctx); err != nil {
-			logger.Warn().Logf("failed to rebuild embedding index: %v", err)
+			return fmt.Errorf("failed to rebuild embedding index: %v", err)
 		}
 	}
 
