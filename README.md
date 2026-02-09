@@ -170,7 +170,7 @@ Watchman recommends [file-based configuration](https://moov-io.github.io/watchma
 
 #### Reporting hits to OFAC
 
-OFAC requires [reporting of positive hits](https://ofac.treasury.gov/ofac-reporting-system). Work with your Financial Institution for complete details.
+OFAC requires [reporting of positive hits](https://ofac.treasury.gov/ofac-reporting-system) and has a [voluntary self-disclosure](https://disclosure.ofac.treas.gov/) portal. Work with your Financial Institution for complete details.
 
 #### Useful resources
 
