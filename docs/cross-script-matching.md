@@ -52,42 +52,49 @@ Watchman supports any OpenAI-compatible embeddings API:
 
 ### Choose a provider
 
-**Option A: Ollama (free, local)**
+**Option A: Ollama (local, open-source models)**
+
 ```bash
 # Install Ollama
 curl -fsSL https://ollama.com/install.sh | sh
 
 # Pull the model
-ollama pull nomic-embed-text
+ollama pull qwen3-embedding
 ```
-
-#### Example Models
-
-Models with [embedding support on Ollama](https://ollama.com/search?c=embedding&o=newest).
-
-| Source                                                                              | Ollama                                                                                       | OpenRouter                                                                  |
-|-------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
-| [HuggingFace](https://huggingface.co/sentence-transformers/paraphrase-MiniLM-L6-v2) | [Link](https://ollama.com/koill/sentence-transformers:paraphrase-multilingual-minilm-l12-v2) | [Link](https://openrouter.ai/sentence-transformers/paraphrase-minilm-l6-v2) |
 
 **Option B: OpenAI (paid, best quality)**
 ```bash
-export EMBEDDINGS_API_KEY="sk-..." # Your OpenAI API key
-```
-
-### Run
-
-```bash
-export EMBEDDINGS_ENABLED=true
-# For Ollama (default):
-export EMBEDDINGS_BASE_URL=http://localhost:11434/v1
-export EMBEDDINGS_MODEL=nomic-embed-text
-
-# For OpenAI:
-# export EMBEDDINGS_BASE_URL=https://api.openai.com/v1
-# export EMBEDDINGS_MODEL=text-embedding-3-small
-# export EMBEDDINGS_DIMENSION=1536
-
-./watchman
+  Search:
+    # Tune these settings based on your available resources (CPUs, etc).
+    # Usually a multiple (i.e. 2x, 4x) of GOMAXPROCS is optimal.
+    Goroutines:
+      Default: 10
+      Min: 1
+      Max: 25
+    Embeddings:
+      Enabled: true # Opt-in feature
+      Provider:
+        Name: "openrouter"                      # ollama, openai, openrouter, azure
+        BaseURL: "https://openrouter.ai/api/v1" # API endpoint (required when enabled)
+        APIKey: "<api-key>"                     # Can be set via EMBEDDINGS_API_KEY env var
+        Model: "qwen/qwen3-embedding-8b"        # Required: e.g., "text-embedding-3-small" (OpenAI)
+        Dimension: 4096                         # Required: must match model (e.g., 1536 for OpenAI, 1024 for e5-large)
+        NormalizeVectors: true                  # L2 normalize if API doesn't
+        Timeout: "10s"
+        RateLimit:
+          RequestsPerSecond: 100
+          Burst: 75
+        Retry:
+          MaxRetries: 3
+          InitialBackoff: "1s"
+          MaxBackoff: "30s"
+      Cache:
+        # Cache type can be one of Blank (disabled), memory, sql
+        Type: "sql"
+      CrossScriptOnly: true # Hybrid approach: embeddings for cross-script only
+      SimilarityThreshold: 0.70
+      BatchSize: 32
+      IndexBuildTimeout: "10m"
 ```
 
 ## Configuration
@@ -105,33 +112,28 @@ export EMBEDDINGS_MODEL=nomic-embed-text
 
 ### Recommended models
 
-Cross-script name matching quality varies significantly between models. Choose based on your accuracy requirements:
+Cross-script name matching quality varies significantly between models. Models with [embedding support on Ollama](https://ollama.com/search?c=embedding&o=newest).
 
-| Model | Provider | Dimension | Cross-script Quality | Notes |
-|-------|----------|-----------|---------------------|-------|
-| `text-embedding-3-small` | OpenAI | 1536 | Best | Recommended for production |
-| `text-embedding-3-large` | OpenAI | 3072 | Best | Higher accuracy, slower |
-| `multilingual-e5-large` | Ollama | 1024 | Good | Best open-source option |
-| `nomic-embed-text` | Ollama | 768 | Limited | General-purpose, not optimized for names |
+Choose based on your accuracy requirements:
+
+| Model                                                             | Provider            | Dimension | Cross-script Quality | Notes                                    |
+|-------------------------------------------------------------------|---------------------|-----------|----------------------|------------------------------------------|
+| [Qwen3 Embedding](https://huggingface.co/Qwen/Qwen3-Embedding-8B) | Ollama & OpenRouter | 4096      | Best                 | Open source router, easy to run.         |
+| `text-embedding-3-small`                                          | OpenAI              | 1536      | Best                 | Recommended for production               |
+| `text-embedding-3-large`                                          | OpenAI              | 3072      | Best                 | Higher accuracy, slower                  |
+| `multilingual-e5-large`                                           | Ollama              | 1024      | Good                 | Best open-source option                  |
+| `nomic-embed-text`                                                | Ollama              | 768       | Limited              | General-purpose, not optimized for names |
 
 ## API
 
 Nothing special — just search as usual. Embeddings kick in automatically for non-Latin queries:
 
 ```bash
-curl -X POST http://localhost:8084/v2/search \
-  -H "Content-Type: application/json" \
-  -d '{"name": "محمد علي", "type": "person"}'
+$ curl -s "http://localhost:8084/v2/search?type=person&limit=1&name=Владимир+Путин+PUTIN" | jq -r '.entities[] | .name,.match'
 ```
-
-## Testing
-
-```bash
-# Unit tests
-go test ./internal/embeddings/...
-
-# Integration tests (needs running provider like Ollama)
-go test -tags integration ./internal/embeddings/... -v
+```
+Vladimir Vladimirovich PUTIN
+0.949172991083859
 ```
 
 ## Known limitations

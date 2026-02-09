@@ -168,7 +168,9 @@ YAML configuration (example with OpenAI):
         APIKey: "${OPENAI_API_KEY}"
         Model: "text-embedding-3-small" # Required - no default
         Dimension: 1536                 # Required - must work with model
-      CacheSize: 10000
+      Cache:
+        Type: "memory" # or sql, which disregards size
+        Size: 10000
       CrossScriptOnly: true
       SimilarityThreshold: 0.7
       BatchSize: 32
