@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sync/atomic"
 	"time"
 
 	openrouter "github.com/OpenRouterTeam/go-sdk"
 	"github.com/OpenRouterTeam/go-sdk/models/operations"
-	"github.com/ccoveille/go-safecast/v2"
 	"github.com/moov-io/base/telemetry"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -83,11 +83,15 @@ func (p *OpenRouterProvider) Embed(ctx context.Context, texts []string) ([][]flo
 
 	ctx, span := telemetry.StartSpan(ctx, "generate-embeddings", trace.WithAttributes(
 		attribute.String("provider", p.Name()),
+		attribute.String("model", p.config.Model),
 		attribute.Int("batch_size", len(texts)),
 	))
 	defer span.End()
 
 	out := make([][]float64, len(texts))
+
+	var promptTokens int64
+	var totalTokens int64
 
 	g, ctx := errgroup.WithContext(ctx)
 
@@ -115,20 +119,15 @@ func (p *OpenRouterProvider) Embed(ctx context.Context, texts []string) ([][]flo
 				return fmt.Errorf("generating embeddings failed: %w", err)
 			}
 
-			// backoff := p.calculateBackoff(attempt) // TODO(adam): ??
-
 			if body := resp.CreateEmbeddingsResponseBody; body != nil {
 				if len(body.Data) > 0 {
 					out[i] = body.Data[0].Embedding.ArrayOfNumber
 				}
 
-				// if body.Usage != nil { // TODO(adam):
-				// 	fmt.Printf("  Tokens: Prompt=%.2f  Total=%.2f", body.Usage.PromptTokens, body.Usage.TotalTokens)
-				// 	if body.Usage.Cost != nil {
-				// 		fmt.Printf("  Cost=%.2f", *body.Usage.Cost)
-				// 	}
-				// 	fmt.Printf("\n")
-				// }
+				if body.Usage != nil {
+					atomic.AddInt64(&promptTokens, int64(body.Usage.PromptTokens))
+					atomic.AddInt64(&totalTokens, int64(body.Usage.TotalTokens))
+				}
 			}
 
 			return nil
@@ -141,39 +140,16 @@ func (p *OpenRouterProvider) Embed(ctx context.Context, texts []string) ([][]flo
 		return nil, err
 	}
 
-	// Normalize if configured
 	if p.normalize {
 		out = normalizeL2Batch(out)
 	}
 
-	// span.SetAttributes(
-	// 	attribute.Int("tokens_used", embResp.Usage.TotalTokens), // TODO(adam):
-	// )
+	span.SetAttributes(
+		attribute.Int64("prompt_tokens", promptTokens),
+		attribute.Int64("total_tokens", totalTokens),
+	)
 
 	return out, nil
-}
-
-// calculateBackoff computes the backoff duration for a given retry attempt.
-func (p *OpenRouterProvider) calculateBackoff(attempt int) time.Duration {
-	initial := p.config.Retry.InitialBackoff
-	if initial == 0 {
-		initial = time.Second
-	}
-	maxBackoff := p.config.Retry.MaxBackoff
-	if maxBackoff == 0 {
-		maxBackoff = 30 * time.Second
-	}
-
-	shift, err := safecast.Convert[uint](attempt - 1)
-	if err == nil {
-		backoff := initial * time.Duration(1<<shift)
-		if backoff > maxBackoff {
-			backoff = maxBackoff
-		}
-		return backoff
-	}
-
-	return initial
 }
 
 func (p *OpenRouterProvider) Dimension() int {
