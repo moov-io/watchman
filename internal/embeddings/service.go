@@ -60,7 +60,7 @@ type service struct {
 	logger log.Logger
 	config Config
 
-	provider EmbeddingProvider
+	provider Provider
 	index    *vectorIndex
 	cache    Cache
 
@@ -115,19 +115,6 @@ func NewService(logger log.Logger, config Config, database db.DB) (Service, erro
 		index:    newVectorIndex(provider.Dimension()),
 		cache:    cache,
 	}, nil
-}
-
-// createProvider creates an embedding provider based on configuration.
-func createProvider(config ProviderConfig) (EmbeddingProvider, error) {
-	switch config.Name {
-	case "openai", "ollama", "openrouter", "azure", "":
-		// All use OpenAI-compatible API format
-		return NewOpenRouterProvider(config)
-	case "mock":
-		return NewMockProvider(config.Dimension), nil
-	default:
-		return nil, fmt.Errorf("unknown provider: %s", config.Name)
-	}
 }
 
 // Encode converts text to a normalized embedding vector.

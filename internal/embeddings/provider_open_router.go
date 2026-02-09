@@ -16,7 +16,7 @@ import (
 	"golang.org/x/time/rate"
 )
 
-// OpenRouterProvider implements EmbeddingProvider using OpenAI-compatible APIs.
+// OpenRouterProvider implements Provider using OpenAI-compatible APIs.
 // Compatible with: OpenAI, Ollama, OpenRouter, Azure OpenAI, LMStudio, etc.
 type OpenRouterProvider struct {
 	config    ProviderConfig
@@ -97,6 +97,7 @@ func (p *OpenRouterProvider) Embed(ctx context.Context, texts []string) ([][]flo
 	for i := range texts {
 		i := i // capture for closure
 		text := texts[i]
+
 		g.Go(func() error {
 			// rate limit check
 			if err := p.limiter.Wait(ctx); err != nil {
@@ -108,7 +109,6 @@ func (p *OpenRouterProvider) Embed(ctx context.Context, texts []string) ([][]flo
 					Str: openrouter.String(text),
 				},
 				Model: p.config.Model,
-				// EncodingFormat: openrouter.Pointer(operations.EncodingFormatBase64),
 			}
 
 			resp, err := p.client.Embeddings.Generate(ctx, req)
@@ -123,7 +123,7 @@ func (p *OpenRouterProvider) Embed(ctx context.Context, texts []string) ([][]flo
 					out[i] = body.Data[0].Embedding.ArrayOfNumber
 				}
 
-				// if body.Usage != nil {
+				// if body.Usage != nil { // TODO(adam):
 				// 	fmt.Printf("  Tokens: Prompt=%.2f  Total=%.2f", body.Usage.PromptTokens, body.Usage.TotalTokens)
 				// 	if body.Usage.Cost != nil {
 				// 		fmt.Printf("  Cost=%.2f", *body.Usage.Cost)
@@ -138,7 +138,7 @@ func (p *OpenRouterProvider) Embed(ctx context.Context, texts []string) ([][]flo
 
 	err := g.Wait()
 	if err != nil {
-		span.RecordError(err) // TODO(adam): panics
+		span.RecordError(err)
 		return nil, err
 	}
 
