@@ -61,6 +61,14 @@ curl -fsSL https://ollama.com/install.sh | sh
 ollama pull nomic-embed-text
 ```
 
+#### Example Models
+
+Models with [embedding support on Ollama](https://ollama.com/search?c=embedding&o=newest).
+
+| Source                                                                              | Ollama                                                                                       | OpenRouter                                                                  |
+|-------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
+| [HuggingFace](https://huggingface.co/sentence-transformers/paraphrase-MiniLM-L6-v2) | [Link](https://ollama.com/koill/sentence-transformers:paraphrase-multilingual-minilm-l12-v2) | [Link](https://openrouter.ai/sentence-transformers/paraphrase-minilm-l6-v2) |
+
 **Option B: OpenAI (paid, best quality)**
 ```bash
 export EMBEDDINGS_API_KEY=ollama
