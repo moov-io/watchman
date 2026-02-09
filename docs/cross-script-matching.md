@@ -71,7 +71,7 @@ Models with [embedding support on Ollama](https://ollama.com/search?c=embedding&
 
 **Option B: OpenAI (paid, best quality)**
 ```bash
-export EMBEDDINGS_API_KEY=ollama
+export EMBEDDINGS_API_KEY="sk-..." # Your OpenAI API key
 ```
 
 ### Run
