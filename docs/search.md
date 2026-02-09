@@ -195,8 +195,7 @@ curl -X POST http://localhost:8084/v2/search \
 | Chinese  | 金正恩         | Kim Jong Un    | 79%   |
 
 This feature requires:
-1. Running an embeddings provider (Ollama, OpenAI, etc.)
-2. Enabling via `EMBEDDINGS_ENABLED=true`
+- Running an embeddings provider (Ollama, OpenAI, etc.)
 
 For detailed setup instructions, see [Cross-Script Name Matching](cross-script-matching.md).
 
