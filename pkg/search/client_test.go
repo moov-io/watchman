@@ -38,7 +38,7 @@ func testAPI(tb testing.TB) testSetup {
 
 	searchConfig := search.DefaultConfig()
 	indexedLists := index.NewLists(nil) // only in-mem
-	searchService, err := search.NewService(logger, searchConfig, indexedLists)
+	searchService, err := search.NewService(logger, searchConfig, nil, indexedLists)
 	require.NoError(tb, err)
 
 	dl := ofactest.GetDownloader(tb)

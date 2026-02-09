@@ -95,12 +95,12 @@ func main() {
 
 	// Setup search service and endpoints
 	indexedLists := index.NewLists(ingestRepository)
-	searchService, err := search.NewService(logger, conf.Search, indexedLists)
+	searchService, err := search.NewService(logger, conf.Search, database, indexedLists)
 	if err != nil {
 		logger.Fatal().LogErrorf("problem setting up search service: %v", err)
 		os.Exit(1)
 	}
-	err = setupPeriodicRefreshing(ctx, logger, errs, conf.Download, downloader, indexedLists)
+	err = setupPeriodicRefreshing(ctx, logger, errs, conf.Download, downloader, indexedLists, searchService)
 	if err != nil {
 		logger.Fatal().LogErrorf("problem during initial download: %v", err)
 		os.Exit(1)

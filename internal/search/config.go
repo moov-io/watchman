@@ -5,10 +5,13 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+
+	"github.com/moov-io/watchman/internal/embeddings"
 )
 
 type Config struct {
 	Goroutines Goroutines
+	Embeddings embeddings.Config
 }
 
 type Goroutines struct {
@@ -31,5 +34,6 @@ func DefaultConfig() Config {
 			Min:     cpus,
 			Max:     cpus * 4,
 		},
+		Embeddings: embeddings.DefaultConfig(),
 	}
 }

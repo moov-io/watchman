@@ -2,10 +2,12 @@ package model_validation
 
 import (
 	"bytes"
+	"cmp"
 	"context"
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"text/tabwriter"
@@ -39,6 +41,10 @@ func TestOFACMethodology_Name(t *testing.T) {
 			ofacPerfectMatches = append(ofacPerfectMatches, result)
 		}
 	}
+
+	slices.SortFunc(ofacPerfectMatches, func(r1, r2 ofactest.SearchResult) int {
+		return cmp.Compare(r1.Name, r2.Name)
+	})
 
 	var buf bytes.Buffer
 	buf.WriteString("## Comparison with OFAC portal\n")

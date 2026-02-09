@@ -137,6 +137,46 @@ By default Watchman does not employ TF-IDF, but it can be enabled and configured
 | `TFIDF_MIN_IDF`        | MinIDF is the floor for IDF values. Prevents very common terms from having zero or negative weight.            | 0.1     |
 | `TFIDF_MAX_IDF`        | MaxIDF is the ceiling for IDF values. Prevents single-occurrence terms from dominating the score.              | 10.0    |
 
+### Cross-Script Embeddings Configuration
+
+Watchman can use neural network embeddings to match names across different writing systems (Arabic, Cyrillic, Chinese, etc.). This feature requires configuring an embeddings API provider (Ollama, OpenAI, OpenRouter, etc.).
+
+See [Cross-Script Name Matching](cross-script-matching.md) for detailed setup instructions.
+
+| Environmental Variable            | Description                                                       | Default |
+|-----------------------------------|-------------------------------------------------------------------|---------|
+| `EMBEDDINGS_ENABLED`              | Enable embedding-based cross-script search.                       | `false` |
+| `EMBEDDINGS_BASE_URL`             | API endpoint URL for embeddings provider (required when enabled). | Empty   |
+| `EMBEDDINGS_API_KEY`              | API key for authentication (optional for Ollama).                 | Empty   |
+| `EMBEDDINGS_MODEL`                | Model name to use for embeddings (required when enabled).         | Empty   |
+| `EMBEDDINGS_DIMENSION`            | Embedding vector dimension (required, must match model).          | `0`     |
+| `EMBEDDINGS_CACHE_SIZE`           | Number of embedding vectors to cache in memory.                   | `10000` |
+| `EMBEDDINGS_CROSS_SCRIPT_ONLY`    | Only use embeddings for non-Latin queries (recommended).          | `true`  |
+| `EMBEDDINGS_SIMILARITY_THRESHOLD` | Minimum similarity score (0.0-1.0) for results.                   | `0.7`   |
+| `EMBEDDINGS_BATCH_SIZE`           | Batch size for encoding multiple texts.                           | `32`    |
+| `EMBEDDINGS_INDEX_BUILD_TIMEOUT`  | Maximum time allowed for building the embedding index.            | `10m`   |
+
+YAML configuration (example with OpenAI):
+
+```yaml
+  Search:
+    Embeddings:
+      Enabled: true
+      Provider:
+        Name: "openai"
+        BaseURL: "https://api.openai.com/v1"
+        APIKey: "${OPENAI_API_KEY}"
+        Model: "text-embedding-3-small" # Required - no default
+        Dimension: 1536                 # Required - must work with model
+      Cache:
+        Type: "memory" # or sql, which disregards size
+        Size: 10000
+      CrossScriptOnly: true
+      SimilarityThreshold: 0.7
+      BatchSize: 32
+      IndexBuildTimeout: "10m"
+```
+
 ### Similarity Configuration
 
 | Environmental Variable             | Description                                                                                                   | Default |

@@ -11,7 +11,9 @@ import (
 	"time"
 
 	"github.com/moov-io/watchman/internal/concurrencychamp"
+	"github.com/moov-io/watchman/internal/db"
 	"github.com/moov-io/watchman/internal/download"
+	"github.com/moov-io/watchman/internal/embeddings"
 	"github.com/moov-io/watchman/internal/index"
 	"github.com/moov-io/watchman/internal/indices"
 	"github.com/moov-io/watchman/internal/largest"
@@ -24,16 +26,33 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+// embeddingSearchLimitMultiplier is used to fetch extra results from embedding search
+// to account for filtering (by type, threshold, etc.) before returning final results.
+const embeddingSearchLimitMultiplier = 2
+
 type Service interface {
 	LatestStats() download.Stats
 
 	Search(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error)
+
+	// RebuildEmbeddingIndex rebuilds the embedding index from current entities.
+	// This should be called after the entity list has been updated.
+	RebuildEmbeddingIndex(ctx context.Context) error
 }
 
-func NewService(logger log.Logger, config Config, indexedLists index.Lists) (Service, error) {
+func NewService(logger log.Logger, config Config, database db.DB, indexedLists index.Lists) (Service, error) {
 	cm, err := concurrencychamp.NewConcurrencyManager(config.Goroutines.Default, config.Goroutines.Min, config.Goroutines.Max)
 	if err != nil {
 		return nil, fmt.Errorf("creating search service: %w", err)
+	}
+
+	// Initialize embeddings service (optional, for cross-script matching)
+	var embeddingsSvc embeddings.Service
+	if config.Embeddings.Enabled {
+		embeddingsSvc, err = embeddings.NewService(logger, config.Embeddings, database)
+		if err != nil {
+			return nil, fmt.Errorf("creating embeddings service: %w", err)
+		}
 	}
 
 	return &service{
@@ -41,6 +60,7 @@ func NewService(logger log.Logger, config Config, indexedLists index.Lists) (Ser
 		config:       config,
 		indexedLists: indexedLists,
 		cm:           cm,
+		embeddings:   embeddingsSvc,
 	}, nil
 }
 
@@ -49,6 +69,7 @@ type service struct {
 	config Config
 
 	indexedLists index.Lists
+	embeddings   embeddings.Service
 
 	cm *concurrencychamp.ConcurrencyManager
 }
@@ -68,10 +89,91 @@ func (s *service) Search(ctx context.Context, query search.Entity[search.Value],
 	))
 	defer span.End()
 
+	// Check if we should use embedding-based search for cross-script queries
+	if s.shouldUseEmbeddings(query.Name) {
+		span.SetAttributes(attribute.Bool("search.use_embeddings", true))
+		out, err := s.performEmbeddingSearch(ctx, query, opts)
+		if err != nil {
+			// Fall back to Jaro-Winkler on embedding search failure
+			s.logger.Info().Logf("embedding search failed, falling back to Jaro-Winkler: %v", err)
+		} else {
+			return out, nil
+		}
+	}
+
+	span.SetAttributes(attribute.Bool("search.use_embeddings", false))
 	out, err := s.performSearch(ctx, query, opts)
 	if err != nil {
 		return nil, fmt.Errorf("v2 search: %w", err)
 	}
+	return out, nil
+}
+
+// shouldUseEmbeddings determines if the query should use embedding-based search.
+// Returns true for non-Latin scripts (Arabic, Cyrillic, Chinese, etc.) when embeddings are enabled.
+func (s *service) shouldUseEmbeddings(queryName string) bool {
+	if s.embeddings == nil {
+		return false
+	}
+	return s.embeddings.ShouldUseEmbeddings(queryName)
+}
+
+// performEmbeddingSearch executes a search using neural embeddings.
+// This is used for cross-script matching (e.g., Arabic query -> Latin results).
+func (s *service) performEmbeddingSearch(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error) {
+	_, span := telemetry.StartSpan(ctx, "perform-embedding-search", trace.WithAttributes(
+		attribute.Int("opts.limit", opts.Limit),
+		attribute.Float64("opts.min_match", opts.MinMatch),
+	))
+	defer span.End()
+
+	// Search using embeddings (fetch extra to account for filtering)
+	results, err := s.embeddings.Search(ctx, query.Name, opts.Limit*embeddingSearchLimitMultiplier)
+	if err != nil {
+		return nil, fmt.Errorf("embedding search: %w", err)
+	}
+
+	// Get all entities for lookup
+	searchEntities, err := s.indexedLists.GetEntities(ctx, query.Source)
+	if err != nil {
+		return nil, fmt.Errorf("getting indexed entities: %w", err)
+	}
+
+	// Build map for fast entity lookup by SourceID
+	entityMap := make(map[string]search.Entity[search.Value], len(searchEntities))
+	for _, e := range searchEntities {
+		entityMap[e.SourceID] = e
+	}
+
+	// Convert results to SearchedEntity
+	var out []search.SearchedEntity[search.Value]
+	for _, result := range results {
+		if result.Score < opts.MinMatch {
+			continue
+		}
+
+		entity, ok := entityMap[result.ID]
+		if !ok {
+			continue
+		}
+
+		// Apply type filter if specified
+		if query.Type != "" && query.Type != entity.Type {
+			continue
+		}
+
+		out = append(out, search.SearchedEntity[search.Value]{
+			Entity: entity,
+			Match:  result.Score,
+		})
+
+		if len(out) >= opts.Limit {
+			break
+		}
+	}
+
+	span.SetAttributes(attribute.Int("results_count", len(out)))
+
 	return out, nil
 }
 
@@ -208,4 +310,44 @@ func getGoroutineCount(cm *concurrencychamp.ConcurrencyManager) (int, error) {
 		return int(n), nil
 	}
 	return cm.PickConcurrency(), nil
+}
+
+// RebuildEmbeddingIndex rebuilds the embedding index from current entities.
+// This extracts entity names and IDs, then calls BuildIndex on the embeddings service.
+func (s *service) RebuildEmbeddingIndex(ctx context.Context) error {
+	if s.embeddings == nil {
+		return nil // Embeddings not enabled
+	}
+
+	ctx, span := telemetry.StartSpan(ctx, "rebuild-embedding-index")
+	defer span.End()
+
+	// Get all entities
+	entities, err := s.indexedLists.GetEntities(ctx, "")
+	if err != nil {
+		return fmt.Errorf("getting entities for embedding index: %w", err)
+	}
+
+	if len(entities) == 0 {
+		s.logger.Info().Log("embeddings: no entities to index")
+		return nil
+	}
+
+	// Extract names and IDs
+	names := make([]string, len(entities))
+	ids := make([]string, len(entities))
+	for i, e := range entities {
+		names[i] = e.Name
+		ids[i] = e.SourceID
+	}
+
+	s.logger.Info().Logf("embeddings: rebuilding index with %d entities", len(entities))
+
+	// Build the embedding index
+	if err := s.embeddings.BuildIndex(ctx, names, ids); err != nil {
+		return fmt.Errorf("building embedding index: %w", err)
+	}
+
+	s.logger.Info().Logf("embeddings: index rebuilt successfully")
+	return nil
 }

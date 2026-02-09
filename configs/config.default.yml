@@ -6,6 +6,13 @@ Watchman:
   Telemetry:
     ServiceName: "watchman"
 
+  # Database:
+  #   Postgres:
+  #     Address: "127.0.0.1:5432"
+  #     User: "watchman"
+  #     Password: "watchman"
+  #   DatabaseName: "watchman"
+
   Webui:
     BasePath: "/"
 
@@ -36,6 +43,31 @@ Watchman:
       Default: 10
       Min: 1
       Max: 25
+    Embeddings:
+      Enabled: false # Opt-in feature
+      Provider:
+        # Name: "ollama"                                         # ollama, openai, openrouter, azure
+        # BaseURL: "http://localhost:11434/v1"                   # API endpoint (required when enabled)
+        # APIKey: "ollama"                                       # Can be set via EMBEDDINGS_API_KEY env var
+        # Model: "koill/sentence-transformers:all-minilm-l12-v2" # Required: e.g., "text-embedding-3-small" (OpenAI)
+        # Dimension: 384                                         # Required: must match model (e.g., 1536 for OpenAI, 1024 for e5-large)
+        # NormalizeVectors: true                                 # L2 normalize if API doesn't
+        Timeout: "30s"
+        RateLimit:
+          RequestsPerSecond: 50
+          Burst: 25
+        Retry:
+          MaxRetries: 3
+          InitialBackoff: "1s"
+          MaxBackoff: "30s"
+      Cache:
+        # Cache type can be one of Blank (disabled), memory, sql
+        Type: "memory"
+        Size: 10000
+      CrossScriptOnly: true   # Hybrid approach: embeddings for cross-script only
+      SimilarityThreshold: 0.70
+      BatchSize: 32
+      IndexBuildTimeout: "10m"
 
   PostalPool:
     Enabled: false

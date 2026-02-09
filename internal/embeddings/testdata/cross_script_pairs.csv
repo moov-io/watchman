@@ -1,0 +1,42 @@
+# Cross-script name matching test pairs
+# Format: Query,Expected Match,Min Score,Description
+# These pairs test the model's ability to match names across different scripts
+# Thresholds based on actual model performance testing
+
+# Arabic to Latin (excellent performance: 0.82-0.97)
+محمد علي,Mohamed Ali,0.90,Common Arabic name transliteration
+أحمد حسن,Ahmed Hassan,0.90,Arabic name with common transliteration
+عبد الله,Abdullah,0.85,Single Arabic name
+خالد محمود,Khaled Mahmoud,0.80,Arabic name pair
+
+# Cyrillic to Latin (exceptional performance: 0.90-0.998)
+Владимир Путин,Vladimir Putin,0.95,Russian name transliteration
+Иван Иванов,Ivan Ivanov,0.95,Common Russian name
+Александр Петров,Alexander Petrov,0.85,Russian name pair
+Дмитрий Медведев,Dmitry Medvedev,0.90,Russian political figure
+
+# Chinese to Latin (moderate performance: 0.64-0.84)
+金正恩,Kim Jong Un,0.75,Korean name in Chinese characters
+李明,Li Ming,0.60,Common Chinese name
+习近平,Xi Jinping,0.55,Chinese political figure
+王伟,Wang Wei,0.80,Common Chinese name
+
+# Korean (Hangul) to Latin (variable performance)
+김정은,Kim Jong Un,0.70,Korean name
+박지성,Park Ji Sung,0.40,Korean name
+이민호,Lee Min Ho,0.35,Korean name
+
+# Japanese to Latin (good performance: 0.78-0.93)
+山田太郎,Yamada Taro,0.70,Common Japanese name
+田中花子,Tanaka Hanako,0.85,Common Japanese female name
+
+# Greek to Latin (good performance: 0.68-0.83)
+Αλέξανδρος,Alexander,0.60,Greek name
+Νικόλαος,Nikolaos,0.80,Greek name
+
+# Hebrew to Latin (excellent performance: 0.91-0.96)
+משה,Moshe,0.90,Hebrew name
+דוד,David,0.85,Common Hebrew name
+
+# Thai to Latin (very good performance: 0.87)
+สมชาย,Somchai,0.80,Common Thai name

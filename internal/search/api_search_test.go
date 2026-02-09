@@ -52,7 +52,7 @@ func testAPI(tb testing.TB) testSetup {
 	indexedLists := index.NewLists(nil) // only in-mem
 
 	searchConfig := DefaultConfig()
-	service, err := NewService(logger, searchConfig, indexedLists)
+	service, err := NewService(logger, searchConfig, nil, indexedLists)
 	require.NoError(tb, err)
 
 	dl := ofactest.GetDownloader(tb)

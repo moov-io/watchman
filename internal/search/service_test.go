@@ -88,7 +88,7 @@ func testService(tb testing.TB) Service {
 	indexedLists := index.NewLists(nil) // only in-mem
 
 	searchConfig := DefaultConfig()
-	svc, err := NewService(logger, searchConfig, indexedLists)
+	svc, err := NewService(logger, searchConfig, nil, indexedLists)
 	require.NoError(tb, err)
 
 	indexedLists.Update(download.Stats{
