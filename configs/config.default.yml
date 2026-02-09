@@ -22,8 +22,7 @@ Watchman:
 
     # Specify which lists to download and include in Watchman results
     # Examples: us_csl, us_ofac, us_non_sdn, us_fincen_311
-    IncludedLists:
-      - us_ofac
+    IncludedLists: []
 
     # Include any senzing formatted OpenSanctions lists
     # OpenSanctions:
