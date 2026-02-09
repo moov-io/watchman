@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/moov-io/watchman/internal/db"
+
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/base/telemetry"
 	"go.opentelemetry.io/otel/attribute"
@@ -60,14 +62,14 @@ type service struct {
 
 	provider EmbeddingProvider
 	index    *vectorIndex
-	cache    *embeddingCache
+	cache    Cache
 
 	mu sync.RWMutex
 }
 
 // NewService creates a new embeddings service.
 // Returns nil if config.Enabled is false.
-func NewService(logger log.Logger, config Config) (Service, error) {
+func NewService(logger log.Logger, config Config, database db.DB) (Service, error) {
 	if !config.Enabled {
 		return nil, nil
 	}
@@ -83,7 +85,8 @@ func NewService(logger log.Logger, config Config) (Service, error) {
 		attribute.String("provider", config.Provider.Name),
 		attribute.String("model", config.Provider.Model),
 		attribute.Int("dimension", config.Provider.Dimension),
-		attribute.Int("cache_size", config.CacheSize),
+		attribute.String("cache_type", config.Cache.Type),
+		attribute.Int("cache_size", config.Cache.Size),
 		attribute.Bool("cross_script_only", config.CrossScriptOnly),
 	))
 	defer span.End()
@@ -97,15 +100,13 @@ func NewService(logger log.Logger, config Config) (Service, error) {
 	logger.Info().Logf("embeddings: using %s provider", provider.Name())
 
 	// Create cache
-	cache, err := newCache(config.CacheSize)
+	cache, err := NewCache(ctx, config, database)
 	if err != nil {
 		return nil, fmt.Errorf("embeddings: failed to create cache: %w", err)
 	}
 
-	logger.Info().Logf("embeddings: service initialized (provider=%s, dimension=%d, cache_size=%d, cross_script_only=%v)",
-		provider.Name(), provider.Dimension(), config.CacheSize, config.CrossScriptOnly)
-
-	_ = ctx // silence unused variable warning
+	logger.Info().Logf("embeddings: service initialized (provider=%s, dimension=%d, %s_cache_size=%d, cross_script_only=%v)",
+		provider.Name(), provider.Dimension(), config.Cache.Type, config.Cache.Size, config.CrossScriptOnly)
 
 	return &service{
 		logger:   logger,
@@ -135,7 +136,7 @@ func (s *service) Encode(ctx context.Context, text string) ([]float64, error) {
 	defer span.End()
 
 	// Check cache first
-	if emb, ok := s.cache.Get(text); ok {
+	if emb, ok := s.cache.Get(ctx, text); ok {
 		span.SetAttributes(attribute.Bool("cache_hit", true))
 		return emb, nil
 	}
@@ -158,7 +159,7 @@ func (s *service) Encode(ctx context.Context, text string) ([]float64, error) {
 	}
 
 	// Cache the result
-	s.cache.Put(text, embeddings[0])
+	s.cache.Put(ctx, text, embeddings[0])
 
 	return embeddings[0], nil
 }
@@ -176,7 +177,7 @@ func (s *service) EncodeBatch(ctx context.Context, texts []string) ([][]float64,
 	uncachedTexts := make([]string, 0, len(texts))
 
 	for i, text := range texts {
-		if emb, ok := s.cache.Get(text); ok {
+		if emb, ok := s.cache.Get(ctx, text); ok {
 			result[i] = emb
 		} else {
 			uncachedIndices = append(uncachedIndices, i)
@@ -199,7 +200,7 @@ func (s *service) EncodeBatch(ctx context.Context, texts []string) ([][]float64,
 		// Fill in results and cache
 		for i, idx := range uncachedIndices {
 			result[idx] = embeddings[i]
-			s.cache.Put(uncachedTexts[i], embeddings[i])
+			s.cache.Put(ctx, uncachedTexts[i], embeddings[i])
 		}
 	}
 

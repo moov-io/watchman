@@ -325,10 +325,11 @@ func createAccuracyTestService(t *testing.T) Service {
 
 	logger := log.NewTestLogger()
 	config := getTestConfig()
-	config.CacheSize = 1000
+	config.Cache.Type = "memory"
+	config.Cache.Size = 1000
 	config.SimilarityThreshold = 0.5
 
-	service, err := NewService(logger, config)
+	service, err := NewService(logger, config, nil)
 	if err != nil {
 		t.Skipf("Could not create embeddings service (provider may be unavailable): %v", err)
 	}
@@ -496,11 +497,12 @@ func createBenchmarkService(b *testing.B) Service {
 
 	logger := log.NewNopLogger()
 	config := getTestConfig()
-	config.CacheSize = 1000
+	config.Cache.Type = "memory"
+	config.Cache.Size = 1000
 	config.SimilarityThreshold = 0.5
 
 	ctx := context.Background()
-	service, err := NewService(logger, config)
+	service, err := NewService(logger, config, nil)
 	if err != nil {
 		b.Skipf("Could not create embeddings service (provider may be unavailable): %v", err)
 		return nil

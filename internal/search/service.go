@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/moov-io/watchman/internal/concurrencychamp"
+	"github.com/moov-io/watchman/internal/db"
 	"github.com/moov-io/watchman/internal/download"
 	"github.com/moov-io/watchman/internal/embeddings"
 	"github.com/moov-io/watchman/internal/index"
@@ -39,7 +40,7 @@ type Service interface {
 	RebuildEmbeddingIndex(ctx context.Context) error
 }
 
-func NewService(logger log.Logger, config Config, indexedLists index.Lists) (Service, error) {
+func NewService(logger log.Logger, config Config, database db.DB, indexedLists index.Lists) (Service, error) {
 	cm, err := concurrencychamp.NewConcurrencyManager(config.Goroutines.Default, config.Goroutines.Min, config.Goroutines.Max)
 	if err != nil {
 		return nil, fmt.Errorf("creating search service: %w", err)
@@ -48,7 +49,7 @@ func NewService(logger log.Logger, config Config, indexedLists index.Lists) (Ser
 	// Initialize embeddings service (optional, for cross-script matching)
 	var embeddingsSvc embeddings.Service
 	if config.Embeddings.Enabled {
-		embeddingsSvc, err = embeddings.NewService(logger, config.Embeddings)
+		embeddingsSvc, err = embeddings.NewService(logger, config.Embeddings, database)
 		if err != nil {
 			return nil, fmt.Errorf("creating embeddings service: %w", err)
 		}

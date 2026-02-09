@@ -175,7 +175,7 @@ func setupIngestAPITest(t *testing.T, fn func(ingestApiSetup)) {
 		indexedLists := index.NewLists(ingestRepository)
 
 		searchConfig := search.DefaultConfig()
-		searchService, err := search.NewService(logger, searchConfig, indexedLists)
+		searchService, err := search.NewService(logger, searchConfig, db, indexedLists)
 		require.NoError(t, err)
 
 		t.Setenv("APP_CONFIG_SECRETS", filepath.Join("testdata", "fincen-config.yml"))

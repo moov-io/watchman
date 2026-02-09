@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/moov-io/base/database"
@@ -17,6 +18,8 @@ import (
 )
 
 type DB interface {
+	Dialect() string
+
 	Ping() error
 	Close() error
 
@@ -81,6 +84,7 @@ func New(config database.DatabaseConfig, logger log.Logger, options ...Option) (
 	out := &db{
 		db:      data,
 		onQuery: func(query string) string { return query },
+		dialect: strings.ToLower(dbType),
 	}
 
 	for _, opt := range append(dbOpts, options...) {
@@ -93,8 +97,14 @@ func New(config database.DatabaseConfig, logger log.Logger, options ...Option) (
 }
 
 type db struct {
-	db      DB
+	db      *sql.DB
 	onQuery func(query string) string
+
+	dialect string
+}
+
+func (db *db) Dialect() string {
+	return db.dialect
 }
 
 func (db *db) Ping() error {

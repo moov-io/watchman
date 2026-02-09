@@ -58,7 +58,10 @@ func getTestConfig() Config {
 				MaxBackoff:     30 * time.Second,
 			},
 		},
-		CacheSize:           100,
+		Cache: CacheConfig{
+			Type: "memory",
+			Size: 100,
+		},
 		CrossScriptOnly:     true,
 		SimilarityThreshold: 0.7,
 		BatchSize:           32,
@@ -70,7 +73,7 @@ func TestIntegration_ServiceCreation(t *testing.T) {
 	logger := log.NewTestLogger()
 	config := getTestConfig()
 
-	service, err := NewService(logger, config)
+	service, err := NewService(logger, config, nil)
 	if err != nil {
 		t.Skipf("Could not create embeddings service (provider may be unavailable): %v", err)
 	}
@@ -313,7 +316,7 @@ func createTestService(t *testing.T) Service {
 	logger := log.NewTestLogger()
 	config := getTestConfig()
 
-	service, err := NewService(logger, config)
+	service, err := NewService(logger, config, nil)
 	if err != nil {
 		t.Skipf("Could not create embeddings service (provider may be unavailable): %v", err)
 	}

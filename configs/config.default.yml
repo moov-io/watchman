@@ -54,7 +54,10 @@ Watchman:
           MaxRetries: 3
           InitialBackoff: "1s"
           MaxBackoff: "30s"
-      CacheSize: 10000
+      Cache:
+        # Cache type can be one of Blank (disabled), memory, sql
+        Type: "memory"
+        Size: 10000
       CrossScriptOnly: true   # Hybrid approach: embeddings for cross-script only
       SimilarityThreshold: 0.70
       BatchSize: 32

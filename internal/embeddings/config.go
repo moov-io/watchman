@@ -3,6 +3,7 @@ package embeddings
 import (
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -15,9 +16,8 @@ type Config struct {
 	// Provider configuration for the embedding API.
 	Provider ProviderConfig `json:"provider"`
 
-	// CacheSize is the maximum number of embeddings to cache in memory.
-	// Helps reduce latency for repeated queries.
-	CacheSize int `json:"cacheSize"`
+	// Cache stores embeddings for the specified model
+	Cache CacheConfig `json:"cache"`
 
 	// CrossScriptOnly when true, embeddings are only used for non-Latin queries.
 	// Latin-only queries fall back to Jaro-Winkler for better performance.
@@ -85,6 +85,17 @@ type ProviderConfig struct {
 	Headers map[string]string `json:"headers,omitempty"`
 }
 
+// CacheConfig holds settings for the embeddings cache
+type CacheConfig struct {
+	// Type is the cache to be used.
+	// Options: Blank (Disabled), memory, sql
+	Type string `json:"type"`
+
+	// Size is the maximum number of embeddings to cache in memory.
+	// This value is ignored for sql
+	Size int `json:"cacheSize"`
+}
+
 // RateLimitConfig controls the rate of API requests.
 type RateLimitConfig struct {
 	// RequestsPerSecond defines the sustained request rate.
@@ -133,7 +144,10 @@ func DefaultConfig() Config {
 				MaxBackoff:     30 * time.Second,
 			},
 		},
-		CacheSize:           10000,
+		Cache: CacheConfig{
+			Type: "memory",
+			Size: 10000,
+		},
 		CrossScriptOnly:     true, // Hybrid approach: embeddings for cross-script only
 		SimilarityThreshold: 0.70,
 		BatchSize:           32,
@@ -185,7 +199,7 @@ func (c Config) Validate() error {
 		return ErrInvalidBatchSize
 	}
 
-	if c.CacheSize < 0 {
+	if strings.EqualFold(c.Cache.Type, "memory") && c.Cache.Size < 0 {
 		return ErrInvalidCacheSize
 	}
 
