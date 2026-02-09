@@ -1,6 +1,9 @@
 ---
 layout: page
 title: Cross-Script Name Matching
+hide_hero: true
+show_sidebar: false
+menubar: docs-menu
 ---
 
 # Cross-Script Name Matching

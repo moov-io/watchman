@@ -70,6 +70,9 @@ Watchman:
       Min: 1
       Max: 25
 
+  Embeddings:
+    Enabled: false # See below for Cross-Script Embeddings
+
   Geocoding:
     Enabled: false
     Provider:
