@@ -55,8 +55,8 @@ Watchman:
         # NormalizeVectors: true                                 # L2 normalize if API doesn't
         Timeout: "30s"
         RateLimit:
-          RequestsPerSecond: 5000
-          Burst: 10000
+          RequestsPerSecond: 50
+          Burst: 25
         Retry:
           MaxRetries: 3
           InitialBackoff: "1s"
