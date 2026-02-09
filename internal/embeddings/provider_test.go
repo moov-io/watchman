@@ -49,6 +49,23 @@ func forEachProvider(t *testing.T, fn func(p embeddings.Provider)) {
 		fn(p)
 	}
 
+	t.Run("chutes", func(t *testing.T) {
+		if testing.Short() {
+			t.Skip("-short flag provided")
+		}
+
+		apiKey := os.Getenv("CHUTES_API_KEY")
+		run(t, apiKey, embeddings.ProviderConfig{
+			Name:    "chutes",
+			BaseURL: "https://chutes-qwen-qwen3-embedding-8b.chutes.ai/v1/",
+			APIKey:  apiKey,
+			// Model:            "", // not required
+			Dimension:        4096,
+			NormalizeVectors: true,
+			Timeout:          10 * time.Second,
+		})
+	})
+
 	t.Run("ollama", func(t *testing.T) {
 		apiKey := os.Getenv("OLLAMA_API_KEY")
 

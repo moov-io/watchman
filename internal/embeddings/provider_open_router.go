@@ -31,9 +31,6 @@ func NewOpenRouterProvider(config ProviderConfig) (*OpenRouterProvider, error) {
 	if config.BaseURL == "" {
 		return nil, ErrBaseURLRequired
 	}
-	if config.Model == "" {
-		return nil, ErrModelRequired
-	}
 	if config.Dimension <= 0 {
 		return nil, ErrInvalidDimension
 	}
@@ -108,7 +105,9 @@ func (p *OpenRouterProvider) Embed(ctx context.Context, texts []string) ([][]flo
 				Input: operations.InputUnion{
 					Str: openrouter.String(text),
 				},
-				Model: p.config.Model,
+			}
+			if p.config.Model != "" {
+				req.Model = p.config.Model
 			}
 
 			resp, err := p.client.Embeddings.Generate(ctx, req)
