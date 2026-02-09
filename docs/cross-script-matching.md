@@ -44,12 +44,13 @@ Set `crossScriptOnly: true` (the default) to get this behavior.
 
 Watchman supports any OpenAI-compatible embeddings API:
 
-| Provider | Base URL | Notes |
-|----------|----------|-------|
-| **Ollama** (local) | `http://localhost:11434/v1` | Free, runs locally |
-| **OpenAI** | `https://api.openai.com/v1` | Best quality, paid |
-| **OpenRouter** | `https://openrouter.ai/api/v1` | Many models, paid |
-| **Azure OpenAI** | `https://{resource}.openai.azure.com/...` | Enterprise |
+| Provider           | Base URL                                              | Notes              |
+|--------------------|-------------------------------------------------------|--------------------|
+| **Chutes**         | `https://chutes-qwen-qwen3-embedding-8b.chutes.ai/v1` | Many models, paid  |
+| **Ollama** (local) | `http://localhost:11434/v1`                           | Free, runs locally |
+| **OpenAI**         | `https://api.openai.com/v1`                           | High quality, paid |
+| **OpenRouter**     | `https://openrouter.ai/api/v1`                        | Many models, paid  |
+| **Azure OpenAI**   | `https://{resource}.openai.azure.com/...`             | Enterprise         |
 
 ## Setup
 

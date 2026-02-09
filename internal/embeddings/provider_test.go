@@ -88,7 +88,7 @@ func forEachProvider(t *testing.T, fn func(p embeddings.Provider)) {
 		apiKey := os.Getenv("OPENAI_API_KEY")
 		run(t, apiKey, embeddings.ProviderConfig{
 			Name:             "openai",
-			BaseURL:          "https://api.openai.com/v1/",
+			BaseURL:          "https://api.openai.com/v1",
 			APIKey:           apiKey,
 			Model:            "text-embedding-3-small",
 			Dimension:        1536,
