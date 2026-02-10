@@ -10,6 +10,19 @@ menubar: docs-menu
 
 > For documentation on older releases of Watchman (v0.31.x series), please visit the [older docs website](https://github.com/moov-io/watchman/tree/v0.31.3/docs) in our GitHub repository.
 
+1. [File](#file)
+   1. [Environment Variables](#environment-variables)
+1. [Download](#download)
+1. [Search](#search)
+1. [Geocoding](#geocoding)
+1. [Included Lists](#included-lists)
+
+#### Search Configuration
+
+1. [TF-IDF Configuration](#tf-idf-configuration)
+1. [Cross Script Embeddings Configuration](#cross-script-embeddings-configuration)
+1. [Similarity Configuration](#similarity-configuration)
+
 ### File
 
 Set the `APP_CONFIG` environment variable with a filepath to a yaml file containing the following:
@@ -38,7 +51,11 @@ Watchman:
   #       MaxIdle: 50
   #       MaxLifetime: "60s"
   #       MaxIdleTime: "60s"
+```
 
+### Download
+
+```yaml
   Download:
     RefreshInterval: "12h"
     InitialDataDirectory: ""
@@ -60,7 +77,11 @@ Watchman:
     # Senzing:
     #   - SourceList: "senzing-persons"
     #     Location: "file://pkg/sources/senzing/testdata/persons.jsonl"
+```
 
+### Search
+
+```yaml
   Search:
     # Tune these settings based on your available resources (CPUs, etc).
     # Watchman will dynamically find an optimal goroutine count for faster responses.
@@ -70,9 +91,13 @@ Watchman:
       Min: 1
       Max: 25
 
-  Embeddings:
-    Enabled: false # See below for Cross-Script Embeddings
+    Embeddings:
+      Enabled: false # See below for Cross-Script Embeddings
+```
 
+### Geocoding
+
+```yaml
   Geocoding:
     Enabled: false
     Provider:
