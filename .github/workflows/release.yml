@@ -178,6 +178,8 @@ jobs:
     - name: Docker Hub Push
       if: ${{ env.DOCKER_USERNAME }} != ""
       run: make docker-hub-push
+      env:
+        ARCH: ${{ matrix.arch }}
 
   docker-hub-manifest:
     name: Docker Hub Manifest
@@ -250,6 +252,7 @@ jobs:
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin quay.io
           make docker-openshift-push
       env:
+        ARCH: ${{ matrix.arch }}
         DOCKER_USERNAME: ${{ secrets.QUAY_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
 
