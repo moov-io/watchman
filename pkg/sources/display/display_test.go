@@ -34,6 +34,13 @@ func TestDetailsURL(t *testing.T) {
 			Expected: "https://www.trade.gov/data-visualization/csl-search",
 		},
 		{
+			Entity: search.Entity[search.Value]{
+				Source:   search.SourceUKCSL,
+				SourceID: "UK-12345",
+			},
+			Expected: "https://www.gov.uk/government/publications/the-uk-sanctions-list",
+		},
+		{
 			Entity:   apiRequest,
 			Expected: "/v2/search?altNames=BURTON+BURGESS&birthDate=1963-07-28&gov_passport=Belize%3AP0017003&gov_ssn=United+States%3A561-77-9011&name=Elvis+Angus+LOGAN+MOREY&type=person",
 		},

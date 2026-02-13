@@ -61,7 +61,7 @@ func fetchLatestUKSanctionsListURL(ctx context.Context, logger log.Logger, initi
 
 	// Fetch the HTML page and look for the latest link
 	ukSanctionsNameAndSource := make(map[string]string)
-	ukSanctionsNameAndSource["UK_Sanctions_List.ods"] = defaultUKSanctionsListHTML
+	ukSanctionsNameAndSource["uk_sanctions_index.html"] = defaultUKSanctionsListHTML
 
 	dl := download.New(logger, nil)
 
@@ -70,7 +70,7 @@ func fetchLatestUKSanctionsListURL(ctx context.Context, logger log.Logger, initi
 		return "", fmt.Errorf("getting UK Sanctions html index: %w", err)
 	}
 
-	indexContents, exists := pages["UK_Sanctions_List.ods"]
+	indexContents, exists := pages["uk_sanctions_index.html"]
 	if !exists {
 		return "", fmt.Errorf("UK sanctions index page %s not found", defaultUKSanctionsListHTML)
 	}

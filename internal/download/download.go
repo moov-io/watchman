@@ -160,6 +160,22 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 		})
 	}
 
+	// UK CSL Records
+	if slices.Contains(requestedLists, search.SourceUKCSL) {
+		listsLoaded = append(listsLoaded, search.SourceUKCSL)
+
+		producerWg.Add(1)
+		g.Go(func() error {
+			defer producerWg.Done()
+
+			err := loadUKCSLRecords(ctx, logger, dl.conf, preparedLists)
+			if err != nil {
+				return fmt.Errorf("loading UK CSL records: %w", err)
+			}
+			return nil
+		})
+	}
+
 	// OpenSanctions lists
 	for _, list := range dl.conf.OpenSanctions.Lists {
 		listsLoaded = append(listsLoaded, list.SourceList)
