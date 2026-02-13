@@ -48,6 +48,9 @@ func ToEntity(record SanctionsListRecord) search.Entity[search.Value] {
 			entity.Type = search.EntityVessel
 			entity.Vessel = mapVessel(record)
 			entity.Name = entity.Vessel.Name
+
+		case Undefined:
+			entity.Type = search.EntityUnknown
 		}
 	}
 
@@ -124,7 +127,7 @@ func mapVessel(record SanctionsListRecord) *search.Vessel {
 	vessel.AltNames = collectAltNames(record)
 
 	// Flag from address countries (ships often have flag country)
-	if len(record.AddressCountries) > 0 {
+	if len(record.AddressCountries) > 0 && record.AddressCountries[0] != "" {
 		vessel.Flag = norm.Country(record.AddressCountries[0])
 	}
 
@@ -165,12 +168,10 @@ func mapAddresses(record SanctionsListRecord) []search.Address {
 }
 
 func mapSanctionsInfo(record SanctionsListRecord) *search.SanctionsInfo {
-	info := &search.SanctionsInfo{}
-
-	// Add UN Reference if available
-	if record.UNReferenceNumber != "" {
-		info.Description = "UN Reference: " + record.UNReferenceNumber
+	if record.UNReferenceNumber == "" {
+		return nil
 	}
-
-	return info
+	return &search.SanctionsInfo{
+		Description: "UN Reference: " + record.UNReferenceNumber,
+	}
 }

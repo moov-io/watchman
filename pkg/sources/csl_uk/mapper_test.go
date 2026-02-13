@@ -217,7 +217,7 @@ func TestMapSanctionsInfo_Empty(t *testing.T) {
 
 	info := mapSanctionsInfo(record)
 
-	require.Empty(t, info.Description)
+	require.Nil(t, info)
 }
 
 func TestConvertSanctionsListData(t *testing.T) {

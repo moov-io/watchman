@@ -16,6 +16,6 @@ func TestExtractVariablesOfType(t *testing.T) {
 	found, err := ast.ExtractVariablesOfType(fsys, modelsPath, "EntityType")
 	require.NoError(t, err)
 
-	expected := []string{"aircraft", "business", "organization", "person", "vessel"}
+	expected := []string{"aircraft", "business", "organization", "person", "unknown", "vessel"}
 	require.ElementsMatch(t, expected, found)
 }

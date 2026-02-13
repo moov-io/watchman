@@ -48,7 +48,9 @@ func loadUKCSLRecords(ctx context.Context, logger log.Logger, conf Config, respo
 	for filename, fd := range files {
 		// Read file content for hashing
 		content, err := io.ReadAll(fd)
-		fd.Close()
+		if closeErr := fd.Close(); closeErr != nil && err == nil {
+			err = closeErr
+		}
 		if err != nil {
 			return fmt.Errorf("reading UK CSL %s: %w", filename, err)
 		}

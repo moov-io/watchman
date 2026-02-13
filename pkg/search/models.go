@@ -45,6 +45,7 @@ type Entity[T Value] struct {
 type EntityType string
 
 var (
+	EntityUnknown      EntityType = "unknown"
 	EntityPerson       EntityType = "person"
 	EntityBusiness     EntityType = "business"
 	EntityOrganization EntityType = "organization"
