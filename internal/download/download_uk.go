@@ -26,7 +26,7 @@ func loadUKCSLRecords(ctx context.Context, logger log.Logger, conf Config, respo
 
 	start := time.Now()
 
-	// Download UK Sanctions List (ODS format)
+	// Download UK Sanctions List (CSV format)
 	files, err := csl_uk.DownloadSanctionsList(ctx, logger, initialDataDirectory(conf))
 	if err != nil {
 		return fmt.Errorf("UK CSL download: %w", err)
@@ -41,7 +41,7 @@ func loadUKCSLRecords(ctx context.Context, logger log.Logger, conf Config, respo
 	logger.Debug().Logf("finished UK CSL download: %v", time.Since(start))
 	start = time.Now()
 
-	// Parse ODS file and compute hash
+	// Parse CSV file and compute hash
 	var records []csl_uk.SanctionsListRecord
 	var hashData bytes.Buffer
 
