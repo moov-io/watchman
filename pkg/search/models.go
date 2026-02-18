@@ -294,6 +294,9 @@ func (e Entity[T]) Normalize() Entity[T] {
 	if e.Business != nil {
 		e.PreparedFields.AltNames = normalizeNames(e.Business.AltNames)
 	}
+	if e.Organization != nil {
+		e.PreparedFields.AltNames = normalizeNames(e.Organization.AltNames)
+	}
 	if e.Aircraft != nil {
 		e.PreparedFields.AltNames = normalizeNames(e.Aircraft.AltNames)
 	}

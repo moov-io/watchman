@@ -119,6 +119,62 @@ func TestEntity_Normalize(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "business",
+			input: Entity[Value]{
+				Name: "ACME Corporation",
+				Type: EntityBusiness,
+				Business: &Business{
+					Name:     "ACME Corporation",
+					AltNames: []string{"Acme Industries", "ACME Holdings"},
+				},
+			},
+			expected: Entity[Value]{
+				Name: "ACME Corporation",
+				Type: "business",
+				Business: &Business{
+					Name:     "ACME Corporation",
+					AltNames: []string{"Acme Industries", "ACME Holdings"},
+				},
+				PreparedFields: PreparedFields{
+					Name:       "acme corporation",
+					NameFields: []string{"acme", "corporation"},
+					AltNames:   []string{"acme industries", "acme holdings"},
+					AltNameFields: [][]string{
+						{"acme", "industries"},
+						{"acme", "holdings"},
+					},
+				},
+			},
+		},
+		{
+			name: "organization",
+			input: Entity[Value]{
+				Name: "International Trade Organization",
+				Type: EntityOrganization,
+				Organization: &Organization{
+					Name:     "International Trade Organization",
+					AltNames: []string{"Trade Org", "ITO Group"},
+				},
+			},
+			expected: Entity[Value]{
+				Name: "International Trade Organization",
+				Type: "organization",
+				Organization: &Organization{
+					Name:     "International Trade Organization",
+					AltNames: []string{"Trade Org", "ITO Group"},
+				},
+				PreparedFields: PreparedFields{
+					Name:       "international trade organization",
+					NameFields: []string{"international", "trade", "organization"},
+					AltNames:   []string{"trade org", "ito group"},
+					AltNameFields: [][]string{
+						{"trade", "org"},
+						{"ito", "group"},
+					},
+				},
+			},
+		},
 	}
 
 	for _, tc := range cases {
