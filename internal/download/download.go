@@ -176,6 +176,22 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 		})
 	}
 
+	// EU CSL Records
+	if slices.Contains(requestedLists, search.SourceEUCSL) {
+		listsLoaded = append(listsLoaded, search.SourceEUCSL)
+
+		producerWg.Add(1)
+		g.Go(func() error {
+			defer producerWg.Done()
+
+			err := loadEUCSLRecords(ctx, logger, dl.conf, preparedLists)
+			if err != nil {
+				return fmt.Errorf("loading EU CSL records: %w", err)
+			}
+			return nil
+		})
+	}
+
 	// OpenSanctions lists
 	for _, list := range dl.conf.OpenSanctions.Lists {
 		listsLoaded = append(listsLoaded, list.SourceList)

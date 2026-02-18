@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/moov-io/watchman/pkg/search"
+	"github.com/moov-io/watchman/pkg/sources/csl_eu"
 	"github.com/moov-io/watchman/pkg/sources/csl_uk"
 	"github.com/moov-io/watchman/pkg/sources/csl_us"
 	"github.com/moov-io/watchman/pkg/sources/ofac"
@@ -15,7 +16,7 @@ import (
 func DetailsURL(entity search.Entity[search.Value]) string {
 	switch entity.Source {
 	case search.SourceEUCSL:
-		return "TODO"
+		return csl_eu.DetailsURL(entity)
 
 	case search.SourceUKCSL:
 		return csl_uk.DetailsURL(entity.SourceID)
