@@ -5,14 +5,11 @@
 package csl_uk
 
 import (
-	"bytes"
 	"encoding/csv"
 	"errors"
 	"io"
 	"strconv"
 	"strings"
-
-	"github.com/knieriem/odf/ods"
 )
 
 func ReadCSLFile(fd io.ReadCloser) ([]CSLRecord, CSL, error) {
@@ -204,23 +201,8 @@ func ReadSanctionsListFile(f io.ReadCloser) ([]SanctionsListRecord, SanctionsLis
 		return nil, nil, errors.New("uk sanctions list file is empty or missing")
 	}
 	defer f.Close()
-	content, err := io.ReadAll(f)
-	if err != nil {
-		return nil, nil, err
-	}
-	fd, err := ods.NewReader(bytes.NewReader(content), int64(len(content)))
-	if err != nil {
-		return nil, nil, err
-	}
-	defer fd.Close()
 
-	doc := new(ods.Doc)
-	err = fd.ParseContent(doc)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	rows, rowsMap, err := parseSanctionsList(doc)
+	rows, rowsMap, err := parseSanctionsListCSV(f)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -228,154 +210,231 @@ func ReadSanctionsListFile(f io.ReadCloser) ([]SanctionsListRecord, SanctionsLis
 	return rows, rowsMap, nil
 }
 
-func parseSanctionsList(doc *ods.Doc) ([]SanctionsListRecord, SanctionsListMap, error) {
-	// read from the ods document
-	var totalReport []SanctionsListRecord
+func parseSanctionsListCSV(r io.Reader) ([]SanctionsListRecord, SanctionsListMap, error) {
+	reader := csv.NewReader(r)
+	reader.LazyQuotes = true
+	reader.FieldsPerRecord = -1 // Allow variable field counts
+
 	report := SanctionsListMap{}
 
-	// unmarshal each row into a uk sanctions list record
-	if len(doc.Table) > 0 {
-		for i, record := range doc.Table[0].Row {
-
-			// manually skip the header and extra rows
-			if record.IsEmpty() || i <= 2 {
+	rowNum := 0
+	for {
+		record, err := reader.Read()
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			// Skip malformed rows
+			if errors.Is(err, csv.ErrFieldCount) ||
+				errors.Is(err, csv.ErrBareQuote) ||
+				errors.Is(err, csv.ErrQuote) {
+				rowNum++
 				continue
 			}
+			return nil, nil, err
+		}
+		rowNum++
 
-			// need a length of row check since we are using the string representation
-			uniqueIDCell := record.Cell[UKSL_UniqueIDIdx]
-			b := new(bytes.Buffer)
-			uniqueID := uniqueIDCell.PlainText(b)
+		// Skip first two rows (Report Date and Header)
+		if rowNum <= 2 {
+			continue
+		}
 
-			if val, ok := report[uniqueID]; !ok {
-				row := new(SanctionsListRecord)
-				row.UniqueID = uniqueID
-				unmarshalSanctionsListRecord(record.Cell, row)
+		if len(record) <= UKSL_UniqueIDIdx {
+			continue // skip empty or malformed records
+		}
 
-				report[uniqueID] = row
-			} else {
-				unmarshalSanctionsListRecord(record.Cell, val)
-			}
+		uniqueID := strings.TrimSpace(record[UKSL_UniqueIDIdx])
+		if uniqueID == "" {
+			continue
+		}
+
+		// Group by UniqueID - multiple rows may exist for same entity
+		if val, ok := report[uniqueID]; !ok {
+			row := new(SanctionsListRecord)
+			row.UniqueID = uniqueID
+			unmarshalSanctionsListRecord(record, row)
+			report[uniqueID] = row
+		} else {
+			unmarshalSanctionsListRecord(record, val)
 		}
 	}
 
+	var totalReport []SanctionsListRecord
 	for _, row := range report {
 		totalReport = append(totalReport, *row)
 	}
 	return totalReport, report, nil
 }
 
-func unmarshalSanctionsListRecord(record []ods.Cell, ukSLRecord *SanctionsListRecord) {
-	if len(record) < UKSL_CountryOfBirthIdx {
-		return
+func unmarshalSanctionsListRecord(record []string, ukSLRecord *SanctionsListRecord) {
+	getField := func(idx int) string {
+		if idx < len(record) {
+			return strings.TrimSpace(record[idx])
+		}
+		return ""
 	}
 
-	b := new(bytes.Buffer)
-	if !record[UKSL_LastUpdatedIdx].IsEmpty() && ukSLRecord.LastUpdated == "" {
-		ukSLRecord.LastUpdated = record[UKSL_LastUpdatedIdx].PlainText(b)
+	// Basic fields (only set if not already set)
+	if ukSLRecord.LastUpdated == "" {
+		ukSLRecord.LastUpdated = getField(UKSL_LastUpdatedIdx)
+	}
+	if ukSLRecord.OFSIGroupID == "" {
+		ukSLRecord.OFSIGroupID = getField(UKSL_OFSI_GroupIDIdx)
+	}
+	if ukSLRecord.UNReferenceNumber == "" {
+		ukSLRecord.UNReferenceNumber = getField(UKSL_UNReferenceNumberIdx)
 	}
 
-	if !record[UKSL_OFSI_GroupIDIdx].IsEmpty() && ukSLRecord.OFSIGroupID == "" {
-		ukSLRecord.OFSIGroupID = record[UKSL_OFSI_GroupIDIdx].PlainText(b)
-	}
-
-	if !record[UKSL_UNReferenceNumberIdx].IsEmpty() && ukSLRecord.UNReferenceNumber == "" {
-		ukSLRecord.UNReferenceNumber = record[UKSL_UNReferenceNumberIdx].PlainText(b)
-	}
-
-	// consolidate names
+	// Consolidate names (Name6 is surname, Name1-5 are given names)
 	var names []string
-	if !record[UKSL_Name6Idx].IsEmpty() {
-		names = append(names, record[UKSL_Name6Idx].PlainText(b))
+	if v := getField(UKSL_Name6Idx); v != "" {
+		names = append(names, v)
 	}
-	if !record[UKSL_Name1Idx].IsEmpty() {
-		names = append(names, record[UKSL_Name1Idx].PlainText(b))
+	if v := getField(UKSL_Name1Idx); v != "" {
+		names = append(names, v)
 	}
-	if !record[UKSL_Name2Idx].IsEmpty() {
-		names = append(names, record[UKSL_Name2Idx].PlainText(b))
+	if v := getField(UKSL_Name2Idx); v != "" {
+		names = append(names, v)
 	}
-	if !record[UKSL_Name3Idx].IsEmpty() {
-		names = append(names, record[UKSL_Name3Idx].PlainText(b))
+	if v := getField(UKSL_Name3Idx); v != "" {
+		names = append(names, v)
 	}
-	if !record[UKSL_Name4Idx].IsEmpty() {
-		names = append(names, record[UKSL_Name4Idx].PlainText(b))
+	if v := getField(UKSL_Name4Idx); v != "" {
+		names = append(names, v)
 	}
-	if !record[UKSL_Name5Idx].IsEmpty() {
-		names = append(names, record[UKSL_Name5Idx].PlainText(b))
+	if v := getField(UKSL_Name5Idx); v != "" {
+		names = append(names, v)
 	}
 	name := strings.Join(names, " ")
-	if !strings.EqualFold(strings.TrimSpace(name), "") && !arrayContains(ukSLRecord.Names, name) {
+	if name != "" && !arrayContains(ukSLRecord.Names, name) {
 		ukSLRecord.Names = append(ukSLRecord.Names, name)
 	}
 
-	if !record[UKSL_NameTypeIdx].IsEmpty() && ukSLRecord.NameTitle == "" {
-		ukSLRecord.NameTitle = record[UKSL_NameTypeIdx].PlainText(b)
+	// Title
+	if ukSLRecord.NameTitle == "" {
+		ukSLRecord.NameTitle = getField(UKSL_TitleIdx)
 	}
 
-	if !record[UKSL_NonLatinScriptIdx].IsEmpty() && !arrayContains(ukSLRecord.NonLatinScriptNames, record[UKSL_NonLatinScriptIdx].PlainText(b)) {
-		ukSLRecord.NonLatinScriptNames = append(ukSLRecord.NonLatinScriptNames, record[UKSL_NonLatinScriptIdx].PlainText(b))
+	// Non-Latin script names
+	if v := getField(UKSL_NonLatinScriptIdx); v != "" && !arrayContains(ukSLRecord.NonLatinScriptNames, v) {
+		ukSLRecord.NonLatinScriptNames = append(ukSLRecord.NonLatinScriptNames, v)
 	}
 
-	if !record[UKSL_EntityTypeIdx].IsEmpty() && ukSLRecord.EntityType == nil {
-		cellValue := record[UKSL_EntityTypeIdx].PlainText(b)
-		entityType := EntityStringMap[cellValue]
-		ukSLRecord.EntityType = &entityType
-	}
-
-	// consolidate addresses
-	var addresses []string
-	addr1 := record[UKSL_AddressLine1Idx]
-	addr2 := record[UKSL_AddressLine2Idx]
-	addr3 := record[UKSL_AddressLine3Idx]
-	addr4 := record[UKSL_AddressLine4Idx]
-	addr5 := record[UKSL_AddressLine5Idx]
-	addr6 := record[UKSL_AddressLine6Idx]
-
-	if !addr1.IsEmpty() {
-		addresses = append(addresses, addr1.PlainText(b))
-	}
-	if !addr2.IsEmpty() {
-		addresses = append(addresses, addr2.PlainText(b))
-	}
-	if !addr3.IsEmpty() {
-		addresses = append(addresses, addr3.PlainText(b))
-	}
-	if !addr4.IsEmpty() {
-		addresses = append(addresses, addr4.PlainText(b))
-	}
-	if !addr5.IsEmpty() {
-		addresses = append(addresses, addr5.PlainText(b))
-	}
-	addr6Value := addr6.PlainText(b)
-	if !addr6.IsEmpty() {
-		addresses = append(addresses, addr6Value)
-		if !arrayContains(ukSLRecord.StateLocalities, addr6Value) {
-			ukSLRecord.StateLocalities = append(ukSLRecord.StateLocalities, addr6Value)
-		}
-	}
-	postalCode := record[UKSL_PostalCodeIdx]
-	postalCodeValue := record[UKSL_PostalCodeIdx].PlainText(b)
-	if !postalCode.IsEmpty() {
-		addresses = append(addresses, postalCodeValue)
-	}
-	addrCountries := record[UKSL_AddressCountryIdx]
-	addrCountriesValue := record[UKSL_AddressCountryIdx].PlainText(b)
-	if !addrCountries.IsEmpty() {
-		addresses = append(addresses, addrCountriesValue)
-		if !arrayContains(ukSLRecord.AddressCountries, addrCountriesValue) {
-			ukSLRecord.AddressCountries = append(ukSLRecord.AddressCountries, addrCountriesValue)
+	// Entity type (from Designation Type column - Individual, Entity, or Ship)
+	if ukSLRecord.EntityType == nil {
+		cellValue := getField(UKSL_EntityTypeIdx)
+		if cellValue != "" {
+			entityType := EntityStringMap[cellValue]
+			ukSLRecord.EntityType = &entityType
 		}
 	}
 
-	address := strings.Join(addresses, ", ")
-	if !strings.EqualFold(strings.TrimSpace(address), "") && !arrayContains(ukSLRecord.Addresses, address) {
+	// Consolidate addresses
+	var addressParts []string
+	if v := getField(UKSL_AddressLine1Idx); v != "" {
+		addressParts = append(addressParts, v)
+	}
+	if v := getField(UKSL_AddressLine2Idx); v != "" {
+		addressParts = append(addressParts, v)
+	}
+	if v := getField(UKSL_AddressLine3Idx); v != "" {
+		addressParts = append(addressParts, v)
+	}
+	if v := getField(UKSL_AddressLine4Idx); v != "" {
+		addressParts = append(addressParts, v)
+	}
+	if v := getField(UKSL_AddressLine5Idx); v != "" {
+		addressParts = append(addressParts, v)
+	}
+	if v := getField(UKSL_AddressLine6Idx); v != "" {
+		addressParts = append(addressParts, v)
+		if !arrayContains(ukSLRecord.StateLocalities, v) {
+			ukSLRecord.StateLocalities = append(ukSLRecord.StateLocalities, v)
+		}
+	}
+
+	// Postal code
+	postalCode := getField(UKSL_PostalCodeIdx)
+	if postalCode != "" && !arrayContains(ukSLRecord.AddressPostalCodes, postalCode) {
+		ukSLRecord.AddressPostalCodes = append(ukSLRecord.AddressPostalCodes, postalCode)
+	}
+
+	// Address country
+	addrCountry := getField(UKSL_AddressCountryIdx)
+	if addrCountry != "" && !arrayContains(ukSLRecord.AddressCountries, addrCountry) {
+		ukSLRecord.AddressCountries = append(ukSLRecord.AddressCountries, addrCountry)
+	}
+
+	// Full address string
+	address := strings.Join(addressParts, ", ")
+	if address != "" && !arrayContains(ukSLRecord.Addresses, address) {
 		ukSLRecord.Addresses = append(ukSLRecord.Addresses, address)
 	}
 
-	cob := record[UKSL_CountryOfBirthIdx]
-	cobValue := record[UKSL_CountryOfBirthIdx].PlainText(b)
-	if !cob.IsEmpty() && ukSLRecord.CountryOfBirth != "" {
-		ukSLRecord.CountryOfBirth = cobValue
+	// Birth information
+	if ukSLRecord.CountryOfBirth == "" {
+		ukSLRecord.CountryOfBirth = getField(UKSL_CountryOfBirthIdx)
+	}
+	if ukSLRecord.TownOfBirth == "" {
+		ukSLRecord.TownOfBirth = getField(UKSL_TownOfBirthIdx)
+	}
+
+	// New fields from CSV
+	if ukSLRecord.DOB == "" {
+		ukSLRecord.DOB = getField(UKSL_DOBIdx)
+	}
+	if ukSLRecord.Nationality == "" {
+		ukSLRecord.Nationality = getField(UKSL_NationalityIdx)
+	}
+	if ukSLRecord.PassportNumber == "" {
+		ukSLRecord.PassportNumber = getField(UKSL_PassportNumberIdx)
+	}
+	if ukSLRecord.PassportAdditionalInfo == "" {
+		ukSLRecord.PassportAdditionalInfo = getField(UKSL_PassportAdditionalIdx)
+	}
+	if ukSLRecord.NationalIDNumber == "" {
+		ukSLRecord.NationalIDNumber = getField(UKSL_NationalIDNumberIdx)
+	}
+	if ukSLRecord.NationalIDAdditionalInfo == "" {
+		ukSLRecord.NationalIDAdditionalInfo = getField(UKSL_NationalIDAdditionalIdx)
+	}
+	if ukSLRecord.Position == "" {
+		ukSLRecord.Position = getField(UKSL_PositionIdx)
+	}
+	if ukSLRecord.Gender == "" {
+		ukSLRecord.Gender = getField(UKSL_GenderIdx)
+	}
+	if ukSLRecord.Regime == "" {
+		ukSLRecord.Regime = getField(UKSL_RegimeNameIdx)
+	}
+	if ukSLRecord.DateDesignated == "" {
+		ukSLRecord.DateDesignated = getField(UKSL_DateDesignatedIdx)
+	}
+	if ukSLRecord.OtherInfo == "" {
+		ukSLRecord.OtherInfo = getField(UKSL_OtherInfoIdx)
+	}
+
+	// Vessel specific fields
+	if ukSLRecord.IMONumber == "" {
+		ukSLRecord.IMONumber = getField(UKSL_IMONumberIdx)
+	}
+	if ukSLRecord.VesselType == "" {
+		ukSLRecord.VesselType = getField(UKSL_TypeOfShipIdx)
+	}
+	if ukSLRecord.Tonnage == "" {
+		ukSLRecord.Tonnage = getField(UKSL_TonnageIdx)
+	}
+	if ukSLRecord.VesselFlag == "" {
+		ukSLRecord.VesselFlag = getField(UKSL_CurrentFlagIdx)
+	}
+	if ukSLRecord.VesselOwner == "" {
+		ukSLRecord.VesselOwner = getField(UKSL_CurrentOwnerIdx)
+	}
+
+	// Business specific fields
+	if ukSLRecord.BusinessRegNumber == "" {
+		ukSLRecord.BusinessRegNumber = getField(UKSL_BusinessRegNumberIdx)
 	}
 }
 

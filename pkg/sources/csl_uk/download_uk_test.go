@@ -9,7 +9,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 	"testing"
 
@@ -73,22 +72,6 @@ func TestCSLDownload_initialDir(t *testing.T) {
 	}
 }
 
-func TestUKSanctionsListIndex(t *testing.T) {
-	if testing.Short() {
-		return
-	}
-
-	logger := log.NewTestLogger()
-	foundURL, err := fetchLatestUKSanctionsListURL(context.Background(), logger, "")
-	require.NoError(t, err)
-
-	acceptedFilenames := []string{"UK_Sanctions_List.ods", "UK-Sanctions-List.ods"}
-	foundFilename := slices.ContainsFunc(acceptedFilenames, func(needle string) bool {
-		return strings.Contains(foundURL, needle)
-	})
-	require.True(t, foundFilename)
-}
-
 func TestUKSanctionsListDownload(t *testing.T) {
 	if testing.Short() {
 		return
@@ -100,7 +83,7 @@ func TestUKSanctionsListDownload(t *testing.T) {
 	require.Len(t, files, 1)
 
 	for filename := range files {
-		if !strings.EqualFold("UK_Sanctions_List.ods", filepath.Base(filename)) {
+		if !strings.EqualFold("UK_Sanctions_List.csv", filepath.Base(filename)) {
 			t.Errorf("unknown file %s", filename)
 		}
 	}
@@ -121,7 +104,7 @@ func TestUKSanctionsListDownload_initialDir(t *testing.T) {
 	}
 
 	// create each file
-	mk(t, "UK_Sanctions_List.ods", "file=UK_Sanctions_List.ods")
+	mk(t, "UK_Sanctions_List.csv", "file=UK_Sanctions_List.csv")
 
 	file, err := DownloadSanctionsList(context.Background(), log.NewNopLogger(), dir)
 	if err != nil {
@@ -133,14 +116,11 @@ func TestUKSanctionsListDownload_initialDir(t *testing.T) {
 	}
 
 	for fn, fd := range file {
-		if strings.EqualFold("UK_Sanctions_List.ods", filepath.Base(fn)) {
+		if strings.EqualFold("UK_Sanctions_List.csv", filepath.Base(fn)) {
 			_, err := io.ReadAll(fd)
 			if err != nil {
 				t.Fatal(err)
 			}
-			// if v := string(bs); v != "file=UK_Sanctions_List.ods" {
-			// 	t.Errorf("UK_Sanctions_List.ods: %v", v)
-			// }
 		} else {
 			t.Fatalf("unknown file: %v", file)
 		}

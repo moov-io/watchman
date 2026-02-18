@@ -25,11 +25,16 @@ Watchman:
     IncludedLists: []
 
     # Include any senzing formatted OpenSanctions lists
+    # Requires API key: set OPENSANCTIONS_API_KEY env var
+    # See available datasets at: https://www.opensanctions.org/datasets/
     # OpenSanctions:
-    #   ApiKey: "secret"
     #   Lists:
-    #     - SourceList: opensanctions_peps
-    #       Location: https://data.opensanctions.org/datasets/latest/us_congress/senzing.json
+    #     # UK HM Treasury Sanctions (same data as gov.uk ODS)
+    #     - SourceList: gb_hmt_sanctions
+    #       Location: https://data.opensanctions.org/datasets/latest/gb_hmt_sanctions/senzing.json
+    #     # UK Foreign Office Sanctions
+    #     - SourceList: gb_fcdo_sanctions
+    #       Location: https://data.opensanctions.org/datasets/latest/gb_fcdo_sanctions/senzing.json
 
     # Include any senzing formatted lists in Watchman's corpus
     # Senzing:
