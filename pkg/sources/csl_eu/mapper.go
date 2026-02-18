@@ -114,23 +114,21 @@ func mapPerson(record CSLRecord) *search.Person {
 
 	// Titles - combine NameAliasTitles and NameAliasFunctions
 	var titles []string
+	titleSet := make(map[string]struct{})
+
 	for _, title := range record.NameAliasTitles {
 		if trimmed := strings.TrimSpace(title); trimmed != "" {
-			titles = append(titles, trimmed)
+			if _, exists := titleSet[trimmed]; !exists {
+				titles = append(titles, trimmed)
+				titleSet[trimmed] = struct{}{}
+			}
 		}
 	}
 	for _, function := range record.NameAliasFunctions {
 		if trimmed := strings.TrimSpace(function); trimmed != "" {
-			// Check if not already in titles
-			exists := false
-			for _, t := range titles {
-				if t == trimmed {
-					exists = true
-					break
-				}
-			}
-			if !exists {
+			if _, exists := titleSet[trimmed]; !exists {
 				titles = append(titles, trimmed)
+				titleSet[trimmed] = struct{}{}
 			}
 		}
 	}

@@ -191,26 +191,26 @@ const (
 	NameAliasRegPubURLIdx      = 33
 
 	// Address fields (34-53)
-	AddressCityIdx           = 34
-	AddressStreetIdx         = 35
-	AddressPoBoxIdx          = 36
-	AddressZipCodeIdx        = 37
-	AddressRegionIdx         = 38
-	AddressPlaceIdx          = 39
-	AddressAsAtListingTimeIdx= 40
-	AddressContactInfoIdx    = 41
-	AddressCountryISOIdx     = 42
-	AddressCountryDescIdx    = 43
-	AddressLogicalIDIdx      = 44
-	AddressRegLanguageIdx    = 45
-	AddressRemarkIdx         = 46
-	AddressRegTypeIdx        = 47
-	AddressRegOrgTypeIdx     = 48
-	AddressRegPubDateIdx     = 49
-	AddressRegEntryDateIdx   = 50
-	AddressRegNumberTitleIdx = 51
-	AddressRegProgrammeIdx   = 52
-	AddressRegPubURLIdx      = 53
+	AddressCityIdx            = 34
+	AddressStreetIdx          = 35
+	AddressPoBoxIdx           = 36
+	AddressZipCodeIdx         = 37
+	AddressRegionIdx          = 38
+	AddressPlaceIdx           = 39
+	AddressAsAtListingTimeIdx = 40
+	AddressContactInfoIdx     = 41
+	AddressCountryISOIdx      = 42
+	AddressCountryDescIdx     = 43
+	AddressLogicalIDIdx       = 44
+	AddressRegLanguageIdx     = 45
+	AddressRemarkIdx          = 46
+	AddressRegTypeIdx         = 47
+	AddressRegOrgTypeIdx      = 48
+	AddressRegPubDateIdx      = 49
+	AddressRegEntryDateIdx    = 50
+	AddressRegNumberTitleIdx  = 51
+	AddressRegProgrammeIdx    = 52
+	AddressRegPubURLIdx       = 53
 
 	// BirthDate fields (54-77)
 	BirthDateIdx           = 54
@@ -239,33 +239,33 @@ const (
 	BirthRegPubURLIdx      = 77
 
 	// Identification fields (78-104)
-	IdentificationNumberIdx      = 78
-	IdentificationDiplomaticIdx  = 79
-	IdentificationKnownExpiredIdx= 80
-	IdentificationKnownFalseIdx  = 81
-	IdentificationReportedLostIdx= 82
-	IdentificationRevokedIdx     = 83
-	IdentificationIssuedByIdx    = 84
-	IdentificationIssuedDateIdx  = 85
-	IdentificationValidFromIdx   = 86
-	IdentificationValidToIdx     = 87
-	IdentificationLatinNumberIdx = 88
-	IdentificationNameOnDocIdx   = 89
-	IdentificationTypeCodeIdx    = 90
-	IdentificationTypeDescIdx    = 91
-	IdentificationRegionIdx      = 92
-	IdentificationCountryISOIdx  = 93
-	IdentificationCountryDescIdx = 94
-	IdentificationLogicalIDIdx   = 95
-	IdentificationRegLanguageIdx = 96
-	IdentificationRemarkIdx      = 97
-	IdentificationRegTypeIdx     = 98
-	IdentificationRegOrgTypeIdx  = 99
-	IdentificationRegPubDateIdx  = 100
-	IdentificationRegEntryDateIdx= 101
-	IdentificationRegNumTitleIdx = 102
-	IdentificationRegProgrammeIdx= 103
-	IdentificationRegPubURLIdx   = 104
+	IdentificationNumberIdx       = 78
+	IdentificationDiplomaticIdx   = 79
+	IdentificationKnownExpiredIdx = 80
+	IdentificationKnownFalseIdx   = 81
+	IdentificationReportedLostIdx = 82
+	IdentificationRevokedIdx      = 83
+	IdentificationIssuedByIdx     = 84
+	IdentificationIssuedDateIdx   = 85
+	IdentificationValidFromIdx    = 86
+	IdentificationValidToIdx      = 87
+	IdentificationLatinNumberIdx  = 88
+	IdentificationNameOnDocIdx    = 89
+	IdentificationTypeCodeIdx     = 90
+	IdentificationTypeDescIdx     = 91
+	IdentificationRegionIdx       = 92
+	IdentificationCountryISOIdx   = 93
+	IdentificationCountryDescIdx  = 94
+	IdentificationLogicalIDIdx    = 95
+	IdentificationRegLanguageIdx  = 96
+	IdentificationRemarkIdx       = 97
+	IdentificationRegTypeIdx      = 98
+	IdentificationRegOrgTypeIdx   = 99
+	IdentificationRegPubDateIdx   = 100
+	IdentificationRegEntryDateIdx = 101
+	IdentificationRegNumTitleIdx  = 102
+	IdentificationRegProgrammeIdx = 103
+	IdentificationRegPubURLIdx    = 104
 
 	// Citizenship fields (105-117)
 	CitizenshipRegionIdx       = 105

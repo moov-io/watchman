@@ -61,7 +61,7 @@ func NewService(logger log.Logger, conf Config) (*Service, error) {
 		endpoints[idx] = fmt.Sprintf("http://127.0.0.1:%d", port)
 
 		g.Go(func() error {
-			cmd := exec.Command(binPath) //nolint:gosec
+			cmd := exec.Command(binPath)
 			cmd.Env = append(cmd.Env, fmt.Sprintf("PORT=%d", port))
 			cmd.Env = append(cmd.Env, fmt.Sprintf("REQUEST_TIMEOUT=%v", conf.RequestTimeout))
 

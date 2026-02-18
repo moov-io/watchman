@@ -17,22 +17,22 @@ import (
 
 func TestToEntity_Person(t *testing.T) {
 	record := CSLRecord{
-		EntityLogicalID:   123,
+		EntityLogicalID:       123,
 		EntitySubjectTypeCode: "person",
 		NameAliasWholeNames: []string{
 			"John Doe",
 			"Johnny D",
 			"J. Doe",
 		},
-		NameAliasGenders: []string{"M"},
-		NameAliasTitles:  []string{"Dr.", "Prof."},
-		BirthDates:       []string{"1985-06-15"},
-		BirthCities:      []string{"Berlin"},
-		BirthCountries:   []string{"Germany"},
-		EntityRemark:     "Test remark",
-		AddressStreets:   []string{"123 Main St"},
-		AddressCities:    []string{"Munich"},
-		AddressZipCodes:  []string{"80331"},
+		NameAliasGenders:           []string{"M"},
+		NameAliasTitles:            []string{"Dr.", "Prof."},
+		BirthDates:                 []string{"1985-06-15"},
+		BirthCities:                []string{"Berlin"},
+		BirthCountries:             []string{"Germany"},
+		EntityRemark:               "Test remark",
+		AddressStreets:             []string{"123 Main St"},
+		AddressCities:              []string{"Munich"},
+		AddressZipCodes:            []string{"80331"},
 		AddressCountryDescriptions: []string{"Germany"},
 		Identifications: []IdentificationInfo{
 			{
@@ -81,7 +81,7 @@ func TestToEntity_Person(t *testing.T) {
 
 func TestToEntity_Enterprise(t *testing.T) {
 	record := CSLRecord{
-		EntityLogicalID:   456,
+		EntityLogicalID:       456,
 		EntitySubjectTypeCode: "enterprise",
 		NameAliasWholeNames: []string{
 			"Acme Corporation",
@@ -116,7 +116,7 @@ func TestToEntity_Enterprise(t *testing.T) {
 
 func TestToEntity_Vessel(t *testing.T) {
 	record := CSLRecord{
-		EntityLogicalID:   789,
+		EntityLogicalID:       789,
 		EntitySubjectTypeCode: "unknown",
 		NameAliasWholeNames: []string{
 			"Sea Explorer",
@@ -141,9 +141,9 @@ func TestToEntity_Vessel(t *testing.T) {
 
 func TestToEntity_UnknownType(t *testing.T) {
 	record := CSLRecord{
-		EntityLogicalID:     999,
+		EntityLogicalID:       999,
 		EntitySubjectTypeCode: "other",
-		NameAliasWholeNames: []string{"Unknown Entity"},
+		NameAliasWholeNames:   []string{"Unknown Entity"},
 	}
 
 	entity := ToEntity(record)
