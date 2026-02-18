@@ -25,8 +25,7 @@ Download the files from [Data Center - SDN List](https://sanctionslist.ofac.trea
 
 **US Consolidated Screening List**
 
-- `csl.csv` - US Consolidated Screening List
-- `dpl.txt` - US Denied Persons List
+- `consolidated.csv` - US Consolidated Screening List
 
 Download the [US Consolidated Screening List](https://www.trade.gov/consolidated-screening-list)
 
@@ -38,7 +37,6 @@ Download the [EU Consolidated Screening List](https://data.europa.eu/data/datase
 
 **UK Consolidated Screening List**
 
-- `ConList.csv` - UK Consolidated Screening List
-- `UK_Sanctions_List.ods` - UK Sanctions List
+- `UK_Sanctions_List.csv` - UK Sanctions List
 
-Download the [UK Consolidated Screening List](https://www.gov.uk/government/publications/financial-sanctions-consolidated-list-of-targets/consolidated-list-of-targets#contents) and the [UK Sanctions List](https://www.gov.uk/government/publications/the-uk-sanctions-list)
+Download the [UK Sanctions List](https://www.gov.uk/government/publications/the-uk-sanctions-list)

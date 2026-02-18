@@ -15,23 +15,10 @@ import (
 )
 
 var (
-	// Consolidated List CSV from https://www.gov.uk/government/publications/financial-sanctions-consolidated-list-of-targets
-	publicCSLDownloadURL = "https://ofsistorage.blob.core.windows.net/publishlive/2022format/ConList.csv"
-	ukCSLDownloadURL     = strx.Or(os.Getenv("UK_CSL_DOWNLOAD_URL"), publicCSLDownloadURL)
-
-	// UK Sanctions List CSV from https://sanctionslist.fcdo.gov.uk/
+	// UK Sanctions List CSV from https://www.gov.uk/government/publications/the-uk-sanctions-list
 	publicUKSanctionsListURL = "https://sanctionslist.fcdo.gov.uk/docs/UK-Sanctions-List.csv"
 	ukSanctionsListURL       = strx.Or(os.Getenv("UK_SANCTIONS_LIST_URL"), publicUKSanctionsListURL)
 )
-
-func DownloadCSL(ctx context.Context, logger log.Logger, initialDir string) (map[string]io.ReadCloser, error) {
-	dl := download.New(logger, nil)
-
-	ukCSLNameAndSource := make(map[string]string)
-	ukCSLNameAndSource["ConList.csv"] = ukCSLDownloadURL
-
-	return dl.GetFiles(ctx, initialDir, ukCSLNameAndSource)
-}
 
 func DownloadSanctionsList(ctx context.Context, logger log.Logger, initialDir string) (map[string]io.ReadCloser, error) {
 	dl := download.New(logger, nil)

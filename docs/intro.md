@@ -31,21 +31,13 @@ Watchman is a robust compliance screening tool that provides:
 
 Watchman integrates the following lists to help you maintain global compliance:
 
-| Source        | List                                                                                                                                                                                    |
-|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| OpenSanctions | [Any senzing dataset from OpenSanctions](https://www.opensanctions.org/datasets/)                                                                                                       |
-| US Treasury   | [Office of Foreign Assets Control (OFAC)](https://ofac.treasury.gov/sanctions-list-service) and Non-SDN list                                                                            |
-| US Government | [Consolidated Screening List (CSL)](https://www.trade.gov/consolidated-screening-list), [FinCEN 311](https://home.treasury.gov/policy-issues/terrorism-and-illicit-finance/311-actions) |
-
-### Future Lists
-
-The v0.50+ series of Watchman has revamped its search engine. The following lists are being re-added into Watchman.
-
-| Source         | List                                                                                                                                                             |
-|----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| European Union | [Consolidated Sanctions List](https://data.europa.eu/data/datasets/consolidated-list-of-persons-groups-and-entities-subject-to-eu-financial-sanctions?locale=en) |
-| United Kingdom | [OFSI Sanctions List](https://www.gov.uk/government/publications/financial-sanctions-consolidated-list-of-targets/consolidated-list-of-targets#contents)         |
-| United Kingdom | [Sanctions List](https://www.gov.uk/government/publications/the-uk-sanctions-list) (Disabled by default)                                                         |
+| Source         | List                                                                                                                                                                                    |
+|----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| European Union | [Consolidated Sanctions List](https://data.europa.eu/data/datasets/consolidated-list-of-persons-groups-and-entities-subject-to-eu-financial-sanctions?locale=en)                        |
+| OpenSanctions  | [Any senzing dataset from OpenSanctions](https://www.opensanctions.org/datasets/)                                                                                                       |
+| US Government  | [Consolidated Screening List (CSL)](https://www.trade.gov/consolidated-screening-list), [FinCEN 311](https://home.treasury.gov/policy-issues/terrorism-and-illicit-finance/311-actions) |
+| US Treasury    | [Office of Foreign Assets Control (OFAC)](https://ofac.treasury.gov/sanctions-list-service) and Non-SDN list                                                                            |
+| United Kingdom | [UK Sanctions List](https://www.gov.uk/government/publications/the-uk-sanctions-list)                                                                                                                 |
 
 ## Search Methodology
 
