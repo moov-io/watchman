@@ -31,17 +31,6 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v6
 
-    - name: Setup Linux Dependencies
-      if: runner.os == 'Linux'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libgl1-mesa-dev and xorg-dev
-
-    - name: Setup Windows Dependencies
-      if: runner.os == 'Windows'
-      run: |
-        choco install -y make mingw
-
     - name: Install Fyne
       run: make setup-webui
 
