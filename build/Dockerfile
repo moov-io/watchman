@@ -1,5 +1,5 @@
 # Backend build stage
-FROM golang:1.25-bookworm AS backend
+FROM golang:1.26-bookworm AS backend
 ARG VERSION
 WORKDIR /src
 
