@@ -142,13 +142,6 @@ else
 	@rm -rf ./bin/ cover.out coverage.txt lint-project.sh misspell* staticcheck* openapi-generator-cli-*.jar
 endif
 
-dist: clean build
-ifeq ($(OS),Windows_NT)
-	GOOS=windows go build -o bin/watchman.exe github.com/moov-io/watchman/cmd/server
-else
-	GOOS=${PLATFORM} go build -o bin/watchman-${PLATFORM}-amd64 github.com/moov-io/watchman/cmd/server
-endif
-
 docker: clean docker-hub docker-openshift
 
 docker-hub:
