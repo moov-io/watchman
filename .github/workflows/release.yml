@@ -39,7 +39,7 @@ jobs:
      - name: Install Fyne dependencies
        run: |
          apt-get update
-         apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libglib2.0-dev libcairo-gobject2 libpango1.0-dev libatk1.0-dev libcairo2-dev libgdk-pixbuf2.0-dev libxss1 libasound2-dev
+         apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libglib2.0-dev libcairo-gobject2 libpango1.0-dev libatk1.0-dev libcairo2-dev libgdk-pixbuf2.0-dev libxss1 libasound2-dev
 
      - uses: goreleaser/goreleaser-action@v6
        with:
