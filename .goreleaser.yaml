@@ -1,3 +1,5 @@
+version: 2
+
 builds:
 - id: watchman
   main: ./cmd/server
@@ -46,4 +48,4 @@ builds:
     - -X main.Version={{ .Version }}
     - -X main.Commit={{ .FullCommit }}
     - -X main.Date={{ .Date }}
-    - -X github.com/moov-io/watchman.Version=={{ .Tag }}
+    - -X github.com/moov-io/watchman.Version={{ .Tag }}

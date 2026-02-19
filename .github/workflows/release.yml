@@ -22,25 +22,32 @@ jobs:
     runs-on: ubuntu-latest
     container: goreleaser/goreleaser-cross
     steps:
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v6
-      with:
-        go-version: stable
-      id: go
+     - name: Set up Go 1.x
+       uses: actions/setup-go@v6
+       with:
+         go-version: stable
+       id: go
 
-    - name: Check out code
-      uses: actions/checkout@v6
+     - name: Check out code
+       uses: actions/checkout@v6
+       with:
+         fetch-depth: 0
 
-    - name: Install Fyne
-      run: make setup-webui
+     - name: Install Fyne
+       run: make setup-webui
 
-    - uses: goreleaser/goreleaser-action@v6
-      with:
-        distribution: goreleaser
-        version: 'latest'
-        args: release --clean
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+     - name: Install Fyne dependencies
+       run: |
+         apt-get update
+         apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libglib2.0-dev libcairo-gobject2 libpango1.0-dev libatk1.0-dev libcairo2-dev libgdk-pixbuf2.0-dev libxss1 libasound2-dev
+
+     - uses: goreleaser/goreleaser-action@v6
+       with:
+         distribution: goreleaser
+         version: 'latest'
+         args: release --clean
+       env:
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   docker-hub:
     name: Docker Hub (${{ matrix.platform }})
