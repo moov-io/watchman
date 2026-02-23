@@ -61,12 +61,12 @@ func (idx *vectorIndex) Add(vectors [][]float64, ids, names []string) {
 // Search finds the k most similar vectors to the query.
 // Returns results sorted by similarity score (highest first).
 // Uses parallel computation across CPU cores for optimal performance.
-func (idx *vectorIndex) Search(query []float64, k int) []SearchResult {
+func (idx *vectorIndex) Search(query []float64, k int) ([]SearchResult, error) {
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()
 
 	if idx.count == 0 {
-		return nil
+		return nil, nil
 	}
 
 	scores := make([]scored, idx.count)
@@ -101,7 +101,10 @@ func (idx *vectorIndex) Search(query []float64, k int) []SearchResult {
 
 	// Use heap-based partial sort for top-k: O(n log k) instead of O(n log n)
 	if k < idx.count {
-		topK := selectTopK(scores, k)
+		topK, err := selectTopK(scores, k)
+		if err != nil {
+			return nil, err
+		}
 		results := make([]SearchResult, k)
 		for i := 0; i < k; i++ {
 			s := topK[i]
@@ -111,7 +114,7 @@ func (idx *vectorIndex) Search(query []float64, k int) []SearchResult {
 				Score: s.score,
 			}
 		}
-		return results
+		return results, nil
 	}
 
 	// If k >= count, sort everything
@@ -129,12 +132,12 @@ func (idx *vectorIndex) Search(query []float64, k int) []SearchResult {
 		}
 	}
 
-	return results
+	return results, nil
 }
 
 // selectTopK uses a min-heap to efficiently find the k highest scores.
 // Time complexity: O(n log k) vs O(n log n) for full sort.
-func selectTopK(scores []scored, k int) []scored {
+func selectTopK(scores []scored, k int) ([]scored, error) {
 	h := &minHeap{data: make([]scored, 0, k)}
 	heap.Init(h)
 
@@ -153,12 +156,12 @@ func selectTopK(scores []scored, k int) []scored {
 		v := heap.Pop(h)
 		s, ok := v.(scored)
 		if !ok {
-			panic(fmt.Errorf("unexpected %T", v)) //nolint:forbidigo
+			return nil, fmt.Errorf("unexpected %T", v)
 		}
 		result[i] = s
 	}
 
-	return result
+	return result, nil
 }
 
 // Size returns the number of vectors in the index.

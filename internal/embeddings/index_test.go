@@ -25,7 +25,8 @@ func TestVectorIndex_AddAndSearch(t *testing.T) {
 
 	// Search for similar vectors
 	query := []float64{1, 0, 0} // Should be most similar to vec0
-	results := idx.Search(query, 2)
+	results, err := idx.Search(query, 2)
+	require.NoError(t, err)
 
 	require.Len(t, results, 2)
 	require.Equal(t, "id0", results[0].ID) // Best match
@@ -51,7 +52,8 @@ func TestVectorIndex_SearchTopK(t *testing.T) {
 
 	// Request k=3
 	query := []float64{1, 0}
-	results := idx.Search(query, 3)
+	results, err := idx.Search(query, 3)
+	require.NoError(t, err)
 
 	require.Len(t, results, 3)
 	// Results should be sorted by score descending
@@ -63,7 +65,8 @@ func TestVectorIndex_EmptyIndex(t *testing.T) {
 	idx := newVectorIndex(3)
 
 	query := []float64{1, 0, 0}
-	results := idx.Search(query, 5)
+	results, err := idx.Search(query, 5)
+	require.NoError(t, err)
 
 	require.Empty(t, results)
 }
@@ -78,7 +81,8 @@ func TestVectorIndex_SearchKLargerThanIndex(t *testing.T) {
 	idx.Add(vectors, ids, names)
 
 	// Request more than available
-	results := idx.Search([]float64{1, 0}, 10)
+	results, err := idx.Search([]float64{1, 0}, 10)
+	require.NoError(t, err)
 
 	require.Len(t, results, 2) // Should return all available
 }

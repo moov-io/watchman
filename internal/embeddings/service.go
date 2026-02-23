@@ -311,7 +311,10 @@ func (s *service) Search(ctx context.Context, query string, k int) ([]SearchResu
 	}
 
 	// Search index
-	results := s.index.Search(queryEmb, k)
+	results, err := s.index.Search(queryEmb, k)
+	if err != nil {
+		return nil, err
+	}
 
 	span.SetAttributes(attribute.Int("results_count", len(results)))
 

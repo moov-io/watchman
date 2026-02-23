@@ -1,7 +1,6 @@
 package tfidf
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 
@@ -66,7 +65,7 @@ func readFloat(envVar string, defaultValue float64) float64 {
 
 	n, err := strconv.ParseFloat(value, 64)
 	if err != nil {
-		panic(fmt.Errorf("unable to parse %s=%q as float64: %w", envVar, value, err)) //nolint:forbidigo
+		return defaultValue
 	}
 	return n
 }
