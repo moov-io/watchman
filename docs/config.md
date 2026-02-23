@@ -152,7 +152,6 @@ PostalPool is an experiment for improving address parsing. It's optional configu
 | `HTTPS_CERT_FILE`        | Filepath containing a certificate (or intermediate chain) to be served by the HTTP server. Requires all traffic be over secure HTTP. | Empty                                       |
 | `HTTPS_KEY_FILE`         | Filepath of a private key matching the leaf certificate from `HTTPS_CERT_FILE`.                                                      | Empty                                       |
 | `LOG_FORMAT`             | Format for logging lines to be written as.                                                                                           | Options: `json`, `plain` - Default: `plain` |
-| `LOG_LEVEL`              | Level of logging to emit.                                                                                                            | Options: `trace`, `info` - Default: `info`  |
 
 ### TF-IDF Configuration
 
