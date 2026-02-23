@@ -111,6 +111,9 @@ func BestPairsJaroWinkler(searchTokens []string, indexedTokens []string) float64
 		}
 	}
 	lengthWeightedAverageScore := totalWeightedScores / float64(searchTokensLength+matchedIndexTokensLength)
+	if math.IsNaN(lengthWeightedAverageScore) {
+		lengthWeightedAverageScore = 0.0
+	}
 
 	//If some index tokens weren't matched by any search token, penalise this search a small amount. If this isn't done,
 	//a query of "John Doe" will match "John Doe" and "John Bartholomew Doe" equally well.
@@ -123,6 +126,10 @@ func BestPairsJaroWinkler(searchTokens []string, indexedTokens []string) float64
 		}
 	}
 	matchedFraction := float64(matchedIndexLength) / float64(indexTokensLength)
+	if math.IsNaN(matchedFraction) {
+		matchedFraction = 0.0
+	}
+
 	return lengthWeightedAverageScore * scalingFactor(matchedFraction, unmatchedIndexPenaltyWeight)
 }
 

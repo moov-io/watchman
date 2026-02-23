@@ -139,6 +139,21 @@ func TestJaroWinkler(t *testing.T) {
 		// common spellings
 		{"sean", "shawn", 0.757}, // TODO(adam): should match higher? They're phonetically similar
 		{"mohamed", "muhammed", 0.849},
+
+		// Edge cases
+		{"a", "a", 1.0},
+		{"a", "b", 0.0},
+		{"", "hello", 0.0},
+		{"hello", "", 0.0},
+		{"café", "cafe", 0.8}, // unicode handling
+		{"123", "123", 1.0},
+		{"123", "456", 0.0},
+		{"hello world", "hello   world", 1.0}, // multiple spaces
+		{"very long string with many words", "another very long string with different words", 0.725}, // long strings
+		{"!@#$%", "!@#$%", 1.0}, // special characters
+		{"!@#$%", "abcde", 0.0},
+		{"αβγ", "αβγ", 1.0}, // greek letters
+		{"αβγ", "abc", 0.0},
 	}
 	for i := range cases {
 		v := cases[i]
