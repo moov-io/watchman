@@ -1,7 +1,6 @@
 package ofac
 
 import (
-	"fmt"
 	"net/url"
 )
 
@@ -12,7 +11,7 @@ const (
 func DetailsURL(entityID string) string {
 	u, err := url.Parse(baseDetailsURL)
 	if err != nil {
-		panic(fmt.Sprintf("invalid %s as baseDetailsURL: %v", baseDetailsURL, err)) //nolint:forbidigo
+		return ""
 	}
 
 	q := u.Query()

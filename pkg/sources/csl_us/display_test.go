@@ -1,4 +1,4 @@
-package ofac
+package csl_us
 
 import (
 	"testing"
@@ -7,8 +7,8 @@ import (
 )
 
 func TestDetailsURL(t *testing.T) {
-	got := DetailsURL("13058")
+	got := DetailsURL("123")
 	require.NotEmpty(t, got)
-	expected := "https://sanctionssearch.ofac.treas.gov/Details.aspx?id=13058"
+	expected := "https://www.trade.gov/data-visualization/csl-search"
 	require.Equal(t, expected, got)
 }
