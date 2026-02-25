@@ -16,42 +16,123 @@ jobs:
     name: Go Tests
     secrets: inherit
 
-  release:
-    name: Release
+  create_release:
+    name: Create Release
     needs: [tests]
     runs-on: ubuntu-latest
-    container: goreleaser/goreleaser-cross
+    permissions:
+      contents: write  # For creating release
+      actions: write   # For uploading artifact
     steps:
-     - name: Set up Go 1.x
-       uses: actions/setup-go@v6
-       with:
-         go-version: stable
-       id: go
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        prerelease: true
 
-     - name: Check out code
-       uses: actions/checkout@v6
-       with:
-         fetch-depth: 0
+    - name: Output Release URL File
+      run: echo "${{ steps.create_release.outputs.upload_url }}" > release_url.txt
 
-     - name: Install Fyne
-       run: make setup-webui
+    - name: Save Release URL File for publish
+      uses: actions/upload-artifact@v6
+      with:
+        name: release_url
+        path: release_url.txt
+        retention-days: 1
 
-     - name: Install Fyne dependencies
-       run: |
-         apt-get update
-         apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libglib2.0-dev libcairo-gobject2 libpango1.0-dev libatk1.0-dev libcairo2-dev libgdk-pixbuf2.0-dev libxss1 libasound2-dev
+  publish:
+    name: Publish
+    needs: [tests, create_release]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    permissions:
+      contents: write  # For uploading release assets
+      actions: read    # For downloading artifact
+    steps:
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v6
+      with:
+        go-version: stable
+      id: go
 
-     - uses: goreleaser/goreleaser-action@v7
-       with:
-         distribution: goreleaser
-         version: 'latest'
-         args: release --clean
-       env:
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v6
+
+    - name: Load Release URL File from release job
+      uses: actions/download-artifact@v7
+      with:
+        name: release_url
+        path: release_url
+
+    - name: Setup Linux Dependencies
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-dev and xorg-dev
+
+    - name: Setup Windows Dependencies
+      if: runner.os == 'Windows'
+      run: |
+        choco install -y make mingw
+
+    - name: Install Fyne
+      run: make setup-webui
+
+    - name: Distribute
+      run: make dist
+
+    - name: Get Release File Name & Upload URL
+      id: get_release_info
+      shell: bash
+      run: |
+        value=`cat release_url/release_url.txt`
+        echo ::set-output name=upload_url::$value
+      env:
+        TAG_REF_NAME: ${{ github.ref }}
+        REPOSITORY_NAME: ${{ github.repository }}
+
+    - name: Upload Linux Binary
+      if: runner.os == 'Linux'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+        asset_path: ./bin/watchman-linux-amd64
+        asset_name: watchman-linux-amd64
+        asset_content_type: application/octet-stream
+
+    - name: Upload macOS Binary
+      if: runner.os == 'macOS'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+        asset_path: ./bin/watchman-darwin-arm64
+        asset_name: watchman-darwin-arm64
+        asset_content_type: application/octet-stream
+
+    - name: Upload Windows Binary
+      if: runner.os == 'Windows'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+        asset_path: ./bin/watchman.exe
+        asset_name: watchman.exe
+        asset_content_type: application/octet-stream
 
   docker-hub:
     name: Docker Hub (${{ matrix.platform }})
-    needs: [tests, release]
+    needs: [tests, create_release]
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
@@ -129,7 +210,7 @@ jobs:
 
   docker-openshift:
     name: Docker Openshift (${{ matrix.platform }})
-    needs: [tests, release]
+    needs: [tests, create_release]
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: read

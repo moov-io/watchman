@@ -95,7 +95,7 @@ func (s *service) Search(ctx context.Context, query search.Entity[search.Value],
 		out, err := s.performEmbeddingSearch(ctx, query, opts)
 		if err != nil {
 			// Fall back to Jaro-Winkler on embedding search failure
-			s.logger.Info().Logf("embedding search failed, falling back to Jaro-Winkler: %v", err)
+			s.logger.Error().Logf("embedding search failed, falling back to Jaro-Winkler: %v", err)
 		} else {
 			return out, nil
 		}
@@ -104,6 +104,7 @@ func (s *service) Search(ctx context.Context, query search.Entity[search.Value],
 	span.SetAttributes(attribute.Bool("search.use_embeddings", false))
 	out, err := s.performSearch(ctx, query, opts)
 	if err != nil {
+		s.logger.Error().Logf("v2 search failed: %v", err)
 		return nil, fmt.Errorf("v2 search: %w", err)
 	}
 	return out, nil
@@ -130,12 +131,14 @@ func (s *service) performEmbeddingSearch(ctx context.Context, query search.Entit
 	// Search using embeddings (fetch extra to account for filtering)
 	results, err := s.embeddings.Search(ctx, query.Name, opts.Limit*embeddingSearchLimitMultiplier)
 	if err != nil {
+		s.logger.Error().Logf("embedding search failed: %v", err)
 		return nil, fmt.Errorf("embedding search: %w", err)
 	}
 
 	// Get all entities for lookup
 	searchEntities, err := s.indexedLists.GetEntities(ctx, query.Source)
 	if err != nil {
+		s.logger.Error().Logf("getting indexed entities failed: %v", err)
 		return nil, fmt.Errorf("getting indexed entities: %w", err)
 	}
 
@@ -208,6 +211,7 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 
 	goroutineCount, err := getGoroutineCount(s.cm)
 	if err != nil {
+		s.logger.Error().Logf("getGoroutineCount failed: %v", err)
 		return nil, fmt.Errorf("getGoroutineCount: %w", err)
 	}
 	start := time.Now()
@@ -215,6 +219,7 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	// Check if the query is targeting ingested files
 	searchEntities, err := s.indexedLists.GetEntities(ctx, query.Source)
 	if err != nil {
+		s.logger.Error().Logf("getting indexed entities failed: %v", err)
 		return nil, fmt.Errorf("getting indexed entities: %w", err)
 	}
 
@@ -305,7 +310,7 @@ func getGoroutineCount(cm *concurrencychamp.ConcurrencyManager) (int, error) {
 	if fromEnv != "" {
 		n, err := strconv.ParseUint(fromEnv, 10, 8)
 		if err != nil {
-			return 0, fmt.Errorf("parsing SEARCH_GOROUTINE_COUNT=%q failed: %v", fromEnv, err)
+			return 0, fmt.Errorf("parsing SEARCH_GOROUTINE_COUNT=%q failed: %w", fromEnv, err)
 		}
 		return int(n), nil
 	}
@@ -325,6 +330,7 @@ func (s *service) RebuildEmbeddingIndex(ctx context.Context) error {
 	// Get all entities
 	entities, err := s.indexedLists.GetEntities(ctx, "")
 	if err != nil {
+		s.logger.Error().Logf("getting entities for embedding index failed: %v", err)
 		return fmt.Errorf("getting entities for embedding index: %w", err)
 	}
 
@@ -345,6 +351,7 @@ func (s *service) RebuildEmbeddingIndex(ctx context.Context) error {
 
 	// Build the embedding index
 	if err := s.embeddings.BuildIndex(ctx, names, ids); err != nil {
+		s.logger.Error().Logf("building embedding index failed: %v", err)
 		return fmt.Errorf("building embedding index: %w", err)
 	}
 
