@@ -46,14 +46,26 @@ We recommend using additional git remote's for pushing/pulling code. This allows
 First, [Fork our project](https://github.com/moov-io/watchman) somewhere and after that's done add the remote:
 
 ```
-$ cd moov/watchman # Whereever this project's source code is
+$ cd moov/watchman # Wherever this project's source code is
 
 $ git remote add $user git@github.com:$user/watchman.git # After
 
 $ git fetch $user
 ```
 
-Now, feel free to branch and push (`git push $user $branch`) to your remote and send us Pull Requests!
+Add your changes
+
+```
+$ git checkout -b fix-issue-123
+
+$ git add path/to/files/changed.go
+
+$ git commit -m "fix: ......"
+
+$ git push $user fix-issue-123
+```
+
+Then open a Pull Request for Moov to review.
 
 ## Pull Requests
 
