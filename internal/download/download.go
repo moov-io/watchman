@@ -222,6 +222,22 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 		return nil
 	})
 
+	// UN CSL Records
+	if slices.Contains(requestedLists, search.SourceUNCSL) {
+		listsLoaded = append(listsLoaded, search.SourceUNCSL)
+
+		producerWg.Add(1)
+		g.Go(func() error {
+			defer producerWg.Done()
+
+			err := loadUNCSLRecords(ctx, logger, dl.conf, preparedLists)
+			if err != nil {
+				return fmt.Errorf("loading UN CSL records: %w", err)
+			}
+			return nil
+		})
+	}
+
 	// Compare the configured lists against those we actually loaded.
 	// Any extra lists are an error as we don't want to silently ignore them.
 	if len(listsLoaded) > len(requestedLists) {
