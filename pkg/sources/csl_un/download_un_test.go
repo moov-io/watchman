@@ -1,4 +1,4 @@
-// Copyright Bloomfielddev Authors
+// Copyright The Moov Authors
 // Use of this source code is governed by an Apache License
 // license that can be found in the LICENSE file.
 
@@ -30,19 +30,18 @@ func TestUNSanctionsListDownload_initialDir(t *testing.T) {
 	}
 
 	// create each file
-	mk(t, "UN_Sanctions_List.xml", "file=UN_Sanctions_List.xml")
+	mk(t, "un_consolidated.xml", "file=un_consolidated.xml")
 
 	file, err := DownloadSanctionsList_UN(context.Background(), log.NewNopLogger(), dir)
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	if len(file) == 0 {
 		t.Fatal("no UN Sanctions List file")
 	}
 
 	for fn, fd := range file {
-		if strings.EqualFold("UN_Sanctions_List.xml", filepath.Base(fn)) {
+		if strings.EqualFold("un_consolidated.xml", filepath.Base(fn)) {
 			_, err := io.ReadAll(fd)
 			if err != nil {
 				t.Fatal(err)

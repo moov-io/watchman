@@ -1,4 +1,4 @@
-// Copyright Bloomfielddev Authors
+// Copyright The Moov Authors
 // Use of this source code is governed by an Apache License
 // license that can be found in the LICENSE file.
 
@@ -16,10 +16,10 @@ import (
 )
 
 var (
-	//publicUNSanctionsListURL is the URL to download the UN CSL from. It can be overridden by setting the UN_SANCTIONS_LIST_URL env var.
-	publicUNSanctionsListURL = "https://scsanctions.un.org/resources/xml/en/consolidated.xml"
+	// publicUNConsolidatedURL is the URL to download the UN CSL from. It can be overridden by setting the UN_SANCTIONS_LIST_URL env var.
+	publicUNConsolidatedURL = "https://scsanctions.un.org/resources/xml/en/consolidated.xml"
 
-	unSanctionsListURL = strx.Or(os.Getenv("UN_SANCTIONS_LIST_URL"), publicUNSanctionsListURL)
+	unSanctionsListURL = strx.Or(os.Getenv("UN_CONSOLIDATED_LIST_URL"), publicUNConsolidatedURL)
 )
 
 func DownloadSanctionsList_UN(ctx context.Context, logger log.Logger, initialDir string) (map[string]io.ReadCloser, error) {
@@ -28,7 +28,7 @@ func DownloadSanctionsList_UN(ctx context.Context, logger log.Logger, initialDir
 	logger.Info().Logf("downloading UN sanctions list from %s", unSanctionsListURL)
 
 	unSanctionsNameAndSource := map[string]string{
-		"UN_Sanctions_List.xml": unSanctionsListURL,
+		"un_consolidated.xml": unSanctionsListURL,
 	}
 
 	return dl.GetFiles(ctx, initialDir, unSanctionsNameAndSource)

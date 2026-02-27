@@ -1,12 +1,14 @@
-// Copyright Bloomfielddev Authors
+// Copyright The Moov Authors
 // Use of this source code is governed by an Apache License
 // license that can be found in the LICENSE file.
 
 package csl_un
 
 import (
+	"cmp"
 	"fmt"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -78,35 +80,9 @@ func parseContactInfo(s string) contactInfo {
 	ci.Websites = websiteRE.FindAllString(s, -1)
 
 	// deduplicate
-	uniq := map[string]struct{}{}
-	filtered := []string{}
-	for _, e := range ci.EmailAddresses {
-		if _, ok := uniq[e]; !ok {
-			uniq[e] = struct{}{}
-			filtered = append(filtered, e)
-		}
-	}
-	ci.EmailAddresses = filtered
-
-	uniq = map[string]struct{}{}
-	filtered = []string{}
-	for _, p := range ci.PhoneNumbers {
-		if _, ok := uniq[p]; !ok {
-			uniq[p] = struct{}{}
-			filtered = append(filtered, p)
-		}
-	}
-	ci.PhoneNumbers = filtered
-
-	uniq = map[string]struct{}{}
-	filtered = []string{}
-	for _, w := range ci.Websites {
-		if _, ok := uniq[w]; !ok {
-			uniq[w] = struct{}{}
-			filtered = append(filtered, w)
-		}
-	}
-	ci.Websites = filtered
+	ci.EmailAddresses = dedup(ci.EmailAddresses)
+	ci.PhoneNumbers = dedup(ci.PhoneNumbers)
+	ci.Websites = dedup(ci.Websites)
 
 	return ci
 }
@@ -274,4 +250,9 @@ func (e UNEntity) ToEntity() search.Entity[search.Value] {
 	}
 
 	return entity.Normalize()
+}
+
+func dedup[T cmp.Ordered](input []T) []T {
+	slices.Sort(input)
+	return slices.Compact(input)
 }

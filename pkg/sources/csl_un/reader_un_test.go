@@ -1,4 +1,4 @@
-// Copyright Bloomfielddev Authors
+// Copyright The Moov Authors
 // Use of this source code is governed by an Apache License
 // license that can be found in the LICENSE file.
 
@@ -71,11 +71,10 @@ func TestReader(t *testing.T) {
 	require.Equal(t, search.SourceUNCSL, entity.Source)
 	require.NotNil(t, entity.Business)
 	require.Nil(t, entity.Person)
+
 	expectedEmails := []string{"Fdlr@fmx.de", "fldrrse@yahoo.fr", "fdlr@gmx.net", "fdlrsrt@gmail"}
-	require.Len(t, entity.Contact.EmailAddresses, len(expectedEmails))
-	for i, email := range expectedEmails {
-		require.Equal(t, email, entity.Contact.EmailAddresses[i])
-	}
+	require.ElementsMatch(t, expectedEmails, entity.Contact.EmailAddresses)
+
 	require.Len(t, entity.Addresses, 2)
 	require.Equal(t, "North Kivu", entity.Addresses[0].City)
 	require.Equal(t, "Democratic Republic of the Congo", entity.Addresses[0].Country)

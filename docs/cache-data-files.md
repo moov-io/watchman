@@ -43,6 +43,6 @@ Download the [UK Sanctions List](https://www.gov.uk/government/publications/the-
 
 **UN Consolidated Sanctions List**
 
-- `UN_consolidated.xml` - UN Consolidated Sanctions List
+- `un_consolidated.xml` - UN Consolidated Sanctions List
 
 Download from [UN Sanctions](https://www.un.org/sc/resources/sc-sanctions)
