@@ -75,6 +75,18 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 				entities = dl.geocodeEntities(ctx, entities)
 			}
 
+			// Catch any non-normalized entities before they're added into the index.
+			var normalized int
+			for idx := range entities {
+				if entities[idx].PreparedFields.Name == "" || len(entities[idx].PreparedFields.NameFields) == 0 {
+					normalized++
+					entities[idx] = entities[idx].Normalize()
+				}
+			}
+			if normalized > 0 {
+				logger.Warn().Logf("normalized %d entities before index inclusion - normalize in the mapper", normalized)
+			}
+
 			logger.Info().Logf("adding %d entities from %v", len(entities), list.ListName)
 
 			stats.Lists[string(list.ListName)] = len(entities)
