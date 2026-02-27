@@ -75,6 +75,18 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 				entities = dl.geocodeEntities(ctx, entities)
 			}
 
+			// Catch any non-normalized entities before they're added into the index.
+			var normalized int
+			for idx := range entities {
+				if entities[idx].PreparedFields.Name == "" || len(entities[idx].PreparedFields.NameFields) == 0 {
+					normalized++
+					entities[idx] = entities[idx].Normalize()
+				}
+			}
+			if normalized > 0 {
+				logger.Warn().Logf("normalized %d entities before index inclusion - normalize in the mapper", normalized)
+			}
+
 			logger.Info().Logf("adding %d entities from %v", len(entities), list.ListName)
 
 			stats.Lists[string(list.ListName)] = len(entities)
@@ -221,6 +233,22 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 		}
 		return nil
 	})
+
+	// UN CSL Records
+	if slices.Contains(requestedLists, search.SourceUNCSL) {
+		listsLoaded = append(listsLoaded, search.SourceUNCSL)
+
+		producerWg.Add(1)
+		g.Go(func() error {
+			defer producerWg.Done()
+
+			err := loadUNCSLRecords(ctx, logger, dl.conf, preparedLists)
+			if err != nil {
+				return fmt.Errorf("loading UN CSL records: %w", err)
+			}
+			return nil
+		})
+	}
 
 	// Compare the configured lists against those we actually loaded.
 	// Any extra lists are an error as we don't want to silently ignore them.

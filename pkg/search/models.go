@@ -64,6 +64,7 @@ var (
 	SourceUSOFAC      SourceList = "us_ofac"
 	SourceUSNonSDN    SourceList = "us_non_sdn"
 	SourceUSFinCEN311 SourceList = "us_fincen_311"
+	SourceUNCSL       SourceList = "un_csl"
 
 	sourceEmpty SourceList = ""
 )
