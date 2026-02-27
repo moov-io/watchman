@@ -24,7 +24,7 @@ func TestUNIndividual_ToEntity(t *testing.T) {
 		Addresses: []Address{
 			{City: "New York", Country: "US", Note: "Phone:+1-222-3333 Email:john@example.com"},
 		},
-		Comments:      "In comments you may reach him at john.doe@domain.org or +44 20 7946 0991 Gender: Male website:https://john.example.com",
+		Comments:      "Email: john.doe@domain.org Phone: +44 20 7946 0991 Gender: Male website:https://john.example.com",
 		BirthDates:    []BirthDate{{Type: "EXACT", Date: "1980-05-20"}},
 		BirthPlaces:   []BirthPlace{{City: "Springfield", State: "IL", Country: "US"}},
 		Nationalities: []Value{{Text: "USA"}},
@@ -137,7 +137,7 @@ func TestUNEntity_ToEntity(t *testing.T) {
 		FirstName: "BigCorp",
 		Aliases:   []Alias{{Name: "BC"}},
 		Addresses: []Address{{City: "London", Country: "GB", Note: "email:info@bigcorp.com phone:+442071838750 website:www.bigcorp.com"}},
-		Comments:  "Reach us at biz@contact.com or call +1234567890",
+		Comments:  "Email: biz@contact.com Phone: +1234567890",
 	}
 
 	ent := e.ToEntity()

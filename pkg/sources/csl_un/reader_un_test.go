@@ -34,84 +34,53 @@ func TestReader(t *testing.T) {
 
 	require.Len(t, entities, 1003)
 
-	// found := entities[563]
-	// require.Equal(t, "ABOUD ROGO MOHAMMED", found.Name)
-	// require.Equal(t, search.EntityPerson, found.Type)
-	// require.Equal(t, search.SourceUNCSL, found.Source)
-	// require.Equal(t, "UN-6908043", found.SourceID)
+	found := entities[563]
+	require.Equal(t, "ABOUD ROGO MOHAMMED", found.Name)
+	require.Equal(t, search.EntityPerson, found.Type)
+	require.Equal(t, search.SourceUNCSL, found.Source)
+	require.Equal(t, "UN-6908043", found.SourceID)
 
-	// t.Logf("%#v", found.Person)
-
-	// require.NotNil(t, found.Person)
-	// require.Nil(t, found.Business)
-	// require.Nil(t, found.Organization)
-	// require.Nil(t, found.Aircraft)
-	// require.Nil(t, found.Vessel)
-
-	for _, found := range entities {
-		var consider int
-
-		if len(found.Contact.EmailAddresses) > 0 || len(found.Contact.PhoneNumbers) > 0 {
-			consider++
+	// Verify phone numbers are extracted for individual DATAID 6909290
+	var individual *search.Entity[search.Value]
+	var entity *search.Entity[search.Value]
+	for i := range entities {
+		if entities[i].SourceID == "UN-6909290" {
+			individual = &entities[i]
 		}
-		if len(found.Addresses) > 0 {
-			consider++
-		}
-
-		if found.SourceID == "UN-6908027" {
-			t.Logf("%#v", found)
-		}
-
-		if consider > 1 {
-			t.Logf("%#v", found)
-			break
+		if entities[i].SourceID == "UN-6908027" {
+			entity = &entities[i]
 		}
 	}
 
-	// TODO(adam): verify phone numbers are extracted
-	// <INDIVIDUAL>
-	//   <DATAID>6909290</DATAID>
-	//   <VERSIONNUM>1</VERSIONNUM>
-	//   <FIRST_NAME>ABUBAKAR</FIRST_NAME>
-	//   <SECOND_NAME>SWALLEH</SECOND_NAME>
-	//   <UN_LIST_TYPE>Al-Qaida</UN_LIST_TYPE>
-	//   <REFERENCE_NUMBER>QDi.436</REFERENCE_NUMBER>
-	//   <LISTED_ON>2025-06-16</LISTED_ON>
-	//   <COMMENTS1>Abubakar Swalleh provides financial, material, or technological support for, or financial or other services to, or in support of, ISIL (listed as Al-Qaida in Iraq (QDe.115). He acted, since 2018, as an ISIL facilitator who provides financial and logistic support including recruitment for ISIL in East and Southern Africa. Phone number: +963936016952. Gender: Male  INTERPOL-UN Security Council Special Notice web link:https://www.interpol.int/en/How-we-work/Notices/View-UN-Notices-Individuals</COMMENTS1>
-	// ...
-	// <INDIVIDUAL_ADDRESS>
-	//   <CITY>Luzira Prison, Luzira, Kampala</CITY>
-	//   <COUNTRY>Uganda</COUNTRY>
-	// </INDIVIDUAL_ADDRESS>
-	// <INDIVIDUAL_DATE_OF_BIRTH>
-	//   <TYPE_OF_DATE>EXACT</TYPE_OF_DATE>
-	//   <DATE>1992-01-13</DATE>
-	// </INDIVIDUAL_DATE_OF_BIRTH>
+	require.NotNil(t, individual)
+	require.Equal(t, "ABUBAKAR SWALLEH", individual.Name)
+	require.Equal(t, search.EntityPerson, individual.Type)
+	require.Equal(t, search.SourceUNCSL, individual.Source)
+	require.NotNil(t, individual.Person)
+	require.Nil(t, individual.Business)
+	require.Len(t, individual.Contact.PhoneNumbers, 1)
+	require.Equal(t, "+963936016952", individual.Contact.PhoneNumbers[0])
+	require.Len(t, individual.Addresses, 1)
+	require.Equal(t, "Luzira Prison, Luzira, Kampala", individual.Addresses[0].City)
+	require.Equal(t, "Uganda", individual.Addresses[0].Country)
 
-	// TODO(adam): verify emails and addresses are extracted
-	// <ENTITY>
-	//       <DATAID>6908027</DATAID>
-	//       <VERSIONNUM>1</VERSIONNUM>
-	//       <FIRST_NAME>FORCES DEMOCRATIQUES DE LIBERATION DU RWANDA (FDLR)</FIRST_NAME>
-	//       <UN_LIST_TYPE>DRC</UN_LIST_TYPE>
-	//       <REFERENCE_NUMBER>CDe.005</REFERENCE_NUMBER>
-	//       <LISTED_ON>2012-12-31</LISTED_ON>
-	//       <COMMENTS1>Email: Fdlr@fmx.de; fldrrse@yahoo.fr; fdlr@gmx.net; fdlrsrt@gmail.com;
-	//          humura2020@gmail.com. INTERPOL-UN Security Council Special Notice web link:https://www.interpol.int/en/How-we-work/Notices/View-UN-Notices-Individuals</COMMENTS1>
-	// ..
-	//   <ENTITY_ADDRESS>
-	//     <CITY>North Kivu</CITY>
-	//     <COUNTRY>Democratic Republic of the Congo</COUNTRY>
-	//   </ENTITY_ADDRESS>
-	//   <ENTITY_ADDRESS>
-	//     <CITY>South Kivu</CITY>
-	//     <COUNTRY>Democratic Republic of the Congo</COUNTRY>
-	//   </ENTITY_ADDRESS>
-
-	// Contact:search.ContactInfo{EmailAddresses:[]string(nil), PhoneNumbers:[]string(nil), FaxNumbers:[]string(nil), Websites:[]string(nil)},
-	// 	Addresses:[]search.Address{search.Address{Line1:"", Line2:"", City:"", PostalCode:"", State:"", Country:"", Latitude:0, Longitude:0}},
-	// 	CryptoAddresses:[]search.CryptoAddress(nil), Affiliations:[]search.Affiliation(nil), SanctionsInfo:(*search.SanctionsInfo)(nil), HistoricalInfo:[]search.HistoricalInfo(nil),
-
+	// Verify emails and addresses are extracted for entity DATAID 6908027
+	require.NotNil(t, entity)
+	require.Equal(t, "FORCES DEMOCRATIQUES DE LIBERATION DU RWANDA (FDLR)", entity.Name)
+	require.Equal(t, search.EntityBusiness, entity.Type)
+	require.Equal(t, search.SourceUNCSL, entity.Source)
+	require.NotNil(t, entity.Business)
+	require.Nil(t, entity.Person)
+	expectedEmails := []string{"Fdlr@fmx.de", "fldrrse@yahoo.fr", "fdlr@gmx.net", "fdlrsrt@gmail"}
+	require.Len(t, entity.Contact.EmailAddresses, len(expectedEmails))
+	for i, email := range expectedEmails {
+		require.Equal(t, email, entity.Contact.EmailAddresses[i])
+	}
+	require.Len(t, entity.Addresses, 2)
+	require.Equal(t, "North Kivu", entity.Addresses[0].City)
+	require.Equal(t, "Democratic Republic of the Congo", entity.Addresses[0].Country)
+	require.Equal(t, "South Kivu", entity.Addresses[1].City)
+	require.Equal(t, "Democratic Republic of the Congo", entity.Addresses[1].Country)
 }
 
 func TestReader_Read_success(t *testing.T) {

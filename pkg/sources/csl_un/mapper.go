@@ -15,9 +15,9 @@ import (
 )
 
 var (
-	emailRE   = regexp.MustCompile(`[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}`)
-	phoneRE   = regexp.MustCompile(`\+?[0-9][0-9\-\s\(\)]{4,}[0-9]`)
-	websiteRE = regexp.MustCompile(`https?://[^\s;]+|www\.[^\s;]+`)
+	websiteRE    = regexp.MustCompile(`https?://[^\s;]+|www\.[^\s;]+`)
+	emailLabelRE = regexp.MustCompile(`(?i)email:\s*(.+)(?:\s*\.\s*|$)`)
+	phoneLabelRE = regexp.MustCompile(`(?i)(?:telephone|phone number|phone):\s*(.+)(?:\s*\.\s*|$)`)
 )
 
 type contactInfo struct {
@@ -35,8 +35,46 @@ func parseContactInfo(s string) contactInfo {
 		return ci
 	}
 
-	ci.EmailAddresses = emailRE.FindAllString(s, -1)
-	ci.PhoneNumbers = phoneRE.FindAllString(s, -1)
+	// Extract emails from labeled sections
+	for _, match := range emailLabelRE.FindAllStringSubmatch(s, -1) {
+		if len(match) > 1 {
+			emailsStr := strings.TrimSpace(match[1])
+			emails := strings.Split(emailsStr, ";")
+			for _, e := range emails {
+				e = strings.TrimSpace(e)
+				if e != "" {
+					// Take first part if has space
+					if idx := strings.Index(e, " "); idx > 0 {
+						e = e[:idx]
+					}
+					ci.EmailAddresses = append(ci.EmailAddresses, e)
+				}
+			}
+		}
+	}
+
+	// Extract phones from labeled sections
+	for _, match := range phoneLabelRE.FindAllStringSubmatch(s, -1) {
+		if len(match) > 1 {
+			phonesStr := strings.TrimSpace(match[1])
+			if phonesStr != "" {
+				parts := strings.Fields(phonesStr)
+				phoneParts := []string{}
+				for _, p := range parts {
+					if strings.Contains(p, ":") {
+						break
+					}
+					phoneParts = append(phoneParts, p)
+				}
+				phone := strings.Join(phoneParts, " ")
+				phone = strings.TrimSuffix(phone, ".")
+				if phone != "" {
+					ci.PhoneNumbers = append(ci.PhoneNumbers, phone)
+				}
+			}
+		}
+	}
+
 	ci.Websites = websiteRE.FindAllString(s, -1)
 
 	// deduplicate
