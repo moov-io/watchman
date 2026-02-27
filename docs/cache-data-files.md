@@ -40,3 +40,9 @@ Download the [EU Consolidated Screening List](https://data.europa.eu/data/datase
 - `UK_Sanctions_List.csv` - UK Sanctions List
 
 Download the [UK Sanctions List](https://www.gov.uk/government/publications/the-uk-sanctions-list)
+
+**UN Consolidated Sanctions List**
+
+- `UN_consolidated.xml` - UN Consolidated Sanctions List
+
+Download from [UN Sanctions](https://www.un.org/sc/resources/sc-sanctions)
