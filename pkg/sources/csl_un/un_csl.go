@@ -8,13 +8,6 @@ import (
 	"encoding/xml"
 )
 
-/*type CLSDATA struct {
-	XMLName     xml.Name   `xml:"CONSOLIDATED_LIST"`
-	Individuals []UNPerson `xml:"INDIVIDUALS>INDIVIDUAL"`
-	Entities    []UNEntity `xml:"ENTITIES>ENTITY"`
-}
-*/
-
 // UNConsolidatedList represents the root of the UN XML file
 type CLSDATA struct {
 	XMLName       xml.Name       `xml:"CONSOLIDATED_LIST"`

@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	//UNCSLDownloadURL is the URL to download the UN CSL from. It can be overridden by setting the UN_CSL_DOWNLOAD_URL env var.
+	//publicUNSanctionsListURL is the URL to download the UN CSL from. It can be overridden by setting the UN_SANCTIONS_LIST_URL env var.
 	publicUNSanctionsListURL = "https://scsanctions.un.org/resources/xml/en/consolidated.xml"
 
 	unSanctionsListURL = strx.Or(os.Getenv("UN_SANCTIONS_LIST_URL"), publicUNSanctionsListURL)

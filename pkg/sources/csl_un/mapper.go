@@ -6,10 +6,72 @@ package csl_un
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/moov-io/watchman/pkg/search"
 )
+
+var (
+	emailRE   = regexp.MustCompile(`[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}`)
+	phoneRE   = regexp.MustCompile(`\+?[0-9][0-9\-\s\(\)]{4,}[0-9]`)
+	websiteRE = regexp.MustCompile(`https?://[^\s;]+|www\.[^\s;]+`)
+)
+
+type contactInfo struct {
+	EmailAddresses []string
+	PhoneNumbers   []string
+	Websites       []string
+}
+
+// parseContactInfo scans a text blob for email addresses and phone numbers.
+// It returns a contactInfo structure containing any matches. Duplicates are
+// removed so callers can safely append results without checking for repeats.
+func parseContactInfo(s string) contactInfo {
+	ci := contactInfo{}
+	if s == "" {
+		return ci
+	}
+
+	ci.EmailAddresses = emailRE.FindAllString(s, -1)
+	ci.PhoneNumbers = phoneRE.FindAllString(s, -1)
+	ci.Websites = websiteRE.FindAllString(s, -1)
+
+	// deduplicate
+	uniq := map[string]struct{}{}
+	filtered := []string{}
+	for _, e := range ci.EmailAddresses {
+		if _, ok := uniq[e]; !ok {
+			uniq[e] = struct{}{}
+			filtered = append(filtered, e)
+		}
+	}
+	ci.EmailAddresses = filtered
+
+	uniq = map[string]struct{}{}
+	filtered = []string{}
+	for _, p := range ci.PhoneNumbers {
+		if _, ok := uniq[p]; !ok {
+			uniq[p] = struct{}{}
+			filtered = append(filtered, p)
+		}
+	}
+	ci.PhoneNumbers = filtered
+
+	uniq = map[string]struct{}{}
+	filtered = []string{}
+	for _, w := range ci.Websites {
+		if _, ok := uniq[w]; !ok {
+			uniq[w] = struct{}{}
+			filtered = append(filtered, w)
+		}
+	}
+	ci.Websites = filtered
+
+	return ci
+}
 
 // ToEntity converts a UNIndividual to the Moov search.Entity format.
 func (p UNIndividual) ToEntity() search.Entity[search.Value] {
@@ -31,6 +93,24 @@ func (p UNIndividual) ToEntity() search.Entity[search.Value] {
 	}
 	//set the full name in the Person struct as well for easier access
 	entity.Person.Name = fullName
+
+	// map gender if available
+	if p.Gender != "" {
+		entity.Person.Gender = search.Gender(p.Gender)
+	} else if p.Comments != "" {
+		// try to extract Gender: Male/Female from comments1 if not present
+		if strings.Contains(p.Comments, "Gender:") {
+			// simple heuristic: look for 'Gender:' and a word after it
+			parts := strings.Split(p.Comments, "Gender:")
+			if len(parts) > 1 {
+				tok := strings.Fields(parts[1])
+				if len(tok) > 0 {
+					entity.Person.Gender = search.Gender(tok[0])
+				}
+			}
+		}
+	}
+
 	// Map Aliases
 	for _, alias := range p.Aliases {
 		if alias.Name != "" {
@@ -44,6 +124,66 @@ func (p UNIndividual) ToEntity() search.Entity[search.Value] {
 			City:    addr.City,
 			Country: addr.Country,
 		})
+	}
+
+	// extract contact info from any address notes
+	for _, addr := range p.Addresses {
+		if addr.Note != "" {
+			ci := parseContactInfo(addr.Note)
+			entity.Contact.EmailAddresses = append(entity.Contact.EmailAddresses, ci.EmailAddresses...)
+			entity.Contact.PhoneNumbers = append(entity.Contact.PhoneNumbers, ci.PhoneNumbers...)
+			entity.Contact.Websites = append(entity.Contact.Websites, ci.Websites...)
+		}
+	}
+
+	// parse comments for contacts as well
+	if p.Comments != "" {
+		ci := parseContactInfo(p.Comments)
+		entity.Contact.EmailAddresses = append(entity.Contact.EmailAddresses, ci.EmailAddresses...)
+		entity.Contact.PhoneNumbers = append(entity.Contact.PhoneNumbers, ci.PhoneNumbers...)
+		entity.Contact.Websites = append(entity.Contact.Websites, ci.Websites...)
+	}
+
+	// extract birth date (prefer exact date, fall back to year)
+	for _, bd := range p.BirthDates {
+		if bd.Date != "" {
+			if t, err := time.Parse("2006-01-02", bd.Date); err == nil {
+				entity.Person.BirthDate = &t
+				break
+			}
+		}
+		if bd.Year != "" {
+			if y, err := strconv.Atoi(bd.Year); err == nil {
+				t := time.Date(y, time.January, 1, 0, 0, 0, 0, time.UTC)
+				entity.Person.BirthDate = &t
+				break
+			}
+		}
+	}
+
+	// extract birth place (first non-empty)
+	for _, bp := range p.BirthPlaces {
+		parts := []string{}
+		if bp.City != "" {
+			parts = append(parts, bp.City)
+		}
+		if bp.State != "" {
+			parts = append(parts, bp.State)
+		}
+		if bp.Country != "" {
+			parts = append(parts, bp.Country)
+		}
+		if len(parts) > 0 {
+			entity.Person.PlaceOfBirth = strings.Join(parts, ", ")
+			break
+		}
+	}
+
+	// extract nationalities
+	for _, n := range p.Nationalities {
+		if n.Text != "" {
+			entity.Person.Titles = append(entity.Person.Titles, n.Text)
+		}
 	}
 
 	return entity.Normalize()
@@ -71,6 +211,28 @@ func (e UNEntity) ToEntity() search.Entity[search.Value] {
 		if alias.Name != "" {
 			entity.Business.AltNames = append(entity.Business.AltNames, alias.Name)
 		}
+	}
+
+	// Map Addresses
+	for _, addr := range e.Addresses {
+		entity.Addresses = append(entity.Addresses, search.Address{
+			City:    addr.City,
+			Country: addr.Country,
+		})
+		if addr.Note != "" {
+			ci := parseContactInfo(addr.Note)
+			entity.Contact.EmailAddresses = append(entity.Contact.EmailAddresses, ci.EmailAddresses...)
+			entity.Contact.PhoneNumbers = append(entity.Contact.PhoneNumbers, ci.PhoneNumbers...)
+			entity.Contact.Websites = append(entity.Contact.Websites, ci.Websites...)
+		}
+	}
+
+	// parse comments field for contact information
+	if e.Comments != "" {
+		ci := parseContactInfo(e.Comments)
+		entity.Contact.EmailAddresses = append(entity.Contact.EmailAddresses, ci.EmailAddresses...)
+		entity.Contact.PhoneNumbers = append(entity.Contact.PhoneNumbers, ci.PhoneNumbers...)
+		entity.Contact.Websites = append(entity.Contact.Websites, ci.Websites...)
 	}
 
 	return entity.Normalize()

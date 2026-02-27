@@ -25,13 +25,13 @@ func loadUNCSLRecords(ctx context.Context, logger log.Logger, conf Config, respo
 
 	start := time.Now()
 
-	// Download UN Sanctions List (CSV format)
+	// Download UN Sanctions List (XML format)
 	files, err := csl_un.DownloadSanctionsList_UN(ctx, logger, initialDataDirectory(conf))
 	if err != nil {
 		return fmt.Errorf("UN CSL download: %w", err)
 	}
 
-	span.AddEvent("finished downloading UN LISt")
+	span.AddEvent("finished downloading UN List")
 
 	if len(files) == 0 {
 		return fmt.Errorf("unexpected %d UN CSL files found", len(files))

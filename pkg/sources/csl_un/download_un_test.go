@@ -16,7 +16,7 @@ import (
 )
 
 func TestUNSanctionsListDownload_initialDir(t *testing.T) {
-	dir, err := os.MkdirTemp("", "iniital-dir")
+	dir, err := os.MkdirTemp("", "initial-dir")
 	if err != nil {
 		t.Fatal(err)
 	}
