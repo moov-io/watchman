@@ -28,7 +28,7 @@ func Similarity[Q any, I any](query Entity[Q], index Entity[I]) float64 {
 // SimilarityWithTFIDF calculates a match score with optional TF-IDF weighting for name matching.
 // When tfidfIndex is nil or disabled, falls back to standard scoring.
 func SimilarityWithTFIDF[Q any, I any](query Entity[Q], index Entity[I], tfidfIndex *tfidf.Index) float64 {
-	return DebugSimilarityWithTFIDF(nil, query, index, tfidfIndex)
+	return DebugSimilarityWithTFIDF(nil, query, index, tfidfIndex).FinalScore
 }
 
 // DebugSimilarity does the same as Similarity, but logs debug info to w.
@@ -36,11 +36,11 @@ func SimilarityWithTFIDF[Q any, I any](query Entity[Q], index Entity[I], tfidfIn
 // The format written to w is not machine readable and is intended for humans to read.
 // The format will evolve over time. No stability guarantee is given over what is written.
 func DebugSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]) float64 {
-	return DebugSimilarityWithTFIDF(w, query, index, nil)
+	return DebugSimilarityWithTFIDF(w, query, index, nil).FinalScore
 }
 
 // DebugSimilarityWithTFIDF does the same as DebugSimilarity, with optional TF-IDF weighting.
-func DebugSimilarityWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], tfidfIndex *tfidf.Index) float64 {
+func DebugSimilarityWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], tfidfIndex *tfidf.Index) SimilarityScore {
 	details := DetailedSimilarityWithTFIDF(w, query, index, tfidfIndex)
 
 	switch len(details.Pieces) {
@@ -84,7 +84,7 @@ func DebugSimilarityWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index 
 		debug(w, "finalScore=%.2f", details.FinalScore)
 	}
 
-	return details.FinalScore
+	return details
 }
 
 var (

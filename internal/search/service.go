@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -145,12 +146,26 @@ func (s *service) performEmbeddingSearch(ctx context.Context, query search.Entit
 	// Build map for fast entity lookup by SourceID
 	entityMap := make(map[string]search.Entity[search.Value], len(searchEntities))
 	for _, e := range searchEntities {
+		// Should we debug any specific entities
+		if slices.Contains(opts.DebugSourceIDs, e.SourceID) {
+			s.logger.Debug().With(log.Fields{
+				"debug_source_id": log.String(e.SourceID),
+			}).Logf("indexed entity: %#v", e)
+		}
+
 		entityMap[e.SourceID] = e
 	}
 
 	// Convert results to SearchedEntity
 	var out []search.SearchedEntity[search.Value]
 	for _, result := range results {
+		// Should we debug any specific entities
+		if slices.Contains(opts.DebugSourceIDs, result.ID) {
+			s.logger.Debug().With(log.Fields{
+				"debug_source_id": log.String(result.ID),
+			}).Logf("embeddings results: %#v", result)
+		}
+
 		if result.Score < opts.MinMatch {
 			continue
 		}
@@ -229,6 +244,14 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	indices.ProcessSliceFn(searchEntities, goroutineCount, func(index search.Entity[search.Value]) {
 		start := time.Now()
 
+		debugSourceID := slices.Contains(opts.DebugSourceIDs, index.SourceID)
+
+		if debugSourceID {
+			s.logger.Debug().With(log.Fields{
+				"debug_source_id": log.String(index.SourceID),
+			}).Logf("indexed entity: %#v", index)
+		}
+
 		var score float64
 		if !opts.Debug {
 			score = search.SimilarityWithTFIDF(query, index, tfidfIndex)
@@ -236,8 +259,18 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 			var buf bytes.Buffer
 			buf.Grow(1700) // approximate size of debug logs
 
-			scores := search.DetailedSimilarityWithTFIDF(&buf, query, index, tfidfIndex)
+			scores := search.DebugSimilarityWithTFIDF(&buf, query, index, tfidfIndex)
 			score = scores.FinalScore
+
+			if debugSourceID {
+				s.logger.Debug().With(log.Fields{
+					"debug_source_id": log.String(index.SourceID),
+				}).Logf("similarity score: %#v", scores)
+
+				s.logger.Debug().With(log.Fields{
+					"debug_source_id": log.String(index.SourceID),
+				}).Logf("scoring debug: %#v", buf.String())
+			}
 
 			// Add debug buffer to be stored
 			debugs.Add(largest.Item[debugRespone]{
@@ -248,7 +281,15 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 				Weight: score,
 			})
 		}
-		stats.AddDuration(time.Since(start))
+
+		dur := time.Since(start)
+		stats.AddDuration(dur)
+
+		if debugSourceID {
+			s.logger.Debug().With(log.Fields{
+				"debug_source_id": log.String(index.SourceID),
+			}).Logf("final score: %.5f after %v", score, dur)
+		}
 
 		items.Add(largest.Item[search.Entity[search.Value]]{
 			Value:  index,
