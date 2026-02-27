@@ -16,8 +16,6 @@ import (
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/base/telemetry"
 	"github.com/moov-io/watchman/pkg/search"
-
-	//"github.com/moov-io/watchman/pkg/sources/cls_un"
 	"github.com/moov-io/watchman/pkg/sources/csl_un"
 )
 
