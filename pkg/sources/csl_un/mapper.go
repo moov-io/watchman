@@ -46,7 +46,7 @@ func (p UNIndividual) ToEntity() search.Entity[search.Value] {
 		})
 	}
 
-	return entity
+	return entity.Normalize()
 }
 
 // ToEntity converts a UNEntity to the Moov search.Entity format.
@@ -73,5 +73,5 @@ func (e UNEntity) ToEntity() search.Entity[search.Value] {
 		}
 	}
 
-	return entity
+	return entity.Normalize()
 }
