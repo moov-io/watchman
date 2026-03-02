@@ -146,7 +146,7 @@ dist: clean build
 ifeq ($(OS),Windows_NT)
 	GOOS=windows go build -o bin/watchman.exe github.com/moov-io/watchman/cmd/server
 else
-	GOOS=${PLATFORM} go build -o bin/watchman-${PLATFORM}-amd64 github.com/moov-io/watchman/cmd/server
+	GOOS=${PLATFORM} go build -o bin/watchman-${PLATFORM}-${ARCH} github.com/moov-io/watchman/cmd/server
 endif
 
 docker: clean docker-hub docker-openshift
