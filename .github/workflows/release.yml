@@ -47,10 +47,16 @@ jobs:
   publish:
     name: Publish
     needs: [tests, create_release]
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - runner: ubuntu-latest
+            arch: amd64
+          - runner: macos-latest
+            arch: arm64
+          - runner: windows-latest
+            arch: amd64
     permissions:
       contents: write  # For uploading release assets
       actions: read    # For downloading artifact
@@ -86,6 +92,8 @@ jobs:
 
     - name: Distribute
       run: make dist
+      env:
+        ARCH: ${{ matrix.arch }}
 
     - name: Get Release File Name & Upload URL
       id: get_release_info

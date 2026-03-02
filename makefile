@@ -142,7 +142,7 @@ else
 	@rm -rf ./bin/ cover.out coverage.txt lint-project.sh misspell* staticcheck* openapi-generator-cli-*.jar
 endif
 
-dist: clean build
+dist:
 ifeq ($(OS),Windows_NT)
 	GOOS=windows go build -o bin/watchman.exe github.com/moov-io/watchman/cmd/server
 else
