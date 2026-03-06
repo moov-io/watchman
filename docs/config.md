@@ -221,6 +221,9 @@ YAML configuration (example with OpenAI):
 | `UNMATCHED_INDEX_TOKEN_WEIGHT`     | Weight of penalty applied to scores when part of the indexed name isn't matched.                              | 0.15    |
 | `ADJACENT_SIMILARITY_POSITIONS`    | How many nearby words to search for highest max similarly score.                                              | 3       |
 | `EXACT_MATCH_FAVORITISM`           | Extra weighting assigned to exact matches.                                                                    | 0.0     |
+| `FINAL_SCORE_LOW_COVERAGE_MULTIPLIER` | Multiplier applied when a query compares against too little of the indexed entity's available data.              | 0.95    |
+| `FINAL_SCORE_MIN_REQUIRED_FIELDS_MULTIPLIER` | Multiplier applied when a search compares fewer than two required fields, such as a name-only query.              | 0.90    |
+| `FINAL_SCORE_NAME_ONLY_MULTIPLIER` | Multiplier applied to name-only matches when no IDs or addresses are present in the query.                    | 0.95    |
 | `DISABLE_PHONETIC_FILTERING`       | Force scoring search terms against every indexed record.                                                      | `false` |
 
 #### Source List Configuration
