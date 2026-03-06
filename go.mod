@@ -2,14 +2,14 @@ module github.com/moov-io/watchman
 
 go 1.25.0
 
-toolchain go1.26.0
+toolchain go1.26.1
 
 require (
 	fyne.io/fyne/v2 v2.7.3
 	github.com/OpenRouterTeam/go-sdk v0.0.0-20260126192013-c2c3c701312e
 	github.com/abadojack/whatlanggo v1.0.1
 	github.com/adamdecaf/merge v0.2.2
-	github.com/antchfx/htmlquery v1.3.5
+	github.com/antchfx/htmlquery v1.3.6
 	github.com/bbalet/stopwords v1.0.0
 	github.com/ccoveille/go-safecast/v2 v2.0.0
 	github.com/dongri/phonenumber v0.1.12
@@ -53,7 +53,7 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.30.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.55.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.55.0 // indirect
-	github.com/antchfx/xpath v1.3.5 // indirect
+	github.com/antchfx/xpath v1.3.6 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
