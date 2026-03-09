@@ -36,6 +36,7 @@ func readFloat(envVar string, defaultValue float64) float64 {
 
 	n, err := strconv.ParseFloat(value, 64)
 	if err != nil {
+		fmt.Fprintf(os.Stderr, "WARN: could not parse %s=%s as float64: %v. Using default %f\n", envVar, value, err, defaultValue)
 		return defaultValue
 	}
 	return n
