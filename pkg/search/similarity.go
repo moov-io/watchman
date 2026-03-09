@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"os"
+	"strconv"
 
 	"github.com/moov-io/watchman/internal/tfidf"
 )
@@ -19,6 +21,26 @@ const (
 	addressWeight        = 25.0
 	supportingInfoWeight = 15.0
 )
+
+var (
+	lowCoveragePenaltyMultiplier           = readFloat("FINAL_SCORE_LOW_COVERAGE_MULTIPLIER", 0.95)
+	minimumRequiredFieldsPenaltyMultiplier = readFloat("FINAL_SCORE_MIN_REQUIRED_FIELDS_MULTIPLIER", 0.90)
+	nameOnlyPenaltyMultiplier              = readFloat("FINAL_SCORE_NAME_ONLY_MULTIPLIER", 0.95)
+)
+
+func readFloat(envVar string, defaultValue float64) float64 {
+	value := os.Getenv(envVar)
+	if value == "" {
+		return defaultValue
+	}
+
+	n, err := strconv.ParseFloat(value, 64)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "WARN: could not parse %s=%s as float64: %v. Using default %f\n", envVar, value, err, defaultValue)
+		return defaultValue
+	}
+	return n
+}
 
 // Similarity calculates a match score between a query and an index entity.
 func Similarity[Q any, I any](query Entity[Q], index Entity[I]) float64 {
@@ -403,7 +425,7 @@ func applyPenaltiesAndBonuses(w io.Writer, baseScore float64, cov coverage, fiel
 
 	// Lighter coverage penalties
 	if cov.ratio < minCoverageThreshold {
-		score *= 0.95
+		score *= lowCoveragePenaltyMultiplier
 
 		if w != nil {
 			debug(w, "  cov.ratio < minCoverageThreshold = %.2f\n", score)
@@ -419,7 +441,7 @@ func applyPenaltiesAndBonuses(w io.Writer, baseScore float64, cov coverage, fiel
 
 	// Lighter minimum fields requirement
 	if fields.required < 2 {
-		score *= 0.90
+		score *= minimumRequiredFieldsPenaltyMultiplier
 
 		if w != nil {
 			debug(w, "  fields.required < 2 = %.2f\n", score)
@@ -428,7 +450,7 @@ func applyPenaltiesAndBonuses(w io.Writer, baseScore float64, cov coverage, fiel
 
 	// Reduced name-only match penalty
 	if !fields.hasID && !fields.hasAddress && fields.hasName {
-		score *= 0.95
+		score *= nameOnlyPenaltyMultiplier
 
 		if w != nil {
 			debug(w, "  reduced name-only match penalty = %.2f\n", score)
