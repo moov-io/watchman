@@ -6,9 +6,10 @@ show_sidebar: false
 menubar: docs-menu
 ---
 
-## Geocoding
+## Enhance Address Matching with Geocoding
 
-Watchman added support in `v0.57.0` for various geocoding providers that populate the `Latitude` and `Longitude` fields of every entity's address.
+Watchman supports multiple geocoding providers to precisely determine coordinates for addresses, significantly improving the accuracy of location-based
+compliance screening. This feature, introduced in v0.57.0, populates Latitude and Longitude fields for all entity addresses.
 
 Refer to the [file configuration](/watchman/config/#file) section for more information.
 

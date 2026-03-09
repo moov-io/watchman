@@ -117,15 +117,19 @@ The final match score is calculated through:
    - High-quality matches that meet specific thresholds receive a boost
    - Configurable via `EXACT_MATCH_FAVORITISM` environment variable
 
+5. **Final Score Adjustments**
+   - Applies multipliers based on query coverage and required fields
+   - Ensures accurate scoring even with partial information
+
 ## Threshold Configuration
 
 Watchman allows customizing match thresholds for different risk tolerances:
 
-| Threshold | Default Value | Use Case |
-|-----------|--------------|----------|
-| High Confidence | 0.95+ | Automatic blocking/alerts |
-| Medium Confidence | 0.85-0.94 | Manual review queue |
-| Low Confidence | 0.70-0.84 | Enhanced due diligence |
+| Threshold         | Default Value | Use Case                  |
+|-------------------|---------------|---------------------------|
+| High Confidence   | 0.95+         | Automatic blocking/alerts |
+| Medium Confidence | 0.85-0.94     | Manual review queue       |
+| Low Confidence    | 0.70-0.84     | Enhanced due diligence    |
 
 ## Performance Optimizations
 

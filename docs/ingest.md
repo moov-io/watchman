@@ -6,11 +6,10 @@ show_sidebar: false
 menubar: docs-menu
 ---
 
-## File Dataset Ingestion
+## Custom File Dataset Ingestion
 
-Watchman has a `POST /v2/ingest/{fileType}` endpoint allows you to upload CSV files containing entity data (e.g., businesses or persons) for ingestion.
-The endpoint processes the file based on a predefined schema defined in the Watchman YAML configuration and returns a JSON response with the parsed entities.
-The parsed entities are included in Watchman's memory for search, but kept as a separate list. Callers must specify a entity type matching the `fileType`.
+Extend Watchman's capabilities by ingesting your own datasets. The `POST /v2/ingest/{fileType}` endpoint enables seamless upload and processing of CSV files containing entity data (e.g., businesses or persons).
+Watchman parses the file according to your configured schema and integrates the entities into its search index as a dedicated list, maintaining separation from standard watchlists.
 
 ### Path Parameters
 

@@ -201,21 +201,23 @@ For detailed setup instructions, see [Cross-Script Name Matching](cross-script-m
 
 ## Best Practices
 
-1. **Use specific IDs when available**
-   - ID-based searches provide the highest confidence matches
-   - Example: government IDs, IMO numbers, passport numbers
+Optimize your Watchman searches for maximum accuracy and efficiency:
 
-2. **Combine multiple parameters**
-   - Searching with name + address improves match quality
+1. **Leverage Specific Identifiers**
+   - Prioritize ID-based searches for the highest confidence matches
+   - Examples: Government IDs, IMO numbers, passport numbers enhance precision
+
+2. **Combine Multiple Parameters**
+   - Enhance match quality by including names with addresses or other details
    - Example: `?type=person&name=maduro&address=caracas&country=VE`
 
-3. **Adjust match thresholds**
-   - Set `minMatch` parameter for filtering low-confidence matches
-   - Configure match favoritism based on your risk tolerance
+3. **Fine-Tune Match Thresholds**
+   - Use `minMatch` to filter low-confidence results effectively
+   - Customize global matching behavior, including favoritism, through configuration options in the [Configuration Guide](/watchman/config/)
 
-5. **Include contextual information**
-   - Add dates, addresses, and identifiers when available
-   - Reduces false positives and improves match confidence
+4. **Incorporate Contextual Data**
+   - Include dates, addresses, and additional identifiers when available
+   - This approach significantly reduces false positives and boosts match confidence
 
 ## API Documentation
 

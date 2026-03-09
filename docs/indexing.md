@@ -6,10 +6,10 @@ show_sidebar: false
 menubar: docs-menu
 ---
 
-# Search Indexing
+# Advanced Search Indexing for Superior Performance
 
-Watchman holds the searchable entities in memory (or in the database for ingested files) to speed up search requests.
-The index is re-computed every time lists are refreshed.
+Watchman maintains searchable entities in memory (with database options for ingested files) to deliver ultra-fast search responses.
+The index automatically rebuilds with each data refresh, ensuring your compliance checks are always based on the latest information.
 
 ## TF-IDF
 

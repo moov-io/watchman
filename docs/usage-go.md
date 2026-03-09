@@ -6,9 +6,11 @@ show_sidebar: false
 menubar: docs-menu
 ---
 
-# Go library
+# Seamless Integration with Go Library
 
 > For documentation on older releases of Watchman (v0.31.x series), please visit the [older docs website](https://github.com/moov-io/watchman/tree/v0.31.3/docs) in our GitHub repository.
+
+Embed Watchman's powerful screening capabilities directly into your Go applications for efficient, programmatic compliance checks.
 
 [![GoDoc](https://pkg.go.dev/badge/github.com/moov-io/watchman?utm_source=godoc)](https://pkg.go.dev/github.com/moov-io/watchman/pkg/search#Client)
 

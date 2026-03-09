@@ -11,7 +11,8 @@ menubar: docs-menu
 > For documentation on older releases of Watchman (v0.31.x series), please visit the [older docs website](https://github.com/moov-io/watchman/tree/v0.31.3/docs) in our GitHub repository.
 
 Watchman is designed to deliver fast, reliable sanctions and watchlist screening for financial services, balancing compliance needs with performance demands. By leveraging several key optimizations,
-Watchman ensures stable query times and efficient resource usage, even under heavy load. These performance traits make it a robust choice for production environments where speed and accuracy are critical.
+Watchman ensures stable query times and efficient resource usage, even under heavy load. Customize these behaviors through the [Configuration Guide](/watchman/config/) to optimize for your specific environment.
+These performance traits make it a robust choice for production environments where speed and accuracy are critical.
 
 One of Watchman’s core strengths is its **precomputation and normalization** of data. On startup, Watchman downloads and processes sanctions lists (like US OFAC and US/UK/EU Consolidated Screening)
 and applies transformations—such as reordering names (e.g., "MADURO MOROS, Nicolas" to "Nicolas MADURO MOROS") — to provide standardized results. Wachman also uses the [libpostal](https://github.com/openvenues/libpostal)

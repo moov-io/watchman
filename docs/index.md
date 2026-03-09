@@ -16,12 +16,16 @@ Moov Watchman is a high-performance sanctions screening and compliance tool that
 
 ## Key Features
 
-- **Geocoding**: Using one of the supported providers.
-- **Senzing Support**: Import data files in [senzing format](https://www.senzing.com/docs/entity_specification/) and get search responses as senzing entities.
-- **Comprehensive Coverage**: Integrates multiple global watchlists in one unified system
-- **High-Performance Search**: Optimized for speed and accuracy using advanced matching algorithms
-- **Flexible Integration**: HTTP API and Go library for easy integration into your systems
-- **Automated Updates**: Regular refreshes of watchlist data to ensure compliance
+Watchman empowers your compliance team with powerful tools designed for accuracy, speed, and ease of use:
+
+- **Comprehensive Global Coverage**: Seamlessly integrates multiple international sanctions lists, ensuring thorough compliance screening across jurisdictions.
+- **Advanced Fuzzy Matching**: Leverages sophisticated algorithms to detect name variations and reduce false negatives, saving time on manual reviews.
+- **High-Performance Search**: Delivers lightning-fast queries with optimized in-memory processing for real-time compliance checks.
+- **Flexible Integration Options**: Provides an intuitive HTTP API and native Go library for seamless incorporation into your existing systems.
+- **Automated Data Management**: Handles automatic downloads and refreshes of watchlists, keeping your data current without manual intervention.
+- **Customizable Configuration**: Fine-tune search parameters, thresholds, and behaviors to align with your organization's specific risk profile. See [Configuration Guide](/watchman/config/) for details.
+- **Geocoding Support**: Enhances address matching accuracy with integrated providers like Google Maps and OpenCage.
+- **Senzing Compatibility**: Supports Senzing format for advanced entity resolution and data import.
 
 ## Included Lists
 

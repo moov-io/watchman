@@ -8,9 +8,11 @@ menubar: docs-menu
 
 # Introduction to Moov Watchman
 
+Discover how Watchman revolutionizes sanctions screening with cutting-edge technology, helping businesses maintain compliance effortlessly while minimizing risks.
+
 ## Core Functionality
 
-Watchman is a robust compliance screening tool that provides:
+Watchman delivers enterprise-grade compliance screening with:
 
 1. **Data Management**:
    - Automatic downloading of sanctions lists (US OFAC, US CSL, UK, EU, etc.)
@@ -43,9 +45,9 @@ Watchman integrates the following lists to help you maintain global compliance:
 
 ### Jaro-Winkler Similarity Algorithm
 
-Watchman uses the [Jaro-Winkler distance](https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance) algorithm to score the similarity between search queries and list entries. This approach:
+Watchman uses the [Jaro-Winkler distance](https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance) algorithm on cleaned and normalized data to score the similarity between search queries and list entries. This approach:
 
-- Matches the methodology used by [US Treasury's OFAC Search](https://ofac.treasury.gov/faqs/892)
+- Matches the methodology used by [US Treasury's OFAC Search](https://ofac.treasury.gov/faqs/892), but with improved scoring
 - Is specifically optimized for person names and other proper nouns
 - Produces scores from 0.0 (completely different) to 1.0 (exact match)
 - Has been validated by [academic research](https://www.wseas.org/multimedia/journals/computers/2015/a965705-699.pdf) as effective for compliance screening
