@@ -40,6 +40,7 @@ func New(config database.DatabaseConfig, logger log.Logger, options ...Option) (
 	for i := 0; err != nil && i < maxRetries; i++ {
 		// Check for a missing config
 		if errors.Is(err, database.ErrMissingConfig) {
+			cancelFunc()
 			return nil, cancelFunc, nil
 		}
 
@@ -49,6 +50,7 @@ func New(config database.DatabaseConfig, logger log.Logger, options ...Option) (
 		data, err = database.New(ctx, logger, config)
 	}
 	if err != nil {
+		cancelFunc()
 		return nil, cancelFunc, logger.Fatal().LogErrorf("Error creating database: %w", err).Err()
 	}
 
@@ -89,6 +91,7 @@ func New(config database.DatabaseConfig, logger log.Logger, options ...Option) (
 
 	for _, opt := range append(dbOpts, options...) {
 		if err := opt(out); err != nil {
+			cancelFunc()
 			return nil, cancelFunc, fmt.Errorf("applying options: %w", err)
 		}
 	}
