@@ -10,12 +10,13 @@ menubar: docs-menu
 
 > For documentation on older releases of Watchman (v0.31.x series), please visit the [older docs website](https://github.com/moov-io/watchman/tree/v0.31.3/docs) in our GitHub repository.
 
-1. [File](#file)
-   1. [Environment Variables](#environment-variables)
-1. [Download](#download)
-1. [Search](#search)
-1. [Geocoding](#geocoding)
-1. [Included Lists](#included-lists)
+ 1. [File](#file)
+    1. [Environment Variables](#environment-variables)
+ 1. [Download](#download)
+ 1. [Search](#search)
+ 1. [Geocoding](#geocoding)
+ 1. [MCP](#mcp)
+ 1. [Included Lists](#included-lists)
 
 #### Search Configuration
 
@@ -129,6 +130,19 @@ PostalPool is an experiment for improving address parsing. It's optional configu
     BinaryPath: "" # POSTAL_SERVER_BIN_PATH is set in Dockerfile
     CGOSelfInstances: 1
 ```
+
+### MCP
+
+> **Experimental Feature**: The MCP server is experimental and may change in future releases.
+
+Enable the Model Context Protocol server endpoints at `/mcp` for AI agent integration:
+
+```yaml
+  MCP:
+    Enabled: false
+```
+
+When enabled, Watchman will run as an MCP server over stdio instead of the HTTP server.
 
 ### Included Lists
 

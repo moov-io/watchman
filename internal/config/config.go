@@ -37,6 +37,8 @@ type Config struct {
 	Geocoding  geocoding.Config
 
 	Ingest ingest.Config
+
+	MCP MCPConfig
 }
 
 type ServerConfig struct {
@@ -45,6 +47,10 @@ type ServerConfig struct {
 
 	TLSCertFile string
 	TLSKeyFile  string
+}
+
+type MCPConfig struct {
+	Enabled bool `yaml:"enabled" json:"enabled"`
 }
 
 func LoadConfig(logger log.Logger) (*Config, error) {

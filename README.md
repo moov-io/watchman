@@ -28,7 +28,7 @@ Moov's mission is to give developers an easy way to create and integrate bank pr
 
 ## What is Watchman?
 
-Moov Watchman is a high-performance sanctions screening and compliance tool that helps businesses meet their regulatory obligations. It provides an HTTP server and [Go library](https://pkg.go.dev/github.com/moov-io/watchman/pkg/search#Client) for searching against multiple global sanctions and screening lists.
+Moov Watchman is a high-performance sanctions screening and compliance tool that helps businesses meet their regulatory obligations. It provides an HTTP server, [Go library](https://pkg.go.dev/github.com/moov-io/watchman/pkg/search#Client), and experimental [Model Context Protocol (MCP)](https://moov-io.github.io/watchman/mcp/) server for searching against multiple global sanctions and screening lists.
 
 ## Key Features
 
@@ -72,7 +72,7 @@ Moov Watchman is actively used in multiple production environments. Please star 
 
 ## Usage
 
-The Watchman project implements an HTTP server and [Go library](https://pkg.go.dev/github.com/moov-io/watchman/pkg/search#Client) for searching against Watchman.
+The Watchman project implements an HTTP server, [Go library](https://pkg.go.dev/github.com/moov-io/watchman/pkg/search#Client), and experimental [Model Context Protocol (MCP)](https://moov-io.github.io/watchman/mcp/) server for searching against Watchman.
 
 Government lists are downloaded (and refreshed), parsed, prepared, normalized, and indexed in-memory. Searches operate concurrently and do not require an external database or connection.
 

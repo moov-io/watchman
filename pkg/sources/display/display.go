@@ -27,7 +27,7 @@ func DetailsURL(entity search.Entity[search.Value]) string {
 	case search.SourceUSOFAC, search.SourceUSNonSDN:
 		return ofac.DetailsURL(entity.SourceID)
 
-	case search.SourceAPIRequest:
+	case search.SourceAPIRequest, search.SourceMCPRequest:
 		// do nothing
 	}
 
@@ -40,7 +40,9 @@ func DetailsURL(entity search.Entity[search.Value]) string {
 	u, _ := url.Parse("/v2/search")
 
 	params := search.BuildQueryParameters(u.Query(), entity)
-	if v := params.Get("source"); v == string(search.SourceAPIRequest) {
+
+	requestSource := search.SourceList(params.Get("source"))
+	if requestSource.IsRequestType() {
 		params.Del("source")
 	}
 

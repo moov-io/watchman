@@ -39,7 +39,7 @@ func (l *lists) GetEntities(ctx context.Context, source search.SourceList) ([]se
 	_, exists := l.latestStats.Lists[string(source)]
 
 	// Let api-request use our inmem entities
-	exists = exists || source == search.SourceAPIRequest
+	exists = exists || source.IsRequestType()
 	if string(source) == "" {
 		exists = true
 	}

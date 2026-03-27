@@ -144,7 +144,7 @@ func DetailedSimilarityWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], ind
 	var exactOverride bool
 
 	// Quick filters
-	if query.Source != sourceEmpty && query.Source != SourceAPIRequest {
+	if query.Source != sourceEmpty && !query.Source.IsRequestType() {
 		if query.Source != index.Source {
 			out.Pieces = emptyPieces
 			return out
