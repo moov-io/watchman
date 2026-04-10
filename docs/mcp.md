@@ -206,33 +206,23 @@ Since the MCP server is configured in stateless mode, you can directly call tool
 
 ```bash
 # Call the search_entities tool directly
-curl -X POST "http://localhost:8084/mcp" \
+curl -s -X POST "http://localhost:8084/mcp" \
   -H "Content-Type: application/json" \
-  -H "Accept: application/json,text/event-stream" \
   -d '{
     "jsonrpc": "2.0",
     "id": 1,
     "method": "tools/call",
     "params": {
-      "name": "search_entities",
-      "arguments": {
-        "request": {
-          "name": "Nicolas Maduro",
-          "entityType": "person",
-          "sourceList": "api-request",
-          "sourceID": "test",
-          "contact": {},
-          "addresses": [],
-          "cryptoAddresses": [],
-          "affiliations": [],
-          "historicalInfo": [],
-          "sourceData": null
-        },
-        "limit": 5,
-        "minMatch": 0.8
-      }
+        "name": "search_entities",
+        "arguments": {
+            "request": {
+                "name": "john",
+                "entityType": "person"
+            },
+            "limit": 1
+        }
     }
-  }'
+}'
 ```
 
 **Note**: The `request` object must include all required fields of the Entity struct. For production use, it's recommended to use an MCP client library that handles the protocol details automatically.
