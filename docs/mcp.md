@@ -149,54 +149,54 @@ All search parameters from the HTTP `/v2/search` endpoint are supported:
 package main
 
 import (
-    "context"
-    "fmt"
-    "log"
+	"context"
+	"fmt"
+	"log"
 
-    "github.com/modelcontextprotocol/go-sdk/mcp"
-    "github.com/moov-io/watchman/pkg/search"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/moov-io/watchman/pkg/search"
 )
 
 func main() {
-    ctx := context.Background()
+	ctx := context.Background()
 
-    // Create MCP client
-    client := mcp.NewClient(&mcp.Implementation{
-        Name:    "watchman-client",
-        Version: "1.0.0",
-    }, nil)
+	// Create MCP client
+	client := mcp.NewClient(&mcp.Implementation{
+		Name:    "watchman-client",
+		Version: "1.0.0",
+	}, nil)
 
-    // Connect to Watchman MCP server
-    session, err := client.Connect(ctx, &mcp.StreamableClientTransport{
-        Endpoint: "http://localhost:8084/mcp",
-    }, nil)
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer session.Close()
+	// Connect to Watchman MCP server
+	session, err := client.Connect(ctx, &mcp.StreamableClientTransport{
+		Endpoint: "http://localhost:8084/mcp",
+	}, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer session.Close()
 
-    // Search for an entity
-    result, err := session.CallTool(ctx, &mcp.CallToolParams{
-        Name: "search_entities",
-        Arguments: map[string]any{
-            "request": search.Entity[search.Value]{
-                Name: "Nicolas Maduro",
-                Type: search.EntityPerson,
-            },
-            "limit": 5,
-            "minMatch": 0.8,
-        },
-    })
-    if err != nil {
-        log.Fatal(err)
-    }
+	// Search for an entity
+	result, err := session.CallTool(ctx, &mcp.CallToolParams{
+		Name: "search_entities",
+		Arguments: map[string]any{
+			"request": search.Entity[search.Value]{
+				Name: "John",
+				Type: search.EntityPerson,
+			},
+			"limit":    1,
+			"minMatch": 0.25,
+		},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
 
-    // Print results
-    for _, content := range result.Content {
-        if textContent, ok := content.(*mcp.TextContent); ok {
-            fmt.Println(textContent.Text)
-        }
-    }
+	// Print results
+	for _, content := range result.Content {
+		if textContent, ok := content.(*mcp.TextContent); ok {
+			fmt.Println(textContent.Text)
+		}
+	}
 }
 ```
 
@@ -219,7 +219,8 @@ curl -s -X POST "http://localhost:8084/mcp" \
                 "name": "john",
                 "entityType": "person"
             },
-            "limit": 1
+            "limit": 1,
+            "minMatch": 0.25
         }
     }
 }'
