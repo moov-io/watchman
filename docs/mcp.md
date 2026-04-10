@@ -21,8 +21,9 @@ The MCP server enables seamless integration with MCP-compatible clients, providi
 To enable the MCP server, add the following to your Watchman configuration:
 
 ```yaml
-mcp:
-  enabled: true
+Watchman:
+  MCP:
+    Enabled: true
 ```
 
 When MCP is enabled, Watchman will serve MCP endpoints at `/mcp` in addition to the standard HTTP API.
@@ -45,9 +46,20 @@ The `request` parameter accepts the same JSON structure as the HTTP `/v2/search`
 
 ```json
 {
-  "name": "Nicolas Maduro",
-  "type": "person",
-  "birthDate": "1962-11-23"
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/call",
+    "params": {
+        "name": "search_entities",
+        "arguments": {
+            "request": {
+                "name": "john",
+                "entityType": "person"
+            },
+            "limit": 1,
+            "minMatch": 0.25
+        }
+    }
 }
 ```
 
@@ -57,29 +69,90 @@ Returns a JSON object with search results:
 
 ```json
 {
-  "query": {
-    "name": "Nicolas Maduro",
-    "type": "person",
-    "birthDate": "1962-11-23"
-  },
-  "entities": [
-    {
-      "name": "Nicolas MADURO MOROS",
-      "entityType": "person",
-      "sourceList": "us_ofac",
-      "sourceID": "OFAC-12345",
-      "person": {
-        "name": "Nicolas MADURO MOROS",
-        "birthDate": "1962-11-23",
-        "placeOfBirth": "Caracas, Venezuela"
-      },
-      "sanctionsInfo": {
-        "programs": ["SDNT"],
-        "description": "President of Venezuela"
-      },
-      "match": 0.95
-    }
-  ]
+    "query": {
+        "name": "John",
+        "entityType": "person",
+        "sourceList": "",
+        "sourceID": "",
+        "person": {
+            "name": "John",
+            "altNames": null,
+            "gender": "",
+            "birthDate": null,
+            "placeOfBirth": "",
+            "deathDate": null,
+            "titles": null,
+            "governmentIDs": null
+        },
+        "business": null,
+        "organization": null,
+        "aircraft": null,
+        "vessel": null,
+        "contact": {
+            "emailAddresses": null,
+            "phoneNumbers": null,
+            "faxNumbers": null,
+            "websites": null
+        },
+        "addresses": null,
+        "cryptoAddresses": null,
+        "affiliations": null,
+        "sanctionsInfo": null,
+        "historicalInfo": null,
+        "sourceData": null
+    },
+    "entities": [
+        {
+            "name": "John NUMBI",
+            "entityType": "person",
+            "sourceList": "us_ofac",
+            "sourceID": "20420",
+            "person": {
+                "name": "John NUMBI",
+                "altNames": null,
+                "gender": "male",
+                "birthDate": "1957-01-01T00:00:00Z",
+                "placeOfBirth": "",
+                "deathDate": null,
+                "titles": [
+                    "General; Former National Inspector, Congolese National Police"
+                ],
+                "governmentIDs": null
+            },
+            "business": null,
+            "organization": null,
+            "aircraft": null,
+            "vessel": null,
+            "contact": {
+                "emailAddresses": null,
+                "phoneNumbers": null,
+                "faxNumbers": null,
+                "websites": null
+            },
+            "addresses": null,
+            "cryptoAddresses": null,
+            "affiliations": null,
+            "sanctionsInfo": null,
+            "historicalInfo": null,
+            "sourceData": {
+                "entityID": "20420",
+                "sdnName": "NUMBI, John",
+                "sdnType": "individual",
+                "program": [
+                    "DRCONGO"
+                ],
+                "title": "General; Former National Inspector, Congolese National Police",
+                "callSign": "",
+                "vesselType": "",
+                "tonnage": "",
+                "grossRegisteredTonnage": "",
+                "vesselFlag": "",
+                "vesselOwner": "",
+                "remarks": "DOB 1957; POB Kolwezi, Katanga Province, Democratic Republic of the Congo; Gender Male; General; Former National Inspector, Congolese National Police."
+            },
+            "match": 0.7445624999999998
+        }
+    ]
 }
 ```
 
@@ -89,9 +162,20 @@ Returns a JSON object with search results:
 
 ```json
 {
-  "request": "{\"name\": \"Nicolas Maduro\", \"type\": \"person\"}",
-  "limit": 5,
-  "minMatch": 0.8
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/call",
+    "params": {
+        "name": "search_entities",
+        "arguments": {
+            "request": {
+                "name": "Nicholas Maduro",
+                "entityType": "person"
+            },
+            "limit": 1,
+            "minMatch": 0.25
+        }
+    }
 }
 ```
 
@@ -99,8 +183,20 @@ Returns a JSON object with search results:
 
 ```json
 {
-  "request": "{\"name\": \"Rosneft\", \"type\": \"business\"}",
-  "limit": 3
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/call",
+    "params": {
+        "name": "search_entities",
+        "arguments": {
+            "request": {
+                "name": "Rosneft",
+                "entityType": "business"
+            },
+            "limit": 1,
+            "minMatch": 0.25
+        }
+    }
 }
 ```
 
@@ -108,8 +204,28 @@ Returns a JSON object with search results:
 
 ```json
 {
-  "request": "{\"name\": \"Vladimir Putin\", \"type\": \"person\", \"birthDate\": \"1952-10-07\", \"addresses\": [{\"country\": \"RU\"}]}",
-  "minMatch": 0.9
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/call",
+    "params": {
+        "name": "search_entities",
+        "arguments": {
+            "request": {
+                "name": "Vladimir Putin",
+                "entityType": "person",
+                "person": {
+                    "birthDate": "1952-10-07"
+                },
+                "addresses": [
+                    {
+                        "country": "RU"
+                    }
+                ]
+            },
+            "limit": 1,
+            "minMatch": 0.25
+        }
+    }
 }
 ```
 
