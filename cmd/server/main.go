@@ -25,6 +25,7 @@ import (
 	"github.com/moov-io/watchman/internal/geocoding"
 	"github.com/moov-io/watchman/internal/index"
 	"github.com/moov-io/watchman/internal/ingest"
+	"github.com/moov-io/watchman/internal/mcp"
 	"github.com/moov-io/watchman/internal/postalpool"
 	"github.com/moov-io/watchman/internal/search"
 	"github.com/moov-io/watchman/internal/webui"
@@ -108,6 +109,12 @@ func main() {
 
 	router := mux.NewRouter()
 	addPingRoute(router)
+
+	// Add MCP endpoint if enabled
+	if conf.MCP.Enabled {
+		mcpServer := mcp.NewServer(logger, searchService)
+		router.PathPrefix("/mcp").Handler(http.StripPrefix("/mcp", mcpServer.Handler()))
+	}
 
 	addressParsingPool, err := postalpool.NewService(logger, conf.PostalPool)
 	if err != nil {

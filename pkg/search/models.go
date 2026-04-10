@@ -55,8 +55,13 @@ var (
 
 type SourceList string
 
+func (sl SourceList) IsRequestType() bool {
+	return sl == SourceAPIRequest || sl == SourceMCPRequest
+}
+
 var (
 	SourceAPIRequest SourceList = "api-request"
+	SourceMCPRequest SourceList = "mcp-request"
 
 	SourceEUCSL       SourceList = "eu_csl"
 	SourceUKCSL       SourceList = "uk_csl"

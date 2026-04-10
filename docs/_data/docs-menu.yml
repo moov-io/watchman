@@ -13,6 +13,8 @@
       link: /config/
     - name: Go library
       link: /usage-go/
+    - name: MCP Server (Experimental)
+      link: /mcp/
 
 - label: Watchman search
   items:

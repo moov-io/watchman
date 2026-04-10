@@ -24,10 +24,11 @@ Watchman delivers enterprise-grade compliance screening with:
    - Advanced fuzzy matching using Jaro-Winkler algorithms
    - Multi-field search with entity type filtering
 
-3. **Integration Options**:
-   - HTTP API for web and service integration
-   - Native Go library for direct implementation
-   - Webhook notifications for automated workflows
+ 3. **Integration Options**:
+    - HTTP API for web and service integration
+    - Native Go library for direct implementation
+    - [Experimental Model Context Protocol (MCP) server](/watchman/mcp/) for AI agent integration
+    - Webhook notifications for automated workflows
 
 ## Included List Sources
 
