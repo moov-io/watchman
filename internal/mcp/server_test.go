@@ -11,6 +11,7 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/moov-io/base/log"
+	"github.com/moov-io/watchman/internal/config"
 	"github.com/moov-io/watchman/internal/index"
 	"github.com/moov-io/watchman/internal/ofactest"
 	"github.com/moov-io/watchman/internal/search"
@@ -32,7 +33,7 @@ func TestMCPHandler(t *testing.T) {
 	require.NoError(t, err)
 	indexedLists.Update(stats)
 
-	server := NewServer(logger, service)
+	server := NewServer(logger, service, config.MCPSigning{})
 	handler := server.Handler()
 
 	t.Run("handler returns http.Handler", func(t *testing.T) {
@@ -55,7 +56,7 @@ func TestSearchEntitiesTool(t *testing.T) {
 	require.NoError(t, err)
 	indexedLists.Update(stats)
 
-	server := NewServer(logger, service)
+	server := NewServer(logger, service, config.MCPSigning{})
 
 	// Test the handleSearchEntities function directly
 	req := &mcp.CallToolRequest{}
@@ -127,7 +128,7 @@ func TestMCPHTTPIntegration(t *testing.T) {
 	require.NoError(t, err)
 	indexedLists.Update(stats)
 
-	server := NewServer(logger, service)
+	server := NewServer(logger, service, config.MCPSigning{})
 	handler := server.Handler()
 
 	// Create a test HTTP server

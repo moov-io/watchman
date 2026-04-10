@@ -112,7 +112,7 @@ func main() {
 
 	// Add MCP endpoint if enabled
 	if conf.MCP.Enabled {
-		mcpServer := mcp.NewServer(logger, searchService)
+		mcpServer := mcp.NewServer(logger, searchService, conf.MCP.Signing)
 		router.PathPrefix("/mcp").Handler(http.StripPrefix("/mcp", mcpServer.Handler()))
 	}
 

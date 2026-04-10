@@ -50,7 +50,14 @@ type ServerConfig struct {
 }
 
 type MCPConfig struct {
-	Enabled bool `yaml:"enabled" json:"enabled"`
+	Enabled bool       `yaml:"enabled" json:"enabled"`
+	Signing MCPSigning `yaml:"signing" json:"signing"`
+}
+
+type MCPSigning struct {
+	Enabled bool   `yaml:"enabled" json:"enabled"`
+	KeyPath string `yaml:"key_path" json:"key_path"`
+	PubPath string `yaml:"pub_path" json:"pub_path"`
 }
 
 func LoadConfig(logger log.Logger) (*Config, error) {
