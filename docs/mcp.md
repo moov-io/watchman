@@ -237,40 +237,6 @@ curl -X POST "http://localhost:8084/mcp" \
 
 **Note**: The `request` object must include all required fields of the Entity struct. For production use, it's recommended to use an MCP client library that handles the protocol details automatically.
 
-### Python Example (using MCP SDK)
-
-```python
-import asyncio
-import json
-from mcp import ClientSession, StdioServerParameters
-from mcp.client.stdio import stdio_client
-
-async def main():
-    # Connect to Watchman MCP server
-    async with stdio_client([
-        "watchman-server",  # Your Watchman binary
-        "--mcp-enabled=true"
-    ]) as (read, write):
-        async with ClientSession(read, write) as session:
-            # Search for entities
-            result = await session.call_tool(
-                "search_entities",
-                arguments={
-                    "request": {
-                        "name": "Nicolas Maduro",
-                        "type": "person"
-                    },
-                    "limit": 5,
-                    "minMatch": 0.8
-                }
-            )
-            
-            print("Search results:", json.dumps(result.content, indent=2))
-
-if __name__ == "__main__":
-    asyncio.run(main())
-```
-
 ## MCP Client Integration
 
 To use Watchman with an MCP client:
