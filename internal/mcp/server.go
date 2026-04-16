@@ -1,8 +1,10 @@
 package mcp
 
 import (
+	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/moov-io/base/log"
@@ -40,22 +42,41 @@ func NewServer(logger log.Logger, service search.Service, signingConf config.MCP
 }
 
 func loadOrGenerateKeys(logger log.Logger, conf config.MCPSigning) (*mcps.KeyPair, error) {
-	// Try environment variables first
+	// Try environment variables first -- require BOTH before attempting env load
 	if os.Getenv("MCPS_PRIVATE_KEY") != "" && os.Getenv("MCPS_PUBLIC_KEY") != "" {
 		logger.Info().Log("MCPS: loading signing keys from environment variables")
 		return mcps.LoadKeyPairFromEnv("MCPS_PRIVATE_KEY", "MCPS_PUBLIC_KEY")
+	}
+	if os.Getenv("MCPS_PRIVATE_KEY") != "" {
+		logger.Warn().Log("MCPS: MCPS_PRIVATE_KEY is set but MCPS_PUBLIC_KEY is missing -- falling back to file-based keys")
 	}
 
 	keyPath := conf.KeyPath
 	pubPath := conf.PubPath
 
-	// Defaults
+	// Defaults -- avoid relative paths in production by resolving against a predictable base
 	if keyPath == "" {
-		keyPath = "watchman-mcps.key"
+		keyPath = defaultKeyPath("watchman-mcps.key")
 	}
 	if pubPath == "" {
-		pubPath = "watchman-mcps.pub"
+		pubPath = defaultKeyPath("watchman-mcps.pub")
 	}
+
+	// If a relative path was supplied (e.g. via config), resolve it to an absolute path
+	// so key storage is not tied to the process working directory.
+	absKey, err := filepath.Abs(keyPath)
+	if err != nil {
+		return nil, fmt.Errorf("MCPS: cannot resolve absolute key path %q: %w", keyPath, err)
+	}
+	absPub, err := filepath.Abs(pubPath)
+	if err != nil {
+		return nil, fmt.Errorf("MCPS: cannot resolve absolute public key path %q: %w", pubPath, err)
+	}
+	if absKey != keyPath {
+		logger.Info().Logf("MCPS: resolved relative key path to %s", absKey)
+	}
+	keyPath = absKey
+	pubPath = absPub
 
 	// Try loading existing keys
 	if _, err := os.Stat(keyPath); err == nil {
@@ -66,6 +87,21 @@ func loadOrGenerateKeys(logger log.Logger, conf config.MCPSigning) (*mcps.KeyPai
 	// Generate new keys
 	logger.Info().Logf("MCPS: generating new signing keys at %s", keyPath)
 	return mcps.GenerateAndSaveKeyPair(keyPath, pubPath)
+}
+
+// defaultKeyPath returns a sensible default absolute location for a signing key file.
+// Precedence: $MCPS_KEY_DIR, then $XDG_CONFIG_HOME/watchman, then $HOME/.watchman, else /etc/watchman.
+func defaultKeyPath(filename string) string {
+	if dir := os.Getenv("MCPS_KEY_DIR"); dir != "" {
+		return filepath.Join(dir, filename)
+	}
+	if dir := os.Getenv("XDG_CONFIG_HOME"); dir != "" {
+		return filepath.Join(dir, "watchman", filename)
+	}
+	if home, err := os.UserHomeDir(); err == nil && home != "" {
+		return filepath.Join(home, ".watchman", filename)
+	}
+	return filepath.Join("/etc/watchman", filename)
 }
 
 func (s *Server) Handler() http.Handler {
