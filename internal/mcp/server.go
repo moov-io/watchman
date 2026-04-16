@@ -1,6 +1,7 @@
 package mcp
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -42,13 +43,19 @@ func NewServer(logger log.Logger, service search.Service, signingConf config.MCP
 }
 
 func loadOrGenerateKeys(logger log.Logger, conf config.MCPSigning) (*mcps.KeyPair, error) {
-	// Try environment variables first -- require BOTH before attempting env load
-	if os.Getenv("MCPS_PRIVATE_KEY") != "" && os.Getenv("MCPS_PUBLIC_KEY") != "" {
-		logger.Info().Log("MCPS: loading signing keys from environment variables")
-		return mcps.LoadKeyPairFromEnv("MCPS_PRIVATE_KEY", "MCPS_PUBLIC_KEY")
+	var envKeyPaths int
+	if os.Getenv("MCPS_PUBLIC_KEY") != "" {
+		envKeyPaths++
 	}
 	if os.Getenv("MCPS_PRIVATE_KEY") != "" {
-		logger.Warn().Log("MCPS: MCPS_PRIVATE_KEY is set but MCPS_PUBLIC_KEY is missing -- falling back to file-based keys")
+		envKeyPaths++
+	}
+	if envKeyPaths == 1 {
+		return nil, errors.New("MCPS: both env vars MCPS_PRIVATE_KEY and MCPS_PUBLIC_KEY are required")
+	}
+	if envKeyPaths == 2 {
+		logger.Info().Log("MCPS: loading signing keys from environment variables")
+		return mcps.LoadKeyPairFromEnv("MCPS_PRIVATE_KEY", "MCPS_PUBLIC_KEY")
 	}
 
 	keyPath := conf.KeyPath
