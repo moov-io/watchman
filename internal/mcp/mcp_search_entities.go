@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/moov-io/watchman/internal/search"
 	pubsearch "github.com/moov-io/watchman/pkg/search"
+	mcps "github.com/razashariff/mcps-go"
 )
 
 type SearchEntityRequest struct {
@@ -100,6 +102,40 @@ func (s *Server) HandleSearchEntities(ctx context.Context, req *mcp.CallToolRequ
 	responseJSON, err := json.Marshal(response)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to marshal response: %w", err)
+	}
+
+	// Sign the response if MCPS signing is enabled
+	if s.signing && s.keyPair != nil {
+		passport := &mcps.Passport{
+			ID:       "watchman-mcp",
+			Subject:  "watchman",
+			Version:  mcps.Version,
+			IssuedAt: time.Now().Unix(),
+			Issuer:   "moov-io/watchman",
+		}
+
+		signed, signErr := mcps.SignMessage(responseJSON, s.keyPair, passport)
+		if signErr != nil {
+			// Log but don't fail the request -- signing is non-blocking
+			s.logger.Error().LogErrorf("MCPS: failed to sign response: %v", signErr)
+		} else {
+			signedJSON, err := json.Marshal(signed)
+			if err != nil {
+				err = s.logger.Error().LogErrorf("MCPS: failed to marshal signed response: %v", err).Err()
+
+				return &mcp.CallToolResult{
+					Content: []mcp.Content{
+						&mcp.TextContent{Text: err.Error()},
+					},
+					IsError: true,
+				}, nil, nil
+			}
+			return &mcp.CallToolResult{
+				Content: []mcp.Content{
+					&mcp.TextContent{Text: string(signedJSON)},
+				},
+			}, nil, nil
+		}
 	}
 
 	return &mcp.CallToolResult{

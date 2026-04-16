@@ -327,6 +327,8 @@ github.com/prometheus/common v0.66.1 h1:h5E0h5/Y8niHc5DlaLlWLArTQI7tMrsfQjHV+d9Z
 github.com/prometheus/common v0.66.1/go.mod h1:gcaUsgf3KfRSwHY4dIMXLPV0K/Wg1oZ8+SbZk/HH/dA=
 github.com/prometheus/procfs v0.16.1 h1:hZ15bTNuirocR6u0JZ6BAHHmwS1p8B4P6MRqxtzMyRg=
 github.com/prometheus/procfs v0.16.1/go.mod h1:teAbpZRB1iIAJYREa1LsoWUXykVXA1KlTmWl8x/U+Is=
+github.com/razashariff/mcps-go v1.0.0 h1:i+f4rClJDrmrkXSzI130xkLbLvki+e7HVlzHMcENmnI=
+github.com/razashariff/mcps-go v1.0.0/go.mod h1:z4tL8BWDGUxbinwWZFt80z1QTEycrdICLqt9yKefLWI=
 github.com/rickar/cal/v2 v2.1.27 h1:4vFfbXI9dB1Rb/mHH51xYx36ILWk0Wu8VY0bMnoTMpw=
 github.com/rickar/cal/v2 v2.1.27/go.mod h1:/fdlMcx7GjPlIBibMzOM9gMvDBsrK+mOtRXdTzUqV/A=
 github.com/rogpeppe/go-internal v1.14.1 h1:UQB4HGPB6osV0SQTLymcB4TgvyWu6ZyliaW0tI/otEQ=

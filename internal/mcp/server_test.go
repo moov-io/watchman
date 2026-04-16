@@ -6,11 +6,13 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/moov-io/base/log"
+	"github.com/moov-io/watchman/internal/config"
 	"github.com/moov-io/watchman/internal/index"
 	"github.com/moov-io/watchman/internal/ofactest"
 	"github.com/moov-io/watchman/internal/search"
@@ -32,7 +34,9 @@ func TestMCPHandler(t *testing.T) {
 	require.NoError(t, err)
 	indexedLists.Update(stats)
 
-	server := NewServer(logger, service)
+	server, err := NewServer(logger, service, config.MCPSigning{})
+	require.NoError(t, err)
+
 	handler := server.Handler()
 
 	t.Run("handler returns http.Handler", func(t *testing.T) {
@@ -55,7 +59,8 @@ func TestSearchEntitiesTool(t *testing.T) {
 	require.NoError(t, err)
 	indexedLists.Update(stats)
 
-	server := NewServer(logger, service)
+	server, err := NewServer(logger, service, config.MCPSigning{})
+	require.NoError(t, err)
 
 	// Test the handleSearchEntities function directly
 	req := &mcp.CallToolRequest{}
@@ -113,6 +118,74 @@ func TestSearchEntitiesRequest(t *testing.T) {
 	require.Equal(t, 0.9, *unmarshaled.MinMatch)
 }
 
+// TestMCPSigningEnabled verifies that the MCP server initialises correctly
+// when MCPS message signing is enabled via config (key paths in a temp dir),
+// and that search_entities responses are emitted in the signed-envelope shape.
+func TestMCPSigningEnabled(t *testing.T) {
+	logger := log.NewTestLogger()
+
+	indexedLists := index.NewLists(nil)
+	searchConfig := search.DefaultConfig()
+	service, err := search.NewService(logger, searchConfig, nil, indexedLists)
+	require.NoError(t, err)
+
+	dl := ofactest.GetDownloader(t)
+	stats, err := dl.RefreshAll(context.Background())
+	require.NoError(t, err)
+	indexedLists.Update(stats)
+
+	tmpDir := t.TempDir()
+	signingConf := config.MCPSigning{
+		Enabled: true,
+		KeyPath: filepath.Join(tmpDir, "test-mcps.key"),
+		PubPath: filepath.Join(tmpDir, "test-mcps.pub"),
+	}
+
+	server, err := NewServer(logger, service, signingConf)
+	require.NoError(t, err)
+	require.True(t, server.signing, "signing should be enabled after successful key init")
+	require.NotNil(t, server.keyPair, "keyPair should be populated when signing is enabled")
+
+	// Run a search and confirm the response is emitted as a signed envelope
+	// rather than a raw pubsearch.SearchResponse.
+	req := &mcp.CallToolRequest{}
+	args := SearchEntitiesRequest{
+		Request: SearchEntityRequest{
+			Name: "Logan",
+			Type: pubsearch.EntityPerson,
+		},
+		Limit:    &[]int{5}[0],
+		MinMatch: &[]float64{0.8}[0],
+	}
+
+	result, extra, err := server.HandleSearchEntities(context.Background(), req, args)
+	require.NoError(t, err)
+	require.Nil(t, extra)
+	require.NotNil(t, result)
+	require.Len(t, result.Content, 1)
+
+	content := result.Content[0].(*mcp.TextContent)
+	var envelope map[string]interface{}
+	err = json.Unmarshal([]byte(content.Text), &envelope)
+	require.NoError(t, err)
+
+	// A signed MCPS envelope carries signature + passport fields alongside the payload.
+	// We assert presence without binding to a specific signature implementation so the
+	// test stays stable across mcps-go versions.
+	_, hasSignature := envelope["signature"]
+	_, hasPassport := envelope["passport"]
+	require.True(t, hasSignature || hasPassport,
+		"signed response should include signature or passport fields; got keys: %v", keysOf(envelope))
+}
+
+func keysOf(m map[string]interface{}) []string {
+	out := make([]string, 0, len(m))
+	for k := range m {
+		out = append(out, k)
+	}
+	return out
+}
+
 func TestMCPHTTPIntegration(t *testing.T) {
 	logger := log.NewTestLogger()
 
@@ -127,7 +200,9 @@ func TestMCPHTTPIntegration(t *testing.T) {
 	require.NoError(t, err)
 	indexedLists.Update(stats)
 
-	server := NewServer(logger, service)
+	server, err := NewServer(logger, service, config.MCPSigning{})
+	require.NoError(t, err)
+
 	handler := server.Handler()
 
 	// Create a test HTTP server
