@@ -33,7 +33,9 @@ func TestMCPHandler(t *testing.T) {
 	require.NoError(t, err)
 	indexedLists.Update(stats)
 
-	server := NewServer(logger, service, config.MCPSigning{})
+	server, err := NewServer(logger, service, config.MCPSigning{})
+	require.NoError(t, err)
+
 	handler := server.Handler()
 
 	t.Run("handler returns http.Handler", func(t *testing.T) {
@@ -56,7 +58,8 @@ func TestSearchEntitiesTool(t *testing.T) {
 	require.NoError(t, err)
 	indexedLists.Update(stats)
 
-	server := NewServer(logger, service, config.MCPSigning{})
+	server, err := NewServer(logger, service, config.MCPSigning{})
+	require.NoError(t, err)
 
 	// Test the handleSearchEntities function directly
 	req := &mcp.CallToolRequest{}
@@ -128,7 +131,9 @@ func TestMCPHTTPIntegration(t *testing.T) {
 	require.NoError(t, err)
 	indexedLists.Update(stats)
 
-	server := NewServer(logger, service, config.MCPSigning{})
+	server, err := NewServer(logger, service, config.MCPSigning{})
+	require.NoError(t, err)
+
 	handler := server.Handler()
 
 	// Create a test HTTP server

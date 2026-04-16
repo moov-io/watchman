@@ -19,7 +19,7 @@ type Server struct {
 	signing bool
 }
 
-func NewServer(logger log.Logger, service search.Service, signingConf config.MCPSigning) *Server {
+func NewServer(logger log.Logger, service search.Service, signingConf config.MCPSigning) (*Server, error) {
 	s := &Server{
 		logger:  logger,
 		service: service,
@@ -29,20 +29,19 @@ func NewServer(logger log.Logger, service search.Service, signingConf config.MCP
 	if signingConf.Enabled {
 		kp, err := loadOrGenerateKeys(logger, signingConf)
 		if err != nil {
-			logger.Error().LogErrorf("MCPS: failed to initialise signing keys: %v", err)
-			s.signing = false
+			return nil, logger.Error().LogErrorf("MCPS: failed to initialise signing keys: %v", err).Err()
 		} else {
 			s.keyPair = kp
 			logger.Info().Log("MCPS: message signing enabled")
 		}
 	}
 
-	return s
+	return s, nil
 }
 
 func loadOrGenerateKeys(logger log.Logger, conf config.MCPSigning) (*mcps.KeyPair, error) {
 	// Try environment variables first
-	if privEnv := os.Getenv("MCPS_PRIVATE_KEY"); privEnv != "" {
+	if os.Getenv("MCPS_PRIVATE_KEY") != "" && os.Getenv("MCPS_PUBLIC_KEY") != "" {
 		logger.Info().Log("MCPS: loading signing keys from environment variables")
 		return mcps.LoadKeyPairFromEnv("MCPS_PRIVATE_KEY", "MCPS_PUBLIC_KEY")
 	}

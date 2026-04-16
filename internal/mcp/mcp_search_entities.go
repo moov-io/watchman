@@ -120,14 +120,21 @@ func (s *Server) HandleSearchEntities(ctx context.Context, req *mcp.CallToolRequ
 			s.logger.Error().LogErrorf("MCPS: failed to sign response: %v", signErr)
 		} else {
 			signedJSON, err := json.Marshal(signed)
-			if err == nil {
+			if err != nil {
+				err = s.logger.Error().LogErrorf("MCPS: failed to marshal signed response: %v", err).Err()
+
 				return &mcp.CallToolResult{
 					Content: []mcp.Content{
-						&mcp.TextContent{Text: string(signedJSON)},
+						&mcp.TextContent{Text: err.Error()},
 					},
+					IsError: true,
 				}, nil, nil
 			}
-			s.logger.Error().LogErrorf("MCPS: failed to marshal signed response: %v", err)
+			return &mcp.CallToolResult{
+				Content: []mcp.Content{
+					&mcp.TextContent{Text: string(signedJSON)},
+				},
+			}, nil, nil
 		}
 	}
 
