@@ -23,15 +23,15 @@ type Server struct {
 	agentPassGate *agentPassGate
 }
 
-func NewServer(logger log.Logger, service search.Service, signingConf config.MCPSigning, agentPassConf config.MCPAgentPass) (*Server, error) {
+func NewServer(logger log.Logger, service search.Service, config config.MCPConfig) (*Server, error) {
 	s := &Server{
 		logger:  logger,
 		service: service,
-		signing: signingConf.Enabled,
+		signing: config.Signing.Enabled,
 	}
 
-	if signingConf.Enabled {
-		kp, err := loadOrGenerateKeys(logger, signingConf)
+	if config.Signing.Enabled {
+		kp, err := loadOrGenerateKeys(logger, config.Signing)
 		if err != nil {
 			return nil, logger.Error().LogErrorf("MCPS: failed to initialise signing keys: %v", err).Err()
 		} else {
@@ -40,7 +40,7 @@ func NewServer(logger log.Logger, service search.Service, signingConf config.MCP
 		}
 	}
 
-	gate, err := initAgentPass(logger, agentPassConf)
+	gate, err := initAgentPass(logger, config.AgentPass)
 	if err != nil {
 		return nil, err
 	}
