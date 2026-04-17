@@ -34,7 +34,7 @@ func TestMCPHandler(t *testing.T) {
 	require.NoError(t, err)
 	indexedLists.Update(stats)
 
-	server, err := NewServer(logger, service, config.MCPSigning{})
+	server, err := NewServer(logger, service, config.MCPSigning{}, config.MCPAgentPass{})
 	require.NoError(t, err)
 
 	handler := server.Handler()
@@ -59,7 +59,7 @@ func TestSearchEntitiesTool(t *testing.T) {
 	require.NoError(t, err)
 	indexedLists.Update(stats)
 
-	server, err := NewServer(logger, service, config.MCPSigning{})
+	server, err := NewServer(logger, service, config.MCPSigning{}, config.MCPAgentPass{})
 	require.NoError(t, err)
 
 	// Test the handleSearchEntities function directly
@@ -141,7 +141,7 @@ func TestMCPSigningEnabled(t *testing.T) {
 		PubPath: filepath.Join(tmpDir, "test-mcps.pub"),
 	}
 
-	server, err := NewServer(logger, service, signingConf)
+	server, err := NewServer(logger, service, signingConf, config.MCPAgentPass{})
 	require.NoError(t, err)
 	require.True(t, server.signing, "signing should be enabled after successful key init")
 	require.NotNil(t, server.keyPair, "keyPair should be populated when signing is enabled")
@@ -200,7 +200,7 @@ func TestMCPHTTPIntegration(t *testing.T) {
 	require.NoError(t, err)
 	indexedLists.Update(stats)
 
-	server, err := NewServer(logger, service, config.MCPSigning{})
+	server, err := NewServer(logger, service, config.MCPSigning{}, config.MCPAgentPass{})
 	require.NoError(t, err)
 
 	handler := server.Handler()

@@ -16,13 +16,14 @@ import (
 )
 
 type Server struct {
-	logger  log.Logger
-	service search.Service
-	keyPair *mcps.KeyPair
-	signing bool
+	logger        log.Logger
+	service       search.Service
+	keyPair       *mcps.KeyPair
+	signing       bool
+	agentPassGate *agentPassGate
 }
 
-func NewServer(logger log.Logger, service search.Service, signingConf config.MCPSigning) (*Server, error) {
+func NewServer(logger log.Logger, service search.Service, signingConf config.MCPSigning, agentPassConf config.MCPAgentPass) (*Server, error) {
 	s := &Server{
 		logger:  logger,
 		service: service,
@@ -38,6 +39,12 @@ func NewServer(logger log.Logger, service search.Service, signingConf config.MCP
 			logger.Info().Log("MCPS: message signing enabled")
 		}
 	}
+
+	gate, err := initAgentPass(logger, agentPassConf)
+	if err != nil {
+		return nil, err
+	}
+	s.agentPassGate = gate
 
 	return s, nil
 }
@@ -131,7 +138,16 @@ func (s *Server) Handler() http.Handler {
 		Stateless:    true,
 		JSONResponse: true, // Use JSON responses instead of SSE for easier testing
 	}
-	return mcpsdk.NewStreamableHTTPHandler(func(req *http.Request) *mcpsdk.Server {
+	handler := mcpsdk.NewStreamableHTTPHandler(func(req *http.Request) *mcpsdk.Server {
 		return server
 	}, opts)
+
+	// Wrap with AgentPass verification middleware if enabled.
+	// When active, every MCP request must carry a valid agent
+	// certificate in the X-AgentPass-Certificate header or it
+	// receives a 401 before the entity screen runs.
+	if s.agentPassGate != nil {
+		return s.agentPassGate.middleware(handler)
+	}
+	return handler
 }
