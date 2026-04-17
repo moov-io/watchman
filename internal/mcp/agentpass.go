@@ -25,10 +25,9 @@ var agentContextKey = agentContextKeyType{}
 // verification middleware. It is initialised once at server
 // startup and reused for every request.
 type agentPassGate struct {
-	logger         log.Logger
-	pool           *agentpass.CertPool
-	minTrust       int
-	requiredScopes []string
+	logger log.Logger
+	pool   *agentpass.CertPool
+	opts   []agentpass.VerifyOption
 }
 
 // initAgentPass loads the trust anchors and prepares the AgentPass
@@ -51,11 +50,17 @@ func initAgentPass(logger log.Logger, conf config.MCPAgentPass) (*agentPassGate,
 	logger.Info().Logf("agentpass: loaded %d trust anchor(s) from %s", pool.Size(), conf.TrustAnchorPath)
 	logger.Info().Logf("agentpass: min_trust_level=L%d required_scopes=%v", conf.MinTrustLevel, conf.RequiredScopes)
 
+	opts := []agentpass.VerifyOption{
+		agentpass.WithMinTrust(conf.MinTrustLevel),
+	}
+	if len(conf.RequiredScopes) > 0 {
+		opts = append(opts, agentpass.WithRequiredScopes(conf.RequiredScopes...))
+	}
+
 	return &agentPassGate{
-		logger:         logger,
-		pool:           pool,
-		minTrust:       conf.MinTrustLevel,
-		requiredScopes: conf.RequiredScopes,
+		logger: logger,
+		pool:   pool,
+		opts:   opts,
 	}, nil
 }
 
@@ -83,21 +88,14 @@ func (g *agentPassGate) middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		opts := []agentpass.VerifyOption{
-			agentpass.WithMinTrust(g.minTrust),
-		}
-		if len(g.requiredScopes) > 0 {
-			opts = append(opts, agentpass.WithRequiredScopes(g.requiredScopes...))
-		}
-
-		verified, err := agentpass.Verify(pemBytes, g.pool, opts...)
+		verified, err := agentpass.Verify(pemBytes, g.pool, g.opts...)
 		if err != nil {
 			g.logger.Warn().Logf("agentpass: rejected agent from %s: %v", r.RemoteAddr, err)
 			http.Error(w, "agent verification failed", http.StatusUnauthorized)
 			return
 		}
 
-		g.logger.Info().Logf("agentpass: verified agent=%s trust=L%d issuer=%s serial=%s",
+		g.logger.Debug().Logf("agentpass: verified agent=%s trust=L%d issuer=%s serial=%s",
 			verified.AgentID, verified.TrustLevel, verified.IssuerID, verified.Serial)
 
 		ctx := context.WithValue(r.Context(), agentContextKey, verified)
