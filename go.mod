@@ -6,7 +6,7 @@ toolchain go1.26.2
 
 require (
 	fyne.io/fyne/v2 v2.7.3
-	github.com/OpenRouterTeam/go-sdk v0.3.0
+	github.com/OpenRouterTeam/go-sdk v0.4.0
 	github.com/abadojack/whatlanggo v1.0.1
 	github.com/adamdecaf/merge v0.2.2
 	github.com/antchfx/htmlquery v1.3.6
