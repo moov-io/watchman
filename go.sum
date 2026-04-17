@@ -51,6 +51,8 @@ github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERo
 github.com/Microsoft/go-winio v0.6.2/go.mod h1:yd8OoFMLzJbo9gZq8j5qaps8bJ9aShtEA8Ipt1oGCvU=
 github.com/OpenRouterTeam/go-sdk v0.3.0 h1:JU8IGZiBGZlDfQ4Wp00/UXPgHB3ZQp2l7uvKEEHvcuE=
 github.com/OpenRouterTeam/go-sdk v0.3.0/go.mod h1:GRqEs3Twjnq1GekyuZCxHi55X8rBiHYK860wc3IvyUE=
+github.com/OpenRouterTeam/go-sdk v0.4.0 h1:BXgcUtgBKM9rPJXeWslAIAiM4KppXe9oyP3N41HVVWI=
+github.com/OpenRouterTeam/go-sdk v0.4.0/go.mod h1:GRqEs3Twjnq1GekyuZCxHi55X8rBiHYK860wc3IvyUE=
 github.com/VividCortex/gohistogram v1.0.0 h1:6+hBz+qvs0JOrrNhhmR7lFxo5sINxBCGXrdtl/UvroE=
 github.com/VividCortex/gohistogram v1.0.0/go.mod h1:Pf5mBqqDxYaXu3hDrrU+w6nw50o/4+TcAqDqk/vUH7g=
 github.com/abadojack/whatlanggo v1.0.1 h1:19N6YogDnf71CTHm3Mp2qhYfkRdyvbgwWdd2EPxJRG4=
