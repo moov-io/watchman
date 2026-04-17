@@ -1,6 +1,6 @@
 module github.com/moov-io/watchman
 
-go 1.26.1
+go 1.25.0
 
 toolchain go1.26.2
 
