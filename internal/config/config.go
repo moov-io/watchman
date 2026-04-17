@@ -50,9 +50,9 @@ type ServerConfig struct {
 }
 
 type MCPConfig struct {
-	Enabled   bool          `yaml:"enabled" json:"enabled"`
-	Signing   MCPSigning    `yaml:"signing" json:"signing"`
-	AgentPass MCPAgentPass  `yaml:"agentpass" json:"agentpass"`
+	Enabled   bool         `yaml:"enabled" json:"enabled"`
+	Signing   MCPSigning   `yaml:"signing" json:"signing"`
+	AgentPass MCPAgentPass `yaml:"agentpass" json:"agentpass"`
 }
 
 type MCPSigning struct {
