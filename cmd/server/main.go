@@ -112,7 +112,7 @@ func main() {
 
 	// Add MCP endpoint if enabled
 	if conf.MCP.Enabled {
-		mcpServer, err := mcp.NewServer(logger, searchService, conf.MCP.Signing)
+		mcpServer, err := mcp.NewServer(logger, searchService, conf.MCP.Signing, conf.MCP.AgentPass)
 		if err != nil {
 			logger.Fatal().LogErrorf("problem starting MCP server: %v", err)
 			os.Exit(1)
