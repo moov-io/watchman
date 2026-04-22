@@ -126,7 +126,15 @@ PostalPool is an experiment for improving address parsing via [libpostal](https:
 ```yaml
   PostalPool:
     Enabled: false
-    Instances: 2
+    # CAUTION: The below configuration is for advanced usage of libpostal which
+    # may deliver performance / concurrency improvements on some architectures.
+    #
+    # The "postal pool" is set of libpostal binaries running on the host controlled
+    # by Watchman. On some systems the libpostal data files will be shared in memory
+    # causing a penalty when multiple libpostal processes access them.
+    #
+    # Most usage can set CGOSelfInstances=1 (default when Enabled) to see the best performance.
+    Instances: 0
     StartingPort: 10000
     StartupTimeout: "60s"
     RequestTimeout: "10s"
