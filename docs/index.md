@@ -29,7 +29,7 @@ Watchman empowers your compliance team with powerful tools designed for accuracy
 
 ## Included Lists
 
-Watchman integrates the following lists to help you maintain global compliance:
+Watchman integrates the following lists to help you maintain global compliance. Use the env variable `INCLUDED_LISTS` or [config file](https://moov-io.github.io/watchman/config/#download) to customize which lists are loaded.
 
 | Source            | List                                                                                                                                                                                    |
 |-------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|

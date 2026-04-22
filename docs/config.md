@@ -167,6 +167,8 @@ When enabled, Watchman will run as an MCP server over stdio instead of the HTTP 
 
 ### Included Lists
 
+Watchman integrates the following lists to help you maintain global compliance.
+
 | List ID           | Name                                        | Source                                                                                                                                   |
 |-------------------|---------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
 | `eu_csl`          | EU Consolidated list of financial sanctions | [URL](https://data.europa.eu/data/datasets/consolidated-list-of-persons-groups-and-entities-subject-to-eu-financial-sanctions?locale=en) |
