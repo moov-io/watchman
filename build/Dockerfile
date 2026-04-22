@@ -30,7 +30,7 @@ ENV PKG_CONFIG_PATH=/src/libpostal/
 RUN VERSION=${VERSION} GOTAGS="-tags libpostal" make build-server postal-server
 
 # Final stage
-FROM debian:trixie-20260406
+FROM debian:trixie-20260421
 LABEL maintainer="Moov <oss@moov.io>"
 
 # Install runtime dependencies
