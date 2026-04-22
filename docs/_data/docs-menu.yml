@@ -20,6 +20,8 @@
   items:
     - name: Search options
       link: /search/
+    - name: Addresses
+      link: /addresses/
     - name: Cross-Script Matching
       link: /cross-script-matching/
     - name: Data Preparation Pipeline
