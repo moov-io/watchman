@@ -85,8 +85,8 @@ func NewService(logger log.Logger, conf Config, database db.DB) (*Service, error
 		l2Repo = NewRepository(database)
 	}
 
-	logger.Info().Logf("geocoding service enabled with provider=%s, rateLimit=%.1f/sec, l1CacheSize=%d",
-		geocoder.Name(), conf.RateLimit.RequestsPerSecond, l1MaxSize)
+	logger.Info().Logf("geocoding service enabled with provider=%s, rateLimit=%.1f/sec, l1CacheSize=%d l2Repo=%T",
+		geocoder.Name(), conf.RateLimit.RequestsPerSecond, l1MaxSize, l2Repo)
 
 	return &Service{
 		logger:   logger,
