@@ -28,7 +28,7 @@ Moov's mission is to give developers an easy way to create and integrate bank pr
 
 ## What is Watchman?
 
-Moov Watchman is a high-performance sanctions screening and compliance tool that helps businesses meet their regulatory obligations. It provides an HTTP server, [Go library](https://pkg.go.dev/github.com/moov-io/watchman/pkg/search#Client), and experimental [Model Context Protocol (MCP)](https://moov-io.github.io/watchman/mcp/) server for searching against multiple global sanctions and screening lists.
+Moov Watchman is a high-performance sanctions screening and compliance tool that helps businesses meet their regulatory obligations. It provides an HTTP server, [Go library](https://pkg.go.dev/github.com/moov-io/watchman/pkg/search#Client), and secure [Model Context Protocol (MCP)](https://moov-io.github.io/watchman/mcp/) server for searching against multiple global sanctions and screening lists. Watchman offers a unified model for entities and queries for humans and agents.
 
 ## Key Features
 
@@ -38,6 +38,7 @@ Moov Watchman is a high-performance sanctions screening and compliance tool that
 - **High-Performance Search**: Optimized for speed and accuracy using advanced matching algorithms
 - **Flexible Integration**: HTTP API and Go library for easy integration into your systems
 - **Automated Updates**: Regular refreshes of watchlist data to ensure compliance
+- **Model Context Protocol**: Integrate AI agents into screening workflows with secure MCP and agentpass.
 
 ## Included Lists
 
@@ -60,11 +61,13 @@ The v0.50+ series of Watchman has revamped its search engine. The following list
 | United Kingdom | [OFSI Sanctions List](https://www.gov.uk/government/publications/financial-sanctions-consolidated-list-of-targets/consolidated-list-of-targets#contents) |
 | United Kingdom | [Sanctions List](https://www.gov.uk/government/publications/the-uk-sanctions-list) (Disabled by default) |
 
-## v2 Endpoints (v0.50+ series and beyond)
+## Agents
 
-The v0.50+ series of Watchman has introduced a new v2 search endpoint and removed the older endpoint. This was done to offer a unified response model, improve overall performance, and work towards a stable v1.0 release.
+Watchman provides an HTTP `/mcp` endpoint with full Model Context Protocol (MCP) support, allowing agents to search the loaded lists. The endpoint is protected by **[MCPS](https://datatracker.ietf.org/doc/draft-sharif-mcps-secure-mcp/)**, which cryptographically verifies agent chains and calls at the point of screening. Untrusted requests are automatically blocked, and every request is proven tamper-resistant through cryptographic attestation.
 
-We encourage you to try out the new Watchman and [report any issues or requests in slack](https://slack.moov.io) (`#watchman` channel).
+Only agents that can prove their identity are permitted to screen entities, verify transactions, or initiate payments.
+
+Check out the **[live demo](https://showcase.cybersecai.co.uk/demo.html#live-check)** to see seamless agent onboarding, verification, and screening in action.
 
 ## Project status
 

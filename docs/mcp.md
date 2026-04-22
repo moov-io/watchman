@@ -10,7 +10,14 @@ menubar: docs-menu
 
 > **Experimental Feature**: The MCP server is an experimental integration that may change in future releases.
 
-Watchman provides an optional [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server implementation, allowing AI assistants and language models to directly interact with sanctions screening functionality.
+Watchman provides an HTTP `/mcp` endpoint with full Model Context Protocol (MCP) support, allowing agents to search the loaded lists.
+The endpoint is protected by **[MCPS](https://datatracker.ietf.org/doc/draft-sharif-mcps-secure-mcp/)**, which cryptographically verifies
+agent chains and calls at the point of screening. Untrusted requests are automatically blocked, and every request is proven tamper-resistant
+through cryptographic attestation.
+
+Only agents that can prove their identity are permitted to screen entities, verify transactions, or initiate payments.
+
+Check out the **[live demo](https://showcase.cybersecai.co.uk/demo.html#live-check)** to see seamless agent onboarding, verification, and screening in action.
 
 ## Overview
 
@@ -24,6 +31,24 @@ To enable the MCP server, add the following to your Watchman configuration:
 Watchman:
   MCP:
     Enabled: true
+    Signing:
+  	  Enabled: true
+	  KeyPath: "/path/to/private-key.pem"
+	  PubPath: "/path/to/public-key.pem"
+    AgentPass:
+	  Enabled: true
+	  TrustAnchorPath: "/path/to/ca.pem"
+      # MinTrustLevel rejects agents whose trust level is below level.
+      # Level must be in the range 0-4; values outside this range are
+      # clamped to the nearest bound. Callers typically set this to 2
+      # in production to reject unverified (L0) and developer-sandbox
+      # (L1) agents.
+	  MinTrustLevel: 0
+      # RequiredScopes rejects agents that lack any of the listed
+      # scopes. Useful for Watchman-style integrations that want to
+      # demand e.g. WithRequiredScopes("sanctions:search") before
+      # accepting a screening request.
+	  RequiredScopes: ["sanctions:search"]
 ```
 
 When MCP is enabled, Watchman will serve MCP endpoints at `/mcp` in addition to the standard HTTP API.
@@ -344,27 +369,13 @@ curl -s -X POST "http://localhost:8084/mcp" \
 
 **Note**: The `request` object must include all required fields of the Entity struct. For production use, it's recommended to use an MCP client library that handles the protocol details automatically.
 
-## MCP Client Integration
+## Client Integration
 
 To use Watchman with an MCP client:
 
 1. Configure Watchman with MCP enabled
 2. Start Watchman with the standard HTTP server
 3. Configure your MCP client to connect to `http://your-watchman-server/mcp`
-
-## Limitations
-
-- Currently only supports the `search_entities` tool
-- Experimental feature that may change without notice
-
-## Future Enhancements
-
-Planned improvements include:
-
-- Additional tools for list management and statistics
-- Enhanced error handling and validation
-- Support for streaming responses
-- Integration with more MCP features
 
 ## Need Help?
 
