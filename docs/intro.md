@@ -34,13 +34,14 @@ Watchman delivers enterprise-grade compliance screening with:
 
 Watchman integrates the following lists to help you maintain global compliance:
 
-| Source         | List                                                                                                                                                                                    |
-|----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| European Union | [Consolidated Sanctions List](https://data.europa.eu/data/datasets/consolidated-list-of-persons-groups-and-entities-subject-to-eu-financial-sanctions?locale=en)                        |
-| OpenSanctions  | [Any senzing dataset from OpenSanctions](https://www.opensanctions.org/datasets/)                                                                                                       |
-| US Government  | [Consolidated Screening List (CSL)](https://www.trade.gov/consolidated-screening-list), [FinCEN 311](https://home.treasury.gov/policy-issues/terrorism-and-illicit-finance/311-actions) |
-| US Treasury    | [Office of Foreign Assets Control (OFAC)](https://ofac.treasury.gov/sanctions-list-service) and Non-SDN list                                                                            |
-| United Kingdom | [UK Sanctions List](https://www.gov.uk/government/publications/the-uk-sanctions-list)                                                                                                                 |
+| Source            | List                                                                                                                                                                                    |
+|-------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **OpenSanctions** | [Any Senzing formatted list from OpenSanctions](https://www.opensanctions.org/datasets/)                                                                                                |
+| European Union    | [Consolidated Sanctions List](https://data.europa.eu/data/datasets/consolidated-list-of-persons-groups-and-entities-subject-to-eu-financial-sanctions?locale=en)                        |
+| US Government     | [Consolidated Screening List (CSL)](https://www.trade.gov/consolidated-screening-list), [FinCEN 311](https://home.treasury.gov/policy-issues/terrorism-and-illicit-finance/311-actions) |
+| US Treasury       | [Office of Foreign Assets Control (OFAC)](https://ofac.treasury.gov/sanctions-list-service) and Non-SDN list                                                                            |
+| United Kingdom    | [OFSI Sanctions List](https://www.gov.uk/government/publications/financial-sanctions-consolidated-list-of-targets/consolidated-list-of-targets#contents)                                |
+| United Nations    | [Consolidated Sanctions List](https://www.un.org/sc/resources/sc-sanctions)                                                                                                             |
 
 ## Search Methodology
 
