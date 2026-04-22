@@ -144,23 +144,23 @@ Enable the Model Context Protocol server endpoints at `/mcp` for AI agent integr
   MCP:
     Enabled: true
     Signing: # optional
-  	  Enabled: true
-	  KeyPath: "/path/to/private-key.pem"
-	  PubPath: "/path/to/public-key.pem"
+      Enabled: true
+      KeyPath: "/path/to/private-key.pem"
+      PubPath: "/path/to/public-key.pem"
     AgentPass: # optional
-	  Enabled: true
-	  TrustAnchorPath: "/path/to/ca.pem"
+      Enabled: true
+      TrustAnchorPath: "/path/to/ca.pem"
       # MinTrustLevel rejects agents whose trust level is below level.
       # Level must be in the range 0-4; values outside this range are
       # clamped to the nearest bound. Callers typically set this to 2
       # in production to reject unverified (L0) and developer-sandbox
       # (L1) agents.
-	  MinTrustLevel: 0
+      MinTrustLevel: 0
       # RequiredScopes rejects agents that lack any of the listed
       # scopes. Useful for Watchman-style integrations that want to
       # demand e.g. WithRequiredScopes("sanctions:search") before
       # accepting a screening request.
-	  RequiredScopes: ["sanctions:search"]
+      RequiredScopes: ["sanctions:search"]
 ```
 
 When enabled, Watchman will run as an MCP server over stdio instead of the HTTP server.
