@@ -16,7 +16,16 @@ RUN ./bootstrap.sh && \
     ldconfig
 
 # Download libpostal data (rarely changes)
-RUN libpostal_data download all /usr/local/share/libpostal
+# This data comes from Senzing's improvements over the openvenues offered data
+# See: https://github.com/Senzing/libpostal-data#version-120
+RUN mkdir -p /usr/local/share/libpostal && \
+    wget -q https://public-read-libpostal-data.s3.amazonaws.com/v1.2.0/parser.tar.gz && \
+    wget -q https://public-read-libpostal-data.s3.amazonaws.com/v1.1.0/libpostal_data.tar.gz && \
+    wget -q https://public-read-libpostal-data.s3.amazonaws.com/v1.1.0/language_classifier.tar.gz && \
+    tar -xzf parser.tar.gz -C /usr/local/share/libpostal && \
+    tar -xzf libpostal_data.tar.gz -C /usr/local/share/libpostal && \
+    tar -xzf language_classifier.tar.gz -C /usr/local/share/libpostal && \
+    rm *.tar.gz
 
 # Copy go.mod and go.sum first to cache dependencies
 COPY go.mod go.sum /src/

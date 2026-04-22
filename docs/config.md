@@ -119,7 +119,9 @@ Watchman:
 
 #### PostalPool
 
-PostalPool is an experiment for improving address parsing. It's optional configuration and may be removed in the future.
+PostalPool is an experiment for improving address parsing via [libpostal](https://github.com/openvenues/libpostal) using [Senzing's updated classifier, data, and parser](https://github.com/Senzing/libpostal-data).
+
+> PostalPool is optional and may be removed in the future.
 
 ```yaml
   PostalPool:

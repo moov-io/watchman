@@ -17,9 +17,8 @@ These performance traits make it a robust choice for production environments whe
 One of Watchman’s core strengths is its **precomputation and normalization** of data. On startup, Watchman downloads and processes sanctions lists (like US OFAC and US/UK/EU Consolidated Screening)
 and applies transformations—such as reordering names (e.g., "MADURO MOROS, Nicolas" to "Nicolas MADURO MOROS") — to provide standardized results.
 
-Wachman can use the [libpostal](https://github.com/openvenues/libpostal) library to parse and normalize postal addresses, improving match
-accuracy at the cost of higher memory usage. This upfront work ensures that searches are faster by reducing the need for on-the-fly
-processing, though it does introduce some memory overhead due to `libpostal`’s requirements.
+Watchman can use the [libpostal](https://github.com/openvenues/libpostal) library (with [Senzing's updated classifier, data, and parser](https://github.com/Senzing/libpostal-data) to parse and normalize postal addresses,
+improving match accuracy at the cost of higher memory usage. This upfront work ensures that searches are faster by reducing the need for on-the-fly processing, though it does introduce some memory overhead due to `libpostal`’s requirements.
 
 > The libpostal library can use ~2GB of memory to load into memory. Run Watchman with enough memory to support your load ontop of libpostal's requirements. [Configure the Postal Pool](/watchman/config/#postalpool) to your needs.
 
