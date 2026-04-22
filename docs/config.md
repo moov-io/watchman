@@ -15,6 +15,7 @@ menubar: docs-menu
  1. [Download](#download)
  1. [Search](#search)
  1. [Geocoding](#geocoding)
+ 1. [Postal Pool](#postalpool) (libpostal integration)
  1. [MCP](#mcp)
  1. [Included Lists](#included-lists)
 
