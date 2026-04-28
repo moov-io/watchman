@@ -44,10 +44,7 @@ LABEL maintainer="Moov <oss@moov.io>"
 
 # Install runtime dependencies
 RUN apt-get update && \
-    apt-get install -y \
-    tini \
-    libssl3 \
-    ca-certificates \
+    apt-get install -y ca-certificates curl tini libssl3 \
     && rm -rf /var/lib/apt/lists/*
 
 # Create necessary directories and copy libpostal files
@@ -66,8 +63,14 @@ ENV POSTAL_SERVER_BIN_PATH=/bin/postal-server
 ENV LD_LIBRARY_PATH=/usr/local/lib
 ENV LIBPOSTAL_DATA_DIR=/usr/local/share/libpostal
 
-EXPOSE 8084
-EXPOSE 9094
+ENV HTTP_PORT=8084
+ENV HEALTH_PORT=9094
+
+EXPOSE ${HTTP_PORT}/tcp
+EXPOSE ${HEALTH_PORT}/tcp
+
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+	CMD curl -f http://localhost:${HEALTH_PORT}/live || exit 1
 
 ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["/bin/server"]
