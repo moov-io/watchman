@@ -401,10 +401,106 @@ paths:
               type: string
           explode: true
 
-        # Government identifier parameters
-        - name: gov_{type}
+        # Government identifier parameters. Value format is `country:identifier` (e.g., `gov_passport=US:123456789`).
+        - name: gov_passport
           in: query
-          description: Government-issued identifier as `country:identifier`, where `{type}` is one of passport, drivers-license, national-id, tax-id, ssn, cedula, curp, cuit, electoral, business-registration, commercial-registry, birth-certificate, refugee-id, diplomatic-passport, personal-id, citizenship, nationality (e.g., `gov_passport=US:123456789`)
+          description: Passport identifier in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_drivers-license
+          in: query
+          description: Driver's license identifier in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_national-id
+          in: query
+          description: National ID in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_tax-id
+          in: query
+          description: Tax ID in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_ssn
+          in: query
+          description: Social Security Number in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_cedula
+          in: query
+          description: Cedula identifier in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_curp
+          in: query
+          description: CURP identifier in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_cuit
+          in: query
+          description: CUIT identifier in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_electoral
+          in: query
+          description: Electoral identifier in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_business-registration
+          in: query
+          description: Business registration number in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_commercial-registry
+          in: query
+          description: Commercial registry number in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_birth-certificate
+          in: query
+          description: Birth certificate number in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_refugee-id
+          in: query
+          description: Refugee ID in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_diplomatic-passport
+          in: query
+          description: Diplomatic passport identifier in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_personal-id
+          in: query
+          description: Personal ID in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_citizenship
+          in: query
+          description: Citizenship identifier in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_nationality
+          in: query
+          description: Nationality identifier in `country:identifier` format
           required: false
           schema:
             type: string
