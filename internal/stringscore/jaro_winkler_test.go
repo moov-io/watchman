@@ -228,6 +228,69 @@ func TestEql(t *testing.T) {
 	eql(t, "", 0.0001, 0.00002)
 }
 
+// TestJaroWinklerWithSoundex verifies Soundex boost integration.
+func TestJaroWinklerWithSoundex(t *testing.T) {
+	t.Run("Soundex disabled", func(t *testing.T) {
+		t.Setenv("USE_SOUNDEX_MATCHING", "no")
+
+		// Should work as before (no Soundex boost)
+		score := stringscore.BestPairsJaroWinkler(
+			strings.Fields("smith"),
+			strings.Fields("smythe"),
+		)
+		require.Greater(t, score, 0.7)
+	})
+
+	t.Run("Soundex enabled - matching phonetics", func(t *testing.T) {
+		t.Setenv("USE_SOUNDEX_MATCHING", "yes")
+		t.Setenv("SOUNDEX_BOOST_WEIGHT", "0.12")
+
+		// These should get a Soundex boost
+		scoringCases := []struct {
+			indexed, search string
+			minScore        float64
+		}{
+			// Phonetically equivalent names that should benefit from Soundex boost
+			// Base Jaro score is ~0.72, with 12% boost = 0.72 * 1.12 = ~0.81
+			{"smith", "smythe", 0.79},
+			{"johnson", "jonson", 0.79},
+		}
+
+		for _, tc := range scoringCases {
+			score := stringscore.BestPairsJaroWinkler(
+				strings.Fields(tc.search),
+				strings.Fields(tc.indexed),
+			)
+			require.GreaterOrEqual(t, score, tc.minScore,
+				"Expected %s vs %s to score >= %.2f (got %.3f) with Soundex boost",
+				tc.search, tc.indexed, tc.minScore, score)
+		}
+	})
+
+	t.Run("Soundex enabled - non-matching phonetics", func(t *testing.T) {
+		t.Setenv("USE_SOUNDEX_MATCHING", "yes")
+
+		// These should NOT get a Soundex boost
+		score := stringscore.BestPairsJaroWinkler(
+			strings.Fields("smith"),
+			strings.Fields("jones"),
+		)
+		require.Less(t, score, 0.8, "Smith vs Jones should have low score (different Soundex)")
+	})
+
+	t.Run("Feature flag test", func(t *testing.T) {
+		// With flag disabled, should use legacy behavior
+		t.Setenv("USE_SOUNDEX_MATCHING", "no")
+		score1 := stringscore.BestPairsJaroWinkler(strings.Fields("smith"), strings.Fields("smythe"))
+
+		// With flag enabled, might be slightly higher (due to boost)
+		t.Setenv("USE_SOUNDEX_MATCHING", "yes")
+		score2 := stringscore.BestPairsJaroWinkler(strings.Fields("smith"), strings.Fields("smythe"))
+
+		require.GreaterOrEqual(t, score2, score1, "Soundex-boosted score should be >= non-boosted")
+	})
+}
+
 func BenchmarkJaroWinkler(b *testing.B) {
 	inputs := []string{
 		"Seyed Mohammad HASHEMI",
