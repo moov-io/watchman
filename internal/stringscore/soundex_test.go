@@ -2,7 +2,8 @@ package stringscore_test
 
 import (
 	"testing"
-
+    "os/exec"   
+    "strings"  
 	"github.com/moov-io/watchman/internal/stringscore"
 	"github.com/stretchr/testify/require"
 )
@@ -40,7 +41,7 @@ func TestEncodeSoundex(t *testing.T) {
 		{"Two letters", "AB", "A100"},
 		{"All vowels", "AEIOU", "A000"},
 		{"With punctuation", "O'Brien", "O165"}, // Punctuation stripped
-		{"With spaces", "Jean Paul", "J514"},    // Spaces stripped, only Jean encoded
+        {"With spaces", "Jean Paul", "J514"},    // Spaces stripped, both words encoded
 		{"Empty string", "", ""},
 		{"Lowercase", "smith", "S530"},
 		{"Mixed case", "SmItH", "S530"},
@@ -130,6 +131,63 @@ func TestSoundexScore(t *testing.T) {
 	// Non-matching
 	require.Equal(t, 0.0, stringscore.SoundexScore("Smith", "Johnson"))
 	require.Equal(t, 0.0, stringscore.SoundexScore("", "Smith"))
+}
+
+// TestEncodeSoundexAgainstSystemSoundex cross-validates our implementation
+// against the system's soundex binary (available on Linux/macOS via dictionaries).
+// Skipped automatically on Windows or systems without the binary.
+// See: https://stackoverflow.com/a/10454018
+func TestEncodeSoundexAgainstSystemSoundex(t *testing.T) {
+    path, err := exec.LookPath("soundex")
+    if err != nil {
+        t.Skip("soundex binary not found on this system, skipping cross-validation")
+    }
+
+    words := []string{
+        "Smith", "Johnson", "Robert", "Williams", "Miller",
+        "Lloyd", "Jackson", "Catherine", "Rubin", "Ashcraft",
+        "Euler", "Ellery", "Gauss", "Ghosh", "Tymczak",
+    }
+
+    for _, word := range words {
+        t.Run(word, func(t *testing.T) {
+            out, err := exec.Command(path, word).Output()
+            require.NoError(t, err)
+
+            systemCode := strings.TrimSpace(string(out))
+            ourCode := stringscore.EncodeSoundex(word)
+
+            require.Equal(t, systemCode, ourCode,
+                "EncodeSoundex(%q): our=%q system=%q", word, ourCode, systemCode)
+        })
+    }
+}
+
+// BenchmarkEncodeSoundex measures encoding performance.
+func BenchmarkEncodeSoundex(b *testing.B) {
+    inputs := []string{
+        "Smith", "Johnson", "Muhammad", "Williams", "Catherine",
+        "Lloyd", "Jackson", "Assad", "Robert", "Miller",
+    }
+    b.ResetTimer()
+    for i := 0; i < b.N; i++ {
+        stringscore.EncodeSoundex(inputs[i%len(inputs)])
+    }
+}
+
+// BenchmarkSoundexMatch measures match performance for two strings.
+func BenchmarkSoundexMatch(b *testing.B) {
+    pairs := [][2]string{
+        {"Smith", "Smythe"},
+        {"Muhammad", "Mohammed"},
+        {"Johnson", "Jonson"},
+        {"Assad", "Asad"},
+    }
+    b.ResetTimer()
+    for i := 0; i < b.N; i++ {
+        p := pairs[i%len(pairs)]
+        stringscore.SoundexMatch(p[0], p[1])
+    }
 }
 
 // TestSoundexRealWorldExamples tests against known sanctions entity variations.

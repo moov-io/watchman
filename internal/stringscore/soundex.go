@@ -29,7 +29,7 @@ var soundexTable = map[rune]rune{
 // Examples:
 //   - "Smith"    → "S530"
 //   - "Lloyd"    → "L300"  (second L is duplicate of first; O resets; Y ignored like vowel; D=3)
-//   - "Miller"   → "M400"  (L=4, second L is dup; E resets; R=6 but we stop at 3 digits)
+//   - "Miller"   → "M460"  (L=4, second L is dup; E resets; R=6; pad with 0)
 //   - "Ashcraft" → "A261"  (S=2; H transparent so C=2 is dup of S, skip; R=6; A resets; F=1; T=3 but stop)
 func EncodeSoundex(s string) string {
 	if s == "" {
@@ -48,7 +48,8 @@ func EncodeSoundex(s string) string {
 		return ""
 	}
 
-	firstLetter := rune(s[0])
+	runes := []rune(s)
+	firstLetter := runes[0]
 
 	// Initialize lastDigit to the Soundex digit of the first letter.
 	// This ensures the second letter (if same phonetic group) is treated as a duplicate.
@@ -56,8 +57,10 @@ func EncodeSoundex(s string) string {
 
 	var code []rune
 
-	for i := 1; i < len(s); i++ {
-		char := rune(s[i])
+	for i, char := range s {
+		if i == 0 {
+			continue
+		}
 
 		// H and W are transparent: skip them WITHOUT resetting lastDigit.
 		// This means consonants on either side of H/W are treated as adjacent.
@@ -95,12 +98,11 @@ func EncodeSoundex(s string) string {
 // SoundexMatch returns true if two strings encode to the same Soundex code.
 // Two empty strings are considered a match.
 func SoundexMatch(s1, s2 string) bool {
-	code1 := EncodeSoundex(s1)
-	code2 := EncodeSoundex(s2)
-	// Two empty strings both return "" — treat as equal (both inputs were empty)
-	if s1 == "" && s2 == "" {
+	if s1 == s2 {
 		return true
 	}
+	code1 := EncodeSoundex(s1)
+	code2 := EncodeSoundex(s2)
 	return code1 == code2 && code1 != ""
 }
 
