@@ -37,6 +37,12 @@ paths:
               description: application/json
               schema:
                 type: string
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unexpected error
   /v2/search:
     get:
       summary: Search for entities in sanction lists
@@ -117,6 +123,17 @@ paths:
           required: false
           schema:
             type: string
+        - name: format
+          in: query
+          description: Output format for the search response (default watchman). May also be set via the Accept header.
+          required: false
+          schema:
+            type: string
+            enum:
+              - watchman
+              - senzing
+              - senzing/json
+              - senzing/ndjson
 
         # Person-specific parameters
         - name: gender
@@ -384,12 +401,120 @@ paths:
               type: string
           explode: true
 
+        # Government identifier parameters. Value format is `country:identifier` (e.g., `gov_passport=US:123456789`).
+        - name: gov_passport
+          in: query
+          description: Passport identifier in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_drivers-license
+          in: query
+          description: Driver's license identifier in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_national-id
+          in: query
+          description: National ID in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_tax-id
+          in: query
+          description: Tax ID in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_ssn
+          in: query
+          description: Social Security Number in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_cedula
+          in: query
+          description: Cedula identifier in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_curp
+          in: query
+          description: CURP identifier in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_cuit
+          in: query
+          description: CUIT identifier in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_electoral
+          in: query
+          description: Electoral identifier in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_business-registration
+          in: query
+          description: Business registration number in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_commercial-registry
+          in: query
+          description: Commercial registry number in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_birth-certificate
+          in: query
+          description: Birth certificate number in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_refugee-id
+          in: query
+          description: Refugee ID in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_diplomatic-passport
+          in: query
+          description: Diplomatic passport identifier in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_personal-id
+          in: query
+          description: Personal ID in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_citizenship
+          in: query
+          description: Citizenship identifier in `country:identifier` format
+          required: false
+          schema:
+            type: string
+        - name: gov_nationality
+          in: query
+          description: Nationality identifier in `country:identifier` format
+          required: false
+          schema:
+            type: string
+
       responses:
         "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SearchResponse'
+            application/x-ndjson:
+              schema:
+                type: string
+                description: Senzing-formatted body (NDJSON for format=senzing/ndjson, JSON array otherwise)
           description: Successful search
           headers:
             Access-Control-Allow-Origin:
@@ -397,7 +522,7 @@ paths:
               schema:
                 type: string
             Content-Type:
-              description: application/json
+              description: application/json or application/x-ndjson
               schema:
                 type: string
         "400":
@@ -412,7 +537,11 @@ paths:
               schema:
                 type: string
         default:
-          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unexpected error
 
   /v2/ingest/{fileType}:
     post:
@@ -442,6 +571,75 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IngestFileResponse'
+        '400':
+          description: Missing or invalid fileType
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v2/export/{fileType}:
+    get:
+      summary: Export an ingested dataset
+      description: Export the entities of an ingested dataset in the chosen format.
+      parameters:
+        - name: fileType
+          in: path
+          description: Dataset name which matches a schema defined in the Watchman config
+          required: true
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: Output format for the export (default watchman). May also be set via the Accept header.
+          required: false
+          schema:
+            type: string
+            enum:
+              - watchman
+              - senzing
+              - senzing/json
+              - senzing/ndjson
+      responses:
+        '200':
+          description: Export successful
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Entity'
+            application/x-ndjson:
+              schema:
+                type: string
+                description: Senzing-formatted body (NDJSON for format=senzing/ndjson, JSON array otherwise)
+          headers:
+            Access-Control-Allow-Origin:
+              description: '*'
+              schema:
+                type: string
+            Content-Type:
+              description: application/json or application/x-ndjson
+              schema:
+                type: string
+        '400':
+          description: Missing or invalid fileType
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
 components:
   schemas:
@@ -465,6 +663,26 @@ components:
         country:
           type: string
           description: ISO-3166 country code
+        latitude:
+          type: number
+          format: double
+          description: Latitude of the address
+        longitude:
+          type: number
+          format: double
+          description: Longitude of the address
+      type: object
+    Affiliation:
+      properties:
+        entityName:
+          type: string
+          description: Name of the related entity
+        type:
+          type: string
+          description: Relationship to the related entity (e.g., "Linked To", "Subsidiary Of", "Owned By")
+        details:
+          type: string
+          description: Additional details about the relationship
       type: object
     Aircraft:
       properties:
@@ -474,12 +692,12 @@ components:
           type: array
           description: Alternative names for the aircraft
         built:
-          format: date
+          format: date-time
           type: string
           description: Build date of the aircraft
         flag:
           type: string
-          description: Country flag of the aircraft
+          description: Country flag of the aircraft (ISO-3166)
         icaoCode:
           type: string
           description: ICAO code of the aircraft
@@ -504,13 +722,18 @@ components:
           type: array
           description: Alternative names for the business
         created:
-          format: date
+          format: date-time
           type: string
           description: Creation date of the business
         dissolved:
-          format: date
+          format: date-time
           type: string
           description: Dissolution date of the business
+        governmentIDs:
+          items:
+            $ref: '#/components/schemas/GovernmentID'
+          type: array
+          description: Government-issued identifiers for the business
         name:
           type: string
           description: Name of the business
@@ -554,6 +777,11 @@ components:
             $ref: '#/components/schemas/Address'
           type: array
           description: Addresses associated with the entity
+        affiliations:
+          items:
+            $ref: '#/components/schemas/Affiliation'
+          type: array
+          description: Other entities this entity is connected to
         aircraft:
           $ref: '#/components/schemas/Aircraft'
           description: Aircraft details (if entity type is aircraft)
@@ -568,6 +796,21 @@ components:
             $ref: '#/components/schemas/CryptoAddress'
           type: array
           description: Cryptocurrency addresses associated with the entity
+        entityType:
+          enum:
+          - unknown
+          - person
+          - business
+          - organization
+          - aircraft
+          - vessel
+          type: string
+          description: Type of entity
+        historicalInfo:
+          items:
+            $ref: '#/components/schemas/HistoricalInfo'
+          type: array
+          description: Historical values for fields that have since changed
         name:
           type: string
           description: Primary name of the entity
@@ -577,16 +820,10 @@ components:
         person:
           $ref: '#/components/schemas/Person'
           description: Person details (if entity type is person)
-        type:
-          enum:
-          - person
-          - business
-          - organization
-          - aircraft
-          - vessel
-          type: string
-          description: Type of entity
-        source:
+        sanctionsInfo:
+          $ref: '#/components/schemas/SanctionsInfo'
+          description: Sanctions programs and details for the entity
+        sourceList:
           type: string
           description: Original list the entity is from
         sourceID:
@@ -605,6 +842,52 @@ components:
           type: string
           description: Error message
       type: object
+    GovernmentID:
+      properties:
+        name:
+          type: string
+          description: Display name for this identifier
+        type:
+          enum:
+          - passport
+          - drivers-license
+          - national-id
+          - tax-id
+          - ssn
+          - cedula
+          - curp
+          - cuit
+          - electoral
+          - business-registration
+          - commercial-registry
+          - birth-certificate
+          - refugee-id
+          - diplomatic-passport
+          - personal-id
+          - citizenship
+          - nationality
+          type: string
+          description: Kind of government ID
+        country:
+          type: string
+          description: Issuing country (ISO-3166)
+        identifier:
+          type: string
+          description: The identifier value
+      type: object
+    HistoricalInfo:
+      properties:
+        type:
+          type: string
+          description: Kind of historical value (e.g., "Former Name", "Previous Flag")
+        value:
+          type: string
+          description: The historical value itself
+        date:
+          format: date-time
+          type: string
+          description: When this value applied
+      type: object
     ListInfoResponse:
       properties:
         lists:
@@ -620,11 +903,11 @@ components:
             us_ofac: "0629...9aab"
           description: Hash of each list's original contents
         startedAt:
-          format: date
+          format: date-time
           type: string
           description: Timestamp of when list refresh started
         endedAt:
-          format: date
+          format: date-time
           type: string
           description: Timestamp of when list refresh completed
         version:
@@ -640,13 +923,18 @@ components:
           type: array
           description: Alternative names for the organization
         created:
-          format: date
+          format: date-time
           type: string
           description: Creation date of the organization
         dissolved:
-          format: date
+          format: date-time
           type: string
           description: Dissolution date of the organization
+        governmentIDs:
+          items:
+            $ref: '#/components/schemas/GovernmentID'
+          type: array
+          description: Government-issued identifiers for the organization
         name:
           type: string
           description: Name of the organization
@@ -659,34 +947,112 @@ components:
           type: array
           description: Alternative names for the person
         birthDate:
-          format: date
+          format: date-time
           type: string
           description: Birth date of the person
         deathDate:
-          format: date
+          format: date-time
           type: string
           description: Death date of the person
         gender:
           type: string
           description: Gender of the person
+        governmentIDs:
+          items:
+            $ref: '#/components/schemas/GovernmentID'
+          type: array
+          description: Government-issued identifiers for the person
         name:
           type: string
           description: Name of the person
+        placeOfBirth:
+          type: string
+          description: Place of birth of the person
         titles:
           items:
             type: string
           type: array
           description: Titles held by the person
       type: object
+    SanctionsInfo:
+      properties:
+        programs:
+          items:
+            type: string
+          type: array
+          description: Sanction programs the entity falls under (e.g., "SDGT", "IRGC")
+        secondary:
+          type: boolean
+          description: Whether the entity is subject to secondary sanctions
+        description:
+          type: string
+          description: Additional sanctions details
+      type: object
+    ScorePiece:
+      properties:
+        score:
+          type: number
+          format: float
+          description: Score for this piece (0-1)
+        weight:
+          type: number
+          format: float
+          description: Weight applied to this piece in the final score
+        matched:
+          type: boolean
+          description: Whether this piece matched
+        required:
+          type: boolean
+          description: Whether this piece is required for a high overall score
+        exact:
+          type: boolean
+          description: Whether this piece was an exact match
+        fieldsCompared:
+          type: integer
+          description: Number of fields that were compared
+        pieceType:
+          type: string
+          description: Type of comparison this piece represents (e.g., "identifiers", "name")
+      type: object
+    SearchedEntity:
+      description: An Entity returned from a search, with match score and optional scoring details
+      allOf:
+        - $ref: '#/components/schemas/Entity'
+        - type: object
+          properties:
+            match:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 1
+              description: Match score for this entity against the query
+            debug:
+              type: string
+              description: Base64-encoded field-level match details (only set when ?debug=true)
+            details:
+              $ref: '#/components/schemas/SimilarityScore'
+              description: Field-level scoring breakdown
     SearchResponse:
       properties:
         query:
           $ref: '#/components/schemas/Entity'
         entities:
           items:
-            $ref: '#/components/schemas/Entity'
+            $ref: '#/components/schemas/SearchedEntity'
           type: array
           description: List of matching entities
+      type: object
+    SimilarityScore:
+      properties:
+        pieces:
+          items:
+            $ref: '#/components/schemas/ScorePiece'
+          type: array
+          description: Per-comparison score breakdown
+        finalScore:
+          type: number
+          format: float
+          description: Computed final match score
       type: object
     Vessel:
       properties:
@@ -696,7 +1062,7 @@ components:
           type: array
           description: Alternative names for the vessel
         built:
-          format: date
+          format: date-time
           type: string
           description: Build date of the vessel
         callSign:
@@ -704,7 +1070,7 @@ components:
           description: Call sign of the vessel
         flag:
           type: string
-          description: Country flag of the vessel
+          description: Country flag of the vessel (ISO-3166)
         grossRegisteredTonnage:
           type: integer
           description: Gross registered tonnage of the vessel
