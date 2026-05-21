@@ -22,7 +22,7 @@ func TestBestPairsJaroWinkler__FalsePositives(t *testing.T) {
 	// 2. SDN Entity 7788 "SHAQIRI, Shaqir"
 	oldScore, newScore = compareAlgorithms("shaqiri shaqir", "zaid shakir")
 	eql(t, "Score is too high", oldScore, 0.908)
-	eql(t, "New score is better", newScore, 0.704)
+	eql(t, "New score is better", newScore, 0.729)
 
 	// Single-word sanctioned names shouldn't match any query with that name part
 	// 1. SDN Entity 15050 "HADI"

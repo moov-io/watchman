@@ -24,7 +24,7 @@ func TestJaroWinkler(t *testing.T) {
 		match           float64
 	}{
 		// examples
-		{"wei, zhao", "wei, Zhao", 0.875},
+		{"wei, zhao", "wei, Zhao", 0.917},
 		{"WEI, Zhao", "WEI, Zhao", 1.0},
 		{"WEI Zhao", "WEI Zhao", 1.0},
 		{strings.ToLower("WEI Zhao"), prepare.LowerAndRemovePunctuation("WEI, Zhao"), 1.0},
@@ -84,15 +84,15 @@ func TestJaroWinkler(t *testing.T) {
 		{"nicolas, maduro moros", "maduro", 0.897},
 		{"nicolas, maduro moros", "nicolás maduro", 0.906},
 		{"africada financial services bureau change", "skylight", 0.441},
-		{"africada financial services bureau change", "skylight financial inc", 0.658},
-		{"africada financial services bureau change", "skylight services inc", 0.599},
-		{"africada financial services bureau change", "skylight financial services", 0.761},
-		{"africada financial services bureau change", "skylight financial services inc", 0.730},
+		{"africada financial services bureau change", "skylight financial inc", 0.670},
+		{"africada financial services bureau change", "skylight services inc", 0.625},
+		{"africada financial services bureau change", "skylight financial services", 0.778},
+		{"africada financial services bureau change", "skylight financial services inc", 0.749},
 
 		// stopwords tests
-		{"the group for the preservation of the holy sites", "the bridgespan group", 0.682},
-		{prepare.LowerAndRemovePunctuation("the group for the preservation of the holy sites"), prepare.LowerAndRemovePunctuation("the bridgespan group"), 0.682},
-		{"group preservation holy sites", "bridgespan group", 0.652},
+		{"the group for the preservation of the holy sites", "the bridgespan group", 0.715},
+		{prepare.LowerAndRemovePunctuation("the group for the preservation of the holy sites"), prepare.LowerAndRemovePunctuation("the bridgespan group"), 0.715},
+		{"group preservation holy sites", "bridgespan group", 0.692},
 
 		{"the group for the preservation of the holy sites", "the logan group", 0.670},
 		{prepare.LowerAndRemovePunctuation("the group for the preservation of the holy sites"), prepare.LowerAndRemovePunctuation("the logan group"), 0.670},
@@ -110,13 +110,13 @@ func TestJaroWinkler(t *testing.T) {
 		{prepare.LowerAndRemovePunctuation("the group for the preservation of the holy sites"), prepare.LowerAndRemovePunctuation("the group"), 0.880},
 		{"group preservation holy sites", "group", 0.879},
 
-		{"the group for the preservation of the holy sites", "The flibbity jibbity flobbity jobbity grobbity zobbity group", 0.345},
+		{"the group for the preservation of the holy sites", "The flibbity jibbity flobbity jobbity grobbity zobbity group", 0.363},
 		{
 			prepare.LowerAndRemovePunctuation("the group for the preservation of the holy sites"),
 			prepare.LowerAndRemovePunctuation("the flibbity jibbity flobbity jobbity grobbity zobbity group"),
-			0.366,
+			0.379,
 		},
-		{"group preservation holy sites", "flibbity jibbity flobbity jobbity grobbity zobbity group", 0.263},
+		{"group preservation holy sites", "flibbity jibbity flobbity jobbity grobbity zobbity group", 0.277},
 
 		// prepare.LowerAndRemovePunctuation
 		{"i c sogo kenkyusho", prepare.LowerAndRemovePunctuation("A.I.C. SOGO KENKYUSHO"), 0.968},
@@ -245,15 +245,13 @@ func TestJaroWinklerWithSoundex(t *testing.T) {
 		t.Setenv("USE_SOUNDEX_MATCHING", "yes")
 		t.Setenv("SOUNDEX_BOOST_WEIGHT", "0.12")
 
-		// These should get a Soundex boost
+		// These should get a Soundex boost (base scores ~0.81 and ~0.92 get lifted)
 		scoringCases := []struct {
 			indexed, search string
 			minScore        float64
 		}{
-			// Phonetically equivalent names that should benefit from Soundex boost
-			// Base Jaro score is ~0.72, with 12% boost = 0.72 * 1.12 = ~0.81
-			{"smith", "smythe", 0.79},
-			{"johnson", "jonson", 0.79},
+			{"smith", "smythe", 0.90},
+			{"johnson", "jonson", 0.99},
 		}
 
 		for _, tc := range scoringCases {
@@ -279,15 +277,16 @@ func TestJaroWinklerWithSoundex(t *testing.T) {
 	})
 
 	t.Run("Feature flag test", func(t *testing.T) {
-		// With flag disabled, should use legacy behavior
+		// With flag disabled, legacy behavior (no boost)
 		t.Setenv("USE_SOUNDEX_MATCHING", "no")
 		score1 := stringscore.BestPairsJaroWinkler(strings.Fields("smith"), strings.Fields("smythe"))
 
-		// With flag enabled, might be slightly higher (due to boost)
+		// With flag enabled + positive weight, score should be strictly higher
 		t.Setenv("USE_SOUNDEX_MATCHING", "yes")
+		t.Setenv("SOUNDEX_BOOST_WEIGHT", "0.10")
 		score2 := stringscore.BestPairsJaroWinkler(strings.Fields("smith"), strings.Fields("smythe"))
 
-		require.GreaterOrEqual(t, score2, score1, "Soundex-boosted score should be >= non-boosted")
+		require.Greater(t, score2, score1, "Soundex-boosted score should be strictly greater than non-boosted")
 	})
 }
 

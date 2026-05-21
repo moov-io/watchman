@@ -41,17 +41,14 @@ func EncodeSoundex(s string) string {
 		return ""
 	}
 
-	// Process runes directly to avoid multiple allocations
-	runes := []rune(s)
-	out := make([]rune, 0, len(runes))
-
-	for _, r := range runes {
+	// Process characters directly to avoid multiple allocations
+	out := make([]rune, 0, len(s))
+	for _, r := range s {
 		if r >= 'a' && r <= 'z' {
 			out = append(out, r-32) // to uppercase
 		} else if r >= 'A' && r <= 'Z' {
 			out = append(out, r)
 		}
-		// non-letters are dropped
 	}
 
 	if len(out) == 0 {

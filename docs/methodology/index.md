@@ -67,8 +67,9 @@ Watchman's implementation includes:
 For handling spelling variations, especially in transliterated names, Watchman includes:
 
 1. **Modified Soundex**
-   - Groups phonetically similar characters
-   - Example: "Smith" and "Smyth" have identical phonetic codes
+   - Groups phonetically similar characters for first-letter filtering and penalty logic
+   - Full `EncodeSoundex` implementation for whole-token phonetic codes (e.g. "Smith"→"S530")
+   - Optional score boosting via `USE_SOUNDEX_MATCHING` + `SOUNDEX_BOOST_WEIGHT` when codes match exactly (same first letter + phonetic digits)
 
 2. **First Character Analysis**
    - Names with different first-character phonetic classes are less likely to match
