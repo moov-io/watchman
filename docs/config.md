@@ -265,7 +265,7 @@ YAML configuration (example with OpenAI):
 | `JARO_WINKLER_PREFIX_SIZE`         | Jaro-Winkler prefix size.                                                                                     | 4       |
 | `LENGTH_DIFFERENCE_CUTOFF_FACTOR`  | Minimum ratio for the length of two matching tokens, before they score is penalised.                          | 0.9     |
 | `LENGTH_DIFFERENCE_PENALTY_WEIGHT` | Weight of penalty applied to scores when two matching tokens have different lengths.                          | 0.3     |
-| `DIFFERENT_LETTER_PENALTY_WEIGHT`  | Weight of penalty applied to scores when two matching tokens begin with different letters.                    | 0.9     |
+| `DIFFERENT_LETTER_PENALTY_WEIGHT`  | Weight of penalty applied to scores when two matching tokens begin with different phonetic classes (see firstCharacterSoundexMatch). | 0.9     |
 | `UNMATCHED_INDEX_TOKEN_WEIGHT`     | Weight of penalty applied to scores when part of the indexed name isn't matched.                              | 0.15    |
 | `ADJACENT_SIMILARITY_POSITIONS`    | How many nearby words to search for highest max similarly score.                                              | 3       |
 | `EXACT_MATCH_FAVORITISM`           | Extra weighting assigned to exact matches.                                                                    | 0.0     |
@@ -273,6 +273,8 @@ YAML configuration (example with OpenAI):
 | `FINAL_SCORE_MIN_REQUIRED_FIELDS_MULTIPLIER` | Multiplier applied when a search compares fewer than two required fields, such as a name-only query.              | 0.90    |
 | `FINAL_SCORE_NAME_ONLY_MULTIPLIER`           | Multiplier applied to name-only matches when no IDs or addresses are present in the query.                    | 0.95    |
 | `DISABLE_PHONETIC_FILTERING`       | Force scoring search terms against every indexed record.                                                      | `false` |
+| `USE_SOUNDEX_MATCHING`             | Enable full Soundex phonetic code matching to optionally boost Jaro-Winkler scores for phonetically similar names (e.g. "Smith" vs "Smythe"). | `false` |
+| `SOUNDEX_BOOST_WEIGHT`             | When `USE_SOUNDEX_MATCHING=yes`, the boost factor applied to pairs whose Soundex codes match (score *= 1+weight, capped at 1.0). Example: `0.12` for a 12% boost. | `0.0`   |
 
 #### Source List Configuration
 

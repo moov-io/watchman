@@ -43,6 +43,7 @@ func TestEncodeSoundex(t *testing.T) {
 		{"Lowercase", "smith", "S530"},
 		{"Mixed case", "SmItH", "S530"},
 		{"Numbers and letters", "Smith123", "S530"},
+		{"No letters", "123!@#", ""},
 
 		// RFC/Standard Soundex examples
 		{"Robert", "Robert", "R163"},
@@ -155,6 +156,13 @@ func TestSoundexDistance(t *testing.T) {
 	require.Equal(t, 1.0, stringscore.SoundexDistance("Johnson", "Jonson"))
 	require.Equal(t, 0.0, stringscore.SoundexDistance("Smith", "Johnson"))
 	require.Equal(t, 0.0, stringscore.SoundexDistance("", "Smith"))
+}
+
+func TestSoundexScore(t *testing.T) {
+	// SoundexScore is alias for backwards compat
+	require.Equal(t, 1.0, stringscore.SoundexScore("Smith", "Smythe"))
+	require.Equal(t, 0.0, stringscore.SoundexScore("Smith", "Johnson"))
+	require.Equal(t, stringscore.SoundexDistance("foo", "bar"), stringscore.SoundexScore("foo", "bar"))
 }
 
 func TestSoundexRealWorldExamples(t *testing.T) {

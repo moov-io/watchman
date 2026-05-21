@@ -99,7 +99,7 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 					Gender: "F",
 				},
 			},
-			expected: 0.155,
+			expected: 0.182,
 		},
 		{
 			name: "mismatched entity type",

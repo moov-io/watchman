@@ -141,11 +141,26 @@ func customJaroWinkler(s1 string, s2 string) float64 {
 		//different lengths
 		score = score * scalingFactor(lengthMetric, lengthDifferencePenaltyWeight)
 	}
-	if s1[0] != s2[0] {
-		//Penalise words that start with a different characters. Jaro-Winkler is too lenient on this
-		//TODO should use a phonetic comparison here, like Soundex
+	if len(s1) > 0 && len(s2) > 0 && !firstCharacterSoundexMatch(s1, s2) {
+		// Penalise words that start with different phonetic classes (e.g. "Smith" vs "Jones").
+		// Using firstCharacterSoundexMatch (modified Soundex for initial letter) allows
+		// common variants like "Catherine"/"Katherine" or "Qaddafi"/"Gaddafi" to avoid
+		// this penalty while still catching truly different onsets.
 		score = score * differentLetterPenaltyWeight
 	}
+
+	// Optional Soundex phonetic boost for pairs that encode to the same full Soundex code.
+	// Enabled via USE_SOUNDEX_MATCHING=yes and controlled by SOUNDEX_BOOST_WEIGHT (e.g. 0.12).
+	if strx.Yes(os.Getenv("USE_SOUNDEX_MATCHING")) {
+		boostWeight := readFloat(os.Getenv("SOUNDEX_BOOST_WEIGHT"), 0.0)
+		if boostWeight > 0 && SoundexMatch(s1, s2) {
+			score *= (1.0 + boostWeight)
+			if score > 1.0 {
+				score = 1.0
+			}
+		}
+	}
+
 	return score
 }
 
