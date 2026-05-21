@@ -1,19 +1,24 @@
 package stringscore
 
-import (
-	"strings"
-	"unicode"
-)
-
-// soundexTable maps letters to their Soundex digit.
-// 0 = ignored (vowels, H, W, Y)
-var soundexTable = map[rune]rune{
-	'B': '1', 'F': '1', 'P': '1', 'V': '1',
-	'C': '2', 'G': '2', 'J': '2', 'K': '2', 'Q': '2', 'S': '2', 'X': '2', 'Z': '2',
-	'D': '3', 'T': '3',
-	'L': '4',
-	'M': '5', 'N': '5',
-	'R': '6',
+// getSoundexDigit returns the Soundex digit for a letter.
+// Returns 0 for vowels, H, W, Y (ignored/separator characters).
+// Using a switch statement instead of a map for better performance and to avoid allocations.
+func getSoundexDigit(r rune) rune {
+	switch r {
+	case 'B', 'F', 'P', 'V':
+		return '1'
+	case 'C', 'G', 'J', 'K', 'Q', 'S', 'X', 'Z':
+		return '2'
+	case 'D', 'T':
+		return '3'
+	case 'L':
+		return '4'
+	case 'M', 'N':
+		return '5'
+	case 'R':
+		return '6'
+	}
+	return 0
 }
 
 // EncodeSoundex returns the standard Soundex code for a string.
@@ -21,62 +26,61 @@ var soundexTable = map[rune]rune{
 // Standard rules:
 //  1. Retain the first letter of the name.
 //  2. Map letters to digits per phonetic group.
-//  3. H and W are transparent (ignored, do NOT break adjacency/duplicate detection).
+//  3. H and W are transparent (ignored) but do NOT reset duplicate tracking.
 //  4. Vowels (A,E,I,O,U) and Y separate consonants (reset duplicate tracking).
 //  5. Remove consecutive duplicate digits.
 //  6. Pad or truncate to letter + 3 digits.
 //
 // Examples:
 //   - "Smith"    → "S530"
-//   - "Lloyd"    → "L300"  (second L is duplicate of first; O resets; Y ignored like vowel; D=3)
-//   - "Miller"   → "M460"  (L=4, second L is dup; E resets; R=6; pad with 0)
-//   - "Ashcraft" → "A261"  (S=2; H transparent so C=2 is dup of S, skip; R=6; A resets; F=1; T=3 but stop)
+//   - "Lloyd"    → "L300"  (second L is duplicate of first; O resets; Y like vowel; D=3)
+//   - "Miller"   → "M460"  (L=4, second L is dup; E resets; R=6)
+//   - "Ashcraft" → "A261"  (S=2; H transparent so C=2 is dup of S; R=6; A resets; F=1)
 func EncodeSoundex(s string) string {
 	if s == "" {
 		return ""
 	}
 
-	// Uppercase and strip non-letters
-	s = strings.ToUpper(s)
-	s = strings.Map(func(r rune) rune {
-		if unicode.IsLetter(r) {
-			return r
+	// Process runes directly to avoid multiple allocations
+	runes := []rune(s)
+	out := make([]rune, 0, len(runes))
+
+	for _, r := range runes {
+		if r >= 'a' && r <= 'z' {
+			out = append(out, r-32) // to uppercase
+		} else if r >= 'A' && r <= 'Z' {
+			out = append(out, r)
 		}
-		return -1
-	}, s)
-	if s == "" {
+		// non-letters are dropped
+	}
+
+	if len(out) == 0 {
 		return ""
 	}
 
-	runes := []rune(s)
-	firstLetter := runes[0]
+	firstLetter := out[0]
 
-	// Initialize lastDigit to the Soundex digit of the first letter.
-	// This ensures the second letter (if same phonetic group) is treated as a duplicate.
-	lastDigit, _ := soundexTable[firstLetter] // 0 if first letter is a vowel
+	// Initialize lastDigit from the first letter so the second letter
+	// (if same phonetic group) is correctly treated as a duplicate.
+	lastDigit := getSoundexDigit(firstLetter)
 
 	var code []rune
 
-	for i, char := range s {
-		if i == 0 {
-			continue
-		}
-
-		// H and W are transparent: skip them WITHOUT resetting lastDigit.
-		// This means consonants on either side of H/W are treated as adjacent.
-		// e.g. Ashcraft: S-H-C → S=2, H ignored, C=2 (duplicate of S, skip)
+	for _, char := range out[1:] {
+		// H and W are transparent: skip WITHOUT resetting lastDigit.
+		// Consonants on either side of H/W are treated as adjacent.
 		if char == 'H' || char == 'W' {
 			continue
 		}
 
-		digit, exists := soundexTable[char]
-		if !exists {
-			// Vowels and Y: they separate consonants, so reset duplicate tracking.
+		digit := getSoundexDigit(char)
+		if digit == 0 {
+			// Vowels and Y: separate consonants, reset duplicate tracking
 			lastDigit = 0
 			continue
 		}
 
-		// Only append if different from the last consonant digit
+		// Only append if different from the last digit
 		if digit != lastDigit {
 			code = append(code, digit)
 			lastDigit = digit
@@ -87,7 +91,7 @@ func EncodeSoundex(s string) string {
 		}
 	}
 
-	// Pad with zeros
+	// Pad with zeros to ensure 3 digits
 	for len(code) < 3 {
 		code = append(code, '0')
 	}
@@ -106,10 +110,17 @@ func SoundexMatch(s1, s2 string) bool {
 	return code1 == code2 && code1 != ""
 }
 
-// SoundexScore returns 1.0 if Soundex codes match, 0.0 otherwise.
-func SoundexScore(s1, s2 string) float64 {
+// SoundexDistance returns 1.0 if Soundex codes match, 0.0 otherwise.
+// The name "Distance" reflects that this is a phonetic similarity measure
+// in the range [0.0, 1.0].
+func SoundexDistance(s1, s2 string) float64 {
 	if SoundexMatch(s1, s2) {
 		return 1.0
 	}
 	return 0.0
+}
+
+// SoundexScore is an alias for SoundexDistance kept for backwards compatibility.
+func SoundexScore(s1, s2 string) float64 {
+	return SoundexDistance(s1, s2)
 }
