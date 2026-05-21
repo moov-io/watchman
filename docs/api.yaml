@@ -133,6 +133,7 @@ paths:
               - watchman
               - senzing
               - senzing/json
+              - senzing/jsonl
               - senzing/ndjson
 
         # Person-specific parameters
@@ -193,7 +194,7 @@ paths:
             type: string
         - name: model
           in: query
-          description: Model of the aircraft (for type=aircraft)
+          description: Model of the aircraft (for type=aircraft) or vessel (for type=vessel)
           required: false
           schema:
             type: string
@@ -205,18 +206,19 @@ paths:
             type: string
         - name: built
           in: query
-          description: Build date of the aircraft (for type=aircraft) in YYYY-MM-DD, YYYY-MM, or YYYY format
+          description: Build date of the aircraft (for type=aircraft) or vessel (for type=vessel) in YYYY-MM-DD, YYYY-MM, or YYYY format
           required: false
           schema:
             type: string
         - name: flag
           in: query
-          description: Flag/country of the aircraft (for type=aircraft)
+          description: Flag/country of the aircraft (for type=aircraft) or vessel (for type=vessel)
           required: false
           schema:
             type: string
 
         # Vessel parameters
+        # (also supports: flag, built, model documented above under aircraft)
         - name: imoNumber
           in: query
           description: IMO number of the vessel (for type=vessel)
@@ -514,7 +516,7 @@ paths:
             application/x-ndjson:
               schema:
                 type: string
-                description: Senzing-formatted body (NDJSON for format=senzing/ndjson, JSON array otherwise)
+                description: Senzing-formatted body (NDJSON/JSONL for format=senzing/jsonl or senzing/ndjson, JSON array otherwise)
           description: Successful search
           headers:
             Access-Control-Allow-Origin:
@@ -605,6 +607,7 @@ paths:
               - watchman
               - senzing
               - senzing/json
+              - senzing/jsonl
               - senzing/ndjson
       responses:
         '200':
@@ -618,7 +621,7 @@ paths:
             application/x-ndjson:
               schema:
                 type: string
-                description: Senzing-formatted body (NDJSON for format=senzing/ndjson, JSON array otherwise)
+                description: Senzing-formatted body (NDJSON/JSONL for format=senzing/jsonl or senzing/ndjson, JSON array otherwise)
           headers:
             Access-Control-Allow-Origin:
               description: '*'
