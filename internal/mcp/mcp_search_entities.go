@@ -47,8 +47,6 @@ type SearchEntitiesRequest struct {
 	IncludeDetails *bool `json:"includeDetails,omitempty" jsonschema:"Include field-level match score breakdown per result (names, addresses, IDs, etc.)"`
 }
 
-
-
 func (s *Server) HandleSearchEntities(ctx context.Context, req *mcp.CallToolRequest, args SearchEntitiesRequest) (*mcp.CallToolResult, any, error) {
 	searchReq := pubsearch.Entity[pubsearch.Value]{
 		Name:            args.Request.Name,
