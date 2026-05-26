@@ -23,6 +23,17 @@ type Config struct {
 
 	IncludedLists []search.SourceList // us_ofac, eu_csl, etc...
 
+	// IgnoredDownloadErrors lists source-list names for which download or parse
+	// errors are suppressed during RefreshAll. A failed list that is named here
+	// will produce a warning log but will not cause RefreshAll to return an error.
+	//
+	// Valid values are the standard known downloadable lists plus any source-list
+	// names configured in OpenSanctions.Lists or Senzing.
+	//
+	// Use the IGNORED_DOWNLOAD_ERRORS environment variable to set this at runtime
+	// using a comma-separated list of source-list names.
+	IgnoredDownloadErrors []search.SourceList
+
 	OpenSanctions OpenSanctionsConfig
 	Senzing       []SenzingList
 }

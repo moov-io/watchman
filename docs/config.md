@@ -80,6 +80,10 @@ Watchman:
       - "us_csl"
       - "us_ofac"
 
+    # Source-list names for which download or parse errors are suppressed.
+    # A failed list named here will log a warning but will not cause a refresh error.
+    IgnoredDownloadErrors: []
+
     # Include any senzing formatted OpenSanctions lists
     # OpenSanctions:
     #   ApiKey: "secret"
@@ -190,6 +194,7 @@ Watchman integrates the following lists to help you maintain global compliance.
 | Environmental Variable   | Description                                                                                                                          | Default                                     |
 |--------------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------|
 | `INCLUDED_LISTS`         | Comma separated list of lists to include.                                                                                            | Empty                                       |
+| `IGNORED_DOWNLOAD_ERRORS`| Comma separated list of source-list names for which download/parse errors are suppressed.                                            | Empty                                       |
 | `DATA_REFRESH_INTERVAL`  | Interval for data redownload and reparse. `off` disables this refreshing.                                                            | 12h                                         |
 | `INITIAL_DATA_DIRECTORY` | Directory filepath with initial files to use instead of downloading. Periodic downloads will replace the initial files.              | Empty                                       |
 | `HTTPS_CERT_FILE`        | Filepath containing a certificate (or intermediate chain) to be served by the HTTP server. Requires all traffic be over secure HTTP. | Empty                                       |
