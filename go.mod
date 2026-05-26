@@ -17,7 +17,7 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/jmoiron/sqlx v1.4.0
-	github.com/modelcontextprotocol/go-sdk v1.6.0
+	github.com/modelcontextprotocol/go-sdk v1.6.1
 	github.com/moov-io/base v0.61.2
 	github.com/moov-io/iso3166 v0.4.0
 	github.com/openvenues/gopostal v0.0.0-20240426055609-4fe3a773f519
