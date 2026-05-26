@@ -12,8 +12,8 @@ Comparing OFAC Names against "Khamis Al" using Watchman's name similarity algori
 | Khamis Al |	AL-QADHAFI, Khamis	| 0.688 |
 | Khamis Al |	ALESSAWI, Khamis F Ali	| 0.872 |
 | Khamis Al |	DR. KHAMIS	| 0.362 |
-| Khamis Al |	EL-QADDAFI, Khamis	| 0.667 |
-| Khamis Al |	ELKADDAFI, Khamis	| 0.682 |
+| Khamis Al |	EL-QADDAFI, Khamis	| 0.688 |
+| Khamis Al |	ELKADDAFI, Khamis	| 0.703 |
 | Khamis Al |	ELSSEID, Sami Ben Khamis Ben Saleh	| 0.503 |
 | Khamis Al |	GADDAFI, Khamis	| 0.784 |
 | Khamis Al |	GADHAFI, Khamis	| 0.784 |

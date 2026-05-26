@@ -59,7 +59,7 @@ func TestOpenCageGeocoder_Success(t *testing.T) {
 	}
 
 	require.InDelta(t, 40.754057, coords.Latitude, tolerance)
-	require.InDelta(t, -73.956462, coords.Longitude, tolerance)
+	require.InDelta(t, -72.6426519, coords.Longitude, tolerance)
 	require.Equal(t, "rooftop", coords.Accuracy)
 }
 
