@@ -50,22 +50,7 @@ type ServerConfig struct {
 }
 
 type MCPConfig struct {
-	Enabled   bool         `yaml:"enabled" json:"enabled"`
-	Signing   MCPSigning   `yaml:"signing" json:"signing"`
-	AgentPass MCPAgentPass `yaml:"agentpass" json:"agentpass"`
-}
-
-type MCPSigning struct {
-	Enabled bool   `yaml:"enabled" json:"enabled"`
-	KeyPath string `yaml:"key_path" json:"key_path"`
-	PubPath string `yaml:"pub_path" json:"pub_path"`
-}
-
-type MCPAgentPass struct {
-	Enabled         bool     `yaml:"enabled" json:"enabled"`
-	TrustAnchorPath string   `yaml:"trust_anchor_path" json:"trust_anchor_path"`
-	MinTrustLevel   int      `yaml:"min_trust_level" json:"min_trust_level"`
-	RequiredScopes  []string `yaml:"required_scopes" json:"required_scopes"`
+	Enabled bool `yaml:"enabled" json:"enabled"`
 }
 
 func LoadConfig(logger log.Logger) (*Config, error) {

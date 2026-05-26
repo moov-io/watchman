@@ -8,12 +8,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/moov-io/watchman/internal/search"
 	pubsearch "github.com/moov-io/watchman/pkg/search"
-	mcps "github.com/razashariff/mcps-go"
 )
 
 type SearchEntityRequest struct {
@@ -49,24 +47,7 @@ type SearchEntitiesRequest struct {
 	IncludeDetails *bool `json:"includeDetails,omitempty" jsonschema:"Include field-level match score breakdown per result (names, addresses, IDs, etc.)"`
 }
 
-// AgentContext carries the verified identity of the AI agent that made this search request.
-// Only present when the MCP server has AgentPass authentication enabled and the request
-// carried a valid X-AgentPass-Certificate header.
-type AgentContext struct {
-	AgentID    string `json:"agentId"`
-	TrustLevel int    `json:"trustLevel"`
-	IssuerID   string `json:"issuerId"`
-}
 
-// mcpSearchResponse is the envelope returned by the search_entities MCP tool.
-// Uses explicit fields instead of embedding pubsearch.SearchResponse to avoid inheriting
-// a custom UnmarshalJSON that would swallow SearchedAt and AgentContext during tests.
-type mcpSearchResponse struct {
-	Query        pubsearch.Entity[pubsearch.Value]           `json:"query"`
-	Entities     []pubsearch.SearchedEntity[pubsearch.Value] `json:"entities"`
-	AgentContext *AgentContext                               `json:"agentContext,omitempty"`
-	SearchedAt   int64                                       `json:"searchedAt"`
-}
 
 func (s *Server) HandleSearchEntities(ctx context.Context, req *mcp.CallToolRequest, args SearchEntitiesRequest) (*mcp.CallToolResult, any, error) {
 	searchReq := pubsearch.Entity[pubsearch.Value]{
@@ -108,13 +89,6 @@ func (s *Server) HandleSearchEntities(ctx context.Context, req *mcp.CallToolRequ
 		opts.Debug = true
 	}
 
-	// Log agent identity so compliance audit trails can tie agent to search activity.
-	agent := agentFromContext(ctx)
-	if agent != nil {
-		s.logger.Info().Logf("mcp: search by agent=%s trust=L%d issuer=%s name=%q type=%s",
-			agent.AgentID, agent.TrustLevel, agent.IssuerID, args.Request.Name, args.Request.Type)
-	}
-
 	// Normalize the request
 	searchReq = searchReq.Normalize()
 
@@ -129,59 +103,14 @@ func (s *Server) HandleSearchEntities(ctx context.Context, req *mcp.CallToolRequ
 		entities = []pubsearch.SearchedEntity[pubsearch.Value]{}
 	}
 
-	resp := mcpSearchResponse{
-		Query:      searchReq,
-		Entities:   entities,
-		SearchedAt: time.Now().Unix(),
-	}
-
-	// Stamp verified agent identity into the response so that MCPS-signed
-	// envelopes carry cryptographic proof of who requested this search.
-	if agent != nil {
-		resp.AgentContext = &AgentContext{
-			AgentID:    agent.AgentID,
-			TrustLevel: agent.TrustLevel,
-			IssuerID:   agent.IssuerID,
-		}
+	resp := pubsearch.SearchResponse{
+		Query:    searchReq,
+		Entities: entities,
 	}
 
 	responseJSON, err := json.Marshal(resp)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to marshal response: %w", err)
-	}
-
-	// Sign the response if MCPS signing is enabled
-	if s.signing && s.keyPair != nil {
-		passport := &mcps.Passport{
-			ID:       "watchman-mcp",
-			Subject:  "watchman",
-			Version:  mcps.Version,
-			IssuedAt: time.Now().Unix(),
-			Issuer:   "moov-io/watchman",
-		}
-
-		signed, signErr := mcps.SignMessage(responseJSON, s.keyPair, passport)
-		if signErr != nil {
-			// Log but don't fail the request -- signing is non-blocking
-			s.logger.Error().LogErrorf("MCPS: failed to sign response: %v", signErr)
-		} else {
-			signedJSON, err := json.Marshal(signed)
-			if err != nil {
-				err = s.logger.Error().LogErrorf("MCPS: failed to marshal signed response: %v", err).Err()
-
-				return &mcp.CallToolResult{
-					Content: []mcp.Content{
-						&mcp.TextContent{Text: err.Error()},
-					},
-					IsError: true,
-				}, nil, nil
-			}
-			return &mcp.CallToolResult{
-				Content: []mcp.Content{
-					&mcp.TextContent{Text: string(signedJSON)},
-				},
-			}, nil, nil
-		}
 	}
 
 	return &mcp.CallToolResult{

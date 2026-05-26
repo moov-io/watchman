@@ -22,8 +22,6 @@ require (
 	github.com/moov-io/iso3166 v0.4.0
 	github.com/openvenues/gopostal v0.0.0-20240426055609-4fe3a773f519
 	github.com/pariz/gountries v0.1.6
-	github.com/razashariff/agentpass-go v1.2.1
-	github.com/razashariff/mcps-go v1.0.0
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v3 v3.9.0
 	github.com/vmihailenco/msgpack/v5 v5.4.1
@@ -123,7 +121,6 @@ require (
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/segmentio/asm v1.1.3 // indirect
 	github.com/segmentio/encoding v0.5.4 // indirect
-	github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect

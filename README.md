@@ -38,7 +38,7 @@ Moov Watchman is a high-performance sanctions screening and compliance tool that
 - **High-Performance Search**: Optimized for speed and accuracy using advanced matching algorithms
 - **Flexible Integration**: HTTP API and Go library for easy integration into your systems
 - **Automated Updates**: Regular refreshes of watchlist data to ensure compliance
-- **Model Context Protocol**: Integrate AI agents into screening workflows with secure MCP and agentpass.
+- **Model Context Protocol**: Integrate AI agents into screening workflows with MCP.
 
 ## Included Lists
 
@@ -55,11 +55,7 @@ Watchman integrates the following lists to help you maintain global compliance. 
 
 ## Agents
 
-Watchman provides an HTTP `/mcp` endpoint with full Model Context Protocol (MCP) support, allowing agents to search the loaded lists. The endpoint is protected by **[MCPS](https://datatracker.ietf.org/doc/draft-sharif-mcps-secure-mcp/)**, which cryptographically verifies agent chains and calls at the point of screening. Untrusted requests are automatically blocked, and every request is proven tamper-resistant through cryptographic attestation.
-
-Only agents that can prove their identity are permitted to screen entities, verify transactions, or initiate payments.
-
-Check out the **[live demo](https://showcase.cybersecai.co.uk/demo.html#live-check)** to see seamless agent onboarding, verification, and screening in action.
+Watchman provides an HTTP `/mcp` endpoint with full Model Context Protocol (MCP) support, allowing agents to search the loaded lists.
 
 ## Project status
 
