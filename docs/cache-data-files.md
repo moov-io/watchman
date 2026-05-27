@@ -46,3 +46,11 @@ Download the [UK Sanctions List](https://www.gov.uk/government/publications/the-
 - `un_consolidated.xml` - UN Consolidated Sanctions List
 
 Download from [UN Sanctions](https://www.un.org/sc/resources/sc-sanctions)
+
+---
+
+**Live downloads with improved reliability**
+
+The `INITIAL_DATA_DIRECTORY` approach above supplies pre-parsed files at startup. For environments that prefer (or require) live downloads with resilience against flaky sources, consider the companion
+project [moov-io/watchman-cache](https://github.com/moov-io/watchman-cache). It acts as a reverse proxy + cache that speaks Watchman's existing `*_DOWNLOAD_TEMPLATE` and `*_DOWNLOAD_URL` variables,
+handles 302 redirects, and can serve stale content for days during origin outages. See the [Download reliability](/watchman/config/#download-reliability) section in the configuration documentation.

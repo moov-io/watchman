@@ -154,6 +154,13 @@ By design, Watchman **does not persist** (save) any data about the search querie
 a MySQL or PostgreSQL database for concurrent access. External lists that are downloaded on startup (and refreshed periodically) are only kept in memory. No encryption of data in-memory
 is performed.
 
+### Download reliability
+
+External sanctions lists are fetched over the network on startup and during periodic refreshes (default every 12h). Government endpoints can be flaky or unavailable, causing startup failures
+or refresh errors. For production use, see [Caching Data Files](https://moov-io.github.io/watchman/cache-data-files/) for local pre-loaded files and the companion project
+[moov-io/watchman-cache](https://github.com/moov-io/watchman-cache), which provides a nginx reverse proxy + long-lived cache designed to sit in front of Watchman.
+It works with the existing `*_DOWNLOAD_TEMPLATE` / `*_DOWNLOAD_URL` environment variables with no changes required to Watchman.
+
 ## Configuration
 
 Watchman recommends [file-based configuration](https://moov-io.github.io/watchman/config/) but supports environmental variable options.

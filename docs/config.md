@@ -293,6 +293,33 @@ YAML configuration (example with OpenAI):
 |-------------------------|-------------------------------------------------------------------------------------------------------|---------|
 | `OPENSANCTIONS_API_KEY` | API key for OpenSanctions authenticated access. Suggested when an `opensanctions_*` list is included. | Empty   |
 
+#### Download reliability
+
+Sanctions list downloads/endpoints (OFAC, trade.gov, EU, UK, UN, etc.) are occasionally slow, return errors, or are unreachable for extended periods. A failed download on startup or during a
+refresh will prevent Watchman from serving requests (initial download failures cause a fatal exit).
+
+For production deployments, consider running [moov-io/watchman-cache](https://github.com/moov-io/watchman-cache) as a reverse proxy in front of Watchman. It is an optional companion project that provides:
+
+- Internal handling of 302 redirects (particularly relevant for OFAC and Non-SDN files that redirect to short-lived S3 pre-signed URLs)
+- Hardened settings (large buffers, long timeouts, retries, SNI fixes, `ipv6=off`) tuned for large files such as `consolidated.csv`
+- Long cache lifetimes (48h on major lists) plus aggressive stale serving (`proxy_cache_use_stale`), allowing Watchman to continue operating even when the origin is down for multiple days
+- Persistent cache storage using a named Docker volume across container restarts
+- An intentional allowlist — only the exact filenames Watchman requests are permitted (it is not an open proxy)
+
+No changes are required inside Watchman. Simply override the download template environment variables to point at the cache:
+
+```
+OFAC_DOWNLOAD_TEMPLATE=http://watchman-cache:8080/api/PublicationPreview/exports/%s
+US_CSL_DOWNLOAD_TEMPLATE=http://watchman-cache:8080/downloadable_consolidated_screening_list/v1/%s
+US_NON_SDN_DOWNLOAD_TEMPLATE=http://watchman-cache:8080/api/PublicationPreview/exports/%s
+EU_CSL_DOWNLOAD_URL=http://watchman-cache:8080/...
+```
+
+A working `docker-compose.yml` example and Go integration test are provided in the [watchman-cache repository](https://github.com/moov-io/watchman-cache).
+
+This approach is complementary to the `INITIAL_DATA_DIRECTORY` feature (see [Caching Data Files](/watchman/cache-data-files/)).
+
 ## Data persistence
 
-By design, Watchman **does not persist** (save) any data about the search queries or actions created. The only storage occurs in memory of the process and upon restart Watchman will have no files or data saved. Also, no in-memory encryption of the data is performed.
+By design, Watchman **does not persist** (save) any data about the search queries or actions created. The only storage occurs in memory of the process and upon restart Watchman will have no
+files or data saved. Also, no in-memory encryption of the data is performed.
