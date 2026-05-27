@@ -25,6 +25,18 @@ menubar: docs-menu
 1. [Cross Script Embeddings Configuration](#cross-script-embeddings-configuration)
 1. [Similarity Configuration](#similarity-configuration)
 
+#### Source List Configuration
+
+1. [European Union](#european-union)
+1. [Open Sanctions](#open-sanctions)
+1. [United Kingdom](#united-kingdom)
+1. [United States](#united-states)
+
+#### Data Persistence
+
+1. [Download reliability](#download-reliability)
+1. [Persistence Disclaimer](#data-persistence)
+
 ### File
 
 Set the `APP_CONFIG` environment variable with a filepath to a yaml file containing the following:
