@@ -104,6 +104,39 @@ jobs:
     - name: Short Tests
       run: go test ./pkg/sources... -count 1 -v
 
+  libpostal:
+    name: Libpostal tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest]
+    steps:
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v6
+      with:
+        go-version: stable
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+
+    - name: Install Libpostal
+      run: make install
+
+    - name: Build postalpool
+      env:
+        GOTAGS: "-tags libpostal"
+      run: make postal-server
+
+    - name: Libpostal Tests
+      env:
+        GOTAGS: "-tags libpostal"
+      run: |
+        go test ./pkg/address/... -count 1 -v
+        go test ./internal/postalpool/... -count 1 -v
+
   docker-hub:
     name: Docker Hub (${{ matrix.platform }})
     runs-on: ${{ matrix.runner }}
