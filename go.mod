@@ -19,8 +19,8 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/modelcontextprotocol/go-sdk v1.6.1
 	github.com/moov-io/base v0.61.2
+	github.com/moov-io/gopostal v0.1.2
 	github.com/moov-io/iso3166 v0.4.0
-	github.com/openvenues/gopostal v0.0.0-20240426055609-4fe3a773f519
 	github.com/pariz/gountries v0.1.6
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v3 v3.9.0

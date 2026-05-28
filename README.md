@@ -202,7 +202,7 @@ Yes please! Checkout our [issues for first time contributors](https://github.com
 
 Building Watchman's source code follows standard Go commands. You can use `make build` to compile the code and `make check` to run linters and tests.
 
-Run `make install` to setup [gopostal](https://github.com/openvenues/gopostal) / [libpostal](https://github.com/openvenues/libpostal) for Watchman.
+Run `make install` to setup [gopostal](https://github.com/moov-io/gopostal) / [libpostal](https://github.com/openvenues/libpostal) for Watchman.
 
 ## Related projects
 

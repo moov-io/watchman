@@ -11,7 +11,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 
-	postal "github.com/openvenues/gopostal/parser"
+	postal "github.com/moov-io/gopostal/parser"
 )
 
 func ParseAddress(ctx context.Context, input string) search.Address {

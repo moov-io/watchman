@@ -3,17 +3,20 @@
 package address
 
 import (
+	"context"
 	"fmt"
 	"sync/atomic"
 	"testing"
 
+	postal "github.com/moov-io/gopostal/parser"
 	"github.com/moov-io/watchman/pkg/search"
 
-	postal "github.com/openvenues/gopostal/parser"
 	"github.com/stretchr/testify/require"
 )
 
 func TestParseAddress(t *testing.T) {
+	ctx := context.Background()
+
 	cases := []struct {
 		input    string
 		expected search.Address
@@ -33,7 +36,7 @@ func TestParseAddress(t *testing.T) {
 		name := fmt.Sprintf("%#v", tc.expected)
 
 		t.Run(name, func(t *testing.T) {
-			got := ParseAddress(tc.input)
+			got := ParseAddress(ctx, tc.input)
 			require.Equal(t, tc.expected, got)
 		})
 	}
@@ -73,6 +76,8 @@ func TestOrganizeLibpostalComponents(t *testing.T) {
 }
 
 func Benchmark_ParseAddress(b *testing.B) {
+	ctx := context.Background()
+
 	inputs := []string{
 		"Flat 7B, Tower 2, Ocean Financial Centre, 12 Marina Boulevard, Singapore 018982",
 		"Room 1403, West Wing, Trading Complex No. 5, 47 Al Souq Street, Dubai, United Arab Emirates",
@@ -95,26 +100,32 @@ func Benchmark_ParseAddress(b *testing.B) {
 		"Building 23, Floor 2, Sevastopol Maritime Complex, 45 Port Street, Sevastopol 99011",
 		"Office 445, Tripoli Trade Center, Omar Al-Mukhtar Street, Tripoli, Libya",
 	}
+	// Warm cache
+	ParseAddress(ctx, inputs[0])
 
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		var index atomic.Int32
 		for pb.Next() {
 			// Get next address in a thread-safe way
-			ParseAddress(inputs[int(index.Add(1))%len(inputs)])
+			ParseAddress(ctx, inputs[int(index.Add(1))%len(inputs)])
 		}
 	})
 }
 
 func Benchmark_ParseSingleAddress(b *testing.B) {
+	ctx := context.Background()
+
 	address := "Flat 7B, Tower 2, Ocean Financial Centre, 12 Marina Boulevard, Singapore 018982"
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		ParseAddress(address)
+		ParseAddress(ctx, address)
 	}
 }
 
 func Benchmark_ParseMultipleAddressesSequential(b *testing.B) {
+	ctx := context.Background()
+
 	inputs := []string{
 		"Flat 7B, Tower 2, Ocean Financial Centre, 12 Marina Boulevard, Singapore 018982",
 		"Room 1403, West Wing, Trading Complex No. 5, 47 Al Souq Street, Dubai, United Arab Emirates",
@@ -123,6 +134,6 @@ func Benchmark_ParseMultipleAddressesSequential(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		ParseAddress(inputs[i%len(inputs)])
+		ParseAddress(ctx, inputs[i%len(inputs)])
 	}
 }
