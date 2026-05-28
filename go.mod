@@ -1,8 +1,6 @@
 module github.com/moov-io/watchman
 
-go 1.25.0
-
-toolchain go1.26.3
+go 1.26.3
 
 require (
 	fyne.io/fyne/v2 v2.7.4
@@ -19,8 +17,8 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/modelcontextprotocol/go-sdk v1.6.1
 	github.com/moov-io/base v0.61.2
+	github.com/moov-io/gopostal v0.1.1
 	github.com/moov-io/iso3166 v0.4.0
-	github.com/openvenues/gopostal v0.0.0-20240426055609-4fe3a773f519
 	github.com/pariz/gountries v0.1.6
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v3 v3.9.0
