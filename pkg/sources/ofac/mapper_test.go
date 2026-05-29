@@ -68,6 +68,18 @@ func TestParseTime(t *testing.T) {
 	})
 }
 
+func TestGovernmentIDPatterensLowercase(t *testing.T) {
+	// To prevent future bugs where a developer might add a new pattern with an uppercase or non-ASCII marker
+	// (which would cause containsFold to silently fail to match), we validate that
+	// all markers in governmentIDPatterns are strictly lowercase ASCII (or empty).
+	for _, pattern := range governmentIDPatterns {
+		for i, c := range pattern.marker {
+			require.True(t, 'a' <= c && c <= 'z',
+				"governmentIDPattern marker %q contains non-lowercase ASCII character %q (0x%02x) at position %d", pattern.marker, c, c, i)
+		}
+	}
+}
+
 func TestParseGovernmentIDs(t *testing.T) {
 	tests := []struct {
 		name    string
