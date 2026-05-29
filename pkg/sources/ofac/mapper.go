@@ -356,29 +356,65 @@ var (
 	governmentIDRefugeeRegex = regexp.MustCompile(`(?i)Refugee\s+ID\s+(?:Card)?\s*([A-Z0-9]+)`)
 )
 
-var (
-	baseGovernmentIDs = map[*regexp.Regexp]search.GovernmentID{
-		governmentIDPassportRegex:             {Type: search.GovernmentIDPassport},
-		governmentIDDriversLicenseRegex:       {Type: search.GovernmentIDDriversLicense},
-		governmentIDDiplomaticPassRegex:       {Type: search.GovernmentIDDiplomaticPass},
-		governmentIDNationalRegex:             {Type: search.GovernmentIDNational},
-		governmentIDPersonalIDRegex:           {Type: search.GovernmentIDPersonalID},
-		governmentIDTaxRegex:                  {Type: search.GovernmentIDTax},
-		governmentIDCUITRegex:                 {Type: search.GovernmentIDCUIT},
-		governmentIDSSNRegex:                  {Type: search.GovernmentIDSSN},
-		governmentIDCedulaRegex:               {Type: search.GovernmentIDCedula},
-		governmentIDCURPRegex:                 {Type: search.GovernmentIDCURP},
-		governmentIDElectoralRegex:            {Type: search.GovernmentIDElectoral},
-		governmentIDBusinessRegistrationRegex: {Type: search.GovernmentIDBusinessRegisration},
-		governmentIDCompanyNumberRegex:        {Type: search.GovernmentIDBusinessRegisration},
-		governmentIDLegalEntityNumberRegex:    {Type: search.GovernmentIDBusinessRegisration},
-		governmentIDCommercialRegistryRegex:   {Type: search.GovernmentIDCommercialRegistry},
-		chinaISINRegex:                        {Type: search.GovernmentIDBusinessRegisration, Country: "China"},
-		chinaUSCCRegex:                        {Type: search.GovernmentIDBusinessRegisration},
-		governmentIDBirthCertRegex:            {Type: search.GovernmentIDBirthCert},
-		governmentIDRefugeeRegex:              {Type: search.GovernmentIDRefugee},
+// governmentIDPattern pairs an identifier regex with the lowercase keyword that
+// must appear in a remark for the regex to match. Every pattern below is anchored
+// on a fixed leading word, so a cheap substring check lets us skip the regexp
+// engine for remarks that cannot contain that identifier. The dotted abbreviation
+// patterns (CUIT, CURP) have no usable literal prefix and use an empty marker so
+// they are always evaluated.
+type governmentIDPattern struct {
+	marker string
+	regex  *regexp.Regexp
+	base   search.GovernmentID
+}
+
+var governmentIDPatterns = []governmentIDPattern{
+	{"passport", governmentIDPassportRegex, search.GovernmentID{Type: search.GovernmentIDPassport}},
+	{"driver", governmentIDDriversLicenseRegex, search.GovernmentID{Type: search.GovernmentIDDriversLicense}},
+	{"diplomatic", governmentIDDiplomaticPassRegex, search.GovernmentID{Type: search.GovernmentIDDiplomaticPass}},
+	{"national", governmentIDNationalRegex, search.GovernmentID{Type: search.GovernmentIDNational}},
+	{"personal", governmentIDPersonalIDRegex, search.GovernmentID{Type: search.GovernmentIDPersonalID}},
+	{"tax", governmentIDTaxRegex, search.GovernmentID{Type: search.GovernmentIDTax}},
+	{"", governmentIDCUITRegex, search.GovernmentID{Type: search.GovernmentIDCUIT}},
+	{"ssn", governmentIDSSNRegex, search.GovernmentID{Type: search.GovernmentIDSSN}},
+	{"cedula", governmentIDCedulaRegex, search.GovernmentID{Type: search.GovernmentIDCedula}},
+	{"", governmentIDCURPRegex, search.GovernmentID{Type: search.GovernmentIDCURP}},
+	{"electoral", governmentIDElectoralRegex, search.GovernmentID{Type: search.GovernmentIDElectoral}},
+	{"business", governmentIDBusinessRegistrationRegex, search.GovernmentID{Type: search.GovernmentIDBusinessRegisration}},
+	{"company", governmentIDCompanyNumberRegex, search.GovernmentID{Type: search.GovernmentIDBusinessRegisration}},
+	{"legal", governmentIDLegalEntityNumberRegex, search.GovernmentID{Type: search.GovernmentIDBusinessRegisration}},
+	{"commercial", governmentIDCommercialRegistryRegex, search.GovernmentID{Type: search.GovernmentIDCommercialRegistry}},
+	{"isin", chinaISINRegex, search.GovernmentID{Type: search.GovernmentIDBusinessRegisration, Country: "China"}},
+	{"social", chinaUSCCRegex, search.GovernmentID{Type: search.GovernmentIDBusinessRegisration}},
+	{"birth", governmentIDBirthCertRegex, search.GovernmentID{Type: search.GovernmentIDBirthCert}},
+	{"refugee", governmentIDRefugeeRegex, search.GovernmentID{Type: search.GovernmentIDRefugee}},
+}
+
+// containsFold reports whether marker, which must be lowercase ASCII, appears in s
+// using ASCII case-insensitive comparison. It avoids allocating a lowercased copy of
+// s on the hot path where we only need a quick presence test.
+func containsFold(s, marker string) bool {
+	if len(marker) == 0 {
+		return true
 	}
-)
+	for i := 0; i+len(marker) <= len(s); i++ {
+		match := true
+		for j := 0; j < len(marker); j++ {
+			c := s[i+j]
+			if 'A' <= c && c <= 'Z' {
+				c += 'a' - 'A'
+			}
+			if c != marker[j] {
+				match = false
+				break
+			}
+		}
+		if match {
+			return true
+		}
+	}
+	return false
+}
 
 func parseGovernmentIDs(remarks []string) []search.GovernmentID {
 	var ids []search.GovernmentID
@@ -387,27 +423,34 @@ func parseGovernmentIDs(remarks []string) []search.GovernmentID {
 		// Extract country first
 		country := extractCountry(r)
 
-		for re, base := range baseGovernmentIDs {
-			if matches := re.FindStringSubmatch(r); len(matches) > 1 {
-				identifier := strings.TrimSpace(strings.TrimRight(matches[1], ".;,"))
-
-				lastOfNameIdx := strings.Index(r, identifier)
-				var name string
-				if lastOfNameIdx > 0 {
-					name = r[:lastOfNameIdx]
-					name = strings.ReplaceAll(name, "alt.", "")
-					name = strings.ReplaceAll(name, "No.", "")
-					name = strings.ReplaceAll(name, "#", "")
-					name = strings.TrimSpace(name)
-				}
-
-				ids = append(ids, search.GovernmentID{
-					Name:       cmp.Or(name, base.Name),
-					Type:       cmp.Or(base.Type),
-					Country:    cmp.Or(country, base.Country), // Use the extracted and normalized country
-					Identifier: cmp.Or(identifier, base.Identifier),
-				})
+		for _, pattern := range governmentIDPatterns {
+			if !containsFold(r, pattern.marker) {
+				continue
 			}
+
+			matches := pattern.regex.FindStringSubmatch(r)
+			if len(matches) <= 1 {
+				continue
+			}
+
+			identifier := strings.TrimSpace(strings.TrimRight(matches[1], ".;,"))
+
+			lastOfNameIdx := strings.Index(r, identifier)
+			var name string
+			if lastOfNameIdx > 0 {
+				name = r[:lastOfNameIdx]
+				name = strings.ReplaceAll(name, "alt.", "")
+				name = strings.ReplaceAll(name, "No.", "")
+				name = strings.ReplaceAll(name, "#", "")
+				name = strings.TrimSpace(name)
+			}
+
+			ids = append(ids, search.GovernmentID{
+				Name:       cmp.Or(name, pattern.base.Name),
+				Type:       cmp.Or(pattern.base.Type),
+				Country:    cmp.Or(country, pattern.base.Country), // Use the extracted and normalized country
+				Identifier: cmp.Or(identifier, pattern.base.Identifier),
+			})
 		}
 	}
 
