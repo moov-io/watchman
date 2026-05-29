@@ -15,7 +15,10 @@ import (
 	"github.com/abadojack/whatlanggo"
 	"github.com/bbalet/stopwords"
 	"github.com/pariz/gountries"
+	"golang.org/x/text/unicode/norm"
 )
+
+//go:generate go run gen_union.go
 
 const (
 	minConfidence = 0.50
@@ -44,7 +47,52 @@ var (
 	numberRegex = regexp.MustCompile(`([\d\.\,\-]{1,}[\d]{1,})`)
 )
 
+// wordSegmenter mirrors the default token segmenter used by
+// github.com/bbalet/stopwords, so we can tell whether CleanString would reshape a
+// token rather than only drop a stopword.
+var wordSegmenter = regexp.MustCompile(`[\pL\p{Mc}\p{Mn}-_']+`)
+
+// trivialNormalization returns the normalized text and true when the detected
+// language cannot affect the result, allowing RemoveStopwords to skip the
+// (expensive) whatlanggo.Detect call.
+//
+// stopwords.CleanString(token, lang) leaves a whitespace-delimited token unchanged
+// under any language when either:
+//   - it matches numberRegex (removeStopwords never cleans numbers), or
+//   - it is not a stopword in any language (absent from stopwordUnion) and is
+//     already NFC and a single intact segment, so the supported-language branch's
+//     NFC and segmentation are no-ops and match the unsupported-language branch,
+//     which does no segmentation at all.
+//
+// When every token is trivial the output is just the lowercased tokens rejoined,
+// identical to the detect-then-clean path for any language.
+func trivialNormalization(input string) (string, bool) {
+	words := strings.Fields(strings.ToLower(input))
+	for _, w := range words {
+		if numberRegex.MatchString(w) {
+			continue
+		}
+		if _, isStopword := stopwordUnion[w]; isStopword {
+			return "", false
+		}
+		if norm.NFC.String(w) != w {
+			return "", false
+		}
+		if seg := wordSegmenter.FindAllString(w, -1); len(seg) != 1 || seg[0] != w {
+			return "", false
+		}
+	}
+	return strings.Join(words, " "), true
+}
+
 func RemoveStopwords(input string) string {
+	if keepStopwords {
+		return input
+	}
+	if out, ok := trivialNormalization(input); ok {
+		return out
+	}
+
 	info := whatlanggo.Detect(input)
 
 	return removeStopwords(input, info.Lang)
