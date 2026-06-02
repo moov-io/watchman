@@ -134,6 +134,7 @@ type SearchResponse struct {
 
 func (s *SearchResponse) UnmarshalJSON(data []byte) error {
 	var aux struct {
+		Query    Entity[Value]           `json:"query"`
 		Entities []SearchedEntity[Value] `json:"entities"`
 		Error    string                  `json:"error"`
 	}
@@ -145,6 +146,7 @@ func (s *SearchResponse) UnmarshalJSON(data []byte) error {
 		return errors.New(aux.Error)
 	}
 
+	s.Query = aux.Query
 	s.Entities = aux.Entities
 
 	return nil
