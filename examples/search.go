@@ -20,11 +20,12 @@ func main() {
 	fmt.Printf("loaded %d list(s): %v\n\n", len(info.Lists), info.Lists)
 
 	// Search using the unified entity query model (mirrors /v2/search)
+	birthDate := time.Date(1962, time.November, 23, 0, 0, 0, 0, time.UTC)
 	query := search.Entity[search.Value]{
 		Name: "Nicolas Maduro",
 		Type: search.EntityPerson,
 		Person: &search.Person{
-			BirthDate: new(time.Date(1962, time.November, 23, 0, 0, 0, 0, time.UTC)),
+			BirthDate: &birthDate,
 			Gender:    search.GenderMale,
 		},
 		// Addresses, Contact, CryptoAddresses, Source, SourceID also supported
