@@ -12,12 +12,14 @@ import (
 
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/pkg/download"
+	"github.com/moov-io/watchman/pkg/search"
 )
 
-func loadOpensanctionsRecords(ctx context.Context, logger log.Logger, config Config, responseCh chan preparedList) error {
+func loadOpensanctionsRecords(ctx context.Context, logger log.Logger, config Config, ignoredLists []search.SourceList, responseCh chan preparedList) error {
 	params := senzingDownload{
-		lists:  config.OpenSanctions.Lists,
-		config: config,
+		lists:        config.OpenSanctions.Lists,
+		config:       config,
+		ignoredLists: ignoredLists,
 	}
 
 	if len(params.lists) == 0 {

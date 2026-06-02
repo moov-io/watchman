@@ -44,6 +44,18 @@ type downloader struct {
 	geocoder GeocodingService
 }
 
+// knownDownloadableLists is the set of standard built-in lists that watchman
+// can download.  It is used when validating IgnoredDownloadErrors entries.
+var knownDownloadableLists = []search.SourceList{
+	search.SourceEUCSL,
+	search.SourceUKCSL,
+	search.SourceUSCSL,
+	search.SourceUSOFAC,
+	search.SourceUSNonSDN,
+	search.SourceUSFinCEN311,
+	search.SourceUNCSL,
+}
+
 func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 	ctx, span := telemetry.StartSpan(ctx, "refresh-all")
 	defer span.End()
@@ -55,6 +67,14 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 		ListHashes: make(map[string]string),
 		StartedAt:  time.Now().In(time.UTC),
 	}
+
+	// Validate IgnoredDownloadErrors before spawning any goroutines so we can
+	// return a clean error without having to tear down the errgroup machinery.
+	ignoredLists := getIgnoredDownloadErrors(dl.conf)
+	if err := validateIgnoredDownloadErrors(dl.conf, ignoredLists); err != nil {
+		return stats, err
+	}
+
 	logger := dl.logger.Info().With(log.Fields{
 		"initial_data_directory": log.String(expandInitialDir(initialDataDirectory(dl.conf))),
 	})
@@ -118,6 +138,10 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 
 			err := loadOFACRecords(ctx, logger, dl.conf, preparedLists)
 			if err != nil {
+				if slices.Contains(ignoredLists, search.SourceUSOFAC) {
+					logger.Warn().Logf("ignoring error loading %s: %v", search.SourceUSOFAC, err)
+					return nil
+				}
 				return fmt.Errorf("loading OFAC records: %w", err)
 			}
 			return nil
@@ -134,6 +158,10 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 
 			err := loadUSNonSDNRecords(ctx, logger, dl.conf, preparedLists)
 			if err != nil {
+				if slices.Contains(ignoredLists, search.SourceUSNonSDN) {
+					logger.Warn().Logf("ignoring error loading %s: %v", search.SourceUSNonSDN, err)
+					return nil
+				}
 				return fmt.Errorf("loading OFAC Non-SDN records: %w", err)
 			}
 			return nil
@@ -150,6 +178,10 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 
 			err := loadCSLUSRecords(ctx, logger, dl.conf, preparedLists)
 			if err != nil {
+				if slices.Contains(ignoredLists, search.SourceUSCSL) {
+					logger.Warn().Logf("ignoring error loading %s: %v", search.SourceUSCSL, err)
+					return nil
+				}
 				return fmt.Errorf("loading US CSL records: %w", err)
 			}
 			return nil
@@ -166,6 +198,10 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 
 			err := loadFinCEN311Records(ctx, logger, dl.conf, preparedLists)
 			if err != nil {
+				if slices.Contains(ignoredLists, search.SourceUSFinCEN311) {
+					logger.Warn().Logf("ignoring error loading %s: %v", search.SourceUSFinCEN311, err)
+					return nil
+				}
 				return fmt.Errorf("loading FinCEN 311 records: %w", err)
 			}
 			return nil
@@ -182,6 +218,10 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 
 			err := loadUKCSLRecords(ctx, logger, dl.conf, preparedLists)
 			if err != nil {
+				if slices.Contains(ignoredLists, search.SourceUKCSL) {
+					logger.Warn().Logf("ignoring error loading %s: %v", search.SourceUKCSL, err)
+					return nil
+				}
 				return fmt.Errorf("loading UK CSL records: %w", err)
 			}
 			return nil
@@ -198,6 +238,10 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 
 			err := loadEUCSLRecords(ctx, logger, dl.conf, preparedLists)
 			if err != nil {
+				if slices.Contains(ignoredLists, search.SourceEUCSL) {
+					logger.Warn().Logf("ignoring error loading %s: %v", search.SourceEUCSL, err)
+					return nil
+				}
 				return fmt.Errorf("loading EU CSL records: %w", err)
 			}
 			return nil
@@ -206,13 +250,13 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 
 	// OpenSanctions lists
 	for _, list := range dl.conf.OpenSanctions.Lists {
-		listsLoaded = append(listsLoaded, list.SourceList)
+		listsLoaded = append(listsLoaded, normalizeListName(list.SourceList))
 	}
 	producerWg.Add(1)
 	g.Go(func() error {
 		defer producerWg.Done()
 
-		err := loadOpensanctionsRecords(ctx, logger, dl.conf, preparedLists)
+		err := loadOpensanctionsRecords(ctx, logger, dl.conf, ignoredLists, preparedLists)
 		if err != nil {
 			return fmt.Errorf("loading opensanctions lists: %w", err)
 		}
@@ -221,13 +265,13 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 
 	// Senzing lists
 	for _, list := range dl.conf.Senzing {
-		listsLoaded = append(listsLoaded, list.SourceList)
+		listsLoaded = append(listsLoaded, normalizeListName(list.SourceList))
 	}
 	producerWg.Add(1)
 	g.Go(func() error {
 		defer producerWg.Done()
 
-		err := loadSenzingRecords(ctx, logger, dl.conf, preparedLists)
+		err := loadSenzingRecords(ctx, logger, dl.conf, ignoredLists, preparedLists)
 		if err != nil {
 			return fmt.Errorf("loading senzing lists: %w", err)
 		}
@@ -244,6 +288,10 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 
 			err := loadUNCSLRecords(ctx, logger, dl.conf, preparedLists)
 			if err != nil {
+				if slices.Contains(ignoredLists, search.SourceUNCSL) {
+					logger.Warn().Logf("ignoring error loading %s: %v", search.SourceUNCSL, err)
+					return nil
+				}
 				return fmt.Errorf("loading UN CSL records: %w", err)
 			}
 			return nil
@@ -330,29 +378,101 @@ func buildTFIDFIndex(logger log.Logger, entities []search.Entity[search.Value]) 
 
 func getIncludedLists(conf Config) []search.SourceList {
 	out := make([]search.SourceList, 0, len(conf.IncludedLists))
-	out = append(out, conf.IncludedLists...)
+	for _, v := range conf.IncludedLists {
+		if list := normalizeListName(v); list != "" {
+			out = append(out, list)
+		}
+	}
 
 	fromEnvStr := strings.TrimSpace(os.Getenv("INCLUDED_LISTS"))
 	if fromEnvStr != "" {
 		for _, v := range strings.Split(fromEnvStr, ",") {
-			list := strings.ToLower(strings.TrimSpace(v))
-			if list != "" {
-				out = append(out, search.SourceList(list))
+			if list := normalizeListName(search.SourceList(v)); list != "" {
+				out = append(out, list)
 			}
 		}
 	}
 
-	// Now add senzing lists
+	// Now add senzing lists (normalized so that custom names and IncludedLists
+	// entries are treated case-insensitively and whitespace is ignored, matching
+	// the behavior of IgnoredDownloadErrors and INCLUDED_LISTS env var).
 	for _, list := range conf.OpenSanctions.Lists {
-		out = append(out, list.SourceList)
+		if list := normalizeListName(list.SourceList); list != "" {
+			out = append(out, list)
+		}
 	}
 	for _, list := range conf.Senzing {
-		out = append(out, list.SourceList)
+		if list := normalizeListName(list.SourceList); list != "" {
+			out = append(out, list)
+		}
 	}
 
 	// Sort and remove duplicates
 	slices.Sort(out)
 	return slices.Compact(out)
+}
+
+// normalizeListName lowercases and trims a SourceList value. User-supplied list
+// names (from YAML or env) may have accidental case or whitespace; we normalize
+// so that matching against the lowercase constants and deduping work reliably.
+func normalizeListName(s search.SourceList) search.SourceList {
+	trimmed := strings.TrimSpace(string(s))
+	if trimmed == "" {
+		return ""
+	}
+	return search.SourceList(strings.ToLower(trimmed))
+}
+
+// getIgnoredDownloadErrors returns the deduplicated, sorted set of source-list
+// names for which download/parse errors should be suppressed.  It merges the
+// YAML-configured IgnoredDownloadErrors field with the IGNORED_DOWNLOAD_ERRORS
+// environment variable (comma-separated, same format as IncludedLists).
+func getIgnoredDownloadErrors(conf Config) []search.SourceList {
+	out := make([]search.SourceList, 0, len(conf.IgnoredDownloadErrors))
+	for _, v := range conf.IgnoredDownloadErrors {
+		if list := normalizeListName(v); list != "" {
+			out = append(out, list)
+		}
+	}
+
+	if fromEnvStr := strings.TrimSpace(os.Getenv("IGNORED_DOWNLOAD_ERRORS")); fromEnvStr != "" {
+		for _, v := range strings.Split(fromEnvStr, ",") {
+			if list := normalizeListName(search.SourceList(v)); list != "" {
+				out = append(out, list)
+			}
+		}
+	}
+
+	slices.Sort(out)
+	return slices.Compact(out)
+}
+
+// validateIgnoredDownloadErrors returns an error if any entry in ignoredLists is
+// not a known standard downloadable list and is not a configured
+// OpenSanctions or Senzing source list.
+func validateIgnoredDownloadErrors(conf Config, ignoredLists []search.SourceList) error {
+	if len(ignoredLists) == 0 {
+		return nil
+	}
+
+	// Build the full set of valid names from standard + custom lists.
+	allValid := make([]search.SourceList, len(knownDownloadableLists))
+	copy(allValid, knownDownloadableLists)
+	for _, l := range conf.OpenSanctions.Lists {
+		allValid = append(allValid, normalizeListName(l.SourceList))
+	}
+	for _, l := range conf.Senzing {
+		allValid = append(allValid, normalizeListName(l.SourceList))
+	}
+
+	for _, ignored := range ignoredLists {
+		// Normalize the ignored entry for the lookup so that validation itself is
+		// robust to casing/whitespace in the (already mostly-normalized) input.
+		if !slices.Contains(allValid, normalizeListName(ignored)) {
+			return fmt.Errorf("unknown list %q in IgnoredDownloadErrors: not a known downloadable SourceList or configured OpenSanctions/Senzing list", ignored)
+		}
+	}
+	return nil
 }
 
 func findExtraLists(config, loaded []search.SourceList) string {

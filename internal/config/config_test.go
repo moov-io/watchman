@@ -22,4 +22,5 @@ func TestLoadConfig(t *testing.T) {
 
 	require.Equal(t, ":8084", conf.Servers.BindAddress)
 	require.Equal(t, 12*time.Hour, conf.Download.RefreshInterval)
+	require.Empty(t, conf.Download.IgnoredDownloadErrors, "default config should have empty IgnoredDownloadErrors")
 }

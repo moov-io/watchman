@@ -53,6 +53,8 @@ Watchman integrates the following lists to help you maintain global compliance. 
 | United Kingdom    | [OFSI Sanctions List](https://www.gov.uk/government/publications/financial-sanctions-consolidated-list-of-targets/consolidated-list-of-targets#contents)                                |
 | United Nations    | [Consolidated Sanctions List](https://www.un.org/sc/resources/sc-sanctions)                                                                                                             |
 
+When loading multiple OpenSanctions or custom Senzing-formatted lists, set the `SENZING_CONCURRENT_DOWNLOADS` environment variable to control parallelism during downloads (defaults to 5 concurrent).
+
 ## Agents
 
 Watchman provides an HTTP `/mcp` endpoint with full Model Context Protocol (MCP) support, allowing agents to search the loaded lists.
