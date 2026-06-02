@@ -177,3 +177,27 @@ You can then perform searches against the ingested file.
 ```
 GET /v2/search?type=fincen-person&name=John+Doe&type=person
 ```
+
+### Exporting Ingested Data
+
+`GET /v2/export/{fileType}` returns the entities previously ingested for a given fileType.
+
+- Supports the same `Accept` header and `?format=` query param as search for Senzing output:
+  - `?format=senzing` or `Accept: senzing` → JSON array
+  - `?format=senzing/jsonl` or `Accept: senzing/jsonl` → JSON Lines (NDJSON)
+
+Example:
+
+```
+curl -s "http://localhost:8084/v2/export/fincen-person" | jq .
+```
+
+Or for Senzing format:
+
+```
+curl -s -H "Accept: senzing/jsonl" "http://localhost:8084/v2/export/fincen-person"
+```
+
+The Go client exposes this as `client.ExportFile(ctx, "fincen-person")`.
+
+This is the read counterpart to `POST /v2/ingest/{fileType}` for backup, migration, or feeding downstream entity resolution systems.

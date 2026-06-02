@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Data preparation Pipeline
+title: Indexing and TF-IDF
 hide_hero: true
 show_sidebar: false
 menubar: docs-menu

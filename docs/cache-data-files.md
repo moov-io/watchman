@@ -47,7 +47,17 @@ Download the [UK Sanctions List](https://www.gov.uk/government/publications/the-
 
 Download from [UN Sanctions](https://www.un.org/sc/resources/sc-sanctions)
 
+**FinCEN 311 Special Measures**
+
+- `fincen_311.html` - FinCEN 311/9714 Special Measures page (parsed for actions)
+
+Point `FINCEN_311_DOWNLOAD_URL` or place the HTML snapshot in your `INITIAL_DATA_DIRECTORY`.
+
 ---
+
+**Senzing / OpenSanctions formatted lists**
+
+For any `opensanctions_*` or custom `Download.Senzing` entries, the `Location` (URL or `file://...`) is used. When using `INITIAL_DATA_DIRECTORY`, relative file references or exact filenames referenced in the location can be resolved from that directory for startup without network access. Periodic refreshes will still attempt live fetches unless the location is a stable local file path.
 
 **Live downloads with improved reliability**
 

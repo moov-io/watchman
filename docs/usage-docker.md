@@ -19,6 +19,8 @@ Start the Docker image [using a tag](https://hub.docker.com/r/moov/watchman/tags
 docker run -p 8084:8084 moov/watchman
 ```
 
+A web-based UI (WASM) is served at the root (`/`) for interactive searching and list inspection. Open http://localhost:8084 in a browser.
+
 Get information about a company using their entity ID:
 
 ```

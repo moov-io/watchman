@@ -97,10 +97,15 @@ Each entity type supports specific search parameters:
 
 ### Search Response
 
-The API returns a unified structure with match scores and entity details:
+The API returns the original query plus a list of matched entities with match scores (0.0-1.0):
 
 ```json
 {
+  "query": {
+    "name": "nicolas maduro",
+    "entityType": "person",
+    ...
+  },
   "entities": [
     {
       "entity": {
@@ -205,7 +210,7 @@ Optimize your Watchman searches for maximum accuracy and efficiency:
 
 1. **Leverage Specific Identifiers**
    - Prioritize ID-based searches for the highest confidence matches
-   - Examples: Government IDs, IMO numbers, passport numbers enhance precision
+   - Use `sourceID=...` for exact record lookup or `gov_<type>=COUNTRY:ID` (e.g. `gov_passport=US:1234`, `gov_ssn=...`) for government-issued IDs. See parameters above.
 
 2. **Combine Multiple Parameters**
    - Enhance match quality by including names with addresses or other details
@@ -218,6 +223,22 @@ Optimize your Watchman searches for maximum accuracy and efficiency:
 4. **Incorporate Contextual Data**
    - Include dates, addresses, and additional identifiers when available
    - This approach significantly reduces false positives and boosts match confidence
+
+## List Information
+
+`GET /v2/listinfo` returns metadata about the currently loaded lists:
+
+```json
+{
+  "lists": { "us_ofac": 12345, "us_csl": 442, ... },
+  "listHashes": { "us_ofac": "0629...9aab", ... },
+  "startedAt": "2025-...",
+  "endedAt": "2025-...",
+  "version": "v0.52.x"
+}
+```
+
+This is useful for monitoring data freshness and which lists are active. The Go client exposes this via `ListInfo(ctx)`.
 
 ## API Documentation
 

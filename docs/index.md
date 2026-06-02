@@ -54,7 +54,7 @@ Watchman helps you manage these compliance obligations efficiently through a sin
 
 To begin using Watchman, see our:
 
-- [Docker Usage](/watchman/usage-docker/)
+- [Docker Usage](/watchman/usage-docker/) (includes a built-in web UI at `/`)
 - [API Documentation](/watchman/api/)
 - [Configuration Options](/watchman/config/)
 

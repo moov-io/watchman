@@ -84,6 +84,10 @@ Watchman:
     # A failed list named here will log a warning but will not cause a refresh error.
     IgnoredDownloadErrors: []
 
+    # When true, an empty list after download/parse will cause a hard error (useful for
+    # detecting data problems early). Default: false (empty lists are tolerated).
+    ErrorOnEmptyList: false
+
     # Include any senzing formatted OpenSanctions lists
     # OpenSanctions:
     #   ApiKey: "secret"
@@ -173,7 +177,7 @@ Enable the Model Context Protocol server endpoints at `/mcp` for AI agent integr
     Enabled: true
 ```
 
-When enabled, Watchman will run as an MCP server over stdio instead of the HTTP server.
+When enabled, Watchman will serve MCP endpoints at `/mcp` (streamable HTTP) in addition to the standard HTTP API. (The MCP server is HTTP-based; no stdio mode is used.)
 
 ### Included Lists
 
@@ -199,6 +203,7 @@ Watchman integrates the following lists to help you maintain global compliance.
 | `SENZING_CONCURRENT_DOWNLOADS` | Maximum concurrent downloads for Senzing-formatted lists (OpenSanctions, custom). 0 or less = unlimited.                             | `5`                                         |
 | `DATA_REFRESH_INTERVAL`        | Interval for data redownload and reparse. `off` disables this refreshing.                                                            | 12h                                         |
 | `INITIAL_DATA_DIRECTORY`       | Directory filepath with initial files to use instead of downloading. Periodic downloads will replace the initial files.              | Empty                                       |
+| `ERROR_ON_EMPTY_LIST`          | If true, an empty list after download/parse causes a startup/refresh error (detects data problems).                                  | false                                       |
 | `HTTPS_CERT_FILE`              | Filepath containing a certificate (or intermediate chain) to be served by the HTTP server. Requires all traffic be over secure HTTP. | Empty                                       |
 | `HTTPS_KEY_FILE`               | Filepath of a private key matching the leaf certificate from `HTTPS_CERT_FILE`.                                                      | Empty                                       |
 | `LOG_FORMAT`                   | Format for logging lines to be written as.                                                                                           | Options: `json`, `plain` - Default: `plain` |
@@ -247,8 +252,18 @@ YAML configuration (example with OpenAI):
         APIKey: "${OPENAI_API_KEY}"
         Model: "text-embedding-3-small" # Required - no default
         Dimension: 1536                 # Required - must work with model
+        NormalizeVectors: false         # OpenAI vectors are already normalized
+        Timeout: "30s"
+        RateLimit:
+          RequestsPerSecond: 50
+          Burst: 25
+        Retry:
+          MaxRetries: 3
+          InitialBackoff: "1s"
+          MaxBackoff: "30s"
+        # Headers: { "HTTP-Referer": "https://example.com" }  # e.g. for OpenRouter
       Cache:
-        Type: "memory" # or sql, which disregards size
+        Type: "memory" # or sql (persistent via DB, ignores Size)
         Size: 10000
       CrossScriptOnly: true
       SimilarityThreshold: 0.7
@@ -290,6 +305,8 @@ YAML configuration (example with OpenAI):
 | `OFAC_DOWNLOAD_TEMPLATE` | HTTP address for downloading raw OFAC files.                        | `https://sanctionslistservice.ofac.treas.gov/api/PublicationPreview/exports/%s` |
 | `US_CSL_DOWNLOAD_URL`    | Use an alternate URL for downloading US Consolidated Screening List | Subresource of `api.trade.gov`                                                  |
 | `CSL_DOWNLOAD_TEMPLATE`  | Same as `US_CSL_DOWNLOAD_URL`                                       |                                                                                 |
+| `US_NON_SDN_DOWNLOAD_TEMPLATE` | Use an alternate URL for downloading US OFAC Non-SDN list     | Subresource of OFAC publication endpoint                                        |
+| `FINCEN_311_DOWNLOAD_URL` | Use an alternate URL for the FinCEN 311 Special Measures page    | Public FinCEN 311 page                                                          |
 
 ##### European Union
 
@@ -304,7 +321,12 @@ YAML configuration (example with OpenAI):
 |--------------------------|---------------------------------------------------------------------|-----------------------------|
 | `UK_CSL_DOWNLOAD_URL`    | Use an alternate URL for downloading UK Consolidated Screening List | Subresource of `www.gov.uk` |
 | `UK_SANCTIONS_LIST_URL`  | Use an alternate URL for downloading UK Sanctions List              | Subresource of `www.gov.uk` |
-| `WITH_UK_SANCTIONS_LIST` | Download and parse the UK Sanctions List on startup.                | Default: `false`            |
+
+##### United Nations
+
+| Environmental Variable       | Description                                                      | Default |
+|------------------------------|------------------------------------------------------------------|---------|
+| `UN_CONSOLIDATED_LIST_URL`   | Use an alternate URL for downloading UN Consolidated Sanctions List | Public UN XML resource |
 
 ##### Open Sanctions
 
