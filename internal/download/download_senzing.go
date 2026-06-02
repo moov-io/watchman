@@ -7,12 +7,15 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"os"
 	"slices"
 
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/pkg/download"
 	"github.com/moov-io/watchman/pkg/search"
 	"github.com/moov-io/watchman/pkg/sources/senzing"
+
+	"golang.org/x/sync/errgroup"
 )
 
 func loadSenzingRecords(ctx context.Context, logger log.Logger, config Config, ignoredLists []search.SourceList, responseCh chan preparedList) error {
@@ -40,13 +43,17 @@ func prepareSenzingRecords(ctx context.Context, logger log.Logger, params senzin
 	// per-source.  This avoids a mixed ignored/non-ignored batch where an
 	// ignored list's download failure would prevent non-ignored lists from
 	// loading.
+	g, ctx := errgroup.WithContext(ctx)
+	g.SetLimit(readInt(os.Getenv("SENZING_CONCURRENT_DOWNLOADS"), 5))
+
 	for _, loc := range params.lists {
-		if err := processSenzingList(ctx, logger, dl, initialDir, params, loc, responseCh); err != nil {
-			return err
-		}
+		loc := loc
+		g.Go(func() error {
+			return processSenzingList(ctx, logger, dl, initialDir, params, loc, responseCh)
+		})
 	}
 
-	return nil
+	return g.Wait()
 }
 
 // processSenzingList downloads and parses one Senzing-format list (used for

@@ -95,6 +95,7 @@ Watchman:
     # Senzing:
     #   - SourceList: "senzing-persons"
     #     Location: "file://pkg/sources/senzing/testdata/persons.jsonl"
+    # Use SENZING_CONCURRENT_DOWNLOADS env var (default 5) to limit parallel downloads of Senzing lists.
 ```
 
 ### Search
@@ -191,15 +192,16 @@ Watchman integrates the following lists to help you maintain global compliance.
 
 ### Environment Variables
 
-| Environmental Variable   | Description                                                                                                                          | Default                                     |
-|--------------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------|
-| `INCLUDED_LISTS`         | Comma separated list of lists to include.                                                                                            | Empty                                       |
-| `IGNORED_DOWNLOAD_ERRORS`| Comma separated list of source-list names for which download/parse errors are suppressed.                                            | Empty                                       |
-| `DATA_REFRESH_INTERVAL`  | Interval for data redownload and reparse. `off` disables this refreshing.                                                            | 12h                                         |
-| `INITIAL_DATA_DIRECTORY` | Directory filepath with initial files to use instead of downloading. Periodic downloads will replace the initial files.              | Empty                                       |
-| `HTTPS_CERT_FILE`        | Filepath containing a certificate (or intermediate chain) to be served by the HTTP server. Requires all traffic be over secure HTTP. | Empty                                       |
-| `HTTPS_KEY_FILE`         | Filepath of a private key matching the leaf certificate from `HTTPS_CERT_FILE`.                                                      | Empty                                       |
-| `LOG_FORMAT`             | Format for logging lines to be written as.                                                                                           | Options: `json`, `plain` - Default: `plain` |
+| Environmental Variable         | Description                                                                                                                          | Default                                     |
+|--------------------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------|
+| `INCLUDED_LISTS`               | Comma separated list of lists to include.                                                                                            | Empty                                       |
+| `IGNORED_DOWNLOAD_ERRORS`      | Comma separated list of source-list names for which download/parse errors are suppressed.                                            | Empty                                       |
+| `SENZING_CONCURRENT_DOWNLOADS` | Maximum concurrent downloads for Senzing-formatted lists (OpenSanctions, custom). 0 or less = unlimited.                             | `5`                                         |
+| `DATA_REFRESH_INTERVAL`        | Interval for data redownload and reparse. `off` disables this refreshing.                                                            | 12h                                         |
+| `INITIAL_DATA_DIRECTORY`       | Directory filepath with initial files to use instead of downloading. Periodic downloads will replace the initial files.              | Empty                                       |
+| `HTTPS_CERT_FILE`              | Filepath containing a certificate (or intermediate chain) to be served by the HTTP server. Requires all traffic be over secure HTTP. | Empty                                       |
+| `HTTPS_KEY_FILE`               | Filepath of a private key matching the leaf certificate from `HTTPS_CERT_FILE`.                                                      | Empty                                       |
+| `LOG_FORMAT`                   | Format for logging lines to be written as.                                                                                           | Options: `json`, `plain` - Default: `plain` |
 
 ### TF-IDF Configuration
 
@@ -309,6 +311,12 @@ YAML configuration (example with OpenAI):
 | Environmental Variable  | Description                                                                                           | Default |
 |-------------------------|-------------------------------------------------------------------------------------------------------|---------|
 | `OPENSANCTIONS_API_KEY` | API key for OpenSanctions authenticated access. Suggested when an `opensanctions_*` list is included. | Empty   |
+
+##### Senzing
+
+| Environmental Variable         | Description                                                                                                                                        | Default |
+|--------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|---------|
+| `SENZING_CONCURRENT_DOWNLOADS` | Maximum concurrent Senzing list downloads. Used when loading multiple `opensanctions_*` lists or custom entries under `Download.Senzing`. A value of 0 or less means unlimited concurrency. | `5`     |
 
 #### Download reliability
 

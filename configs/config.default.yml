@@ -45,6 +45,7 @@ Watchman:
     # Senzing:
     #   - SourceList: "senzing-persons"
     #     Location: "file://pkg/sources/senzing/testdata/persons.jsonl"
+    # Use SENZING_CONCURRENT_DOWNLOADS env var (default 5) to limit parallel downloads of Senzing lists.
 
   Search:
     # Tune these settings based on your available resources (CPUs, etc).
