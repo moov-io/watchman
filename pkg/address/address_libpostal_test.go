@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestParseAddress(t *testing.T) {
+func TestParseAddress_libpostal(t *testing.T) {
 	ctx := context.Background()
 
 	cases := []struct {

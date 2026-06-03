@@ -29,6 +29,7 @@ import (
 	"github.com/moov-io/watchman/internal/postalpool"
 	"github.com/moov-io/watchman/internal/search"
 	"github.com/moov-io/watchman/internal/webui"
+	"github.com/moov-io/watchman/pkg/address"
 
 	"github.com/gorilla/mux"
 	"go.uber.org/automaxprocs/maxprocs"
@@ -68,6 +69,11 @@ func main() {
 
 	// Listen for errors
 	errs := make(chan error, 1)
+
+	// Init libpostal (if configured)
+	start := time.Now()
+	got := address.ParseAddress(ctx, "123 First St Anytown CA 90210")
+	logger.Debug().Logf("parsing init address (%s) took %v", got.Format(), time.Since(start))
 
 	// Setup database
 	database, shutdown, err := db.New(conf.Database, logger)
