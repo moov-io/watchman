@@ -131,11 +131,9 @@ jobs:
       run: make postal-server
 
     - name: Libpostal Tests
-      env:
-        GOTAGS: "-tags libpostal"
       run: |
-        go test ./pkg/address/... -count 1 -v
-        go test ./internal/postalpool/... -count 1 -v
+        go test -tags=libpostal ./pkg/address/... -count 1 -v
+        go test -tags=libpostal ./internal/postalpool/... -count 1 -v
 
   docker-hub:
     name: Docker Hub (${{ matrix.platform }})
