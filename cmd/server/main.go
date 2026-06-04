@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"time"
 
@@ -70,10 +71,27 @@ func main() {
 	// Listen for errors
 	errs := make(chan error, 1)
 
-	// Init libpostal (if configured)
-	start := time.Now()
-	got := address.ParseAddress(ctx, "123 First St Anytown CA 90210")
-	logger.Debug().Logf("parsing init address (%s) took %v", got.Format(), time.Since(start))
+	// Warm up libpostal (if configured). On a multi-CPU host this runs
+	// concurrently with the initial data load below. Both are heavy,
+	// independent startup steps, so overlapping them shortens startup. With a
+	// single CPU there is nothing to overlap, so run it inline. When started
+	// concurrently the warm-up is joined before the HTTP server serves (below).
+	warmUpLibpostal := func() {
+		start := time.Now()
+		got := address.ParseAddress(ctx, "123 First St Anytown CA 90210")
+		logger.Debug().Logf("parsing init address (%s) took %v", got.Format(), time.Since(start))
+	}
+
+	var libpostalWarm chan struct{}
+	if runtime.GOMAXPROCS(0) > 1 {
+		libpostalWarm = make(chan struct{})
+		go func() {
+			defer close(libpostalWarm)
+			warmUpLibpostal()
+		}()
+	} else {
+		warmUpLibpostal()
+	}
 
 	// Setup database
 	database, shutdown, err := db.New(conf.Database, logger)
@@ -111,6 +129,13 @@ func main() {
 	if err != nil {
 		logger.Fatal().LogErrorf("problem during initial download: %v", err)
 		os.Exit(1)
+	}
+
+	// If the warm-up was started concurrently, block until it finishes so the
+	// first search request does not pay the model load. This has overlapped
+	// with the data load above.
+	if libpostalWarm != nil {
+		<-libpostalWarm
 	}
 
 	router := mux.NewRouter()
