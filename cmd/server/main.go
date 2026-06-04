@@ -12,7 +12,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"runtime"
 	"syscall"
 	"time"
 
@@ -82,16 +81,11 @@ func main() {
 		logger.Debug().Logf("parsing init address (%s) took %v", got.Format(), time.Since(start))
 	}
 
-	var libpostalWarm chan struct{}
-	if runtime.GOMAXPROCS(0) > 1 {
-		libpostalWarm = make(chan struct{})
-		go func() {
-			defer close(libpostalWarm)
-			warmUpLibpostal()
-		}()
-	} else {
+	libpostalWarm := make(chan struct{})
+	go func() {
+		defer close(libpostalWarm)
 		warmUpLibpostal()
-	}
+	}()
 
 	// Setup database
 	database, shutdown, err := db.New(conf.Database, logger)
