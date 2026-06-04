@@ -20,7 +20,7 @@ and applies transformations—such as reordering names (e.g., "MADURO MOROS, Nic
 Watchman can use the [libpostal](https://github.com/openvenues/libpostal) library (with [Senzing's updated classifier, data, and parser](https://github.com/Senzing/libpostal-data)) to parse and normalize postal addresses,
 improving match accuracy at the cost of higher memory usage. This upfront work ensures that searches are faster by reducing the need for on-the-fly processing, though it does introduce some memory overhead due to `libpostal`’s requirements.
 
-> The libpostal library can use ~2GB of memory to load into memory. Run Watchman with enough memory to support your load ontop of libpostal's requirements. [Configure the Postal Pool](/watchman/config/#postalpool) to your needs.
+> The libpostal library can use ~3GB of memory to load into memory. Run Watchman with enough memory to support your load ontop of libpostal's requirements. [Configure the Postal Pool](/watchman/config/#postalpool) to your needs.
 
 Watchman operates entirely with **in-memory lists**, storing all sanction data in memory without disk persistence. This eliminates I/O bottlenecks, enabling rapid search operations.
 The trade-off is that data is reloaded on restart, but this ensures freshness and avoids stale data slowing down queries. Combined with a high-performance search implementation using the
