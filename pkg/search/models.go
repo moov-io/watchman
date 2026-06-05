@@ -289,9 +289,15 @@ type PreparedAddress struct {
 }
 
 func (e Entity[T]) Normalize() Entity[T] {
+	// Personal names are proper nouns whose "stopword-like" tokens ("al", "bin",
+	// "de", "van") are meaningful particles, so for people we skip stopword
+	// removal. That also avoids the whatlanggo language detection that stopword
+	// removal performs, which dominates index preparation cost. See nameFields.
+	isPerson := e.Person != nil
+
 	// Name
 	e.PreparedFields.Name = prepare.LowerAndRemovePunctuation(e.Name)
-	e.PreparedFields.NameFields = removeStopwords(e.PreparedFields.Name)
+	e.PreparedFields.NameFields = nameFields(e.PreparedFields.Name, isPerson)
 
 	// Entity Type
 	if e.Person != nil {
@@ -314,7 +320,7 @@ func (e Entity[T]) Normalize() Entity[T] {
 	if len(e.PreparedFields.AltNames) > 0 {
 		e.PreparedFields.AltNameFields = make([][]string, len(e.PreparedFields.AltNames))
 		for idx := range e.PreparedFields.AltNames {
-			e.PreparedFields.AltNameFields[idx] = removeStopwords(e.PreparedFields.AltNames[idx])
+			e.PreparedFields.AltNameFields[idx] = nameFields(e.PreparedFields.AltNames[idx], isPerson)
 		}
 	}
 
@@ -328,9 +334,20 @@ func (e Entity[T]) Normalize() Entity[T] {
 	return e
 }
 
-func removeStopwords(input string) []string {
+// nameFields splits a normalized name into its search tokens. For people it
+// skips stopword removal: personal names are proper nouns where "stopword-like"
+// tokens ("al", "bin", "de", "van") are meaningful particles, and the whatlanggo
+// language detection that stopword removal performs dominates index preparation.
+// Other entity types keep stopword removal, where tokens like
+// "the"/"company"/"limited" are noise. The input is already lowercased,
+// depunctuated and unicode-normalized by LowerAndRemovePunctuation, so the
+// person path needs no further cleanup.
+func nameFields(input string, isPerson bool) []string {
 	if input == "" {
 		return nil
+	}
+	if isPerson {
+		return strings.Fields(input)
 	}
 	return strings.Fields(prepare.RemoveStopwords(input))
 }

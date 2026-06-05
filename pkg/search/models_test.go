@@ -175,6 +175,35 @@ func TestEntity_Normalize(t *testing.T) {
 				},
 			},
 		},
+		{
+			// Person names keep "stopword-like" particles ("al", "abu") that
+			// stopword removal would otherwise strip; for people we skip it.
+			name: "person keeps name particles",
+			input: Entity[Value]{
+				Name: "Saddam Hussein al-Tikriti",
+				Type: EntityPerson,
+				Person: &Person{
+					Name:     "Saddam Hussein al-Tikriti",
+					AltNames: []string{"Abu Ali"},
+				},
+			},
+			expected: Entity[Value]{
+				Name: "Saddam Hussein al-Tikriti",
+				Type: "person",
+				Person: &Person{
+					Name:     "Saddam Hussein al-Tikriti",
+					AltNames: []string{"Abu Ali"},
+				},
+				PreparedFields: PreparedFields{
+					Name:       "saddam hussein al tikriti",
+					NameFields: []string{"saddam", "hussein", "al", "tikriti"},
+					AltNames:   []string{"abu ali"},
+					AltNameFields: [][]string{
+						{"abu", "ali"},
+					},
+				},
+			},
+		},
 	}
 
 	for _, tc := range cases {
