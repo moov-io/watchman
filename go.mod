@@ -12,6 +12,7 @@ require (
 	github.com/antchfx/htmlquery v1.3.6
 	github.com/bbalet/stopwords v1.0.0
 	github.com/ccoveille/go-safecast/v2 v2.0.1
+	github.com/dgryski/go-minhash v0.0.0-20190315135803-ad340ca03076
 	github.com/dongri/phonenumber v0.1.12
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-retryablehttp v0.7.8
@@ -22,6 +23,7 @@ require (
 	github.com/moov-io/gopostal v0.1.2
 	github.com/moov-io/iso3166 v0.4.0
 	github.com/pariz/gountries v0.1.6
+	github.com/spaolacci/murmur3 v0.0.0-20180118202830-f09979ecbc72
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v3 v3.9.0
 	github.com/vmihailenco/msgpack/v5 v5.4.1
@@ -33,6 +35,7 @@ require (
 	golang.org/x/sync v0.20.0
 	golang.org/x/text v0.37.0
 	golang.org/x/time v0.15.0
+	gopkg.in/go-dedup/simhash.v1 v1.0.0-20170701025421-ab6ea107ab65
 )
 
 require (
@@ -60,6 +63,8 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cncf/xds/go v0.0.0-20260202195803-dba9d589def2 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/dgryski/go-metro v0.0.0-20250106013310-edb8663e5e33 // indirect
+	github.com/dgryski/go-spooky v0.0.0-20170606183049-ed3d087f40e2 // indirect
 	github.com/envoyproxy/go-control-plane/envoy v1.37.0 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.3.3 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
@@ -69,6 +74,9 @@ require (
 	github.com/fyne-io/glfw-js v0.3.0 // indirect
 	github.com/fyne-io/image v0.1.1 // indirect
 	github.com/fyne-io/oksvg v0.2.0 // indirect
+	github.com/go-dedup/megophone v0.0.0-20170830025436-f01be21026f5 // indirect
+	github.com/go-dedup/simhash v0.0.0-20170904020510-9ecaca7b509c // indirect
+	github.com/go-dedup/text v0.0.0-20170907015346-8bb1b95e3cb7 // indirect
 	github.com/go-gl/gl v0.0.0-20231021071112-07e5d0ea2e71 // indirect
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a // indirect
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
