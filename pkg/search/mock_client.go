@@ -11,14 +11,17 @@ import (
 type MockClient struct {
 	Err error
 
-	ListInfoResponse   ListInfoResponse
-	IngestFileResponse IngestFileResponse
-	ExportFileResponse []Entity[Value]
+	ListInfoResponse      ListInfoResponse
+	IngestFileResponse    IngestFileResponse
+	ExportFileResponse    []Entity[Value]
+	RefreshStatusResponse RefreshStatusResponse
 
-	ListInfoErr   error
-	SearchErr     error
-	IngestFileErr error
-	ExportFileErr error
+	ListInfoErr      error
+	SearchErr        error
+	IngestFileErr    error
+	ExportFileErr    error
+	RefreshStatusErr error
+	DataRefreshErr   error
 
 	mu       sync.RWMutex
 	Index    []Entity[Value]
@@ -95,6 +98,24 @@ func (c *MockClient) ExportFile(ctx context.Context, fileType string) ([]Entity[
 		return nil, err
 	}
 	return c.ExportFileResponse, nil
+}
+
+func (c *MockClient) RefreshStatus(ctx context.Context) (RefreshStatusResponse, error) {
+	err := cmp.Or(c.RefreshStatusErr, c.Err)
+	if err != nil {
+		var out RefreshStatusResponse
+		return out, err
+	}
+	return c.RefreshStatusResponse, nil
+}
+
+func (c *MockClient) DataRefresh(ctx context.Context, wait bool) (RefreshStatusResponse, error) {
+	err := cmp.Or(c.DataRefreshErr, c.Err)
+	if err != nil {
+		var out RefreshStatusResponse
+		return out, err
+	}
+	return c.RefreshStatusResponse, nil
 }
 
 func (c *MockClient) Normalize() {
