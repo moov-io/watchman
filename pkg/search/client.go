@@ -72,12 +72,11 @@ type Client interface {
 	// RefreshStatus retrieves the status of the current or most recent data refresh.
 	RefreshStatus(ctx context.Context) (RefreshStatusResponse, error)
 
-	// DataRefresh triggers an on-demand data refresh. When wait is true the call
-	// blocks until the refresh completes; otherwise it returns once the refresh has
-	// been accepted. This endpoint must be enabled on the server
-	// (Watchman.Download.AllowManualRefresh). It returns an error if a refresh is
-	// already running or the refresh fails.
-	DataRefresh(ctx context.Context, wait bool) (RefreshStatusResponse, error)
+	// DataRefresh triggers an on-demand data refresh. The refresh runs in the
+	// background; poll RefreshStatus to observe progress and completion. This
+	// endpoint must be enabled on the server (Watchman.Download.AllowManualRefresh).
+	// It returns an error if a refresh is already running.
+	DataRefresh(ctx context.Context) (RefreshStatusResponse, error)
 }
 
 func NewClient(httpClient *http.Client, baseAddress string) Client {
@@ -162,23 +161,21 @@ func (c *client) RefreshStatus(ctx context.Context) (RefreshStatusResponse, erro
 	if err != nil {
 		return out, fmt.Errorf("refresh status GET: %w", err)
 	}
-	if resp != nil && resp.Body != nil {
-		defer resp.Body.Close()
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return out, fmt.Errorf("refresh status GET failed with status %d", resp.StatusCode)
 	}
 
-	err = json.NewDecoder(resp.Body).Decode(&out)
-	if err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
 		return out, fmt.Errorf("decoding refresh status response: %w", err)
 	}
 	return out, nil
 }
 
-// DataRefresh triggers an on-demand data refresh.
-func (c *client) DataRefresh(ctx context.Context, wait bool) (RefreshStatusResponse, error) {
+// DataRefresh triggers an on-demand data refresh that runs in the background.
+func (c *client) DataRefresh(ctx context.Context) (RefreshStatusResponse, error) {
 	addr := c.baseAddress + "/v2/data/refresh"
-	if wait {
-		addr += "?wait=true"
-	}
 
 	var out RefreshStatusResponse
 	req, err := retryablehttp.NewRequest("POST", addr, nil)
@@ -190,20 +187,18 @@ func (c *client) DataRefresh(ctx context.Context, wait bool) (RefreshStatusRespo
 	if err != nil {
 		return out, fmt.Errorf("data refresh POST: %w", err)
 	}
-	if resp != nil && resp.Body != nil {
-		defer resp.Body.Close()
-	}
+	defer resp.Body.Close()
 
-	// The server returns a Status body for accepted, completed, and conflict responses.
+	// The server returns a Status body for both accepted and conflict responses.
 	switch resp.StatusCode {
-	case http.StatusOK, http.StatusAccepted, http.StatusConflict:
+	case http.StatusAccepted, http.StatusConflict:
 		if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
 			return out, fmt.Errorf("decoding data refresh response: %w", err)
 		}
 	}
 
 	switch resp.StatusCode {
-	case http.StatusOK, http.StatusAccepted:
+	case http.StatusAccepted:
 		return out, nil
 	case http.StatusConflict:
 		return out, fmt.Errorf("data refresh already running")

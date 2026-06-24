@@ -109,7 +109,7 @@ func (c *MockClient) RefreshStatus(ctx context.Context) (RefreshStatusResponse, 
 	return c.RefreshStatusResponse, nil
 }
 
-func (c *MockClient) DataRefresh(ctx context.Context, wait bool) (RefreshStatusResponse, error) {
+func (c *MockClient) DataRefresh(ctx context.Context) (RefreshStatusResponse, error) {
 	err := cmp.Or(c.DataRefreshErr, c.Err)
 	if err != nil {
 		var out RefreshStatusResponse

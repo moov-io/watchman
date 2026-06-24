@@ -3,7 +3,6 @@ package refresh
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -71,26 +70,6 @@ func TestAPI_RefreshAsync(t *testing.T) {
 	}, 2*time.Second, 5*time.Millisecond)
 }
 
-func TestAPI_RefreshWaitSuccess(t *testing.T) {
-	router, _ := newTestController(t, &fakeDownloader{stats: okStats()}, true)
-
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, httptest.NewRequest("POST", "/v2/data/refresh?wait=true", nil))
-
-	require.Equal(t, http.StatusOK, w.Code)
-	require.Equal(t, StateSucceeded, decodeStatus(t, w).State)
-}
-
-func TestAPI_RefreshWaitError(t *testing.T) {
-	router, _ := newTestController(t, &fakeDownloader{err: errors.New("kaboom")}, true)
-
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, httptest.NewRequest("POST", "/v2/data/refresh?wait=true", nil))
-
-	require.Equal(t, http.StatusInternalServerError, w.Code)
-	require.Equal(t, "kaboom", decodeStatus(t, w).LastError)
-}
-
 func TestAPI_RefreshDisabled(t *testing.T) {
 	router, _ := newTestController(t, &fakeDownloader{stats: okStats()}, false)
 
@@ -103,12 +82,4 @@ func TestAPI_RefreshDisabled(t *testing.T) {
 	w2 := httptest.NewRecorder()
 	router.ServeHTTP(w2, httptest.NewRequest("GET", "/v2/data/refresh", nil))
 	require.Equal(t, http.StatusOK, w2.Code)
-}
-
-func TestAPI_RefreshUnusedParam(t *testing.T) {
-	router, _ := newTestController(t, &fakeDownloader{stats: okStats()}, true)
-
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, httptest.NewRequest("POST", "/v2/data/refresh?bogus=1", nil))
-	require.Equal(t, http.StatusBadRequest, w.Code)
 }

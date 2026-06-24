@@ -2,17 +2,13 @@ package refresh
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/moov-io/base/log"
-	"github.com/moov-io/base/strx"
 	"github.com/moov-io/base/telemetry"
 	"github.com/moov-io/watchman/internal/api"
 
 	"github.com/gorilla/mux"
-	"go.opentelemetry.io/otel/attribute"
 )
 
 type Controller interface {
@@ -62,37 +58,10 @@ func (c *controller) status(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *controller) refresh(w http.ResponseWriter, r *http.Request) {
-	ctx, span := telemetry.StartSpan(r.Context(), "api-data-refresh")
+	_, span := telemetry.StartSpan(r.Context(), "api-data-refresh")
 	defer span.End()
 
-	queryParams := api.NewQueryParams(r.URL)
-	wait := strx.Yes(queryParams.Get("wait"))
-
-	if extra := queryParams.UnusedQueryParams(); len(extra) > 0 {
-		err := c.logger.Error().LogErrorf("extra/unused query parameters in request: %v", strings.Join(extra, ",")).Err()
-		api.ErrorResponse(w, err)
-		return
-	}
-
-	span.SetAttributes(attribute.Bool("wait", wait))
-
-	if wait {
-		// Synchronous refresh. Intended for small/test data sets; a full refresh of
-		// real data can exceed the server's HTTP write timeout.
-		err := c.manager.RefreshNow(ctx, TriggerManual)
-		switch {
-		case errors.Is(err, ErrAlreadyRunning):
-			writeStatusResponse(w, http.StatusConflict, c.manager.Status())
-		case err != nil:
-			c.logger.Error().LogErrorf("manual data refresh failed: %v", err)
-			writeStatusResponse(w, http.StatusInternalServerError, c.manager.Status())
-		default:
-			writeStatusResponse(w, http.StatusOK, c.manager.Status())
-		}
-		return
-	}
-
-	// Asynchronous refresh (default).
+	// The refresh runs in the background; clients poll GET /v2/data/refresh for status.
 	if started := c.manager.TriggerAsync(TriggerManual); !started {
 		writeStatusResponse(w, http.StatusConflict, c.manager.Status())
 		return

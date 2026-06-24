@@ -67,24 +67,9 @@ paths:
         enabled on the server (Watchman.Download.AllowManualRefresh); when disabled it responds
         with 405 Method Not Allowed.
 
-        By default the refresh runs in the background and the call returns 202 immediately. Use
-        wait=true to block until the refresh completes; note a full refresh of real data can
-        exceed the server's HTTP write timeout.
-      parameters:
-        - name: wait
-          in: query
-          description: Block until the refresh completes instead of returning immediately
-          required: false
-          schema:
-            type: boolean
-            default: false
+        The refresh runs in the background and the call returns 202 immediately. Poll
+        GET /v2/data/refresh to observe progress and completion.
       responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RefreshStatusResponse'
-          description: Refresh completed (wait=true)
         "202":
           content:
             application/json:
