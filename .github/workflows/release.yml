@@ -52,6 +52,8 @@ jobs:
         include:
           - runner: ubuntu-latest
             arch: amd64
+          - runner: ubuntu-latest
+            arch: arm64
           - runner: macos-latest
             arch: arm64
           - runner: windows-latest
@@ -111,8 +113,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.get_release_info.outputs.upload_url }}
-        asset_path: ./bin/watchman-linux-amd64
-        asset_name: watchman-linux-amd64
+        asset_path: ./bin/watchman-linux-${{ matrix.arch }}
+        asset_name: watchman-linux-${{ matrix.arch }}
         asset_content_type: application/octet-stream
 
     - name: Upload macOS Binary
@@ -122,8 +124,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.get_release_info.outputs.upload_url }}
-        asset_path: ./bin/watchman-darwin-arm64
-        asset_name: watchman-darwin-arm64
+        asset_path: ./bin/watchman-darwin-${{ matrix.arch }}
+        asset_name: watchman-darwin-${{ matrix.arch }}
         asset_content_type: application/octet-stream
 
     - name: Upload Windows Binary
