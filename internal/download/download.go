@@ -54,6 +54,7 @@ var knownDownloadableLists = []search.SourceList{
 	search.SourceUSNonSDN,
 	search.SourceUSFinCEN311,
 	search.SourceUNCSL,
+	search.SourceUSTEL,
 }
 
 func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
@@ -293,6 +294,26 @@ func (dl *downloader) RefreshAll(ctx context.Context) (Stats, error) {
 					return nil
 				}
 				return fmt.Errorf("loading UN CSL records: %w", err)
+			}
+			return nil
+		})
+	}
+
+	// US TEL Records
+	if slices.Contains(requestedLists, search.SourceUSTEL) {
+		listsLoaded = append(listsLoaded, search.SourceUSTEL)
+
+		producerWg.Add(1)
+		g.Go(func() error {
+			defer producerWg.Done()
+
+			err := loadUSTelRecords(ctx, logger, dl.conf, preparedLists)
+			if err != nil {
+				if slices.Contains(ignoredLists, search.SourceUSTEL) {
+					logger.Warn().Logf("ignoring error loading %s: %v", search.SourceUSTEL, err)
+					return nil
+				}
+				return fmt.Errorf("loading US TEL records: %w", err)
 			}
 			return nil
 		})
