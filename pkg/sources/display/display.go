@@ -10,6 +10,7 @@ import (
 	"github.com/moov-io/watchman/pkg/sources/csl_us"
 	"github.com/moov-io/watchman/pkg/sources/ofac"
 	"github.com/moov-io/watchman/pkg/sources/opensanctions"
+	"github.com/moov-io/watchman/pkg/sources/us_tel"
 )
 
 // DetailsURL returns a URL where you can view the entity on the source's website
@@ -26,6 +27,9 @@ func DetailsURL(entity search.Entity[search.Value]) string {
 
 	case search.SourceUSOFAC, search.SourceUSNonSDN:
 		return ofac.DetailsURL(entity.SourceID)
+
+	case search.SourceUSTEL:
+		return us_tel.DetailsURL(entity.SourceID)
 
 	case search.SourceAPIRequest, search.SourceMCPRequest:
 		// do nothing

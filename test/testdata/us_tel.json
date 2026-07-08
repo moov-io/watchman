@@ -1,0 +1,237 @@
+[
+  {
+    "id": "NK-TST001aBcDeFgHiJkLmN",
+    "caption": "Crimson Dawn Network",
+    "schema": "LegalEntity",
+    "referents": [
+      "us-dos-terr-a1b2c3d4e5f6",
+      "ofac-10001"
+    ],
+    "datasets": ["us_state_terrorist_exclusion"],
+    "origin": ["inferred"],
+    "first_seen": "2024-06-10T20:32:02",
+    "last_seen": "2026-06-09T20:32:01",
+    "last_change": "2024-06-16T20:32:02",
+    "properties": {
+      "program": [
+        "Section 411 of the USA PATRIOT ACT of 2001 (8 U.S.C. § 1182) Terrorist Exclusion List (TEL)"
+      ],
+      "topics": ["sanction"],
+      "name": ["Crimson Dawn Network"]
+    },
+    "target": true
+  },
+  {
+    "id": "NK-TST002qWeRtYuIoPaSd",
+    "caption": "Eastern Crescent Holdings",
+    "schema": "LegalEntity",
+    "referents": [
+      "us-dos-terr-b2c3d4e5f6g7",
+      "tw-shtc-20002",
+      "omnio-20002"
+    ],
+    "datasets": ["us_state_terrorist_exclusion"],
+    "origin": ["inferred"],
+    "first_seen": "2024-07-01T10:15:00",
+    "last_seen": "2026-06-09T20:32:01",
+    "last_change": "2024-07-10T11:20:00",
+    "properties": {
+      "program": [
+        "Section 411 of the USA PATRIOT ACT of 2001 (8 U.S.C. § 1182) Terrorist Exclusion List (TEL)"
+      ],
+      "topics": ["sanction"],
+      "name": ["Eastern Crescent Holdings"]
+    },
+    "target": true
+  },
+  {
+    "id": "NK-TST003zXcVbNmAsDfGh",
+    "caption": "Al-Hikma Trading Center",
+    "schema": "LegalEntity",
+    "referents": [
+      "us-dos-terr-c3d4e5f6g7h8"
+    ],
+    "datasets": ["us_state_terrorist_exclusion"],
+    "origin": ["inferred"],
+    "first_seen": "2024-08-05T08:00:00",
+    "last_seen": "2026-06-09T20:32:01",
+    "last_change": "2024-08-20T08:00:00",
+    "properties": {
+      "program": [
+        "Section 411 of the USA PATRIOT ACT of 2001 (8 U.S.C. § 1182) Terrorist Exclusion List (TEL)"
+      ],
+      "topics": ["sanction"],
+      "name": ["Al-Hikma Trading Center"]
+    },
+    "target": true
+  },
+  {
+    "id": "NK-TST004jKlMnOpQrStUv",
+    "caption": "Free Horizon Brigade",
+    "schema": "LegalEntity",
+    "referents": [
+      "us-dos-fto-d4e5f6g7h8i9",
+      "ofac-10004",
+      "au-dfat-40004"
+    ],
+    "datasets": ["us_state_terrorist_exclusion"],
+    "origin": ["inferred"],
+    "first_seen": "2024-09-10T12:30:00",
+    "last_seen": "2026-06-09T20:32:01",
+    "last_change": "2024-09-15T12:30:00",
+    "properties": {
+      "program": [
+        "Section 411 of the USA PATRIOT ACT of 2001 (8 U.S.C. § 1182) Terrorist Exclusion List (TEL)"
+      ],
+      "topics": ["sanction"],
+      "name": ["Free Horizon Brigade"]
+    },
+    "target": true
+  },
+  {
+    "id": "NK-TST005wErTyUiOpAsDf",
+    "caption": "Northern Relief Foundation",
+    "schema": "LegalEntity",
+    "referents": [
+      "us-dos-terr-e5f6g7h8i9j0",
+      "omnio-50005"
+    ],
+    "datasets": ["us_state_terrorist_exclusion"],
+    "origin": ["inferred"],
+    "first_seen": "2024-10-01T09:00:00",
+    "last_seen": "2026-06-09T20:32:01",
+    "last_change": "2024-10-03T09:00:00",
+    "properties": {
+      "program": [
+        "Section 411 of the USA PATRIOT ACT of 2001 (8 U.S.C. § 1182) Terrorist Exclusion List (TEL)"
+      ],
+      "topics": ["sanction"],
+      "name": ["Northern Relief Foundation"]
+    },
+    "target": true
+  },
+  {
+    "id": "NK-TST006yUiOpAsDfGhJk",
+    "caption": "Unity Resistance Front",
+    "schema": "LegalEntity",
+    "referents": [
+      "us-dos-fto-f6g7h8i9j0k1",
+      "gb-proscribed-60006",
+      "nz-terr-60006"
+    ],
+    "datasets": ["us_state_terrorist_exclusion"],
+    "origin": ["inferred"],
+    "first_seen": "2024-11-11T11:11:11",
+    "last_seen": "2026-06-09T20:32:01",
+    "last_change": "2024-11-20T11:11:11",
+    "properties": {
+      "program": [
+        "Section 411 of the USA PATRIOT ACT of 2001 (8 U.S.C. § 1182) Terrorist Exclusion List (TEL)"
+      ],
+      "topics": ["sanction"],
+      "name": [
+        "Unity Resistance Front",
+        "URF"
+      ]
+    },
+    "target": true
+  },
+  {
+    "id": "NK-TST007rTyUiOpAsDfGhJ",
+    "caption": "Desert Star Logistics",
+    "schema": "LegalEntity",
+    "referents": [
+      "ofac-70007",
+      "usgsa-70007"
+    ],
+    "datasets": ["us_state_terrorist_exclusion"],
+    "origin": ["inferred"],
+    "first_seen": "2024-12-01T06:45:00",
+    "last_seen": "2026-06-09T20:32:01",
+    "last_change": "2024-12-08T06:45:00",
+    "properties": {
+      "program": [
+        "Section 411 of the USA PATRIOT ACT of 2001 (8 U.S.C. § 1182) Terrorist Exclusion List (TEL)"
+      ],
+      "topics": ["sanction"],
+      "name": ["Desert Star Logistics"]
+    },
+    "target": true
+  },
+  {
+    "id": "NK-TST008uIoPaSdFgHjKl",
+    "caption": "People's Liberation Collective",
+    "schema": "LegalEntity",
+    "referents": [
+      "us-dos-terr-h8i9j0k1l2m3",
+      "permid-80008",
+      "ofac-80008"
+    ],
+    "datasets": ["us_state_terrorist_exclusion"],
+    "origin": ["inferred"],
+    "first_seen": "2025-01-15T14:10:00",
+    "last_seen": "2026-06-09T20:32:01",
+    "last_change": "2025-01-20T14:10:00",
+    "properties": {
+      "program": [
+        "Section 411 of the USA PATRIOT ACT of 2001 (8 U.S.C. § 1182) Terrorist Exclusion List (TEL)"
+      ],
+      "topics": ["sanction"],
+      "name": [
+        "People's Liberation Collective",
+        "PLC"
+      ]
+    },
+    "target": true
+  },
+  {
+    "id": "NK-TST009pAsDfGhJkLmNo",
+    "caption": "Silver Coast Import Export",
+    "schema": "LegalEntity",
+    "referents": [
+      "tw-shtc-90009",
+      "omnio-90009",
+      "us-dos-terr-90009"
+    ],
+    "datasets": ["us_state_terrorist_exclusion"],
+    "origin": ["inferred"],
+    "first_seen": "2025-02-01T13:00:00",
+    "last_seen": "2026-06-09T20:32:01",
+    "last_change": "2025-02-10T13:00:00",
+    "properties": {
+      "program": [
+        "Section 411 of the USA PATRIOT ACT of 2001 (8 U.S.C. § 1182) Terrorist Exclusion List (TEL)"
+      ],
+      "topics": ["sanction"],
+      "name": ["Silver Coast Import Export"]
+    },
+    "target": true
+  },
+  {
+    "id": "NK-TST010lMnOpQrStUvWx",
+    "caption": "New Dawn Alliance",
+    "schema": "LegalEntity",
+    "referents": [
+      "us-dos-fto-01010",
+      "ofac-01010",
+      "au-dfat-01010",
+      "usgsa-01010"
+    ],
+    "datasets": ["us_state_terrorist_exclusion"],
+    "origin": ["inferred"],
+    "first_seen": "2025-03-15T07:30:00",
+    "last_seen": "2026-06-09T20:32:01",
+    "last_change": "2025-03-20T07:30:00",
+    "properties": {
+      "program": [
+        "Section 411 of the USA PATRIOT ACT of 2001 (8 U.S.C. § 1182) Terrorist Exclusion List (TEL)"
+      ],
+      "topics": ["sanction"],
+      "name": [
+        "New Dawn Alliance",
+        "NDA"
+      ]
+    },
+    "target": true
+  }
+]
