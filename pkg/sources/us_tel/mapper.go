@@ -6,6 +6,7 @@ package us_tel
 
 import (
 	"strings"
+
 	"github.com/moov-io/watchman/pkg/search"
 )
 
@@ -21,7 +22,7 @@ func addPersonToEntity(name string, aliases []string, entity *search.Entity[sear
 	for _, alias := range aliases {
 		entity.Person.AltNames = append(entity.Person.AltNames, alias)
 	}
-	
+
 	// FIX: Removed "return entity" since this function has no return type specified
 }
 
@@ -37,7 +38,7 @@ func addBusinessToEntity(name string, aliases []string, entity *search.Entity[se
 	for _, alias := range aliases {
 		entity.Business.AltNames = append(entity.Business.AltNames, alias)
 	}
-	
+
 	// FIX: Removed "return entity" since this function has no return type specified
 }
 
@@ -77,17 +78,21 @@ func (r TELRecord) altNames(primary string) []string {
 
 	primary = strings.TrimSpace(primary)
 	if primary != "" {
-		seen[primary] = true
+		seen[strings.ToLower(primary)] = true
 	}
 
 	for _, name := range r.Properties.Name {
 		name = strings.TrimSpace(name)
-		if name == "" || seen[name] {
+		if name == "" {
+			continue
+		}
+		lower := strings.ToLower(name)
+		if seen[lower] {
 			continue
 		}
 
 		alts = append(alts, name)
-		seen[name] = true
+		seen[lower] = true
 	}
 
 	return alts

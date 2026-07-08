@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/moov-io/base/log"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUSTelDownload_initialDir(t *testing.T) {
@@ -95,11 +96,6 @@ func TestUSTelDownload_badURL(t *testing.T) {
 	publicUSTelDownloadUrl = "file:///nonexistent/path"
 
 	files, err := DownloadUsTel(context.Background(), log.NewNopLogger(), "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	if len(files) != 0 {
-		t.Errorf("expected 0 files returned on failure, got %d", len(files))
-	}
+	require.NoError(t, err)
+	require.Empty(t, files)
 }

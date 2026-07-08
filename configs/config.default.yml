@@ -22,16 +22,7 @@ Watchman:
 
     # Specify which lists to download and include in Watchman results
     # Examples: us_csl, us_ofac, us_non_sdn, us_fincen_311, uk_csl, eu_csl, un_csl
-    IncludedLists: [
-      'us_csl',
-      'us_ofac',
-      'us_non_sdn',
-      'us_fincen_311',
-      'uk_csl',
-      'eu_csl',
-      'un_csl',
-      'us_tel',
-    ]
+    IncludedLists: []
 
     # Source-list names for which download or parse errors are suppressed.
     # A failed list named here will log a warning but will not cause a refresh error.
