@@ -10,13 +10,6 @@ type Config struct {
 	RefreshInterval      time.Duration
 	InitialDataDirectory string
 
-	// AllowManualRefresh enables the POST /v2/data/refresh endpoint, which triggers
-	// an on-demand data refresh. The GET /v2/data/refresh status endpoint is always
-	// available regardless of this setting.
-	//
-	// Default: false
-	AllowManualRefresh bool
-
 	// ErrorOnEmptyList determines whether Watchman should raise an error when a list
 	// becomes empty during refresh or download operations. An empty list could indicate:
 	//   - A parsing error in the list processing logic

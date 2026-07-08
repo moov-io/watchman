@@ -27,7 +27,7 @@ import (
 	"github.com/moov-io/watchman/internal/ingest"
 	"github.com/moov-io/watchman/internal/mcp"
 	"github.com/moov-io/watchman/internal/postalpool"
-	"github.com/moov-io/watchman/internal/refresh"
+
 	"github.com/moov-io/watchman/internal/search"
 	"github.com/moov-io/watchman/internal/webui"
 	"github.com/moov-io/watchman/pkg/address"
@@ -120,7 +120,7 @@ func main() {
 		logger.Fatal().LogErrorf("problem setting up search service: %v", err)
 		os.Exit(1)
 	}
-	refreshManager := refresh.NewManager(ctx, logger, downloader, indexedLists, searchService)
+	refreshManager := download.NewRefresher(ctx, logger, downloader, indexedLists, searchService)
 	err = setupPeriodicRefreshing(ctx, logger, errs, conf.Download, refreshManager)
 	if err != nil {
 		logger.Fatal().LogErrorf("problem during initial download: %v", err)
@@ -155,7 +155,7 @@ func main() {
 	searchController := search.NewController(logger, searchService, addressParsingPool)
 	searchController.AppendRoutes(router)
 
-	refreshController := refresh.NewController(logger, refreshManager, conf.Download.AllowManualRefresh)
+	refreshController := download.NewRefreshController(logger, refreshManager)
 	refreshController.AppendRoutes(router)
 
 	ingestController := ingest.NewController(logger, ingestService)

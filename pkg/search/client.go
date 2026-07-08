@@ -73,8 +73,7 @@ type Client interface {
 	RefreshStatus(ctx context.Context) (RefreshStatusResponse, error)
 
 	// DataRefresh triggers an on-demand data refresh. The refresh runs in the
-	// background; poll RefreshStatus to observe progress and completion. This
-	// endpoint must be enabled on the server (Watchman.Download.AllowManualRefresh).
+	// background; poll RefreshStatus to observe progress and completion.
 	// It returns an error if a refresh is already running.
 	DataRefresh(ctx context.Context) (RefreshStatusResponse, error)
 }

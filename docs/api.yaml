@@ -63,12 +63,9 @@ paths:
     post:
       summary: Trigger a data refresh
       description: |
-        Triggers an on-demand refresh of all configured sanction lists. This endpoint must be
-        enabled on the server (Watchman.Download.AllowManualRefresh); when disabled it responds
-        with 405 Method Not Allowed.
-
-        The refresh runs in the background and the call returns 202 immediately. Poll
-        GET /v2/data/refresh to observe progress and completion.
+        Triggers an on-demand refresh of all configured sanction lists. The refresh runs in
+        the background and the call returns 202 immediately. Poll GET /v2/data/refresh to
+        observe progress and completion.
       responses:
         "202":
           content:

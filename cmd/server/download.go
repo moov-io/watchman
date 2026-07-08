@@ -14,12 +14,11 @@ import (
 
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/internal/download"
-	"github.com/moov-io/watchman/internal/refresh"
 )
 
-func setupPeriodicRefreshing(ctx context.Context, logger log.Logger, errs chan error, conf download.Config, mgr refresh.Manager) error {
+func setupPeriodicRefreshing(ctx context.Context, logger log.Logger, errs chan error, conf download.Config, r *download.Refresher) error {
 	// Initial, blocking load. A failure here is fatal to startup.
-	if err := mgr.RefreshNow(ctx, refresh.TriggerStartup); err != nil {
+	if err := r.RefreshNow(ctx, download.TriggerStartup); err != nil {
 		return err
 	}
 
@@ -39,8 +38,8 @@ func setupPeriodicRefreshing(ctx context.Context, logger log.Logger, errs chan e
 
 			case <-ticker.C:
 				// A manual refresh may be in progress; skip this tick rather than fail.
-				err := mgr.RefreshNow(ctx, refresh.TriggerScheduled)
-				if err != nil && !errors.Is(err, refresh.ErrAlreadyRunning) {
+				err := r.RefreshNow(ctx, download.TriggerScheduled)
+				if err != nil && !errors.Is(err, download.ErrAlreadyRunning) {
 					errs <- err
 				}
 			}

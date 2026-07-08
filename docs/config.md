@@ -74,10 +74,6 @@ Watchman:
     RefreshInterval: "12h"
     InitialDataDirectory: ""
 
-    # Enable the POST /v2/data/refresh endpoint to trigger an on-demand data refresh.
-    # The GET /v2/data/refresh status endpoint is always available. Default: false
-    AllowManualRefresh: false
-
     # Specify which lists to download and include in Watchman results
     # Examples: us_csl, us_ofac, us_non_sdn, us_fincen_311, uk_csl, eu_csl, un_csl
     IncludedLists:
