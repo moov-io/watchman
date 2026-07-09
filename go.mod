@@ -1,12 +1,12 @@
 module github.com/moov-io/watchman
 
-go 1.25.0
+go 1.25.10
 
-toolchain go1.26.4
+toolchain go1.26.5
 
 require (
 	fyne.io/fyne/v2 v2.7.4
-	github.com/OpenRouterTeam/go-sdk v0.4.1
+	github.com/OpenRouterTeam/go-sdk v0.5.12
 	github.com/abadojack/whatlanggo v1.0.1
 	github.com/adamdecaf/merge v0.2.2
 	github.com/antchfx/htmlquery v1.3.6
@@ -18,18 +18,18 @@ require (
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/modelcontextprotocol/go-sdk v1.6.1
-	github.com/moov-io/base v0.61.2
+	github.com/moov-io/base v0.61.3
 	github.com/moov-io/gopostal v0.1.2
 	github.com/moov-io/iso3166 v0.4.0
 	github.com/pariz/gountries v0.1.6
 	github.com/stretchr/testify v1.11.1
-	github.com/urfave/cli/v3 v3.9.0
+	github.com/urfave/cli/v3 v3.10.1
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	github.com/xrash/smetrics v0.0.0-20250705151800-55b8f293f342
 	go.opentelemetry.io/otel v1.44.0
 	go.opentelemetry.io/otel/trace v1.44.0
 	go.uber.org/automaxprocs v1.6.0
-	golang.org/x/net v0.56.0
+	golang.org/x/net v0.57.0
 	golang.org/x/sync v0.22.0
 	golang.org/x/text v0.40.0
 	golang.org/x/time v0.15.0
@@ -39,7 +39,7 @@ require (
 	cel.dev/expr v0.25.1 // indirect
 	cloud.google.com/go v0.123.0 // indirect
 	cloud.google.com/go/alloydb v1.26.0 // indirect
-	cloud.google.com/go/alloydbconn v1.18.2 // indirect
+	cloud.google.com/go/alloydbconn v1.18.3 // indirect
 	cloud.google.com/go/auth v0.20.0 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/compute/metadata v0.9.0 // indirect
@@ -155,8 +155,8 @@ require (
 	google.golang.org/api v0.278.0 // indirect
 	google.golang.org/genproto v0.0.0-20260504160031-60b97b32f348 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260504160031-60b97b32f348 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260504160031-60b97b32f348 // indirect
-	google.golang.org/grpc v1.81.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260511170946-3700d4141b60 // indirect
+	google.golang.org/grpc v1.81.1 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
