@@ -60,9 +60,9 @@ func (sl SourceList) IsRequestType() bool {
 }
 
 var (
-	SourceAPIRequest SourceList = "api-request"
-	SourceMCPRequest SourceList = "mcp-request"
-	SourceUSTEL	  	  SourceList = "us_tel"
+	SourceAPIRequest  SourceList = "api-request"
+	SourceMCPRequest  SourceList = "mcp-request"
+	SourceUSTEL       SourceList = "us_tel"
 	SourceEUCSL       SourceList = "eu_csl"
 	SourceUKCSL       SourceList = "uk_csl"
 	SourceUSCSL       SourceList = "us_csl"
