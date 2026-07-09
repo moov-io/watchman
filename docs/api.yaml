@@ -43,6 +43,48 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Unexpected error
+  /v2/data/refresh:
+    get:
+      summary: Get the status of the data refresh
+      description: Returns the state, timing, and any error of the current or most recent data refresh
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshStatusResponse'
+          description: Status of the current or most recent data refresh
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unexpected error
+    post:
+      summary: Trigger a data refresh
+      description: |
+        Triggers an on-demand refresh of all configured sanction lists. The refresh runs in
+        the background and the call returns 202 immediately. Poll GET /v2/data/refresh to
+        observe progress and completion.
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshStatusResponse'
+          description: Refresh accepted and running in the background
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshStatusResponse'
+          description: A refresh is already running
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unexpected error
   /v2/search:
     get:
       summary: Search for entities in sanction lists
@@ -917,6 +959,40 @@ components:
           type: string
           example: "v0.51.0"
           description: Version of the Watchman service
+      type: object
+    RefreshStatusResponse:
+      properties:
+        state:
+          type: string
+          enum:
+            - idle
+            - running
+            - succeeded
+            - failed
+          example: succeeded
+          description: Lifecycle state of the current or most recent refresh
+        trigger:
+          type: string
+          enum:
+            - startup
+            - scheduled
+            - manual
+          description: What initiated the refresh
+        startedAt:
+          format: date-time
+          type: string
+          description: Timestamp of when the refresh started
+        finishedAt:
+          format: date-time
+          type: string
+          description: Timestamp of when the refresh completed (absent while running)
+        duration:
+          type: string
+          example: "2m3s"
+          description: Wall-clock duration of the last completed refresh
+        lastError:
+          type: string
+          description: Error message from the most recent failed refresh, if any
       type: object
     Organization:
       properties:

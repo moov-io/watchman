@@ -47,13 +47,15 @@ func TestDownloader_setupPeriodicRefreshing(t *testing.T) {
 
 	indexedLists := index.NewLists(nil) // only in-memory
 
+	r := download.NewRefresher(ctx, logger, dl, indexedLists, nil)
+
 	go func() {
 		time.Sleep(500 * time.Millisecond)
 		cancelFunc()
 	}()
 
 	errs := make(chan error, 1)
-	err = setupPeriodicRefreshing(ctx, logger, errs, conf, dl, indexedLists, nil)
+	err = setupPeriodicRefreshing(ctx, logger, errs, conf, r)
 	require.NoError(t, err)
 
 	cancelFunc()

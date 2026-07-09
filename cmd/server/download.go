@@ -7,22 +7,18 @@ package main
 import (
 	"cmp"
 	"context"
-	"fmt"
+	"errors"
 	"os"
-	"runtime"
 	"strings"
 	"time"
 
 	"github.com/moov-io/base/log"
-	"github.com/moov-io/base/telemetry"
 	"github.com/moov-io/watchman/internal/download"
-	"github.com/moov-io/watchman/internal/index"
-	"github.com/moov-io/watchman/internal/search"
 )
 
-func setupPeriodicRefreshing(ctx context.Context, logger log.Logger, errs chan error, conf download.Config, downloader download.Downloader, indexedLists index.Lists, searchService search.Service) error {
-	err := refreshAllSources(ctx, logger, downloader, indexedLists, searchService)
-	if err != nil {
+func setupPeriodicRefreshing(ctx context.Context, logger log.Logger, errs chan error, conf download.Config, r *download.Refresher) error {
+	// Initial, blocking load. A failure here is fatal to startup.
+	if err := r.RefreshNow(ctx, download.TriggerStartup); err != nil {
 		return err
 	}
 
@@ -41,8 +37,9 @@ func setupPeriodicRefreshing(ctx context.Context, logger log.Logger, errs chan e
 				return
 
 			case <-ticker.C:
-				err := refreshAllSources(ctx, logger, downloader, indexedLists, searchService)
-				if err != nil {
+				// A manual refresh may be in progress; skip this tick rather than fail.
+				err := r.RefreshNow(ctx, download.TriggerScheduled)
+				if err != nil && !errors.Is(err, download.ErrAlreadyRunning) {
 					errs <- err
 				}
 			}
@@ -65,36 +62,4 @@ func getRefreshInterval(conf download.Config) time.Duration {
 		}
 	}
 	return cmp.Or(conf.RefreshInterval, defaultRefreshInterval)
-}
-
-func refreshAllSources(ctx context.Context, logger log.Logger, downloader download.Downloader, indexedLists index.Lists, searchService search.Service) error {
-	ctx, span := telemetry.StartSpan(ctx, "refresh-all-sources")
-	defer span.End()
-
-	stats, err := downloader.RefreshAll(ctx)
-	if err != nil {
-		return err
-	}
-
-	logger.Info().Logf("data refreshed - %v entities from %v lists took %v (using %.2fGB)",
-		len(stats.Entities), len(stats.Lists), stats.EndedAt.Sub(stats.StartedAt), getCurrentMemoryUsed())
-
-	// Replace in-mem entities
-	indexedLists.Update(stats)
-
-	// Rebuild embedding index if enabled
-	if searchService != nil {
-		if err := searchService.RebuildEmbeddingIndex(ctx); err != nil {
-			return fmt.Errorf("failed to rebuild embedding index: %v", err)
-		}
-	}
-
-	return nil
-}
-
-func getCurrentMemoryUsed() float64 {
-	var mem runtime.MemStats
-	runtime.ReadMemStats(&mem)
-
-	return float64(mem.Alloc) / 1024.0 / 1024.0 / 1024.0 // divide by 1GB
 }

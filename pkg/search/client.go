@@ -68,6 +68,14 @@ type Client interface {
 	// The fileType parameter specifies the dataset name (e.g., "fincen-person") as defined in the
 	// Watchman.Ingest.Files YAML configuration.
 	ExportFile(ctx context.Context, fileType string) ([]Entity[Value], error)
+
+	// RefreshStatus retrieves the status of the current or most recent data refresh.
+	RefreshStatus(ctx context.Context) (RefreshStatusResponse, error)
+
+	// DataRefresh triggers an on-demand data refresh. The refresh runs in the
+	// background; poll RefreshStatus to observe progress and completion.
+	// It returns an error if a refresh is already running.
+	DataRefresh(ctx context.Context) (RefreshStatusResponse, error)
 }
 
 func NewClient(httpClient *http.Client, baseAddress string) Client {
@@ -124,6 +132,78 @@ func (c *client) ListInfo(ctx context.Context) (ListInfoResponse, error) {
 		return out, fmt.Errorf("decoding listinfo response: %w", err)
 	}
 	return out, nil
+}
+
+// RefreshStatusResponse describes the current or most recent data refresh.
+type RefreshStatusResponse struct {
+	State   string `json:"state"`
+	Trigger string `json:"trigger,omitempty"`
+
+	StartedAt  *time.Time `json:"startedAt,omitempty"`
+	FinishedAt *time.Time `json:"finishedAt,omitempty"`
+	Duration   string     `json:"duration,omitempty"`
+
+	LastError string `json:"lastError,omitempty"`
+}
+
+// RefreshStatus retrieves the status of the current or most recent data refresh.
+func (c *client) RefreshStatus(ctx context.Context) (RefreshStatusResponse, error) {
+	addr := c.baseAddress + "/v2/data/refresh"
+
+	var out RefreshStatusResponse
+	req, err := retryablehttp.NewRequest("GET", addr, nil)
+	if err != nil {
+		return out, fmt.Errorf("creating refresh status request: %w", err)
+	}
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return out, fmt.Errorf("refresh status GET: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return out, fmt.Errorf("refresh status GET failed with status %d", resp.StatusCode)
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+		return out, fmt.Errorf("decoding refresh status response: %w", err)
+	}
+	return out, nil
+}
+
+// DataRefresh triggers an on-demand data refresh that runs in the background.
+func (c *client) DataRefresh(ctx context.Context) (RefreshStatusResponse, error) {
+	addr := c.baseAddress + "/v2/data/refresh"
+
+	var out RefreshStatusResponse
+	req, err := retryablehttp.NewRequest("POST", addr, nil)
+	if err != nil {
+		return out, fmt.Errorf("creating data refresh request: %w", err)
+	}
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return out, fmt.Errorf("data refresh POST: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// The server returns a Status body for both accepted and conflict responses.
+	switch resp.StatusCode {
+	case http.StatusAccepted, http.StatusConflict:
+		if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+			return out, fmt.Errorf("decoding data refresh response: %w", err)
+		}
+	}
+
+	switch resp.StatusCode {
+	case http.StatusAccepted:
+		return out, nil
+	case http.StatusConflict:
+		return out, fmt.Errorf("data refresh already running")
+	default:
+		return out, fmt.Errorf("data refresh failed with status %d", resp.StatusCode)
+	}
 }
 
 type SearchResponse struct {
