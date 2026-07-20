@@ -234,7 +234,13 @@ func (c *corpus) selectCandidates(query search.Entity[search.Value], opts Candid
 	// Exact prepared name shortcut (name set but fields empty after stopwords)
 	if name := query.PreparedFields.Name; name != "" {
 		if exact := c.exactNames[name]; len(exact) > 0 {
-			filtered := intersectSorted(exact, partition)
+			// exact is tiny; binary-search each index in the (large) sorted partition
+			var filtered []int
+			for _, idx := range exact {
+				if _, found := slices.BinarySearch(partition, idx); found {
+					filtered = append(filtered, idx)
+				}
+			}
 			if len(filtered) > 0 {
 				return c.materialize(filtered)
 			}
@@ -286,27 +292,6 @@ func (c *corpus) materialize(idxs []int) []search.Entity[search.Value] {
 	out := make([]search.Entity[search.Value], len(idxs))
 	for i, idx := range idxs {
 		out[i] = c.entities[idx]
-	}
-	return out
-}
-
-// intersectSorted returns intersection of two ascending slices.
-func intersectSorted(a, b []int) []int {
-	if len(a) == 0 || len(b) == 0 {
-		return nil
-	}
-	var out []int
-	i, j := 0, 0
-	for i < len(a) && j < len(b) {
-		if a[i] == b[j] {
-			out = append(out, a[i])
-			i++
-			j++
-		} else if a[i] < b[j] {
-			i++
-		} else {
-			j++
-		}
 	}
 	return out
 }
