@@ -46,6 +46,8 @@ The API requires specifying an entity type:
 | `aircraft` | Aircraft registrations | `?type=aircraft&callSign=EP-GOM` |
 | `vessel` | Maritime vessels | `?type=vessel&imoNumber=9401598` |
 
+> **Performance:** Always include `type` (and `source` when you only need one list). Watchman partitions the in-memory corpus by source and type and uses name-token indexes to select candidates before fuzzy scoring. See [Performance](/watchman/performance/) and [Indexing](/watchman/indexing/).
+
 ### Advanced Entity Search Parameters
 
 Each entity type supports specific search parameters:

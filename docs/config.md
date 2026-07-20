@@ -23,7 +23,7 @@ menubar: docs-menu
 
 1. [TF-IDF Configuration](#tf-idf-configuration)
 1. [Cross Script Embeddings Configuration](#cross-script-embeddings-configuration)
-1. [Similarity Configuration](#similarity-configuration)
+1. [Similarity Configuration](#similarity-configuration) (`SEARCH_MAX_IN_FLIGHT`, Jaro-Winkler flags, etc.)
 
 #### Source List Configuration
 
@@ -114,9 +114,15 @@ Watchman:
       Min: 1
       Max: 25
 
+    # Max concurrent full searches admitted at once (admission control).
+    # 0 or omit = GOMAXPROCS. Override with SEARCH_MAX_IN_FLIGHT.
+    # MaxInFlight: 8
+
     Embeddings:
       Enabled: false # See below for Cross-Script Embeddings
 ```
+
+See [Performance](/watchman/performance/) for how admission control, per-search workers, and candidate indexes interact under load.
 
 ### Geocoding
 
@@ -213,6 +219,7 @@ Watchman integrates the following lists to help you maintain global compliance.
 [TF-IDF](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) (Term Frequency–Inverse Document Frequency) is a technique used to measure the importance of a word in a corpus. Less frequent words are more important.
 
 By default Watchman does not employ TF-IDF, but it can be enabled and configured with the following environmental variables.
+When enabled, term weights for indexed entities are computed once at list refresh and attached to each entity; query weights are computed once per search.
 
 | Environmental Variable | Description                                                                                                    | Default |
 |------------------------|----------------------------------------------------------------------------------------------------------------|---------|
@@ -275,6 +282,7 @@ YAML configuration (example with OpenAI):
 
 | Environmental Variable             | Description                                                                                                   | Default |
 |------------------------------------|---------------------------------------------------------------------------------------------------------------|---------|
+| `SEARCH_MAX_IN_FLIGHT`             | Maximum number of concurrent full searches admitted at once. Extra requests wait. `0` / empty uses `GOMAXPROCS`. | `GOMAXPROCS` |
 | `SEARCH_GOROUTINE_COUNT`           | Set a fixed number of goroutines used for each search. Default is to dynamically optimize for faster results. | Empty   |
 | `KEEP_STOPWORDS`                   | Boolean to keep stopwords in names.                                                                           | `false` |
 | `JARO_WINKLER_BOOST_THRESHOLD`     | Jaro-Winkler boost threshold.                                                                                 | 0.7     |
@@ -288,9 +296,11 @@ YAML configuration (example with OpenAI):
 | `FINAL_SCORE_LOW_COVERAGE_MULTIPLIER`        | Multiplier applied when a query compares against too little of the indexed entity's available data.              | 0.95    |
 | `FINAL_SCORE_MIN_REQUIRED_FIELDS_MULTIPLIER` | Multiplier applied when a search compares fewer than two required fields, such as a name-only query.              | 0.90    |
 | `FINAL_SCORE_NAME_ONLY_MULTIPLIER`           | Multiplier applied to name-only matches when no IDs or addresses are present in the query.                    | 0.95    |
-| `DISABLE_PHONETIC_FILTERING`       | Force scoring search terms against every indexed record.                                                      | `false` |
-| `USE_SOUNDEX_MATCHING`             | Enable full Soundex phonetic code matching to optionally boost Jaro-Winkler scores for phonetically similar names (e.g. "Smith" vs "Smythe"). | `false` |
-| `SOUNDEX_BOOST_WEIGHT`             | When `USE_SOUNDEX_MATCHING=yes`, the boost factor applied to pairs whose Soundex codes match (score *= 1+weight, capped at 1.0). Example: `0.12` for a 12% boost. | `0.0`   |
+| `DISABLE_PHONETIC_FILTERING`       | Force comparing search tokens against every index token (skip first-letter phonetic filter inside Jaro-Winkler). Loaded at process start. | `false` |
+| `USE_SOUNDEX_MATCHING`             | Enable full Soundex phonetic code matching to optionally boost Jaro-Winkler scores for phonetically similar names (e.g. "Smith" vs "Smythe"). Loaded at process start. | `false` |
+| `SOUNDEX_BOOST_WEIGHT`             | When `USE_SOUNDEX_MATCHING=yes`, the boost factor applied to pairs whose Soundex codes match (score *= 1+weight, capped at 1.0). Example: `0.12` for a 12% boost. Loaded at process start. | `0.0`   |
+
+> **Note:** `DISABLE_PHONETIC_FILTERING`, `USE_SOUNDEX_MATCHING`, and `SOUNDEX_BOOST_WEIGHT` are read once at process startup for hot-path performance. Restart Watchman after changing them.
 
 #### Source List Configuration
 

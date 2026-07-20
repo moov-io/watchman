@@ -20,9 +20,9 @@ Watchman delivers enterprise-grade compliance screening with:
    - Custom data file support for specialized screening needs
 
 2. **Search Capabilities**:
-   - High-performance indexing and search functionality
+   - High-performance in-memory indexing (source/type partitions, name-token candidates, optional TF-IDF)
    - Advanced fuzzy matching using Jaro-Winkler algorithms
-   - Multi-field search with entity type filtering
+   - Multi-field search with entity type filtering and concurrent scoring
 
  3. **Integration Options**:
     - HTTP API for web and service integration
