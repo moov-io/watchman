@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync/atomic"
 
 	"github.com/moov-io/base/strx"
 
@@ -25,7 +26,32 @@ var (
 	// Watchman parameters
 	exactMatchFavoritism        = readFloat(os.Getenv("EXACT_MATCH_FAVORITISM"), 0.0)
 	unmatchedIndexPenaltyWeight = readFloat(os.Getenv("UNMATCHED_INDEX_TOKEN_WEIGHT"), 0.15)
+
+	// Hot-path feature flags (read once; call ReloadEnvConfig after changing env in tests)
+	disablePhoneticFiltering atomic.Bool
+	useSoundexMatching       atomic.Bool
+	soundexBoostWeight       atomic.Uint64 // float64 bits
 )
+
+func init() {
+	ReloadEnvConfig()
+}
+
+// ReloadEnvConfig re-reads environment-controlled scoring flags.
+// Production loads these once at startup; tests may call this after t.Setenv.
+func ReloadEnvConfig() {
+	disablePhoneticFiltering.Store(strx.Yes(os.Getenv("DISABLE_PHONETIC_FILTERING")))
+	useSoundexMatching.Store(strx.Yes(os.Getenv("USE_SOUNDEX_MATCHING")))
+	soundexBoostWeight.Store(math.Float64bits(readFloat(os.Getenv("SOUNDEX_BOOST_WEIGHT"), 0.0)))
+}
+
+// ResetEnvConfigForTest clears hot-path feature flags to their default (off) state.
+// Intended for test cleanup so parallel/sequential tests do not leak flag values.
+func ResetEnvConfigForTest() {
+	disablePhoneticFiltering.Store(false)
+	useSoundexMatching.Store(false)
+	soundexBoostWeight.Store(math.Float64bits(0))
+}
 
 func readFloat(override string, value float64) float64 {
 	if override != "" {
@@ -68,18 +94,18 @@ func BestPairsJaroWinkler(searchTokens []string, indexedTokens []string) float64
 	searchTokensLength := sumLength(searchTokens)
 	indexTokensLength := sumLength(indexedTokens)
 
-	disablePhoneticFiltering := strx.Yes(os.Getenv("DISABLE_PHONETIC_FILTERING"))
+	skipPhonetic := disablePhoneticFiltering.Load()
 
 	//Compare each search token to each indexed token. Sort the results in descending order
 	scoresCapacity := (len(searchTokens) + len(indexedTokens))
-	if !disablePhoneticFiltering {
+	if !skipPhonetic {
 		scoresCapacity /= 5 // reduce the capacity as many terms don't phonetically match
 	}
 	scores := make([]Score, 0, scoresCapacity)
 	for searchIdx, searchToken := range searchTokens {
 		for indexIdx, indexedToken := range indexedTokens {
 			// Compare the first letters phonetically and only run jaro-winkler on those which are similar
-			if disablePhoneticFiltering || firstCharacterSoundexMatch(indexedToken, searchToken) {
+			if skipPhonetic || firstCharacterSoundexMatch(indexedToken, searchToken) {
 				scores = append(scores, Score{
 					score:          customJaroWinkler(indexedToken, searchToken),
 					searchTokenIdx: searchIdx,
@@ -151,8 +177,8 @@ func customJaroWinkler(s1 string, s2 string) float64 {
 
 	// Optional Soundex phonetic boost for pairs that encode to the same full Soundex code.
 	// Enabled via USE_SOUNDEX_MATCHING=yes and controlled by SOUNDEX_BOOST_WEIGHT (e.g. 0.12).
-	if strx.Yes(os.Getenv("USE_SOUNDEX_MATCHING")) {
-		boostWeight := readFloat(os.Getenv("SOUNDEX_BOOST_WEIGHT"), 0.0)
+	if useSoundexMatching.Load() {
+		boostWeight := math.Float64frombits(soundexBoostWeight.Load())
 		if boostWeight > 0 && SoundexMatch(s1, s2) {
 			score *= (1.0 + boostWeight)
 			if score > 1.0 {
@@ -405,17 +431,17 @@ func BestPairsJaroWinklerWeighted(searchTokens []string, indexedTokens []string,
 		indexTokenIdx  int
 	}
 
-	disablePhoneticFiltering := strx.Yes(os.Getenv("DISABLE_PHONETIC_FILTERING"))
+	skipPhonetic := disablePhoneticFiltering.Load()
 
 	// Compare each search token to each indexed token
 	scoresCapacity := (len(searchTokens) + len(indexedTokens))
-	if !disablePhoneticFiltering {
+	if !skipPhonetic {
 		scoresCapacity /= 5
 	}
 	scores := make([]Score, 0, scoresCapacity)
 	for searchIdx, searchToken := range searchTokens {
 		for indexIdx, indexedToken := range indexedTokens {
-			if disablePhoneticFiltering || firstCharacterSoundexMatch(indexedToken, searchToken) {
+			if skipPhonetic || firstCharacterSoundexMatch(indexedToken, searchToken) {
 				scores = append(scores, Score{
 					score:          customJaroWinkler(indexedToken, searchToken),
 					searchTokenIdx: searchIdx,
