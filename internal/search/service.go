@@ -265,16 +265,22 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 		}
 	}
 
-	// Per-worker local top-K (no shared mutex on the hot path), then merge
+	// Size the worker pool to the candidate set — pruning often leaves few entities.
 	if goroutineCount < 1 {
 		goroutineCount = 1
 	}
-	localItems := make([]*largest.Items[search.Entity[search.Value]], goroutineCount)
+	numWorkers := goroutineCount
+	if numWorkers <= 1 || len(searchEntities) < numWorkers {
+		numWorkers = 1
+	}
+
+	// Per-worker local top-K (no shared mutex on the hot path), then merge
+	localItems := make([]*largest.Items[search.Entity[search.Value]], numWorkers)
 	var localDebugs []*largest.Items[debugRespone]
 	if opts.Debug {
-		localDebugs = make([]*largest.Items[debugRespone], goroutineCount)
+		localDebugs = make([]*largest.Items[debugRespone], numWorkers)
 	}
-	for i := 0; i < goroutineCount; i++ {
+	for i := 0; i < numWorkers; i++ {
 		localItems[i] = largest.NewItems[search.Entity[search.Value]](opts.Limit, opts.MinMatch)
 		if opts.Debug {
 			localDebugs[i] = largest.NewItems[debugRespone](opts.Limit, opts.MinMatch)
@@ -289,27 +295,25 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 		scoreEntities(entities, query, tfidfIndex, opts, hasDebugIDs, s.logger, localItems[w], debugLocal)
 	}
 
-	if goroutineCount <= 1 || len(searchEntities) < goroutineCount {
+	if numWorkers <= 1 {
 		score(0, searchEntities)
 	} else {
-		chunkSize := (len(searchEntities) + goroutineCount - 1) / goroutineCount
+		chunkSize := (len(searchEntities) + numWorkers - 1) / numWorkers
 		var wg sync.WaitGroup
-		worker := 0
-		for startIdx := 0; startIdx < len(searchEntities); startIdx += chunkSize {
+		for worker := 0; worker < numWorkers; worker++ {
+			startIdx := worker * chunkSize
+			if startIdx >= len(searchEntities) {
+				break
+			}
 			endIdx := startIdx + chunkSize
 			if endIdx > len(searchEntities) {
 				endIdx = len(searchEntities)
 			}
-			w := worker
-			if w >= goroutineCount {
-				w = goroutineCount - 1
-			}
 			wg.Add(1)
-			go func(w, startIdx, endIdx int) {
+			go func(w, start, end int) {
 				defer wg.Done()
-				score(w, searchEntities[startIdx:endIdx])
-			}(w, startIdx, endIdx)
-			worker++
+				score(w, searchEntities[start:end])
+			}(worker, startIdx, endIdx)
 		}
 		wg.Wait()
 	}
@@ -328,11 +332,11 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	}
 
 	diff := time.Since(start)
-	s.cm.RecordDuration(goroutineCount, diff)
+	s.cm.RecordDuration(numWorkers, diff)
 
 	span.SetAttributes(
 		attribute.Int("index.searched_entities", len(searchEntities)),
-		attribute.Int("search.goroutine_count", goroutineCount),
+		attribute.Int("search.goroutine_count", numWorkers),
 		attribute.Int64("search.duration", diff.Milliseconds()),
 	)
 

@@ -1,6 +1,7 @@
 package index
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/moov-io/watchman/internal/tfidf"
@@ -177,13 +178,13 @@ func (c *corpus) selectCandidates(query search.Entity[search.Value], opts Candid
 
 	// Crypto exact-address fast path
 	if len(query.CryptoAddresses) > 0 {
-		partSet := partitionSet(partition)
 		var hits []int
 		seen := make(map[int]struct{})
 		for _, addr := range query.CryptoAddresses {
 			key := cryptoKey(addr.Currency, addr.Address)
 			for _, idx := range c.cryptoKeys[key] {
-				if _, inPart := partSet[idx]; !inPart {
+				// partition is sorted ascending (built by appending increasing indices)
+				if _, found := slices.BinarySearch(partition, idx); !found {
 					continue
 				}
 				if _, ok := seen[idx]; ok {
@@ -235,14 +236,13 @@ func (c *corpus) nameCandidateIndices(query search.Entity[search.Value], partiti
 		return partition
 	}
 
-	partSet := partitionSet(partition)
-
-	// Union postings for query tokens, restricted to partition
+	// Union postings for query tokens, restricted to partition.
+	// Membership uses binary search over the sorted partition (no map alloc per query).
 	seen := make(map[int]struct{})
 	var candidates []int
 	for _, tok := range tokens {
 		for _, idx := range c.nameTokens[tok] {
-			if _, inPart := partSet[idx]; !inPart {
+			if _, found := slices.BinarySearch(partition, idx); !found {
 				continue
 			}
 			if _, ok := seen[idx]; ok {
@@ -276,14 +276,6 @@ func (c *corpus) materialize(idxs []int) []search.Entity[search.Value] {
 		out[i] = c.entities[idx]
 	}
 	return out
-}
-
-func partitionSet(partition []int) map[int]struct{} {
-	partSet := make(map[int]struct{}, len(partition))
-	for _, idx := range partition {
-		partSet[idx] = struct{}{}
-	}
-	return partSet
 }
 
 // intersectSorted returns intersection of two ascending slices.

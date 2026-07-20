@@ -242,44 +242,37 @@ func scoreSimilarityFast[Q any, I any](query Entity[Q], index Entity[I], tfidfIn
 		}
 	}
 
-	var exactOverride bool
-	var pieces [9]ScorePiece
+	// Critical exact matches always force final score 1.0 — skip expensive name/address work.
+	p0 := compareExactIdentifiers(nil, query, index, criticalIdWeight)
+	if p0.Matched && p0.FieldsCompared > 0 {
+		return 1.0
+	}
+	p1 := compareExactCryptoAddresses(nil, query, index, criticalIdWeight)
+	if p1.Matched && p1.FieldsCompared > 0 {
+		return 1.0
+	}
+	p2 := compareExactGovernmentIDs(nil, query, index, criticalIdWeight)
+	if p2.Matched && p2.FieldsCompared > 0 {
+		return 1.0
+	}
+	p3 := compareExactContactInfo(nil, query, index, criticalIdWeight)
+	if p3.Matched && p3.FieldsCompared > 0 {
+		return 1.0
+	}
 
-	pieces[0] = compareExactIdentifiers(nil, query, index, criticalIdWeight)
-	if pieces[0].Matched && pieces[0].FieldsCompared > 0 {
-		exactOverride = true
-		if math.IsNaN(pieces[0].Score) {
-			pieces[0].Score = 1.0
-		}
+	pieces := [9]ScorePiece{
+		p0,
+		p1,
+		p2,
+		p3,
+		compareNameWithTFIDF(nil, query, index, nameWeight, tfidfIndex),
+		compareEntityTitlesFuzzy(nil, query, index, nameWeight),
+		compareEntityDates(nil, query, index, supportingInfoWeight),
+		compareAddresses(nil, query, index, addressWeight),
+		compareSupportingInfo(nil, query, index, supportingInfoWeight),
 	}
-	pieces[1] = compareExactCryptoAddresses(nil, query, index, criticalIdWeight)
-	if pieces[1].Matched && pieces[1].FieldsCompared > 0 {
-		exactOverride = true
-		if math.IsNaN(pieces[1].Score) {
-			pieces[1].Score = 1.0
-		}
-	}
-	pieces[2] = compareExactGovernmentIDs(nil, query, index, criticalIdWeight)
-	if pieces[2].Matched && pieces[2].FieldsCompared > 0 {
-		exactOverride = true
-		if math.IsNaN(pieces[2].Score) {
-			pieces[2].Score = 1.0
-		}
-	}
-	pieces[3] = compareExactContactInfo(nil, query, index, criticalIdWeight)
-	if pieces[3].Matched && pieces[3].FieldsCompared > 0 {
-		exactOverride = true
-		if math.IsNaN(pieces[3].Score) {
-			pieces[3].Score = 1.0
-		}
-	}
-	pieces[4] = compareNameWithTFIDF(nil, query, index, nameWeight, tfidfIndex)
-	pieces[5] = compareEntityTitlesFuzzy(nil, query, index, nameWeight)
-	pieces[6] = compareEntityDates(nil, query, index, supportingInfoWeight)
-	pieces[7] = compareAddresses(nil, query, index, addressWeight)
-	pieces[8] = compareSupportingInfo(nil, query, index, supportingInfoWeight)
 
-	return calculateFinalScore(nil, pieces[:], exactOverride, query, index)
+	return calculateFinalScore(nil, pieces[:], false, query, index)
 }
 
 // SimilarityScore gives detailed results of which fields matched and how they were scored against each other.
