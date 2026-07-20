@@ -86,11 +86,36 @@ func NewClient(httpClient *http.Client, baseAddress string) Client {
 	retryableclient := retryablehttp.NewClient()
 	retryableclient.HTTPClient = httpClient
 	retryableclient.Logger = nil // disable logging
+	// Default retryablehttp errors embed method + full request URL (query string
+	// included). Search queries often carry PII, so omit the URI entirely.
+	retryableclient.ErrorHandler = func(resp *http.Response, err error, numTries int) (*http.Response, error) {
+		if resp != nil && resp.Body != nil {
+			_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 4096))
+			resp.Body.Close()
+		}
+		if err != nil {
+			return nil, fmt.Errorf("giving up after %d attempt(s): %w", numTries, withoutRequestURL(err))
+		}
+		if resp != nil {
+			return nil, fmt.Errorf("giving up after %d attempt(s): %s", numTries, resp.Status)
+		}
+		return nil, fmt.Errorf("giving up after %d attempt(s)", numTries)
+	}
 
 	return &client{
 		client:      retryableclient,
 		baseAddress: baseAddress,
 	}
+}
+
+// withoutRequestURL drops *url.Error's Op/URL (which include the request URI and
+// query string) and returns the underlying cause. Other errors pass through.
+func withoutRequestURL(err error) error {
+	var ue *url.Error
+	if errors.As(err, &ue) && ue.Err != nil {
+		return ue.Err
+	}
+	return err
 }
 
 type client struct {
@@ -121,7 +146,7 @@ func (c *client) ListInfo(ctx context.Context) (ListInfoResponse, error) {
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return out, fmt.Errorf("listinfo GET: %w", err)
+		return out, fmt.Errorf("listinfo GET: %w", withoutRequestURL(err))
 	}
 	if resp != nil && resp.Body != nil {
 		defer resp.Body.Close()
@@ -158,7 +183,7 @@ func (c *client) RefreshStatus(ctx context.Context) (RefreshStatusResponse, erro
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return out, fmt.Errorf("refresh status GET: %w", err)
+		return out, fmt.Errorf("refresh status GET: %w", withoutRequestURL(err))
 	}
 	defer resp.Body.Close()
 
@@ -184,7 +209,7 @@ func (c *client) DataRefresh(ctx context.Context) (RefreshStatusResponse, error)
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return out, fmt.Errorf("data refresh POST: %w", err)
+		return out, fmt.Errorf("data refresh POST: %w", withoutRequestURL(err))
 	}
 	defer resp.Body.Close()
 
@@ -265,7 +290,7 @@ func (c *client) SearchByEntity(ctx context.Context, entity Entity[Value], opts 
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return out, fmt.Errorf("search by entity: %w", err)
+		return out, fmt.Errorf("search by entity: %w", withoutRequestURL(err))
 	}
 	if resp != nil && resp.Body != nil {
 		defer resp.Body.Close()
@@ -538,7 +563,7 @@ func (c *client) IngestFile(ctx context.Context, fileType string, file io.Reader
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return out, fmt.Errorf("ingest file: %w", err)
+		return out, fmt.Errorf("ingest file: %w", withoutRequestURL(err))
 	}
 	if resp != nil && resp.Body != nil {
 		defer resp.Body.Close()
@@ -572,7 +597,7 @@ func (c *client) ExportFile(ctx context.Context, fileType string) ([]Entity[Valu
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return out, fmt.Errorf("export file: %w", err)
+		return out, fmt.Errorf("export file: %w", withoutRequestURL(err))
 	}
 	if resp != nil && resp.Body != nil {
 		defer resp.Body.Close()
