@@ -269,6 +269,18 @@ type PreparedFields struct {
 	NameFields    []string
 	AltNameFields [][]string
 
+	// HistoricalNames / HistoricalNameFields are precomputed "Former Name" values
+	// so search does not re-normalize them on every comparison.
+	HistoricalNames      []string
+	HistoricalNameFields [][]string
+
+	// Optional TF-IDF term weights aligned with NameFields / AltNameFields /
+	// HistoricalNameFields. Populated at index build time when TF-IDF is enabled;
+	// for query entities, NameWeights is set once per search.
+	NameWeights           []float64
+	AltNameWeights        [][]float64
+	HistoricalNameWeights [][]float64
+
 	Contact   ContactInfo
 	Addresses []PreparedAddress
 }
@@ -316,6 +328,22 @@ func (e Entity[T]) Normalize() Entity[T] {
 		for idx := range e.PreparedFields.AltNames {
 			e.PreparedFields.AltNameFields[idx] = removeStopwords(e.PreparedFields.AltNames[idx])
 		}
+	}
+
+	// Historical former names (precompute for search hot path)
+	if len(e.HistoricalInfo) > 0 {
+		var names []string
+		var fields [][]string
+		for _, hist := range e.HistoricalInfo {
+			if !strings.EqualFold(hist.Type, "Former Name") || hist.Value == "" {
+				continue
+			}
+			prepared := prepare.LowerAndRemovePunctuation(hist.Value)
+			names = append(names, prepared)
+			fields = append(fields, removeStopwords(prepared))
+		}
+		e.PreparedFields.HistoricalNames = names
+		e.PreparedFields.HistoricalNameFields = fields
 	}
 
 	// Contact
