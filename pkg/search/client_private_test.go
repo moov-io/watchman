@@ -1,9 +1,14 @@
 package search
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 	"time"
 
@@ -119,4 +124,84 @@ func TestSearchResponse_Unmarshal(t *testing.T) {
 
 func ptr[T any](in T) *T {
 	return &in
+}
+
+func TestWithoutRequestURL(t *testing.T) {
+	t.Parallel()
+
+	raw := &url.Error{
+		Op:  "Get",
+		URL: "http://localhost/v2/search?name=Carol+Demo&emailAddress=carol.demo%40example.test",
+		Err: context.DeadlineExceeded,
+	}
+	got := withoutRequestURL(raw)
+	require.True(t, errors.Is(got, context.DeadlineExceeded))
+	require.NotContains(t, got.Error(), "Carol")
+	require.NotContains(t, got.Error(), "http://")
+	require.NotContains(t, got.Error(), "name=")
+
+	// Non-URL errors pass through unchanged.
+	plain := errors.New("boom")
+	require.Equal(t, plain, withoutRequestURL(plain))
+}
+
+func TestClient_SearchByEntity_ErrorOmitsRequestURI(t *testing.T) {
+	// Closed server → connection error. net/http and retryablehttp otherwise
+	// embed the full request URL (query string included) in the error text.
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	baseURL := server.URL
+	server.Close()
+
+	c := NewClient(&http.Client{Timeout: time.Second}, baseURL).(*client)
+	c.client.RetryMax = 0
+	c.client.Backoff = func(_, _ time.Duration, _ int, _ *http.Response) time.Duration {
+		return 0
+	}
+
+	// Synthetic fixture data only — not real personal information.
+	const (
+		fakeName  = "Acme Widget Holdings LLC"
+		fakeEmail = "compliance.contact@acme-widget-test.example"
+		fakePhone = "555-0142"
+		fakeTaxID = "99-1234567"
+	)
+
+	query := Entity[Value]{
+		Name: fakeName,
+		Type: EntityBusiness,
+		Business: &Business{
+			Name: fakeName,
+			GovernmentIDs: []GovernmentID{
+				{Type: GovernmentIDTax, Country: "United States", Identifier: fakeTaxID},
+			},
+		},
+		Contact: ContactInfo{
+			EmailAddresses: []string{fakeEmail},
+			PhoneNumbers:   []string{fakePhone},
+		},
+	}
+
+	_, err := c.SearchByEntity(context.Background(), query, SearchOpts{Limit: 5, MinMatch: 0.75})
+	require.Error(t, err)
+
+	msg := err.Error()
+	for _, snippet := range []string{
+		fakeName, fakeEmail, fakePhone, fakeTaxID,
+		"emailAddress=", "phoneNumber=", "gov_tax-id=", "name=",
+		"/v2/search", // request path from *url.Error / retryablehttp
+	} {
+		require.Falsef(t, strings.Contains(msg, snippet),
+			"error must not contain %q\nfull error: %s", snippet, msg)
+	}
+
+	require.Contains(t, msg, "search by entity")
+	require.True(t,
+		strings.Contains(msg, "giving up") ||
+			strings.Contains(msg, "connection") ||
+			strings.Contains(msg, "refused") ||
+			strings.Contains(msg, "reset") ||
+			strings.Contains(msg, "dial"),
+		"expected a network failure reason, got: %s", msg)
 }
