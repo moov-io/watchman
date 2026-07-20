@@ -274,30 +274,29 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 		numWorkers = 1
 	}
 
-	// Per-worker local top-K (no shared mutex on the hot path), then merge
-	localItems := make([]*largest.Items[search.Entity[search.Value]], numWorkers)
-	var localDebugs []*largest.Items[debugRespone]
+	items := largest.NewItems[search.Entity[search.Value]](opts.Limit, opts.MinMatch)
+	var debugs *largest.Items[debugRespone]
 	if opts.Debug {
-		localDebugs = make([]*largest.Items[debugRespone], numWorkers)
-	}
-	for i := 0; i < numWorkers; i++ {
-		localItems[i] = largest.NewItems[search.Entity[search.Value]](opts.Limit, opts.MinMatch)
-		if opts.Debug {
-			localDebugs[i] = largest.NewItems[debugRespone](opts.Limit, opts.MinMatch)
-		}
-	}
-
-	score := func(w int, entities []search.Entity[search.Value]) {
-		var debugLocal *largest.Items[debugRespone]
-		if opts.Debug {
-			debugLocal = localDebugs[w]
-		}
-		scoreEntities(entities, query, tfidfIndex, opts, hasDebugIDs, s.logger, localItems[w], debugLocal)
+		debugs = largest.NewItems[debugRespone](opts.Limit, opts.MinMatch)
 	}
 
 	if numWorkers <= 1 {
-		score(0, searchEntities)
+		// Common path after candidate pruning: score directly, no local heaps/merge.
+		scoreEntities(searchEntities, query, tfidfIndex, opts, hasDebugIDs, s.logger, items, debugs)
 	} else {
+		// Per-worker local top-K (no shared mutex on the hot path), then merge
+		localItems := make([]*largest.Items[search.Entity[search.Value]], numWorkers)
+		var localDebugs []*largest.Items[debugRespone]
+		if opts.Debug {
+			localDebugs = make([]*largest.Items[debugRespone], numWorkers)
+		}
+		for i := 0; i < numWorkers; i++ {
+			localItems[i] = largest.NewItems[search.Entity[search.Value]](opts.Limit, opts.MinMatch)
+			if opts.Debug {
+				localDebugs[i] = largest.NewItems[debugRespone](opts.Limit, opts.MinMatch)
+			}
+		}
+
 		chunkSize := (len(searchEntities) + numWorkers - 1) / numWorkers
 		var wg sync.WaitGroup
 		for worker := 0; worker < numWorkers; worker++ {
@@ -312,22 +311,20 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 			wg.Add(1)
 			go func(w, start, end int) {
 				defer wg.Done()
-				score(w, searchEntities[start:end])
+				var debugLocal *largest.Items[debugRespone]
+				if opts.Debug {
+					debugLocal = localDebugs[w]
+				}
+				scoreEntities(searchEntities[start:end], query, tfidfIndex, opts, hasDebugIDs, s.logger, localItems[w], debugLocal)
 			}(worker, startIdx, endIdx)
 		}
 		wg.Wait()
-	}
 
-	// Merge local top-K into final results
-	items := largest.NewItems[search.Entity[search.Value]](opts.Limit, opts.MinMatch)
-	var debugs *largest.Items[debugRespone]
-	if opts.Debug {
-		debugs = largest.NewItems[debugRespone](opts.Limit, opts.MinMatch)
-	}
-	for i := range localItems {
-		items.Merge(localItems[i])
-		if opts.Debug {
-			debugs.Merge(localDebugs[i])
+		for i := range localItems {
+			items.Merge(localItems[i])
+			if opts.Debug {
+				debugs.Merge(localDebugs[i])
+			}
 		}
 	}
 

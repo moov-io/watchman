@@ -116,6 +116,39 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 		require.Empty(t, got, "empty source partition must not fall back to all entities")
 	})
 
+	t.Run("empty source/type does not duplicate all-partition entries", func(t *testing.T) {
+		bare := mustNorm(search.Entity[search.Value]{
+			Name:     "Bare Entity",
+			SourceID: "bare",
+			// Source and Type intentionally empty
+		})
+		idx.Update(download.Stats{
+			Entities: []search.Entity[search.Value]{bare},
+			Lists:    map[string]int{"": 1},
+		})
+		impl := idx.(*lists)
+		impl.mu.RLock()
+		all := impl.corpus.bySourceType[""][""]
+		impl.mu.RUnlock()
+		require.Equal(t, []int{0}, all, "empty source/type must append entity once to all-partition")
+	})
+
+	t.Run("crypto without name tokens does not expand to full partition", func(t *testing.T) {
+		idx.Update(stats) // restore multi-entity corpus
+		query := mustNorm(search.Entity[search.Value]{
+			// No name — only crypto. Must not expand to full business partition.
+			Type: search.EntityBusiness,
+			CryptoAddresses: []search.CryptoAddress{
+				{Currency: "XBT", Address: "abc123"},
+			},
+		})
+		require.Empty(t, query.PreparedFields.NameFields)
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Len(t, cands, 1)
+		require.Equal(t, "3", cands[0].SourceID)
+	})
+
 	t.Run("name tokens deduped per entity", func(t *testing.T) {
 		// Rebuild with an entity that repeats a token across primary and alt names
 		dup := mustNorm(search.Entity[search.Value]{

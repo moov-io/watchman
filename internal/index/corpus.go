@@ -65,10 +65,19 @@ func buildCorpus(entities []search.Entity[search.Value], tfidfIndex *tfidf.Index
 
 		src := string(e.Source)
 		typ := string(e.Type)
+		// Always index under the "all sources / all types" key once.
+		// Only add more specific keys when they are non-empty so empty Source/Type
+		// does not append the same entity index multiple times to one partition.
 		c.addToPartition("", "", i)
-		c.addToPartition(src, "", i)
-		c.addToPartition("", typ, i)
-		c.addToPartition(src, typ, i)
+		if src != "" {
+			c.addToPartition(src, "", i)
+		}
+		if typ != "" {
+			c.addToPartition("", typ, i)
+		}
+		if src != "" && typ != "" {
+			c.addToPartition(src, typ, i)
+		}
 
 		// Exact prepared name
 		if name := e.PreparedFields.Name; name != "" {
@@ -199,16 +208,16 @@ func (c *corpus) selectCandidates(query search.Entity[search.Value], opts Candid
 				hits = append(hits, idx)
 			}
 		}
-		// Crypto-only query: return exact hits (may be empty → fall through)
-		if len(hits) > 0 && len(query.PreparedFields.NameFields) == 0 && query.PreparedFields.Name == "" {
-			return c.materialize(hits)
-		}
 		if len(hits) > 0 {
-			// Merge with name candidates so multi-field queries stay complete
-			for _, idx := range c.nameCandidateIndices(query, partition, opts) {
-				if _, ok := seen[idx]; !ok {
-					seen[idx] = struct{}{}
-					hits = append(hits, idx)
+			// Merge name candidates only when the query has name tokens.
+			// Otherwise nameCandidateIndices returns the full partition and would
+			// defeat the crypto exact-address fast path.
+			if len(query.PreparedFields.NameFields) > 0 {
+				for _, idx := range c.nameCandidateIndices(query, partition, opts) {
+					if _, ok := seen[idx]; !ok {
+						seen[idx] = struct{}{}
+						hits = append(hits, idx)
+					}
 				}
 			}
 			return c.materialize(hits)
