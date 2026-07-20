@@ -138,9 +138,13 @@ func cryptoKey(currency, address string) string {
 
 // partitionIndices returns entity indices for the given source and type filters.
 // Empty source or type means "all".
-func (c *corpus) partitionIndices(source search.SourceList, entityType search.EntityType) []int {
+//
+// The bool is true when the source key exists in the corpus (even if the type
+// slice is empty). Callers must distinguish "unknown source" from "known source,
+// zero entities of this type" so they do not fall back to a full corpus scan.
+func (c *corpus) partitionIndices(source search.SourceList, entityType search.EntityType) ([]int, bool) {
 	if c == nil {
-		return nil
+		return nil, false
 	}
 
 	src := string(source)
@@ -149,12 +153,17 @@ func (c *corpus) partitionIndices(source search.SourceList, entityType search.En
 	}
 	typ := string(entityType)
 
-	byType := c.bySourceType[src]
-	if byType == nil {
+	byType, ok := c.bySourceType[src]
+	if !ok {
 		// Unknown source with no in-memory partition
-		return nil
+		return nil, false
 	}
-	return byType[typ]
+	// Missing type key means an empty partition for that type, not an unknown source.
+	idxs, _ := byType[typ]
+	if idxs == nil {
+		return []int{}, true
+	}
+	return idxs, true
 }
 
 // CandidateOpts controls candidate selection.
@@ -181,12 +190,13 @@ func (c *corpus) selectCandidates(query search.Entity[search.Value], opts Candid
 		opts.MaxFraction = 0.5
 	}
 
-	partition := c.partitionIndices(query.Source, query.Type)
-	if partition == nil {
-		// Fall back to scanning everything when partitions missing
-		return c.entities
+	partition, sourceOK := c.partitionIndices(query.Source, query.Type)
+	if !sourceOK {
+		// Unknown source key: do not scan unrelated lists
+		return nil
 	}
 	if len(partition) == 0 {
+		// Known source (or all-sources) but no entities of this type
 		return nil
 	}
 

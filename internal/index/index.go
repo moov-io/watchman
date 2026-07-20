@@ -55,7 +55,7 @@ func (l *lists) GetEntities(ctx context.Context, source search.SourceList) ([]se
 			// Always return the partition (even if empty) so we never leak entities
 			// from other sources when the requested partition has no rows.
 			if src := string(source); src != "" && !source.IsRequestType() {
-				idxs := l.corpus.partitionIndices(source, "")
+				idxs, _ := l.corpus.partitionIndices(source, "")
 				return l.corpus.materialize(idxs), nil
 			}
 			return l.corpus.entities, nil

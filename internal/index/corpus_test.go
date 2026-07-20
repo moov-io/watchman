@@ -101,6 +101,18 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 		require.Equal(t, "1", cands[0].SourceID)
 	})
 
+	t.Run("empty type within known source does not scan full corpus", func(t *testing.T) {
+		// US OFAC has persons and businesses but no aircraft
+		query := mustNorm(search.Entity[search.Value]{
+			Name:   "Anything",
+			Type:   search.EntityAircraft,
+			Source: search.SourceUSOFAC,
+		})
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Empty(t, cands, "empty type partition must not fall back to scoring all entities")
+	})
+
 	t.Run("GetEntities empty partition does not leak other sources", func(t *testing.T) {
 		// Source is registered in Lists but has no entities in the corpus
 		idx.Update(download.Stats{
