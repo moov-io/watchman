@@ -53,7 +53,29 @@ func (xs *Items[T]) Add(it Item[T]) {
 
 	xs.mu.Lock()
 	defer xs.mu.Unlock()
+	xs.addLocked(it)
+}
 
+// AddLocal is like Add but without locking. Safe only when a single goroutine
+// owns the Items instance (e.g. a per-worker local top-K buffer).
+func (xs *Items[T]) AddLocal(it Item[T]) {
+	if it.Weight < xs.minMatch {
+		return
+	}
+	xs.addLocked(it)
+}
+
+// Merge incorporates all items from other into xs.
+func (xs *Items[T]) Merge(other *Items[T]) {
+	if other == nil {
+		return
+	}
+	for _, it := range other.Items() {
+		xs.Add(it)
+	}
+}
+
+func (xs *Items[T]) addLocked(it Item[T]) {
 	// If there's room, just insert in the correct spot
 	if len(xs.items) < xs.capacity {
 		xs.insertDescending(it)
