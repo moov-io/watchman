@@ -32,6 +32,11 @@ import (
 // to account for filtering (by type, threshold, etc.) before returning final results.
 const embeddingSearchLimitMultiplier = 2
 
+// smallCandidateBypass is the max candidate-set size that skips the search admission
+// semaphore. Exact crypto/ID hits and tightly pruned name queries stay off the queue
+// so they are not blocked behind full-partition scans.
+const smallCandidateBypass = 100
+
 type Service interface {
 	LatestStats() download.Stats
 
@@ -223,17 +228,28 @@ type debugRespone struct {
 }
 
 func (s *service) performSearch(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error) {
-	// Admission control: bound concurrent full scans so worker pools do not oversubscribe CPUs
-	select {
-	case s.searchSem <- struct{}{}:
-		defer func() { <-s.searchSem }()
-	case <-ctx.Done():
-		return nil, ctx.Err()
+	// Candidate selection first (cheap, RLock only) so we can skip admission control
+	// for tiny result sets and avoid queuing them behind full-partition scans.
+	searchEntities, err := s.indexedLists.SelectCandidates(ctx, query)
+	if err != nil {
+		s.logger.Error().Logf("selecting candidate entities failed: %v", err)
+		return nil, fmt.Errorf("selecting candidate entities: %w", err)
+	}
+
+	// Admission control: bound concurrent large scans so worker pools do not oversubscribe CPUs.
+	if len(searchEntities) > smallCandidateBypass {
+		select {
+		case s.searchSem <- struct{}{}:
+			defer func() { <-s.searchSem }()
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		}
 	}
 
 	_, span := telemetry.StartSpan(ctx, "perform-search", trace.WithAttributes(
 		attribute.Int("opts.limit", opts.Limit),
 		attribute.Float64("opts.min_match", opts.MinMatch),
+		attribute.Int("index.candidate_count", len(searchEntities)),
 	))
 	defer span.End()
 
@@ -243,13 +259,6 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 		return nil, fmt.Errorf("getGoroutineCount: %w", err)
 	}
 	start := time.Now()
-
-	// Candidate selection: source/type partition + token/crypto inverted indexes
-	searchEntities, err := s.indexedLists.SelectCandidates(ctx, query)
-	if err != nil {
-		s.logger.Error().Logf("selecting candidate entities failed: %v", err)
-		return nil, fmt.Errorf("selecting candidate entities: %w", err)
-	}
 
 	// Precompute query term weights once per search when TF-IDF is enabled
 	tfidfIndex := s.indexedLists.GetTFIDFIndex()
@@ -381,8 +390,9 @@ func scoreEntities(
 ) {
 	for i := range entities {
 		indexEntity := entities[i]
+		isDebugEntity := hasDebugIDs && slices.Contains(opts.DebugSourceIDs, indexEntity.SourceID)
 
-		if hasDebugIDs && slices.Contains(opts.DebugSourceIDs, indexEntity.SourceID) {
+		if isDebugEntity {
 			logger.Debug().With(log.Fields{
 				"debug_source_id": log.String(indexEntity.SourceID),
 			}).Logf("indexed entity: %#v", indexEntity)
@@ -398,7 +408,7 @@ func scoreEntities(
 			scores := search.DebugSimilarityWithTFIDF(&buf, query, indexEntity, tfidfIndex)
 			score = scores.FinalScore
 
-			if hasDebugIDs && slices.Contains(opts.DebugSourceIDs, indexEntity.SourceID) {
+			if isDebugEntity {
 				logger.Debug().With(log.Fields{
 					"debug_source_id": log.String(indexEntity.SourceID),
 				}).Logf("similarity score: %#v", scores)
@@ -419,7 +429,7 @@ func scoreEntities(
 			}
 		}
 
-		if hasDebugIDs && slices.Contains(opts.DebugSourceIDs, indexEntity.SourceID) {
+		if isDebugEntity {
 			logger.Debug().With(log.Fields{
 				"debug_source_id": log.String(indexEntity.SourceID),
 			}).Logf("final score: %.5f", score)
