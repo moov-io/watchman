@@ -16,10 +16,11 @@ The index automatically rebuilds with each data refresh, ensuring your complianc
 When lists finish downloading and preparing, Watchman constructs an in-memory **search corpus** from every entity:
 
 1. **Prepared fields** — normalized names, tokenized name fields (stopwords removed), alt names, former names, addresses, and contact data (see [pipeline](/watchman/pipeline/) and entity `Normalize()`).
-2. **Source × type partitions** — index slices keyed by list source and entity type so queries with `source` / `type` only score the relevant subset.
-3. **Name-token inverted index** — maps each significant prepared name token to entity positions (primary name, alternate names, and historical “Former Name” values).
-4. **Crypto address index** — exact lookup by `CURRENCY:address` for fast crypto screening.
-5. **Optional TF-IDF weights** — when enabled, term weights for each entity’s name fields are stored on the entity so search does not recompute them per comparison.
+2. **Source × type partitions** — index slices keyed by list source and entity type so queries with `source` / `type` only score the relevant subset. Empty source or type values are not double-counted into the “all” partition.
+3. **Name-token inverted index** — maps each significant prepared name token to entity positions (primary name, alternate names, and historical “Former Name” values). Each entity is posted **once per distinct token** even if the token repeats across name fields.
+4. **Exact prepared-name map** — maps the full prepared name string to entity positions for exact-name shortcuts.
+5. **Crypto address index** — exact lookup by `CURRENCY:address` for fast crypto screening.
+6. **Optional TF-IDF weights** — when enabled, term weights for each entity’s name fields are stored on the entity so search does not recompute them per comparison.
 
 These structures are immutable for readers until the next successful refresh replaces the corpus atomically.
 
@@ -30,14 +31,20 @@ Before Jaro-Winkler scoring, Watchman selects a **candidate set**:
 | Query shape | Candidate strategy |
 |-------------|-------------------|
 | `type` and/or `source` set | Start from that partition only |
+| Known source, empty type (no entities of that type) | **Empty result** — does not scan other types or sources |
+| Unknown / unregistered source | **Empty result** — does not fall back to the full corpus |
 | Name tokens present | Union of inverted-index hits for those tokens, restricted to the partition |
-| No token hits (e.g. heavy typos) | **Fall back to the full partition** (preserves recall) |
-| Crypto address on query | Exact crypto hits (merged with name candidates when both are present) |
-| Name-less / identifier-oriented | Full partition for the filtered source/type |
+| No token hits (e.g. heavy typos) | **Fall back to the full partition** (preserves recall within that source/type) |
+| Crypto address only | Exact crypto hits only (does not expand to the full partition) |
+| Crypto + name tokens | Union of crypto hits and name-token candidates |
+| Exact prepared name (no tokens after stopwords) | Binary-search exact-name postings against the partition |
+| Name-less / identifier-oriented (no crypto) | Full partition for the filtered source/type |
 
-If candidates would cover most of the partition (default threshold: half the partition size), Watchman scores the full partition instead—token pruning would not save work.
+If name-token candidates would cover most of the partition (default threshold: half the partition size), Watchman scores the full partition instead—token pruning would not save work.
 
-Always pass **`type`** (and **`source`** when appropriate) on `/v2/search` for the best latency. See [Performance](/watchman/performance/) for concurrency and tuning.
+Candidate index membership checks use binary search over sorted partition slices (no per-query partition maps). Duplicate postings are removed with sort + compact.
+
+Always pass **`type`** (and **`source`** when appropriate) on `/v2/search` for the best latency. See [Performance](/watchman/performance/) for concurrency, admission control, and tuning.
 
 ## TF-IDF
 

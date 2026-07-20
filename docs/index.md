@@ -20,7 +20,8 @@ Watchman empowers your compliance team with powerful tools designed for accuracy
 
 - **Comprehensive Global Coverage**: Seamlessly integrates multiple international sanctions lists, ensuring thorough compliance screening across jurisdictions.
 - **Advanced Fuzzy Matching**: Leverages sophisticated algorithms to detect name variations and reduce false negatives, saving time on manual reviews.
-- **High-Performance Search**: Delivers lightning-fast queries with optimized in-memory processing for real-time compliance checks.
+- **High-Performance Search**: In-memory corpus with source/type partitions, name-token and crypto candidate indexes, and parallel scoring for real-time compliance checks. See [Performance](/watchman/performance/) and [Indexing](/watchman/indexing/).
+
 - **Flexible Integration Options**: Provides an intuitive HTTP API and native Go library for seamless incorporation into your existing systems.
 - **Automated Data Management**: Handles automatic downloads and refreshes of watchlists, keeping your data current without manual intervention.
 - **Customizable Configuration**: Fine-tune search parameters, thresholds, and behaviors to align with your organization's specific risk profile. See [Configuration Guide](/watchman/config/) for details.

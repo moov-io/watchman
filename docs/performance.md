@@ -33,10 +33,13 @@ Each `/v2/search` request roughly follows this path:
 
 1. **Parse and normalize** the query (names, addresses, IDs).
 2. **Select candidates** from the in-memory corpus using prebuilt indexes (see [Indexing](/watchman/indexing/)).
-3. **Score candidates in parallel** with Jaro-Winkler similarity (and optional TF-IDF weighting).
-4. **Keep a top-N heap** of the best matches above `minMatch`, then return JSON.
+3. **Admission control** (only when the candidate set is large — see below).
+4. **Score candidates** with Jaro-Winkler similarity (and optional TF-IDF weighting), in parallel when needed.
+5. **Keep a top-N heap** of the best matches above `minMatch`, then return JSON.
 
 Candidate selection is **recall-safe relative to a full source/type partition scan**: if name tokens do not hit the inverted index (for example a pure typo with no shared tokens), Watchman falls back to scoring the entire matching partition rather than returning empty results.
+
+Empty partitions (for example `type=aircraft` when that source has no aircraft) return **no candidates** — Watchman does not fall back to scanning unrelated sources or types.
 
 ### Candidate selection
 
@@ -45,7 +48,8 @@ On every list refresh Watchman builds:
 | Structure | Purpose |
 |-----------|---------|
 | **Source × type partitions** | Restrict scoring to the requested `source` and/or `type` when provided |
-| **Name-token inverted index** | Union of entities whose prepared primary, alt, or former names contain a query token |
+| **Name-token inverted index** | Union of entities whose prepared primary, alt, or former names contain a query token (one posting per token per entity) |
+| **Exact prepared-name map** | Fast path when the full prepared name matches exactly |
 | **Crypto address map** | Exact `CURRENCY:address` lookup for crypto-only (or crypto+name) queries |
 | **TF-IDF term weights** (optional) | Precomputed per-entity weights so search does not recompute IDF on every comparison |
 
@@ -53,17 +57,21 @@ On every list refresh Watchman builds:
 
 - Always send `type=` (and `source=` when you only need one list). This shrinks the partition before token lookup.
 - Prefer multi-token names when possible; shared tokens prune the candidate set aggressively.
-- Identifier-heavy queries (crypto addresses, government IDs) use exact paths where available; name-less ID scans still use the type/source partition.
+- Crypto-only queries use the exact address index and do **not** expand to a full partition scan.
+- Identifier-heavy queries (government IDs, contact info) still score within the type/source partition; critical exact ID matches short-circuit similarity to a perfect score without running full name/address comparison.
 
 ### Concurrency model
 
 Watchman uses two layers of concurrency control:
 
-1. **Admission control (`SEARCH_MAX_IN_FLIGHT`)** — limits how many full searches run at once (default: `GOMAXPROCS`). Extra requests wait rather than oversubscribing every CPU with stacked worker pools. Tune this when you run many concurrent clients against one instance.
+1. **Admission control (`SEARCH_MAX_IN_FLIGHT`)** — limits how many *large* searches run at once (default: `GOMAXPROCS`). Candidate selection runs **before** the semaphore. When the candidate set has **100 or fewer** entities (exact crypto hits, tightly pruned name queries, empty partitions), the search **bypasses** the queue so fast lookups are not blocked behind full-partition scans. Larger candidate sets acquire a slot; extra requests wait rather than oversubscribing every CPU with stacked worker pools.
 
-2. **Per-search worker pool** — each admitted search fans out scoring across a dynamic number of goroutines (`Search.Goroutines` in config, or a fixed `SEARCH_GOROUTINE_COUNT`). A feedback loop (concurrency champion) adjusts the worker count based on recent search durations for stable latency on shared hardware.
+2. **Per-search worker pool** — each search fans out scoring across a dynamic number of goroutines (`Search.Goroutines` in config, or a fixed `SEARCH_GOROUTINE_COUNT`). A feedback loop (concurrency champion) adjusts the worker count based on recent search durations for stable latency on shared hardware.
 
-Each worker maintains a **local top-K** of best matches and merges into the final result set after scoring, avoiding a shared mutex on every entity comparison.
+**Worker sizing**
+
+- If there is only one worker (common after heavy pruning), scoring writes directly into the final top-K heap — no per-worker buffers or merge step.
+- With multiple workers, each maintains a **local top-K** and merges into the final result set after scoring, avoiding a shared mutex on every entity comparison.
 
 As shown in the first graph below, which tracks search requests per second (req/s) over time, Watchman maintains consistent query performance despite fluctuating load.
 
@@ -80,6 +88,7 @@ encouraging richer query data for better performance.
 Similarity scoring is allocation-conscious for bulk search:
 
 - Score pieces are computed on the stack for the non-debug path.
+- Critical exact matches (government IDs, crypto addresses, contact identifiers) **return 1.0 immediately** and skip expensive name/title/address comparison.
 - Former names and related prepared fields are normalized at index time (and query normalize), not on every comparison.
 - Optional TF-IDF weights are attached to index entities when lists load; query weights are computed once per search.
 - Jaro-Winkler feature flags (`DISABLE_PHONETIC_FILTERING`, `USE_SOUNDEX_MATCHING`, `SOUNDEX_BOOST_WEIGHT`) are read at process start (see [Similarity Configuration](/watchman/config/#similarity-configuration)). Changing them requires a restart.
@@ -90,7 +99,7 @@ Debug mode (`debug=true`) is substantially more expensive (extra buffers and det
 
 | Variable / setting | Role |
 |--------------------|------|
-| `SEARCH_MAX_IN_FLIGHT` | Max concurrent searches (admission control); default `GOMAXPROCS` |
+| `SEARCH_MAX_IN_FLIGHT` | Max concurrent *large* searches (admission control); default `GOMAXPROCS`. Candidate sets ≤ 100 skip the queue. |
 | `SEARCH_GOROUTINE_COUNT` | Fixed workers per search; empty = dynamic champion |
 | `Search.Goroutines` | Default / min / max for dynamic workers |
 | `TFIDF_ENABLED` | Optional name-term weighting (index-time weights) |

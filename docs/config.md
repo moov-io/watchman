@@ -114,7 +114,9 @@ Watchman:
       Min: 1
       Max: 25
 
-    # Max concurrent full searches admitted at once (admission control).
+    # Max concurrent *large* searches admitted at once (admission control).
+    # Candidate selection runs first; sets with <= 100 entities bypass the queue
+    # so exact/crypto hits are not blocked behind full-partition scans.
     # 0 or omit = GOMAXPROCS. Override with SEARCH_MAX_IN_FLIGHT.
     # MaxInFlight: 8
 
@@ -282,7 +284,7 @@ YAML configuration (example with OpenAI):
 
 | Environmental Variable             | Description                                                                                                   | Default |
 |------------------------------------|---------------------------------------------------------------------------------------------------------------|---------|
-| `SEARCH_MAX_IN_FLIGHT`             | Maximum number of concurrent full searches admitted at once. Extra requests wait. `0` / empty uses `GOMAXPROCS`. | `GOMAXPROCS` |
+| `SEARCH_MAX_IN_FLIGHT`             | Maximum number of concurrent *large* searches admitted at once (candidate set &gt; 100). Smaller sets bypass the queue. Extra large searches wait. `0` / empty uses `GOMAXPROCS`. | `GOMAXPROCS` |
 | `SEARCH_GOROUTINE_COUNT`           | Set a fixed number of goroutines used for each search. Default is to dynamically optimize for faster results. | Empty   |
 | `KEEP_STOPWORDS`                   | Boolean to keep stopwords in names.                                                                           | `false` |
 | `JARO_WINKLER_BOOST_THRESHOLD`     | Jaro-Winkler boost threshold.                                                                                 | 0.7     |
