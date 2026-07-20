@@ -6,9 +6,11 @@ import (
 	"encoding/base64"
 	"fmt"
 	"os"
+	"runtime"
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/moov-io/watchman/internal/concurrencychamp"
@@ -16,9 +18,8 @@ import (
 	"github.com/moov-io/watchman/internal/download"
 	"github.com/moov-io/watchman/internal/embeddings"
 	"github.com/moov-io/watchman/internal/index"
-	"github.com/moov-io/watchman/internal/indices"
 	"github.com/moov-io/watchman/internal/largest"
-	"github.com/moov-io/watchman/internal/minmaxmed"
+	"github.com/moov-io/watchman/internal/tfidf"
 	"github.com/moov-io/watchman/pkg/search"
 
 	"github.com/moov-io/base/log"
@@ -56,12 +57,21 @@ func NewService(logger log.Logger, config Config, database db.DB, indexedLists i
 		}
 	}
 
+	inFlight := config.MaxInFlight
+	if inFlight <= 0 {
+		inFlight = runtime.GOMAXPROCS(0)
+		if inFlight < 1 {
+			inFlight = 1
+		}
+	}
+
 	return &service{
 		logger:       logger,
 		config:       config,
 		indexedLists: indexedLists,
 		cm:           cm,
 		embeddings:   embeddingsSvc,
+		searchSem:    make(chan struct{}, inFlight),
 	}, nil
 }
 
@@ -73,6 +83,9 @@ type service struct {
 	embeddings   embeddings.Service
 
 	cm *concurrencychamp.ConcurrencyManager
+
+	// searchSem limits concurrent full-corpus searches to avoid goroutine oversubscription
+	searchSem chan struct{}
 }
 
 func (s *service) LatestStats() download.Stats {
@@ -210,19 +223,19 @@ type debugRespone struct {
 }
 
 func (s *service) performSearch(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error) {
+	// Admission control: bound concurrent full scans so worker pools do not oversubscribe CPUs
+	select {
+	case s.searchSem <- struct{}{}:
+		defer func() { <-s.searchSem }()
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+
 	_, span := telemetry.StartSpan(ctx, "perform-search", trace.WithAttributes(
 		attribute.Int("opts.limit", opts.Limit),
 		attribute.Float64("opts.min_match", opts.MinMatch),
 	))
 	defer span.End()
-
-	stats := minmaxmed.New(10) // window size
-	items := largest.NewItems[search.Entity[search.Value]](opts.Limit, opts.MinMatch)
-
-	var debugs *largest.Items[debugRespone]
-	if opts.Debug {
-		debugs = largest.NewItems[debugRespone](opts.Limit, opts.MinMatch)
-	}
 
 	goroutineCount, err := getGoroutineCount(s.cm)
 	if err != nil {
@@ -231,71 +244,88 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	}
 	start := time.Now()
 
-	// Check if the query is targeting ingested files
-	searchEntities, err := s.indexedLists.GetEntities(ctx, query.Source)
+	// Candidate selection: source/type partition + token/crypto inverted indexes
+	searchEntities, err := s.indexedLists.SelectCandidates(ctx, query)
 	if err != nil {
-		s.logger.Error().Logf("getting indexed entities failed: %v", err)
-		return nil, fmt.Errorf("getting indexed entities: %w", err)
+		s.logger.Error().Logf("selecting candidate entities failed: %v", err)
+		return nil, fmt.Errorf("selecting candidate entities: %w", err)
 	}
 
-	// Get TF-IDF index for weighted name matching
+	// Precompute query term weights once per search when TF-IDF is enabled
 	tfidfIndex := s.indexedLists.GetTFIDFIndex()
+	if tfidfIndex != nil && tfidfIndex.Enabled() && len(query.PreparedFields.NameFields) > 0 {
+		query.PreparedFields.NameWeights = tfidfIndex.GetWeights(query.PreparedFields.NameFields)
+	}
 
-	indices.ProcessSliceFn(searchEntities, goroutineCount, func(index search.Entity[search.Value]) {
-		start := time.Now()
-
-		debugSourceID := slices.Contains(opts.DebugSourceIDs, index.SourceID)
-
-		if debugSourceID {
-			s.logger.Debug().With(log.Fields{
-				"debug_source_id": log.String(index.SourceID),
-			}).Logf("indexed entity: %#v", index)
+	hasDebugIDs := false
+	for _, id := range opts.DebugSourceIDs {
+		if id != "" {
+			hasDebugIDs = true
+			break
 		}
+	}
 
-		var score float64
-		if !opts.Debug {
-			score = search.SimilarityWithTFIDF(query, index, tfidfIndex)
-		} else {
-			var buf bytes.Buffer
-			buf.Grow(1700) // approximate size of debug logs
+	// Per-worker local top-K (no shared mutex on the hot path), then merge
+	if goroutineCount < 1 {
+		goroutineCount = 1
+	}
+	localItems := make([]*largest.Items[search.Entity[search.Value]], goroutineCount)
+	var localDebugs []*largest.Items[debugRespone]
+	if opts.Debug {
+		localDebugs = make([]*largest.Items[debugRespone], goroutineCount)
+	}
+	for i := 0; i < goroutineCount; i++ {
+		localItems[i] = largest.NewItems[search.Entity[search.Value]](opts.Limit, opts.MinMatch)
+		if opts.Debug {
+			localDebugs[i] = largest.NewItems[debugRespone](opts.Limit, opts.MinMatch)
+		}
+	}
 
-			scores := search.DebugSimilarityWithTFIDF(&buf, query, index, tfidfIndex)
-			score = scores.FinalScore
+	score := func(w int, entities []search.Entity[search.Value]) {
+		var debugLocal *largest.Items[debugRespone]
+		if opts.Debug {
+			debugLocal = localDebugs[w]
+		}
+		scoreEntities(entities, query, tfidfIndex, opts, hasDebugIDs, s.logger, localItems[w], debugLocal)
+	}
 
-			if debugSourceID {
-				s.logger.Debug().With(log.Fields{
-					"debug_source_id": log.String(index.SourceID),
-				}).Logf("similarity score: %#v", scores)
-
-				s.logger.Debug().With(log.Fields{
-					"debug_source_id": log.String(index.SourceID),
-				}).Logf("scoring debug: %#v", buf.String())
+	if goroutineCount <= 1 || len(searchEntities) < goroutineCount {
+		score(0, searchEntities)
+	} else {
+		chunkSize := (len(searchEntities) + goroutineCount - 1) / goroutineCount
+		var wg sync.WaitGroup
+		worker := 0
+		for startIdx := 0; startIdx < len(searchEntities); startIdx += chunkSize {
+			endIdx := startIdx + chunkSize
+			if endIdx > len(searchEntities) {
+				endIdx = len(searchEntities)
 			}
-
-			// Add debug buffer to be stored
-			debugs.Add(largest.Item[debugRespone]{
-				Value: debugRespone{
-					scores: scores,
-					buffer: &buf,
-				},
-				Weight: score,
-			})
+			w := worker
+			if w >= goroutineCount {
+				w = goroutineCount - 1
+			}
+			wg.Add(1)
+			go func(w, startIdx, endIdx int) {
+				defer wg.Done()
+				score(w, searchEntities[startIdx:endIdx])
+			}(w, startIdx, endIdx)
+			worker++
 		}
+		wg.Wait()
+	}
 
-		dur := time.Since(start)
-		stats.AddDuration(dur)
-
-		if debugSourceID {
-			s.logger.Debug().With(log.Fields{
-				"debug_source_id": log.String(index.SourceID),
-			}).Logf("final score: %.5f after %v", score, dur)
+	// Merge local top-K into final results
+	items := largest.NewItems[search.Entity[search.Value]](opts.Limit, opts.MinMatch)
+	var debugs *largest.Items[debugRespone]
+	if opts.Debug {
+		debugs = largest.NewItems[debugRespone](opts.Limit, opts.MinMatch)
+	}
+	for i := range localItems {
+		items.Merge(localItems[i])
+		if opts.Debug {
+			debugs.Merge(localDebugs[i])
 		}
-
-		items.Add(largest.Item[search.Entity[search.Value]]{
-			Value:  index,
-			Weight: score,
-		})
-	})
+	}
 
 	diff := time.Since(start)
 	s.cm.RecordDuration(goroutineCount, diff)
@@ -306,11 +336,11 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 		attribute.Int64("search.duration", diff.Milliseconds()),
 	)
 
-	// After processing the list add stats to the span
-	stats.AddEvent(span)
-
 	results := items.Items()
-	debugLogs := debugs.Items()
+	var debugLogs []largest.Item[debugRespone]
+	if debugs != nil {
+		debugLogs = debugs.Items()
+	}
 	var out []search.SearchedEntity[search.Value]
 
 	for idx, res := range results {
@@ -336,6 +366,69 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	}
 
 	return out, nil
+}
+
+func scoreEntities(
+	entities []search.Entity[search.Value],
+	query search.Entity[search.Value],
+	tfidfIndex *tfidf.Index,
+	opts SearchOpts,
+	hasDebugIDs bool,
+	logger log.Logger,
+	items *largest.Items[search.Entity[search.Value]],
+	debugs *largest.Items[debugRespone],
+) {
+	for i := range entities {
+		indexEntity := entities[i]
+
+		if hasDebugIDs && slices.Contains(opts.DebugSourceIDs, indexEntity.SourceID) {
+			logger.Debug().With(log.Fields{
+				"debug_source_id": log.String(indexEntity.SourceID),
+			}).Logf("indexed entity: %#v", indexEntity)
+		}
+
+		var score float64
+		if !opts.Debug {
+			score = search.SimilarityWithTFIDF(query, indexEntity, tfidfIndex)
+		} else {
+			var buf bytes.Buffer
+			buf.Grow(1700) // approximate size of debug logs
+
+			scores := search.DebugSimilarityWithTFIDF(&buf, query, indexEntity, tfidfIndex)
+			score = scores.FinalScore
+
+			if hasDebugIDs && slices.Contains(opts.DebugSourceIDs, indexEntity.SourceID) {
+				logger.Debug().With(log.Fields{
+					"debug_source_id": log.String(indexEntity.SourceID),
+				}).Logf("similarity score: %#v", scores)
+
+				logger.Debug().With(log.Fields{
+					"debug_source_id": log.String(indexEntity.SourceID),
+				}).Logf("scoring debug: %#v", buf.String())
+			}
+
+			if debugs != nil {
+				debugs.AddLocal(largest.Item[debugRespone]{
+					Value: debugRespone{
+						scores: scores,
+						buffer: &buf,
+					},
+					Weight: score,
+				})
+			}
+		}
+
+		if hasDebugIDs && slices.Contains(opts.DebugSourceIDs, indexEntity.SourceID) {
+			logger.Debug().With(log.Fields{
+				"debug_source_id": log.String(indexEntity.SourceID),
+			}).Logf("final score: %.5f", score)
+		}
+
+		items.AddLocal(largest.Item[search.Entity[search.Value]]{
+			Value:  indexEntity,
+			Weight: score,
+		})
+	}
 }
 
 func getGoroutineCount(cm *concurrencychamp.ConcurrencyManager) (int, error) {
