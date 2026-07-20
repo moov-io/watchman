@@ -134,23 +134,30 @@ Watchman allows customizing match thresholds for different risk tolerances:
 
 ## Performance Optimizations
 
-Watchman includes several performance enhancements:
+Watchman includes several performance enhancements. See [Performance](/watchman/performance/) and [Indexing](/watchman/indexing/) for operational detail.
 
-1. **Early Termination**
-   - Once a high-confidence match is found, detailed scoring may be skipped
-   - Reduces processing time for obvious matches
+1. **Corpus partitions and candidate indexes**
+   - Entities are partitioned by source and type at index time
+   - Name-token inverted indexes, exact-name maps, and crypto lookups select candidates before full similarity scoring
+   - Empty type/source partitions return no candidates (no cross-list leak)
+   - Empty name-token hits fall back to a full *partition* scan so recall is preserved within that filter
 
-2. **Phonetic Pre-filtering**
-   - Initial filtering based on phonetic codes
-   - Narrows candidate pool before expensive comparison
+2. **Phonetic filtering inside Jaro-Winkler**
+   - First-character phonetic classes skip unlikely token pairs before running full Jaro-Winkler
+   - Optional full Soundex boost when `USE_SOUNDEX_MATCHING` is enabled
 
-3. **Caching**
-   - Frequently searched entities are cached
-   - Improves performance for common searches
+3. **Precomputed prepared fields**
+   - Names, alt names, former names, addresses, and optional TF-IDF weights are prepared at index/query normalize time
+   - Bulk scoring avoids re-normalizing index entities on every comparison
+   - Critical exact ID/crypto/contact matches short-circuit to a perfect score without full fuzzy work
 
-4. **Parallel Processing**
-   - Multi-threaded search for large entity sets
-   - Scales with available CPU cores
+4. **Parallel scoring with admission control**
+   - Candidate selection runs first; searches with ≤100 candidates skip the admission queue
+   - Larger searches acquire `SEARCH_MAX_IN_FLIGHT` so stacked worker pools do not oversubscribe CPUs
+   - Multi-worker searches use local top-K heaps and merge; single-worker paths score directly into the final heap
+
+5. **Address high-confidence short-circuit**
+   - Within a single address pair comparison, scoring can stop early once a high-confidence field match is found
 
 ## Benefits for Compliance Teams
 

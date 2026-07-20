@@ -17,7 +17,9 @@ import (
 )
 
 func TestJaroWinkler(t *testing.T) {
+	t.Cleanup(stringscore.ResetEnvConfigForTest)
 	t.Setenv("DISABLE_PHONETIC_FILTERING", "")
+	stringscore.ReloadEnvConfig()
 
 	cases := []struct {
 		indexed, search string
@@ -230,8 +232,11 @@ func TestEql(t *testing.T) {
 
 // TestJaroWinklerWithSoundex verifies Soundex boost integration.
 func TestJaroWinklerWithSoundex(t *testing.T) {
+	t.Cleanup(stringscore.ResetEnvConfigForTest)
+
 	t.Run("Soundex disabled", func(t *testing.T) {
 		t.Setenv("USE_SOUNDEX_MATCHING", "no")
+		stringscore.ReloadEnvConfig()
 
 		// Should work as before (no Soundex boost)
 		score := stringscore.BestPairsJaroWinkler(
@@ -244,6 +249,7 @@ func TestJaroWinklerWithSoundex(t *testing.T) {
 	t.Run("Soundex enabled - matching phonetics", func(t *testing.T) {
 		t.Setenv("USE_SOUNDEX_MATCHING", "yes")
 		t.Setenv("SOUNDEX_BOOST_WEIGHT", "0.12")
+		stringscore.ReloadEnvConfig()
 
 		// These should get a Soundex boost (base scores ~0.81 and ~0.92 get lifted)
 		scoringCases := []struct {
@@ -267,6 +273,7 @@ func TestJaroWinklerWithSoundex(t *testing.T) {
 
 	t.Run("Soundex enabled - non-matching phonetics", func(t *testing.T) {
 		t.Setenv("USE_SOUNDEX_MATCHING", "yes")
+		stringscore.ReloadEnvConfig()
 
 		// These should NOT get a Soundex boost
 		score := stringscore.BestPairsJaroWinkler(
@@ -279,11 +286,13 @@ func TestJaroWinklerWithSoundex(t *testing.T) {
 	t.Run("Feature flag test", func(t *testing.T) {
 		// With flag disabled, legacy behavior (no boost)
 		t.Setenv("USE_SOUNDEX_MATCHING", "no")
+		stringscore.ReloadEnvConfig()
 		score1 := stringscore.BestPairsJaroWinkler(strings.Fields("smith"), strings.Fields("smythe"))
 
 		// With flag enabled + positive weight, score should be strictly higher
 		t.Setenv("USE_SOUNDEX_MATCHING", "yes")
 		t.Setenv("SOUNDEX_BOOST_WEIGHT", "0.10")
+		stringscore.ReloadEnvConfig()
 		score2 := stringscore.BestPairsJaroWinkler(strings.Fields("smith"), strings.Fields("smythe"))
 
 		require.Greater(t, score2, score1, "Soundex-boosted score should be strictly greater than non-boosted")

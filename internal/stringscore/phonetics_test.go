@@ -20,15 +20,19 @@ func TestFirstCharacterSoundexMatch(t *testing.T) {
 }
 
 func TestDisablePhoneticFiltering(t *testing.T) {
+	t.Cleanup(ResetEnvConfigForTest)
+
 	search := strings.Fields("ian mckinley")
 	indexed := strings.Fields("tian xiang 7")
 
 	t.Setenv("DISABLE_PHONETIC_FILTERING", "no")
+	ReloadEnvConfig()
 	score := BestPairsJaroWinkler(search, indexed)
 	require.InDelta(t, 0.00, score, 0.01)
 
 	// Disable filtering (force the compare)
 	t.Setenv("DISABLE_PHONETIC_FILTERING", "yes")
+	ReloadEnvConfig()
 
 	score = BestPairsJaroWinkler(search, indexed)
 	require.InDelta(t, 0.544, score, 0.01)

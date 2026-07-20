@@ -12,6 +12,9 @@ import (
 )
 
 func TestBestPairsJaroWinkler__FalsePositives(t *testing.T) {
+	t.Cleanup(stringscore.ResetEnvConfigForTest)
+	stringscore.ResetEnvConfigForTest()
+
 	// Words in the query should be matched against at most one indexed word. Doubled names on the sanctioned list can
 	// skew results
 	// 1. SDN Entity 40273, VLADIMIROV, Vladimir Vladimirovich
@@ -48,6 +51,9 @@ func TestBestPairsJaroWinkler__FalsePositives(t *testing.T) {
 }
 
 func TestBestPairsJaroWinkler__TruePositives(t *testing.T) {
+	t.Cleanup(stringscore.ResetEnvConfigForTest)
+	stringscore.ResetEnvConfigForTest()
+
 	// Unmatched indexed words had a large weight, causing false negatives for missing "middle names"
 	// 1. Saddam Hussein
 	oldScore, newScore := compareAlgorithms("saddam hussein al tikriti", "saddam hussien")

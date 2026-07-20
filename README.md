@@ -35,7 +35,7 @@ Moov Watchman is a high-performance sanctions screening and compliance tool that
 - **Geocoding**: Using one of the supported providers.
 - **Senzing Support**: Import data files in [senzing format](https://www.senzing.com/docs/entity_specification/) and get search responses as senzing entities.
 - **Comprehensive Coverage**: Integrates multiple global watchlists in one unified system
-- **High-Performance Search**: Optimized for speed and accuracy using advanced matching algorithms
+- **High-Performance Search**: In-memory corpus with source/type partitions, name-token and crypto candidate indexes, admission control, and parallel Jaro-Winkler scoring (see [Performance](https://moov-io.github.io/watchman/performance/) and [Indexing](https://moov-io.github.io/watchman/indexing/))
 - **Flexible Integration**: HTTP API and Go library for easy integration into your systems
 - **Automated Updates**: Regular refreshes of watchlist data to ensure compliance
 - **Model Context Protocol**: Integrate AI agents into screening workflows with MCP.
@@ -67,7 +67,7 @@ Moov Watchman is actively used in multiple production environments. Please star 
 
 The Watchman project implements an HTTP server, [Go library](https://pkg.go.dev/github.com/moov-io/watchman/pkg/search#Client), and experimental [Model Context Protocol (MCP)](https://moov-io.github.io/watchman/mcp/) server for searching against Watchman.
 
-Government lists are downloaded (and refreshed), parsed, prepared, normalized, and indexed in-memory. Searches operate concurrently and do not require an external database or connection.
+Government lists are downloaded (and refreshed), parsed, prepared, normalized, and indexed in-memory. On each refresh Watchman builds source/type partitions, inverted name-token indexes, exact-name maps, and crypto address lookups so searches score a **candidate set** (with safe fallback to a full *source/type partition* on name typos) rather than always scanning every entity. Candidate selection runs before admission control; tightly pruned queries (≤100 candidates) skip the queue. Prefer `type` and `source` on `/v2/search` for best latency—see [Performance](https://moov-io.github.io/watchman/performance/), [Indexing](https://moov-io.github.io/watchman/indexing/), and [Configuration](https://moov-io.github.io/watchman/config/#similarity-configuration) (`SEARCH_MAX_IN_FLIGHT`, `SEARCH_GOROUTINE_COUNT`).
 
 ### Docker
 

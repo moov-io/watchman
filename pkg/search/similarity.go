@@ -49,8 +49,9 @@ func Similarity[Q any, I any](query Entity[Q], index Entity[I]) float64 {
 
 // SimilarityWithTFIDF calculates a match score with optional TF-IDF weighting for name matching.
 // When tfidfIndex is nil or disabled, falls back to standard scoring.
+// This path avoids allocating the detailed ScorePiece slice returned by DebugSimilarity.
 func SimilarityWithTFIDF[Q any, I any](query Entity[Q], index Entity[I], tfidfIndex *tfidf.Index) float64 {
-	return DebugSimilarityWithTFIDF(nil, query, index, tfidfIndex).FinalScore
+	return scoreSimilarityFast(query, index, tfidfIndex)
 }
 
 // DebugSimilarity does the same as Similarity, but logs debug info to w.
@@ -137,13 +138,12 @@ func DetailedSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity
 
 // DetailedSimilarityWithTFIDF returns scoring details with optional TF-IDF weighting for name matching.
 func DetailedSimilarityWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], tfidfIndex *tfidf.Index) SimilarityScore {
-	out := SimilarityScore{
-		Pieces: make([]ScorePiece, 0, 9),
-	}
+	var out SimilarityScore
 
 	var exactOverride bool
 
-	// Quick filters
+	// Quick filters — these are free when the search service already partitioned,
+	// but remain here for direct Similarity() callers.
 	if query.Source != sourceEmpty && !query.Source.IsRequestType() {
 		if query.Source != index.Source {
 			out.Pieces = emptyPieces
@@ -166,56 +166,113 @@ func DetailedSimilarityWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], ind
 		}
 	}
 
+	// Stack-allocated piece buffer avoids per-comparison heap alloc of the slice header backing array
+	var pieces [9]ScorePiece
+
 	// Critical identifiers (highest weight)
-	exactIdentifiers := compareExactIdentifiers(w, query, index, criticalIdWeight)
-	if exactIdentifiers.Matched && exactIdentifiers.FieldsCompared > 0 {
+	pieces[0] = compareExactIdentifiers(w, query, index, criticalIdWeight)
+	if pieces[0].Matched && pieces[0].FieldsCompared > 0 {
 		exactOverride = true
-		if math.IsNaN(exactIdentifiers.Score) {
-			exactIdentifiers.Score = 1.0
+		if math.IsNaN(pieces[0].Score) {
+			pieces[0].Score = 1.0
 		}
 	}
 
-	exactCryptoAddresses := compareExactCryptoAddresses(w, query, index, criticalIdWeight)
-	if exactCryptoAddresses.Matched && exactCryptoAddresses.FieldsCompared > 0 {
+	pieces[1] = compareExactCryptoAddresses(w, query, index, criticalIdWeight)
+	if pieces[1].Matched && pieces[1].FieldsCompared > 0 {
 		exactOverride = true
-		if math.IsNaN(exactCryptoAddresses.Score) {
-			exactCryptoAddresses.Score = 1.0
+		if math.IsNaN(pieces[1].Score) {
+			pieces[1].Score = 1.0
 		}
 	}
 
-	exactGovernmentIDs := compareExactGovernmentIDs(w, query, index, criticalIdWeight)
-	if exactGovernmentIDs.Matched && exactGovernmentIDs.FieldsCompared > 0 {
+	pieces[2] = compareExactGovernmentIDs(w, query, index, criticalIdWeight)
+	if pieces[2].Matched && pieces[2].FieldsCompared > 0 {
 		exactOverride = true
-		if math.IsNaN(exactGovernmentIDs.Score) {
-			exactGovernmentIDs.Score = 1.0
+		if math.IsNaN(pieces[2].Score) {
+			pieces[2].Score = 1.0
 		}
 	}
 
-	exactContactInfo := compareExactContactInfo(w, query, index, criticalIdWeight)
-	if exactContactInfo.Matched && exactContactInfo.FieldsCompared > 0 {
+	pieces[3] = compareExactContactInfo(w, query, index, criticalIdWeight)
+	if pieces[3].Matched && pieces[3].FieldsCompared > 0 {
 		exactOverride = true
-		if math.IsNaN(exactContactInfo.Score) {
-			exactContactInfo.Score = 1.0
+		if math.IsNaN(pieces[3].Score) {
+			pieces[3].Score = 1.0
 		}
 	}
-	out.Pieces = append(out.Pieces, exactIdentifiers, exactCryptoAddresses, exactGovernmentIDs, exactContactInfo)
 
 	// Name comparison (second highest weight) - use TF-IDF if provided
-	out.Pieces = append(out.Pieces,
-		compareNameWithTFIDF(w, query, index, nameWeight, tfidfIndex),
-		compareEntityTitlesFuzzy(w, query, index, nameWeight),
-	)
+	pieces[4] = compareNameWithTFIDF(w, query, index, nameWeight, tfidfIndex)
+	pieces[5] = compareEntityTitlesFuzzy(w, query, index, nameWeight)
 
 	// Supporting information (lower weight)
-	out.Pieces = append(out.Pieces,
-		compareEntityDates(w, query, index, supportingInfoWeight),
-		compareAddresses(w, query, index, addressWeight),
-		compareSupportingInfo(w, query, index, supportingInfoWeight),
-	)
+	pieces[6] = compareEntityDates(w, query, index, supportingInfoWeight)
+	pieces[7] = compareAddresses(w, query, index, addressWeight)
+	pieces[8] = compareSupportingInfo(w, query, index, supportingInfoWeight)
 
-	out.FinalScore = calculateFinalScore(w, out.Pieces, exactOverride, query, index)
+	pieceSlice := pieces[:]
+	out.FinalScore = calculateFinalScore(w, pieceSlice, exactOverride, query, index)
+
+	// Only allocate a heap-backed Pieces slice when the caller needs details (debug writer)
+	// or when Exact override short pieces aren't used. Always copy for API stability of Details.
+	out.Pieces = make([]ScorePiece, 9)
+	copy(out.Pieces, pieceSlice)
 
 	return out
+}
+
+// scoreSimilarityFast is the allocation-light path used by bulk search: it returns only the final score.
+func scoreSimilarityFast[Q any, I any](query Entity[Q], index Entity[I], tfidfIndex *tfidf.Index) float64 {
+	// Quick filters
+	if query.Source != sourceEmpty && !query.Source.IsRequestType() {
+		if query.Source != index.Source {
+			return 0
+		}
+	}
+	if query.SourceID != "" {
+		if query.SourceID == index.SourceID {
+			return 1.0
+		}
+		return 0
+	}
+	if query.Type != emptyEntityType {
+		if query.Type != index.Type {
+			return 0
+		}
+	}
+
+	// Critical exact matches always force final score 1.0 — skip expensive name/address work.
+	p0 := compareExactIdentifiers(nil, query, index, criticalIdWeight)
+	if p0.Matched && p0.FieldsCompared > 0 {
+		return 1.0
+	}
+	p1 := compareExactCryptoAddresses(nil, query, index, criticalIdWeight)
+	if p1.Matched && p1.FieldsCompared > 0 {
+		return 1.0
+	}
+	p2 := compareExactGovernmentIDs(nil, query, index, criticalIdWeight)
+	if p2.Matched && p2.FieldsCompared > 0 {
+		return 1.0
+	}
+	p3 := compareExactContactInfo(nil, query, index, criticalIdWeight)
+	if p3.Matched && p3.FieldsCompared > 0 {
+		return 1.0
+	}
+
+	pieces := [9]ScorePiece{
+		p0,
+		p1,
+		p2,
+		p3,
+		compareNameWithTFIDF(nil, query, index, nameWeight, tfidfIndex),
+		compareEntityTitlesFuzzy(nil, query, index, nameWeight),
+		compareEntityDates(nil, query, index, supportingInfoWeight),
+		compareAddresses(nil, query, index, addressWeight),
+		compareSupportingInfo(nil, query, index, supportingInfoWeight),
+	}
+
+	return calculateFinalScore(nil, pieces[:], false, query, index)
 }
 
 // SimilarityScore gives detailed results of which fields matched and how they were scored against each other.
