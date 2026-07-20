@@ -203,19 +203,13 @@ func (c *corpus) selectCandidates(query search.Entity[search.Value], opts Candid
 	// Crypto exact-address fast path
 	if len(query.CryptoAddresses) > 0 {
 		var hits []int
-		seen := make(map[int]struct{})
 		for _, addr := range query.CryptoAddresses {
 			key := cryptoKey(addr.Currency, addr.Address)
 			for _, idx := range c.cryptoKeys[key] {
 				// partition is sorted ascending (built by appending increasing indices)
-				if _, found := slices.BinarySearch(partition, idx); !found {
-					continue
+				if _, found := slices.BinarySearch(partition, idx); found {
+					hits = append(hits, idx)
 				}
-				if _, ok := seen[idx]; ok {
-					continue
-				}
-				seen[idx] = struct{}{}
-				hits = append(hits, idx)
 			}
 		}
 		if len(hits) > 0 {
@@ -223,13 +217,10 @@ func (c *corpus) selectCandidates(query search.Entity[search.Value], opts Candid
 			// Otherwise nameCandidateIndices returns the full partition and would
 			// defeat the crypto exact-address fast path.
 			if len(query.PreparedFields.NameFields) > 0 {
-				for _, idx := range c.nameCandidateIndices(query, partition, opts) {
-					if _, ok := seen[idx]; !ok {
-						seen[idx] = struct{}{}
-						hits = append(hits, idx)
-					}
-				}
+				hits = append(hits, c.nameCandidateIndices(query, partition, opts)...)
 			}
+			slices.Sort(hits)
+			hits = slices.Compact(hits)
 			return c.materialize(hits)
 		}
 	}
@@ -261,19 +252,13 @@ func (c *corpus) nameCandidateIndices(query search.Entity[search.Value], partiti
 	}
 
 	// Union postings for query tokens, restricted to partition.
-	// Membership uses binary search over the sorted partition (no map alloc per query).
-	seen := make(map[int]struct{})
+	// Deduplicate with sort+compact instead of a per-query seen map.
 	var candidates []int
 	for _, tok := range tokens {
 		for _, idx := range c.nameTokens[tok] {
-			if _, found := slices.BinarySearch(partition, idx); !found {
-				continue
+			if _, found := slices.BinarySearch(partition, idx); found {
+				candidates = append(candidates, idx)
 			}
-			if _, ok := seen[idx]; ok {
-				continue
-			}
-			seen[idx] = struct{}{}
-			candidates = append(candidates, idx)
 		}
 	}
 
@@ -281,6 +266,9 @@ func (c *corpus) nameCandidateIndices(query search.Entity[search.Value], partiti
 	if len(candidates) == 0 {
 		return partition
 	}
+
+	slices.Sort(candidates)
+	candidates = slices.Compact(candidates)
 
 	// If candidates cover too much of the partition, scoring them is no cheaper
 	maxCount := int(float64(len(partition)) * opts.MaxFraction)
