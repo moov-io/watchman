@@ -51,12 +51,12 @@ func (l *lists) GetEntities(ctx context.Context, source search.SourceList) ([]se
 
 	if exists {
 		if l.corpus != nil {
-			// Prefer partitioned view when a specific source is requested
+			// Prefer partitioned view when a specific source is requested.
+			// Always return the partition (even if empty) so we never leak entities
+			// from other sources when the requested partition has no rows.
 			if src := string(source); src != "" && !source.IsRequestType() {
 				idxs := l.corpus.partitionIndices(source, "")
-				if len(idxs) > 0 {
-					return l.corpus.materialize(idxs), nil
-				}
+				return l.corpus.materialize(idxs), nil
 			}
 			return l.corpus.entities, nil
 		}

@@ -75,12 +75,17 @@ func buildCorpus(entities []search.Entity[search.Value], tfidfIndex *tfidf.Index
 			c.exactNames[name] = append(c.exactNames[name], i)
 		}
 
-		// Name tokens (primary, alt, historical)
+		// Name tokens (primary, alt, historical) — one posting per token per entity
+		seenTokens := make(map[string]struct{})
 		addTokens := func(tokens []string) {
 			for _, tok := range tokens {
 				if tok == "" {
 					continue
 				}
+				if _, dup := seenTokens[tok]; dup {
+					continue
+				}
+				seenTokens[tok] = struct{}{}
 				c.nameTokens[tok] = append(c.nameTokens[tok], i)
 			}
 		}

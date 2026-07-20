@@ -38,19 +38,20 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 		}),
 	}
 
-	lists := NewLists(nil)
-	lists.Update(download.Stats{
+	stats := download.Stats{
 		Entities: entities,
 		Lists: map[string]int{
 			string(search.SourceUSOFAC): 2,
 			string(search.SourceEUCSL):  1,
 		},
-	})
+	}
 
+	idx := NewLists(nil)
+	idx.Update(stats)
 	ctx := context.Background()
 
 	t.Run("GetEntities by source", func(t *testing.T) {
-		got, err := lists.GetEntities(ctx, search.SourceUSOFAC)
+		got, err := idx.GetEntities(ctx, search.SourceUSOFAC)
 		require.NoError(t, err)
 		require.Len(t, got, 2)
 	})
@@ -61,7 +62,7 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 			Type:   search.EntityBusiness,
 			Source: search.SourceUSOFAC,
 		})
-		cands, err := lists.SelectCandidates(ctx, query)
+		cands, err := idx.SelectCandidates(ctx, query)
 		require.NoError(t, err)
 		// Should not include the person or EU entity
 		require.NotEmpty(t, cands)
@@ -81,7 +82,7 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 			},
 		})
 		// empty source → all sources partition
-		cands, err := lists.SelectCandidates(ctx, query)
+		cands, err := idx.SelectCandidates(ctx, query)
 		require.NoError(t, err)
 		require.Len(t, cands, 1)
 		require.Equal(t, "3", cands[0].SourceID)
@@ -93,11 +94,58 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 			Type:   search.EntityPerson,
 			Source: search.SourceUSOFAC,
 		})
-		cands, err := lists.SelectCandidates(ctx, query)
+		cands, err := idx.SelectCandidates(ctx, query)
 		require.NoError(t, err)
 		// Full person partition for US OFAC
 		require.Len(t, cands, 1)
 		require.Equal(t, "1", cands[0].SourceID)
+	})
+
+	t.Run("GetEntities empty partition does not leak other sources", func(t *testing.T) {
+		// Source is registered in Lists but has no entities in the corpus
+		idx.Update(download.Stats{
+			Entities: entities,
+			Lists: map[string]int{
+				string(search.SourceUSOFAC): 2,
+				string(search.SourceEUCSL):  1,
+				string(search.SourceUKCSL):  0, // listed but empty
+			},
+		})
+		got, err := idx.GetEntities(ctx, search.SourceUKCSL)
+		require.NoError(t, err)
+		require.Empty(t, got, "empty source partition must not fall back to all entities")
+	})
+
+	t.Run("name tokens deduped per entity", func(t *testing.T) {
+		// Rebuild with an entity that repeats a token across primary and alt names
+		dup := mustNorm(search.Entity[search.Value]{
+			Name:     "Smith Trading Smith",
+			Type:     search.EntityBusiness,
+			Source:   search.SourceUSOFAC,
+			SourceID: "dup",
+			Business: &search.Business{
+				Name:     "Smith Trading Smith",
+				AltNames: []string{"Smith Holdings"},
+			},
+		})
+		idx.Update(download.Stats{
+			Entities: []search.Entity[search.Value]{dup},
+			Lists:    map[string]int{string(search.SourceUSOFAC): 1},
+		})
+
+		cands, err := idx.SelectCandidates(ctx, mustNorm(search.Entity[search.Value]{
+			Name:   "Smith",
+			Type:   search.EntityBusiness,
+			Source: search.SourceUSOFAC,
+		}))
+		require.NoError(t, err)
+		require.Len(t, cands, 1)
+
+		impl := idx.(*lists)
+		impl.mu.RLock()
+		postings := impl.corpus.nameTokens["smith"]
+		impl.mu.RUnlock()
+		require.Equal(t, []int{0}, postings, "entity index should appear once per token")
 	})
 }
 
