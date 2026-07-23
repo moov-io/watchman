@@ -72,7 +72,6 @@ require (
 	github.com/fyne-io/image v0.1.1 // indirect
 	github.com/fyne-io/oksvg v0.2.0 // indirect
 	github.com/go-gl/gl v0.0.0-20260331235117-4566fea9a276 // indirect
-	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a // indirect
 	github.com/go-gl/glfw/v3.4/glfw v0.1.0-pre.1.0.20260707082822-2a407d02d01a // indirect
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/go-kit/kit v0.13.0 // indirect
@@ -119,7 +118,6 @@ require (
 	github.com/prometheus/common v0.67.5 // indirect
 	github.com/prometheus/procfs v0.20.1 // indirect
 	github.com/rickar/cal/v2 v2.1.27 // indirect
-	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/rymdport/portal v0.4.2 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/segmentio/asm v1.1.3 // indirect
@@ -159,7 +157,7 @@ require (
 	google.golang.org/genproto v0.0.0-20260504160031-60b97b32f348 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260504160031-60b97b32f348 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260511170946-3700d4141b60 // indirect
-	google.golang.org/grpc v1.81.1 // indirect
+	google.golang.org/grpc v1.82.1 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
