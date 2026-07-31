@@ -3,6 +3,8 @@ package index
 import (
 	"context"
 	"fmt"
+	"runtime"
+	"runtime/debug"
 	"sync"
 
 	"github.com/moov-io/watchman"
@@ -112,15 +114,44 @@ func (l *lists) LatestStats() download.Stats {
 	return out
 }
 
+// Update replaces the searchable corpus with a newly downloaded generation.
+//
+// Memory ownership after Update:
+//   - The entity slice and TF-IDF index live only on the in-memory corpus.
+//   - latestStats keeps list metadata (counts, hashes, timestamps) only.
+//
+// Callers should drop their own references to stats.Entities after Update so the
+// previous generation (and download temps) can be collected. Update runs a GC
+// and FreeOSMemory after the swap to reduce refresh peak RSS / OOM risk when the
+// old and new corpora would otherwise coexist until the next natural GC cycle.
 func (l *lists) Update(latest download.Stats) {
-	// Build search corpus outside the write lock (CPU-heavy)
+	// Build search corpus outside the write lock (CPU-heavy).
+	// corpus.entities aliases latest.Entities (no extra copy of the slice).
 	c := buildCorpus(latest.Entities, latest.TFIDFIndex)
 
-	l.mu.Lock()
-	defer l.mu.Unlock()
+	// Metadata only — do not retain a second root to the entity slice / TF-IDF
+	// via latestStats (LatestStats() already omitted Entities; this makes the
+	// in-process graph match that intent).
+	meta := latest
+	meta.Entities = nil
+	meta.TFIDFIndex = nil
 
-	l.latestStats = latest
+	l.mu.Lock()
+	prev := l.corpus
+	l.latestStats = meta
 	l.corpus = c
+	l.mu.Unlock()
+
+	// Previous corpus is unreachable from lists after unlock. Clear the local
+	// ref so this frame does not keep it alive across GC below.
+	prev = nil
+	_ = prev
+
+	// Refresh is infrequent; reclaim the prior generation promptly so cgroup
+	// peaks are closer to one corpus than two. FreeOSMemory returns idle heap
+	// pages to the OS (important after large refreshes).
+	runtime.GC()
+	debug.FreeOSMemory()
 }
 
 func (l *lists) GetTFIDFIndex() *tfidf.Index {

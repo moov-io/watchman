@@ -153,17 +153,26 @@ func (r *Refresher) run(ctx context.Context) error {
 		return err
 	}
 
+	entityCount := len(stats.Entities)
 	r.logger.Info().Logf("data refreshed - %v entities from %v lists took %v (using %.2fGB)",
-		len(stats.Entities), len(stats.Lists), stats.EndedAt.Sub(stats.StartedAt), getCurrentMemoryUsed())
+		entityCount, len(stats.Lists), stats.EndedAt.Sub(stats.StartedAt), getCurrentMemoryUsed())
 
 	if r.indexedLists != nil {
+		// Index takes ownership of the entity slice inside the corpus. Clear our
+		// local roots afterward so RefreshAll's return value does not keep the
+		// previous generation + new slice alive on this stack until run returns.
 		r.indexedLists.Update(stats)
+		stats.Entities = nil
+		stats.TFIDFIndex = nil
 	}
 	if r.searchService != nil {
+		// Rebuild reads entities from the live index (corpus), not stats.Entities.
 		if err := r.searchService.RebuildEmbeddingIndex(ctx); err != nil {
 			return fmt.Errorf("failed to rebuild embedding index: %w", err)
 		}
 	}
+
+	r.logger.Info().Logf("search index swapped (%d entities, heap %.2fGB)", entityCount, getCurrentMemoryUsed())
 	return nil
 }
 
