@@ -137,15 +137,11 @@ func (l *lists) Update(latest download.Stats) {
 	meta.TFIDFIndex = nil
 
 	l.mu.Lock()
-	prev := l.corpus
+	// Overwriting l.corpus drops the only lists-owned root to the previous
+	// generation; nothing else in this frame retains it.
 	l.latestStats = meta
 	l.corpus = c
 	l.mu.Unlock()
-
-	// Previous corpus is unreachable from lists after unlock. Clear the local
-	// ref so this frame does not keep it alive across GC below.
-	prev = nil
-	_ = prev
 
 	// Refresh is infrequent; reclaim the prior generation promptly so cgroup
 	// peaks are closer to one corpus than two. FreeOSMemory returns idle heap
