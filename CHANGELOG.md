@@ -2,6 +2,17 @@
 
 Please refer to the [Github Releases](https://github.com/moov-io/watchman/releases) page for future updates.
 
+## v0.65.2 (Released 2026-07-31)
+
+IMPROVEMENTS
+
+- download/index: reduce refresh memory peak after corpus swap — corpus owns entity slice; clear metadata dual-roots; GC + FreeOSMemory after index swap so heap returns to steady-state when Update returns instead of lingering near ~2.5× until a later GC ([#791](https://github.com/moov-io/watchman/pull/791))
+
+BUILD
+
+- fix(deps): update module github.com/openrouterteam/go-sdk to v0.7.10 (#788)
+- fix(deps): update module github.com/openrouterteam/go-sdk to v0.7.17 (#789)
+
 ## v0.52.2 (Released 2025-06-02)
 
 IMPROVEMENTS
