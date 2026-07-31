@@ -1,0 +1,54 @@
+# Watchman corpusfile baseline — OFAC package testdata (pkg/sources/ofac/testdata)
+# Machine: Apple M4 Max, darwin/arm64
+# Updated: 2026-07-31 (deeper cold split + gob/zstd)
+# Re-run:
+#   go test ./internal/corpusfile/ -run TestCorpus_MemoryReport -v
+#   go test ./internal/corpusfile/ -bench='BenchmarkCorpus_' -benchmem -count=5
+#
+# Size proxies use gob-encoded byte lengths (GC-stable), not RSS.
+
+## Field breakdown (isolated gob of each group; sums > full entity gob)
+entities=16989 total=33.61MB
+  PreparedFields   13.47 MB  40.1%   # still hot — largest group
+  SourceData        7.37 MB  21.9%   # cold
+  Person            2.78 MB   8.3%   # Name/AltNames cold; IDs/titles/dates hot
+  Business          2.78 MB   8.3%
+  Contact           1.99 MB   5.9%   # phones/faxes/websites cold; emails hot
+  Addresses         1.93 MB   5.8%   # raw cold; PreparedFields.Addresses hot
+  Name+IDs          1.82 MB   5.4%
+  Affiliations      0.80 MB   2.4%   # Details cold
+  SanctionsInfo     0.31 MB   0.9%   # Description cold
+  Vessel/Aircraft/Crypto/… remainder
+
+## Size report (TestCorpus_MemoryReport)
+entities=16989
+full_gob_MB=12.34
+full_B_per_entity=762
+hot_gob_MB=5.63          # was 7.60 with SourceData-only cold
+hot_B_per_entity=348     # was 469
+cold_payload_MB=12.79    # expanded cold fields
+snapshot_file_MB=13.05   # gob+zstd on disk
+cold_stripped_share=54.4%  # was 38.4% with SourceData-only
+
+## Latency / allocs (BenchmarkCorpus_, count=1)
+BenchmarkCorpus_Baseline_Similarity        ~1.47 ms/op   score path unchanged
+BenchmarkCorpus_Tiered_Similarity          ~1.48 ms/op
+BenchmarkCorpus_Tiered_HydrateTopN         ~0.43 ms/op   top-20 cold hydrate (zstd)
+BenchmarkCorpus_Baseline_BuildCorpus       ~15 ms/op
+BenchmarkCorpus_Tiered_BuildCorpus        ~337 ms/op   snapshot write + cold encode
+BenchmarkCorpus_Baseline_SelectAndScore    ~165 µs/op    108 candidates
+BenchmarkCorpus_Tiered_SelectAndScore      ~164 µs/op
+
+## Takeaways
+- Deeper cold split cuts hot gob ~54% vs full (5.63 vs 12.34 MB proxy).
+- PreparedFields is the next mountain (~40% of field breakdown) — needs denser
+  encoding / string table, not just "move to disk" (it is on the score path).
+- Score path stays flat; hydrate top-20 stays sub-ms.
+- Refresh cost is the tradeoff until binary hot table + parallel encode.
+
+## Live profiles (production)
+Admin server (default :9094) already exposes pprof. New endpoint:
+  GET /debug/memory?gc=1
+Collect bundle:
+  ./internal/corpusfile/collect_profiles.sh http://127.0.0.1:9094 ./profiles
+EOF

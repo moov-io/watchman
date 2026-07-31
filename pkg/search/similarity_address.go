@@ -21,15 +21,17 @@ func compareAddresses[Q any, I any](w io.Writer, query Entity[Q], index Entity[I
 	fieldsCompared := 0
 	var scores []float64
 
+	qAddrs := query.PreparedFields.Addresses
+	iAddrs := index.PreparedFields.Addresses
 	if w != nil {
-		debug(w, "address comparison details: query=%d  index=%d\n", len(query.Addresses), len(index.Addresses))
+		debug(w, "address comparison details: query=%d  index=%d\n", len(qAddrs), len(iAddrs))
 	}
 
-	// Compare addresses
-	if len(query.Addresses) > 0 && len(index.Addresses) > 0 {
+	// Score prepared addresses only — raw Addresses may live in cold storage.
+	if len(qAddrs) > 0 && len(iAddrs) > 0 {
 		fieldsCompared++
 
-		if score := findBestAddressMatch(w, query.PreparedFields.Addresses, index.PreparedFields.Addresses); score > 0 {
+		if score := findBestAddressMatch(w, qAddrs, iAddrs); score > 0 {
 			scores = append(scores, score)
 		}
 	}

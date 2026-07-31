@@ -165,7 +165,7 @@ func main() {
 	webuiController := webui.NewController(logger, conf.Webui)
 	webuiController.AppendRoutes(router)
 
-	// Start Admin server (with Prometheus metrics)
+	// Start Admin server (with Prometheus metrics + pprof)
 	adminServer, err := admin.New(admin.Opts{
 		Addr: conf.Servers.AdminAddress,
 	})
@@ -173,6 +173,8 @@ func main() {
 		errs <- fmt.Errorf("problem starting admin server: %v", err)
 	} else {
 		adminServer.AddVersionHandler(watchman.Version) // Setup 'GET /version'
+		// Live MemStats + corpus counts; pprof heap/allocs already on this server.
+		index.RegisterMemoryAdmin(adminServer, indexedLists)
 	}
 	go func() {
 		if adminServer == nil {

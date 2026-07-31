@@ -561,10 +561,11 @@ func countCommonFields[I any](index Entity[I]) int {
 	if len(index.Contact.EmailAddresses) > 0 {
 		count++
 	}
-	if len(index.Contact.PhoneNumbers) > 0 {
+	// Phones/faxes may only exist on PreparedFields when raw Contact is cold-stripped.
+	if len(index.Contact.PhoneNumbers) > 0 || len(index.PreparedFields.Contact.PhoneNumbers) > 0 {
 		count++
 	}
-	if len(index.Contact.FaxNumbers) > 0 {
+	if len(index.Contact.FaxNumbers) > 0 || len(index.PreparedFields.Contact.FaxNumbers) > 0 {
 		count++
 	}
 	if len(index.CryptoAddresses) > 0 {
@@ -573,7 +574,7 @@ func countCommonFields[I any](index Entity[I]) int {
 	if len(index.Affiliations) > 0 {
 		count++
 	}
-	if len(index.Addresses) > 0 {
+	if len(index.Addresses) > 0 || len(index.PreparedFields.Addresses) > 0 {
 		count++
 	}
 

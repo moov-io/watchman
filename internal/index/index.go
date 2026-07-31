@@ -132,3 +132,17 @@ func (l *lists) GetTFIDFIndex() *tfidf.Index {
 	}
 	return l.latestStats.TFIDFIndex
 }
+
+// EntityCount returns the number of entities in the in-memory corpus, or 0.
+func EntityCount(l Lists) int {
+	impl, ok := l.(*lists)
+	if !ok || impl == nil {
+		return 0
+	}
+	impl.mu.RLock()
+	defer impl.mu.RUnlock()
+	if impl.corpus == nil {
+		return 0
+	}
+	return len(impl.corpus.entities)
+}
