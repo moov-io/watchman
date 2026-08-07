@@ -71,17 +71,19 @@ func (c *controller) ingestFile(w http.ResponseWriter, r *http.Request) {
 
 	parsedFile, err := c.service.ReadEntitiesFromFile(ctx, fileType, r.Body)
 	if err != nil {
-		err = logger.Error().LogErrorf("problem reading entities from %s file: %v", fileType, err).Err()
+		// file_type is already attached as a structured field; avoid interpolating
+		// user-controlled values into the log message (CWE-117 / go/log-injection).
+		err = logger.Error().LogErrorf("problem reading entities from file: %v", err).Err()
 		api.ErrorResponse(w, err)
 		return
 	}
 
-	logger.Info().Logf("found %d entities from %s file", len(parsedFile.Entities), parsedFile.FileType)
+	logger.Info().Logf("found %d entities from file", len(parsedFile.Entities))
 
 	// Save the parsed entities
 	err = c.service.ReplaceEntities(ctx, parsedFile.FileType, parsedFile.Entities)
 	if err != nil {
-		err = logger.Error().LogErrorf("problem updating %s entities: %v", fileType, err).Err()
+		err = logger.Error().LogErrorf("problem updating entities: %v", err).Err()
 		api.ErrorResponse(w, err)
 		return
 	}
