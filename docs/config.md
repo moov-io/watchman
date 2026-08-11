@@ -67,6 +67,32 @@ Watchman:
   #       MaxIdleTime: "60s"
 ```
 
+### Metrics
+
+The admin server (`AdminAddress`, `:9094` by default) serves Prometheus metrics at
+`/metrics`, including Go runtime and process collectors plus a duration histogram for
+every request the API server handles:
+
+```
+watchman_http_request_duration_seconds_bucket{method="GET",route="/v2/search",code="200",le="0.25"}
+watchman_http_request_duration_seconds_sum{...}
+watchman_http_request_duration_seconds_count{...}
+```
+
+The `route` label is the registered path template, not the requested path — so
+`/v2/ingest/{fileType}` stays one time series no matter how many file types are seen, and
+query strings never reach the labels. Requests matching no route are recorded as
+`route="unmatched"`.
+
+```promql
+# p95 search latency
+histogram_quantile(0.95, sum(rate(
+  watchman_http_request_duration_seconds_bucket{route="/v2/search"}[5m])) by (le))
+
+# request rate by route
+sum(rate(watchman_http_request_duration_seconds_count[5m])) by (route)
+```
+
 ### Download
 
 ```yaml
