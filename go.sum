@@ -55,6 +55,8 @@ github.com/OpenRouterTeam/go-sdk v0.7.39 h1:sHxL75XSDdWWpxnlyTDItLbH1Tq5wQHOWv+W
 github.com/OpenRouterTeam/go-sdk v0.7.39/go.mod h1:8ZRHxPEBG2Lu7BXRGbcoTdhRQnXGFZ+y0jKVpCAQR8c=
 github.com/OpenRouterTeam/go-sdk v0.7.40 h1:haUPF4iOamBBg1aUVqWSBN7BGFuldWBa31z8OHh86ns=
 github.com/OpenRouterTeam/go-sdk v0.7.40/go.mod h1:8ZRHxPEBG2Lu7BXRGbcoTdhRQnXGFZ+y0jKVpCAQR8c=
+github.com/OpenRouterTeam/go-sdk v0.7.41 h1:x9hhvdXE37sjIDzF/jPalsggAu0N2k+o/ajaExQKf1c=
+github.com/OpenRouterTeam/go-sdk v0.7.41/go.mod h1:8ZRHxPEBG2Lu7BXRGbcoTdhRQnXGFZ+y0jKVpCAQR8c=
 github.com/VividCortex/gohistogram v1.0.0 h1:6+hBz+qvs0JOrrNhhmR7lFxo5sINxBCGXrdtl/UvroE=
 github.com/VividCortex/gohistogram v1.0.0/go.mod h1:Pf5mBqqDxYaXu3hDrrU+w6nw50o/4+TcAqDqk/vUH7g=
 github.com/abadojack/whatlanggo v1.0.1 h1:19N6YogDnf71CTHm3Mp2qhYfkRdyvbgwWdd2EPxJRG4=
@@ -122,6 +124,8 @@ github.com/felixge/fgprof v0.9.3 h1:VvyZxILNuCiUCSXtPtYmmtGvb65nqXh2QFWc0Wpf2/g=
 github.com/felixge/fgprof v0.9.3/go.mod h1:RdbpDgzqYVh/T9fPELJyV7EYJuHB55UTEULNun8eiPw=
 github.com/felixge/httpsnoop v1.0.4 h1:NFTV2Zj1bL4mc9sqWACXbQFVBBg2W3GPvqp8/ESS2Wg=
 github.com/felixge/httpsnoop v1.0.4/go.mod h1:m8KPJKqk1gH5J9DgRY2ASl2lWCfGKXixSwevea8zH2U=
+github.com/felixge/httpsnoop v1.1.0 h1:3YtUj32ZZkqZtt3sZZsClsymw/QDuVfpNhoA31zeORc=
+github.com/felixge/httpsnoop v1.1.0/go.mod h1:Zqxgdd+1Rkcz8euOqdr7lqgCRJztwr5hp9vDSi5UZCE=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
 github.com/frankban/quicktest v1.14.6/go.mod h1:4ptaffx2x8+WTWXmUCuVU6aPUX1/Mz7zb5vbUoiM6w0=
 github.com/fredbi/uri v1.1.1 h1:xZHJC08GZNIUhbP5ImTHnt5Ya0T8FI2VAwI/37kh2Ko=
