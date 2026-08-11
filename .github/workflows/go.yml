@@ -93,16 +93,16 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
+
     - name: Set up Go 1.x
       uses: actions/setup-go@v7
       with:
         go-version: stable
       id: go
-
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v7
-      with:
-        fetch-depth: 0
 
     - name: Short Tests
       run: go test ./pkg/sources... -count 1 -v
@@ -114,16 +114,16 @@ jobs:
       matrix:
         os: [macos-latest]
     steps:
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
+
     - name: Set up Go 1.x
       uses: actions/setup-go@v7
       with:
         go-version: stable
       id: go
-
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v7
-      with:
-        fetch-depth: 0
 
     - name: Install Libpostal
       run: make install
@@ -151,14 +151,14 @@ jobs:
             platform: linux/arm64
             runner: ubuntu-24.04-arm
     steps:
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v7
+
     - name: Set up Go 1.x
       uses: actions/setup-go@v7
       with:
         go-version: stable
       id: go
-
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v7
 
     - name: Docker Hub
       run: make docker-hub
@@ -178,14 +178,14 @@ jobs:
             platform: linux/arm64
             runner: ubuntu-24.04-arm
     steps:
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v7
+
     - name: Set up Go 1.x
       uses: actions/setup-go@v7
       with:
         go-version: stable
       id: go
-
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v7
 
     - name: Docker Hub
       run: make docker-openshift
