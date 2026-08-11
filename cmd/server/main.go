@@ -26,6 +26,7 @@ import (
 	"github.com/moov-io/watchman/internal/index"
 	"github.com/moov-io/watchman/internal/ingest"
 	"github.com/moov-io/watchman/internal/mcp"
+	"github.com/moov-io/watchman/internal/metrics"
 	"github.com/moov-io/watchman/internal/postalpool"
 
 	"github.com/moov-io/watchman/internal/search"
@@ -33,6 +34,7 @@ import (
 	"github.com/moov-io/watchman/pkg/address"
 
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/automaxprocs/maxprocs"
 )
 
@@ -135,6 +137,13 @@ func main() {
 	}
 
 	router := mux.NewRouter()
+
+	// Time every request and publish it on the admin server's /metrics. Attached before
+	// the routes so it wraps all of them, including the webui's catch-all.
+	httpMetrics := metrics.NewHTTPMetrics(prometheus.DefaultRegisterer)
+	router.Use(httpMetrics.Middleware)
+	router.NotFoundHandler = httpMetrics.Middleware(http.NotFoundHandler())
+
 	addPingRoute(router)
 
 	// Add MCP endpoint if enabled

@@ -13,6 +13,7 @@ require (
 	github.com/bbalet/stopwords v1.0.0
 	github.com/ccoveille/go-safecast/v2 v2.0.1
 	github.com/dongri/phonenumber v0.1.12
+	github.com/felixge/httpsnoop v1.0.4
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/hashicorp/golang-lru/v2 v2.0.7
@@ -22,6 +23,8 @@ require (
 	github.com/moov-io/gopostal v0.1.2
 	github.com/moov-io/iso3166 v0.4.0
 	github.com/pariz/gountries v0.1.6
+	github.com/prometheus/client_golang v1.24.1
+	github.com/prometheus/client_model v0.6.2
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v3 v3.10.1
 	github.com/vmihailenco/msgpack/v5 v5.4.1
@@ -64,7 +67,6 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/envoyproxy/go-control-plane/envoy v1.37.0 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.3.3 // indirect
-	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fredbi/uri v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/fyne-io/gl-js v0.2.1-0.20260315212741-029c47fd27e8 // indirect
@@ -113,8 +115,6 @@ require (
 	github.com/pelletier/go-toml/v2 v2.3.1 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/prometheus/client_golang v1.24.1 // indirect
-	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.70.1 // indirect
 	github.com/prometheus/procfs v0.21.1 // indirect
 	github.com/rickar/cal/v2 v2.1.29 // indirect
