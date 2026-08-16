@@ -26,7 +26,7 @@ require (
 	github.com/prometheus/client_golang v1.24.1
 	github.com/prometheus/client_model v0.6.2
 	github.com/stretchr/testify v1.11.1
-	github.com/urfave/cli/v3 v3.10.1
+	github.com/urfave/cli/v3 v3.11.0
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	github.com/xrash/smetrics v0.0.0-20250705151800-55b8f293f342
 	go.opentelemetry.io/otel v1.45.0
