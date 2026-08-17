@@ -6,7 +6,7 @@ toolchain go1.26.6
 
 require (
 	fyne.io/fyne/v2 v2.8.0
-	github.com/OpenRouterTeam/go-sdk v0.7.51
+	github.com/OpenRouterTeam/go-sdk v0.7.52
 	github.com/abadojack/whatlanggo v1.0.1
 	github.com/adamdecaf/merge v0.2.2
 	github.com/antchfx/htmlquery v1.3.6
@@ -25,7 +25,7 @@ require (
 	github.com/pariz/gountries v0.1.6
 	github.com/prometheus/client_golang v1.24.1
 	github.com/prometheus/client_model v0.6.2
-	github.com/stretchr/testify v1.11.1
+	github.com/stretchr/testify v1.12.0
 	github.com/urfave/cli/v3 v3.11.0
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	github.com/xrash/smetrics v0.0.0-20250705151800-55b8f293f342
