@@ -116,6 +116,7 @@ jobs:
 
   docker-hub:
     name: Docker Hub (${{ matrix.platform }})
+    if: github.repository_owner == 'moov-io' && !github.event.repository.fork
     needs: [tests, create_release]
     runs-on: ${{ matrix.runner }}
     permissions:
@@ -173,6 +174,7 @@ jobs:
 
   docker-hub-manifest:
     name: Docker Hub Manifest
+    if: github.repository_owner == 'moov-io' && !github.event.repository.fork
     needs: [docker-hub]
     runs-on: ubuntu-latest
     permissions:
@@ -206,6 +208,7 @@ jobs:
 
   docker-openshift:
     name: Docker Openshift (${{ matrix.platform }})
+    if: github.repository_owner == 'moov-io' && !github.event.repository.fork
     needs: [tests, create_release]
     runs-on: ${{ matrix.runner }}
     permissions:
@@ -258,6 +261,7 @@ jobs:
 
   docker-openshift-manifest:
     name: Docker Openshift Manifest
+    if: github.repository_owner == 'moov-io' && !github.event.repository.fork
     needs: [docker-openshift]
     runs-on: ubuntu-latest
     permissions:
