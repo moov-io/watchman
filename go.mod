@@ -5,8 +5,8 @@ go 1.25.10
 toolchain go1.27.0
 
 require (
-	fyne.io/fyne/v2 v2.8.0
-	github.com/OpenRouterTeam/go-sdk v0.7.83
+	fyne.io/fyne/v2 v2.8.1
+	github.com/OpenRouterTeam/go-sdk v0.7.84
 	github.com/abadojack/whatlanggo v1.0.1
 	github.com/adamdecaf/merge v0.2.2
 	github.com/antchfx/htmlquery v1.3.6
@@ -51,7 +51,7 @@ require (
 	cloud.google.com/go/monitoring v1.29.0 // indirect
 	cloud.google.com/go/spanner v1.94.0 // indirect
 	filippo.io/edwards25519 v1.2.0 // indirect
-	fyne.io/systray v1.12.2 // indirect
+	fyne.io/systray v1.12.3-0.20260810170012-af4e8e793ec4 // indirect
 	github.com/BurntSushi/toml v1.6.0 // indirect
 	github.com/GoogleCloudPlatform/grpc-gcp-go/grpcgcp v1.6.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.33.0 // indirect
