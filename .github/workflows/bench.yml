@@ -55,7 +55,7 @@ jobs:
 
     - name: Log Failure
       if: ${{ failure() }}
-      run: cat ./output.txt
+      run: cat ./output.txt || true
 
     - name: Store benchmark result
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
@@ -84,7 +84,7 @@ jobs:
 
     - name: Log Failure
       if: ${{ failure() }}
-      run: cat ./output.txt
+      run: cat ./output.txt || true
 
     - name: Store OFAC results
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
@@ -113,7 +113,7 @@ jobs:
 
     - name: Log Failure
       if: ${{ failure() }}
-      run: cat ./output.txt
+      run: cat ./output.txt || true
 
     - name: Store CSL US results
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
