@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"runtime"
 	"testing"
 	"time"
 
@@ -87,10 +86,6 @@ func TestMinMaxMed(t *testing.T) {
 	})
 
 	t.Run("time", func(t *testing.T) {
-		if runtime.GOOS == "windows" {
-			t.Skip("time is wonky on Windows")
-		}
-
 		ctx := context.Background()
 
 		var buf bytes.Buffer
@@ -101,15 +96,12 @@ func TestMinMaxMed(t *testing.T) {
 
 		_, span := telemetry.StartSpan(ctx, "minmaxmed-scores")
 
+		// Use fixed durations so stats do not depend on wall-clock sleep,
+		// which overshoots enough on macOS/Windows CI to fail tight deltas.
 		m := minmaxmed.New(5)
-		start := time.Now()
-
-		time.Sleep(10 * time.Millisecond)
-		m.AddDuration(time.Since(start))
-		time.Sleep(20 * time.Millisecond)
-		m.AddDuration(time.Since(start))
-		time.Sleep(30 * time.Millisecond)
-		m.AddDuration(time.Since(start))
+		m.AddDuration(10 * time.Millisecond)
+		m.AddDuration(30 * time.Millisecond)
+		m.AddDuration(60 * time.Millisecond)
 
 		m.AddEvent(span)
 		span.End()
@@ -125,19 +117,19 @@ func TestMinMaxMed(t *testing.T) {
 		for i := range evt.Attributes {
 			switch evt.Attributes[i].Key {
 			case "min_ms":
-				require.Greater(t, evt.Attributes[i].Value.Value, 0.0)
+				require.Equal(t, int64(10), int64(evt.Attributes[i].Value.Value))
 				require.Equal(t, "INT64", evt.Attributes[i].Value.Type)
 
 			case "max_ms":
-				require.Greater(t, evt.Attributes[i].Value.Value, 50.0)
+				require.Equal(t, int64(60), int64(evt.Attributes[i].Value.Value))
 				require.Equal(t, "INT64", evt.Attributes[i].Value.Type)
 
 			case "median_ms":
-				require.InDelta(t, 30.0, evt.Attributes[i].Value.Value, 10.0)
+				require.InDelta(t, 30.0, evt.Attributes[i].Value.Value, 0.01)
 				require.Equal(t, "FLOAT64", evt.Attributes[i].Value.Type)
 
 			case "average_ms":
-				require.InDelta(t, 30.0, evt.Attributes[i].Value.Value, 10.0)
+				require.InDelta(t, 100.0/3.0, evt.Attributes[i].Value.Value, 0.01)
 				require.Equal(t, "FLOAT64", evt.Attributes[i].Value.Type)
 
 			case "observations":
