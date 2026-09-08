@@ -6,7 +6,7 @@ toolchain go1.27.1
 
 require (
 	fyne.io/fyne/v2 v2.8.1
-	github.com/OpenRouterTeam/go-sdk v0.7.121
+	github.com/OpenRouterTeam/go-sdk v0.7.123
 	github.com/abadojack/whatlanggo v1.0.1
 	github.com/adamdecaf/merge v0.2.2
 	github.com/antchfx/htmlquery v1.3.6
@@ -34,7 +34,7 @@ require (
 	go.uber.org/automaxprocs v1.6.0
 	golang.org/x/net v0.58.0
 	golang.org/x/sync v0.23.0
-	golang.org/x/text v0.41.0
+	golang.org/x/text v0.42.0
 	golang.org/x/time v0.16.0
 )
 
