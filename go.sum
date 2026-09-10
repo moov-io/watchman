@@ -65,6 +65,8 @@ github.com/OpenRouterTeam/go-sdk v0.7.126 h1:3j/65pEykd12U6qNvkywu3rU/qZC7zwHaoB
 github.com/OpenRouterTeam/go-sdk v0.7.126/go.mod h1:8vFtUZ9I2YiDntYbck42wQhrx9DsJN5PHbViaHwTkXc=
 github.com/OpenRouterTeam/go-sdk v0.7.128 h1:DcFIGPMlLHQ5HG9sQzUWJdwF+7piLnk2i0+/J8FgE+A=
 github.com/OpenRouterTeam/go-sdk v0.7.128/go.mod h1:8vFtUZ9I2YiDntYbck42wQhrx9DsJN5PHbViaHwTkXc=
+github.com/OpenRouterTeam/go-sdk v0.7.129 h1:evU3YpkfjOo/TauoKaNDKvGkmX8HX/1gdm5IvIgcL80=
+github.com/OpenRouterTeam/go-sdk v0.7.129/go.mod h1:8vFtUZ9I2YiDntYbck42wQhrx9DsJN5PHbViaHwTkXc=
 github.com/VividCortex/gohistogram v1.0.0 h1:6+hBz+qvs0JOrrNhhmR7lFxo5sINxBCGXrdtl/UvroE=
 github.com/VividCortex/gohistogram v1.0.0/go.mod h1:Pf5mBqqDxYaXu3hDrrU+w6nw50o/4+TcAqDqk/vUH7g=
 github.com/abadojack/whatlanggo v1.0.1 h1:19N6YogDnf71CTHm3Mp2qhYfkRdyvbgwWdd2EPxJRG4=
