@@ -98,7 +98,7 @@ func processSenzingList(ctx context.Context, logger log.Logger, dl *download.Dow
 		return fmt.Errorf("parsing %s failed: %w", source, err)
 	}
 
-	if len(entities) == 0 && params.config.ErrorOnEmptyList {
+	if len(entities) == 0 && errorOnEmptyList(params.config) {
 		if ignored {
 			logger.Warn().Logf("ignoring empty list for %s", source)
 			return nil

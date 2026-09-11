@@ -76,7 +76,7 @@ func loadUKCSLRecords(ctx context.Context, logger log.Logger, conf Config, respo
 	logger.Debug().Logf("finished UK CSL preparation: %d entities in %v", len(entities), time.Since(start))
 	span.AddEvent("finished UK CSL preparation")
 
-	if len(entities) == 0 && conf.ErrorOnEmptyList {
+	if len(entities) == 0 && errorOnEmptyList(conf) {
 		return errors.New("no entities parsed from UK CSL")
 	}
 

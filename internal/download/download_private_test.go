@@ -132,6 +132,83 @@ func TestConfig_getIncludedLists(t *testing.T) {
 	}
 }
 
+func TestConfig_errorOnEmptyList(t *testing.T) {
+	cases := []struct {
+		name     string
+		conf     Config
+		envValue string
+		expected bool
+	}{
+		{
+			name:     "empty config and env",
+			conf:     Config{},
+			expected: false,
+		},
+		{
+			name:     "from config field only",
+			conf:     Config{ErrorOnEmptyList: true},
+			expected: true,
+		},
+		{
+			name:     "from env var only",
+			conf:     Config{},
+			envValue: "true",
+			expected: true,
+		},
+		{
+			name:     "env var yes",
+			conf:     Config{},
+			envValue: "yes",
+			expected: true,
+		},
+		{
+			name:     "env var with whitespace",
+			conf:     Config{},
+			envValue: " TRUE ",
+			expected: true,
+		},
+		{
+			name:     "env var and config field both true",
+			conf:     Config{ErrorOnEmptyList: true},
+			envValue: "true",
+			expected: true,
+		},
+		{
+			name:     "env var and config field both false",
+			conf:     Config{},
+			envValue: "false",
+			expected: false,
+		},
+		{
+			name:     "env var overrides config field",
+			conf:     Config{ErrorOnEmptyList: true},
+			envValue: "false",
+			expected: false,
+		},
+		{
+			name:     "blank env var keeps config field",
+			conf:     Config{ErrorOnEmptyList: true},
+			envValue: "  ",
+			expected: true,
+		},
+		{
+			name:     "unparsable env var is false",
+			conf:     Config{},
+			envValue: "maybe",
+			expected: false,
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.envValue != "" {
+				t.Setenv("ERROR_ON_EMPTY_LIST", tc.envValue)
+			}
+			got := errorOnEmptyList(tc.conf)
+			require.Equal(t, tc.expected, got)
+		})
+	}
+}
+
 func TestConfig_findExtraLists(t *testing.T) {
 	cases := []struct {
 		name           string

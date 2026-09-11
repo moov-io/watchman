@@ -19,6 +19,8 @@ type Config struct {
 	//
 	// Setting this to true enables early detection of potential data integrity problems.
 	// Default: false
+	//
+	// Use the ERROR_ON_EMPTY_LIST environment variable to set this at runtime.
 	ErrorOnEmptyList bool
 
 	IncludedLists []search.SourceList // us_ofac, eu_csl, etc...
