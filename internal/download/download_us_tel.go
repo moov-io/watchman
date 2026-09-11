@@ -71,7 +71,7 @@ func loadUSTelRecords(ctx context.Context, logger log.Logger, conf Config, respo
 	logger.Debug().Logf("finished US TEL preparation: %d entities in %v", len(entities), time.Since(start))
 	span.AddEvent("finished US TEL preparation")
 
-	if len(entities) == 0 && conf.ErrorOnEmptyList {
+	if len(entities) == 0 && errorOnEmptyList(conf) {
 		return errors.New("no entities parsed from US TEL")
 	}
 

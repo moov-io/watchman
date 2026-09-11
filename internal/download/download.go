@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/moov-io/base/log"
+	"github.com/moov-io/base/strx"
 	"github.com/moov-io/base/telemetry"
 	"github.com/moov-io/watchman/internal/tfidf"
 	"github.com/moov-io/watchman/pkg/search"
@@ -539,6 +540,16 @@ func expandInitialDir(initialDir string) string {
 
 func initialDataDirectory(conf Config) string {
 	return cmp.Or(os.Getenv("INITIAL_DATA_DIRECTORY"), conf.InitialDataDirectory)
+}
+
+// errorOnEmptyList reports whether an empty list should fail the refresh.
+// The ERROR_ON_EMPTY_LIST environment variable takes precedence over the
+// YAML-configured ErrorOnEmptyList field when it is set.
+func errorOnEmptyList(conf Config) bool {
+	if fromEnvStr := strings.TrimSpace(os.Getenv("ERROR_ON_EMPTY_LIST")); fromEnvStr != "" {
+		return strx.Yes(fromEnvStr)
+	}
+	return conf.ErrorOnEmptyList
 }
 
 // geocodeEntities applies geocoding to all addresses in the given entities.

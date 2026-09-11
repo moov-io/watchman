@@ -46,7 +46,7 @@ func loadFinCEN311Records(ctx context.Context, logger log.Logger, conf Config, r
 	logger.Debug().Logf("finished FinCEN 311 preparation: %v", time.Since(start))
 	span.AddEvent("finished FinCEN 311 preparation")
 
-	if len(entities) == 0 && conf.ErrorOnEmptyList {
+	if len(entities) == 0 && errorOnEmptyList(conf) {
 		return errors.New("no entities parsed from FinCEN 311")
 	}
 

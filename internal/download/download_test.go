@@ -249,6 +249,36 @@ func TestDownloader_RefreshAll_DoesNotIgnoreUnconfiguredEmptySenzingList(t *test
 	require.Error(t, err, "empty list error for non-ignored list must propagate")
 }
 
+// TestDownloader_RefreshAll_ErrorOnEmptyListFromEnv verifies that the
+// ERROR_ON_EMPTY_LIST environment variable enables the empty-list check
+// without the ErrorOnEmptyList config field being set.
+func TestDownloader_RefreshAll_ErrorOnEmptyListFromEnv(t *testing.T) {
+	logger := log.NewTestLogger()
+	emptyFile := emptySenzingFile(t)
+
+	const listName search.SourceList = "senzing-empty-env"
+
+	conf := download.Config{
+		// ErrorOnEmptyList intentionally left false
+		Senzing: []download.SenzingList{
+			{SourceList: listName, Location: "file://" + emptyFile},
+		},
+	}
+	dl, err := download.NewDownloader(logger, conf, nil)
+	require.NoError(t, err)
+
+	// Without the env var an empty list is tolerated.
+	stats, err := dl.RefreshAll(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, 0, stats.Lists[string(listName)])
+
+	// With the env var the empty list is an error.
+	t.Setenv("ERROR_ON_EMPTY_LIST", "true")
+
+	_, err = dl.RefreshAll(context.Background())
+	require.ErrorContains(t, err, "no entities parsed from senzing list")
+}
+
 // TestDownloader_RefreshAll_IgnoredDownloadError_CustomListCasing validates that
 // a custom (Senzing) list name declared with unusual casing/whitespace can still
 // be successfully referenced in IgnoredDownloadErrors using different casing.

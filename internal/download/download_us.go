@@ -46,7 +46,7 @@ func loadOFACRecords(ctx context.Context, logger log.Logger, conf Config, respon
 	logger.Debug().Logf("finished OFAC preparation: %v", time.Since(start))
 	span.AddEvent("finished OFAC preparation")
 
-	if len(entities) == 0 && conf.ErrorOnEmptyList {
+	if len(entities) == 0 && errorOnEmptyList(conf) {
 		return errors.New("no entities parsed from US OFAC")
 	}
 
@@ -92,7 +92,7 @@ func loadUSNonSDNRecords(ctx context.Context, logger log.Logger, conf Config, re
 	logger.Debug().Logf("finished US Non-SDN preparation: %v", time.Since(start))
 	span.AddEvent("finished US Non-SDN preparation")
 
-	if len(entities) == 0 && conf.ErrorOnEmptyList {
+	if len(entities) == 0 && errorOnEmptyList(conf) {
 		return errors.New("no entities parsed from US Non-SDN")
 	}
 
@@ -135,7 +135,7 @@ func loadCSLUSRecords(ctx context.Context, logger log.Logger, conf Config, respo
 	logger.Debug().Logf("finished US CSL preparation: %v", time.Since(start))
 	span.AddEvent("finished US CSL preparation")
 
-	if len(entities) == 0 && conf.ErrorOnEmptyList {
+	if len(entities) == 0 && errorOnEmptyList(conf) {
 		return errors.New("no entities parsed from US CSL")
 	}
 
