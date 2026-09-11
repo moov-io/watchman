@@ -108,6 +108,7 @@ jobs:
 
     - name: Upload Windows Binary
       if: runner.os == 'Windows'
+      shell: bash
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         TAG: ${{ github.ref_name }}
