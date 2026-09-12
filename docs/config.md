@@ -334,15 +334,15 @@ YAML configuration (example with OpenAI):
 
 | Environmental Variable | Description                                            | Default |
 |------------------------|--------------------------------------------------------|---------|
-| `DOWNLOAD_TIMEOUT`     | Duration of time allowed for a list to fully download. | `45s`   |
+| `DOWNLOAD_TIMEOUT`     | Duration of time allowed for a list to fully download. | `60s`   |
 
 ##### United States
 
 | Environmental Variable   | Description                                                         | Default                                                                         |
 |--------------------------|---------------------------------------------------------------------|---------------------------------------------------------------------------------|
 | `OFAC_DOWNLOAD_TEMPLATE` | HTTP address for downloading raw OFAC files.                        | `https://sanctionslistservice.ofac.treas.gov/api/PublicationPreview/exports/%s` |
-| `US_CSL_DOWNLOAD_URL`    | Use an alternate URL for downloading US Consolidated Screening List | Subresource of `api.trade.gov`                                                  |
-| `CSL_DOWNLOAD_TEMPLATE`  | Same as `US_CSL_DOWNLOAD_URL`                                       |                                                                                 |
+| `US_CSL_DOWNLOAD_URL`    | Use an alternate URL for downloading US Consolidated Screening List | Subresource of `data.trade.gov`                                                 |
+| `US_CSL_DOWNLOAD_TEMPLATE` | Same as `US_CSL_DOWNLOAD_URL`                                     |                                                                                 |
 | `US_NON_SDN_DOWNLOAD_TEMPLATE` | Use an alternate URL for downloading US OFAC Non-SDN list     | Subresource of OFAC publication endpoint                                        |
 | `FINCEN_311_DOWNLOAD_URL` | Use an alternate URL for the FinCEN 311 Special Measures page    | Public FinCEN 311 page                                                          |
 
@@ -357,8 +357,7 @@ YAML configuration (example with OpenAI):
 
 | Environmental Variable   | Description                                                         | Default                     |
 |--------------------------|---------------------------------------------------------------------|-----------------------------|
-| `UK_CSL_DOWNLOAD_URL`    | Use an alternate URL for downloading UK Consolidated Screening List | Subresource of `www.gov.uk` |
-| `UK_SANCTIONS_LIST_URL`  | Use an alternate URL for downloading UK Sanctions List              | Subresource of `www.gov.uk` |
+| `UK_SANCTIONS_LIST_URL`  | Use an alternate URL for downloading UK Sanctions List              | Subresource of `sanctionslist.fcdo.gov.uk` |
 
 ##### United Nations
 
