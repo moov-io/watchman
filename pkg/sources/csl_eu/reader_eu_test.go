@@ -104,6 +104,25 @@ func TestParseEU_ShortRecords(t *testing.T) {
 	assert.Equal(t, "REF456", recordMap[456].EntityReferenceNumber)
 }
 
+func TestParseEU_NonNumericLogicalID(t *testing.T) {
+	csvData := "fileGenerationDate;Entity_LogicalId;Entity_EU_ReferenceNumber\n" +
+		"2022-01-01;123;REF123\n" +
+		"2022-01-01;not-an-id;REFBAD\n" +
+		"2022-01-01;456;REF456\n" +
+		"2022-01-01;;REFEMPTY\n"
+
+	reader := io.NopCloser(strings.NewReader(csvData))
+	records, recordMap, err := ParseEU(reader)
+
+	require.NoError(t, err)
+	require.Equal(t, 2, len(records), "non-numeric EntityLogicalID rows must not be stored")
+	require.NotNil(t, recordMap[123], "expected record 123")
+	require.NotNil(t, recordMap[456], "expected record 456")
+	require.Nil(t, recordMap[0], "unparsable IDs must not collapse onto 0")
+	assert.Equal(t, "REF123", recordMap[123].EntityReferenceNumber)
+	assert.Equal(t, "REF456", recordMap[456].EntityReferenceNumber)
+}
+
 func TestParseEU_OnlyHeader(t *testing.T) {
 	// CSV with only header row
 	csvData := `fileGenerationDate;Entity_LogicalId;Entity_EU_ReferenceNumber

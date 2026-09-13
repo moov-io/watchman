@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"strings"
 )
 
 // minRecordColumns is the minimum number of columns required for a valid CSV record
@@ -52,9 +53,13 @@ func ParseEU(r io.ReadCloser) ([]CSLRecord, CSL, error) {
 			continue // skip empty or malformed records
 		}
 
-		// merge rows at this point
-		// for each record we need to add that to the map
-		logicalID, _ := strconv.Atoi(record[EntityLogicalIdx])
+		// Rows with the same EntityLogicalID are aliases of one listed entity.
+		// Atoi errors used to become 0, so every unparsable ID collapsed onto
+		// one record. Skip those rows instead, same as short or malformed CSV.
+		logicalID, err := strconv.Atoi(strings.TrimSpace(record[EntityLogicalIdx]))
+		if err != nil {
+			continue
+		}
 		// check if entry does not exist
 		if val, ok := report[logicalID]; !ok {
 			// creates the initial record
