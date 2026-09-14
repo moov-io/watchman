@@ -17,6 +17,50 @@ func TestService_Disabled(t *testing.T) {
 	require.Nil(t, svc)
 }
 
+func TestService_APIKeyFromEnv(t *testing.T) {
+	cases := []struct {
+		name     string
+		confKey  string
+		envValue string
+		expected string
+	}{
+		{
+			name:     "from env var only",
+			envValue: "env-key",
+			expected: "env-key",
+		},
+		{
+			name:     "env var overrides config field",
+			confKey:  "yaml-key",
+			envValue: "env-key",
+			expected: "env-key",
+		},
+		{
+			name:     "from config field only",
+			confKey:  "yaml-key",
+			expected: "yaml-key",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Setenv("GEOCODING_API_KEY", tc.envValue)
+
+			conf := Config{
+				Enabled: true,
+				Provider: ProviderConfig{
+					Name:   "opencage", // OpenCage requires an API key
+					APIKey: tc.confKey,
+				},
+			}
+			svc, err := NewService(log.NewTestLogger(), conf, nil)
+			require.NoError(t, err)
+
+			require.Equal(t, tc.expected, svc.geocoder.(*OpenCageGeocoder).apiKey)
+		})
+	}
+}
+
 func TestService_GeocodeAddress_NilService(t *testing.T) {
 	var svc *Service
 	coords, err := svc.GeocodeAddress(context.Background(), search.Address{})
