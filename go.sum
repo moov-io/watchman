@@ -71,6 +71,8 @@ github.com/OpenRouterTeam/go-sdk v0.7.130 h1:057rrxal2wIZhYoYAjHWNMjb8aoz3rX41aJ
 github.com/OpenRouterTeam/go-sdk v0.7.130/go.mod h1:8vFtUZ9I2YiDntYbck42wQhrx9DsJN5PHbViaHwTkXc=
 github.com/OpenRouterTeam/go-sdk v0.7.132 h1:gpmpT8oaS+OZgPSJOnX8FuaT4KwEGeFun9u9RugkN3E=
 github.com/OpenRouterTeam/go-sdk v0.7.132/go.mod h1:8vFtUZ9I2YiDntYbck42wQhrx9DsJN5PHbViaHwTkXc=
+github.com/OpenRouterTeam/go-sdk v0.7.133 h1:xiXC0uG0aQS+fKSWuwFUQkDiz/+pf4srWsnNhhq5Vn8=
+github.com/OpenRouterTeam/go-sdk v0.7.133/go.mod h1:8vFtUZ9I2YiDntYbck42wQhrx9DsJN5PHbViaHwTkXc=
 github.com/VividCortex/gohistogram v1.0.0 h1:6+hBz+qvs0JOrrNhhmR7lFxo5sINxBCGXrdtl/UvroE=
 github.com/VividCortex/gohistogram v1.0.0/go.mod h1:Pf5mBqqDxYaXu3hDrrU+w6nw50o/4+TcAqDqk/vUH7g=
 github.com/abadojack/whatlanggo v1.0.1 h1:19N6YogDnf71CTHm3Mp2qhYfkRdyvbgwWdd2EPxJRG4=
@@ -292,6 +294,8 @@ github.com/moby/term v0.5.0 h1:xt8Q1nalod/v7BqbG21f8mQPqH+xAaC9C3N3wfWbVP0=
 github.com/moby/term v0.5.0/go.mod h1:8FzsFHVUBGZdbDsJw/ot+X+d5HLUbvklYLJ9uGfcI3Y=
 github.com/modelcontextprotocol/go-sdk v1.7.0 h1:yqjY2dsbKAC0LSuWZVBMrHgiG8ukXv6NRo0JiALay44=
 github.com/modelcontextprotocol/go-sdk v1.7.0/go.mod h1:dL7u98E/zjJTGzEq+j30jQ8K2k1mb6LeAH4inEcSGts=
+github.com/modelcontextprotocol/go-sdk v1.8.0 h1:KIvahhYqwtbeniWVPs3TcXEA7b8jEtwfBpOTAI+Urx4=
+github.com/modelcontextprotocol/go-sdk v1.8.0/go.mod h1:dL7u98E/zjJTGzEq+j30jQ8K2k1mb6LeAH4inEcSGts=
 github.com/moov-io/base v0.63.3 h1:QjgtSx435TwckC4DhfXwS2SkNU5Q6n2w0Vvpj7xy0lg=
 github.com/moov-io/base v0.63.3/go.mod h1:c1+IS104Fapi7VI0ndTR7/BvKj8trVgJPvrJ21bW4oc=
 github.com/moov-io/gopostal v0.1.2 h1:7GlXeIKVuW83kSU/Pqpk5xgUQzaC15VUWdJDGchzE6A=
