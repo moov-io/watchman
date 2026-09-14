@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"os"
-	"runtime"
 	"slices"
 	"strconv"
 	"strings"
@@ -62,21 +61,13 @@ func NewService(logger log.Logger, config Config, database db.DB, indexedLists i
 		}
 	}
 
-	inFlight := config.MaxInFlight
-	if inFlight <= 0 {
-		inFlight = runtime.GOMAXPROCS(0)
-		if inFlight < 1 {
-			inFlight = 1
-		}
-	}
-
 	return &service{
 		logger:       logger,
 		config:       config,
 		indexedLists: indexedLists,
 		cm:           cm,
 		embeddings:   embeddingsSvc,
-		searchSem:    make(chan struct{}, inFlight),
+		searchSem:    make(chan struct{}, getMaxInFlight(config)),
 	}, nil
 }
 

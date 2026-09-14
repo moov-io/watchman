@@ -50,3 +50,18 @@ func DefaultConfig() Config {
 		MaxInFlight: inFlight,
 	}
 }
+
+// getMaxInFlight returns how many large searches may run at once (admission control).
+// The SEARCH_MAX_IN_FLIGHT environment variable takes precedence over the
+// YAML-configured MaxInFlight field when it holds a positive integer.
+func getMaxInFlight(conf Config) int {
+	if v := strings.TrimSpace(os.Getenv("SEARCH_MAX_IN_FLIGHT")); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			return n
+		}
+	}
+	if conf.MaxInFlight > 0 {
+		return conf.MaxInFlight
+	}
+	return max(runtime.GOMAXPROCS(0), 1)
+}
