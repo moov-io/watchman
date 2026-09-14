@@ -158,12 +158,12 @@ docker-hub-push:
 	docker push moov/watchman:${VERSION}.${ARCH}
 
 docker-hub-manifest:
-ifeq ($(shell docker manifest inspect moov/watchman:${VERSION} > /dev/null ; echo $$?), 0)
-	$(error docker tag already exists)
-else
+	@if docker manifest inspect moov/watchman:${VERSION} >/dev/null 2>&1; then \
+		echo "error: docker tag already exists: moov/watchman:${VERSION}" >&2; \
+		exit 1; \
+	fi
 	docker manifest create moov/watchman:${VERSION} moov/watchman:${VERSION}.arm64 moov/watchman:${VERSION}.amd64
 	docker manifest push moov/watchman:${VERSION}
-endif
 
 docker-openshift:
 	docker build --pull --build-arg VERSION=${VERSION} -t quay.io/moov/watchman:${VERSION}.${ARCH} -f ./build/Dockerfile.openshift .
@@ -172,12 +172,12 @@ docker-openshift-push:
 	docker push quay.io/moov/watchman:${VERSION}.${ARCH}
 
 docker-openshift-manifest:
-ifeq ($(shell docker manifest inspect quay.io/moov/watchman:${VERSION} > /dev/null ; echo $$?), 0)
-	$(error docker tag already exists)
-else
+	@if docker manifest inspect quay.io/moov/watchman:${VERSION} >/dev/null 2>&1; then \
+		echo "error: docker tag already exists: quay.io/moov/watchman:${VERSION}" >&2; \
+		exit 1; \
+	fi
 	docker manifest create quay.io/moov/watchman:${VERSION} quay.io/moov/watchman:${VERSION}.arm64 quay.io/moov/watchman:${VERSION}.amd64
 	docker manifest push quay.io/moov/watchman:${VERSION}
-endif
 
 docker-static:
 	docker build --pull --build-arg VERSION=${VERSION} --build-arg ARCH=${ARCH} -t moov/watchman:v2-static.${ARCH} -f ./build/Dockerfile.static .
