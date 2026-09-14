@@ -65,7 +65,7 @@ jobs:
         tool: 'go'
         output-file-path: "./output.txt"
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        skip-fetch-gh-pages: true
+        skip-fetch-gh-pages: false
         auto-push: true
         # Show alert with commit comment on detecting possible performance regression
         alert-threshold: '120%'
@@ -94,7 +94,7 @@ jobs:
         tool: 'go'
         output-file-path: "./output.txt"
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        skip-fetch-gh-pages: true
+        skip-fetch-gh-pages: false
         auto-push: true
         # Show alert with commit comment on detecting possible performance regression
         alert-threshold: '120%'
@@ -123,7 +123,7 @@ jobs:
         tool: 'go'
         output-file-path: "./output.txt"
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        skip-fetch-gh-pages: true
+        skip-fetch-gh-pages: false
         auto-push: true
         # Show alert with commit comment on detecting possible performance regression
         alert-threshold: '120%'

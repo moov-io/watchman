@@ -1,7 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1789411809210,
+  "lastUpdate": 0,
   "repoUrl": "https://github.com/moov-io/watchman",
-  "entries": {
-    "moov-io/watchman Common Benchmarks": []
-  }
-};
+  "entries": {}
+}
