@@ -4,6 +4,7 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/moov-io/watchman/internal/embeddings"
 	"github.com/moov-io/watchman/internal/index"
 
 	"github.com/moov-io/base/log"
@@ -85,4 +86,47 @@ func TestNewService_MaxInFlightFromEnv(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, 4, cap(svc.(*service).searchSem))
+}
+
+func TestNewService_EmbeddingsEnabledFromEnv(t *testing.T) {
+	newService := func(t *testing.T, yamlEnabled bool) *service {
+		t.Helper()
+
+		emb := embeddings.DefaultConfig()
+		emb.Enabled = yamlEnabled
+		emb.Provider.Name = "mock"
+		emb.Provider.BaseURL = "http://mock"
+		emb.Provider.Model = "mock"
+		emb.Provider.Dimension = 16
+
+		conf := Config{
+			Goroutines: DefaultConfig().Goroutines,
+			Embeddings: emb,
+		}
+		svc, err := NewService(log.NewTestLogger(), conf, nil, index.NewLists(nil))
+		require.NoError(t, err)
+
+		return svc.(*service)
+	}
+
+	t.Run("env enables", func(t *testing.T) {
+		t.Setenv("EMBEDDINGS_ENABLED", "true")
+
+		svc := newService(t, false)
+		require.NotNil(t, svc.embeddings)
+	})
+
+	t.Run("env disables", func(t *testing.T) {
+		t.Setenv("EMBEDDINGS_ENABLED", "false")
+
+		svc := newService(t, true)
+		require.Nil(t, svc.embeddings)
+	})
+
+	t.Run("no env keeps yaml", func(t *testing.T) {
+		t.Setenv("EMBEDDINGS_ENABLED", "")
+
+		require.Nil(t, newService(t, false).embeddings)
+		require.NotNil(t, newService(t, true).embeddings)
+	})
 }

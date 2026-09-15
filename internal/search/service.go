@@ -52,13 +52,10 @@ func NewService(logger log.Logger, config Config, database db.DB, indexedLists i
 		return nil, fmt.Errorf("creating search service: %w", err)
 	}
 
-	// Initialize embeddings service (optional, for cross-script matching)
-	var embeddingsSvc embeddings.Service
-	if config.Embeddings.Enabled {
-		embeddingsSvc, err = embeddings.NewService(logger, config.Embeddings, database)
-		if err != nil {
-			return nil, fmt.Errorf("creating embeddings service: %w", err)
-		}
+	// Initialize embeddings service (optional, for cross-script matching). Returns nil when disabled.
+	embeddingsSvc, err := embeddings.NewService(logger, config.Embeddings, database)
+	if err != nil {
+		return nil, fmt.Errorf("creating embeddings service: %w", err)
 	}
 
 	return &service{
