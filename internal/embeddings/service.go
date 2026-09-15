@@ -70,12 +70,12 @@ type service struct {
 // NewService creates a new embeddings service.
 // Returns nil if config.Enabled is false.
 func NewService(logger log.Logger, config Config, database db.DB) (Service, error) {
+	// Apply environment variable overrides
+	config.LoadFromEnv()
+
 	if !config.Enabled {
 		return nil, nil
 	}
-
-	// Apply environment variable overrides
-	config.LoadFromEnv()
 
 	if err := config.Validate(); err != nil {
 		return nil, fmt.Errorf("embeddings: invalid config: %w", err)

@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/moov-io/base/strx"
 )
 
 // Config holds configuration for the embeddings service.
@@ -157,6 +159,9 @@ func DefaultConfig() Config {
 
 // LoadFromEnv applies environment variable overrides to the configuration.
 func (c *Config) LoadFromEnv() {
+	if enabled := strings.TrimSpace(os.Getenv("EMBEDDINGS_ENABLED")); enabled != "" {
+		c.Enabled = strx.Yes(enabled)
+	}
 	if apiKey := os.Getenv("EMBEDDINGS_API_KEY"); apiKey != "" {
 		c.Provider.APIKey = apiKey
 	}
@@ -169,6 +174,24 @@ func (c *Config) LoadFromEnv() {
 	if dim := os.Getenv("EMBEDDINGS_DIMENSION"); dim != "" {
 		if d, err := strconv.Atoi(dim); err == nil && d > 0 {
 			c.Provider.Dimension = d
+		}
+	}
+	if size := os.Getenv("EMBEDDINGS_CACHE_SIZE"); size != "" {
+		if n, err := strconv.Atoi(size); err == nil && n > 0 {
+			c.Cache.Size = n
+		}
+	}
+	if crossScriptOnly := strings.TrimSpace(os.Getenv("EMBEDDINGS_CROSS_SCRIPT_ONLY")); crossScriptOnly != "" {
+		c.CrossScriptOnly = strx.Yes(crossScriptOnly)
+	}
+	if batchSize := os.Getenv("EMBEDDINGS_BATCH_SIZE"); batchSize != "" {
+		if n, err := strconv.Atoi(batchSize); err == nil && n > 0 {
+			c.BatchSize = n
+		}
+	}
+	if timeout := os.Getenv("EMBEDDINGS_INDEX_BUILD_TIMEOUT"); timeout != "" {
+		if d, err := time.ParseDuration(timeout); err == nil {
+			c.IndexBuildTimeout = d
 		}
 	}
 }
