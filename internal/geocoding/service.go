@@ -1,10 +1,12 @@
 package geocoding
 
 import (
+	"cmp"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"os"
 	"sync"
 	"time"
 
@@ -51,6 +53,7 @@ func NewService(logger log.Logger, conf Config, database db.DB) (*Service, error
 	}
 
 	// Create geocoder based on provider config
+	conf.Provider.APIKey = cmp.Or(os.Getenv("GEOCODING_API_KEY"), conf.Provider.APIKey)
 	geocoder, err := createGeocoder(conf.Provider)
 	if err != nil {
 		return nil, fmt.Errorf("creating geocoder: %w", err)
