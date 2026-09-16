@@ -208,6 +208,11 @@ type SearchOpts struct {
 	RequestID      string
 	Debug          bool
 	DebugSourceIDs []string
+
+     // UseSoundex controls phonetic Soundex matching for this request...
+    // When nil, falls back to the USE_SOUNDEX_MATCHING environment variable...
+    UseSoundex *bool
+
 }
 
 type debugRespone struct {
@@ -216,6 +221,8 @@ type debugRespone struct {
 }
 
 func (s *service) performSearch(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error) {
+	
+	
 	// Candidate selection first (cheap, RLock only) so we can skip admission control
 	// for tiny result sets and avoid queuing them behind full-partition scans.
 	searchEntities, err := s.indexedLists.SelectCandidates(ctx, query)
@@ -240,6 +247,15 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 		attribute.Int("index.candidate_count", len(searchEntities)),
 	))
 	defer span.End()
+	  // Apply per-request Soundex override if provided.
+    // Falls back to USE_SOUNDEX_MATCHING env var when nil.
+    if opts.UseSoundex != nil {
+        if *opts.UseSoundex {
+            os.Setenv("USE_SOUNDEX_MATCHING", "yes")
+        } else {
+            os.Setenv("USE_SOUNDEX_MATCHING", "no")
+        }
+    }
 
 	goroutineCount, err := getGoroutineCount(s.cm)
 	if err != nil {

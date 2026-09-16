@@ -45,6 +45,7 @@ type SearchEntitiesRequest struct {
 	MinMatch *float64 `json:"minMatch,omitempty" jsonschema:"Minimum match score threshold (default 0.0)"`
 
 	IncludeDetails *bool `json:"includeDetails,omitempty" jsonschema:"Include field-level match score breakdown per result (names, addresses, IDs, etc.)"`
+	UseSoundex     *bool `json:"useSoundex,omitempty" jsonschema:"Enable phonetic Soundex matching for this request (default false)"`
 }
 
 func (s *Server) HandleSearchEntities(ctx context.Context, req *mcp.CallToolRequest, args SearchEntitiesRequest) (*mcp.CallToolResult, any, error) {
@@ -75,6 +76,7 @@ func (s *Server) HandleSearchEntities(ctx context.Context, req *mcp.CallToolRequ
 	opts := search.SearchOpts{
 		Limit:    10,
 		MinMatch: 0.0,
+		UseSoundex: args.UseSoundex,
 	}
 
 	if args.Limit != nil {

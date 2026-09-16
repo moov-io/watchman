@@ -84,6 +84,7 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 		RequestID:      queryParams.Get("requestID"),
 		Debug:          debug,
 		DebugSourceIDs: strings.Split(queryParams.Get("debugSourceIDs"), ","),
+		UseSoundex:      extractUseSoundex(queryParams),
 	}
 
 	outputFormat, subformat := api.ChooseEntityFormat(r.Header, queryParams.Get("format"))
@@ -137,6 +138,16 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 var (
 	softResultsLimit, hardResultsLimit = 10, 100
 )
+
+func extractUseSoundex(q *api.QueryParams) *bool {
+	v := strings.TrimSpace(q.Get("useSoundex"))
+	if v == "" {
+		return nil
+
+	}
+	result := strings.EqualFold(v, "true") || strings.EqualFold(v, "yes")
+	return &result
+}
 
 func extractSearchLimit(q *api.QueryParams) int {
 	limit := softResultsLimit
