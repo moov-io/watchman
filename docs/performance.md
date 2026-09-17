@@ -51,6 +51,7 @@ On every list refresh Watchman builds:
 | **Name-token inverted index** | Union of entities whose prepared primary, alt, or former names contain a query token (one posting per token per entity) |
 | **Exact prepared-name map** | Fast path when the full prepared name matches exactly |
 | **Crypto address map** | Exact `CURRENCY:address` lookup for crypto-only (or crypto+name) queries |
+| **Blocking keys** | Hashed `GOVID:` / `ADDR:` prefix postings for identifier and address-only queries (see [Record linkage](/watchman/record-linkage/)) |
 | **TF-IDF term weights** (optional) | Precomputed per-entity weights so search does not recompute IDF on every comparison |
 
 **Tips for faster queries**
@@ -91,7 +92,7 @@ Similarity scoring is allocation-conscious for bulk search:
 - Critical exact matches (government IDs, crypto addresses, contact identifiers) **return 1.0 immediately** and skip expensive name/title/address comparison.
 - Former names and related prepared fields are normalized at index time (and query normalize), not on every comparison.
 - Optional TF-IDF weights are attached to index entities when lists load; query weights are computed once per search.
-- Jaro-Winkler feature flags (`DISABLE_PHONETIC_FILTERING`, `USE_SOUNDEX_MATCHING`, `SOUNDEX_BOOST_WEIGHT`) are read at process start (see [Similarity Configuration](/watchman/config/#similarity-configuration)). Changing them requires a restart. Individual searches can still select `?algorithm=jaro-winkler` or `?algorithm=soundex` without a restart.
+- Jaro-Winkler feature flags (`DISABLE_PHONETIC_FILTERING`, `USE_SOUNDEX_MATCHING`, `SOUNDEX_BOOST_WEIGHT`) are read at process start (see [Similarity Configuration](/watchman/config/#similarity-configuration)). Changing them requires a restart. Individual searches can still select `?algorithm=jaro-winkler`, `?algorithm=soundex`, `?algorithm=soft-bidist`, or `?algorithm=soft-bisim` without a restart.
 
 Debug mode (`debug=true`) is substantially more expensive (extra buffers and detailed score pieces) and should stay off in production traffic.
 

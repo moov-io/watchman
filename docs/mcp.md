@@ -38,7 +38,7 @@ Searches for entities in sanctions lists using the same powerful matching algori
 - **request** (string, required): JSON string representing the search request, identical to the `/v2/search` HTTP endpoint
 - **limit** (number, optional): Maximum number of results to return (default: 10)
 - **minMatch** (number, optional): Minimum match score threshold (default: 0.0)
-- **algorithm** (string, optional): String matching algorithm. `jaro-winkler` (default) or `soundex` to enable phonetic Soundex boosting. Same values as the HTTP `?algorithm=` query parameter.
+- **algorithm** (string, optional): String matching algorithm. `jaro-winkler` (default), `soundex` (phonetic boost), `soft-bidist`, or `soft-bisim`. Same values as the HTTP `?algorithm=` query parameter.
 
 #### Request Format
 
@@ -257,7 +257,7 @@ All search parameters from the HTTP `/v2/search` endpoint are supported:
 - `emailAddresses`: Email addresses
 - `cryptoAddresses`: Cryptocurrency addresses
 - `governmentIDs`: Government-issued IDs (passports, tax IDs, etc.)
-- `algorithm`: String matching algorithm (`jaro-winkler` or `soundex`)
+- `algorithm`: String matching algorithm (`jaro-winkler`, `soundex`, `soft-bidist`, or `soft-bisim`)
 
 ## Usage Examples
 

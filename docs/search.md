@@ -42,10 +42,15 @@ Name scoring defaults to Watchman's Jaro-Winkler setup. Pass `algorithm` to sele
 |-------|----------|
 | `jaro-winkler` (default) | Token pairwise Jaro-Winkler scoring |
 | `soundex` | Jaro-Winkler with a Soundex phonetic boost for token pairs that encode to the same code (e.g. "Smith" / "Smythe") |
+| `soft-bidist` | [Soft-Bidist](https://github.com/PhonoGrams/soft_bigram) character-bigram edit distance (Hadwan 2021). Aliases: `soft-bigram`, `bidist` |
+| `soft-bisim` | [Soft-Bisim](https://github.com/PhonoGrams/soft-bisim) character-bigram similarity (Millán-Hernández 2019). Alias: `bisim` |
 
 ```
 GET /v2/search?type=person&name=smythe&algorithm=soundex
+GET /v2/search?type=person&name=aleksandr&algorithm=soft-bidist
 ```
+
+Soft-Bidist and Soft-Bisim replace only the inner token pair scorer. Watchman's BestPairs alignment, length-difference penalty, and first-letter phonetic filter still apply. Jaro-Winkler remains the default.
 
 When `algorithm` is omitted, process-wide flags such as `USE_SOUNDEX_MATCHING` still apply. An explicit `algorithm` value overrides those flags for that request. See [Similarity Configuration](/watchman/config/#similarity-configuration).
 
@@ -61,7 +66,7 @@ The API requires specifying an entity type:
 | `aircraft` | Aircraft registrations | `?type=aircraft&callSign=EP-GOM` |
 | `vessel` | Maritime vessels | `?type=vessel&imoNumber=9401598` |
 
-> **Performance:** Always include `type` (and `source` when you only need one list). Watchman partitions the in-memory corpus by source and type and uses name-token / crypto indexes to select candidates before fuzzy scoring. Empty type partitions return no matches (they do not scan other lists). Crypto-only queries use an exact address index. See [Performance](/watchman/performance/) and [Indexing](/watchman/indexing/).
+> **Performance:** Always include `type` (and `source` when you only need one list). Watchman partitions the in-memory corpus by source and type and uses name-token, crypto, and hashed government-ID / address blocking keys to select candidates before fuzzy scoring. Empty type partitions return no matches (they do not scan other lists). Crypto-only and government-ID queries use exact indexes. See [Performance](/watchman/performance/), [Indexing](/watchman/indexing/), and [Record linkage](/watchman/record-linkage/).
 
 ### Advanced Entity Search Parameters
 

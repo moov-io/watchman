@@ -149,13 +149,15 @@ paths:
             maximum: 1
         - name: algorithm
           in: query
-          description: String matching algorithm. Defaults to jaro-winkler. Use soundex to enable phonetic Soundex boosting of Jaro-Winkler scores.
+          description: String matching algorithm. Defaults to jaro-winkler. soundex enables phonetic Soundex boosting of Jaro-Winkler scores. soft-bidist and soft-bisim use PhonoGrams character-bigram scorers (aliases soft-bigram/bidist and bisim).
           required: false
           schema:
             type: string
             enum:
               - jaro-winkler
               - soundex
+              - soft-bidist
+              - soft-bisim
             default: jaro-winkler
         - name: requestID
           in: query

@@ -59,7 +59,7 @@ func main() {
 		Limit:    5,
 		MinMatch: 0.75,
 		Debug:    false,
-		// Algorithm: search.AlgorithmSoundex, // optional phonetic boost; default is Jaro-Winkler
+		// Algorithm: search.AlgorithmSoftBidist, // optional: AlgorithmSoundex, AlgorithmSoftBisim; default is Jaro-Winkler
 	}
 
 	resp, err := client.SearchByEntity(ctx, query, opts)

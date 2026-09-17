@@ -117,6 +117,18 @@ func TestSearchEntities_AlgorithmSoundex(t *testing.T) {
 	require.Len(t, result.Content, 1)
 }
 
+func TestSearchEntities_AlgorithmSoftBidist(t *testing.T) {
+	srv := newTestServer(t)
+
+	alg := "soft-bidist"
+	result, _, err := srv.HandleSearchEntities(context.Background(), &mcpsdk.CallToolRequest{}, SearchEntitiesRequest{
+		Request:   SearchEntityRequest{Name: "Logan", Type: pubsearch.EntityPerson},
+		Algorithm: &alg,
+	})
+	require.NoError(t, err)
+	require.Len(t, result.Content, 1)
+}
+
 func TestSearchEntities_AlgorithmInvalid(t *testing.T) {
 	srv := newTestServer(t)
 

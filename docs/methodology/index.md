@@ -71,6 +71,7 @@ For handling spelling variations, especially in transliterated names, Watchman i
    - Full `EncodeSoundex` implementation for whole-token phonetic codes (e.g. "Smith"→"S530")
    - Optional score boosting via `USE_SOUNDEX_MATCHING` + `SOUNDEX_BOOST_WEIGHT` when codes match exactly (same first letter + phonetic digits)
    - Per-request override with `?algorithm=soundex` (HTTP) or `algorithm: "soundex"` (MCP); `algorithm=jaro-winkler` is the default setup
+   - Character n-gram alternatives: `?algorithm=soft-bidist` (Soft-Bidist) and `?algorithm=soft-bisim` (Soft-Bisim) replace the inner token scorer while keeping BestPairs alignment and first-letter filtering
 
 2. **First Character Analysis**
    - Names with different first-character phonetic classes are less likely to match

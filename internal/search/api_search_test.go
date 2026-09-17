@@ -261,6 +261,33 @@ func TestAPI_Search(t *testing.T) {
 		require.Equal(t, http.StatusOK, w.Code)
 	})
 
+	t.Run("algorithm soft-bidist", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=2&algorithm=soft-bidist", nil)
+
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+
+		require.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("algorithm soft-bisim", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=2&algorithm=soft-bisim", nil)
+
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+
+		require.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("algorithm soft-bigram alias", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=2&algorithm=soft-bigram", nil)
+
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+
+		require.Equal(t, http.StatusOK, w.Code)
+	})
+
 	t.Run("algorithm invalid", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&algorithm=levenshtein", nil)
 

@@ -21,6 +21,11 @@ func TestParseStringMatchAlgorithm(t *testing.T) {
 		{in: "jw", want: AlgorithmJaroWinkler},
 		{in: "soundex", want: AlgorithmSoundex},
 		{in: " Soundex ", want: AlgorithmSoundex},
+		{in: "soft-bidist", want: AlgorithmSoftBidist},
+		{in: "soft_bigram", want: AlgorithmSoftBidist},
+		{in: "bidist", want: AlgorithmSoftBidist},
+		{in: "soft-bisim", want: AlgorithmSoftBisim},
+		{in: "bisim", want: AlgorithmSoftBisim},
 		{in: "levenshtein", wantErr: true},
 	}
 	for _, tc := range cases {
@@ -46,4 +51,12 @@ func TestStringMatchAlgorithm_ScoringConfig(t *testing.T) {
 	sx := AlgorithmSoundex.scoringConfig()
 	require.True(t, sx.UseSoundexBoost)
 	require.InDelta(t, defaultSoundexBoostWeight, sx.SoundexBoostWeight, 0.0001)
+
+	bidist := AlgorithmSoftBidist.scoringConfig()
+	require.False(t, bidist.UseSoundexBoost)
+	require.Equal(t, stringscore.TokenScorerSoftBidist, bidist.TokenScorer)
+
+	bisim := AlgorithmSoftBisim.scoringConfig()
+	require.False(t, bisim.UseSoundexBoost)
+	require.Equal(t, stringscore.TokenScorerSoftBisim, bisim.TokenScorer)
 }
