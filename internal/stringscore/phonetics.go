@@ -4,8 +4,9 @@ import (
 	"unicode"
 )
 
-// TODO(adam): implement double metaphone and Beider-Morse Phonetic Matching
-// add configuration to pick between soundex, double metaphone, and beider-morse
+// Soundex first-letter grouping for the phonetic filter.
+// Per-request ?algorithm=soundex|double-metaphone|beider-morse boosts Jaro-Winkler
+// when encodings match (see pkg/search).
 //
 // phonetic filter can be disabled, which might be good to Moov to do (try DISABLE_PHONETIC_FILTERING=yes)
 //
