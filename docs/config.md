@@ -18,6 +18,7 @@ menubar: docs-menu
  1. [Geocoding](#geocoding)
  1. [Postal Pool](#postalpool) (libpostal integration)
  1. [MCP](#mcp)
+ 1. [Ingest](#ingest)
  1. [Included Lists](#included-lists)
 
 #### Search Configuration
@@ -219,6 +220,17 @@ Enable the Model Context Protocol server endpoints at `/mcp` for AI agent integr
 
 When enabled, Watchman will serve MCP endpoints at `/mcp` (streamable HTTP) in addition to the standard HTTP API. (The MCP server is HTTP-based; no stdio mode is used.)
 
+### Ingest
+
+`POST /v2/ingest/{fileType}` reads the request body into a configured file schema. The body is capped to limit memory use:
+
+```yaml
+  Ingest:
+    MaxBodyBytes: 33554432 # 32MiB; oversized uploads return HTTP 413
+```
+
+`INGEST_MAX_BODY_BYTES` overrides the YAML value when it is a positive integer. See [File Dataset Ingestion](/watchman/ingest/) and [Network access](/watchman/network/).
+
 ### Included Lists
 
 Watchman integrates the following lists to help you maintain global compliance.
@@ -247,6 +259,7 @@ Watchman integrates the following lists to help you maintain global compliance.
 | `HTTPS_CERT_FILE`              | Filepath containing a certificate (or intermediate chain) to be served by the HTTP server. Requires all traffic be over secure HTTP. | Empty                                       |
 | `HTTPS_KEY_FILE`               | Filepath of a private key matching the leaf certificate from `HTTPS_CERT_FILE`.                                                      | Empty                                       |
 | `LOG_FORMAT`                   | Format for logging lines to be written as.                                                                                           | Options: `json`, `plain` - Default: `plain` |
+| `INGEST_MAX_BODY_BYTES`        | Maximum `POST /v2/ingest/{fileType}` request body size in bytes. Oversized uploads return HTTP 413.                                  | `33554432` (32MiB)                          |
 
 ### TF-IDF Configuration
 

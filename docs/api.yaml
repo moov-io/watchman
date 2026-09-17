@@ -600,7 +600,9 @@ paths:
   /v2/ingest/{fileType}:
     post:
       summary: Import a file as a dataset
-      description: Import a file as an in-memory dataset for use in searches.
+      description: |
+        Import a file as an in-memory dataset for use in searches.
+        Request bodies are capped (32MiB by default; see Ingest.MaxBodyBytes / INGEST_MAX_BODY_BYTES).
       parameters:
         - name: fileType
           in: path
@@ -627,6 +629,12 @@ paths:
                 $ref: '#/components/schemas/IngestFileResponse'
         '400':
           description: Missing or invalid fileType
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '413':
+          description: Request body exceeds the configured ingest size limit
           content:
             application/json:
               schema:

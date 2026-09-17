@@ -21,6 +21,8 @@ Ingest is served on the unauthenticated business API. Only `fileType` values def
 
 Watchman will expect a CSV file containing entity data, with headers matching the schema defined in the Watchman configuration.
 
+The HTTP body is capped at 32MiB by default. Oversized uploads return `413`. Override with `Ingest.MaxBodyBytes` (YAML) or `INGEST_MAX_BODY_BYTES` (bytes). See [Network access](/watchman/network/).
+
 Senzing files can be ingested as well by specifying their format in the yaml config.
 
 ```yaml
@@ -63,6 +65,7 @@ Below is an example Watchman YAML configuration for two file types: fincen-busin
 ```yaml
 Watchman:
   Ingest:
+    MaxBodyBytes: 33554432 # 32MiB default; oversized uploads return HTTP 413
     files:
       fincen-business:
         format: csv

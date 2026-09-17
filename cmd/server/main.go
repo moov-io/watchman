@@ -167,7 +167,7 @@ func main() {
 	refreshController := download.NewRefreshController(logger, refreshManager)
 	refreshController.AppendRoutes(router)
 
-	ingestController := ingest.NewController(logger, ingestService)
+	ingestController := ingest.NewController(logger, ingestService, conf.Ingest)
 	ingestController.AppendRoutes(router)
 
 	// Add the Webui last

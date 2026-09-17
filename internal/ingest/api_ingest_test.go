@@ -183,7 +183,7 @@ func setupIngestAPITest(t *testing.T, fn func(ingestApiSetup)) {
 		require.NoError(t, err)
 
 		ingestService := ingest.NewService(logger, ingestConf.Ingest, ingestRepository)
-		controller := ingest.NewController(logger, ingestService)
+		controller := ingest.NewController(logger, ingestService, ingestConf.Ingest)
 
 		router := mux.NewRouter()
 		controller.AppendRoutes(router)
@@ -199,5 +199,79 @@ func setupIngestAPITest(t *testing.T, fn func(ingestApiSetup)) {
 			server:        server,
 			searchService: searchService,
 		})
+	})
+}
+
+type recordingIngestService struct {
+	reads int
+}
+
+func (s *recordingIngestService) ReadEntitiesFromFile(_ context.Context, name string, contents io.Reader) (ingest.FileEntities, error) {
+	s.reads++
+	if contents != nil {
+		if _, err := io.Copy(io.Discard, contents); err != nil {
+			return ingest.FileEntities{}, err
+		}
+	}
+	return ingest.FileEntities{
+		FileType: name,
+		Entities: []pubsearch.Entity[pubsearch.Value]{{Name: "ok"}},
+	}, nil
+}
+
+func (s *recordingIngestService) ReplaceEntities(context.Context, string, []pubsearch.Entity[pubsearch.Value]) error {
+	return nil
+}
+
+func (s *recordingIngestService) GetEntitiesBySource(context.Context, string) ([]pubsearch.Entity[pubsearch.Value], error) {
+	return nil, nil
+}
+
+func TestIngestFile_MaxBodyBytes(t *testing.T) {
+	logger := log.NewTestLogger()
+	svc := &recordingIngestService{}
+	controller := ingest.NewController(logger, svc, ingest.Config{MaxBodyBytes: 64})
+
+	router := mux.NewRouter()
+	controller.AppendRoutes(router)
+
+	t.Run("under limit", func(t *testing.T) {
+		svc.reads = 0
+		req := httptest.NewRequest("POST", "/v2/ingest/custom", bytes.NewReader([]byte("tiny body")))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		require.Equal(t, http.StatusOK, w.Code)
+		require.Equal(t, 1, svc.reads)
+	})
+
+	t.Run("content-length over limit", func(t *testing.T) {
+		svc.reads = 0
+		body := bytes.Repeat([]byte("a"), 100)
+		req := httptest.NewRequest("POST", "/v2/ingest/custom", bytes.NewReader(body))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		require.Equal(t, http.StatusRequestEntityTooLarge, w.Code)
+		require.Contains(t, w.Body.String(), "request body exceeds 64 byte limit")
+		require.Equal(t, 0, svc.reads)
+	})
+
+	t.Run("chunked body over limit", func(t *testing.T) {
+		svc.reads = 0
+		pr, pw := io.Pipe()
+		go func() {
+			_, _ = pw.Write(bytes.Repeat([]byte("x"), 200))
+			_ = pw.Close()
+		}()
+
+		req := httptest.NewRequest("POST", "/v2/ingest/custom", pr)
+		req.ContentLength = -1
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		require.Equal(t, http.StatusRequestEntityTooLarge, w.Code)
+		require.Contains(t, w.Body.String(), "request body exceeds 64 byte limit")
+		require.Equal(t, 1, svc.reads)
 	})
 }

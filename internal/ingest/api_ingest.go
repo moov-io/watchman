@@ -2,6 +2,8 @@ package ingest
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/moov-io/base/log"
@@ -18,16 +20,18 @@ type Controller interface {
 	AppendRoutes(router *mux.Router) *mux.Router
 }
 
-func NewController(logger log.Logger, service Service) Controller {
+func NewController(logger log.Logger, service Service, conf Config) Controller {
 	return &controller{
 		logger:  logger,
 		service: service,
+		conf:    conf,
 	}
 }
 
 type controller struct {
 	logger  log.Logger
 	service Service
+	conf    Config
 }
 
 func (c *controller) AppendRoutes(router *mux.Router) *mux.Router {
@@ -62,15 +66,28 @@ func (c *controller) ingestFile(w http.ResponseWriter, r *http.Request) {
 		"file_type": log.String(fileType),
 	})
 
-	if r.Body != nil {
-		defer r.Body.Close()
-	}
-
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 
+	maxBytes := c.conf.maxBodyBytes()
+	if r.ContentLength > maxBytes {
+		logger.Info().Logf("rejecting ingest body: content-length %d exceeds %d byte limit", r.ContentLength, maxBytes)
+		api.ErrorResponseStatus(w, http.StatusRequestEntityTooLarge, errRequestBodyTooLarge(maxBytes))
+		return
+	}
+
+	if r.Body != nil {
+		r.Body = http.MaxBytesReader(w, r.Body, maxBytes)
+		defer r.Body.Close()
+	}
+
 	parsedFile, err := c.service.ReadEntitiesFromFile(ctx, fileType, r.Body)
 	if err != nil {
+		if isMaxBytesError(err) {
+			logger.Error().Log("ingest request body too large")
+			api.ErrorResponseStatus(w, http.StatusRequestEntityTooLarge, errRequestBodyTooLarge(maxBytes))
+			return
+		}
 		// file_type is already attached as a structured field; avoid interpolating
 		// user-controlled values into the log message (CWE-117 / go/log-injection).
 		logger.Error().Log("problem reading entities from file")
@@ -154,4 +171,13 @@ func (c *controller) exportFile(w http.ResponseWriter, r *http.Request) {
 		api.ErrorResponse(w, err)
 		return
 	}
+}
+
+func errRequestBodyTooLarge(maxBytes int64) error {
+	return fmt.Errorf("request body exceeds %d byte limit", maxBytes)
+}
+
+func isMaxBytesError(err error) bool {
+	var maxBytesErr *http.MaxBytesError
+	return errors.As(err, &maxBytesErr)
 }

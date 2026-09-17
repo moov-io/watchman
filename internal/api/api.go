@@ -11,8 +11,12 @@ type errorResponse struct {
 }
 
 func ErrorResponse(w http.ResponseWriter, err error) error {
+	return ErrorResponseStatus(w, http.StatusBadRequest, err)
+}
+
+func ErrorResponseStatus(w http.ResponseWriter, status int, err error) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusBadRequest)
+	w.WriteHeader(status)
 
 	return encodeError(w, err)
 }
