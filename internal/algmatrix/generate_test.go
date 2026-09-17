@@ -15,10 +15,23 @@ func TestWriteAlgorithmComparisonDoc(t *testing.T) {
 	if !strings.Contains(md, "dominguez") {
 		t.Fatal("missing false-positive row")
 	}
+	if !strings.Contains(md, "algorithm-comparison.csv") {
+		t.Fatal("missing CSV download link")
+	}
+
+	csvBody := RenderCSV()
+	if !strings.HasPrefix(csvBody, "query,index,note,") {
+		t.Fatalf("csv header: %q", csvBody[:min(80, len(csvBody))])
+	}
+	if strings.Count(csvBody, "\n") < len(pairs)+1 {
+		t.Fatal("csv missing rows")
+	}
 
 	root := repoRoot(t)
-	path := filepath.Join(root, "docs", "algorithm-comparison.md")
-	if err := os.WriteFile(path, []byte(md), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(root, "docs", "algorithm-comparison.md"), []byte(md), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "docs", "algorithm-comparison.csv"), []byte(csvBody), 0o644); err != nil {
 		t.Fatal(err)
 	}
 }

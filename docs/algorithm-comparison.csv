@@ -1,0 +1,16 @@
+query,index,note,jw,jw+tfidf,soundex,dmeta,bmpm,bidist,bidist+tfidf,bisim,editex,editex+tfidf,nsim,nsim-3
+precede,preceed,spelling / doubled letter,0.971,0.971,1.000,1.000,1.000,0.971,0.971,0.857,0.857,0.857,0.857,0.857
+achieve,acheive,transposition,0.967,0.967,1.000,1.000,0.967,0.943,0.943,0.686,0.857,0.857,0.714,0.714
+smith,smythe,phonetic (English),0.815,0.815,0.913,0.913,0.913,0.807,0.807,0.538,0.792,0.792,0.633,0.633
+catherine,katherine,C/K onset,0.926,0.926,0.926,1.000,1.000,0.956,0.956,0.789,0.944,0.944,0.833,0.778
+qaddafi,gaddafi,Q/G onset,0.905,0.905,0.905,1.000,0.905,0.943,0.943,0.729,0.857,0.857,0.786,0.714
+aleksandr,alexander,transliteration,0.896,0.896,1.000,1.000,1.000,0.822,0.822,0.656,0.722,0.722,0.722,0.704
+nicolas maduro,nicolas moros maduro,missing middle,0.958,0.945,0.958,0.958,0.958,0.958,0.945,0.958,0.958,0.945,0.958,0.958
+alexander lukashenko,lukashenko alexander grigoryevich,token order / extra given,0.942,0.942,0.942,0.942,0.942,0.942,0.942,0.942,0.942,0.942,0.942,0.942
+saddam hussein,saddam hussein al tikriti,missing suffix,0.939,0.919,0.939,0.939,0.939,0.939,0.919,0.939,0.939,0.919,0.939,0.939
+hadi,hadi alwai,short vs longer,0.917,0.919,0.917,0.917,0.917,0.917,0.919,0.917,0.917,0.919,0.917,0.917
+li shangfu,li shanlan,shared short token,0.867,0.907,0.867,0.867,0.867,0.756,0.830,0.733,0.667,0.769,0.722,0.778
+vladimir,vladimirov vladimir vladimirovich,doubled family,0.889,0.895,0.898,0.898,0.889,0.889,0.895,0.889,0.889,0.895,0.889,0.889
+dominguez,jimenez,false-positive control,0.000,0.000,0.000,0.000,0.000,0.000,0.000,0.000,0.000,0.000,0.000,0.000
+cycloserine,cyclosporine,LASA look-alike,0.908,0.908,1.000,1.000,0.908,0.925,0.925,0.792,0.875,0.875,0.833,0.806
+schumacher,shumaker,German / English spelling,0.820,0.820,0.919,0.919,0.919,0.790,0.790,0.555,0.752,0.752,0.611,0.564
