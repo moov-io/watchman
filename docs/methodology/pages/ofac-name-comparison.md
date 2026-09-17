@@ -1,5 +1,5 @@
 ## Comparison with OFAC portal
-The [OFAC portal](https://sanctionssearch.ofac.treas.gov/) returned 20 100% matches for "Khamis Al"
+The [OFAC portal](https://sanctionssearch.ofac.treas.gov/) returned 21 100% matches for "Khamis Al"
 
 Comparing OFAC Names against "Khamis Al" using Watchman's name similarity algorithm
 
@@ -10,6 +10,7 @@ Comparing OFAC Names against "Khamis Al" using Watchman's name similarity algori
 | Khamis Al |	AL-KHANJAR, Khamis	| 0.688 |
 | Khamis Al |	AL-MUHAMMAD, Khamis Sirhan	| 0.649 |
 | Khamis Al |	AL-QADHAFI, Khamis	| 0.688 |
+| Khamis Al |	ALDEN, Khaldun Khamis Zakaria	| 0.715 |
 | Khamis Al |	ALESSAWI, Khamis F Ali	| 0.872 |
 | Khamis Al |	DR. KHAMIS	| 0.362 |
 | Khamis Al |	EL-QADDAFI, Khamis	| 0.688 |
