@@ -74,8 +74,8 @@ func (s *Server) HandleSearchEntities(ctx context.Context, req *mcp.CallToolRequ
 	}
 
 	opts := search.SearchOpts{
-		Limit:    10,
-		MinMatch: 0.0,
+		Limit:      10,
+		MinMatch:   0.0,
 		UseSoundex: args.UseSoundex,
 	}
 

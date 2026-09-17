@@ -84,7 +84,7 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 		RequestID:      queryParams.Get("requestID"),
 		Debug:          debug,
 		DebugSourceIDs: strings.Split(queryParams.Get("debugSourceIDs"), ","),
-		UseSoundex:      extractUseSoundex(queryParams),
+		UseSoundex:     extractUseSoundex(queryParams),
 	}
 
 	outputFormat, subformat := api.ChooseEntityFormat(r.Header, queryParams.Get("format"))
