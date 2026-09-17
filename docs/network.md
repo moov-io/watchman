@@ -8,7 +8,7 @@ menubar: docs-menu
 
 # Network access
 
-Watchman is not designed to be served directly on the internet. Run it on a private network, or put a reverse proxy / API gateway in front of it. Authentication, ACLs, and rate limiting belong at the edge of the deployment, not inside Watchman.
+Watchman is not designed to be served directly on the internet. Run it on a private network, or put a reverse proxy / API gateway with allowed paths in front of it. Authentication, ACLs, and rate limiting belong at the edge of the deployment, not inside Watchman.
 
 ## HTTP API (`BindAddress`)
 

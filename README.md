@@ -204,7 +204,7 @@ Twitter [@moov](https://twitter.com/moov)	| You can follow Moov.io's Twitter fee
 [GitHub Issue](https://github.com/moov-io/watchman/issues) | If you are able to reproduce a problem please open a GitHub Issue under the specific project that caused the error.
 [moov-io slack](https://slack.moov.io/) | Join our slack channel (`#watchman`) to have an interactive discussion about the development of the project.
 
-If you find a security issue please contact us at [`security@moov.io`](mailto:security@moov.io). Watchman is not designed to be served on the internet; see [Network access](https://moov-io.github.io/watchman/network/).
+If you find a security issue please contact us at [`security@moov.io`](mailto:security@moov.io).
 
 ## Supported and tested platforms
 
