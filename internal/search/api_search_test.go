@@ -279,6 +279,34 @@ func TestAPI_Search(t *testing.T) {
 		require.Equal(t, http.StatusOK, w.Code)
 	})
 
+	t.Run("algorithm editex", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=2&algorithm=editex", nil)
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+		require.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("algorithm nsim", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=2&algorithm=nsim", nil)
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+		require.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("algorithm double-metaphone", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=2&algorithm=double-metaphone", nil)
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+		require.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("algorithm beider-morse", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=2&algorithm=beider-morse", nil)
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+		require.Equal(t, http.StatusOK, w.Code)
+	})
+
 	t.Run("algorithm soft-bigram alias", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=2&algorithm=soft-bigram", nil)
 

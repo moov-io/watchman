@@ -20,6 +20,8 @@
   items:
     - name: Search options
       link: /search/
+    - name: Algorithm comparison
+      link: /algorithm-comparison/
     - name: Addresses
       link: /addresses/
     - name: Cross-Script Matching

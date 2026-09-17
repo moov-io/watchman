@@ -45,4 +45,27 @@ func TestSimilarity_AlgorithmSoftNGrams(t *testing.T) {
 	require.Greater(t, jw, 0.0)
 	require.Greater(t, bidist, 0.5, "soft-bidist should treat Aleksandr/Alexander as a close pair")
 	require.Greater(t, bisim, 0.5, "soft-bisim should treat Aleksandr/Alexander as a close pair")
+
+	ed := SimilarityWithOpts(query, index, SimilarityOpts{Algorithm: AlgorithmEditex})
+	ns := SimilarityWithOpts(query, index, SimilarityOpts{Algorithm: AlgorithmNSim})
+	require.Greater(t, ed, 0.5, "editex")
+	require.Greater(t, ns, 0.5, "nsim")
+}
+
+func TestSimilarity_PhoneticBoosts(t *testing.T) {
+	query := Entity[Value]{
+		Name:   "Smythe",
+		Type:   EntityPerson,
+		Person: &Person{Name: "Smythe"},
+	}.Normalize()
+	index := Entity[Value]{
+		Name:   "Smith",
+		Type:   EntityPerson,
+		Person: &Person{Name: "Smith"},
+	}.Normalize()
+
+	jw := SimilarityWithOpts(query, index, SimilarityOpts{Algorithm: AlgorithmJaroWinkler})
+	dm := SimilarityWithOpts(query, index, SimilarityOpts{Algorithm: AlgorithmDoubleMetaphone})
+	require.Greater(t, jw, 0.0)
+	require.GreaterOrEqual(t, dm, jw)
 }

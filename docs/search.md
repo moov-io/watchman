@@ -44,13 +44,20 @@ Name scoring defaults to Watchman's Jaro-Winkler setup. Pass `algorithm` to sele
 | `soundex` | Jaro-Winkler with a Soundex phonetic boost for token pairs that encode to the same code (e.g. "Smith" / "Smythe") |
 | `soft-bidist` | [Soft-Bidist](https://github.com/PhonoGrams/soft_bigram) character-bigram edit distance (Hadwan 2021). Aliases: `soft-bigram`, `bidist` |
 | `soft-bisim` | [Soft-Bisim](https://github.com/PhonoGrams/soft-bisim) character-bigram similarity (Millán-Hernández 2019). Alias: `bisim` |
+| `editex` | [Editex](https://github.com/PhonoGrams/editex) phonetic-group edit distance (Zobel & Dart 1996) |
+| `nsim` | [Kondrak N-SIM](https://github.com/PhonoGrams/ngram) n=2 (BI-SIM). Aliases: `n-sim`, `kondrak` |
+| `nsim-3` | Kondrak N-SIM n=3 (Trigram-2B affixing). Alias: `trigram` |
+| `double-metaphone` | Jaro-Winkler with a [Double Metaphone](https://github.com/PhonoGrams/double_metaphone) boost when codes overlap |
+| `beider-morse` | Jaro-Winkler with a [Beider-Morse](https://github.com/PhonoGrams/beider_morse) boost when generic keys overlap. Alias: `bmpm` |
 
 ```
 GET /v2/search?type=person&name=smythe&algorithm=soundex
 GET /v2/search?type=person&name=aleksandr&algorithm=soft-bidist
 ```
 
-Soft-Bidist and Soft-Bisim replace only the inner token pair scorer. Watchman's BestPairs alignment, length-difference penalty, and first-letter phonetic filter still apply. Jaro-Winkler remains the default.
+Inner scorers (`soft-bidist`, `soft-bisim`, `editex`, `nsim`, `nsim-3`) replace only the token pair metric. Phonetic options (`soundex`, `double-metaphone`, `beider-morse`) keep Jaro-Winkler and boost pairs whose encodings match. BestPairs alignment, length-difference penalty, and first-letter phonetic filter still apply. Jaro-Winkler remains the default.
+
+See [Algorithm comparison](/watchman/algorithm-comparison/) for a generated score matrix (TF-IDF on/off) on paper and OFAC-style pairs.
 
 When `algorithm` is omitted, process-wide flags such as `USE_SOUNDEX_MATCHING` still apply. An explicit `algorithm` value overrides those flags for that request. See [Similarity Configuration](/watchman/config/#similarity-configuration).
 
