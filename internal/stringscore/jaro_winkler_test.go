@@ -343,6 +343,38 @@ func TestBestPairsJaroWinklerWithConfig_SoftNGrams(t *testing.T) {
 	require.Equal(t, 0.0, filtered)
 }
 
+func TestBestPairs_EditexAndNSim(t *testing.T) {
+	t.Cleanup(stringscore.ResetEnvConfigForTest)
+	stringscore.ResetEnvConfigForTest()
+
+	ed := stringscore.BestPairsJaroWinklerWithConfig(
+		[]string{"niall"}, []string{"neil"},
+		stringscore.ScoringConfig{TokenScorer: stringscore.TokenScorerEditex},
+	)
+	require.Greater(t, ed, 0.7)
+
+	ns := stringscore.BestPairsJaroWinklerWithConfig(
+		[]string{"toradol"}, []string{"tegretol"},
+		stringscore.ScoringConfig{TokenScorer: stringscore.TokenScorerNSim},
+	)
+	require.Greater(t, ns, 0.4)
+}
+
+func TestBestPairs_DoubleMetaphoneBoost(t *testing.T) {
+	t.Cleanup(stringscore.ResetEnvConfigForTest)
+	stringscore.ResetEnvConfigForTest()
+
+	jw := stringscore.BestPairsJaroWinklerWithConfig(
+		[]string{"smythe"}, []string{"smith"},
+		stringscore.ScoringConfig{},
+	)
+	dm := stringscore.BestPairsJaroWinklerWithConfig(
+		[]string{"smythe"}, []string{"smith"},
+		stringscore.ScoringConfig{UseDoubleMetaphoneBoost: true, SoundexBoostWeight: 0.12},
+	)
+	require.GreaterOrEqual(t, dm, jw)
+}
+
 func BenchmarkJaroWinkler(b *testing.B) {
 	inputs := []string{
 		"Seyed Mohammad HASHEMI",

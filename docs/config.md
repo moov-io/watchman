@@ -347,7 +347,7 @@ YAML configuration (example with OpenAI):
 | `USE_SOUNDEX_MATCHING`             | Enable full Soundex phonetic code matching to optionally boost Jaro-Winkler scores for phonetically similar names (e.g. "Smith" vs "Smythe"). Loaded at process start. Per-request `?algorithm=soundex` (or MCP `algorithm`) overrides this for a single search. | `false` |
 | `SOUNDEX_BOOST_WEIGHT`             | When Soundex matching is enabled, the boost factor applied to pairs whose Soundex codes match (score *= 1+weight, capped at 1.0). Example: `0.12` for a 12% boost. Per-request `algorithm=soundex` uses `0.12` when this is unset. | `0.0`   |
 
-> **Note:** `DISABLE_PHONETIC_FILTERING`, `USE_SOUNDEX_MATCHING`, and `SOUNDEX_BOOST_WEIGHT` are read once at process startup for hot-path performance. Restart Watchman after changing them. Search requests may still override the string-matching algorithm with `?algorithm=jaro-winkler`, `?algorithm=soundex`, `?algorithm=soft-bidist`, or `?algorithm=soft-bisim` without a restart.
+> **Note:** `DISABLE_PHONETIC_FILTERING`, `USE_SOUNDEX_MATCHING`, and `SOUNDEX_BOOST_WEIGHT` are read once at process startup for hot-path performance. Restart Watchman after changing them. Search requests may still override the string-matching algorithm with `?algorithm=` (see [Search](/watchman/search/) and [Algorithm comparison](/watchman/algorithm-comparison/)) without a restart.
 
 #### Source List Configuration
 

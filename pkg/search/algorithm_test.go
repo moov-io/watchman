@@ -26,6 +26,15 @@ func TestParseStringMatchAlgorithm(t *testing.T) {
 		{in: "bidist", want: AlgorithmSoftBidist},
 		{in: "soft-bisim", want: AlgorithmSoftBisim},
 		{in: "bisim", want: AlgorithmSoftBisim},
+		{in: "editex", want: AlgorithmEditex},
+		{in: "nsim", want: AlgorithmNSim},
+		{in: "kondrak", want: AlgorithmNSim},
+		{in: "nsim-3", want: AlgorithmNSim3},
+		{in: "trigram", want: AlgorithmNSim3},
+		{in: "double-metaphone", want: AlgorithmDoubleMetaphone},
+		{in: "dmetaphone", want: AlgorithmDoubleMetaphone},
+		{in: "beider-morse", want: AlgorithmBeiderMorse},
+		{in: "bmpm", want: AlgorithmBeiderMorse},
 		{in: "levenshtein", wantErr: true},
 	}
 	for _, tc := range cases {
@@ -59,4 +68,20 @@ func TestStringMatchAlgorithm_ScoringConfig(t *testing.T) {
 	bisim := AlgorithmSoftBisim.scoringConfig()
 	require.False(t, bisim.UseSoundexBoost)
 	require.Equal(t, stringscore.TokenScorerSoftBisim, bisim.TokenScorer)
+
+	ed := AlgorithmEditex.scoringConfig()
+	require.Equal(t, stringscore.TokenScorerEditex, ed.TokenScorer)
+
+	ns := AlgorithmNSim.scoringConfig()
+	require.Equal(t, stringscore.TokenScorerNSim, ns.TokenScorer)
+
+	ns3 := AlgorithmNSim3.scoringConfig()
+	require.Equal(t, stringscore.TokenScorerNSim3, ns3.TokenScorer)
+
+	dm := AlgorithmDoubleMetaphone.scoringConfig()
+	require.True(t, dm.UseDoubleMetaphoneBoost)
+	require.InDelta(t, defaultSoundexBoostWeight, dm.SoundexBoostWeight, 0.0001)
+
+	bm := AlgorithmBeiderMorse.scoringConfig()
+	require.True(t, bm.UseBeiderMorseBoost)
 }

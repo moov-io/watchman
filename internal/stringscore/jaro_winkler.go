@@ -11,6 +11,10 @@ import (
 
 	"github.com/moov-io/base/strx"
 
+	"github.com/PhonoGrams/beider_morse"
+	"github.com/PhonoGrams/double_metaphone"
+	"github.com/PhonoGrams/editex"
+	"github.com/PhonoGrams/ngram"
 	softbisim "github.com/PhonoGrams/soft-bisim"
 	"github.com/PhonoGrams/soft_bigram"
 	"github.com/xrash/smetrics"
@@ -63,14 +67,19 @@ const (
 	TokenScorerJaroWinkler TokenScorer = iota
 	TokenScorerSoftBidist
 	TokenScorerSoftBisim
+	TokenScorerEditex
+	TokenScorerNSim
+	TokenScorerNSim3
 )
 
 // ScoringConfig controls optional per-comparison behavior. Zero value uses the
 // process-wide environment defaults from ReloadEnvConfig.
 type ScoringConfig struct {
-	UseSoundexBoost    bool
-	SoundexBoostWeight float64
-	TokenScorer        TokenScorer
+	UseSoundexBoost         bool
+	UseDoubleMetaphoneBoost bool
+	UseBeiderMorseBoost     bool
+	SoundexBoostWeight      float64
+	TokenScorer             TokenScorer
 }
 
 // DefaultScoringConfig returns the process-wide scoring flags.
@@ -199,6 +208,12 @@ func tokenSimilarity(s1 string, s2 string, cfg ScoringConfig) float64 {
 		score = soft_bigram.Similarity(s1, s2)
 	case TokenScorerSoftBisim:
 		score = softbisim.Similarity(s1, s2)
+	case TokenScorerEditex:
+		score = editex.Similarity(s1, s2)
+	case TokenScorerNSim:
+		score = ngram.NSim(s1, s2, 2)
+	case TokenScorerNSim3:
+		score = ngram.NSim(s1, s2, 3)
 	case TokenScorerJaroWinkler:
 		score = smetrics.JaroWinkler(s1, s2, boostThreshold, prefixSize)
 	default:
@@ -218,11 +233,22 @@ func tokenSimilarity(s1 string, s2 string, cfg ScoringConfig) float64 {
 		score = score * differentLetterPenaltyWeight
 	}
 
-	// Optional Soundex phonetic boost for pairs that encode to the same full Soundex code.
-	if cfg.UseSoundexBoost && cfg.SoundexBoostWeight > 0 && SoundexMatch(s1, s2) {
-		score *= (1.0 + cfg.SoundexBoostWeight)
-		if score > 1.0 {
-			score = 1.0
+	if cfg.SoundexBoostWeight > 0 {
+		boost := false
+		if cfg.UseSoundexBoost && SoundexMatch(s1, s2) {
+			boost = true
+		}
+		if cfg.UseDoubleMetaphoneBoost && double_metaphone.Match(s1, s2) {
+			boost = true
+		}
+		if cfg.UseBeiderMorseBoost && beider_morse.Match(s1, s2) {
+			boost = true
+		}
+		if boost {
+			score *= (1.0 + cfg.SoundexBoostWeight)
+			if score > 1.0 {
+				score = 1.0
+			}
 		}
 	}
 
