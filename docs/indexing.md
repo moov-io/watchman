@@ -20,7 +20,8 @@ When lists finish downloading and preparing, Watchman constructs an in-memory **
 3. **Name-token inverted index** — maps each significant prepared name token to entity positions (primary name, alternate names, and historical “Former Name” values). Each entity is posted **once per distinct token** even if the token repeats across name fields.
 4. **Exact prepared-name map** — maps the full prepared name string to entity positions for exact-name shortcuts.
 5. **Crypto address index** — exact lookup by `CURRENCY:address` for fast crypto screening.
-6. **Optional TF-IDF weights** — when enabled, term weights for each entity’s name fields are stored on the entity so search does not recompute them per comparison.
+6. **Blocking keys** — PII-safe composite hashes (`GOVID:`, `ADDR:`, hashed Soundex `NAME:` tokens, and related kinds) plus their coarse-to-fine prefixes. Government-ID queries use exact `GOVID:` lookup; address-only queries use the finest `ADDR:` prefix that still prunes the partition. The keys never store names, ID numbers, or addresses. See [Record linkage](/watchman/record-linkage/).
+7. **Optional TF-IDF weights** — when enabled, term weights for each entity’s name fields are stored on the entity so search does not recompute them per comparison.
 
 These structures are immutable for readers until the next successful refresh replaces the corpus atomically.
 
@@ -37,8 +38,11 @@ Before Jaro-Winkler scoring, Watchman selects a **candidate set**:
 | No token hits (e.g. heavy typos) | **Fall back to the full partition** (preserves recall within that source/type) |
 | Crypto address only | Exact crypto hits only (does not expand to the full partition) |
 | Crypto + name tokens | Union of crypto hits and name-token candidates |
+| Government ID (no name) | Exact hashed `GOVID:` hits; if none, fall back to the partition |
+| Government ID + name tokens | Union of `GOVID:` hits and name-token candidates |
+| Address only (no name tokens) | Finest hashed `ADDR:` prefix that still prunes the partition; otherwise the partition |
 | Exact prepared name (no tokens after stopwords) | Binary-search exact-name postings against the partition |
-| Name-less / identifier-oriented (no crypto) | Full partition for the filtered source/type |
+| Name-less / identifier-oriented (no crypto, no GOVID/address hits) | Full partition for the filtered source/type |
 
 If name-token candidates would cover most of the partition (default threshold: half the partition size), Watchman scores the full partition instead—token pruning would not save work.
 

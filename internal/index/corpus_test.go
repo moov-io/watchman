@@ -194,6 +194,91 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 	})
 }
 
+func TestCorpus_BlockingKeys(t *testing.T) {
+	john := mustNorm(search.Entity[search.Value]{
+		Name:     "John Smith",
+		Type:     search.EntityPerson,
+		Source:   search.SourceUSOFAC,
+		SourceID: "j1",
+		Person: &search.Person{
+			GovernmentIDs: []search.GovernmentID{
+				{Type: search.GovernmentIDPassport, Country: "US", Identifier: "1234567890"},
+			},
+		},
+		Addresses: []search.Address{
+			{Line1: "541 First St", City: "Anytown", State: "CA", PostalCode: "90210", Country: "US"},
+		},
+	})
+	jane := mustNorm(search.Entity[search.Value]{
+		Name:     "Jane Doe",
+		Type:     search.EntityPerson,
+		Source:   search.SourceUSOFAC,
+		SourceID: "j2",
+		Person: &search.Person{
+			GovernmentIDs: []search.GovernmentID{
+				{Type: search.GovernmentIDPassport, Country: "GB", Identifier: "999888777"},
+			},
+		},
+		Addresses: []search.Address{
+			{Line1: "10 Downing Street", City: "London", PostalCode: "SW1A 2AA", Country: "GB"},
+		},
+	})
+
+	idx := NewLists(nil)
+	idx.Update(download.Stats{
+		Entities: []search.Entity[search.Value]{john, jane},
+		Lists:    map[string]int{string(search.SourceUSOFAC): 2},
+	})
+	ctx := context.Background()
+
+	t.Run("government ID query does not scan the other person", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:   search.EntityPerson,
+			Source: search.SourceUSOFAC,
+			Person: &search.Person{
+				GovernmentIDs: []search.GovernmentID{
+					{Type: search.GovernmentIDPassport, Country: "US", Identifier: "1234567890"},
+				},
+			},
+		})
+		require.Empty(t, query.PreparedFields.NameFields)
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Len(t, cands, 1)
+		require.Equal(t, "j1", cands[0].SourceID)
+	})
+
+	t.Run("address-only query stays in the matching country block", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:   search.EntityPerson,
+			Source: search.SourceUSOFAC,
+			Addresses: []search.Address{
+				{City: "Anytown", State: "CA", PostalCode: "90210", Country: "US"},
+			},
+		})
+		require.Empty(t, query.PreparedFields.NameFields)
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Len(t, cands, 1)
+		require.Equal(t, "j1", cands[0].SourceID)
+	})
+
+	t.Run("unknown government ID falls back to the partition", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:   search.EntityPerson,
+			Source: search.SourceUSOFAC,
+			Person: &search.Person{
+				GovernmentIDs: []search.GovernmentID{
+					{Type: search.GovernmentIDPassport, Country: "US", Identifier: "0000000000"},
+				},
+			},
+		})
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Len(t, cands, 2, "no blocking-key hits must not drop recall")
+	})
+}
+
 func mustNorm(e search.Entity[search.Value]) search.Entity[search.Value] {
 	return e.Normalize()
 }
