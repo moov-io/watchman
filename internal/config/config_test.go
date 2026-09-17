@@ -23,4 +23,8 @@ func TestLoadConfig(t *testing.T) {
 	require.Equal(t, ":8084", conf.Servers.BindAddress)
 	require.Equal(t, 12*time.Hour, conf.Download.RefreshInterval)
 	require.Empty(t, conf.Download.IgnoredDownloadErrors, "default config should have empty IgnoredDownloadErrors")
+	require.False(t, conf.Deepparse.Enabled, "deepparse is opt-in")
+	require.Equal(t, "http://localhost:8000", conf.Deepparse.BaseURL)
+	require.Equal(t, "bpemb-attention", conf.Deepparse.Model)
+	require.Equal(t, 10*time.Second, conf.Deepparse.Timeout)
 }

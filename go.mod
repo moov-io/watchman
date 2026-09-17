@@ -14,6 +14,7 @@ require (
 	github.com/PhonoGrams/soft-bisim v0.1.0
 	github.com/PhonoGrams/soft_bigram v0.2.0
 	github.com/abadojack/whatlanggo v1.0.1
+	github.com/adamdecaf/deepparse-go v0.2.0
 	github.com/adamdecaf/merge v0.2.2
 	github.com/antchfx/htmlquery v1.3.6
 	github.com/bbalet/stopwords v1.0.0

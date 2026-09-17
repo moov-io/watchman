@@ -67,6 +67,8 @@ github.com/VividCortex/gohistogram v1.0.0 h1:6+hBz+qvs0JOrrNhhmR7lFxo5sINxBCGXrd
 github.com/VividCortex/gohistogram v1.0.0/go.mod h1:Pf5mBqqDxYaXu3hDrrU+w6nw50o/4+TcAqDqk/vUH7g=
 github.com/abadojack/whatlanggo v1.0.1 h1:19N6YogDnf71CTHm3Mp2qhYfkRdyvbgwWdd2EPxJRG4=
 github.com/abadojack/whatlanggo v1.0.1/go.mod h1:66WiQbSbJBIlOZMsvbKe5m6pzQovxCH9B/K8tQB2uoc=
+github.com/adamdecaf/deepparse-go v0.2.0 h1:5bsiRApeS5HMhH/27P4ichPx75bMgLH7agHTXunappM=
+github.com/adamdecaf/deepparse-go v0.2.0/go.mod h1:yJgT6S9X4gJjj1w6Qt8PVs0ueiuQ4Vypua3juPvy/Yc=
 github.com/adamdecaf/merge v0.2.2 h1:gp20Lbi3QNPF8q3tb+3CAmk0GInJ8peFzBEhGsgs8VE=
 github.com/adamdecaf/merge v0.2.2/go.mod h1:nyr0ZFlYZFhNwL6eGTq5P/Opi8n+zt/kIONOIhM4er0=
 github.com/antchfx/htmlquery v1.3.6 h1:RNHHL7YehO5XdO8IM8CynwLKONwRHWkrghbYhQIk9ag=

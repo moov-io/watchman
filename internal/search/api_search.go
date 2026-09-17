@@ -14,7 +14,6 @@ import (
 	"github.com/moov-io/base/telemetry"
 	"github.com/moov-io/watchman/internal/api"
 	"github.com/moov-io/watchman/internal/norm"
-	"github.com/moov-io/watchman/internal/postalpool"
 	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/pkg/address"
 	"github.com/moov-io/watchman/pkg/search"
@@ -28,18 +27,18 @@ type Controller interface {
 	AppendRoutes(router *mux.Router) *mux.Router
 }
 
-func NewController(logger log.Logger, service Service, addressParsingPool *postalpool.Service) Controller {
+func NewController(logger log.Logger, service Service, addressParser address.Parser) Controller {
 	return &controller{
-		logger:             logger,
-		service:            service,
-		addressParsingPool: addressParsingPool,
+		logger:        logger,
+		service:       service,
+		addressParser: addressParser,
 	}
 }
 
 type controller struct {
-	logger             log.Logger
-	service            Service
-	addressParsingPool *postalpool.Service
+	logger        log.Logger
+	service       Service
+	addressParser address.Parser
 }
 
 func (c *controller) AppendRoutes(router *mux.Router) *mux.Router {
@@ -71,7 +70,7 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 	queryParams := api.NewQueryParams(r.URL)
 	debug := strx.Yes(queryParams.Get("debug"))
 
-	req, err := readSearchRequest(ctx, c.addressParsingPool, queryParams)
+	req, err := readSearchRequest(ctx, c.addressParser, queryParams)
 	if err != nil {
 		err = c.logger.Error().LogErrorf("problem reading v2 search request: %w", err).Err()
 		api.ErrorResponse(w, err)
@@ -175,7 +174,7 @@ func extractAlgorithm(q *api.QueryParams) (search.StringMatchAlgorithm, error) {
 	return search.ParseStringMatchAlgorithm(q.Get("algorithm"))
 }
 
-func readSearchRequest(ctx context.Context, addressParsingPool *postalpool.Service, q *api.QueryParams) (search.Entity[search.Value], error) {
+func readSearchRequest(ctx context.Context, addressParser address.Parser, q *api.QueryParams) (search.Entity[search.Value], error) {
 	var err error
 	var req search.Entity[search.Value]
 
@@ -260,7 +259,7 @@ func readSearchRequest(ctx context.Context, addressParsingPool *postalpool.Servi
 	req.Contact.Websites = readStrings(q.GetAll("website"), q.GetAll("websites"))
 
 	addresses := readStrings(q.GetAll("address"), q.GetAll("addresses"))
-	req.Addresses = readAddresses(ctx, addressParsingPool, addresses)
+	req.Addresses = readAddresses(ctx, addressParser, addresses)
 
 	cryptoAddresses := readStrings(q.GetAll("cryptoAddress"), q.GetAll("cryptoAddresses"))
 	req.CryptoAddresses = readCryptoCurrencyAddresses(cryptoAddresses)
@@ -330,22 +329,11 @@ func readGovernmentIDs(q *api.QueryParams) []search.GovernmentID {
 	return out
 }
 
-func readAddresses(ctx context.Context, addressParsingPool *postalpool.Service, inputs []string) []search.Address {
+func readAddresses(ctx context.Context, addressParser address.Parser, inputs []string) []search.Address {
 	out := make([]search.Address, len(inputs))
 
 	for idx, input := range inputs {
-		// Prefer the pool if it's defined
-		if addressParsingPool != nil {
-			addr, err := addressParsingPool.ParseAddress(ctx, input)
-			if err == nil {
-				out[idx] = addr
-			}
-		} else {
-			// Fallback to standard parsing
-			out[idx] = address.ParseAddress(ctx, input)
-		}
-
-		// Normalize the country
+		out[idx] = address.Parse(ctx, addressParser, input)
 		out[idx].Country = norm.Country(out[idx].Country)
 	}
 

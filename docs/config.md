@@ -17,6 +17,7 @@ menubar: docs-menu
  1. [Search](#search)
  1. [Geocoding](#geocoding)
  1. [Postal Pool](#postalpool) (libpostal integration)
+ 1. [Deepparse](#deepparse) (optional alternative to libpostal)
  1. [MCP](#mcp)
  1. [Ingest](#ingest)
  1. [Included Lists](#included-lists)
@@ -206,6 +207,28 @@ PostalPool is an experiment for improving address parsing via [libpostal](https:
     BinaryPath: "" # POSTAL_SERVER_BIN_PATH is set in Dockerfile
     CGOSelfInstances: 1
 ```
+
+#### Deepparse
+
+Deepparse is an optional HTTP client for [GRAAL-Research/deepparse](https://github.com/GRAAL-Research/deepparse), a neural-network address parser that runs outside Watchman. Default parsers (usaddress / libpostal) are unchanged until this is enabled.
+
+Start the published image from this repository without pulling it into the default test stack:
+
+```
+make setup-deepparse
+```
+
+That runs `ghcr.io/graal-research/deepparse:0.11.0` on port `8000` (`docker compose --profile deepparse`). First start downloads models and can take several minutes.
+
+```yaml
+  Deepparse:
+    Enabled: false
+    BaseURL: "http://localhost:8000"  # or DEEPPARSE_URL
+    Model: "bpemb-attention"          # bpemb, bpemb-attention; the image skips FastText
+    Timeout: "10s"
+```
+
+If both Deepparse and PostalPool are enabled, Watchman uses Deepparse and logs a warning.
 
 ### MCP
 

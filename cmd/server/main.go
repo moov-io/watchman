@@ -21,6 +21,7 @@ import (
 	"github.com/moov-io/watchman"
 	"github.com/moov-io/watchman/internal/config"
 	"github.com/moov-io/watchman/internal/db"
+	"github.com/moov-io/watchman/internal/deepparse"
 	"github.com/moov-io/watchman/internal/download"
 	"github.com/moov-io/watchman/internal/geocoding"
 	"github.com/moov-io/watchman/internal/index"
@@ -156,12 +157,12 @@ func main() {
 		router.PathPrefix("/mcp").Handler(http.StripPrefix("/mcp", mcpServer.Handler()))
 	}
 
-	addressParsingPool, err := postalpool.NewService(logger, conf.PostalPool)
+	addressParser, err := newAddressParser(logger, conf)
 	if err != nil {
-		logger.Fatal().LogErrorf("problem setting up address parsing pool: %v", err)
+		logger.Fatal().LogErrorf("problem setting up address parser: %v", err)
 		os.Exit(1)
 	}
-	searchController := search.NewController(logger, searchService, addressParsingPool)
+	searchController := search.NewController(logger, searchService, addressParser)
 	searchController.AppendRoutes(router)
 
 	refreshController := download.NewRefreshController(logger, refreshManager)
@@ -240,6 +241,31 @@ func main() {
 		shutdownServer()
 		logger.LogErrorf("final exit: %v", err)
 	}
+}
+
+func newAddressParser(logger log.Logger, conf *config.Config) (address.Parser, error) {
+	if conf.Deepparse.Enabled {
+		if conf.PostalPool.Enabled {
+			logger.Warn().Log("deepparse is enabled; postalpool will not be used")
+		}
+		svc, err := deepparse.NewService(logger, conf.Deepparse)
+		if err != nil {
+			return nil, err
+		}
+		if svc == nil {
+			return nil, nil
+		}
+		return svc, nil
+	}
+
+	pool, err := postalpool.NewService(logger, conf.PostalPool)
+	if err != nil {
+		return nil, err
+	}
+	if pool == nil {
+		return nil, nil
+	}
+	return pool, nil
 }
 
 func addPingRoute(r *mux.Router) {
