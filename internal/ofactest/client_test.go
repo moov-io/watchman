@@ -8,6 +8,10 @@ import (
 )
 
 func TestClient(t *testing.T) {
+	if testing.Short() {
+		t.Skip("requires the live OFAC Sanctions List Service")
+	}
+
 	cc := NewClient()
 
 	ctx := context.Background()
