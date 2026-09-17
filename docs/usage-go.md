@@ -59,7 +59,9 @@ func main() {
 		Limit:    5,
 		MinMatch: 0.75,
 		Debug:    false,
-		// Algorithm: search.AlgorithmSoftBidist, // optional: AlgorithmSoundex, AlgorithmSoftBisim; default is Jaro-Winkler
+		// Algorithm: search.AlgorithmEditex, // optional; default is Jaro-Winkler.
+		// Also: AlgorithmSoundex, AlgorithmSoftBidist, AlgorithmSoftBisim,
+		// AlgorithmNSim, AlgorithmNSim3, AlgorithmDoubleMetaphone, AlgorithmBeiderMorse.
 	}
 
 	resp, err := client.SearchByEntity(ctx, query, opts)
