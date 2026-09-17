@@ -80,7 +80,8 @@ func ParseStringMatchAlgorithm(raw string) (StringMatchAlgorithm, error) {
 	case string(AlgorithmBeiderMorse), "beidermorse", "bmpm":
 		return AlgorithmBeiderMorse, nil
 	default:
-		return "", fmt.Errorf("unknown algorithm %q (supported: %s)", raw, supportedAlgorithms)
+		// Omit the raw value so HTTP error logs are not a log-injection source.
+		return "", fmt.Errorf("unknown algorithm (supported: %s)", supportedAlgorithms)
 	}
 }
 

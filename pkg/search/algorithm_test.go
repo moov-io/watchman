@@ -42,6 +42,8 @@ func TestParseStringMatchAlgorithm(t *testing.T) {
 			got, err := ParseStringMatchAlgorithm(tc.in)
 			if tc.wantErr {
 				require.Error(t, err)
+				require.Contains(t, err.Error(), "unknown algorithm")
+				require.NotContains(t, err.Error(), tc.in)
 				return
 			}
 			require.NoError(t, err)
