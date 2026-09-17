@@ -51,6 +51,8 @@ github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERo
 github.com/Microsoft/go-winio v0.6.2/go.mod h1:yd8OoFMLzJbo9gZq8j5qaps8bJ9aShtEA8Ipt1oGCvU=
 github.com/OpenRouterTeam/go-sdk v0.7.149 h1:ltyphoWdsiHDjHAYhBFKDG0TX0IGd49iQqL7FDk9PY4=
 github.com/OpenRouterTeam/go-sdk v0.7.149/go.mod h1:8vFtUZ9I2YiDntYbck42wQhrx9DsJN5PHbViaHwTkXc=
+github.com/OpenRouterTeam/go-sdk v0.7.150 h1:NITmA7i86h3LOYqJEdQC68Frewf7Ai4PAD1HwfnSexo=
+github.com/OpenRouterTeam/go-sdk v0.7.150/go.mod h1:8vFtUZ9I2YiDntYbck42wQhrx9DsJN5PHbViaHwTkXc=
 github.com/PhonoGrams/soft-bisim v0.1.0 h1:epISGRQHJf5kr88FGnUyDwp3k5rtD0rdG5tDD2HpssQ=
 github.com/PhonoGrams/soft-bisim v0.1.0/go.mod h1:O3sji+bRKgld1RT4NKx7WrXR+y51SmCl2fQPSZMYyZ0=
 github.com/PhonoGrams/soft_bigram v0.2.0 h1:qXFY2efrpm6kt3vRygmvAHt5/LtPbCWd01vobKmhycM=
