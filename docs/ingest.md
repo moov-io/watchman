@@ -11,6 +11,8 @@ menubar: docs-menu
 Extend Watchman's capabilities by ingesting your own datasets. The `POST /v2/ingest/{fileType}` endpoint enables seamless upload and processing of CSV files containing entity data (e.g., businesses or persons).
 Watchman parses the file according to your configured schema and integrates the entities into its search index as a dedicated list, maintaining separation from standard watchlists.
 
+Ingest is served on the unauthenticated business API. Only `fileType` values defined in config are accepted; an unknown type does not create a new list. See [Network access](/watchman/network/).
+
 ### Path Parameters
 
 - `fileType` (required): The type of file being ingested, corresponding to a specific configuration in the Watchman YAML (e.g., `fincen-business` or `fincen-person`).

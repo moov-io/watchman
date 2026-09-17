@@ -19,6 +19,8 @@ Start the Docker image [using a tag](https://hub.docker.com/r/moov/watchman/tags
 docker run -p 8084:8084 moov/watchman
 ```
 
+That example publishes only the business API (`:8084`). Do not expose Watchman on the public internet. The admin port (`:9094`) is separate so it can stay unpublished. See [Network access](/watchman/network/).
+
 A web-based UI (WASM) is served at the root (`/`) for interactive searching and list inspection. Open http://localhost:8084 in a browser.
 
 Get information about a company using their entity ID:

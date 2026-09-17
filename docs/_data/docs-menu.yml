@@ -40,6 +40,8 @@
 
 - label: Production and monitoring
   items:
+    - name: Network access
+      link: /network/
     - name: Caching Data Files
       link: /cache-data-files/
     - name: Performance

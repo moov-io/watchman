@@ -78,6 +78,8 @@ Start the Docker image [using a tag](https://hub.docker.com/r/moov/watchman/tags
 docker run -p 8084:8084 moov/watchman
 ```
 
+That example publishes only the business API (`:8084`). Do not expose Watchman on the public internet. See [Network access](#network-access).
+
 Run a search for an individual or business:
 ```
 curl -s "http://localhost:8084/v2/search?name=Nicolas+Maduro&type=person&limit=1&minMatch=0.75" | jq .
@@ -150,6 +152,14 @@ curl -s "http://localhost:8084/v2/search?name=Nicolas+Maduro&type=person&limit=1
 
 </details>
 
+### Network access
+
+Watchman is not designed to be served directly on the internet. Run it on a private network or behind a reverse proxy / API gateway. Authentication, ACLs, and rate limiting belong at the edge of the deployment, not inside Watchman.
+
+The HTTP API (`BindAddress`, `:8084`) is unauthenticated by design (search, ingest, export, refresh, web UI, MCP). The admin server (`AdminAddress`, `:9094`) is a **separate port** so you can firewall it, bind it to an internal interface, or block it entirely. Prometheus `/metrics` and `/version` live on the admin port on purpose and are unauthenticated.
+
+See [Network access](https://moov-io.github.io/watchman/network/) and [issue #875](https://github.com/moov-io/watchman/issues/875).
+
 ### Data persistence
 
 By design, Watchman **does not persist** (save) any data about the search queries or lists pulled from external sources. Watchman can store ingested files (the individual records) in
@@ -192,7 +202,7 @@ Twitter [@moov](https://twitter.com/moov)	| You can follow Moov.io's Twitter fee
 [GitHub Issue](https://github.com/moov-io/watchman/issues) | If you are able to reproduce a problem please open a GitHub Issue under the specific project that caused the error.
 [moov-io slack](https://slack.moov.io/) | Join our slack channel (`#watchman`) to have an interactive discussion about the development of the project.
 
-If you find a security issue please contact us at [`security@moov.io`](mailto:security@moov.io).
+If you find a security issue please contact us at [`security@moov.io`](mailto:security@moov.io). Watchman is not designed to be served on the internet; see [Network access](https://moov-io.github.io/watchman/network/).
 
 ## Supported and tested platforms
 

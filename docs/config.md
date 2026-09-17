@@ -12,6 +12,7 @@ menubar: docs-menu
 
  1. [File](#file)
     1. [Environment Variables](#environment-variables)
+    1. [Metrics](#metrics)
  1. [Download](#download)
  1. [Search](#search)
  1. [Geocoding](#geocoding)
@@ -67,11 +68,14 @@ Watchman:
   #       MaxIdleTime: "60s"
 ```
 
+`BindAddress` is the business API. `AdminAddress` is a **separate port** for Prometheus metrics and `/version` so deployments can firewall, bind internally, or block admin without touching search. Watchman is not designed to be served directly on the internet. See [Network access](/watchman/network/).
+
 ### Metrics
 
 The admin server (`AdminAddress`, `:9094` by default) serves Prometheus metrics at
 `/metrics`, including Go runtime and process collectors plus a duration histogram for
-every request the API server handles:
+every request the API server handles. Metrics on this port are unauthenticated by design;
+do not expose `:9094` on the public internet.
 
 ```
 watchman_http_request_duration_seconds_bucket{method="GET",route="/v2/search",code="200",le="0.25"}
@@ -325,10 +329,10 @@ YAML configuration (example with OpenAI):
 | `FINAL_SCORE_MIN_REQUIRED_FIELDS_MULTIPLIER` | Multiplier applied when a search compares fewer than two required fields, such as a name-only query.              | 0.90    |
 | `FINAL_SCORE_NAME_ONLY_MULTIPLIER`           | Multiplier applied to name-only matches when no IDs or addresses are present in the query.                    | 0.95    |
 | `DISABLE_PHONETIC_FILTERING`       | Force comparing search tokens against every index token (skip first-letter phonetic filter inside Jaro-Winkler). Loaded at process start. | `false` |
-| `USE_SOUNDEX_MATCHING`             | Enable full Soundex phonetic code matching to optionally boost Jaro-Winkler scores for phonetically similar names (e.g. "Smith" vs "Smythe"). Loaded at process start. | `false` |
-| `SOUNDEX_BOOST_WEIGHT`             | When `USE_SOUNDEX_MATCHING=yes`, the boost factor applied to pairs whose Soundex codes match (score *= 1+weight, capped at 1.0). Example: `0.12` for a 12% boost. Loaded at process start. | `0.0`   |
+| `USE_SOUNDEX_MATCHING`             | Enable full Soundex phonetic code matching to optionally boost Jaro-Winkler scores for phonetically similar names (e.g. "Smith" vs "Smythe"). Loaded at process start. Per-request `?algorithm=soundex` (or MCP `algorithm`) overrides this for a single search. | `false` |
+| `SOUNDEX_BOOST_WEIGHT`             | When Soundex matching is enabled, the boost factor applied to pairs whose Soundex codes match (score *= 1+weight, capped at 1.0). Example: `0.12` for a 12% boost. Per-request `algorithm=soundex` uses `0.12` when this is unset. | `0.0`   |
 
-> **Note:** `DISABLE_PHONETIC_FILTERING`, `USE_SOUNDEX_MATCHING`, and `SOUNDEX_BOOST_WEIGHT` are read once at process startup for hot-path performance. Restart Watchman after changing them.
+> **Note:** `DISABLE_PHONETIC_FILTERING`, `USE_SOUNDEX_MATCHING`, and `SOUNDEX_BOOST_WEIGHT` are read once at process startup for hot-path performance. Restart Watchman after changing them. Search requests may still override the string-matching algorithm with `?algorithm=jaro-winkler` or `?algorithm=soundex` without a restart.
 
 #### Source List Configuration
 
