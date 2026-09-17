@@ -26,6 +26,10 @@ import (
 //
 
 func TestOFACMethodology_Name(t *testing.T) {
+	if testing.Short() {
+		t.Skip("requires the live OFAC Sanctions List Service")
+	}
+
 	ctx := context.Background()
 	ofacClient := ofactest.NewClient()
 
