@@ -59,6 +59,8 @@ Point `FINCEN_311_DOWNLOAD_URL` or place the HTML snapshot in your `INITIAL_DATA
 
 For any `opensanctions_*` or custom `Download.Senzing` entries, the `Location` (URL or `file://...`) is used. When using `INITIAL_DATA_DIRECTORY`, relative file references or exact filenames referenced in the location can be resolved from that directory for startup without network access. Periodic refreshes will still attempt live fetches unless the location is a stable local file path.
 
+`Location` and the `*_DOWNLOAD_TEMPLATE` / `*_DOWNLOAD_URL` variables are operator configuration. `file://` and internal HTTP caches are supported on purpose; Watchman does not allowlist hosts or jail local paths. See [Network access](/watchman/network/).
+
 **Live downloads with improved reliability**
 
 The `INITIAL_DATA_DIRECTORY` approach above supplies pre-parsed files at startup. For environments that prefer (or require) live downloads with resilience against flaky sources, consider the companion

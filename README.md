@@ -158,7 +158,9 @@ Watchman is not designed to be served directly on the internet. Run it on a priv
 
 The HTTP API (`BindAddress`, `:8084`) is unauthenticated by design (search, ingest, export, refresh, web UI, MCP). The admin server (`AdminAddress`, `:9094`) is a **separate port** so you can firewall it, bind it to an internal interface, or block it entirely. Prometheus `/metrics` and `/version` live on the admin port on purpose and are unauthenticated.
 
-See [Network access](https://moov-io.github.io/watchman/network/) and [issue #875](https://github.com/moov-io/watchman/issues/875).
+Download URLs (`file://` locations, `*_DOWNLOAD_TEMPLATE`, `*_DOWNLOAD_URL`) are operator configuration, not API input. Watchman does not allowlist hosts or jail `file://` paths.
+
+See [Network access](https://moov-io.github.io/watchman/network/), [issue #875](https://github.com/moov-io/watchman/issues/875), and [issue #876](https://github.com/moov-io/watchman/issues/876).
 
 ### Data persistence
 

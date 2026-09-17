@@ -132,6 +132,8 @@ sum(rate(watchman_http_request_duration_seconds_count[5m])) by (route)
     # Use SENZING_CONCURRENT_DOWNLOADS env var (default 5) to limit parallel downloads of Senzing lists.
 ```
 
+`Location` and the `*_DOWNLOAD_TEMPLATE` / `*_DOWNLOAD_URL` environment variables are operator configuration, not API input. `file://` is supported for local Senzing files. Pointing templates at an internal HTTP cache (including `http://` on a private network) is expected. Watchman does not allowlist download hosts or jail `file://` paths. See [Network access](/watchman/network/).
+
 ### Search
 
 ```yaml
@@ -394,7 +396,8 @@ For production deployments, consider running [moov-io/watchman-cache](https://gi
 - Persistent cache storage using a named Docker volume across container restarts
 - An intentional allowlist — only the exact filenames Watchman requests are permitted (it is not an open proxy)
 
-No changes are required inside Watchman. Simply override the download template environment variables to point at the cache:
+No changes are required inside Watchman. Simply override the download template environment variables to point at the cache
+(including `http://` on a private network; that is expected, not a misconfiguration):
 
 ```
 OFAC_DOWNLOAD_TEMPLATE=http://watchman-cache:8080/api/PublicationPreview/exports/%s

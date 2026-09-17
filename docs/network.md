@@ -29,3 +29,17 @@ The admin HTTP server is a **separate port** (`AdminAddress`, `:9094` by default
 Prometheus metrics (`/metrics`) and `/version` live on the admin server on purpose and are unauthenticated. Unauthenticated `/metrics` on that port is expected.
 
 See [issue #875](https://github.com/moov-io/watchman/issues/875).
+
+## Download URLs
+
+List download locations are operator configuration, not API input. Nothing in the HTTP API lets a caller pick a URL.
+
+- `Download.Senzing[].Location` and `OpenSanctions.Lists[].Location` come from YAML
+- `OFAC_DOWNLOAD_TEMPLATE` and the other `*_DOWNLOAD_TEMPLATE` / `*_DOWNLOAD_URL` variables come from the environment
+- `POST /v2/data/refresh` refetches whatever is already configured
+
+`file://` is supported so operators can load a local Senzing file (see [Configuration](/watchman/config/#download) and [Caching Data Files](/watchman/cache-data-files/)). Pointing templates at an internal HTTP cache, including `http://` on a private network, is the intended way to run [watchman-cache](https://github.com/moov-io/watchman-cache).
+
+Watchman does not allowlist download hosts, reject `file:` paths, or block private / loopback / link-local addresses. A cross-OS denylist of "sensitive" paths is not maintained. Whoever can write `APP_CONFIG` or the process environment already controls the process.
+
+See [issue #876](https://github.com/moov-io/watchman/issues/876).
