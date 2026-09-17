@@ -147,6 +147,16 @@ paths:
             format: float
             minimum: 0
             maximum: 1
+        - name: algorithm
+          in: query
+          description: String matching algorithm. Defaults to jaro-winkler. Use soundex to enable phonetic Soundex boosting of Jaro-Winkler scores.
+          required: false
+          schema:
+            type: string
+            enum:
+              - jaro-winkler
+              - soundex
+            default: jaro-winkler
         - name: requestID
           in: query
           description: Client-provided ID for request tracking

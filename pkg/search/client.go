@@ -258,9 +258,10 @@ func (s *SearchResponse) UnmarshalJSON(data []byte) error {
 }
 
 type SearchOpts struct {
-	Limit    int
-	MinMatch float64
-	Debug    bool
+	Limit     int
+	MinMatch  float64
+	Debug     bool
+	Algorithm StringMatchAlgorithm
 }
 
 // SearchByEntity searches for entities (e.g., individuals, businesses) using the provided query fields and
@@ -312,6 +313,9 @@ func SetSearchOpts(q url.Values, opts SearchOpts) url.Values {
 	}
 	if opts.Debug {
 		q.Set("debug", "yes")
+	}
+	if opts.Algorithm != "" {
+		q.Set("algorithm", string(opts.Algorithm))
 	}
 
 	return q

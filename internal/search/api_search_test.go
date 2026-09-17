@@ -237,6 +237,39 @@ func TestAPI_Search(t *testing.T) {
 			fmt.Println(string(raw))
 		}
 	})
+
+	t.Run("algorithm soundex", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=2&algorithm=soundex", nil)
+
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+
+		require.Equal(t, http.StatusOK, w.Code)
+
+		var response search.SearchResponse
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		require.NoError(t, err)
+		require.Len(t, response.Entities, 2)
+	})
+
+	t.Run("algorithm jaro-winkler", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=2&algorithm=jaro-winkler", nil)
+
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+
+		require.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("algorithm invalid", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&algorithm=levenshtein", nil)
+
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+
+		require.Equal(t, http.StatusBadRequest, w.Code)
+		require.Contains(t, w.Body.String(), "unknown algorithm")
+	})
 }
 
 func TestAPI_Senzing(t *testing.T) {

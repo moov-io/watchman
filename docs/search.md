@@ -34,6 +34,21 @@ Accept: senzing/jsonl # One object per line {...}\n{...}
 
 The `format` query parameter accepts this as well, `?format=senzing` or `?format=senzing/jsonl`.
 
+### Matching Algorithm
+
+Name scoring defaults to Watchman's Jaro-Winkler setup. Pass `algorithm` to select a string-matching algorithm per request:
+
+| Value | Behavior |
+|-------|----------|
+| `jaro-winkler` (default) | Token pairwise Jaro-Winkler scoring |
+| `soundex` | Jaro-Winkler with a Soundex phonetic boost for token pairs that encode to the same code (e.g. "Smith" / "Smythe") |
+
+```
+GET /v2/search?type=person&name=smythe&algorithm=soundex
+```
+
+When `algorithm` is omitted, process-wide flags such as `USE_SOUNDEX_MATCHING` still apply. An explicit `algorithm` value overrides those flags for that request. See [Similarity Configuration](/watchman/config/#similarity-configuration).
+
 ### Entity Types
 
 The API requires specifying an entity type:

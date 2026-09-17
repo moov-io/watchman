@@ -104,3 +104,27 @@ func TestSearchEntities_IncludeDetails_FalseOmitsPieces(t *testing.T) {
 			"Details.Pieces should be empty when includeDetails=false")
 	}
 }
+
+func TestSearchEntities_AlgorithmSoundex(t *testing.T) {
+	srv := newTestServer(t)
+
+	alg := "soundex"
+	result, _, err := srv.HandleSearchEntities(context.Background(), &mcpsdk.CallToolRequest{}, SearchEntitiesRequest{
+		Request:   SearchEntityRequest{Name: "Logan", Type: pubsearch.EntityPerson},
+		Algorithm: &alg,
+	})
+	require.NoError(t, err)
+	require.Len(t, result.Content, 1)
+}
+
+func TestSearchEntities_AlgorithmInvalid(t *testing.T) {
+	srv := newTestServer(t)
+
+	alg := "levenshtein"
+	_, _, err := srv.HandleSearchEntities(context.Background(), &mcpsdk.CallToolRequest{}, SearchEntitiesRequest{
+		Request:   SearchEntityRequest{Name: "Logan", Type: pubsearch.EntityPerson},
+		Algorithm: &alg,
+	})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "unknown algorithm")
+}

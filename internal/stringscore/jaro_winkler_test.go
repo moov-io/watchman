@@ -299,6 +299,23 @@ func TestJaroWinklerWithSoundex(t *testing.T) {
 	})
 }
 
+func TestBestPairsJaroWinklerWithConfig_Soundex(t *testing.T) {
+	t.Cleanup(stringscore.ResetEnvConfigForTest)
+	stringscore.ResetEnvConfigForTest()
+
+	jw := stringscore.BestPairsJaroWinklerWithConfig(
+		strings.Fields("smith"),
+		strings.Fields("smythe"),
+		stringscore.ScoringConfig{},
+	)
+	sx := stringscore.BestPairsJaroWinklerWithConfig(
+		strings.Fields("smith"),
+		strings.Fields("smythe"),
+		stringscore.ScoringConfig{UseSoundexBoost: true, SoundexBoostWeight: 0.12},
+	)
+	require.Greater(t, sx, jw)
+}
+
 func BenchmarkJaroWinkler(b *testing.B) {
 	inputs := []string{
 		"Seyed Mohammad HASHEMI",

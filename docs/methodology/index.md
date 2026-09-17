@@ -70,6 +70,7 @@ For handling spelling variations, especially in transliterated names, Watchman i
    - Groups phonetically similar characters for first-letter filtering and penalty logic
    - Full `EncodeSoundex` implementation for whole-token phonetic codes (e.g. "Smith"→"S530")
    - Optional score boosting via `USE_SOUNDEX_MATCHING` + `SOUNDEX_BOOST_WEIGHT` when codes match exactly (same first letter + phonetic digits)
+   - Per-request override with `?algorithm=soundex` (HTTP) or `algorithm: "soundex"` (MCP); `algorithm=jaro-winkler` is the default setup
 
 2. **First Character Analysis**
    - Names with different first-character phonetic classes are less likely to match
@@ -144,7 +145,7 @@ Watchman includes several performance enhancements. See [Performance](/watchman/
 
 2. **Phonetic filtering inside Jaro-Winkler**
    - First-character phonetic classes skip unlikely token pairs before running full Jaro-Winkler
-   - Optional full Soundex boost when `USE_SOUNDEX_MATCHING` is enabled
+   - Optional full Soundex boost when `USE_SOUNDEX_MATCHING` is enabled, or when a search sets `algorithm=soundex`
 
 3. **Precomputed prepared fields**
    - Names, alt names, former names, addresses, and optional TF-IDF weights are prepared at index/query normalize time

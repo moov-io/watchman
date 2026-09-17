@@ -45,6 +45,8 @@ type SearchEntitiesRequest struct {
 	MinMatch *float64 `json:"minMatch,omitempty" jsonschema:"Minimum match score threshold (default 0.0)"`
 
 	IncludeDetails *bool `json:"includeDetails,omitempty" jsonschema:"Include field-level match score breakdown per result (names, addresses, IDs, etc.)"`
+
+	Algorithm *string `json:"algorithm,omitempty" jsonschema:"String matching algorithm: jaro-winkler (default) or soundex"`
 }
 
 func (s *Server) HandleSearchEntities(ctx context.Context, req *mcp.CallToolRequest, args SearchEntitiesRequest) (*mcp.CallToolResult, any, error) {
@@ -85,6 +87,13 @@ func (s *Server) HandleSearchEntities(ctx context.Context, req *mcp.CallToolRequ
 	}
 	if args.IncludeDetails != nil && *args.IncludeDetails {
 		opts.Debug = true
+	}
+	if args.Algorithm != nil {
+		alg, err := pubsearch.ParseStringMatchAlgorithm(*args.Algorithm)
+		if err != nil {
+			return nil, nil, err
+		}
+		opts.Algorithm = alg
 	}
 
 	// Normalize the request

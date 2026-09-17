@@ -30,10 +30,10 @@ type nameMatch struct {
 }
 
 func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) ScorePiece {
-	return compareNameWithTFIDF(w, query, index, weight, nil)
+	return compareNameWithTFIDF(w, query, index, weight, SimilarityOpts{})
 }
 
-func compareNameWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64, tfidfIndex *tfidf.Index) ScorePiece {
+func compareNameWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64, opts SimilarityOpts) ScorePiece {
 	// Early return for empty query
 	if query.PreparedFields.Name == "" {
 		return ScorePiece{Score: 0, Weight: 0, FieldsCompared: 0, PieceType: "name"}
@@ -54,9 +54,10 @@ func compareNameWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Enti
 
 	queryTerms := query.PreparedFields.NameFields
 	queryWeights := query.PreparedFields.NameWeights
+	cfg := opts.Algorithm.scoringConfig()
 
 	// Check primary name
-	bestMatch := compareNameTermsWeighted(queryTerms, index.PreparedFields.NameFields, queryWeights, index.PreparedFields.NameWeights, tfidfIndex)
+	bestMatch := compareNameTermsWeighted(queryTerms, index.PreparedFields.NameFields, queryWeights, index.PreparedFields.NameWeights, opts.TFIDF, cfg)
 
 	// Check alternate names
 	for idx := range index.PreparedFields.AltNameFields {
@@ -64,7 +65,7 @@ func compareNameWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Enti
 		if idx < len(index.PreparedFields.AltNameWeights) {
 			indexWeights = index.PreparedFields.AltNameWeights[idx]
 		}
-		altMatch := compareNameTermsWeighted(queryTerms, index.PreparedFields.AltNameFields[idx], queryWeights, indexWeights, tfidfIndex)
+		altMatch := compareNameTermsWeighted(queryTerms, index.PreparedFields.AltNameFields[idx], queryWeights, indexWeights, opts.TFIDF, cfg)
 		if altMatch.score > bestMatch.score {
 			bestMatch = altMatch
 		}
@@ -76,7 +77,7 @@ func compareNameWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Enti
 		if idx < len(index.PreparedFields.HistoricalNameWeights) {
 			indexWeights = index.PreparedFields.HistoricalNameWeights[idx]
 		}
-		histMatch := compareNameTermsWeighted(queryTerms, index.PreparedFields.HistoricalNameFields[idx], queryWeights, indexWeights, tfidfIndex)
+		histMatch := compareNameTermsWeighted(queryTerms, index.PreparedFields.HistoricalNameFields[idx], queryWeights, indexWeights, opts.TFIDF, cfg)
 		histMatch.score *= 0.95 // Apply penalty for historical names
 		histMatch.isHistorical = true
 		if histMatch.score > bestMatch.score {
@@ -103,18 +104,18 @@ func compareNameWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Enti
 
 // compareNameFields performs detailed term-by-term comparison
 func compareNameTerms(queryTerms, indexTerms []string) nameMatch {
-	return compareNameTermsWeighted(queryTerms, indexTerms, nil, nil, nil)
+	return compareNameTermsWeighted(queryTerms, indexTerms, nil, nil, nil, stringscore.DefaultScoringConfig())
 }
 
 // compareNameTermsWithTFIDF performs term-by-term comparison with optional TF-IDF weighting.
 // When tfidfIndex is nil or disabled, falls back to unweighted comparison.
 func compareNameTermsWithTFIDF(queryTerms, indexTerms []string, tfidfIndex *tfidf.Index) nameMatch {
-	return compareNameTermsWeighted(queryTerms, indexTerms, nil, nil, tfidfIndex)
+	return compareNameTermsWeighted(queryTerms, indexTerms, nil, nil, tfidfIndex, stringscore.DefaultScoringConfig())
 }
 
 // compareNameTermsWeighted prefers precomputed weights; falls back to tfidfIndex.GetWeights
 // only when weights are missing and the index is enabled.
-func compareNameTermsWeighted(queryTerms, indexTerms []string, queryWeights, indexWeights []float64, tfidfIndex *tfidf.Index) nameMatch {
+func compareNameTermsWeighted(queryTerms, indexTerms []string, queryWeights, indexWeights []float64, tfidfIndex *tfidf.Index, cfg stringscore.ScoringConfig) nameMatch {
 	var score float64
 	if len(indexTerms) > 0 {
 		useWeighted := false
@@ -127,9 +128,9 @@ func compareNameTermsWeighted(queryTerms, indexTerms []string, queryWeights, ind
 		}
 
 		if useWeighted {
-			score = stringscore.BestPairCombinationJaroWinklerWeighted(queryTerms, indexTerms, queryWeights, indexWeights)
+			score = stringscore.BestPairCombinationJaroWinklerWeightedWithConfig(queryTerms, indexTerms, queryWeights, indexWeights, cfg)
 		} else {
-			score = stringscore.BestPairCombinationJaroWinkler(queryTerms, indexTerms)
+			score = stringscore.BestPairCombinationJaroWinklerWithConfig(queryTerms, indexTerms, cfg)
 		}
 	}
 

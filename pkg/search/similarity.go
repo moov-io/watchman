@@ -42,6 +42,12 @@ func readFloat(envVar string, defaultValue float64) float64 {
 	return n
 }
 
+// SimilarityOpts configures similarity scoring for a comparison.
+type SimilarityOpts struct {
+	TFIDF     *tfidf.Index
+	Algorithm StringMatchAlgorithm
+}
+
 // Similarity calculates a match score between a query and an index entity.
 func Similarity[Q any, I any](query Entity[Q], index Entity[I]) float64 {
 	return SimilarityWithTFIDF(query, index, nil)
@@ -51,7 +57,12 @@ func Similarity[Q any, I any](query Entity[Q], index Entity[I]) float64 {
 // When tfidfIndex is nil or disabled, falls back to standard scoring.
 // This path avoids allocating the detailed ScorePiece slice returned by DebugSimilarity.
 func SimilarityWithTFIDF[Q any, I any](query Entity[Q], index Entity[I], tfidfIndex *tfidf.Index) float64 {
-	return scoreSimilarityFast(query, index, tfidfIndex)
+	return SimilarityWithOpts(query, index, SimilarityOpts{TFIDF: tfidfIndex})
+}
+
+// SimilarityWithOpts calculates a match score with TF-IDF weighting and a string-match algorithm.
+func SimilarityWithOpts[Q any, I any](query Entity[Q], index Entity[I], opts SimilarityOpts) float64 {
+	return scoreSimilarityFast(query, index, opts)
 }
 
 // DebugSimilarity does the same as Similarity, but logs debug info to w.
@@ -64,7 +75,12 @@ func DebugSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]
 
 // DebugSimilarityWithTFIDF does the same as DebugSimilarity, with optional TF-IDF weighting.
 func DebugSimilarityWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], tfidfIndex *tfidf.Index) SimilarityScore {
-	details := DetailedSimilarityWithTFIDF(w, query, index, tfidfIndex)
+	return DebugSimilarityWithOpts(w, query, index, SimilarityOpts{TFIDF: tfidfIndex})
+}
+
+// DebugSimilarityWithOpts does the same as DebugSimilarity, with scoring options.
+func DebugSimilarityWithOpts[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], opts SimilarityOpts) SimilarityScore {
+	details := DetailedSimilarityWithOpts(w, query, index, opts)
 
 	switch len(details.Pieces) {
 	case 0:
@@ -138,6 +154,11 @@ func DetailedSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity
 
 // DetailedSimilarityWithTFIDF returns scoring details with optional TF-IDF weighting for name matching.
 func DetailedSimilarityWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], tfidfIndex *tfidf.Index) SimilarityScore {
+	return DetailedSimilarityWithOpts(w, query, index, SimilarityOpts{TFIDF: tfidfIndex})
+}
+
+// DetailedSimilarityWithOpts returns scoring details with optional TF-IDF weighting and algorithm.
+func DetailedSimilarityWithOpts[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], opts SimilarityOpts) SimilarityScore {
 	var out SimilarityScore
 
 	var exactOverride bool
@@ -203,7 +224,7 @@ func DetailedSimilarityWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], ind
 	}
 
 	// Name comparison (second highest weight) - use TF-IDF if provided
-	pieces[4] = compareNameWithTFIDF(w, query, index, nameWeight, tfidfIndex)
+	pieces[4] = compareNameWithTFIDF(w, query, index, nameWeight, opts)
 	pieces[5] = compareEntityTitlesFuzzy(w, query, index, nameWeight)
 
 	// Supporting information (lower weight)
@@ -223,7 +244,7 @@ func DetailedSimilarityWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], ind
 }
 
 // scoreSimilarityFast is the allocation-light path used by bulk search: it returns only the final score.
-func scoreSimilarityFast[Q any, I any](query Entity[Q], index Entity[I], tfidfIndex *tfidf.Index) float64 {
+func scoreSimilarityFast[Q any, I any](query Entity[Q], index Entity[I], opts SimilarityOpts) float64 {
 	// Quick filters
 	if query.Source != sourceEmpty && !query.Source.IsRequestType() {
 		if query.Source != index.Source {
@@ -265,7 +286,7 @@ func scoreSimilarityFast[Q any, I any](query Entity[Q], index Entity[I], tfidfIn
 		p1,
 		p2,
 		p3,
-		compareNameWithTFIDF(nil, query, index, nameWeight, tfidfIndex),
+		compareNameWithTFIDF(nil, query, index, nameWeight, opts),
 		compareEntityTitlesFuzzy(nil, query, index, nameWeight),
 		compareEntityDates(nil, query, index, supportingInfoWeight),
 		compareAddresses(nil, query, index, addressWeight),

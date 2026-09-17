@@ -93,6 +93,7 @@ func (s *service) Search(ctx context.Context, query search.Entity[search.Value],
 		attribute.String("request_id", opts.RequestID),
 		attribute.Bool("query.debug", opts.Debug),
 		attribute.StringSlice("query.debug_source_ids", opts.DebugSourceIDs),
+		attribute.String("opts.algorithm", opts.Algorithm.Name()),
 	))
 	defer span.End()
 
@@ -208,6 +209,10 @@ type SearchOpts struct {
 	RequestID      string
 	Debug          bool
 	DebugSourceIDs []string
+
+	// Algorithm selects the name-matching algorithm. Empty uses the default
+	// Jaro-Winkler setup (process env flags still apply).
+	Algorithm search.StringMatchAlgorithm
 }
 
 type debugRespone struct {
@@ -237,6 +242,7 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	_, span := telemetry.StartSpan(ctx, "perform-search", trace.WithAttributes(
 		attribute.Int("opts.limit", opts.Limit),
 		attribute.Float64("opts.min_match", opts.MinMatch),
+		attribute.String("opts.algorithm", opts.Algorithm.Name()),
 		attribute.Int("index.candidate_count", len(searchEntities)),
 	))
 	defer span.End()
@@ -386,14 +392,19 @@ func scoreEntities(
 			}).Logf("indexed entity: %#v", indexEntity)
 		}
 
+		simOpts := search.SimilarityOpts{
+			TFIDF:     tfidfIndex,
+			Algorithm: opts.Algorithm,
+		}
+
 		var score float64
 		if !opts.Debug {
-			score = search.SimilarityWithTFIDF(query, indexEntity, tfidfIndex)
+			score = search.SimilarityWithOpts(query, indexEntity, simOpts)
 		} else {
 			var buf bytes.Buffer
 			buf.Grow(1700) // approximate size of debug logs
 
-			scores := search.DebugSimilarityWithTFIDF(&buf, query, indexEntity, tfidfIndex)
+			scores := search.DebugSimilarityWithOpts(&buf, query, indexEntity, simOpts)
 			score = scores.FinalScore
 
 			if isDebugEntity {

@@ -78,12 +78,20 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	algorithm, err := extractAlgorithm(queryParams)
+	if err != nil {
+		err = c.logger.Error().LogErrorf("problem reading v2 search request: %w", err).Err()
+		api.ErrorResponse(w, err)
+		return
+	}
+
 	opts := SearchOpts{
 		Limit:          extractSearchLimit(queryParams),
 		MinMatch:       extractSearchMinMatch(queryParams),
 		RequestID:      queryParams.Get("requestID"),
 		Debug:          debug,
 		DebugSourceIDs: strings.Split(queryParams.Get("debugSourceIDs"), ","),
+		Algorithm:      algorithm,
 	}
 
 	outputFormat, subformat := api.ChooseEntityFormat(r.Header, queryParams.Get("format"))
@@ -161,6 +169,10 @@ func extractSearchMinMatch(q *api.QueryParams) float64 {
 		return n
 	}
 	return 0.00
+}
+
+func extractAlgorithm(q *api.QueryParams) (search.StringMatchAlgorithm, error) {
+	return search.ParseStringMatchAlgorithm(q.Get("algorithm"))
 }
 
 func readSearchRequest(ctx context.Context, addressParsingPool *postalpool.Service, q *api.QueryParams) (search.Entity[search.Value], error) {

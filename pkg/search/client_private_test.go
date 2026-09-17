@@ -33,8 +33,9 @@ func TestClient_buildQueryParameters(t *testing.T) {
 				},
 			},
 			opts: SearchOpts{
-				Limit:    3,
-				MinMatch: 0.9,
+				Limit:     3,
+				MinMatch:  0.9,
+				Algorithm: AlgorithmSoundex,
 			},
 			expected: map[string][]string{
 				"name":      []string{"john doe"},
@@ -45,6 +46,7 @@ func TestClient_buildQueryParameters(t *testing.T) {
 				"birthDate": []string{"1998-04-12"},
 				"limit":     []string{"3"},
 				"minMatch":  []string{"0.90"},
+				"algorithm": []string{"soundex"},
 			},
 		},
 		{
