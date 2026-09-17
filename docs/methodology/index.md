@@ -12,7 +12,7 @@ menubar: docs-menu
 
 ## Overview
 
-Moov Watchman implements a sophisticated multi-dimensional matching system designed to balance accuracy, performance, and usability for compliance professionals. This document explains the technical foundations of Watchman's matching algorithms.
+Moov Watchman implements a sophisticated multi-dimensional matching system designed to balance accuracy, performance, and usability for compliance professionals. This document explains the technical foundations of Watchman's matching algorithms. Name scoring defaults to Jaro-Winkler; optional `?algorithm=` scorers are compared in [Algorithm comparison](/watchman/algorithm-comparison/).
 
 ## Core Matching Architecture
 
@@ -70,8 +70,7 @@ For handling spelling variations, especially in transliterated names, Watchman i
    - Groups phonetically similar characters for first-letter filtering and penalty logic
    - Full `EncodeSoundex` implementation for whole-token phonetic codes (e.g. "Smith"→"S530")
    - Optional score boosting via `USE_SOUNDEX_MATCHING` + `SOUNDEX_BOOST_WEIGHT` when codes match exactly (same first letter + phonetic digits)
-   - Per-request override with `?algorithm=soundex` (HTTP) or `algorithm: "soundex"` (MCP); `algorithm=jaro-winkler` is the default setup
-   - Character n-gram / phonetic alternatives: `soft-bidist`, `soft-bisim`, `editex`, `nsim`, `nsim-3`, `double-metaphone`, `beider-morse` (see [Algorithm comparison](/watchman/algorithm-comparison/))
+   - Per-request `?algorithm=soundex` (or MCP `algorithm`) overrides this for a single search; see [Algorithm comparison](/watchman/algorithm-comparison/) for the other optional scorers
 
 2. **First Character Analysis**
    - Names with different first-character phonetic classes are less likely to match

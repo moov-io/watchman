@@ -21,7 +21,7 @@ Watchman delivers enterprise-grade compliance screening with:
 
 2. **Search Capabilities**:
    - High-performance in-memory indexing (source/type partitions, name-token and crypto candidates, optional TF-IDF)
-   - Advanced fuzzy matching using Jaro-Winkler algorithms with exact-ID short-circuit
+   - Advanced fuzzy matching (Jaro-Winkler by default, with exact-ID short-circuit)
    - Multi-field search with entity type filtering, admission control, and concurrent scoring
 
  3. **Integration Options**:
@@ -53,6 +53,8 @@ Watchman uses the [Jaro-Winkler distance](https://en.wikipedia.org/wiki/Jaro%E2%
 - Is specifically optimized for person names and other proper nouns
 - Produces scores from 0.0 (completely different) to 1.0 (exact match)
 - Has been validated by [academic research](https://www.wseas.org/multimedia/journals/computers/2015/a965705-699.pdf) as effective for compliance screening
+
+Jaro-Winkler is the default. Optional `?algorithm=` scorers are compared in [Algorithm comparison](/watchman/algorithm-comparison/).
 
 ### Search Customization
 
