@@ -18,6 +18,9 @@ func TestWriteAlgorithmComparisonDoc(t *testing.T) {
 	if !strings.Contains(md, "algorithm-comparison.csv") {
 		t.Fatal("missing CSV download link")
 	}
+	if !strings.Contains(md, "csvq") {
+		t.Fatal("missing csvq tip")
+	}
 
 	csvBody := RenderCSV()
 	if !strings.HasPrefix(csvBody, "query,index,note,") {

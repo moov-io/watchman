@@ -27,6 +27,11 @@ Length-difference and different-first-letter penalties still apply. `dominguez`/
 
 <p><a class="button is-link is-light" href="{{ '/algorithm-comparison.csv' | relative_url }}" download="watchman-algorithm-comparison.csv">Download CSV</a></p>
 
+<div class="notification is-info is-light">
+<p><strong>Tip:</strong> Use <a href="https://github.com/adamdecaf/csvq">csvq</a> to sort the downloaded CSV by algorithm.</p>
+<pre><code>csvq -sort.dsc bmpm -format table -headers ~/Downloads/watchman-algorithm-comparison.csv</code></pre>
+</div>
+
 <style>
 .alg-matrix { overflow-x: auto; max-width: 100%; }
 .alg-matrix table { white-space: nowrap; }
