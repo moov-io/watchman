@@ -23,6 +23,18 @@ func TestErrorResponse(t *testing.T) {
 	require.Equal(t, expected, w.Body.String())
 }
 
+func TestErrorResponseStatus(t *testing.T) {
+	w := httptest.NewRecorder()
+	err := api.ErrorResponseStatus(w, http.StatusRequestEntityTooLarge, errors.New("too big"))
+	require.NoError(t, err)
+
+	require.Equal(t, http.StatusRequestEntityTooLarge, w.Code)
+	require.Equal(t, "application/json", w.Header().Get("Content-Type"))
+
+	expected := `{"error":"too big"}` + "\n"
+	require.Equal(t, expected, w.Body.String())
+}
+
 type Object struct {
 	Name  string  `json:"name"`
 	Age   int     `json:"age"`

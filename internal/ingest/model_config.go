@@ -1,11 +1,35 @@
 package ingest
 
+import (
+	"os"
+	"strconv"
+	"strings"
+)
+
+const defaultMaxBodyBytes int64 = 32 << 20 // 32 MiB
+
 type Config struct {
 	Files map[string]File
 
 	// PaginationLimit controls the batch size when listing entities from the database.
 	// Defaults to 1000 if not set.
 	PaginationLimit int
+
+	// MaxBodyBytes is the maximum POST /v2/ingest/{fileType} request body size.
+	// Zero or negative uses defaultMaxBodyBytes (32 MiB). Override with INGEST_MAX_BODY_BYTES.
+	MaxBodyBytes int64
+}
+
+func (c Config) maxBodyBytes() int64 {
+	if v := strings.TrimSpace(os.Getenv("INGEST_MAX_BODY_BYTES")); v != "" {
+		if n, err := strconv.ParseInt(v, 10, 64); err == nil && n > 0 {
+			return n
+		}
+	}
+	if c.MaxBodyBytes > 0 {
+		return c.MaxBodyBytes
+	}
+	return defaultMaxBodyBytes
 }
 
 type File struct {

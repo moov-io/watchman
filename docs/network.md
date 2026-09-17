@@ -14,7 +14,7 @@ Watchman is not designed to be served directly on the internet. Run it on a priv
 
 The business API (`BindAddress`, `:8084` by default) serves search, ingest, export, data refresh, the web UI, and (when enabled) MCP. These routes are unauthenticated by design.
 
-Operators who need auth or rate limits should terminate them on the proxy in front of `:8084`. `POST /v2/ingest/{fileType}` only accepts `fileType` values already defined in config; an unknown type does not create a new list.
+Operators who need auth or rate limits should terminate them on the proxy in front of `:8084`. `POST /v2/ingest/{fileType}` only accepts `fileType` values already defined in config; an unknown type does not create a new list. Ingest request bodies are capped (32MiB by default; `Ingest.MaxBodyBytes` or `INGEST_MAX_BODY_BYTES`).
 
 See [issue #875](https://github.com/moov-io/watchman/issues/875).
 

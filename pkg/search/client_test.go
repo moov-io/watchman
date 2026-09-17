@@ -54,7 +54,7 @@ func testAPI(tb testing.TB) testSetup {
 	ingestService := ingest.NewService(logger, conf.Ingest, ingestRepository)
 
 	searchController := search.NewController(logger, searchService, nil)
-	ingestController := ingest.NewController(logger, ingestService)
+	ingestController := ingest.NewController(logger, ingestService, conf.Ingest)
 
 	router := mux.NewRouter()
 	searchController.AppendRoutes(router)
