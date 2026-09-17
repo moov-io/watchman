@@ -19,10 +19,20 @@ const (
 	// for token pairs that encode to the same Soundex code.
 	AlgorithmSoundex StringMatchAlgorithm = "soundex"
 
+	// AlgorithmSoftBidist is Soft-Bidist (Hadwan 2021), a character-bigram
+	// edit distance. Aliases: soft-bigram, bidist.
+	AlgorithmSoftBidist StringMatchAlgorithm = "soft-bidist"
+
+	// AlgorithmSoftBisim is Soft-Bisim (Millán-Hernández 2019), a
+	// character-bigram similarity. Alias: bisim.
+	AlgorithmSoftBisim StringMatchAlgorithm = "soft-bisim"
+
 	// defaultSoundexBoostWeight is applied when algorithm=soundex is requested
 	// and SOUNDEX_BOOST_WEIGHT is unset (0).
 	defaultSoundexBoostWeight = 0.12
 )
+
+const supportedAlgorithms = "jaro-winkler, soundex, soft-bidist, soft-bisim"
 
 // ParseStringMatchAlgorithm parses a caller-provided algorithm name.
 // Empty input is the default Jaro-Winkler setup (process env flags still apply).
@@ -37,8 +47,12 @@ func ParseStringMatchAlgorithm(raw string) (StringMatchAlgorithm, error) {
 		return AlgorithmJaroWinkler, nil
 	case string(AlgorithmSoundex):
 		return AlgorithmSoundex, nil
+	case string(AlgorithmSoftBidist), "soft-bigram", "bidist":
+		return AlgorithmSoftBidist, nil
+	case string(AlgorithmSoftBisim), "bisim":
+		return AlgorithmSoftBisim, nil
 	default:
-		return "", fmt.Errorf("unknown algorithm %q (supported: jaro-winkler, soundex)", raw)
+		return "", fmt.Errorf("unknown algorithm %q (supported: %s)", raw, supportedAlgorithms)
 	}
 }
 
@@ -60,6 +74,12 @@ func (a StringMatchAlgorithm) scoringConfig() stringscore.ScoringConfig {
 		}
 	case AlgorithmJaroWinkler:
 		cfg.UseSoundexBoost = false
+	case AlgorithmSoftBidist:
+		cfg.UseSoundexBoost = false
+		cfg.TokenScorer = stringscore.TokenScorerSoftBidist
+	case AlgorithmSoftBisim:
+		cfg.UseSoundexBoost = false
+		cfg.TokenScorer = stringscore.TokenScorerSoftBisim
 	}
 	return cfg
 }

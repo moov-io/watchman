@@ -42,10 +42,15 @@ Name scoring defaults to Watchman's Jaro-Winkler setup. Pass `algorithm` to sele
 |-------|----------|
 | `jaro-winkler` (default) | Token pairwise Jaro-Winkler scoring |
 | `soundex` | Jaro-Winkler with a Soundex phonetic boost for token pairs that encode to the same code (e.g. "Smith" / "Smythe") |
+| `soft-bidist` | [Soft-Bidist](https://github.com/PhonoGrams/soft_bigram) character-bigram edit distance (Hadwan 2021). Aliases: `soft-bigram`, `bidist` |
+| `soft-bisim` | [Soft-Bisim](https://github.com/PhonoGrams/soft-bisim) character-bigram similarity (Millán-Hernández 2019). Alias: `bisim` |
 
 ```
 GET /v2/search?type=person&name=smythe&algorithm=soundex
+GET /v2/search?type=person&name=aleksandr&algorithm=soft-bidist
 ```
+
+Soft-Bidist and Soft-Bisim replace only the inner token pair scorer. Watchman's BestPairs alignment, length-difference penalty, and first-letter phonetic filter still apply. Jaro-Winkler remains the default.
 
 When `algorithm` is omitted, process-wide flags such as `USE_SOUNDEX_MATCHING` still apply. An explicit `algorithm` value overrides those flags for that request. See [Similarity Configuration](/watchman/config/#similarity-configuration).
 

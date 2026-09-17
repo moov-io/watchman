@@ -316,6 +316,33 @@ func TestBestPairsJaroWinklerWithConfig_Soundex(t *testing.T) {
 	require.Greater(t, sx, jw)
 }
 
+func TestBestPairsJaroWinklerWithConfig_SoftNGrams(t *testing.T) {
+	t.Cleanup(stringscore.ResetEnvConfigForTest)
+	stringscore.ResetEnvConfigForTest()
+
+	bidist := stringscore.BestPairsJaroWinklerWithConfig(
+		[]string{"precede"},
+		[]string{"preceed"},
+		stringscore.ScoringConfig{TokenScorer: stringscore.TokenScorerSoftBidist},
+	)
+	require.InDelta(t, 0.97, bidist, 0.05)
+
+	bisim := stringscore.BestPairsJaroWinklerWithConfig(
+		[]string{"cycloserine"},
+		[]string{"cyclosporine"},
+		stringscore.ScoringConfig{TokenScorer: stringscore.TokenScorerSoftBisim},
+	)
+	require.Greater(t, bisim, 0.7)
+
+	// Watchman first-letter phonetic filter still applies: D vs J is not compared.
+	filtered := stringscore.BestPairsJaroWinklerWithConfig(
+		[]string{"dominguez"},
+		[]string{"jimenez"},
+		stringscore.ScoringConfig{TokenScorer: stringscore.TokenScorerSoftBidist},
+	)
+	require.Equal(t, 0.0, filtered)
+}
+
 func BenchmarkJaroWinkler(b *testing.B) {
 	inputs := []string{
 		"Seyed Mohammad HASHEMI",

@@ -46,7 +46,7 @@ type SearchEntitiesRequest struct {
 
 	IncludeDetails *bool `json:"includeDetails,omitempty" jsonschema:"Include field-level match score breakdown per result (names, addresses, IDs, etc.)"`
 
-	Algorithm *string `json:"algorithm,omitempty" jsonschema:"String matching algorithm: jaro-winkler (default) or soundex"`
+	Algorithm *string `json:"algorithm,omitempty" jsonschema:"String matching algorithm: jaro-winkler (default), soundex, soft-bidist, or soft-bisim"`
 }
 
 func (s *Server) HandleSearchEntities(ctx context.Context, req *mcp.CallToolRequest, args SearchEntitiesRequest) (*mcp.CallToolResult, any, error) {

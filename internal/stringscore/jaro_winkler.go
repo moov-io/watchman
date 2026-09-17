@@ -11,6 +11,8 @@ import (
 
 	"github.com/moov-io/base/strx"
 
+	softbisim "github.com/PhonoGrams/soft-bisim"
+	"github.com/PhonoGrams/soft_bigram"
 	"github.com/xrash/smetrics"
 )
 
@@ -53,11 +55,22 @@ func ResetEnvConfigForTest() {
 	soundexBoostWeight.Store(math.Float64bits(0))
 }
 
+// TokenScorer selects the inner pairwise string similarity used by BestPairs.
+// The zero value is Jaro-Winkler.
+type TokenScorer uint8
+
+const (
+	TokenScorerJaroWinkler TokenScorer = iota
+	TokenScorerSoftBidist
+	TokenScorerSoftBisim
+)
+
 // ScoringConfig controls optional per-comparison behavior. Zero value uses the
 // process-wide environment defaults from ReloadEnvConfig.
 type ScoringConfig struct {
 	UseSoundexBoost    bool
 	SoundexBoostWeight float64
+	TokenScorer        TokenScorer
 }
 
 // DefaultScoringConfig returns the process-wide scoring flags.
@@ -127,7 +140,7 @@ func BestPairsJaroWinklerWithConfig(searchTokens []string, indexedTokens []strin
 			// Compare the first letters phonetically and only run jaro-winkler on those which are similar
 			if skipPhonetic || firstCharacterSoundexMatch(indexedToken, searchToken) {
 				scores = append(scores, Score{
-					score:          customJaroWinkler(indexedToken, searchToken, cfg),
+					score:          tokenSimilarity(indexedToken, searchToken, cfg),
 					searchTokenIdx: searchIdx,
 					indexTokenIdx:  indexIdx,
 				})
@@ -179,8 +192,18 @@ func BestPairsJaroWinklerWithConfig(searchTokens []string, indexedTokens []strin
 	return lengthWeightedAverageScore * scalingFactor(matchedFraction, unmatchedIndexPenaltyWeight)
 }
 
-func customJaroWinkler(s1 string, s2 string, cfg ScoringConfig) float64 {
-	score := smetrics.JaroWinkler(s1, s2, boostThreshold, prefixSize)
+func tokenSimilarity(s1 string, s2 string, cfg ScoringConfig) float64 {
+	var score float64
+	switch cfg.TokenScorer {
+	case TokenScorerSoftBidist:
+		score = soft_bigram.Similarity(s1, s2)
+	case TokenScorerSoftBisim:
+		score = softbisim.Similarity(s1, s2)
+	case TokenScorerJaroWinkler:
+		score = smetrics.JaroWinkler(s1, s2, boostThreshold, prefixSize)
+	default:
+		score = smetrics.JaroWinkler(s1, s2, boostThreshold, prefixSize)
+	}
 
 	if lengthMetric := lengthDifferenceFactor(s1, s2); lengthMetric < lengthDifferenceCutoffFactor {
 		//If there's a big difference in matched token lengths, punish the score. Jaro-Winkler is quite permissive about
@@ -469,7 +492,7 @@ func BestPairsJaroWinklerWeightedWithConfig(searchTokens []string, indexedTokens
 		for indexIdx, indexedToken := range indexedTokens {
 			if skipPhonetic || firstCharacterSoundexMatch(indexedToken, searchToken) {
 				scores = append(scores, Score{
-					score:          customJaroWinkler(indexedToken, searchToken, cfg),
+					score:          tokenSimilarity(indexedToken, searchToken, cfg),
 					searchTokenIdx: searchIdx,
 					indexTokenIdx:  indexIdx,
 				})
