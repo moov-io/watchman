@@ -13,8 +13,8 @@ type pair struct {
 }
 
 var pairs = []pair{
-	{"precede", "preceed", "spelling / doubled letter"},
-	{"achieve", "acheive", "transposition"},
+	{"precede", "preceed", "spelling / doubled letter"}, //nolint:misspell
+	{"achieve", "acheive", "transposition"},             //nolint:misspell
 	{"smith", "smythe", "phonetic (English)"},
 	{"catherine", "katherine", "C/K onset"},
 	{"qaddafi", "gaddafi", "Q/G onset"},
