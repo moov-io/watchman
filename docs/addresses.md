@@ -12,7 +12,7 @@ Watchman optionally uses **[libpostal](https://github.com/openvenues/libpostal)*
 
 To enable libpostal support, activate the **[PostalPool](/watchman/config/#postalpool)** option in Watchman’s configuration.
 
-Without PostalPool, Watchman uses a built-in US-oriented parser (`usaddress`) unless the binary is built with the `libpostal` tag.
+Without PostalPool, Pre-built Watchman releases use libpostal/PostalPool. Otherwise Watchman uses a built-in US-oriented parser (`usaddress`).
 
 ### Deepparse (optional)
 
