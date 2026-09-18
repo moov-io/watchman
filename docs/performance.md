@@ -22,6 +22,8 @@ improving match accuracy at the cost of higher memory usage. This upfront work e
 
 > The libpostal library can use ~3GB of memory to load into memory. Run Watchman with enough memory to support your load ontop of libpostal's requirements. [Configure the Postal Pool](/watchman/config/#postalpool) to your needs.
 
+Alternatively, [deepparse](/watchman/config/#deepparse) can parse query addresses over HTTP so Watchman does not load libpostal in-process. The sidecar image still needs CPU and model cache on first start.
+
 Watchman operates entirely with **in-memory lists**, storing all sanction data in memory without disk persistence. This eliminates I/O bottlenecks, enabling rapid search operations.
 The trade-off is that data is reloaded on restart, but this ensures freshness and avoids stale data slowing down queries. Combined with a high-performance search implementation using the
 Jaro-Winkler algorithm, Watchman delivers quick and accurate fuzzy matching for names and addresses, with scoring from 0.0 (no match) to 1.0 (exact match).

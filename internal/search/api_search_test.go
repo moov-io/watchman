@@ -74,6 +74,15 @@ func testAPI(tb testing.TB) testSetup {
 	}
 }
 
+type stubAddressParser struct {
+	addr search.Address
+	err  error
+}
+
+func (s stubAddressParser) ParseAddress(ctx context.Context, input string) (search.Address, error) {
+	return s.addr, s.err
+}
+
 func TestAPI_readSearchRequest(t *testing.T) {
 	ctx := context.Background()
 
@@ -163,6 +172,16 @@ func TestAPI_readSearchRequest(t *testing.T) {
 		}
 		require.Len(t, query.Addresses, 1)
 		require.Equal(t, expected, query.Addresses[0])
+	})
+
+	t.Run("address with parser", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?type=person&name=Jane&address=raw-input", nil)
+		q := &api.QueryParams{Values: req.URL.Query()}
+
+		parser := stubAddressParser{addr: search.Address{Line1: "350 rue des lilas", City: "quebec city", PostalCode: "g1l 1b6"}}
+		query, err := readSearchRequest(ctx, parser, q)
+		require.NoError(t, err)
+		require.Equal(t, parser.addr, query.Addresses[0])
 	})
 
 	t.Run("government id (US Passport)", func(t *testing.T) {

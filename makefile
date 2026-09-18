@@ -119,6 +119,11 @@ build-webui:
 setup:
 	docker compose up -d --force-recreate --remove-orphans
 
+# Optional GRAAL-Research/deepparse sidecar for address parsing (issue #589).
+.PHONY: setup-deepparse
+setup-deepparse:
+	docker compose --profile deepparse up -d deepparse
+
 .PHONY: teardown
 teardown:
 	-docker compose down --remove-orphans

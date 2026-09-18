@@ -89,6 +89,14 @@ Watchman:
     BinaryPath: "" # POSTAL_SERVER_BIN_PATH is set in Dockerfile
     CGOSelfInstances: 1
 
+  # Optional alternative to libpostal / usaddress. Runs as an HTTP sidecar
+  # (see docker compose --profile deepparse). Default parsers are unchanged.
+  Deepparse:
+    Enabled: false
+    BaseURL: "http://localhost:8000" # DEEPPARSE_URL overrides
+    Model: "bpemb-attention"         # bpemb, bpemb-attention; image skips FastText
+    Timeout: "10s"
+
   Geocoding:
     Enabled: false
     Provider:
