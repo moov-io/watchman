@@ -6,7 +6,7 @@ toolchain go1.27.1
 
 require (
 	fyne.io/fyne/v2 v2.8.1
-	github.com/OpenRouterTeam/go-sdk v0.8.3
+	github.com/OpenRouterTeam/go-sdk v0.8.6
 	github.com/PhonoGrams/beider_morse v0.1.0
 	github.com/PhonoGrams/double_metaphone v0.1.0
 	github.com/PhonoGrams/editex v0.1.0
