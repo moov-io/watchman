@@ -3,6 +3,7 @@ package webui
 import (
 	"bytes"
 	"compress/gzip"
+	"fmt"
 	"io/fs"
 	"net/http"
 	"path"
@@ -115,7 +116,10 @@ func (h *staticHandler) compressed(name string) ([]byte, error) {
 		return nil, fs.ErrNotExist
 	}
 	loaded, _ := h.caches.LoadOrStore(name, &wasmCache{})
-	cache := loaded.(*wasmCache)
+	cache, ok := loaded.(*wasmCache)
+	if !ok {
+		return nil, fmt.Errorf("cached wasm %s has unexpected type %T", name, loaded)
+	}
 	cache.once.Do(func() {
 		cache.body, cache.err = gzipFile(h.fsys, name)
 		if cache.err != nil || h.logger == nil {

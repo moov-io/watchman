@@ -40,7 +40,11 @@ func newResultsPane() *resultsPane {
 		func() int { return len(pane.entities) },
 		func() fyne.CanvasObject { return newResultRow() },
 		func(id widget.ListItemID, obj fyne.CanvasObject) {
-			obj.(*resultRow).set(pane.entities[id])
+			row, ok := obj.(*resultRow)
+			if !ok {
+				return
+			}
+			row.set(pane.entities[id])
 		},
 	)
 	pane.list.OnSelected = func(id widget.ListItemID) {

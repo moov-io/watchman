@@ -31,7 +31,11 @@ type parsedSource struct {
 func ExtractVariablesOfType(fsys fs.FS, path, typeName string) ([]string, error) {
 	key := path + "\x00" + typeName
 	if cached, ok := extractCache.Load(key); ok {
-		return cloneStrings(cached.([]string)), nil
+		values, ok := cached.([]string)
+		if !ok {
+			return nil, fmt.Errorf("cached %s values have unexpected type %T", typeName, cached)
+		}
+		return cloneStrings(values), nil
 	}
 
 	values, err := extractVariablesOfType(fsys, path, typeName)
@@ -88,7 +92,10 @@ func extractVariablesOfType(fsys fs.FS, path, typeName string) ([]string, error)
 
 func parseCached(fsys fs.FS, path string) (*ast.File, error) {
 	loaded, _ := parsedFiles.LoadOrStore(path, &parsedSource{})
-	entry := loaded.(*parsedSource)
+	entry, ok := loaded.(*parsedSource)
+	if !ok {
+		return nil, fmt.Errorf("cached parse of %s has unexpected type %T", path, loaded)
+	}
 	entry.once.Do(func() {
 		entry.node, entry.err = parseSource(fsys, path)
 	})
