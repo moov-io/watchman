@@ -3,219 +3,198 @@ package ui
 import (
 	"cmp"
 	"context"
-	"fmt"
+	"image/color"
 	"slices"
-	"time"
+
+	"github.com/moov-io/watchman/pkg/search"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
 func AdminContainer(ctx context.Context, env Environment) fyne.CanvasObject {
-	// Create the main container
-	mainContainer := container.NewVBox()
+	versionValue := statValue("—")
+	startedValue := statValue("—")
+	endedValue := statValue("—")
+	totalValue := statValue("—")
 
-	// Create header
-	header := widget.NewLabelWithStyle("List Information", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
-	mainContainer.Add(header)
+	status := widget.NewLabel("Loading lists…")
+	status.Wrapping = fyne.TextWrapWord
+	status.Importance = widget.LowImportance
 
-	// Create status labels (will be updated with data)
-	versionLabel := widget.NewLabel("Version: Loading...")
-	startedLabel := widget.NewLabel("Started: -")
-	endedLabel := widget.NewLabel("Ended: -")
-
-	// Status container
-	statusContainer := container.NewVBox(
-		versionLabel,
-		startedLabel,
-		endedLabel,
-	)
-
-	// Create a container for the lists table
-	listsLabel := widget.NewLabelWithStyle("Available Lists", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
-
-	// Create table with headers
+	var entries []listEntry
 	table := widget.NewTable(
 		func() (int, int) {
-			return 1, 3 // Start with header row only, 3 columns
+			return len(entries) + 1, 3
 		},
 		func() fyne.CanvasObject {
-			return widget.NewLabel("Template")
+			label := widget.NewLabel("template")
+			label.Truncation = fyne.TextTruncateEllipsis
+			return label
 		},
-		func(i widget.TableCellID, o fyne.CanvasObject) {
-			label := o.(*widget.Label)
-			label.SetText("Loading...")
-
-			// Set header row styling
-			if i.Row == 0 {
-				label.TextStyle = fyne.TextStyle{Bold: true}
-				label.Alignment = fyne.TextAlignCenter
-			} else {
-				label.TextStyle = fyne.TextStyle{}
-
-				// Align count to right, others to left
-				if i.Col == 1 { // Count column
-					label.Alignment = fyne.TextAlignTrailing
-				} else {
-					label.Alignment = fyne.TextAlignLeading
-				}
-			}
-		},
-	)
-
-	// Set column widths
-	table.SetColumnWidth(0, 100) // List name
-	table.SetColumnWidth(1, 80)  // Count
-	table.SetColumnWidth(2, 600) // Hash
-
-	listsScroll := container.NewScroll(table)
-	listsScroll.SetMinSize(fyne.NewSize(0, env.Height*0.4))
-
-	listsContainer := container.NewBorder(listsLabel, nil, nil, nil, listsScroll)
-
-	// Create refresh button
-	refreshBtn := widget.NewButton("Refresh Data", func() {
-		updateListInfo(env, ctx, versionLabel, startedLabel, endedLabel, listsScroll)
-	})
-
-	// Add components to main container
-	mainContainer.Add(refreshBtn)
-	mainContainer.Add(statusContainer)
-	mainContainer.Add(listsContainer)
-
-	// Initial data fetch
-	updateListInfo(env, ctx, versionLabel, startedLabel, endedLabel, listsScroll)
-
-	return container.NewPadded(mainContainer)
-}
-
-// updateListInfo fetches the list info and updates the UI
-func updateListInfo(env Environment, ctx context.Context, versionLabel, startedLabel, endedLabel *widget.Label, listsContent fyne.CanvasObject) {
-	listInfo, err := env.Client.ListInfo(ctx)
-	if err != nil {
-		versionLabel.SetText(fmt.Sprintf("Error: %s", err))
-		return
-	}
-
-	// Update version and timestamps
-	versionLabel.SetText(fmt.Sprintf("Version: %s", listInfo.Version))
-	startedLabel.SetText(fmt.Sprintf("Started: %s", formatTime(listInfo.StartedAt)))
-	endedLabel.SetText(fmt.Sprintf("Ended: %s", formatTime(listInfo.EndedAt)))
-
-	// Get the table widget
-	table := listsContent.(*container.Scroll).Content.(*widget.Table)
-
-	// Create slice of list entries for sorting (optional)
-	type listEntry struct {
-		name  string
-		count int
-		hash  string
-	}
-
-	entries := make([]listEntry, 0, len(listInfo.Lists))
-	for listName, count := range listInfo.Lists {
-		hash := listInfo.ListHashes[listName]
-		entries = append(entries, listEntry{
-			name:  listName,
-			count: count,
-			hash:  hash,
-		})
-	}
-	slices.SortFunc(entries, func(e1, e2 listEntry) int {
-		return -1 * cmp.Compare(e1.count, e2.count) // DESC
-	})
-
-	// Resize table based on data
-	table.CreateCell = func() fyne.CanvasObject {
-		return widget.NewLabel("Template")
-	}
-
-	// Update table data
-	if len(entries) == 0 {
-		// Only show headers and "No lists" message
-		table.Length = func() (int, int) {
-			return 2, 3
-		}
-
-		table.UpdateCell = func(id widget.TableCellID, object fyne.CanvasObject) {
-			label := object.(*widget.Label)
-
-			// Headers
+		func(id widget.TableCellID, obj fyne.CanvasObject) {
+			label := obj.(*widget.Label)
+			label.TextStyle = fyne.TextStyle{}
+			label.Importance = widget.MediumImportance
+			label.Selectable = false
+			label.Truncation = fyne.TextTruncateEllipsis
 			if id.Row == 0 {
 				label.TextStyle = fyne.TextStyle{Bold: true}
-				label.Alignment = fyne.TextAlignCenter
-
+				label.Alignment = fyne.TextAlignLeading
 				switch id.Col {
 				case 0:
-					label.SetText("List Name")
+					label.SetText("List")
 				case 1:
-					label.SetText("Count")
+					label.SetText("Entities")
+					label.Alignment = fyne.TextAlignTrailing
 				case 2:
 					label.SetText("Hash")
 				}
-			} else if id.Row == 1 {
-				// No lists message, centered across all columns
-				label.Alignment = fyne.TextAlignCenter
-				label.TextStyle = fyne.TextStyle{}
-
-				if id.Col == 0 {
-					label.SetText("No lists available")
-				} else {
-					label.SetText("")
-				}
+				return
 			}
-		}
-	} else {
-		// Show headers and data
-		table.Length = func() (int, int) {
-			return len(entries) + 1, 3 // +1 for header row
-		}
-
-		table.UpdateCell = func(id widget.TableCellID, object fyne.CanvasObject) {
-			label := object.(*widget.Label)
-
-			// Headers
-			if id.Row == 0 {
-				label.TextStyle = fyne.TextStyle{Bold: true}
-				label.Alignment = fyne.TextAlignCenter
-
-				switch id.Col {
-				case 0:
-					label.SetText("List Name")
-				case 1:
-					label.SetText("Count")
-				case 2:
-					label.SetText("Hash")
-				}
-			} else {
-				// Data rows
-				entry := entries[id.Row-1]
-				label.TextStyle = fyne.TextStyle{}
-
-				switch id.Col {
-				case 0:
-					label.Alignment = fyne.TextAlignLeading
-					label.SetText(entry.name)
-				case 1:
-					label.Alignment = fyne.TextAlignTrailing
-					label.SetText(fmt.Sprintf("%d", entry.count))
-				case 2:
-					label.Alignment = fyne.TextAlignLeading
+			if id.Row-1 >= len(entries) {
+				label.SetText("")
+				return
+			}
+			entry := entries[id.Row-1]
+			switch id.Col {
+			case 0:
+				label.Alignment = fyne.TextAlignLeading
+				label.SetText(entry.name)
+			case 1:
+				label.Alignment = fyne.TextAlignTrailing
+				label.SetText(formatCount(entry.count))
+			default:
+				label.Alignment = fyne.TextAlignLeading
+				label.TextStyle = fyne.TextStyle{Monospace: true}
+				label.Selectable = true
+				label.Truncation = fyne.TextTruncateOff
+				if entry.hash == "" {
+					label.SetText("—")
+				} else {
 					label.SetText(entry.hash)
 				}
 			}
-		}
+		},
+	)
+	table.SetColumnWidth(0, 160)
+	table.SetColumnWidth(1, 120)
+	table.SetColumnWidth(2, 560)
+
+	// The table scrolls itself. An outer scroll offsets the header from the rows.
+
+	var refreshBtn *widget.Button
+	load := func() {
+		refreshBtn.Disable()
+		status.Importance = widget.LowImportance
+		status.SetText("Loading lists…")
+		status.Show()
+
+		go func() {
+			info, err := env.Client.ListInfo(ctx)
+			fyne.Do(func() {
+				refreshBtn.Enable()
+				if err != nil {
+					versionValue.SetText("—")
+					startedValue.SetText("—")
+					endedValue.SetText("—")
+					totalValue.SetText("—")
+					entries = nil
+					table.Refresh()
+					table.Hide()
+					status.Importance = widget.DangerImportance
+					status.SetText(err.Error())
+					status.Show()
+					return
+				}
+				applyListInfo(info, versionValue, startedValue, endedValue, totalValue, &entries)
+				table.Refresh()
+				if len(entries) == 0 {
+					table.Hide()
+					status.Importance = widget.LowImportance
+					status.SetText("No lists are loaded.")
+					status.Show()
+					return
+				}
+				status.Hide()
+				table.Show()
+			})
+		}()
 	}
 
-	// Refresh the table
-	table.Refresh()
+	refreshBtn = widget.NewButtonWithIcon("Refresh", theme.ViewRefreshIcon(), load)
+	table.Hide()
+	load()
+
+	stats := container.NewHBox(
+		statBlock("Version", versionValue),
+		statGap(),
+		statBlock("Started", startedValue),
+		statGap(),
+		statBlock("Finished", endedValue),
+		statGap(),
+		statBlock("Entities", totalValue),
+	)
+
+	header := container.NewVBox(
+		container.NewBorder(nil, nil, sectionLabel("Loaded lists"), refreshBtn),
+		stats,
+		status,
+		statGap(),
+	)
+
+	return container.NewPadded(container.NewBorder(header, nil, nil, nil, table))
 }
 
-// formatTime returns a user-friendly time string
-func formatTime(t time.Time) string {
-	if t.IsZero() {
-		return "N/A"
+func statGap() fyne.CanvasObject {
+	gap := canvas.NewRectangle(color.Transparent)
+	gap.SetMinSize(fyne.NewSize(36, 8))
+	return gap
+}
+
+type listEntry struct {
+	name  string
+	count int
+	hash  string
+}
+
+func applyListInfo(
+	info search.ListInfoResponse,
+	versionValue, startedValue, endedValue, totalValue *widget.Label,
+	entries *[]listEntry,
+) {
+	versionValue.SetText(cmp.Or(info.Version, "—"))
+	startedValue.SetText(formatTime(info.StartedAt))
+	endedValue.SetText(formatTime(info.EndedAt))
+
+	next := make([]listEntry, 0, len(info.Lists))
+	total := 0
+	for name, count := range info.Lists {
+		total += count
+		next = append(next, listEntry{
+			name:  name,
+			count: count,
+			hash:  info.ListHashes[name],
+		})
 	}
-	return t.Format(time.RFC3339)
+	slices.SortFunc(next, func(a, b listEntry) int {
+		return -1 * cmp.Compare(a.count, b.count)
+	})
+	*entries = next
+	totalValue.SetText(formatCount(total))
+}
+
+func statBlock(title string, value *widget.Label) fyne.CanvasObject {
+	caption := widget.NewLabel(title)
+	caption.Importance = widget.LowImportance
+	return container.NewVBox(caption, value)
+}
+
+func statValue(text string) *widget.Label {
+	label := widget.NewLabel(text)
+	label.TextStyle = fyne.TextStyle{Bold: true}
+	return label
 }

@@ -1,0 +1,19 @@
+body {
+    background-color: #101722;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.application-name {
+    color: #E6EDF7;
+    font-size: 22px;
+    font-weight: 600;
+}
+.application-version {
+    color: #8B98AD;
+    font-size: 13px;
+}
+.action {
+    color: #8FB4FF;
+}
+.action-error {
+    color: #FF8A80;
+}

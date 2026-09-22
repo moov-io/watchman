@@ -18,4 +18,9 @@ func TestExtractVariablesOfType(t *testing.T) {
 
 	expected := []string{"aircraft", "business", "organization", "person", "unknown", "vessel"}
 	require.ElementsMatch(t, expected, found)
+
+	found[0] = "mutated"
+	again, err := ast.ExtractVariablesOfType(fsys, modelsPath, "EntityType")
+	require.NoError(t, err)
+	require.ElementsMatch(t, expected, again)
 }

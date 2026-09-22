@@ -114,6 +114,9 @@ postal-server:
 
 build-webui:
 	cd ./cmd/ui/ && fyne package --release --icon ./assets/icon.jpeg -os web --app-version "${APP_VERSION}" && cd -
+	cp cmd/ui/assets/splash-light.css cmd/ui/wasm/light.css
+	cp cmd/ui/assets/splash-dark.css cmd/ui/wasm/dark.css
+	python3 scripts/patch-webui-splash.py cmd/ui/wasm/index.html
 
 .PHONY: setup
 setup:
