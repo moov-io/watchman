@@ -73,7 +73,7 @@ The API requires specifying an entity type:
 | `aircraft` | Aircraft registrations | `?type=aircraft&callSign=EP-GOM` |
 | `vessel` | Maritime vessels | `?type=vessel&imoNumber=9401598` |
 
-> **Performance:** Always include `type` (and `source` when you only need one list). Watchman partitions the in-memory corpus by source and type and uses name-token, crypto, and hashed government-ID / address blocking keys to select candidates before fuzzy scoring. Empty type partitions return no matches (they do not scan other lists). Crypto-only and government-ID queries use exact indexes. See [Performance](/watchman/performance/), [Indexing](/watchman/indexing/), and [Record linkage](/watchman/record-linkage/).
+> **Performance:** Always include `type` (and `source` when you only need one list). Watchman partitions the in-memory corpus by source and type and uses name-token, crypto, and hashed government-ID / IMO / contact / address blocking keys to select candidates before fuzzy scoring. Empty type partitions return no matches (they do not scan other lists). Crypto-only, government-ID, IMO/MMSI, aircraft-serial, and contact queries use exact indexes. See [Performance](/watchman/performance/), [Indexing](/watchman/indexing/), and [Record linkage](/watchman/record-linkage/).
 
 ### Advanced Entity Search Parameters
 

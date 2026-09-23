@@ -57,6 +57,33 @@ func Benchmark_Search(b *testing.B) {
 	})
 }
 
+func Benchmark_SearchVesselIMO(b *testing.B) {
+	svc := testService(b)
+	ctx := context.Background()
+	query := ofactest.EntityForBenchmark(b, "50972")
+	query.Name = ""
+	query.Source = ""
+	if query.Vessel != nil {
+		query.Vessel.Name = ""
+		query.Vessel.AltNames = nil
+		query.Vessel.CallSign = ""
+	}
+	query.PreparedFields = search.PreparedFields{}
+	query = query.Normalize()
+	opts := SearchOpts{
+		Limit:    5,
+		MinMatch: 0.80,
+	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		results, err := svc.Search(ctx, query, opts)
+		require.NoError(b, err)
+		require.Greater(b, len(results), 0)
+	}
+}
+
 func Benchmark_SearchBusinessTokens(b *testing.B) {
 	svc := testService(b)
 	ctx := context.Background()

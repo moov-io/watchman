@@ -41,19 +41,41 @@ func (c *corpus) cryptoHits(query search.Entity[search.Value], partition []int) 
 	return hits
 }
 
-func (c *corpus) governmentIDHits(query search.Entity[search.Value], partition []int) []int {
+var exactBlockKinds = []string{
+	linksim.KindGovID,
+	linksim.KindIMO,
+	linksim.KindMMSI,
+	linksim.KindAir,
+	linksim.KindContact,
+}
+
+// identifierHits returns exact crypto, government-ID, IMO, MMSI, aircraft
+// serial, and contact (email/phone) hits in the partition.
+func (c *corpus) identifierHits(query search.Entity[search.Value], partition []int) []int {
 	var hits []int
-	for _, key := range linksim.Keys(query) {
-		if !strings.HasPrefix(key, linksim.KindGovID+":") {
-			continue
-		}
-		hits = append(hits, c.lookupBlockKey(key, partition)...)
+	if len(query.CryptoAddresses) > 0 {
+		hits = append(hits, c.cryptoHits(query, partition)...)
+	}
+	keys := linksim.Keys(query)
+	for _, kind := range exactBlockKinds {
+		hits = append(hits, c.hitsForKind(keys, partition, kind)...)
 	}
 	if len(hits) == 0 {
 		return nil
 	}
 	slices.Sort(hits)
 	return slices.Compact(hits)
+}
+
+func (c *corpus) hitsForKind(keys []string, partition []int, kind string) []int {
+	prefix := kind + ":"
+	var hits []int
+	for _, key := range keys {
+		if strings.HasPrefix(key, prefix) {
+			hits = append(hits, c.lookupBlockKey(key, partition)...)
+		}
+	}
+	return hits
 }
 
 func (c *corpus) addressHits(query search.Entity[search.Value], partition []int, opts CandidateOpts) []int {

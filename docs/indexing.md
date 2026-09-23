@@ -38,8 +38,8 @@ Before Jaro-Winkler scoring, Watchman selects a **candidate set**:
 | No token hits (e.g. heavy typos) | **Fall back to the full partition** (preserves recall within that source/type) |
 | Crypto address only | Exact crypto hits only (does not expand to the full partition) |
 | Crypto + name tokens | Union of crypto hits and name-token candidates |
-| Government ID (no name) | Exact hashed `GOVID:` hits; if none, fall back to the partition |
-| Government ID + name tokens | Union of `GOVID:` hits and name-token candidates |
+| Government ID / IMO / MMSI / aircraft serial / email / phone (no name) | Exact hashed `GOVID:` / `IMO:` / `MMSI:` / `AIR:` / `CONTACT:` hits; if none, fall back to the partition |
+| Those identifiers + name tokens | Union of identifier hits and name-token candidates |
 | Address only (no name tokens) | Finest hashed `ADDR:` prefix that still prunes the partition; otherwise the partition |
 | Exact prepared name (no tokens after stopwords) | Binary-search exact-name postings against the partition |
 | Name-less / identifier-oriented (no crypto, no GOVID/address hits) | Full partition for the filtered source/type |

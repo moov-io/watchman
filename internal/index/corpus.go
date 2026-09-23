@@ -222,8 +222,9 @@ func candidatesFromEntities(entities []search.Entity[search.Value], tfidfIndex *
 //
 // Strategy (never reduces recall below a full partition scan):
 //  1. Restrict to source/type partition.
-//  2. Exact crypto address and government-ID blocking-key hits short-circuit
-//     to those entities (merged with name-token hits when the query has a name).
+//  2. Exact crypto, government-ID, IMO, MMSI, aircraft-serial, and contact
+//     (email/phone) blocking-key hits short-circuit to those entities
+//     (merged with name-token hits when the query has a name).
 //  3. Name-token inverted index: intersect postings for query tokens that hit,
 //     starting from the rarest token. Tokens with no postings are skipped
 //     (typos). If the intersection is empty, fall back to the union of those
@@ -251,12 +252,8 @@ func (c *corpus) selectCandidates(query search.Entity[search.Value], opts Candid
 		return c.result(nil)
 	}
 
-	// Exact identifier fast path (crypto addresses, government-ID blocking keys)
-	var idHits []int
-	if len(query.CryptoAddresses) > 0 {
-		idHits = append(idHits, c.cryptoHits(query, partition)...)
-	}
-	idHits = append(idHits, c.governmentIDHits(query, partition)...)
+	// Exact identifier fast path (crypto, GOVID, IMO, MMSI, aircraft serial, contact)
+	idHits := c.identifierHits(query, partition)
 	if len(idHits) > 0 {
 		// Merge name candidates only when the query has name tokens.
 		// Otherwise nameCandidateIndices returns the full partition and would

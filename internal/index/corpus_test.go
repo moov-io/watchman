@@ -372,6 +372,132 @@ func TestCorpus_BlockingKeys(t *testing.T) {
 	})
 }
 
+func TestCorpus_ExactIdentifiers(t *testing.T) {
+	vessel := mustNorm(search.Entity[search.Value]{
+		Name:     "Frunze",
+		Type:     search.EntityVessel,
+		Source:   search.SourceUSOFAC,
+		SourceID: "v1",
+		Vessel:   &search.Vessel{Name: "Frunze", IMONumber: "9263643", MMSI: "518998343"},
+	})
+	otherVessel := mustNorm(search.Entity[search.Value]{
+		Name:     "Other Ship",
+		Type:     search.EntityVessel,
+		Source:   search.SourceUSOFAC,
+		SourceID: "v2",
+		Vessel:   &search.Vessel{Name: "Other Ship", IMONumber: "1111111"},
+	})
+	aircraft := mustNorm(search.Entity[search.Value]{
+		Name:     "EP-GOM",
+		Type:     search.EntityAircraft,
+		Source:   search.SourceUSOFAC,
+		SourceID: "a1",
+		Aircraft: &search.Aircraft{Name: "EP-GOM", SerialNumber: "MSN-12345"},
+	})
+	contact := mustNorm(search.Entity[search.Value]{
+		Name:     "Jane Contact",
+		Type:     search.EntityPerson,
+		Source:   search.SourceUSOFAC,
+		SourceID: "p1",
+		Person:   &search.Person{Name: "Jane Contact"},
+		Contact: search.ContactInfo{
+			EmailAddresses: []string{"info@example.com"},
+			PhoneNumbers:   []string{"+1-202-555-0100"},
+		},
+	})
+	otherPerson := mustNorm(search.Entity[search.Value]{
+		Name:     "John Smith",
+		Type:     search.EntityPerson,
+		Source:   search.SourceUSOFAC,
+		SourceID: "p2",
+		Person:   &search.Person{Name: "John Smith"},
+	})
+
+	idx := NewLists(nil)
+	idx.Update(download.Stats{
+		Entities: []search.Entity[search.Value]{vessel, otherVessel, aircraft, contact, otherPerson},
+		Lists:    map[string]int{string(search.SourceUSOFAC): 5},
+	})
+	ctx := context.Background()
+
+	t.Run("IMO-only query does not scan other vessels", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:   search.EntityVessel,
+			Source: search.SourceUSOFAC,
+			Vessel: &search.Vessel{IMONumber: "9263643"},
+		})
+		require.Empty(t, query.PreparedFields.NameFields)
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "v1", cands.At(0).SourceID)
+	})
+
+	t.Run("MMSI-only query does not scan other vessels", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:   search.EntityVessel,
+			Source: search.SourceUSOFAC,
+			Vessel: &search.Vessel{MMSI: "518998343"},
+		})
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "v1", cands.At(0).SourceID)
+	})
+
+	t.Run("aircraft serial query does not scan other types", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:     search.EntityAircraft,
+			Source:   search.SourceUSOFAC,
+			Aircraft: &search.Aircraft{SerialNumber: "MSN-12345"},
+		})
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "a1", cands.At(0).SourceID)
+	})
+
+	t.Run("email-only query does not scan other persons", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:   search.EntityPerson,
+			Source: search.SourceUSOFAC,
+			Contact: search.ContactInfo{
+				EmailAddresses: []string{"info@example.com"},
+			},
+		})
+		require.Empty(t, query.PreparedFields.NameFields)
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "p1", cands.At(0).SourceID)
+	})
+
+	t.Run("phone-only query does not scan other persons", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:   search.EntityPerson,
+			Source: search.SourceUSOFAC,
+			Contact: search.ContactInfo{
+				PhoneNumbers: []string{"+1-202-555-0100"},
+			},
+		})
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "p1", cands.At(0).SourceID)
+	})
+
+	t.Run("unknown IMO falls back to the vessel partition", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:   search.EntityVessel,
+			Source: search.SourceUSOFAC,
+			Vessel: &search.Vessel{IMONumber: "0000000"},
+		})
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 2, cands.Len(), "no blocking-key hits must not drop recall")
+	})
+}
+
 func mustNorm(e search.Entity[search.Value]) search.Entity[search.Value] {
 	return e.Normalize()
 }
