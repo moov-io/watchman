@@ -34,7 +34,7 @@ Before Jaro-Winkler scoring, Watchman selects a **candidate set**:
 | `type` and/or `source` set | Start from that partition only |
 | Known source, empty type (no entities of that type) | **Empty result** — does not scan other types or sources |
 | Unknown / unregistered source | **Empty result** — does not fall back to the full corpus |
-| Name tokens present | Intersect inverted-index hits for **distinctive** tokens (skip empty postings, legal suffixes like `limited`/`llc`, and tokens covering more than 20% of the partition). A query of "Ocean Shipping Limited" still matches a DBA of "Ocean Shipping". If the intersection is empty, use the union of those hitting tokens. |
+| Name tokens present | Intersect inverted-index hits for **distinctive** tokens, using document frequency in this partition (not a language-specific suffix list). Tokens with no postings are skipped. A token that is much more common than the rest of the query (Limited, ООО, GmbH, 有限公司, …) is optional, so "Ocean Shipping Limited" still matches a DBA of "Ocean Shipping". If the intersection is empty, use the union of those hitting tokens. |
 | No token hits (e.g. heavy typos) | **Fall back to the full partition** (preserves recall within that source/type) |
 | Crypto address only | Exact crypto hits only (does not expand to the full partition) |
 | Crypto + name tokens | Union of crypto hits and name-token candidates |

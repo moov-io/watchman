@@ -50,7 +50,7 @@ On every list refresh Watchman builds:
 | Structure | Purpose |
 |-----------|---------|
 | **Source × type partitions** | Restrict scoring to the requested `source` and/or `type` when provided |
-| **Name-token inverted index** | Entities whose prepared primary, alt, or former names contain a query token. Search intersects **distinctive** tokens (legal suffixes and very common words are optional) so "Ocean Shipping Limited" still matches a DBA of "Ocean Shipping". |
+| **Name-token inverted index** | Entities whose prepared primary, alt, or former names contain a query token. Search intersects **distinctive** tokens by document frequency in this partition (no language-specific suffix list), so extra common legal-form words in any language do not drop a DBA that omits them. |
 | **Exact prepared-name map** | Fast path when the full prepared name matches exactly |
 | **Crypto address map** | Exact `CURRENCY:address` lookup for crypto-only (or crypto+name) queries |
 | **Blocking keys** | Hashed `GOVID:` / `ADDR:` postings, plus plaintext IMO/MMSI/serial/email/phone indexes for prefix and QWERTY-near typed queries (see [Record linkage](/watchman/record-linkage/)) |

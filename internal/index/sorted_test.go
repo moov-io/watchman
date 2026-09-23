@@ -18,6 +18,21 @@ func TestIntersectSorted(t *testing.T) {
 	require.Empty(t, intersectSorted([]int{1, 2}, []int{3, 4}))
 }
 
+func TestDistinctiveQueryTokens(t *testing.T) {
+	ocean := tokenPostings{hits: []int{0, 1}}
+	shipping := tokenPostings{hits: []int{0, 1}}
+	limited := tokenPostings{hits: []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}}
+	got := distinctiveQueryTokens([]tokenPostings{ocean, shipping, limited}, 13)
+	require.Len(t, got, 2)
+	require.Equal(t, []int{0, 1}, got[0])
+	require.Equal(t, []int{0, 1}, got[1])
+
+	john := tokenPostings{hits: []int{0, 1}}
+	smith := tokenPostings{hits: []int{0, 2}}
+	got = distinctiveQueryTokens([]tokenPostings{john, smith}, 3)
+	require.Len(t, got, 2, "equal-frequency person tokens stay required")
+}
+
 func TestUnionSorted(t *testing.T) {
 	require.Nil(t, unionSorted(nil))
 	require.Equal(t, []int{1, 2, 3, 5}, unionSorted([][]int{{1, 3, 5}, {1, 2}}))

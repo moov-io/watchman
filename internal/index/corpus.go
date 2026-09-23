@@ -4,7 +4,6 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/moov-io/watchman/internal/prepare"
 	"github.com/moov-io/watchman/internal/tfidf"
 	"github.com/moov-io/watchman/pkg/search"
 )
@@ -150,10 +149,52 @@ func (c *corpus) addToPartition(source, entityType string, idx int) {
 	byType[entityType] = append(byType[entityType], idx)
 }
 
-// distinctiveMaxDF is the maximum fraction of a partition a token may cover
-// and still be required in the name-token intersection. Common words above
-// this are optional, like legal suffixes.
-const distinctiveMaxDF = 0.20
+const (
+	// distinctiveMaxDF is the maximum fraction of a partition a token may cover
+	// and still be required in the name-token intersection. Common words above
+	// this are optional (Limited, ООО, GmbH, 有限公司 — whatever is frequent here).
+	distinctiveMaxDF = 0.20
+
+	// optionalDFRatio: when a query token is this many times more frequent than
+	// the next-rarest query token, it is optional. Extra legal-form words in any
+	// language are usually the most common token in the query.
+	optionalDFRatio = 2
+)
+
+// distinctiveQueryTokens picks which hitting query tokens to AND.
+// Language-agnostic: uses document frequency in this partition, not a suffix list.
+//
+//   - Skip empty postings (already done by the caller).
+//   - If two or more tokens hit, drop the most common when it is at least
+//     optionalDFRatio times as frequent as the next (e.g. "Limited" vs "Shipping").
+//   - Of the rest, keep only tokens at or below distinctiveMaxDF when any such
+//     token exists, so a corpus-wide common word is not required.
+func distinctiveQueryTokens(hitting []tokenPostings, partN float64) [][]int {
+	slices.SortFunc(hitting, func(a, b tokenPostings) int {
+		return len(a.hits) - len(b.hits)
+	})
+	if len(hitting) >= 2 {
+		most := hitting[len(hitting)-1]
+		next := hitting[len(hitting)-2]
+		if len(most.hits) >= optionalDFRatio*len(next.hits) {
+			hitting = hitting[:len(hitting)-1]
+		}
+	}
+	var distinctive [][]int
+	for _, h := range hitting {
+		if float64(len(h.hits))/partN <= distinctiveMaxDF {
+			distinctive = append(distinctive, h.hits)
+		}
+	}
+	if len(distinctive) > 0 {
+		return distinctive
+	}
+	out := make([][]int, len(hitting))
+	for i, h := range hitting {
+		out[i] = h.hits
+	}
+	return out
+}
 
 func cryptoKey(currency, address string) string {
 	currency = strings.ToUpper(strings.TrimSpace(currency))
@@ -246,11 +287,12 @@ func candidatesFromEntities(entities []search.Entity[search.Value], tfidfIndex *
 //  2. Crypto and government-ID hits are exact. IMO, MMSI, aircraft serial,
 //     email, and phone also match prefixes and single QWERTY-adjacent typos.
 //     Identifier hits are merged with name-token hits when the query has a name.
-//  3. Name-token inverted index: intersect distinctive tokens (skip empty
-//     postings, legal suffixes, and very common tokens). Extra query tokens
-//     such as "Limited" do not drop a DBA that omits them. If the intersection
-//     is empty, fall back to the union of those hitting tokens. If no token
-//     hits, or the set is too large, use the full partition.
+//  3. Name-token inverted index: intersect distinctive tokens using document
+//     frequency in this partition (no language-specific suffix list). Extra
+//     common query tokens (Limited, ООО, GmbH, …) do not drop a DBA that omits
+//     them. If the intersection is empty, fall back to the union of those
+//     hitting tokens. If no token hits, or the set is too large, use the full
+//     partition.
 //  4. Address-only queries use hashed ADDR prefix blocks when they prune the
 //     partition; otherwise fall through.
 //  5. Identifier-only / empty-name queries use the full partition.
@@ -310,6 +352,10 @@ func (c *corpus) selectCandidates(query search.Entity[search.Value], opts Candid
 	return c.result(partition)
 }
 
+type tokenPostings struct {
+	hits []int
+}
+
 func (c *corpus) nameCandidateIndices(query search.Entity[search.Value], partition []int, opts CandidateOpts) []int {
 	tokens := query.PreparedFields.NameFields
 	if len(tokens) == 0 {
@@ -318,47 +364,25 @@ func (c *corpus) nameCandidateIndices(query search.Entity[search.Value], partiti
 
 	// Per-token postings restricted to the partition. Skip tokens with no hits
 	// so a misspelled word does not wipe a good match on the remaining tokens.
-	//
-	// Legal-form suffixes (limited, llc, gmbh, …) and very common tokens are
-	// optional: a query of "Ocean Shipping Limited" must still match a DBA of
-	// "Ocean Shipping". Intersect only the distinctive tokens.
-	var distinctive, common, suffix [][]int
 	partN := float64(len(partition))
 	if partN < 1 {
 		partN = 1
 	}
+	hitting := make([]tokenPostings, 0, len(tokens))
 	for _, tok := range tokens {
 		hits := intersectSorted(c.nameTokens[tok], partition)
 		if len(hits) == 0 {
 			continue
 		}
-		if prepare.IsCompanySuffixToken(tok) {
-			suffix = append(suffix, hits)
-			continue
-		}
-		df := float64(len(hits)) / partN
-		if df > distinctiveMaxDF {
-			common = append(common, hits)
-			continue
-		}
-		distinctive = append(distinctive, hits)
-	}
-
-	// Never AND a legal suffix: "Ocean Shipping Limited" must still match
-	// a DBA of "Ocean Shipping". Prefer low-DF tokens; if none, use the
-	// other non-suffix hits; suffix-only queries use the suffix lists.
-	lists := distinctive
-	if len(lists) == 0 {
-		lists = common
-	}
-	if len(lists) == 0 {
-		lists = suffix
+		hitting = append(hitting, tokenPostings{hits: hits})
 	}
 
 	// No token hits (e.g. pure typos) → full partition to preserve recall
-	if len(lists) == 0 {
+	if len(hitting) == 0 {
 		return partition
 	}
+
+	lists := distinctiveQueryTokens(hitting, partN)
 
 	// Intersect from the rarest distinctive token.
 	slices.SortFunc(lists, func(a, b []int) int {

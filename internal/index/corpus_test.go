@@ -245,15 +245,17 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 			SourceID: "other",
 			Business: &search.Business{Name: "Acme Company Limited"},
 		})
-		fillers := make([]search.Entity[search.Value], 0, 6)
+		fillers := make([]search.Entity[search.Value], 0, 16)
 		fillers = append(fillers, dba, legal, other)
-		for i := 0; i < 3; i++ {
+		// Make "limited" much more common than "ocean"/"shipping" so frequency,
+		// not an English suffix list, treats it as optional.
+		for i := 0; i < 10; i++ {
 			fillers = append(fillers, mustNorm(search.Entity[search.Value]{
-				Name:     fmt.Sprintf("Northwind Traders %d", i),
+				Name:     fmt.Sprintf("Northwind Traders Limited %d", i),
 				Type:     search.EntityBusiness,
 				Source:   search.SourceUSOFAC,
 				SourceID: fmt.Sprintf("f%d", i),
-				Business: &search.Business{Name: fmt.Sprintf("Northwind Traders %d", i)},
+				Business: &search.Business{Name: fmt.Sprintf("Northwind Traders Limited %d", i)},
 			}))
 		}
 		idx.Update(download.Stats{
@@ -263,6 +265,49 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 
 		cands, err := idx.SelectCandidates(ctx, mustNorm(search.Entity[search.Value]{
 			Name:   "Ocean Shipping Limited",
+			Type:   search.EntityBusiness,
+			Source: search.SourceUSOFAC,
+		}))
+		require.NoError(t, err)
+		ids := make([]string, cands.Len())
+		for i := 0; i < cands.Len(); i++ {
+			ids[i] = cands.At(i).SourceID
+		}
+		require.ElementsMatch(t, []string{"dba", "legal"}, ids)
+	})
+
+	t.Run("common legal-form token in another language is optional too", func(t *testing.T) {
+		dba := mustNorm(search.Entity[search.Value]{
+			Name:     "Gazprom",
+			Type:     search.EntityBusiness,
+			Source:   search.SourceUSOFAC,
+			SourceID: "dba",
+			Business: &search.Business{Name: "Gazprom"},
+		})
+		legal := mustNorm(search.Entity[search.Value]{
+			Name:     "OOO Gazprom",
+			Type:     search.EntityBusiness,
+			Source:   search.SourceUSOFAC,
+			SourceID: "legal",
+			Business: &search.Business{Name: "OOO Gazprom"},
+		})
+		ents := []search.Entity[search.Value]{dba, legal}
+		for i := 0; i < 10; i++ {
+			ents = append(ents, mustNorm(search.Entity[search.Value]{
+				Name:     fmt.Sprintf("OOO Widget %d", i),
+				Type:     search.EntityBusiness,
+				Source:   search.SourceUSOFAC,
+				SourceID: fmt.Sprintf("w%d", i),
+				Business: &search.Business{Name: fmt.Sprintf("OOO Widget %d", i)},
+			}))
+		}
+		idx.Update(download.Stats{
+			Entities: ents,
+			Lists:    map[string]int{string(search.SourceUSOFAC): len(ents)},
+		})
+
+		cands, err := idx.SelectCandidates(ctx, mustNorm(search.Entity[search.Value]{
+			Name:   "OOO Gazprom",
 			Type:   search.EntityBusiness,
 			Source: search.SourceUSOFAC,
 		}))
