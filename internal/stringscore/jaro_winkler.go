@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"sync/atomic"
 
 	"github.com/moov-io/base/strx"
@@ -125,30 +127,91 @@ func BestPairsJaroWinkler(searchTokens []string, indexedTokens []string) float64
 	return BestPairsJaroWinklerWithConfig(searchTokens, indexedTokens, DefaultScoringConfig())
 }
 
+type scorePair struct {
+	score          float64
+	searchTokenIdx int
+	indexTokenIdx  int
+}
+
+type bestPairsScratch struct {
+	scores        []scorePair
+	matchedSearch []bool
+	matchedIndex  []bool
+}
+
+var bestPairsPool = sync.Pool{
+	New: func() any {
+		return &bestPairsScratch{}
+	},
+}
+
+func getBestPairsScratch() *bestPairsScratch {
+	s, ok := bestPairsPool.Get().(*bestPairsScratch)
+	if !ok || s == nil {
+		return &bestPairsScratch{}
+	}
+	return s
+}
+
+func (s *bestPairsScratch) reset(scoreCap, nSearch, nIndex int) {
+	if cap(s.scores) < scoreCap {
+		s.scores = make([]scorePair, 0, scoreCap)
+	} else {
+		s.scores = s.scores[:0]
+	}
+	s.matchedSearch = resizeBool(s.matchedSearch, nSearch)
+	s.matchedIndex = resizeBool(s.matchedIndex, nIndex)
+}
+
+func resizeBool(b []bool, n int) []bool {
+	if cap(b) < n {
+		return make([]bool, n)
+	}
+	b = b[:n]
+	clear(b)
+	return b
+}
+
+func pairScoreCapacity(nSearch, nIndex int, skipPhonetic bool) int {
+	capn := nSearch + nIndex
+	if !skipPhonetic {
+		capn /= 5
+	}
+	if capn < 1 {
+		return 1
+	}
+	return capn
+}
+
+func sortScorePairs(scores []scorePair) {
+	slices.SortFunc(scores, func(a, b scorePair) int {
+		switch {
+		case a.score > b.score:
+			return -1
+		case a.score < b.score:
+			return 1
+		default:
+			return 0
+		}
+	})
+}
+
 // BestPairsJaroWinklerWithConfig is BestPairsJaroWinkler with an explicit scoring config.
 func BestPairsJaroWinklerWithConfig(searchTokens []string, indexedTokens []string, cfg ScoringConfig) float64 {
-	type Score struct {
-		score          float64
-		searchTokenIdx int
-		indexTokenIdx  int
-	}
-
 	searchTokensLength := sumLength(searchTokens)
 	indexTokensLength := sumLength(indexedTokens)
 
 	skipPhonetic := disablePhoneticFiltering.Load()
 
-	//Compare each search token to each indexed token. Sort the results in descending order
-	scoresCapacity := (len(searchTokens) + len(indexedTokens))
-	if !skipPhonetic {
-		scoresCapacity /= 5 // reduce the capacity as many terms don't phonetically match
-	}
-	scores := make([]Score, 0, scoresCapacity)
+	scratch := getBestPairsScratch()
+	defer bestPairsPool.Put(scratch)
+	scratch.reset(pairScoreCapacity(len(searchTokens), len(indexedTokens), skipPhonetic), len(searchTokens), len(indexedTokens))
+
 	for searchIdx, searchToken := range searchTokens {
 		for indexIdx, indexedToken := range indexedTokens {
 			// Compare the first letters phonetically and only run jaro-winkler on those which are similar
 			if skipPhonetic || firstCharacterSoundexMatch(indexedToken, searchToken) {
-				scores = append(scores, Score{
+				scratch.scores = append(scratch.scores, scorePair{
 					score:          tokenSimilarity(indexedToken, searchToken, cfg),
 					searchTokenIdx: searchIdx,
 					indexTokenIdx:  indexIdx,
@@ -156,25 +219,18 @@ func BestPairsJaroWinklerWithConfig(searchTokens []string, indexedTokens []strin
 			}
 		}
 	}
-	sort.Slice(scores[:], func(i, j int) bool {
-		return scores[i].score > scores[j].score
-	})
+	sortScorePairs(scratch.scores)
 
-	//Pick the highest score for each search term, where the indexed token hasn't yet been matched
-	matchedSearchTokens := make([]bool, len(searchTokens))
-	matchedIndexTokens := make([]bool, len(indexedTokens))
 	matchedIndexTokensLength := 0
 	totalWeightedScores := 0.0
-	for _, score := range scores {
-		//If neither the search token nor index token have been matched so far
-		if !matchedSearchTokens[score.searchTokenIdx] && !matchedIndexTokens[score.indexTokenIdx] {
-			//Weight the importance of this word score by its character length
+	for _, score := range scratch.scores {
+		if !scratch.matchedSearch[score.searchTokenIdx] && !scratch.matchedIndex[score.indexTokenIdx] {
 			searchToken := searchTokens[score.searchTokenIdx]
 			indexToken := indexedTokens[score.indexTokenIdx]
 			totalWeightedScores += score.score * float64(len(searchToken)+len(indexToken))
 
-			matchedSearchTokens[score.searchTokenIdx] = true
-			matchedIndexTokens[score.indexTokenIdx] = true
+			scratch.matchedSearch[score.searchTokenIdx] = true
+			scratch.matchedIndex[score.indexTokenIdx] = true
 			matchedIndexTokensLength += len(indexToken)
 		}
 	}
@@ -183,13 +239,9 @@ func BestPairsJaroWinklerWithConfig(searchTokens []string, indexedTokens []strin
 		lengthWeightedAverageScore = 0.0
 	}
 
-	//If some index tokens weren't matched by any search token, penalise this search a small amount. If this isn't done,
-	//a query of "John Doe" will match "John Doe" and "John Bartholomew Doe" equally well.
-	//Calculate the fraction of the index name that wasn't matched, apply a weighting to reduce the importance of
-	//unmatched portion, then scale down the final score.
 	matchedIndexLength := 0
 	for i, str := range indexedTokens {
-		if matchedIndexTokens[i] {
+		if scratch.matchedIndex[i] {
 			matchedIndexLength += len(str)
 		}
 	}
@@ -500,24 +552,16 @@ func BestPairsJaroWinklerWeightedWithConfig(searchTokens []string, indexedTokens
 		return BestPairsJaroWinklerWithConfig(searchTokens, indexedTokens, cfg)
 	}
 
-	type Score struct {
-		score          float64
-		searchTokenIdx int
-		indexTokenIdx  int
-	}
-
 	skipPhonetic := disablePhoneticFiltering.Load()
 
-	// Compare each search token to each indexed token
-	scoresCapacity := (len(searchTokens) + len(indexedTokens))
-	if !skipPhonetic {
-		scoresCapacity /= 5
-	}
-	scores := make([]Score, 0, scoresCapacity)
+	scratch := getBestPairsScratch()
+	defer bestPairsPool.Put(scratch)
+	scratch.reset(pairScoreCapacity(len(searchTokens), len(indexedTokens), skipPhonetic), len(searchTokens), len(indexedTokens))
+
 	for searchIdx, searchToken := range searchTokens {
 		for indexIdx, indexedToken := range indexedTokens {
 			if skipPhonetic || firstCharacterSoundexMatch(indexedToken, searchToken) {
-				scores = append(scores, Score{
+				scratch.scores = append(scratch.scores, scorePair{
 					score:          tokenSimilarity(indexedToken, searchToken, cfg),
 					searchTokenIdx: searchIdx,
 					indexTokenIdx:  indexIdx,
@@ -525,26 +569,19 @@ func BestPairsJaroWinklerWeightedWithConfig(searchTokens []string, indexedTokens
 			}
 		}
 	}
-	sort.Slice(scores[:], func(i, j int) bool {
-		return scores[i].score > scores[j].score
-	})
+	sortScorePairs(scratch.scores)
 
-	// Pick the highest score for each search term, where the indexed token hasn't yet been matched
-	matchedSearchTokens := make([]bool, len(searchTokens))
-	matchedIndexTokens := make([]bool, len(indexedTokens))
 	var totalWeightedScores float64
 	var totalWeight float64
 
-	for _, score := range scores {
-		if !matchedSearchTokens[score.searchTokenIdx] && !matchedIndexTokens[score.indexTokenIdx] {
-			// Use TF-IDF weight instead of character length
-			// Average the weights of both tokens in the pair
+	for _, score := range scratch.scores {
+		if !scratch.matchedSearch[score.searchTokenIdx] && !scratch.matchedIndex[score.indexTokenIdx] {
 			pairWeight := (searchWeights[score.searchTokenIdx] + indexWeights[score.indexTokenIdx]) / 2.0
 			totalWeightedScores += score.score * pairWeight
 			totalWeight += pairWeight
 
-			matchedSearchTokens[score.searchTokenIdx] = true
-			matchedIndexTokens[score.indexTokenIdx] = true
+			scratch.matchedSearch[score.searchTokenIdx] = true
+			scratch.matchedIndex[score.indexTokenIdx] = true
 		}
 	}
 
@@ -554,11 +591,10 @@ func BestPairsJaroWinklerWeightedWithConfig(searchTokens []string, indexedTokens
 
 	weightedAverageScore := totalWeightedScores / totalWeight
 
-	// Apply penalty for unmatched index tokens, weighted by their TF-IDF importance
 	var matchedWeight, totalIndexWeight float64
 	for i := range indexedTokens {
 		totalIndexWeight += indexWeights[i]
-		if matchedIndexTokens[i] {
+		if scratch.matchedIndex[i] {
 			matchedWeight += indexWeights[i]
 		}
 	}

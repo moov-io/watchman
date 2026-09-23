@@ -91,6 +91,8 @@ encouraging richer query data for better performance.
 Similarity scoring is allocation-conscious for bulk search:
 
 - Score pieces are computed on the stack for the non-debug path.
+- Jaro-Winkler token-pair scratch buffers are pooled across comparisons.
+- Alternate and historical names are skipped once the primary (or a prior alias) already scores at or above the exact-match threshold.
 - Critical exact matches (government IDs, crypto addresses, contact identifiers) **return 1.0 immediately** and skip expensive name/title/address comparison.
 - Former names and related prepared fields are normalized at index time (and query normalize), not on every comparison.
 - Optional TF-IDF weights are attached to index entities when lists load; query weights are computed once per search.
