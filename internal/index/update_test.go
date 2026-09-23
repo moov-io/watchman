@@ -65,7 +65,7 @@ func TestLists_Update_CorpusOwnsEntities(t *testing.T) {
 		Source: search.SourceUSOFAC,
 	}.Normalize())
 	require.NoError(t, err)
-	require.NotEmpty(t, cands)
+	require.Greater(t, cands.Len(), 0)
 
 	stats := lists.LatestStats()
 	require.Nil(t, stats.Entities)

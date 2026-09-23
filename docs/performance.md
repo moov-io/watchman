@@ -37,7 +37,7 @@ Each `/v2/search` request roughly follows this path:
 2. **Select candidates** from the in-memory corpus using prebuilt indexes (see [Indexing](/watchman/indexing/)).
 3. **Admission control** (only when the candidate set is large — see below).
 4. **Score candidates** with Jaro-Winkler similarity (and optional TF-IDF weighting), in parallel when needed.
-5. **Keep a top-N heap** of the best matches above `minMatch`, then return JSON.
+5. **Keep a top-N heap** of the best matches above `minMatch` (by corpus index, then copy only those entities), then return JSON.
 
 Candidate selection is **recall-safe relative to a full source/type partition scan**: if name tokens do not hit the inverted index (for example a pure typo with no shared tokens), Watchman falls back to scoring the entire matching partition rather than returning empty results.
 

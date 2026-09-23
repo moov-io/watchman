@@ -23,7 +23,7 @@ When lists finish downloading and preparing, Watchman constructs an in-memory **
 6. **Blocking keys** — PII-safe composite hashes (`GOVID:`, `ADDR:`, hashed Soundex `NAME:` tokens, and related kinds) plus their coarse-to-fine prefixes. Government-ID queries use exact `GOVID:` lookup; address-only queries use the finest `ADDR:` prefix that still prunes the partition. The keys never store names, ID numbers, or addresses. See [Record linkage](/watchman/record-linkage/).
 7. **Optional TF-IDF weights** — when enabled, term weights for each entity’s name fields are stored on the entity so search does not recompute them per comparison.
 
-These structures are immutable for readers until the next successful refresh replaces the corpus atomically.
+These structures are immutable for readers until the next successful refresh replaces the corpus atomically. Search scores candidate **indices** against that generation and copies entity values only for the top-N results.
 
 ## Candidate selection at search time
 

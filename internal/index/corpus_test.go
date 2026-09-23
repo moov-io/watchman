@@ -66,13 +66,14 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 		cands, err := idx.SelectCandidates(ctx, query)
 		require.NoError(t, err)
 		// Should not include the person or EU entity
-		require.NotEmpty(t, cands)
-		for _, c := range cands {
+		require.Greater(t, cands.Len(), 0)
+		for i := 0; i < cands.Len(); i++ {
+			c := cands.At(i)
 			require.Equal(t, search.EntityBusiness, c.Type)
 			require.Equal(t, search.SourceUSOFAC, c.Source)
 		}
 		// Token "shipping" should hit entity 2
-		require.True(t, len(cands) <= 2)
+		require.True(t, cands.Len() <= 2)
 	})
 
 	t.Run("crypto exact candidate", func(t *testing.T) {
@@ -85,8 +86,8 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 		// empty source → all sources partition
 		cands, err := idx.SelectCandidates(ctx, query)
 		require.NoError(t, err)
-		require.Len(t, cands, 1)
-		require.Equal(t, "3", cands[0].SourceID)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "3", cands.At(0).SourceID)
 	})
 
 	t.Run("typo falls back to partition", func(t *testing.T) {
@@ -98,8 +99,8 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 		cands, err := idx.SelectCandidates(ctx, query)
 		require.NoError(t, err)
 		// Full person partition for US OFAC
-		require.Len(t, cands, 1)
-		require.Equal(t, "1", cands[0].SourceID)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "1", cands.At(0).SourceID)
 	})
 
 	t.Run("empty type within known source does not scan full corpus", func(t *testing.T) {
@@ -111,7 +112,7 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 		})
 		cands, err := idx.SelectCandidates(ctx, query)
 		require.NoError(t, err)
-		require.Empty(t, cands, "empty type partition must not fall back to scoring all entities")
+		require.Equal(t, 0, cands.Len(), "empty type partition must not fall back to scoring all entities")
 	})
 
 	t.Run("GetEntities empty partition does not leak other sources", func(t *testing.T) {
@@ -158,8 +159,8 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 		require.Empty(t, query.PreparedFields.NameFields)
 		cands, err := idx.SelectCandidates(ctx, query)
 		require.NoError(t, err)
-		require.Len(t, cands, 1)
-		require.Equal(t, "3", cands[0].SourceID)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "3", cands.At(0).SourceID)
 	})
 
 	t.Run("multi-token query intersects from the rarest token", func(t *testing.T) {
@@ -195,8 +196,8 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 			Source: search.SourceUSOFAC,
 		}))
 		require.NoError(t, err)
-		require.Len(t, cands, 1)
-		require.Equal(t, "js", cands[0].SourceID)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "js", cands.At(0).SourceID)
 	})
 
 	t.Run("misspelled extra token does not drop the matching token", func(t *testing.T) {
@@ -218,8 +219,8 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 			Source: search.SourceUSOFAC,
 		}))
 		require.NoError(t, err)
-		require.Len(t, cands, 1)
-		require.Equal(t, "js", cands[0].SourceID)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "js", cands.At(0).SourceID)
 	})
 
 	t.Run("disjoint token hits fall back to union", func(t *testing.T) {
@@ -248,8 +249,8 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 			Source: search.SourceUSOFAC,
 		}))
 		require.NoError(t, err)
-		require.Len(t, cands, 2)
-		ids := []string{cands[0].SourceID, cands[1].SourceID}
+		require.Equal(t, 2, cands.Len())
+		ids := []string{cands.At(0).SourceID, cands.At(1).SourceID}
 		require.ElementsMatch(t, []string{"jd", "jas"}, ids)
 	})
 
@@ -276,7 +277,7 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 			Source: search.SourceUSOFAC,
 		}))
 		require.NoError(t, err)
-		require.Len(t, cands, 1)
+		require.Equal(t, 1, cands.Len())
 
 		impl := idx.(*lists)
 		impl.mu.RLock()
@@ -336,8 +337,8 @@ func TestCorpus_BlockingKeys(t *testing.T) {
 		require.Empty(t, query.PreparedFields.NameFields)
 		cands, err := idx.SelectCandidates(ctx, query)
 		require.NoError(t, err)
-		require.Len(t, cands, 1)
-		require.Equal(t, "j1", cands[0].SourceID)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "j1", cands.At(0).SourceID)
 	})
 
 	t.Run("address-only query stays in the matching country block", func(t *testing.T) {
@@ -351,8 +352,8 @@ func TestCorpus_BlockingKeys(t *testing.T) {
 		require.Empty(t, query.PreparedFields.NameFields)
 		cands, err := idx.SelectCandidates(ctx, query)
 		require.NoError(t, err)
-		require.Len(t, cands, 1)
-		require.Equal(t, "j1", cands[0].SourceID)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "j1", cands.At(0).SourceID)
 	})
 
 	t.Run("unknown government ID falls back to the partition", func(t *testing.T) {
@@ -367,7 +368,7 @@ func TestCorpus_BlockingKeys(t *testing.T) {
 		})
 		cands, err := idx.SelectCandidates(ctx, query)
 		require.NoError(t, err)
-		require.Len(t, cands, 2, "no blocking-key hits must not drop recall")
+		require.Equal(t, 2, cands.Len(), "no blocking-key hits must not drop recall")
 	})
 }
 
@@ -424,7 +425,7 @@ func BenchmarkSelectCandidates(b *testing.B) {
 		if err != nil {
 			b.Fatal(err)
 		}
-		if len(cands) == 0 {
+		if cands.Len() == 0 {
 			b.Fatal("expected candidates")
 		}
 	}

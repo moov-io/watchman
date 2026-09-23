@@ -180,6 +180,44 @@ type CandidateOpts struct {
 	MaxFraction float64
 }
 
+// Candidates is a read-only view of corpus entities to score.
+// Entities aliases the in-memory generation (no per-search copy of the
+// candidate set). The slice remains valid after SelectCandidates returns
+// because the caller holds a reference to that generation.
+type Candidates struct {
+	Entities []search.Entity[search.Value]
+	Indices  []int
+	TFIDF    *tfidf.Index
+}
+
+// Len returns the number of candidates to score.
+func (c Candidates) Len() int {
+	return len(c.Indices)
+}
+
+// At returns the i-th candidate. It copies the entity header.
+func (c Candidates) At(i int) search.Entity[search.Value] {
+	return c.Entities[c.Indices[i]]
+}
+
+func (c *corpus) result(idxs []int) Candidates {
+	if len(idxs) == 0 {
+		return Candidates{Entities: c.entities, TFIDF: c.tfidf}
+	}
+	return Candidates{Entities: c.entities, Indices: idxs, TFIDF: c.tfidf}
+}
+
+func candidatesFromEntities(entities []search.Entity[search.Value], tfidfIndex *tfidf.Index) Candidates {
+	if len(entities) == 0 {
+		return Candidates{}
+	}
+	idxs := make([]int, len(entities))
+	for i := range idxs {
+		idxs[i] = i
+	}
+	return Candidates{Entities: entities, Indices: idxs, TFIDF: tfidfIndex}
+}
+
 // selectCandidates returns entities to score for the query.
 //
 // Strategy (never reduces recall below a full partition scan):
@@ -194,9 +232,9 @@ type CandidateOpts struct {
 //  4. Address-only queries use hashed ADDR prefix blocks when they prune the
 //     partition; otherwise fall through.
 //  5. Identifier-only / empty-name queries use the full partition.
-func (c *corpus) selectCandidates(query search.Entity[search.Value], opts CandidateOpts) []search.Entity[search.Value] {
+func (c *corpus) selectCandidates(query search.Entity[search.Value], opts CandidateOpts) Candidates {
 	if c == nil || len(c.entities) == 0 {
-		return nil
+		return Candidates{}
 	}
 
 	if opts.MaxFraction <= 0 || opts.MaxFraction > 1 {
@@ -206,11 +244,11 @@ func (c *corpus) selectCandidates(query search.Entity[search.Value], opts Candid
 	partition, sourceOK := c.partitionIndices(query.Source, query.Type)
 	if !sourceOK {
 		// Unknown source key: do not scan unrelated lists
-		return nil
+		return Candidates{}
 	}
 	if len(partition) == 0 {
 		// Known source (or all-sources) but no entities of this type
-		return nil
+		return c.result(nil)
 	}
 
 	// Exact identifier fast path (crypto addresses, government-ID blocking keys)
@@ -228,31 +266,30 @@ func (c *corpus) selectCandidates(query search.Entity[search.Value], opts Candid
 		}
 		slices.Sort(idHits)
 		idHits = slices.Compact(idHits)
-		return c.materialize(idHits)
+		return c.result(idHits)
 	}
 
 	// Name-based candidates
 	if len(query.PreparedFields.NameFields) > 0 {
-		idxs := c.nameCandidateIndices(query, partition, opts)
-		return c.materialize(idxs)
+		return c.result(c.nameCandidateIndices(query, partition, opts))
 	}
 
 	// Address prefix blocking for address-only queries
 	if addr := c.addressHits(query, partition, opts); len(addr) > 0 {
-		return c.materialize(addr)
+		return c.result(addr)
 	}
 
 	// Exact prepared name shortcut (name set but fields empty after stopwords)
 	if name := query.PreparedFields.Name; name != "" {
 		if exact := c.exactNames[name]; len(exact) > 0 {
 			if filtered := intersectSorted(exact, partition); len(filtered) > 0 {
-				return c.materialize(filtered)
+				return c.result(filtered)
 			}
 		}
 	}
 
 	// Identifier / type-only / empty query: full partition
-	return c.materialize(partition)
+	return c.result(partition)
 }
 
 func (c *corpus) nameCandidateIndices(query search.Entity[search.Value], partition []int, opts CandidateOpts) []int {
