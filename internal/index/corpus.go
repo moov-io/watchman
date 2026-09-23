@@ -282,7 +282,7 @@ func candidatesFromEntities(entities []search.Entity[search.Value], tfidfIndex *
 
 // selectCandidates returns entities to score for the query.
 //
-// Strategy (never reduces recall below a full partition scan):
+// Strategy (name typos with no token hits still scan the partition):
 //  1. Restrict to source/type partition.
 //  2. Crypto and government-ID hits are exact. IMO, MMSI, aircraft serial,
 //     email, and phone also match prefixes and single QWERTY-adjacent typos.
