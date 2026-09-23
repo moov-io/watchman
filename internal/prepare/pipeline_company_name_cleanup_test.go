@@ -10,6 +10,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestIsCompanySuffixToken(t *testing.T) {
+	require.True(t, IsCompanySuffixToken("limited"))
+	require.True(t, IsCompanySuffixToken("llc"))
+	require.True(t, IsCompanySuffixToken("gmbh"))
+	require.False(t, IsCompanySuffixToken("shipping"))
+	require.False(t, IsCompanySuffixToken("ocean"))
+}
+
 func TestPipeline__companyNameCleanupStep(t *testing.T) {
 	out := RemoveCompanyTitles("SAI ADVISORS INC.")
 	require.Equal(t, "SAI ADVISORS", out)

@@ -34,11 +34,12 @@ Before Jaro-Winkler scoring, Watchman selects a **candidate set**:
 | `type` and/or `source` set | Start from that partition only |
 | Known source, empty type (no entities of that type) | **Empty result** — does not scan other types or sources |
 | Unknown / unregistered source | **Empty result** — does not fall back to the full corpus |
-| Name tokens present | Intersect inverted-index hits for tokens that match, starting from the rarest token, restricted to the partition. Tokens with no postings are skipped. If the intersection is empty, use the union of the hitting tokens. |
+| Name tokens present | Intersect inverted-index hits for **distinctive** tokens (skip empty postings, legal suffixes like `limited`/`llc`, and tokens covering more than 20% of the partition). A query of "Ocean Shipping Limited" still matches a DBA of "Ocean Shipping". If the intersection is empty, use the union of those hitting tokens. |
 | No token hits (e.g. heavy typos) | **Fall back to the full partition** (preserves recall within that source/type) |
 | Crypto address only | Exact crypto hits only (does not expand to the full partition) |
 | Crypto + name tokens | Union of crypto hits and name-token candidates |
-| Government ID / IMO / MMSI / aircraft serial / email / phone (no name) | Exact hashed `GOVID:` / `IMO:` / `MMSI:` / `AIR:` / `CONTACT:` hits; if none, fall back to the partition |
+| Government ID (no name) | Exact hashed `GOVID:` hits; if none, fall back to the partition |
+| IMO / MMSI / aircraft serial / email / phone (no name) | Prefix and single QWERTY-adjacent typo on the normalized identifier (min length 3–4). If none, fall back to the partition |
 | Those identifiers + name tokens | Union of identifier hits and name-token candidates |
 | Address only (no name tokens) | Finest hashed `ADDR:` prefix that still prunes the partition; otherwise the partition |
 | Exact prepared name (no tokens after stopwords) | Binary-search exact-name postings against the partition |

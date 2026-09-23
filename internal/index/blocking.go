@@ -41,25 +41,18 @@ func (c *corpus) cryptoHits(query search.Entity[search.Value], partition []int) 
 	return hits
 }
 
-var exactBlockKinds = []string{
-	linksim.KindGovID,
-	linksim.KindIMO,
-	linksim.KindMMSI,
-	linksim.KindAir,
-	linksim.KindContact,
-}
-
-// identifierHits returns exact crypto, government-ID, IMO, MMSI, aircraft
-// serial, and contact (email/phone) hits in the partition.
+// identifierHits returns crypto, government-ID, IMO, MMSI, aircraft serial,
+// and contact (email/phone) hits in the partition. Government IDs and crypto
+// are exact. IMO/MMSI/serial/email/phone also match prefixes and single
+// QWERTY-adjacent typos.
 func (c *corpus) identifierHits(query search.Entity[search.Value], partition []int) []int {
 	var hits []int
 	if len(query.CryptoAddresses) > 0 {
 		hits = append(hits, c.cryptoHits(query, partition)...)
 	}
 	keys := linksim.Keys(query)
-	for _, kind := range exactBlockKinds {
-		hits = append(hits, c.hitsForKind(keys, partition, kind)...)
-	}
+	hits = append(hits, c.hitsForKind(keys, partition, linksim.KindGovID)...)
+	hits = append(hits, intersectSorted(c.plainIdentifierHits(query), partition)...)
 	if len(hits) == 0 {
 		return nil
 	}

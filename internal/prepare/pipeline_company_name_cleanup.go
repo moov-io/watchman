@@ -32,3 +32,44 @@ var (
 func RemoveCompanyTitles(in string) string {
 	return companySuffixReplacer.Replace(in)
 }
+
+// companySuffixTokens are legal-form words after LowerAndRemovePunctuation.
+// Candidate selection treats them as optional so a query of
+// "Ocean Shipping Limited" still matches a DBA of "Ocean Shipping".
+var companySuffixTokens = map[string]struct{}{
+	"ag":           {},
+	"aps":          {},
+	"bv":           {},
+	"cjsc":         {},
+	"co":           {},
+	"company":      {},
+	"corp":         {},
+	"corporation":  {},
+	"gmbh":         {},
+	"inc":          {},
+	"incorporated": {},
+	"jsc":          {},
+	"limited":      {},
+	"llc":          {},
+	"llp":          {},
+	"ltd":          {},
+	"ltda":         {},
+	"nv":           {},
+	"ooo":          {},
+	"oy":           {},
+	"pjsc":         {},
+	"plc":          {},
+	"pt":           {},
+	"pty":          {},
+	"pvt":          {},
+	"sa":           {},
+	"se":           {},
+	"sl":           {},
+}
+
+// IsCompanySuffixToken reports whether tok is a legal-entity suffix
+// (limited, llc, gmbh, …) after name normalization.
+func IsCompanySuffixToken(tok string) bool {
+	_, ok := companySuffixTokens[tok]
+	return ok
+}
