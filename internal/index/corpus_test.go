@@ -2,6 +2,7 @@ package index
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/moov-io/watchman/internal/download"
@@ -161,6 +162,97 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 		require.Equal(t, "3", cands[0].SourceID)
 	})
 
+	t.Run("multi-token query intersects from the rarest token", func(t *testing.T) {
+		johnSmith := mustNorm(search.Entity[search.Value]{
+			Name:     "John Smith",
+			Type:     search.EntityPerson,
+			Source:   search.SourceUSOFAC,
+			SourceID: "js",
+			Person:   &search.Person{Name: "John Smith"},
+		})
+		johnDoe := mustNorm(search.Entity[search.Value]{
+			Name:     "John Doe",
+			Type:     search.EntityPerson,
+			Source:   search.SourceUSOFAC,
+			SourceID: "jd",
+			Person:   &search.Person{Name: "John Doe"},
+		})
+		janeSmith := mustNorm(search.Entity[search.Value]{
+			Name:     "Jane Smith",
+			Type:     search.EntityPerson,
+			Source:   search.SourceUSOFAC,
+			SourceID: "jas",
+			Person:   &search.Person{Name: "Jane Smith"},
+		})
+		idx.Update(download.Stats{
+			Entities: []search.Entity[search.Value]{johnSmith, johnDoe, janeSmith},
+			Lists:    map[string]int{string(search.SourceUSOFAC): 3},
+		})
+
+		cands, err := idx.SelectCandidates(ctx, mustNorm(search.Entity[search.Value]{
+			Name:   "John Smith",
+			Type:   search.EntityPerson,
+			Source: search.SourceUSOFAC,
+		}))
+		require.NoError(t, err)
+		require.Len(t, cands, 1)
+		require.Equal(t, "js", cands[0].SourceID)
+	})
+
+	t.Run("misspelled extra token does not drop the matching token", func(t *testing.T) {
+		johnSmith := mustNorm(search.Entity[search.Value]{
+			Name:     "John Smith",
+			Type:     search.EntityPerson,
+			Source:   search.SourceUSOFAC,
+			SourceID: "js",
+			Person:   &search.Person{Name: "John Smith"},
+		})
+		idx.Update(download.Stats{
+			Entities: []search.Entity[search.Value]{johnSmith},
+			Lists:    map[string]int{string(search.SourceUSOFAC): 1},
+		})
+
+		cands, err := idx.SelectCandidates(ctx, mustNorm(search.Entity[search.Value]{
+			Name:   "John Zzznotatoken",
+			Type:   search.EntityPerson,
+			Source: search.SourceUSOFAC,
+		}))
+		require.NoError(t, err)
+		require.Len(t, cands, 1)
+		require.Equal(t, "js", cands[0].SourceID)
+	})
+
+	t.Run("disjoint token hits fall back to union", func(t *testing.T) {
+		johnDoe := mustNorm(search.Entity[search.Value]{
+			Name:     "John Doe",
+			Type:     search.EntityPerson,
+			Source:   search.SourceUSOFAC,
+			SourceID: "jd",
+			Person:   &search.Person{Name: "John Doe"},
+		})
+		janeSmith := mustNorm(search.Entity[search.Value]{
+			Name:     "Jane Smith",
+			Type:     search.EntityPerson,
+			Source:   search.SourceUSOFAC,
+			SourceID: "jas",
+			Person:   &search.Person{Name: "Jane Smith"},
+		})
+		idx.Update(download.Stats{
+			Entities: []search.Entity[search.Value]{johnDoe, janeSmith},
+			Lists:    map[string]int{string(search.SourceUSOFAC): 2},
+		})
+
+		cands, err := idx.SelectCandidates(ctx, mustNorm(search.Entity[search.Value]{
+			Name:   "John Smith",
+			Type:   search.EntityPerson,
+			Source: search.SourceUSOFAC,
+		}))
+		require.NoError(t, err)
+		require.Len(t, cands, 2)
+		ids := []string{cands[0].SourceID, cands[1].SourceID}
+		require.ElementsMatch(t, []string{"jd", "jas"}, ids)
+	})
+
 	t.Run("name tokens deduped per entity", func(t *testing.T) {
 		// Rebuild with an entity that repeats a token across primary and alt names
 		dup := mustNorm(search.Entity[search.Value]{
@@ -281,4 +373,59 @@ func TestCorpus_BlockingKeys(t *testing.T) {
 
 func mustNorm(e search.Entity[search.Value]) search.Entity[search.Value] {
 	return e.Normalize()
+}
+
+func BenchmarkSelectCandidates(b *testing.B) {
+	entities := make([]search.Entity[search.Value], 0, 4400)
+	for i := 0; i < 4000; i++ {
+		entities = append(entities, mustNorm(search.Entity[search.Value]{
+			Name:     "Acme Company Limited",
+			Type:     search.EntityBusiness,
+			Source:   search.SourceUSOFAC,
+			SourceID: fmt.Sprintf("c%d", i),
+			Business: &search.Business{Name: "Acme Company Limited"},
+		}))
+	}
+	for i := 0; i < 200; i++ {
+		entities = append(entities, mustNorm(search.Entity[search.Value]{
+			Name:     "Ocean Shipping Limited",
+			Type:     search.EntityBusiness,
+			Source:   search.SourceUSOFAC,
+			SourceID: fmt.Sprintf("s%d", i),
+			Business: &search.Business{Name: "Ocean Shipping Limited"},
+		}))
+	}
+	for i := 0; i < 200; i++ {
+		entities = append(entities, mustNorm(search.Entity[search.Value]{
+			Name:     "Ocean Freight Group",
+			Type:     search.EntityBusiness,
+			Source:   search.SourceUSOFAC,
+			SourceID: fmt.Sprintf("f%d", i),
+			Business: &search.Business{Name: "Ocean Freight Group"},
+		}))
+	}
+
+	idx := NewLists(nil)
+	idx.Update(download.Stats{
+		Entities: entities,
+		Lists:    map[string]int{string(search.SourceUSOFAC): len(entities)},
+	})
+	query := mustNorm(search.Entity[search.Value]{
+		Name:   "Ocean Shipping Limited",
+		Type:   search.EntityBusiness,
+		Source: search.SourceUSOFAC,
+	})
+	ctx := context.Background()
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		cands, err := idx.SelectCandidates(ctx, query)
+		if err != nil {
+			b.Fatal(err)
+		}
+		if len(cands) == 0 {
+			b.Fatal("expected candidates")
+		}
+	}
 }

@@ -34,7 +34,7 @@ Before Jaro-Winkler scoring, Watchman selects a **candidate set**:
 | `type` and/or `source` set | Start from that partition only |
 | Known source, empty type (no entities of that type) | **Empty result** — does not scan other types or sources |
 | Unknown / unregistered source | **Empty result** — does not fall back to the full corpus |
-| Name tokens present | Union of inverted-index hits for those tokens, restricted to the partition |
+| Name tokens present | Intersect inverted-index hits for tokens that match, starting from the rarest token, restricted to the partition. Tokens with no postings are skipped. If the intersection is empty, use the union of the hitting tokens. |
 | No token hits (e.g. heavy typos) | **Fall back to the full partition** (preserves recall within that source/type) |
 | Crypto address only | Exact crypto hits only (does not expand to the full partition) |
 | Crypto + name tokens | Union of crypto hits and name-token candidates |
@@ -46,7 +46,7 @@ Before Jaro-Winkler scoring, Watchman selects a **candidate set**:
 
 If name-token candidates would cover most of the partition (default threshold: half the partition size), Watchman scores the full partition instead—token pruning would not save work.
 
-Candidate index membership checks use binary search over sorted partition slices (no per-query partition maps). Duplicate postings are removed with sort + compact.
+Candidate index membership checks intersect sorted posting lists with the (sorted) partition. Duplicate postings are removed with sort + compact.
 
 Always pass **`type`** (and **`source`** when appropriate) on `/v2/search` for the best latency. See [Performance](/watchman/performance/) for concurrency, admission control, and tuning.
 

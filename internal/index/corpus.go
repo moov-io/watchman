@@ -186,8 +186,11 @@ type CandidateOpts struct {
 //  1. Restrict to source/type partition.
 //  2. Exact crypto address and government-ID blocking-key hits short-circuit
 //     to those entities (merged with name-token hits when the query has a name).
-//  3. Name-token inverted index: union of postings for query name tokens,
-//     intersected with the partition. If empty or too large, use full partition.
+//  3. Name-token inverted index: intersect postings for query tokens that hit,
+//     starting from the rarest token. Tokens with no postings are skipped
+//     (typos). If the intersection is empty, fall back to the union of those
+//     hitting tokens. If no token hits, or the set is too large, use the full
+//     partition.
 //  4. Address-only queries use hashed ADDR prefix blocks when they prune the
 //     partition; otherwise fall through.
 //  5. Identifier-only / empty-name queries use the full partition.
@@ -242,14 +245,7 @@ func (c *corpus) selectCandidates(query search.Entity[search.Value], opts Candid
 	// Exact prepared name shortcut (name set but fields empty after stopwords)
 	if name := query.PreparedFields.Name; name != "" {
 		if exact := c.exactNames[name]; len(exact) > 0 {
-			// exact is tiny; binary-search each index in the (large) sorted partition
-			var filtered []int
-			for _, idx := range exact {
-				if _, found := slices.BinarySearch(partition, idx); found {
-					filtered = append(filtered, idx)
-				}
-			}
-			if len(filtered) > 0 {
+			if filtered := intersectSorted(exact, partition); len(filtered) > 0 {
 				return c.materialize(filtered)
 			}
 		}
@@ -265,24 +261,40 @@ func (c *corpus) nameCandidateIndices(query search.Entity[search.Value], partiti
 		return partition
 	}
 
-	// Union postings for query tokens, restricted to partition.
-	// Deduplicate with sort+compact instead of a per-query seen map.
-	var candidates []int
+	// Per-token postings restricted to the partition. Skip tokens with no hits
+	// so a misspelled word does not wipe a good match on the remaining tokens.
+	lists := make([][]int, 0, len(tokens))
 	for _, tok := range tokens {
-		for _, idx := range c.nameTokens[tok] {
-			if _, found := slices.BinarySearch(partition, idx); found {
-				candidates = append(candidates, idx)
-			}
+		hits := intersectSorted(c.nameTokens[tok], partition)
+		if len(hits) == 0 {
+			continue
 		}
+		lists = append(lists, hits)
 	}
 
 	// No token hits (e.g. pure typos) → full partition to preserve recall
-	if len(candidates) == 0 {
+	if len(lists) == 0 {
 		return partition
 	}
 
-	slices.Sort(candidates)
-	candidates = slices.Compact(candidates)
+	// Intersect from the rarest token so common words (company, limited, ali)
+	// do not inflate the candidate set.
+	slices.SortFunc(lists, func(a, b []int) int {
+		return len(a) - len(b)
+	})
+	candidates := lists[0]
+	for i := 1; i < len(lists); i++ {
+		candidates = intersectSorted(candidates, lists[i])
+		if len(candidates) == 0 {
+			break
+		}
+	}
+
+	// Disjoint tokens (John∩Smith empty while both hit) → union so recall
+	// matches the previous union-of-postings behavior.
+	if len(candidates) == 0 {
+		candidates = unionSorted(lists)
+	}
 
 	// If candidates cover too much of the partition, scoring them is no cheaper
 	maxCount := int(float64(len(partition)) * opts.MaxFraction)

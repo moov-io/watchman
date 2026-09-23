@@ -57,6 +57,27 @@ func Benchmark_Search(b *testing.B) {
 	})
 }
 
+func Benchmark_SearchBusinessTokens(b *testing.B) {
+	svc := testService(b)
+	ctx := context.Background()
+	query := search.Entity[search.Value]{
+		Name: "Shipping Limited",
+		Type: search.EntityBusiness,
+	}.Normalize()
+	opts := SearchOpts{
+		Limit:    20,
+		MinMatch: 0.1,
+	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		results, err := svc.Search(ctx, query, opts)
+		require.NoError(b, err)
+		require.Greater(b, len(results), 0)
+	}
+}
+
 func Benchmark_SearchParallel(b *testing.B) {
 	svc := testService(b)
 	ctx := context.Background()

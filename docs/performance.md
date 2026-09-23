@@ -50,7 +50,7 @@ On every list refresh Watchman builds:
 | Structure | Purpose |
 |-----------|---------|
 | **Source × type partitions** | Restrict scoring to the requested `source` and/or `type` when provided |
-| **Name-token inverted index** | Union of entities whose prepared primary, alt, or former names contain a query token (one posting per token per entity) |
+| **Name-token inverted index** | Entities whose prepared primary, alt, or former names contain a query token (one posting per token per entity). Search intersects those postings from the rarest token; disjoint tokens fall back to their union. |
 | **Exact prepared-name map** | Fast path when the full prepared name matches exactly |
 | **Crypto address map** | Exact `CURRENCY:address` lookup for crypto-only (or crypto+name) queries |
 | **Blocking keys** | Hashed `GOVID:` / `ADDR:` prefix postings for identifier and address-only queries (see [Record linkage](/watchman/record-linkage/)) |
@@ -59,7 +59,7 @@ On every list refresh Watchman builds:
 **Tips for faster queries**
 
 - Always send `type=` (and `source=` when you only need one list). This shrinks the partition before token lookup.
-- Prefer multi-token names when possible; shared tokens prune the candidate set aggressively.
+- Prefer multi-token names when possible; shared tokens are intersected so common words do not pull in the rest of the partition.
 - Crypto-only queries use the exact address index and do **not** expand to a full partition scan.
 - Identifier-heavy queries (government IDs, contact info) still score within the type/source partition; critical exact ID matches short-circuit similarity to a perfect score without running full name/address comparison.
 

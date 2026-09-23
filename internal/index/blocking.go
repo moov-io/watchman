@@ -26,13 +26,7 @@ func (c *corpus) indexBlockingKeys(e search.Entity[search.Value], idx int) {
 }
 
 func (c *corpus) lookupBlockKey(key string, partition []int) []int {
-	var hits []int
-	for _, idx := range c.blockKeys[key] {
-		if _, found := slices.BinarySearch(partition, idx); found {
-			hits = append(hits, idx)
-		}
-	}
-	return hits
+	return intersectSorted(c.blockKeys[key], partition)
 }
 
 func (c *corpus) cryptoHits(query search.Entity[search.Value], partition []int) []int {
@@ -42,11 +36,7 @@ func (c *corpus) cryptoHits(query search.Entity[search.Value], partition []int) 
 		if key == "" {
 			continue
 		}
-		for _, idx := range c.cryptoKeys[key] {
-			if _, found := slices.BinarySearch(partition, idx); found {
-				hits = append(hits, idx)
-			}
-		}
+		hits = append(hits, intersectSorted(c.cryptoKeys[key], partition)...)
 	}
 	return hits
 }
