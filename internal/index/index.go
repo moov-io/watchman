@@ -20,7 +20,7 @@ type Lists interface {
 	// It applies source/type partitioning, name/crypto inverted indexes, and hashed
 	// government-ID / address blocking keys, with safe fallbacks that never reduce
 	// recall below a full partition scan.
-	SelectCandidates(ctx context.Context, query search.Entity[search.Value]) ([]search.Entity[search.Value], error)
+	SelectCandidates(ctx context.Context, query search.Entity[search.Value]) (Candidates, error)
 	Update(latest download.Stats)
 	LatestStats() download.Stats
 	GetTFIDFIndex() *tfidf.Index
@@ -75,7 +75,7 @@ func (l *lists) GetEntities(ctx context.Context, source search.SourceList) ([]se
 	return nil, fmt.Errorf("source %s not found", source)
 }
 
-func (l *lists) SelectCandidates(ctx context.Context, query search.Entity[search.Value]) ([]search.Entity[search.Value], error) {
+func (l *lists) SelectCandidates(ctx context.Context, query search.Entity[search.Value]) (Candidates, error) {
 	l.mu.RLock()
 	defer l.mu.RUnlock()
 
@@ -89,15 +89,19 @@ func (l *lists) SelectCandidates(ctx context.Context, query search.Entity[search
 
 	// Ingested-only source: pull from repository and return as-is (no inverted index)
 	if !exists && l.ingestRepository != nil {
-		return l.ingestRepository.ListBySource(ctx, "", source, 1000)
+		ents, err := l.ingestRepository.ListBySource(ctx, "", source, 1000)
+		if err != nil {
+			return Candidates{}, err
+		}
+		return candidatesFromEntities(ents, nil), nil
 	}
 
 	if exists {
 		// Corpus not built yet — return full list
-		return l.latestStats.Entities, nil
+		return candidatesFromEntities(l.latestStats.Entities, l.latestStats.TFIDFIndex), nil
 	}
 
-	return nil, fmt.Errorf("source %s not found", source)
+	return Candidates{}, fmt.Errorf("source %s not found", source)
 }
 
 func (l *lists) LatestStats() download.Stats {

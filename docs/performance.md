@@ -37,7 +37,7 @@ Each `/v2/search` request roughly follows this path:
 2. **Select candidates** from the in-memory corpus using prebuilt indexes (see [Indexing](/watchman/indexing/)).
 3. **Admission control** (only when the candidate set is large — see below).
 4. **Score candidates** with Jaro-Winkler similarity (and optional TF-IDF weighting), in parallel when needed.
-5. **Keep a top-N heap** of the best matches above `minMatch`, then return JSON.
+5. **Keep a top-N heap** of the best matches above `minMatch` (by corpus index, then copy only those entities), then return JSON.
 
 Candidate selection is **recall-safe relative to a full source/type partition scan**: if name tokens do not hit the inverted index (for example a pure typo with no shared tokens), Watchman falls back to scoring the entire matching partition rather than returning empty results.
 
@@ -50,18 +50,18 @@ On every list refresh Watchman builds:
 | Structure | Purpose |
 |-----------|---------|
 | **Source × type partitions** | Restrict scoring to the requested `source` and/or `type` when provided |
-| **Name-token inverted index** | Union of entities whose prepared primary, alt, or former names contain a query token (one posting per token per entity) |
+| **Name-token inverted index** | Entities whose prepared primary, alt, or former names contain a query token. Search intersects **distinctive** tokens by document frequency in this partition (no language-specific suffix list), so extra common legal-form words in any language do not drop a DBA that omits them. |
 | **Exact prepared-name map** | Fast path when the full prepared name matches exactly |
 | **Crypto address map** | Exact `CURRENCY:address` lookup for crypto-only (or crypto+name) queries |
-| **Blocking keys** | Hashed `GOVID:` / `ADDR:` prefix postings for identifier and address-only queries (see [Record linkage](/watchman/record-linkage/)) |
+| **Blocking keys** | Hashed `GOVID:` / `ADDR:` postings, plus plaintext IMO/MMSI/serial/email/phone indexes for prefix and QWERTY-near typed queries (see [Record linkage](/watchman/record-linkage/)) |
 | **TF-IDF term weights** (optional) | Precomputed per-entity weights so search does not recompute IDF on every comparison |
 
 **Tips for faster queries**
 
 - Always send `type=` (and `source=` when you only need one list). This shrinks the partition before token lookup.
-- Prefer multi-token names when possible; shared tokens prune the candidate set aggressively.
+- Prefer multi-token names when possible; shared tokens are intersected so common words do not pull in the rest of the partition.
 - Crypto-only queries use the exact address index and do **not** expand to a full partition scan.
-- Identifier-heavy queries (government IDs, contact info) still score within the type/source partition; critical exact ID matches short-circuit similarity to a perfect score without running full name/address comparison.
+- Identifier-heavy queries: government IDs are exact; IMO/MMSI/serial/email/phone accept prefixes and a single QWERTY-adjacent typo. Critical exact ID matches still short-circuit similarity to a perfect score.
 
 ### Concurrency model
 
@@ -91,6 +91,8 @@ encouraging richer query data for better performance.
 Similarity scoring is allocation-conscious for bulk search:
 
 - Score pieces are computed on the stack for the non-debug path.
+- Jaro-Winkler token-pair scratch buffers are pooled across comparisons.
+- Alternate and historical names are skipped once the primary (or a prior alias) already scores at or above the exact-match threshold.
 - Critical exact matches (government IDs, crypto addresses, contact identifiers) **return 1.0 immediately** and skip expensive name/title/address comparison.
 - Former names and related prepared fields are normalized at index time (and query normalize), not on every comparison.
 - Optional TF-IDF weights are attached to index entities when lists load; query weights are computed once per search.

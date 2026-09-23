@@ -2,6 +2,7 @@ package index
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/moov-io/watchman/internal/download"
@@ -65,13 +66,14 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 		cands, err := idx.SelectCandidates(ctx, query)
 		require.NoError(t, err)
 		// Should not include the person or EU entity
-		require.NotEmpty(t, cands)
-		for _, c := range cands {
+		require.Greater(t, cands.Len(), 0)
+		for i := 0; i < cands.Len(); i++ {
+			c := cands.At(i)
 			require.Equal(t, search.EntityBusiness, c.Type)
 			require.Equal(t, search.SourceUSOFAC, c.Source)
 		}
 		// Token "shipping" should hit entity 2
-		require.True(t, len(cands) <= 2)
+		require.True(t, cands.Len() <= 2)
 	})
 
 	t.Run("crypto exact candidate", func(t *testing.T) {
@@ -84,8 +86,8 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 		// empty source → all sources partition
 		cands, err := idx.SelectCandidates(ctx, query)
 		require.NoError(t, err)
-		require.Len(t, cands, 1)
-		require.Equal(t, "3", cands[0].SourceID)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "3", cands.At(0).SourceID)
 	})
 
 	t.Run("typo falls back to partition", func(t *testing.T) {
@@ -97,8 +99,8 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 		cands, err := idx.SelectCandidates(ctx, query)
 		require.NoError(t, err)
 		// Full person partition for US OFAC
-		require.Len(t, cands, 1)
-		require.Equal(t, "1", cands[0].SourceID)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "1", cands.At(0).SourceID)
 	})
 
 	t.Run("empty type within known source does not scan full corpus", func(t *testing.T) {
@@ -110,7 +112,7 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 		})
 		cands, err := idx.SelectCandidates(ctx, query)
 		require.NoError(t, err)
-		require.Empty(t, cands, "empty type partition must not fall back to scoring all entities")
+		require.Equal(t, 0, cands.Len(), "empty type partition must not fall back to scoring all entities")
 	})
 
 	t.Run("GetEntities empty partition does not leak other sources", func(t *testing.T) {
@@ -157,8 +159,195 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 		require.Empty(t, query.PreparedFields.NameFields)
 		cands, err := idx.SelectCandidates(ctx, query)
 		require.NoError(t, err)
-		require.Len(t, cands, 1)
-		require.Equal(t, "3", cands[0].SourceID)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "3", cands.At(0).SourceID)
+	})
+
+	t.Run("multi-token query intersects from the rarest token", func(t *testing.T) {
+		johnSmith := mustNorm(search.Entity[search.Value]{
+			Name:     "John Smith",
+			Type:     search.EntityPerson,
+			Source:   search.SourceUSOFAC,
+			SourceID: "js",
+			Person:   &search.Person{Name: "John Smith"},
+		})
+		johnDoe := mustNorm(search.Entity[search.Value]{
+			Name:     "John Doe",
+			Type:     search.EntityPerson,
+			Source:   search.SourceUSOFAC,
+			SourceID: "jd",
+			Person:   &search.Person{Name: "John Doe"},
+		})
+		janeSmith := mustNorm(search.Entity[search.Value]{
+			Name:     "Jane Smith",
+			Type:     search.EntityPerson,
+			Source:   search.SourceUSOFAC,
+			SourceID: "jas",
+			Person:   &search.Person{Name: "Jane Smith"},
+		})
+		idx.Update(download.Stats{
+			Entities: []search.Entity[search.Value]{johnSmith, johnDoe, janeSmith},
+			Lists:    map[string]int{string(search.SourceUSOFAC): 3},
+		})
+
+		cands, err := idx.SelectCandidates(ctx, mustNorm(search.Entity[search.Value]{
+			Name:   "John Smith",
+			Type:   search.EntityPerson,
+			Source: search.SourceUSOFAC,
+		}))
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "js", cands.At(0).SourceID)
+	})
+
+	t.Run("misspelled extra token does not drop the matching token", func(t *testing.T) {
+		johnSmith := mustNorm(search.Entity[search.Value]{
+			Name:     "John Smith",
+			Type:     search.EntityPerson,
+			Source:   search.SourceUSOFAC,
+			SourceID: "js",
+			Person:   &search.Person{Name: "John Smith"},
+		})
+		idx.Update(download.Stats{
+			Entities: []search.Entity[search.Value]{johnSmith},
+			Lists:    map[string]int{string(search.SourceUSOFAC): 1},
+		})
+
+		cands, err := idx.SelectCandidates(ctx, mustNorm(search.Entity[search.Value]{
+			Name:   "John Zzznotatoken",
+			Type:   search.EntityPerson,
+			Source: search.SourceUSOFAC,
+		}))
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "js", cands.At(0).SourceID)
+	})
+
+	t.Run("legal suffix on the query does not drop a DBA without it", func(t *testing.T) {
+		dba := mustNorm(search.Entity[search.Value]{
+			Name:     "Ocean Shipping",
+			Type:     search.EntityBusiness,
+			Source:   search.SourceUSOFAC,
+			SourceID: "dba",
+			Business: &search.Business{Name: "Ocean Shipping"},
+		})
+		legal := mustNorm(search.Entity[search.Value]{
+			Name:     "Ocean Shipping Limited",
+			Type:     search.EntityBusiness,
+			Source:   search.SourceUSOFAC,
+			SourceID: "legal",
+			Business: &search.Business{Name: "Ocean Shipping Limited"},
+		})
+		other := mustNorm(search.Entity[search.Value]{
+			Name:     "Acme Company Limited",
+			Type:     search.EntityBusiness,
+			Source:   search.SourceUSOFAC,
+			SourceID: "other",
+			Business: &search.Business{Name: "Acme Company Limited"},
+		})
+		fillers := make([]search.Entity[search.Value], 0, 16)
+		fillers = append(fillers, dba, legal, other)
+		// Make "limited" much more common than "ocean"/"shipping" so frequency,
+		// not an English suffix list, treats it as optional.
+		for i := 0; i < 10; i++ {
+			fillers = append(fillers, mustNorm(search.Entity[search.Value]{
+				Name:     fmt.Sprintf("Northwind Traders Limited %d", i),
+				Type:     search.EntityBusiness,
+				Source:   search.SourceUSOFAC,
+				SourceID: fmt.Sprintf("f%d", i),
+				Business: &search.Business{Name: fmt.Sprintf("Northwind Traders Limited %d", i)},
+			}))
+		}
+		idx.Update(download.Stats{
+			Entities: fillers,
+			Lists:    map[string]int{string(search.SourceUSOFAC): len(fillers)},
+		})
+
+		cands, err := idx.SelectCandidates(ctx, mustNorm(search.Entity[search.Value]{
+			Name:   "Ocean Shipping Limited",
+			Type:   search.EntityBusiness,
+			Source: search.SourceUSOFAC,
+		}))
+		require.NoError(t, err)
+		ids := make([]string, cands.Len())
+		for i := 0; i < cands.Len(); i++ {
+			ids[i] = cands.At(i).SourceID
+		}
+		require.ElementsMatch(t, []string{"dba", "legal"}, ids)
+	})
+
+	t.Run("common legal-form token in another language is optional too", func(t *testing.T) {
+		dba := mustNorm(search.Entity[search.Value]{
+			Name:     "Gazprom",
+			Type:     search.EntityBusiness,
+			Source:   search.SourceUSOFAC,
+			SourceID: "dba",
+			Business: &search.Business{Name: "Gazprom"},
+		})
+		legal := mustNorm(search.Entity[search.Value]{
+			Name:     "OOO Gazprom",
+			Type:     search.EntityBusiness,
+			Source:   search.SourceUSOFAC,
+			SourceID: "legal",
+			Business: &search.Business{Name: "OOO Gazprom"},
+		})
+		ents := []search.Entity[search.Value]{dba, legal}
+		for i := 0; i < 10; i++ {
+			ents = append(ents, mustNorm(search.Entity[search.Value]{
+				Name:     fmt.Sprintf("OOO Widget %d", i),
+				Type:     search.EntityBusiness,
+				Source:   search.SourceUSOFAC,
+				SourceID: fmt.Sprintf("w%d", i),
+				Business: &search.Business{Name: fmt.Sprintf("OOO Widget %d", i)},
+			}))
+		}
+		idx.Update(download.Stats{
+			Entities: ents,
+			Lists:    map[string]int{string(search.SourceUSOFAC): len(ents)},
+		})
+
+		cands, err := idx.SelectCandidates(ctx, mustNorm(search.Entity[search.Value]{
+			Name:   "OOO Gazprom",
+			Type:   search.EntityBusiness,
+			Source: search.SourceUSOFAC,
+		}))
+		require.NoError(t, err)
+		ids := make([]string, cands.Len())
+		for i := 0; i < cands.Len(); i++ {
+			ids[i] = cands.At(i).SourceID
+		}
+		require.ElementsMatch(t, []string{"dba", "legal"}, ids)
+	})
+
+	t.Run("disjoint token hits fall back to union", func(t *testing.T) {
+		johnDoe := mustNorm(search.Entity[search.Value]{
+			Name:     "John Doe",
+			Type:     search.EntityPerson,
+			Source:   search.SourceUSOFAC,
+			SourceID: "jd",
+			Person:   &search.Person{Name: "John Doe"},
+		})
+		janeSmith := mustNorm(search.Entity[search.Value]{
+			Name:     "Jane Smith",
+			Type:     search.EntityPerson,
+			Source:   search.SourceUSOFAC,
+			SourceID: "jas",
+			Person:   &search.Person{Name: "Jane Smith"},
+		})
+		idx.Update(download.Stats{
+			Entities: []search.Entity[search.Value]{johnDoe, janeSmith},
+			Lists:    map[string]int{string(search.SourceUSOFAC): 2},
+		})
+
+		cands, err := idx.SelectCandidates(ctx, mustNorm(search.Entity[search.Value]{
+			Name:   "John Smith",
+			Type:   search.EntityPerson,
+			Source: search.SourceUSOFAC,
+		}))
+		require.NoError(t, err)
+		require.Equal(t, 2, cands.Len())
+		ids := []string{cands.At(0).SourceID, cands.At(1).SourceID}
+		require.ElementsMatch(t, []string{"jd", "jas"}, ids)
 	})
 
 	t.Run("name tokens deduped per entity", func(t *testing.T) {
@@ -184,7 +373,7 @@ func TestCorpus_PartitionAndCandidates(t *testing.T) {
 			Source: search.SourceUSOFAC,
 		}))
 		require.NoError(t, err)
-		require.Len(t, cands, 1)
+		require.Equal(t, 1, cands.Len())
 
 		impl := idx.(*lists)
 		impl.mu.RLock()
@@ -244,8 +433,8 @@ func TestCorpus_BlockingKeys(t *testing.T) {
 		require.Empty(t, query.PreparedFields.NameFields)
 		cands, err := idx.SelectCandidates(ctx, query)
 		require.NoError(t, err)
-		require.Len(t, cands, 1)
-		require.Equal(t, "j1", cands[0].SourceID)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "j1", cands.At(0).SourceID)
 	})
 
 	t.Run("address-only query stays in the matching country block", func(t *testing.T) {
@@ -259,8 +448,8 @@ func TestCorpus_BlockingKeys(t *testing.T) {
 		require.Empty(t, query.PreparedFields.NameFields)
 		cands, err := idx.SelectCandidates(ctx, query)
 		require.NoError(t, err)
-		require.Len(t, cands, 1)
-		require.Equal(t, "j1", cands[0].SourceID)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "j1", cands.At(0).SourceID)
 	})
 
 	t.Run("unknown government ID falls back to the partition", func(t *testing.T) {
@@ -275,10 +464,240 @@ func TestCorpus_BlockingKeys(t *testing.T) {
 		})
 		cands, err := idx.SelectCandidates(ctx, query)
 		require.NoError(t, err)
-		require.Len(t, cands, 2, "no blocking-key hits must not drop recall")
+		require.Equal(t, 2, cands.Len(), "no blocking-key hits must not drop recall")
+	})
+}
+
+func TestCorpus_ExactIdentifiers(t *testing.T) {
+	vessel := mustNorm(search.Entity[search.Value]{
+		Name:     "Frunze",
+		Type:     search.EntityVessel,
+		Source:   search.SourceUSOFAC,
+		SourceID: "v1",
+		Vessel:   &search.Vessel{Name: "Frunze", IMONumber: "9263643", MMSI: "518998343"},
+	})
+	otherVessel := mustNorm(search.Entity[search.Value]{
+		Name:     "Other Ship",
+		Type:     search.EntityVessel,
+		Source:   search.SourceUSOFAC,
+		SourceID: "v2",
+		Vessel:   &search.Vessel{Name: "Other Ship", IMONumber: "1111111"},
+	})
+	aircraft := mustNorm(search.Entity[search.Value]{
+		Name:     "EP-GOM",
+		Type:     search.EntityAircraft,
+		Source:   search.SourceUSOFAC,
+		SourceID: "a1",
+		Aircraft: &search.Aircraft{Name: "EP-GOM", SerialNumber: "MSN-12345"},
+	})
+	contact := mustNorm(search.Entity[search.Value]{
+		Name:     "Jane Contact",
+		Type:     search.EntityPerson,
+		Source:   search.SourceUSOFAC,
+		SourceID: "p1",
+		Person:   &search.Person{Name: "Jane Contact"},
+		Contact: search.ContactInfo{
+			EmailAddresses: []string{"info@example.com"},
+			PhoneNumbers:   []string{"+1-202-555-0100"},
+		},
+	})
+	otherPerson := mustNorm(search.Entity[search.Value]{
+		Name:     "John Smith",
+		Type:     search.EntityPerson,
+		Source:   search.SourceUSOFAC,
+		SourceID: "p2",
+		Person:   &search.Person{Name: "John Smith"},
+	})
+
+	idx := NewLists(nil)
+	idx.Update(download.Stats{
+		Entities: []search.Entity[search.Value]{vessel, otherVessel, aircraft, contact, otherPerson},
+		Lists:    map[string]int{string(search.SourceUSOFAC): 5},
+	})
+	ctx := context.Background()
+
+	t.Run("IMO-only query does not scan other vessels", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:   search.EntityVessel,
+			Source: search.SourceUSOFAC,
+			Vessel: &search.Vessel{IMONumber: "9263643"},
+		})
+		require.Empty(t, query.PreparedFields.NameFields)
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "v1", cands.At(0).SourceID)
+	})
+
+	t.Run("MMSI-only query does not scan other vessels", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:   search.EntityVessel,
+			Source: search.SourceUSOFAC,
+			Vessel: &search.Vessel{MMSI: "518998343"},
+		})
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "v1", cands.At(0).SourceID)
+	})
+
+	t.Run("aircraft serial query does not scan other types", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:     search.EntityAircraft,
+			Source:   search.SourceUSOFAC,
+			Aircraft: &search.Aircraft{SerialNumber: "MSN-12345"},
+		})
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "a1", cands.At(0).SourceID)
+	})
+
+	t.Run("email-only query does not scan other persons", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:   search.EntityPerson,
+			Source: search.SourceUSOFAC,
+			Contact: search.ContactInfo{
+				EmailAddresses: []string{"info@example.com"},
+			},
+		})
+		require.Empty(t, query.PreparedFields.NameFields)
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "p1", cands.At(0).SourceID)
+	})
+
+	t.Run("phone-only query does not scan other persons", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:   search.EntityPerson,
+			Source: search.SourceUSOFAC,
+			Contact: search.ContactInfo{
+				PhoneNumbers: []string{"+1-202-555-0100"},
+			},
+		})
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "p1", cands.At(0).SourceID)
+	})
+
+	t.Run("IMO prefix query matches the vessel", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:   search.EntityVessel,
+			Source: search.SourceUSOFAC,
+			Vessel: &search.Vessel{IMONumber: "9263"},
+		})
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "v1", cands.At(0).SourceID)
+	})
+
+	t.Run("IMO QWERTY-adjacent typo matches the vessel", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:   search.EntityVessel,
+			Source: search.SourceUSOFAC,
+			Vessel: &search.Vessel{IMONumber: "9263642"}, // 3 → 2 on the number row
+		})
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "v1", cands.At(0).SourceID)
+	})
+
+	t.Run("email prefix query matches the person", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:   search.EntityPerson,
+			Source: search.SourceUSOFAC,
+			Contact: search.ContactInfo{
+				EmailAddresses: []string{"info@"},
+			},
+		})
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "p1", cands.At(0).SourceID)
+	})
+
+	t.Run("short IMO prefix falls back to the vessel partition", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:   search.EntityVessel,
+			Source: search.SourceUSOFAC,
+			Vessel: &search.Vessel{IMONumber: "92"},
+		})
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 2, cands.Len())
+	})
+
+	t.Run("unknown IMO falls back to the vessel partition", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:   search.EntityVessel,
+			Source: search.SourceUSOFAC,
+			Vessel: &search.Vessel{IMONumber: "0000000"},
+		})
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 2, cands.Len(), "no blocking-key hits must not drop recall")
 	})
 }
 
 func mustNorm(e search.Entity[search.Value]) search.Entity[search.Value] {
 	return e.Normalize()
+}
+
+func BenchmarkSelectCandidates(b *testing.B) {
+	entities := make([]search.Entity[search.Value], 0, 4400)
+	for i := 0; i < 4000; i++ {
+		entities = append(entities, mustNorm(search.Entity[search.Value]{
+			Name:     "Acme Company Limited",
+			Type:     search.EntityBusiness,
+			Source:   search.SourceUSOFAC,
+			SourceID: fmt.Sprintf("c%d", i),
+			Business: &search.Business{Name: "Acme Company Limited"},
+		}))
+	}
+	for i := 0; i < 200; i++ {
+		entities = append(entities, mustNorm(search.Entity[search.Value]{
+			Name:     "Ocean Shipping Limited",
+			Type:     search.EntityBusiness,
+			Source:   search.SourceUSOFAC,
+			SourceID: fmt.Sprintf("s%d", i),
+			Business: &search.Business{Name: "Ocean Shipping Limited"},
+		}))
+	}
+	for i := 0; i < 200; i++ {
+		entities = append(entities, mustNorm(search.Entity[search.Value]{
+			Name:     "Ocean Freight Group",
+			Type:     search.EntityBusiness,
+			Source:   search.SourceUSOFAC,
+			SourceID: fmt.Sprintf("f%d", i),
+			Business: &search.Business{Name: "Ocean Freight Group"},
+		}))
+	}
+
+	idx := NewLists(nil)
+	idx.Update(download.Stats{
+		Entities: entities,
+		Lists:    map[string]int{string(search.SourceUSOFAC): len(entities)},
+	})
+	query := mustNorm(search.Entity[search.Value]{
+		Name:   "Ocean Shipping Limited",
+		Type:   search.EntityBusiness,
+		Source: search.SourceUSOFAC,
+	})
+	ctx := context.Background()
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		cands, err := idx.SelectCandidates(ctx, query)
+		if err != nil {
+			b.Fatal(err)
+		}
+		if cands.Len() == 0 {
+			b.Fatal("expected candidates")
+		}
+	}
 }

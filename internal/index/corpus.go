@@ -31,6 +31,14 @@ type corpus struct {
 	// blockKeys maps PII-safe composite blocking keys and their segment
 	// prefixes (see internal/linksim) to entity indices.
 	blockKeys map[string][]int
+
+	// Plaintext identifier indexes for prefix and QWERTY-near queries.
+	// Hashed linksim keys cannot match a typed prefix.
+	imo   idIndex
+	mmsi  idIndex
+	air   idIndex
+	email idIndex
+	phone idIndex
 }
 
 // buildCorpus constructs partitions and inverted indexes from the entity list.
@@ -120,7 +128,14 @@ func buildCorpus(entities []search.Entity[search.Value], tfidfIndex *tfidf.Index
 		}
 
 		c.indexBlockingKeys(*e, i)
+		c.indexPlainIdentifiers(*e, i)
 	}
+
+	c.imo.sort()
+	c.mmsi.sort()
+	c.air.sort()
+	c.email.sort()
+	c.phone.sort()
 
 	return c
 }
@@ -132,6 +147,53 @@ func (c *corpus) addToPartition(source, entityType string, idx int) {
 		c.bySourceType[source] = byType
 	}
 	byType[entityType] = append(byType[entityType], idx)
+}
+
+const (
+	// distinctiveMaxDF is the maximum fraction of a partition a token may cover
+	// and still be required in the name-token intersection. Common words above
+	// this are optional (Limited, ООО, GmbH, 有限公司 — whatever is frequent here).
+	distinctiveMaxDF = 0.20
+
+	// optionalDFRatio: when a query token is this many times more frequent than
+	// the next-rarest query token, it is optional. Extra legal-form words in any
+	// language are usually the most common token in the query.
+	optionalDFRatio = 2
+)
+
+// distinctiveQueryTokens picks which hitting query tokens to AND.
+// Language-agnostic: uses document frequency in this partition, not a suffix list.
+//
+//   - Skip empty postings (already done by the caller).
+//   - If two or more tokens hit, drop the most common when it is at least
+//     optionalDFRatio times as frequent as the next (e.g. "Limited" vs "Shipping").
+//   - Of the rest, keep only tokens at or below distinctiveMaxDF when any such
+//     token exists, so a corpus-wide common word is not required.
+func distinctiveQueryTokens(hitting []tokenPostings, partN float64) [][]int {
+	slices.SortFunc(hitting, func(a, b tokenPostings) int {
+		return len(a.hits) - len(b.hits)
+	})
+	if len(hitting) >= 2 {
+		most := hitting[len(hitting)-1]
+		next := hitting[len(hitting)-2]
+		if len(most.hits) >= optionalDFRatio*len(next.hits) {
+			hitting = hitting[:len(hitting)-1]
+		}
+	}
+	var distinctive [][]int
+	for _, h := range hitting {
+		if float64(len(h.hits))/partN <= distinctiveMaxDF {
+			distinctive = append(distinctive, h.hits)
+		}
+	}
+	if len(distinctive) > 0 {
+		return distinctive
+	}
+	out := make([][]int, len(hitting))
+	for i, h := range hitting {
+		out[i] = h.hits
+	}
+	return out
 }
 
 func cryptoKey(currency, address string) string {
@@ -180,20 +242,63 @@ type CandidateOpts struct {
 	MaxFraction float64
 }
 
+// Candidates is a read-only view of corpus entities to score.
+// Entities aliases the in-memory generation (no per-search copy of the
+// candidate set). The slice remains valid after SelectCandidates returns
+// because the caller holds a reference to that generation.
+type Candidates struct {
+	Entities []search.Entity[search.Value]
+	Indices  []int
+	TFIDF    *tfidf.Index
+}
+
+// Len returns the number of candidates to score.
+func (c Candidates) Len() int {
+	return len(c.Indices)
+}
+
+// At returns the i-th candidate. It copies the entity header.
+func (c Candidates) At(i int) search.Entity[search.Value] {
+	return c.Entities[c.Indices[i]]
+}
+
+func (c *corpus) result(idxs []int) Candidates {
+	if len(idxs) == 0 {
+		return Candidates{Entities: c.entities, TFIDF: c.tfidf}
+	}
+	return Candidates{Entities: c.entities, Indices: idxs, TFIDF: c.tfidf}
+}
+
+func candidatesFromEntities(entities []search.Entity[search.Value], tfidfIndex *tfidf.Index) Candidates {
+	if len(entities) == 0 {
+		return Candidates{}
+	}
+	idxs := make([]int, len(entities))
+	for i := range idxs {
+		idxs[i] = i
+	}
+	return Candidates{Entities: entities, Indices: idxs, TFIDF: tfidfIndex}
+}
+
 // selectCandidates returns entities to score for the query.
 //
-// Strategy (never reduces recall below a full partition scan):
+// Strategy (name typos with no token hits still scan the partition):
 //  1. Restrict to source/type partition.
-//  2. Exact crypto address and government-ID blocking-key hits short-circuit
-//     to those entities (merged with name-token hits when the query has a name).
-//  3. Name-token inverted index: union of postings for query name tokens,
-//     intersected with the partition. If empty or too large, use full partition.
+//  2. Crypto and government-ID hits are exact. IMO, MMSI, aircraft serial,
+//     email, and phone also match prefixes and single QWERTY-adjacent typos.
+//     Identifier hits are merged with name-token hits when the query has a name.
+//  3. Name-token inverted index: intersect distinctive tokens using document
+//     frequency in this partition (no language-specific suffix list). Extra
+//     common query tokens (Limited, ООО, GmbH, …) do not drop a DBA that omits
+//     them. If the intersection is empty, fall back to the union of those
+//     hitting tokens. If no token hits, or the set is too large, use the full
+//     partition.
 //  4. Address-only queries use hashed ADDR prefix blocks when they prune the
 //     partition; otherwise fall through.
 //  5. Identifier-only / empty-name queries use the full partition.
-func (c *corpus) selectCandidates(query search.Entity[search.Value], opts CandidateOpts) []search.Entity[search.Value] {
+func (c *corpus) selectCandidates(query search.Entity[search.Value], opts CandidateOpts) Candidates {
 	if c == nil || len(c.entities) == 0 {
-		return nil
+		return Candidates{}
 	}
 
 	if opts.MaxFraction <= 0 || opts.MaxFraction > 1 {
@@ -203,19 +308,15 @@ func (c *corpus) selectCandidates(query search.Entity[search.Value], opts Candid
 	partition, sourceOK := c.partitionIndices(query.Source, query.Type)
 	if !sourceOK {
 		// Unknown source key: do not scan unrelated lists
-		return nil
+		return Candidates{}
 	}
 	if len(partition) == 0 {
 		// Known source (or all-sources) but no entities of this type
-		return nil
+		return c.result(nil)
 	}
 
-	// Exact identifier fast path (crypto addresses, government-ID blocking keys)
-	var idHits []int
-	if len(query.CryptoAddresses) > 0 {
-		idHits = append(idHits, c.cryptoHits(query, partition)...)
-	}
-	idHits = append(idHits, c.governmentIDHits(query, partition)...)
+	// Exact identifier fast path (crypto, GOVID, IMO, MMSI, aircraft serial, contact)
+	idHits := c.identifierHits(query, partition)
 	if len(idHits) > 0 {
 		// Merge name candidates only when the query has name tokens.
 		// Otherwise nameCandidateIndices returns the full partition and would
@@ -225,38 +326,34 @@ func (c *corpus) selectCandidates(query search.Entity[search.Value], opts Candid
 		}
 		slices.Sort(idHits)
 		idHits = slices.Compact(idHits)
-		return c.materialize(idHits)
+		return c.result(idHits)
 	}
 
 	// Name-based candidates
 	if len(query.PreparedFields.NameFields) > 0 {
-		idxs := c.nameCandidateIndices(query, partition, opts)
-		return c.materialize(idxs)
+		return c.result(c.nameCandidateIndices(query, partition, opts))
 	}
 
 	// Address prefix blocking for address-only queries
 	if addr := c.addressHits(query, partition, opts); len(addr) > 0 {
-		return c.materialize(addr)
+		return c.result(addr)
 	}
 
 	// Exact prepared name shortcut (name set but fields empty after stopwords)
 	if name := query.PreparedFields.Name; name != "" {
 		if exact := c.exactNames[name]; len(exact) > 0 {
-			// exact is tiny; binary-search each index in the (large) sorted partition
-			var filtered []int
-			for _, idx := range exact {
-				if _, found := slices.BinarySearch(partition, idx); found {
-					filtered = append(filtered, idx)
-				}
-			}
-			if len(filtered) > 0 {
-				return c.materialize(filtered)
+			if filtered := intersectSorted(exact, partition); len(filtered) > 0 {
+				return c.result(filtered)
 			}
 		}
 	}
 
 	// Identifier / type-only / empty query: full partition
-	return c.materialize(partition)
+	return c.result(partition)
+}
+
+type tokenPostings struct {
+	hits []int
 }
 
 func (c *corpus) nameCandidateIndices(query search.Entity[search.Value], partition []int, opts CandidateOpts) []int {
@@ -265,24 +362,45 @@ func (c *corpus) nameCandidateIndices(query search.Entity[search.Value], partiti
 		return partition
 	}
 
-	// Union postings for query tokens, restricted to partition.
-	// Deduplicate with sort+compact instead of a per-query seen map.
-	var candidates []int
+	// Per-token postings restricted to the partition. Skip tokens with no hits
+	// so a misspelled word does not wipe a good match on the remaining tokens.
+	partN := float64(len(partition))
+	if partN < 1 {
+		partN = 1
+	}
+	hitting := make([]tokenPostings, 0, len(tokens))
 	for _, tok := range tokens {
-		for _, idx := range c.nameTokens[tok] {
-			if _, found := slices.BinarySearch(partition, idx); found {
-				candidates = append(candidates, idx)
-			}
+		hits := intersectSorted(c.nameTokens[tok], partition)
+		if len(hits) == 0 {
+			continue
 		}
+		hitting = append(hitting, tokenPostings{hits: hits})
 	}
 
 	// No token hits (e.g. pure typos) → full partition to preserve recall
-	if len(candidates) == 0 {
+	if len(hitting) == 0 {
 		return partition
 	}
 
-	slices.Sort(candidates)
-	candidates = slices.Compact(candidates)
+	lists := distinctiveQueryTokens(hitting, partN)
+
+	// Intersect from the rarest distinctive token.
+	slices.SortFunc(lists, func(a, b []int) int {
+		return len(a) - len(b)
+	})
+	candidates := lists[0]
+	for i := 1; i < len(lists); i++ {
+		candidates = intersectSorted(candidates, lists[i])
+		if len(candidates) == 0 {
+			break
+		}
+	}
+
+	// Disjoint distinctive tokens (John∩Smith empty while both hit) → union
+	// so recall matches the previous union-of-postings behavior.
+	if len(candidates) == 0 {
+		candidates = unionSorted(lists)
+	}
 
 	// If candidates cover too much of the partition, scoring them is no cheaper
 	maxCount := int(float64(len(partition)) * opts.MaxFraction)

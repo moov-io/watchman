@@ -26,13 +26,7 @@ func (c *corpus) indexBlockingKeys(e search.Entity[search.Value], idx int) {
 }
 
 func (c *corpus) lookupBlockKey(key string, partition []int) []int {
-	var hits []int
-	for _, idx := range c.blockKeys[key] {
-		if _, found := slices.BinarySearch(partition, idx); found {
-			hits = append(hits, idx)
-		}
-	}
-	return hits
+	return intersectSorted(c.blockKeys[key], partition)
 }
 
 func (c *corpus) cryptoHits(query search.Entity[search.Value], partition []int) []int {
@@ -42,28 +36,39 @@ func (c *corpus) cryptoHits(query search.Entity[search.Value], partition []int) 
 		if key == "" {
 			continue
 		}
-		for _, idx := range c.cryptoKeys[key] {
-			if _, found := slices.BinarySearch(partition, idx); found {
-				hits = append(hits, idx)
-			}
-		}
+		hits = append(hits, intersectSorted(c.cryptoKeys[key], partition)...)
 	}
 	return hits
 }
 
-func (c *corpus) governmentIDHits(query search.Entity[search.Value], partition []int) []int {
+// identifierHits returns crypto, government-ID, IMO, MMSI, aircraft serial,
+// and contact (email/phone) hits in the partition. Government IDs and crypto
+// are exact. IMO/MMSI/serial/email/phone also match prefixes and single
+// QWERTY-adjacent typos.
+func (c *corpus) identifierHits(query search.Entity[search.Value], partition []int) []int {
 	var hits []int
-	for _, key := range linksim.Keys(query) {
-		if !strings.HasPrefix(key, linksim.KindGovID+":") {
-			continue
-		}
-		hits = append(hits, c.lookupBlockKey(key, partition)...)
+	if len(query.CryptoAddresses) > 0 {
+		hits = append(hits, c.cryptoHits(query, partition)...)
 	}
+	keys := linksim.Keys(query)
+	hits = append(hits, c.hitsForKind(keys, partition, linksim.KindGovID)...)
+	hits = append(hits, intersectSorted(c.plainIdentifierHits(query), partition)...)
 	if len(hits) == 0 {
 		return nil
 	}
 	slices.Sort(hits)
 	return slices.Compact(hits)
+}
+
+func (c *corpus) hitsForKind(keys []string, partition []int, kind string) []int {
+	prefix := kind + ":"
+	var hits []int
+	for _, key := range keys {
+		if strings.HasPrefix(key, prefix) {
+			hits = append(hits, c.lookupBlockKey(key, partition)...)
+		}
+	}
+	return hits
 }
 
 func (c *corpus) addressHits(query search.Entity[search.Value], partition []int, opts CandidateOpts) []int {

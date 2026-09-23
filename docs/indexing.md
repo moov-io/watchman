@@ -23,7 +23,7 @@ When lists finish downloading and preparing, Watchman constructs an in-memory **
 6. **Blocking keys** — PII-safe composite hashes (`GOVID:`, `ADDR:`, hashed Soundex `NAME:` tokens, and related kinds) plus their coarse-to-fine prefixes. Government-ID queries use exact `GOVID:` lookup; address-only queries use the finest `ADDR:` prefix that still prunes the partition. The keys never store names, ID numbers, or addresses. See [Record linkage](/watchman/record-linkage/).
 7. **Optional TF-IDF weights** — when enabled, term weights for each entity’s name fields are stored on the entity so search does not recompute them per comparison.
 
-These structures are immutable for readers until the next successful refresh replaces the corpus atomically.
+These structures are immutable for readers until the next successful refresh replaces the corpus atomically. Search scores candidate **indices** against that generation and copies entity values only for the top-N results.
 
 ## Candidate selection at search time
 
@@ -34,19 +34,20 @@ Before Jaro-Winkler scoring, Watchman selects a **candidate set**:
 | `type` and/or `source` set | Start from that partition only |
 | Known source, empty type (no entities of that type) | **Empty result** — does not scan other types or sources |
 | Unknown / unregistered source | **Empty result** — does not fall back to the full corpus |
-| Name tokens present | Union of inverted-index hits for those tokens, restricted to the partition |
+| Name tokens present | Intersect inverted-index hits for **distinctive** tokens, using document frequency in this partition (not a language-specific suffix list). Tokens with no postings are skipped. A token that is much more common than the rest of the query (Limited, ООО, GmbH, 有限公司, …) is optional, so "Ocean Shipping Limited" still matches a DBA of "Ocean Shipping". If the intersection is empty, use the union of those hitting tokens. |
 | No token hits (e.g. heavy typos) | **Fall back to the full partition** (preserves recall within that source/type) |
 | Crypto address only | Exact crypto hits only (does not expand to the full partition) |
 | Crypto + name tokens | Union of crypto hits and name-token candidates |
 | Government ID (no name) | Exact hashed `GOVID:` hits; if none, fall back to the partition |
-| Government ID + name tokens | Union of `GOVID:` hits and name-token candidates |
+| IMO / MMSI / aircraft serial / email / phone (no name) | Prefix and single QWERTY-adjacent typo on the normalized identifier (min length 3–4). If none, fall back to the partition |
+| Those identifiers + name tokens | Union of identifier hits and name-token candidates |
 | Address only (no name tokens) | Finest hashed `ADDR:` prefix that still prunes the partition; otherwise the partition |
 | Exact prepared name (no tokens after stopwords) | Binary-search exact-name postings against the partition |
 | Name-less / identifier-oriented (no crypto, no GOVID/address hits) | Full partition for the filtered source/type |
 
 If name-token candidates would cover most of the partition (default threshold: half the partition size), Watchman scores the full partition instead—token pruning would not save work.
 
-Candidate index membership checks use binary search over sorted partition slices (no per-query partition maps). Duplicate postings are removed with sort + compact.
+Candidate index membership checks intersect sorted posting lists with the (sorted) partition. Duplicate postings are removed with sort + compact.
 
 Always pass **`type`** (and **`source`** when appropriate) on `/v2/search` for the best latency. See [Performance](/watchman/performance/) for concurrency, admission control, and tuning.
 

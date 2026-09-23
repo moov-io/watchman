@@ -223,14 +223,14 @@ type debugRespone struct {
 func (s *service) performSearch(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error) {
 	// Candidate selection first (cheap, RLock only) so we can skip admission control
 	// for tiny result sets and avoid queuing them behind full-partition scans.
-	searchEntities, err := s.indexedLists.SelectCandidates(ctx, query)
+	cands, err := s.indexedLists.SelectCandidates(ctx, query)
 	if err != nil {
 		s.logger.Error().Logf("selecting candidate entities failed: %v", err)
 		return nil, fmt.Errorf("selecting candidate entities: %w", err)
 	}
 
 	// Admission control: bound concurrent large scans so worker pools do not oversubscribe CPUs.
-	if len(searchEntities) > smallCandidateBypass {
+	if cands.Len() > smallCandidateBypass {
 		select {
 		case s.searchSem <- struct{}{}:
 			defer func() { <-s.searchSem }()
@@ -243,7 +243,7 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 		attribute.Int("opts.limit", opts.Limit),
 		attribute.Float64("opts.min_match", opts.MinMatch),
 		attribute.String("opts.algorithm", opts.Algorithm.Name()),
-		attribute.Int("index.candidate_count", len(searchEntities)),
+		attribute.Int("index.candidate_count", cands.Len()),
 	))
 	defer span.End()
 
@@ -254,8 +254,9 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	}
 	start := time.Now()
 
-	// Precompute query term weights once per search when TF-IDF is enabled
-	tfidfIndex := s.indexedLists.GetTFIDFIndex()
+	// Precompute query term weights once per search when TF-IDF is enabled.
+	// Use the TF-IDF index from the same corpus generation as the candidates.
+	tfidfIndex := cands.TFIDF
 	if tfidfIndex != nil && tfidfIndex.Enabled() && len(query.PreparedFields.NameFields) > 0 {
 		query.PreparedFields.NameWeights = tfidfIndex.GetWeights(query.PreparedFields.NameFields)
 	}
@@ -273,11 +274,11 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 		goroutineCount = 1
 	}
 	numWorkers := goroutineCount
-	if numWorkers <= 1 || len(searchEntities) < numWorkers {
+	if numWorkers <= 1 || cands.Len() < numWorkers {
 		numWorkers = 1
 	}
 
-	items := largest.NewItems[search.Entity[search.Value]](opts.Limit, opts.MinMatch)
+	items := largest.NewItems[int](opts.Limit, opts.MinMatch)
 	var debugs *largest.Items[debugRespone]
 	if opts.Debug {
 		debugs = largest.NewItems[debugRespone](opts.Limit, opts.MinMatch)
@@ -285,31 +286,31 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 
 	if numWorkers <= 1 {
 		// Common path after candidate pruning: score directly, no local heaps/merge.
-		scoreEntities(searchEntities, query, tfidfIndex, opts, hasDebugIDs, s.logger, items, debugs)
+		scoreEntities(cands.Entities, cands.Indices, query, tfidfIndex, opts, hasDebugIDs, s.logger, items, debugs)
 	} else {
 		// Per-worker local top-K (no shared mutex on the hot path), then merge
-		localItems := make([]*largest.Items[search.Entity[search.Value]], numWorkers)
+		localItems := make([]*largest.Items[int], numWorkers)
 		var localDebugs []*largest.Items[debugRespone]
 		if opts.Debug {
 			localDebugs = make([]*largest.Items[debugRespone], numWorkers)
 		}
 		for i := 0; i < numWorkers; i++ {
-			localItems[i] = largest.NewItems[search.Entity[search.Value]](opts.Limit, opts.MinMatch)
+			localItems[i] = largest.NewItems[int](opts.Limit, opts.MinMatch)
 			if opts.Debug {
 				localDebugs[i] = largest.NewItems[debugRespone](opts.Limit, opts.MinMatch)
 			}
 		}
 
-		chunkSize := (len(searchEntities) + numWorkers - 1) / numWorkers
+		chunkSize := (cands.Len() + numWorkers - 1) / numWorkers
 		var wg sync.WaitGroup
 		for worker := 0; worker < numWorkers; worker++ {
 			startIdx := worker * chunkSize
-			if startIdx >= len(searchEntities) {
+			if startIdx >= cands.Len() {
 				break
 			}
 			endIdx := startIdx + chunkSize
-			if endIdx > len(searchEntities) {
-				endIdx = len(searchEntities)
+			if endIdx > cands.Len() {
+				endIdx = cands.Len()
 			}
 			wg.Add(1)
 			go func(w, start, end int) {
@@ -318,7 +319,7 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 				if opts.Debug {
 					debugLocal = localDebugs[w]
 				}
-				scoreEntities(searchEntities[start:end], query, tfidfIndex, opts, hasDebugIDs, s.logger, localItems[w], debugLocal)
+				scoreEntities(cands.Entities, cands.Indices[start:end], query, tfidfIndex, opts, hasDebugIDs, s.logger, localItems[w], debugLocal)
 			}(worker, startIdx, endIdx)
 		}
 		wg.Wait()
@@ -335,7 +336,7 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	s.cm.RecordDuration(numWorkers, diff)
 
 	span.SetAttributes(
-		attribute.Int("index.searched_entities", len(searchEntities)),
+		attribute.Int("index.searched_entities", cands.Len()),
 		attribute.Int("search.goroutine_count", numWorkers),
 		attribute.Int64("search.duration", diff.Milliseconds()),
 	)
@@ -348,12 +349,13 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	var out []search.SearchedEntity[search.Value]
 
 	for idx, res := range results {
-		if res.Value.SourceID == "" || res.Weight <= 0.001 {
+		ent := cands.Entities[res.Value]
+		if ent.SourceID == "" || res.Weight <= 0.001 {
 			continue
 		}
 
 		searched := search.SearchedEntity[search.Value]{
-			Entity: res.Value,
+			Entity: ent,
 			Match:  res.Weight,
 		}
 
@@ -374,16 +376,17 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 
 func scoreEntities(
 	entities []search.Entity[search.Value],
+	idxs []int,
 	query search.Entity[search.Value],
 	tfidfIndex *tfidf.Index,
 	opts SearchOpts,
 	hasDebugIDs bool,
 	logger log.Logger,
-	items *largest.Items[search.Entity[search.Value]],
+	items *largest.Items[int],
 	debugs *largest.Items[debugRespone],
 ) {
-	for i := range entities {
-		indexEntity := entities[i]
+	for _, idx := range idxs {
+		indexEntity := entities[idx]
 		isDebugEntity := hasDebugIDs && slices.Contains(opts.DebugSourceIDs, indexEntity.SourceID)
 
 		if isDebugEntity {
@@ -434,8 +437,8 @@ func scoreEntities(
 			}).Logf("final score: %.5f", score)
 		}
 
-		items.AddLocal(largest.Item[search.Entity[search.Value]]{
-			Value:  indexEntity,
+		items.AddLocal(largest.Item[int]{
+			Value:  idx,
 			Weight: score,
 		})
 	}

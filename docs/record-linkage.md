@@ -75,8 +75,9 @@ On each list refresh the corpus indexes every key and every prefix. Candidate se
 | Query shape | Blocking behavior |
 |-------------|-------------------|
 | Government ID present | Exact `GOVID:` lookup (same idea as crypto addresses). No hits → fall back to the source/type partition so recall is preserved. |
+| IMO / MMSI / aircraft serial / email / phone | Prefix and QWERTY-adjacent typo on a plaintext identifier index (hashed `IMO:` / `CONTACT:` keys stay for external blockers). No hits → fall back to the partition. |
 | Address, no name tokens | Finest `ADDR:` prefix that still prunes the partition. Too broad or empty → fall back. |
-| Name tokens | Existing name-token index (unchanged). |
+| Name tokens | Distinctive-token intersection by document frequency in this partition (no language-specific suffix list). |
 
 Call `linksim.Keys(entity)` after `entity.Normalize()`.
 

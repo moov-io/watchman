@@ -59,29 +59,39 @@ func compareNameWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Enti
 	// Check primary name
 	bestMatch := compareNameTermsWeighted(queryTerms, index.PreparedFields.NameFields, queryWeights, index.PreparedFields.NameWeights, opts.TFIDF, cfg)
 
-	// Check alternate names
-	for idx := range index.PreparedFields.AltNameFields {
-		var indexWeights []float64
-		if idx < len(index.PreparedFields.AltNameWeights) {
-			indexWeights = index.PreparedFields.AltNameWeights[idx]
-		}
-		altMatch := compareNameTermsWeighted(queryTerms, index.PreparedFields.AltNameFields[idx], queryWeights, indexWeights, opts.TFIDF, cfg)
-		if altMatch.score > bestMatch.score {
-			bestMatch = altMatch
+	// Check alternate names unless the primary is already an exact-quality match.
+	if bestMatch.score < exactMatchThreshold {
+		for idx := range index.PreparedFields.AltNameFields {
+			var indexWeights []float64
+			if idx < len(index.PreparedFields.AltNameWeights) {
+				indexWeights = index.PreparedFields.AltNameWeights[idx]
+			}
+			altMatch := compareNameTermsWeighted(queryTerms, index.PreparedFields.AltNameFields[idx], queryWeights, indexWeights, opts.TFIDF, cfg)
+			if altMatch.score > bestMatch.score {
+				bestMatch = altMatch
+				if bestMatch.score >= exactMatchThreshold {
+					break
+				}
+			}
 		}
 	}
 
 	// Check historical names with penalty (precomputed at Normalize time)
-	for idx := range index.PreparedFields.HistoricalNameFields {
-		var indexWeights []float64
-		if idx < len(index.PreparedFields.HistoricalNameWeights) {
-			indexWeights = index.PreparedFields.HistoricalNameWeights[idx]
-		}
-		histMatch := compareNameTermsWeighted(queryTerms, index.PreparedFields.HistoricalNameFields[idx], queryWeights, indexWeights, opts.TFIDF, cfg)
-		histMatch.score *= 0.95 // Apply penalty for historical names
-		histMatch.isHistorical = true
-		if histMatch.score > bestMatch.score {
-			bestMatch = histMatch
+	if bestMatch.score < exactMatchThreshold {
+		for idx := range index.PreparedFields.HistoricalNameFields {
+			var indexWeights []float64
+			if idx < len(index.PreparedFields.HistoricalNameWeights) {
+				indexWeights = index.PreparedFields.HistoricalNameWeights[idx]
+			}
+			histMatch := compareNameTermsWeighted(queryTerms, index.PreparedFields.HistoricalNameFields[idx], queryWeights, indexWeights, opts.TFIDF, cfg)
+			histMatch.score *= 0.95 // Apply penalty for historical names
+			histMatch.isHistorical = true
+			if histMatch.score > bestMatch.score {
+				bestMatch = histMatch
+				if bestMatch.score >= exactMatchThreshold {
+					break
+				}
+			}
 		}
 	}
 
