@@ -43,6 +43,10 @@
   items:
     - name: Scoring Methodology
       link: /methodology/
+    - name: For compliance and risk
+      link: /methodology/for-compliance/
+    - name: OFAC portal comparison
+      link: /methodology/pages/ofac-name-comparison/
 
 - label: Production and monitoring
   items:

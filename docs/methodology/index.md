@@ -8,202 +8,122 @@ menubar: docs-menu
 
 # Similarity Methodology
 
-> For documentation on older releases of Watchman (v0.31.x series), please visit the [older docs website](https://github.com/moov-io/watchman/tree/v0.31.3/docs) in our GitHub repository.
+This page is the technical description of how Watchman scores a query against a watchlist entity. For a program-level briefing written for BSA/AML, sanctions, and model-risk staff, see [For compliance and risk](/watchman/methodology/for-compliance/). Empirical results on analyst-labeled OpenSanctions pairs are in [OpenSanctions Pairs](/watchman/opensanctions-pairs/).
 
-## Overview
+Name scoring defaults to token-pairwise [Jaro–Winkler](https://www.tandfonline.com/doi/abs/10.1080/01621459.1989.10478785). Optional `?algorithm=` scorers are compared in [Algorithm comparison](/watchman/algorithm-comparison/).
 
-Moov Watchman implements a sophisticated multi-dimensional matching system designed to balance accuracy, performance, and usability for compliance professionals. This document explains the technical foundations of Watchman's matching algorithms. Name scoring defaults to Jaro-Winkler; optional `?algorithm=` scorers are compared in [Algorithm comparison](/watchman/algorithm-comparison/).
+## Why multi-field scoring
 
-## Core Matching Architecture
+Watchman scores **identifiers, names, dates, addresses, contact, and supporting fields** together. Name-only queries produce large review queues. OFAC’s public search is a useful illustration: the query `Khamis Al` returns many 100% hits on the portal; Watchman’s name scorer spreads those same SDN names from about 0.26 to 0.87. See [Comparison with the OFAC portal](/watchman/methodology/pages/ofac-name-comparison/).
 
-Watchman uses a hierarchical matching approach that evaluates entity similarity across multiple dimensions:
+That design follows classical record linkage: Fellegi and Sunter treat matching as a decision on agreement patterns across fields, not a single string compare ([Fellegi & Sunter, 1969](https://www.tandfonline.com/doi/abs/10.1080/01621459.1969.10501049)). Jaro’s comparator, later extended by Winkler, is the usual way to turn typographical variation into a partial-agreement weight ([Jaro, 1989](https://www.tandfonline.com/doi/abs/10.1080/01621459.1989.10478785); [Winkler, 1990](https://eric.ed.gov/?id=ED325505)).
 
-| Priority | Component | Description |
-|----------|-----------|-------------|
-| Highest | Critical Identifiers | Government IDs, passport numbers, registration codes |
-| High | Name Matching | Sophisticated fuzzy matching of entity names |
-| Medium | Supporting Information | Addresses, dates of birth, and contextual metadata |
-| Low | Relationship Data | Connections to other entities, when available |
+## Score pieces and weights
 
-### Using Multiple Fields
+After `Normalize()` (case, punctuation, stopwords, phones, addresses), `Similarity` builds these pieces:
 
-Watchman is designed for searches to use multiple fields and downranks name only searches. In production usage there are many false positive matches when searching by a name or partial name.
+| Piece | Weight | Compared fields |
+|-------|-------:|-----------------|
+| Exact identifiers | 50 | Type + country + identifier (passport, tax ID, IMO/MMSI, serial, …) |
+| Crypto addresses | 50 | Currency + address |
+| Government IDs (loose) | 50 | Identifier with optional country (0.7–1.0) |
+| Contact | 50 | Email, phone, fax |
+| Name | 35 | Best pairwise token alignment, including alt and former names |
+| Titles | 35 | Person titles / positions |
+| Addresses | 25 | Structured address fields |
+| Dates | 15 | Birth, death, incorporation, dissolution |
+| Supporting | 15 | Sanctions programs, historical names |
 
-## Advanced Name Matching
+Empty query fields are not compared. The blended score is a coverage-aware weighted average (`FINAL_SCORE_*` multipliers). Name-only queries are down-ranked (`FINAL_SCORE_NAME_ONLY_MULTIPLIER`, default 0.95).
 
-### Jaro-Winkler Algorithm
+### Exact override
 
-Watchman uses an enhanced version of the Jaro-Winkler string similarity algorithm:
+A piece forces **1.0** only when it is **Exact** (identifier *and* country) **and** a unique identity key: passport, national ID, SSN-like IDs, IMO/MMSI, aircraft serial, or crypto address. Tax ID, business registration, commercial registry, email, and phone **never** override. They keep high weight in the blend so related companies that share an INN are not treated as the same legal person. Call-sign-only vessel matches do not override.
+
+### Identifier conflict
+
+If both records populate the same ID type (and country, when both set) with **different** values, the blended score is multiplied by `ID_CONFLICT_PENALTY_MULTIPLIER` (default 0.70). Missing IDs on one side are not a conflict. Matching unique keys still short-circuit to 1.0 before this penalty.
+
+### Type recast
+
+Person, business, and organization queries can be projected onto the index entity’s type instead of scoring 0. That covers FollowTheMoney `LegalEntity` records encoded as businesses. Vessel and aircraft mismatches stay 0. Typed `/v2/search?type=person` still only searches the person partition.
+
+## Name matching
+
+### Jaro–Winkler
 
 ```
 sim_jw(s1, s2) = sim_j(s1, s2) + p * l * (1 - sim_j(s1, s2))
 ```
 
-Where:
-- `sim_j` is the base Jaro similarity
-- `p` is the prefix scaling factor (default 0.1)
-- `l` is the length of the common prefix (up to 4 characters)
+- `sim_j` is Jaro similarity (common characters and transpositions)
+- `p` is the prefix scale (default 0.1)
+- `l` is the common prefix length, capped at 4
 
-Watchman's implementation includes:
+Watchman applies this **token-wise**, not on the raw full name:
 
-1. **Token-based Comparison**
-   - Names are tokenized and compared word-by-word
-   - Example: "John Michael Smith" → ["john", "michael", "smith"]
+1. Names are tokenized (`John Michael Smith` → `john`, `michael`, `smith`).
+2. Tokens are paired with positional preference and a first-letter phonetic filter (first letters are rarely mistranscribed).
+3. Length-difference penalties reduce scores when one token is much shorter.
+4. Alternate and historical names are tried; scoring can skip remaining aliases once a high-confidence name hit is found.
 
-2. **Positional Weighting**
-   - Tokens in similar positions receive higher match scores
-   - Handles name order variations more effectively
+### Optional algorithms
 
-3. **Length Normalization**
-   - Shorter token comparisons are weighted differently than longer ones
-   - Prevents bias towards long or short names
+`?algorithm=` (or MCP `algorithm`) selects the token-pair metric without a restart:
 
-4. **First-Letter Penalty**
-   - Different first letters receive an additional penalty
-   - Based on research showing first letters are rarely mistranscribed
+| Value | Role |
+|-------|------|
+| `jaro-winkler` (default) | Token pairwise Jaro–Winkler |
+| `soundex`, `double-metaphone`, `beider-morse` | Same alignment, phonetic boost when encodings overlap |
+| `soft-bidist`, `soft-bisim`, `editex`, `nsim`, `nsim-3` | Replace the token-pair metric; BestPairs / length / first-letter filters stay |
 
-### Phonetic Matching
+Process-wide `USE_SOUNDEX_MATCHING` still applies when `algorithm` is omitted.
 
-For handling spelling variations, especially in transliterated names, Watchman includes:
+### TF-IDF and embeddings
 
-1. **Modified Soundex**
-   - Groups phonetically similar characters for first-letter filtering and penalty logic
-   - Full `EncodeSoundex` implementation for whole-token phonetic codes (e.g. "Smith"→"S530")
-   - Optional score boosting via `USE_SOUNDEX_MATCHING` + `SOUNDEX_BOOST_WEIGHT` when codes match exactly (same first letter + phonetic digits)
-   - Per-request `?algorithm=soundex` (or MCP `algorithm`) overrides this for a single search; see [Algorithm comparison](/watchman/algorithm-comparison/) for the other optional scorers
+Optional **TF-IDF** down-weights common tokens (`Limited`, `ООО`, `GmbH`) using an index built at list refresh.
 
-2. **First Character Analysis**
-   - Names with different first-character phonetic classes are less likely to match
-   - Improves performance by eliminating obvious non-matches early
+Optional **embeddings** (Ollama, OpenAI, OpenRouter, Azure) add a neural name vector. Default `EMBEDDINGS_CROSS_SCRIPT_ONLY=true`: Latin queries stay on Jaro–Winkler; non-Latin queries also search the vector index. On OpenSanctions Pairs, this hybrid is the only config that moves transliteration recall in a material way. See [Cross-script matching](/watchman/cross-script-matching/) and [OpenSanctions Pairs](/watchman/opensanctions-pairs/).
 
-## Entity-Type Specific Matching
+## Entity-type matching
 
-Watchman applies specialized matching logic based on entity type:
+**Person.** Government IDs, given/family names and aliases, birth and death dates, titles, gender.
 
-### Person Matching
+**Business / organization.** Tax and registration numbers as evidence (not identity), names and aliases, incorporation/dissolution, addresses.
 
-- **ID Verification**: Exact matches on government IDs
-- **Name Components**: First, middle, last name specifics
-- **Date Verification**: Birth date comparison when available
-- **Title Comparison**: Professional roles and titles
+**Vessel / aircraft.** IMO, MMSI, call sign, serial, ICAO, flag. IMO/MMSI/serial remain unique-identity keys.
 
-### Business Matching
+## Thresholds as policy
 
-- **Registration Numbers**: Tax and business identifiers
-- **Name Normalization**: Special handling of business entity types
-- **Abbreviation Handling**: Common business abbreviations (Inc → Incorporated)
+The API returns a score in `[0, 1]`. `minMatch` is a **policy** cutoff, not a hidden model parameter.
 
-### Vessel/Aircraft Matching
+| Band | Typical `minMatch` | Use |
+|------|-------------------:|-----|
+| High confidence | 0.95+ | Auto-block / auto-alert after identifier confirmation |
+| Screening default | 0.80 | Production hit generation with high precision |
+| High recall | ~0.59 | When missing a designation is costlier than extra review |
+| Enhanced due diligence | 0.70–0.84 | Broader queues |
 
-- **Specialized Identifiers**: IMO numbers, call signs, registration codes
-- **Flag/Registry** Confirmation: Jurisdictional information
-- **Technical Details**: Tonnage, model, etc.
+On 472,477 analyst-judged OpenSanctions subject pairs, Jaro–Winkler at 0.80 had precision 0.986 and recall 0.689. Dropping the cutoff to 0.59 raised recall to 0.920 at precision 0.945. With cross-script embeddings (hybrid) at 0.80, precision was 0.946 and recall 0.815.
 
-## Scoring System
+## Candidate selection (before scoring)
 
-The final match score is calculated through:
+Scoring runs only on candidates. See [Indexing](/watchman/indexing/) and [Performance](/watchman/performance/).
 
-1. **Weighted Component Aggregation**
-   - Each component's score is multiplied by its importance weight
-   - Formula: `final_score = Σ(component_score * component_weight) / Σ(component_weight)`
+1. Partition by source and type.
+2. Exact crypto / government-ID hits; prefix and QWERTY-near indexes on IMO, MMSI, serial, email, phone.
+3. Name-token inverted index: intersect distinctive tokens; fall back to the union or the full partition.
+4. Address prefix blocks for address-only queries.
+5. Searches with ≤100 candidates skip the admission queue; larger searches take `SEARCH_MAX_IN_FLIGHT`.
 
-2. **Critical Field Multipliers**
-   - Required fields receive extra weight
-   - Exact matches on certain fields can override fuzzy matching
+Empty type under a known source with no entities of that type returns nothing. Empty `type=` selects the all-types partition for that source.
 
-3. **Coverage Analysis**
-   - Penalties applied when query doesn't cover enough entity fields
-   - Prevents high scores from partial data
+## What changed after OpenSanctions Pairs
 
-4. **Perfect Match Boosting**
-   - High-quality matches that meet specific thresholds receive a boost
-   - Configurable via `EXACT_MATCH_FAVORITISM` environment variable
+Evaluating the production scorer on 755,540 labeled pairs led to three scoring-policy changes:
 
-5. **Final Score Adjustments**
-   - Applies multipliers based on query coverage and required fields
-   - Ensures accurate scoring even with partial information
+1. Tax IDs and contact no longer force 1.0.
+2. Conflicting same-type IDs apply a 0.70 multiplier by default.
+3. Person/business/organization type mismatches recast instead of scoring 0 (~+100 ns and +1 alloc vs same-type scoring on Apple M4 Max).
 
-## Threshold Configuration
-
-Watchman allows customizing match thresholds for different risk tolerances:
-
-| Threshold         | Default Value | Use Case                  |
-|-------------------|---------------|---------------------------|
-| High Confidence   | 0.95+         | Automatic blocking/alerts |
-| Medium Confidence | 0.85-0.94     | Manual review queue       |
-| Low Confidence    | 0.70-0.84     | Enhanced due diligence    |
-
-## Performance Optimizations
-
-Watchman includes several performance enhancements. See [Performance](/watchman/performance/) and [Indexing](/watchman/indexing/) for operational detail.
-
-1. **Corpus partitions and candidate indexes**
-   - Entities are partitioned by source and type at index time
-   - Name-token inverted indexes, exact-name maps, and crypto lookups select candidates before full similarity scoring
-   - Empty type/source partitions return no candidates (no cross-list leak)
-   - Empty name-token hits fall back to a full *partition* scan so recall is preserved within that filter
-
-2. **Phonetic filtering inside Jaro-Winkler**
-   - First-character phonetic classes skip unlikely token pairs before running full Jaro-Winkler
-   - Optional full Soundex boost when `USE_SOUNDEX_MATCHING` is enabled, or when a search sets `algorithm=soundex`
-
-3. **Precomputed prepared fields**
-   - Names, alt names, former names, addresses, and optional TF-IDF weights are prepared at index/query normalize time
-   - Bulk scoring avoids re-normalizing index entities on every comparison
-   - Critical exact ID/crypto/contact matches short-circuit to a perfect score without full fuzzy work
-
-4. **Parallel scoring with admission control**
-   - Candidate selection runs first; searches with ≤100 candidates skip the admission queue
-   - Larger searches acquire `SEARCH_MAX_IN_FLIGHT` so stacked worker pools do not oversubscribe CPUs
-   - Multi-worker searches use local top-K heaps and merge; single-worker paths score directly into the final heap
-
-5. **Address high-confidence short-circuit**
-   - Within a single address pair comparison, scoring can stop early once a high-confidence field match is found
-
-## Benefits for Compliance Teams
-
-Watchman's sophisticated matching provides several key advantages:
-
-1. **Reduced False Positives**
-   - Multi-dimensional scoring reduces irrelevant matches
-   - Context-aware matching prioritizes meaningful similarities
-
-2. **Improved Match Confidence**
-   - Detailed scoring provides better justification for match decisions
-   - More information for analysts making review decisions
-
-3. **Comprehensive Audit Trail**
-   - Score components show exactly why matches occurred
-   - Helps demonstrate compliance program effectiveness
-
-4. **Risk-Based Approach**
-   - Configurable thresholds align with organizational risk tolerance
-   - Different rules can be applied to different entity types or programs
-
-## Validation Methodology
-
-Watchman's matching algorithms are validated through:
-
-1. **Test Suite Verification**
-   - Comprehensive test cases covering edge cases
-   - Regression testing on algorithm changes
-
-2. **Known Entity Testing**
-   - Verification against known sanctions entities and aliases
-   - Spelling variation handling
-
-3. **False Positive Analysis**
-   - Regular review of common false positives
-   - Algorithm tuning to reduce unnecessary matches
-
-## Other Links
-
-- [FDIC Bank Secrecy Act / Anti-Money Laundering](https://www.fdic.gov/resources/bankers/bank-secrecy-act/)
-- [FFIEC BSA/AML Risk Assessment](https://bsaaml.ffiec.gov/manual/BSAAMLRiskAssessment/01)
-- [Frequently Asked Questions Regarding Customer Due Diligence Requirements for Financial Institutions](https://www.fincen.gov/sites/default/files/2018-04/FinCEN_Guidance_CDD_FAQ_FINAL_508_2.pdf)
-- [OFAC FAQ #249 - How is the Score calculated?](https://ofac.treasury.gov/faqs/249)
-- [Sound Practices for Model Risk Management: Supervisory Guidance on Model Risk Management](https://www.occ.gov/news-issuances/bulletins/2011/bulletin-2011-12.html)
-- [Application of Jaro-Winkler String Comparator in Enhancing Veterans Administrative Records](https://nces.ed.gov/FCSM/pdf/H_4HyoParkFCSM2018final.pdf)
-- [Efficient Approximate Entity Matching Using Jaro-Winkler Distance](https://jqin.gitee.io/files/wise2017-wang.pdf)
-
-For more information on validation, see the [Scoring Methodology](/watchman/methodology/) page.
+The research evaluator is `go run ./research/opensanctions-pairs`. Full tables: [RESULTS.md](https://github.com/moov-io/watchman/blob/master/research/opensanctions-pairs/RESULTS.md).

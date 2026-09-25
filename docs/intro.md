@@ -8,7 +8,9 @@ menubar: docs-menu
 
 # Introduction to Moov Watchman
 
-Discover how Watchman revolutionizes sanctions screening with cutting-edge technology, helping businesses maintain compliance effortlessly while minimizing risks.
+Watchman downloads sanctions lists and scores customers and counterparties against them with an inspectable, multi-field matcher.
+
+Program-level briefing: [For compliance and risk](/watchman/methodology/for-compliance/). Technical scorer: [Similarity methodology](/watchman/methodology/).
 
 ## Core Functionality
 

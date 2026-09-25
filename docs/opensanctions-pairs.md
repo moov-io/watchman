@@ -45,4 +45,4 @@ Vessels are essentially solved (IMO/MMSI, F1 0.993). Person/Person is the bulk o
 
 Work from this evaluation also tightened production scoring (separate PRs): unique identity keys (passport, IMO, crypto) still force 1.0; tax/registration IDs are evidence only; conflicting same-type IDs apply `ID_CONFLICT_PENALTY_MULTIPLIER`; person/business/organization type mismatches recast instead of scoring 0.
 
-See [Search](/watchman/search/), [Performance](/watchman/performance/), [Cross-script matching](/watchman/cross-script-matching/), and [Configuration](/watchman/config/).
+See [For compliance and risk](/watchman/methodology/for-compliance/), [Search](/watchman/search/), [Performance](/watchman/performance/), [Cross-script matching](/watchman/cross-script-matching/), and [Configuration](/watchman/config/).
