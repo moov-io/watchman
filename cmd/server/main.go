@@ -118,6 +118,9 @@ func main() {
 
 	// Setup search service and endpoints
 	indexedLists := index.NewLists(ingestRepository)
+	if err := indexedLists.RefreshIngest(ctx); err != nil {
+		logger.Warn().Logf("problem loading ingested lists into search index: %v", err)
+	}
 	searchService, err := search.NewService(logger, conf.Search, database, indexedLists)
 	if err != nil {
 		logger.Fatal().LogErrorf("problem setting up search service: %v", err)
@@ -168,7 +171,7 @@ func main() {
 	refreshController := download.NewRefreshController(logger, refreshManager)
 	refreshController.AppendRoutes(router)
 
-	ingestController := ingest.NewController(logger, ingestService, conf.Ingest)
+	ingestController := ingest.NewController(logger, ingestService, conf.Ingest, indexedLists)
 	ingestController.AppendRoutes(router)
 
 	// Add the Webui last

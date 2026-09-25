@@ -12,7 +12,11 @@ menubar: docs-menu
 
 Rows are stored in MySQL or PostgreSQL when you configure `Database`. Without a database, ingest lives only in that process and is gone on restart.
 
-Downloaded lists (OFAC, EU, UK, UN) sit in the in-memory corpus with a name-token index and ID blocks. An ingested-only `fileType` is loaded from the database at search time with **no inverted index**, and only the **first 1,000 rows** of that source are scored (`ListBySource` with a hardcoded limit). Files larger than that are silently incomplete on `/v2/search`. Keep internal lists small, or filter candidates yourself with [record-linkage keys](/watchman/record-linkage/) (`recordlink.Keys`) before calling Watchman.
+After each upload, Watchman loads **every** ingested row into the same in-memory search index used for OFAC and the other downloaded lists (name-token postings, ID blocks, source/type partitions). A per-source checksum in `ingest_sources` is compared on search so Watchman does not scan the entity table again when the snapshot is unchanged. Another process sharing the database picks up a new file on the next search when the checksum changes.
+
+`GET /v2/listinfo` includes ingested sources (row counts and checksums) next to the downloaded lists.
+
+If you persist ingested rows in your own database as well, store [record-linkage keys](/watchman/record-linkage/) (`recordlink.Keys`) rather than raw names or identifiers.
 
 Ingest is on the unauthenticated business API. Body cap is 32MiB by default (`413` if larger). See [Network access](/watchman/network/).
 
@@ -184,7 +188,7 @@ first_name,middle_name,last_name,suffix,tracking_number,alias_first_name,alias_m
 GET /v2/search?source=fincen-person&type=person&name=John+Doe&minMatch=0.80
 ```
 
-Only the first 1,000 rows of that ingested source are candidates. There is no name-token index on ingest-only lists.
+All ingested rows of that source are in the search index. Cross-script embeddings still apply to downloaded lists; ingested files score with the same Jaro–Winkler / identifier matcher.
 
 ### Exporting Ingested Data
 

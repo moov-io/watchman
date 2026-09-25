@@ -2,27 +2,34 @@ package ingest
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
+	"time"
 
-	"github.com/moov-io/base/database"
 	"github.com/moov-io/watchman/internal/db"
 	"github.com/moov-io/watchman/pkg/search"
 )
+
+const listPageSize = 1000
 
 type Repository interface {
 	Upsert(ctx context.Context, fileType string, entities []search.Entity[search.Value]) error
 	Get(ctx context.Context, sourceID string, source search.SourceList) (*search.Entity[search.Value], error)
 	ListBySource(ctx context.Context, lastSourceID string, source search.SourceList, limit int) ([]search.Entity[search.Value], error)
+	ListAll(ctx context.Context) ([]search.Entity[search.Value], error)
+	Checksums(ctx context.Context) ([]SourceChecksum, error)
 }
 
-func NewRepository(db db.DB) Repository {
-	if db == nil {
+func NewRepository(database db.DB) Repository {
+	if database == nil {
 		return &MockRepository{}
 	}
-	return &sqlRepository{db: db}
+	return &sqlRepository{db: database}
 }
 
 type sqlRepository struct {
@@ -30,71 +37,87 @@ type sqlRepository struct {
 }
 
 func (r *sqlRepository) Upsert(ctx context.Context, fileType string, entities []search.Entity[search.Value]) error {
-	// Delete the existing rows
-	err := r.deleteEntities(ctx, fileType)
+	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
+		return fmt.Errorf("begin ingest upsert: %w", err)
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	if err := r.deleteEntities(ctx, tx, fileType); err != nil {
 		return err
 	}
+	if _, err := tx.ExecContext(ctx, "DELETE FROM ingest_sources WHERE source = ?;", fileType); err != nil {
+		return fmt.Errorf("deleting %s ingest checksum: %w", fileType, err)
+	}
 
-	for idx := range entities {
-		err = r.upsertEntity(ctx, entities[idx])
+	if len(entities) == 0 {
+		if err := tx.Commit(); err != nil {
+			return fmt.Errorf("commit empty ingest upsert: %w", err)
+		}
+		return nil
+	}
+
+	indexed := append([]search.Entity[search.Value](nil), entities...)
+	for i := range indexed {
+		indexed[i].Source = search.SourceList(fileType)
+	}
+	sort.Slice(indexed, func(i, j int) bool {
+		return indexed[i].SourceID < indexed[j].SourceID
+	})
+
+	h := sha256.New()
+	for i := range indexed {
+		raw, err := json.Marshal(indexed[i])
 		if err != nil {
-			return fmt.Errorf("upserting (%s) %s/%s entity: %w", fileType, entities[idx].Source, entities[idx].SourceID, err)
+			return fmt.Errorf("json marshal: %w", err)
+		}
+		writeChecksum(h, indexed[i].SourceID, raw)
+		if err := r.insertEntity(ctx, tx, indexed[i], raw); err != nil {
+			return fmt.Errorf("upserting (%s) %s/%s entity: %w", fileType, indexed[i].Source, indexed[i].SourceID, err)
 		}
 	}
 
+	_, err = tx.ExecContext(ctx,
+		`INSERT INTO ingest_sources (source, entity_count, checksum, updated_at) VALUES (?, ?, ?, ?);`,
+		fileType,
+		len(indexed),
+		hex.EncodeToString(h.Sum(nil)),
+		time.Now().UTC(),
+	)
+	if err != nil {
+		return fmt.Errorf("inserting %s ingest checksum: %w", fileType, err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit ingest upsert: %w", err)
+	}
 	return nil
 }
 
-func (r *sqlRepository) deleteEntities(ctx context.Context, fileType string) error {
-	qry := "DELETE FROM ingested_entities WHERE source = ?;"
-
-	_, err := r.db.ExecContext(ctx, qry, fileType)
+func (r *sqlRepository) deleteEntities(ctx context.Context, tx db.Tx, fileType string) error {
+	_, err := tx.ExecContext(ctx, "DELETE FROM ingested_entities WHERE source = ?;", fileType)
 	if err != nil {
 		return fmt.Errorf("deleting %s entities: %w", fileType, err)
 	}
 	return nil
 }
 
-func (r *sqlRepository) upsertEntity(ctx context.Context, entity search.Entity[search.Value]) error {
-	qry := `INSERT INTO ingested_entities (type, source, source_id, entity) VALUES (?, ?, ?, ?);`
-
-	bs, err := json.Marshal(entity)
-	if err != nil {
-		return fmt.Errorf("json marshal: %w", err)
-	}
-
-	_, err = r.db.ExecContext(ctx, qry,
+func (r *sqlRepository) insertEntity(ctx context.Context, tx db.Tx, entity search.Entity[search.Value], raw []byte) error {
+	_, err := tx.ExecContext(ctx,
+		`INSERT INTO ingested_entities (type, source, source_id, entity) VALUES (?, ?, ?, ?);`,
 		string(entity.Type),
 		string(entity.Source),
 		string(entity.SourceID),
-		bs,
+		raw,
 	)
 	if err != nil {
-		// Update if we collide on INSERT
-		if database.UniqueViolation(err) {
-			qry := `UPDATE ingested_entities SET entity = ? WHERE source = ? AND source_id = ?;`
-
-			_, err := r.db.ExecContext(ctx, qry,
-				// SET
-				bs,
-				// WHERE
-				string(entity.Source),
-				string(entity.SourceID),
-			)
-			if err != nil {
-				return fmt.Errorf("updating ingested entity: %w", err)
-			}
-			return nil
-		}
 		return fmt.Errorf("inserting ingested entity: %w", err)
 	}
-
 	return nil
 }
 
 func (r *sqlRepository) Get(ctx context.Context, sourceID string, source search.SourceList) (*search.Entity[search.Value], error) {
-	qry := `SELECT entity from ingested_entities where source_id = ? AND source = ? LIMIT 1;`
+	qry := `SELECT entity FROM ingested_entities WHERE source_id = ? AND source = ? LIMIT 1;`
 
 	rows, err := r.queryScanEntities(ctx, qry, sourceID, string(source))
 	if err != nil {
@@ -107,13 +130,68 @@ func (r *sqlRepository) Get(ctx context.Context, sourceID string, source search.
 }
 
 func (r *sqlRepository) ListBySource(ctx context.Context, lastSourceID string, source search.SourceList, limit int) ([]search.Entity[search.Value], error) {
-	qry := `SELECT entity from ingested_entities where source_id > ? AND source = ? LIMIT ?;`
+	if limit <= 0 {
+		limit = listPageSize
+	}
+	qry := `SELECT entity FROM ingested_entities WHERE source = ? AND source_id > ? ORDER BY source_id ASC LIMIT ?;`
 
-	rows, err := r.queryScanEntities(ctx, qry, lastSourceID, string(source), limit)
+	rows, err := r.queryScanEntities(ctx, qry, string(source), lastSourceID, limit)
 	if err != nil {
 		return nil, fmt.Errorf("listing ingested entities by source: %w", err)
 	}
 	return rows, nil
+}
+
+func (r *sqlRepository) ListAll(ctx context.Context) ([]search.Entity[search.Value], error) {
+	var all []search.Entity[search.Value]
+	lastSource, lastID := "", ""
+	for {
+		batch, err := r.listAfter(ctx, lastSource, lastID, listPageSize)
+		if err != nil {
+			return nil, err
+		}
+		if len(batch) == 0 {
+			break
+		}
+		all = append(all, batch...)
+		last := batch[len(batch)-1]
+		lastSource, lastID = string(last.Source), last.SourceID
+		if len(batch) < listPageSize {
+			break
+		}
+	}
+	return all, nil
+}
+
+func (r *sqlRepository) listAfter(ctx context.Context, lastSource, lastSourceID string, limit int) ([]search.Entity[search.Value], error) {
+	qry := `SELECT entity FROM ingested_entities
+WHERE source > ? OR (source = ? AND source_id > ?)
+ORDER BY source ASC, source_id ASC
+LIMIT ?;`
+
+	rows, err := r.queryScanEntities(ctx, qry, lastSource, lastSource, lastSourceID, limit)
+	if err != nil {
+		return nil, fmt.Errorf("listing all ingested entities: %w", err)
+	}
+	return rows, nil
+}
+
+func (r *sqlRepository) Checksums(ctx context.Context) ([]SourceChecksum, error) {
+	rows, err := r.db.QueryContext(ctx, `SELECT source, entity_count, checksum FROM ingest_sources ORDER BY source ASC;`)
+	if err != nil {
+		return nil, fmt.Errorf("listing ingest checksums: %w", err)
+	}
+	defer func() { _ = rows.Close() }()
+
+	var out []SourceChecksum
+	for rows.Next() {
+		var row SourceChecksum
+		if err := rows.Scan(&row.Source, &row.EntityCount, &row.Checksum); err != nil {
+			return nil, fmt.Errorf("scanning ingest checksum: %w", err)
+		}
+		out = append(out, row)
+	}
+	return out, rows.Err()
 }
 
 func (r *sqlRepository) queryScanEntities(ctx context.Context, qry string, args ...interface{}) ([]search.Entity[search.Value], error) {

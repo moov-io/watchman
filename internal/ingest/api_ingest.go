@@ -20,11 +20,17 @@ type Controller interface {
 	AppendRoutes(router *mux.Router) *mux.Router
 }
 
-func NewController(logger log.Logger, service Service, conf Config) Controller {
+// IndexCache is the in-memory ingest search index. Optional; tests may pass nil.
+type IndexCache interface {
+	RefreshIngest(ctx context.Context) error
+}
+
+func NewController(logger log.Logger, service Service, conf Config, cache IndexCache) Controller {
 	return &controller{
 		logger:  logger,
 		service: service,
 		conf:    conf,
+		cache:   cache,
 	}
 }
 
@@ -32,6 +38,7 @@ type controller struct {
 	logger  log.Logger
 	service Service
 	conf    Config
+	cache   IndexCache
 }
 
 func (c *controller) AppendRoutes(router *mux.Router) *mux.Router {
@@ -103,6 +110,15 @@ func (c *controller) ingestFile(w http.ResponseWriter, r *http.Request) {
 		logger.Error().Log("problem updating entities")
 		api.ErrorResponse(w, err)
 		return
+	}
+
+	if c.cache != nil {
+		if err := c.cache.RefreshIngest(ctx); err != nil {
+			span.RecordError(err)
+			logger.Error().Logf("problem refreshing ingest search index: %v", err)
+			api.ErrorResponse(w, err)
+			return
+		}
 	}
 
 	// Marshal the response
