@@ -24,70 +24,23 @@ For an optional [deepparse](/watchman/config/#deepparse) sidecar used in tests a
 make setup-deepparse
 ```
 
-Search a person (always include `type`; prefer `minMatch=0.80`):
+Search is `GET /v2/search`. Send `type`. Adding fields raises the score (OFAC SDN 48603):
 
 ```
-curl -s "http://localhost:8084/v2/search?name=Nicolas+Maduro&type=person&limit=1&minMatch=0.80" | jq .
+# Name only
+curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&limit=1" \
+  | jq '{name: .entities[0].name, match: (.entities[0].match*1000|round/1000)}'
+# {"name":"Dmitry Yuryevich KHOROSHEV","match":0.767}
+
+# Name + date of birth
+curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&birthDate=1993-04-17&limit=1" \
+  | jq '{name: .entities[0].name, match: (.entities[0].match*1000|round/1000)}'
+# {"name":"Dmitry Yuryevich KHOROSHEV","match":0.867}
+
+# Name + passport → 1.0
+curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&gov_passport=RU:2018278055&limit=1" \
+  | jq '{name: .entities[0].name, match: .entities[0].match}'
+# {"name":"Dmitry Yuryevich KHOROSHEV","match":1}
 ```
-```json
-{
-  "entities": [
-    {
-      "name": "Nicolas MADURO MOROS",
-      "entityType": "person",
-      "sourceList": "us_ofac",
-      "sourceID": "22790",
-      "person": {
-        "name": "Nicolas MADURO MOROS",
-        "altNames": null,
-        "gender": "male",
-        "birthDate": "1962-11-23T00:00:00Z",
-        "deathDate": null,
-        "titles": [
-          "President of the Bolivarian Republic of Venezuela"
-        ],
-        "governmentIDs": [
-          {
-            "type": "cedula",
-            "country": "Venezuela",
-            "identifier": "5892464"
-          }
-        ]
-      },
-      "business": null,
-      "organization": null,
-      "aircraft": null,
-      "vessel": null,
-      "contact": {
-        "emailAddresses": null,
-        "phoneNumbers": null,
-        "faxNumbers": null,
-        "websites": null
-      },
-      "addresses": null,
-      "cryptoAddresses": null,
-      "affiliations": null,
-      "sanctionsInfo": null,
-      "historicalInfo": null,
-      "sourceData": {
-        "entityID": "22790",
-        "sdnName": "MADURO MOROS, Nicolas",
-        "sdnType": "individual",
-        "program": [
-          "VENEZUELA",
-          "IRAN-CON-ARMS-EO"
-        ],
-        "title": "President of the Bolivarian Republic of Venezuela",
-        "callSign": "",
-        "vesselType": "",
-        "tonnage": "",
-        "grossRegisteredTonnage": "",
-        "vesselFlag": "",
-        "vesselOwner": "",
-        "remarks": "DOB 23 Nov 1962; POB Caracas, Venezuela; citizen Venezuela; Gender Male; Cedula No. 5892464 (Venezuela); President of the Bolivarian Republic of Venezuela."
-      },
-      "match": 0.7784062500000001
-    }
-  ]
-}
-```
+
+`minMatch=0.80` is a typical production cutoff. The name-only query would return no rows at that cutoff; the passport query would. Each result is the list record with `match` on the same object. Full recipe: [Using Watchman](/watchman/using-watchman/).

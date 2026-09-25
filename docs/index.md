@@ -41,7 +41,8 @@ Use `INCLUDED_LISTS` or the [config file](/watchman/config/#included-lists) to c
 
 ```
 docker run -p 8084:8084 -e INCLUDED_LISTS=us_ofac moov/watchman
-curl -s "http://localhost:8084/v2/search?type=person&name=Nicolas+Maduro&minMatch=0.80&limit=1" | jq .
+curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&gov_passport=RU:2018278055&minMatch=0.80&limit=1" \
+  | jq '{name: .entities[0].name, match: .entities[0].match}'
 ```
 
 UI at `http://localhost:8084`. Production checklist: [Using Watchman](/watchman/using-watchman/). API: [Search](/watchman/search/). Knobs: [Configuration](/watchman/config/).

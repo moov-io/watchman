@@ -89,7 +89,7 @@ The paper reports sampled sets (about 1k–10k pairs) and includes auto-merge ro
 | nomenklatura RegressionV1 (paper sample) | 0.845 | 0.994 | High recall, large review queue |
 | GPT-4o 0-shot (paper sample) | 0.988 | 0.991 | Yes/no from the full JSON record |
 | Watchman Jaro-Winkler at 0.80 | 0.989 | 0.834 | Screening-shaped queue |
-| Watchman Jaro-Winkler at 0.59 | 0.960 | 0.960 | Higher recall, still inspectable scores |
+| Watchman Jaro-Winkler at 0.59 | 0.965 | 0.955 | Higher recall, still inspectable scores |
 
 GPT-4o is a ceiling on pairwise identity when the model sees every field. Watchman is the list-driven control you can threshold, log, and defend. Wolfsberg still applies: screening compares names, IDs, and dates; it does not decide beneficial ownership.
 
@@ -103,12 +103,13 @@ Full tables: [OpenSanctions Pairs evaluation](/watchman/opensanctions-pairs/) an
 - **Transliteration.** Whether embeddings are on, `CROSS_SCRIPT_ONLY`, and that hybrid recall on labeled cross-script pairs was 0.91 at 0.80.
 - **False-positive design.** Tax IDs do not auto-confirm identity; conflicting national IDs penalize the score.
 - **Explainability.** Stored `debug` pieces or equivalent logging of which fields drove the hit.
+- **Screening logs.** Watchman does not retain search queries. You must keep who was screened, when, against which list hashes (`GET /v2/listinfo`), at which `minMatch`, and what was returned. That record lives in your application, not in Watchman.
 - **Change control.** Scoring-policy changes are in git, tested, and described in [methodology](/watchman/methodology/).
 
 ## How to run it in the program
 
 1. Screen **onboarding, periodic refresh, and (where required) transactions** against OFAC plus the other lists your risk assessment names.
-2. Always send **`type=`** (`person`, `business`, `vessel`, …). Unknown type: call person and business (and vessel/aircraft when those IDs exist).
+2. Always send **`type=`** (`person`, `business`, `vessel`, …). It is optional in the API; omitting it searches every type, and a wrong type can miss the hit. Unknown type: call person and business (and vessel/aircraft when those IDs exist).
 3. Send **IDs and dates when CDD has them**. That is the difference between a 1.0 passport hit and a name-only 0.81.
 4. Set **`minMatch=0.80`** with cross-script embeddings for a production-shaped queue; lower it if the board has accepted more review.
 5. Route hits to investigation with the score pieces attached. True matches become blocks, rejects, and — where applicable — [FinCEN](https://www.fincen.gov/) reporting. False hits become tuning evidence.

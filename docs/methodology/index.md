@@ -118,7 +118,7 @@ Scoring runs only on candidates. See [Indexing](/watchman/indexing/) and [Perfor
 4. Address prefix blocks for address-only queries.
 5. Searches with ≤100 candidates skip the admission queue; larger searches take `SEARCH_MAX_IN_FLIGHT`.
 
-Empty type under a known source with no entities of that type returns nothing. Empty `type=` selects the all-types partition for that source.
+Empty type under a known source with no entities of that type returns nothing. Empty `type=` selects the all-types partition for that source (slower). `type` is not required; send it so GET person/business fields are read and the search stays in one partition. A wrong type can miss the hit.
 
 ## Measured results
 

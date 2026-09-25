@@ -3,9 +3,9 @@
 <p align="center">
   <a href="https://moov-io.github.io/watchman/">Project Documentation</a>
   ·
-  <a href="https://moov-io.github.io/watchman/api/#overview">API Endpoints</a>
+  <a href="https://moov-io.github.io/watchman/using-watchman/">Using Watchman</a>
   ·
-  <a href="https://moov.io/blog/education/watchman-api-guide/">API Guide</a>
+  <a href="https://moov-io.github.io/watchman/api/#overview">API Endpoints</a>
   ·
   <a href="https://slack.moov.io/">Community</a>
   ·
@@ -17,7 +17,7 @@
 [![GoDoc](https://pkg.go.dev/badge/github.com/moov-io/watchman?utm_source=godoc)](https://pkg.go.dev/github.com/moov-io/watchman/pkg/search#Client)
 [![Build Status](https://github.com/moov-io/watchman/workflows/Go/badge.svg)](https://github.com/moov-io/watchman/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/moov-io/watchman)](https://goreportcard.com/report/github.com/moov-io/watchman)
-[![Apache 2 License](https://img.shields.io/badge/license-Apache2-blue.svg)](https://raw.githubusercontent.com/moov-io/ach/master/LICENSE)
+[![Apache 2 License](https://img.shields.io/badge/license-Apache2-blue.svg)](https://raw.githubusercontent.com/moov-io/watchman/master/LICENSE)
 [![Slack Channel](https://slack.moov.io/badge.svg?bg=e01563&fgColor=fffff)](https://slack.moov.io/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/moov/watchman)](https://hub.docker.com/r/moov/watchman)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/moov-io/watchman)
@@ -32,7 +32,7 @@ Moov Watchman is an open-source **sanctions screening engine**. It downloads OFA
 
 How to run it: [Using Watchman](https://moov-io.github.io/watchman/using-watchman/). For BSA/AML and sanctions officers: [For compliance and risk](https://moov-io.github.io/watchman/methodology/for-compliance/).
 
-We measured the matcher on a public labeled set of 755,540 sanctions pairs ([details](https://moov-io.github.io/watchman/opensanctions-pairs/)). At `minMatch=0.80`, almost every returned hit was a real match (precision 0.99). Enabling embeddings for names in different writing systems raised the share of true matches found from 0.69 to 0.82, with precision 0.95.
+We measured the matcher on 472,477 labeled people, companies, and vessels from [OpenSanctions Pairs](https://moov-io.github.io/watchman/opensanctions-pairs/). At `minMatch=0.80`, almost every returned hit was a real match (precision 0.99). Enabling embeddings for names in different writing systems raised the share of true matches found from 0.69 to 0.82, with precision 0.95.
 
 ## Key Features
 
@@ -65,7 +65,9 @@ Moov Watchman is actively used in multiple production environments. Please star 
 
 ## Usage
 
-Always send `type` (and `source` when you only need one list). Candidate selection runs before admission control; queries with ≤100 candidates skip the queue. See [Using Watchman](https://moov-io.github.io/watchman/using-watchman/), [Performance](https://moov-io.github.io/watchman/performance/), and [Indexing](https://moov-io.github.io/watchman/indexing/).
+Send `type` (`person`, `business`, `vessel`, …) on every search. It is not a required query parameter: omitting it searches every type, which is slower. A wrong type searches only that partition, so the designated party can be missing from the page. On GET, fields such as `birthDate` and `gov_*` are only read when `type` is set; sending them without `type` is HTTP 400.
+
+See [Using Watchman](https://moov-io.github.io/watchman/using-watchman/), [Search](https://moov-io.github.io/watchman/search/), [Performance](https://moov-io.github.io/watchman/performance/), and [Indexing](https://moov-io.github.io/watchman/indexing/).
 
 ### Docker
 
@@ -78,77 +80,26 @@ docker run -p 8084:8084 -e INCLUDED_LISTS=us_ofac moov/watchman
 
 That example publishes only the business API (`:8084`). Do not expose Watchman on the public internet. See [Network access](#network-access).
 
-Run a search for an individual or business:
-```
-curl -s "http://localhost:8084/v2/search?name=Nicolas+Maduro&type=person&limit=1&minMatch=0.80" | jq .
-```
+Search is `GET /v2/search`. Adding fields raises the score. These queries use OFAC SDN 48603 (Dmitry Yuryevich KHOROSHEV). `jq` prints the top hit:
 
-<details>
+```
+# Name only — often under the 0.80 screening line
+curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&limit=1" \
+  | jq '{name: .entities[0].name, match: (.entities[0].match*1000|round/1000)}'
+# {"name":"Dmitry Yuryevich KHOROSHEV","match":0.767}
 
-```json
-{
-  "entities": [
-    {
-      "name": "Nicolas MADURO MOROS",
-      "entityType": "person",
-      "sourceList": "us_ofac",
-      "sourceID": "22790",
-      "person": {
-        "name": "Nicolas MADURO MOROS",
-        "altNames": null,
-        "gender": "male",
-        "birthDate": "1962-11-23T00:00:00Z",
-        "deathDate": null,
-        "titles": [
-          "President of the Bolivarian Republic of Venezuela"
-        ],
-        "governmentIDs": [
-          {
-            "type": "cedula",
-            "country": "Venezuela",
-            "identifier": "5892464"
-          }
-        ]
-      },
-      "business": null,
-      "organization": null,
-      "aircraft": null,
-      "vessel": null,
-      "contact": {
-        "emailAddresses": null,
-        "phoneNumbers": null,
-        "faxNumbers": null,
-        "websites": null
-      },
-      "addresses": null,
-      "cryptoAddresses": null,
-      "affiliations": null,
-      "sanctionsInfo": null,
-      "historicalInfo": null,
-      "sourceData": {
-        "entityID": "22790",
-        "sdnName": "MADURO MOROS, Nicolas",
-        "sdnType": "individual",
-        "program": [
-          "VENEZUELA",
-          "IRAN-CON-ARMS-EO"
-        ],
-        "title": "President of the Bolivarian Republic of Venezuela",
-        "callSign": "",
-        "vesselType": "",
-        "tonnage": "",
-        "grossRegisteredTonnage": "",
-        "vesselFlag": "",
-        "vesselOwner": "",
-        "remarks": "DOB 23 Nov 1962; POB Caracas, Venezuela; citizen Venezuela; Gender Male; Cedula No. 5892464 (Venezuela); President of the Bolivarian Republic of Venezuela."
-      },
-      "match": 0.7784062500000001
-    }
-  ]
-}
+# Name + date of birth
+curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&birthDate=1993-04-17&limit=1" \
+  | jq '{name: .entities[0].name, match: (.entities[0].match*1000|round/1000)}'
+# {"name":"Dmitry Yuryevich KHOROSHEV","match":0.867}
+
+# Name + passport (unique identity key → 1.0)
+curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&gov_passport=RU:2018278055&limit=1" \
+  | jq '{name: .entities[0].name, match: .entities[0].match}'
+# {"name":"Dmitry Yuryevich KHOROSHEV","match":1}
 ```
 
-</details>
+`minMatch=0.80` is a typical production cutoff. The name-only query above would return no rows at that cutoff; the passport query would. Each entity in `entities` is the list record with a `match` field (0 to 1) on the same object.
 
 ### Network access
 
@@ -162,7 +113,7 @@ See [Network access](https://moov-io.github.io/watchman/network/), [issue #875](
 
 ### Data persistence
 
-By design, Watchman **does not persist** (save) any data about the search queries or lists pulled from external sources. Watchman can store ingested files (the individual records) in
+By design, Watchman **does not persist** search queries. Your application must retain screening logs (who was screened, when, against which list hashes, at which cutoff). Watchman can store ingested files (the individual records) in
 a MySQL or PostgreSQL database for concurrent access. External lists that are downloaded on startup (and refreshed periodically) are only kept in memory. No encryption of data in-memory
 is performed.
 
@@ -228,7 +179,7 @@ As part of Moov's initiative to offer open source fintech infrastructure, we hav
 
 - [Moov Wire](https://github.com/moov-io/wire) implements an interface to write files for the Fedwire Funds Service, a real-time gross settlement funds transfer system operated by the United States Federal Reserve Banks.
 
-- [Moov ACH](https://github.com/moov-io/ach) provides ACH file generation and parsing, supporting all Standard Entry Codes for the primary method of money movement throughout the United States.
+- [Moov ACH](https://github.com/moov-io/ach) provides ACH file generation and parsing, supporting all Standard Entry Codes for the primary method of money movement throughout the United States.
 
 - [Moov Metro 2](https://github.com/moov-io/metro2) provides a way to easily read, create, and validate Metro 2 format, which is used for consumer credit history reporting by the United States credit bureaus.
 

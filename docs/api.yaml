@@ -1,9 +1,9 @@
 openapi: 3.0.2
 info:
   description: |
-    Moov Watchman offers download, parse, and search functions over numerous trade sanction lists from the United States, agencies, and nonprofits for complying with regional laws.
+    Moov Watchman is an open-source sanctions screening engine. It downloads OFAC, EU, UK, UN, and related lists and scores customers and counterparties on GET /v2/search.
 
-    > For documentation on older releases of Watchman (v0.31.x series), please visit the [older docs website](https://github.com/moov-io/watchman/tree/v0.31.3/docs) in our GitHub repository.
+    Usage: https://moov-io.github.io/watchman/using-watchman/
   contact:
     url: https://github.com/moov-io/watchman
   license:
@@ -110,7 +110,11 @@ paths:
             type: string
         - name: type
           in: query
-          description: Type of entity to search for
+          description: >
+            Entity type partition (person, business, organization, aircraft, vessel).
+            Optional. Omit to search every type (slower). A wrong type searches only
+            that partition and can miss the hit. GET fields such as birthDate and
+            gov_* are only read when type is set.
           required: false
           schema:
             type: string

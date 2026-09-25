@@ -164,6 +164,8 @@ See [Performance](/watchman/performance/) for how admission control, per-search 
 
 ### Geocoding
 
+Optional. Off by default. Fills `latitude` / `longitude` on **list** addresses at refresh. Similarity scoring does not use those coordinates; see [Geocoding](/watchman/geocoding/) for tradeoffs.
+
 ```yaml
   Geocoding:
     Enabled: false
@@ -442,5 +444,8 @@ This approach is complementary to the `INITIAL_DATA_DIRECTORY` feature (see [Cac
 
 ## Data persistence
 
-By design, Watchman **does not persist** (save) any data about the search queries or actions created. The only storage occurs in memory of the process and upon restart Watchman will have no
-files or data saved. Also, no in-memory encryption of the data is performed.
+Watchman **does not store search queries**. There is no screening log inside the process. Your application must retain who was screened, when, against which list hashes (`GET /v2/listinfo`), at which `minMatch`, and what was returned. Restarting Watchman does not replay past searches.
+
+Downloaded government lists live **in memory**. On restart Watchman loads them again from the origin, from `INITIAL_DATA_DIRECTORY`, or from [watchman-cache](/watchman/cache-data-files/). No in-memory encryption is performed.
+
+**Ingested files** can be stored in MySQL or PostgreSQL if you uncomment the `Database` block above. That is how ingest survives a restart and how multiple Watchman processes share the same uploaded rows. Without a database, ingest exists only in that process and is gone when it exits. See [File Dataset Ingestion](/watchman/ingest/).

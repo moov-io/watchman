@@ -16,7 +16,7 @@ Watchman downloads sanctions lists and scores customers and counterparties again
 
 **Lists.** OFAC SDN and Non-SDN, US CSL, FinCEN 311, EU, UK, UN, OpenSanctions Senzing files, CSV ingest. Refresh on an interval or `POST /v2/data/refresh`. `GET /v2/listinfo` reports counts, hashes, and timestamps.
 
-**Search.** `GET /v2/search` (and JSON POST) with `type`, name, aliases, government IDs (`gov_passport=US:…`), dates, addresses, crypto, contact. Ranked hits with a score in `[0, 1]`. Optional Senzing JSON. WASM UI at `/`. Go client. Experimental [MCP](/watchman/mcp/).
+**Search.** `GET /v2/search` with `type`, name, aliases, government IDs (`gov_passport=US:…`), dates, addresses, crypto, contact. Ranked hits with a score in `[0, 1]`. Optional Senzing JSON. WASM UI at `/`. Go client. Experimental [MCP](/watchman/mcp/). `type` is optional; send it so person/business fields are read and the search stays in one partition.
 
 **Matcher.** Names are compared token by token (Jaro–Winkler by default), then combined with IDs, dates, and addresses. A matching passport, IMO number, or crypto address can score 1.0. A matching tax number or email raises the score without forcing a match. Two IDs of the same type that disagree lower the score. Optional extras: TF-IDF (down-weight common words) and embeddings (better matches across writing systems).
 
