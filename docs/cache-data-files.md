@@ -8,8 +8,6 @@ menubar: docs-menu
 
 # Caching Data Files for Optimal Performance
 
-> For documentation on older releases of Watchman (v0.31.x series), please visit the [older docs website](https://github.com/moov-io/watchman/tree/v0.31.3/docs) in our GitHub repository.
-
 Leverage local data file caching to accelerate Watchman startups, reduce network dependency, and ensure reliable operation even with unstable remote sources. This feature is particularly valuable for large-scale deployments.
 
 By setting `INITIAL_DATA_DIRECTORY` to a local directory Watchman will look for the following files.

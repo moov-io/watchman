@@ -8,7 +8,7 @@ menubar: docs-menu
 
 ## Configuration
 
-v0.31 docs: [v0.31.3](https://github.com/moov-io/watchman/tree/v0.31.3/docs). Practical recipe: [Using Watchman](/watchman/using-watchman/).
+Practical recipe: [Using Watchman](/watchman/using-watchman/).
 
  1. [File](#file)
     1. [Environment Variables](#environment-variables)

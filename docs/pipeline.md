@@ -8,8 +8,6 @@ menubar: docs-menu
 
 # Intelligent Data Preparation Pipeline
 
-> For documentation on older releases of Watchman (v0.31.x series), please visit the [older docs website](https://github.com/moov-io/watchman/tree/v0.31.3/docs) in our GitHub repository.
-
 ## Overview
 
 Watchman's sophisticated data pipeline transforms raw sanctions data into optimized, searchable formats. By standardizing names and data variations,

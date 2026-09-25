@@ -10,7 +10,7 @@ menubar: docs-menu
 
 All screening goes through **`/v2/search`**. Send a structured entity (`type` + name and whatever CDD has: IDs, dates, address). Watchman returns ranked hits with a score in `[0, 1]`.
 
-Practical recipe: [Using Watchman](/watchman/using-watchman/). Older v0.31 `/search` docs: [v0.31.3](https://github.com/moov-io/watchman/tree/v0.31.3/docs).
+Practical recipe: [Using Watchman](/watchman/using-watchman/).
 
 ## Overview
 

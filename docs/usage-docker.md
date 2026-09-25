@@ -8,7 +8,7 @@ menubar: docs-menu
 
 # Quick Start with Docker
 
-Images: [`moov/watchman`](https://hub.docker.com/r/moov/watchman/) on Docker Hub, [`quay.io/moov/watchman`](https://quay.io/repository/moov/watchman?tab=tags) for OpenShift. `moov/watchman:v2-static` ships frozen 2019 files for fast local tests. Older **v0.31** API docs: [v0.31.3](https://github.com/moov-io/watchman/tree/v0.31.3/docs).
+Images: [`moov/watchman`](https://hub.docker.com/r/moov/watchman/) on Docker Hub, [`quay.io/moov/watchman`](https://quay.io/repository/moov/watchman?tab=tags) for OpenShift. `moov/watchman:v2-static` ships frozen 2019 files for fast local tests.
 
 Business API on **:8084**. Admin/metrics on **:9094**. Do not expose Watchman on the public internet. See [Network access](/watchman/network/).
 

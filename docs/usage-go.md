@@ -8,7 +8,7 @@ menubar: docs-menu
 
 # Go library
 
-Call a running Watchman over HTTP with `pkg/search`. Same query model as `/v2/search`. [Using Watchman](/watchman/using-watchman/) has the field and `minMatch` recipe. v0.31 docs: [v0.31.3](https://github.com/moov-io/watchman/tree/v0.31.3/docs).
+Call a running Watchman over HTTP with `pkg/search`. Same query model as `/v2/search`. [Using Watchman](/watchman/using-watchman/) has the field and `minMatch` recipe.
 
 [![GoDoc](https://pkg.go.dev/badge/github.com/moov-io/watchman?utm_source=godoc)](https://pkg.go.dev/github.com/moov-io/watchman/pkg/search#Client)
 
