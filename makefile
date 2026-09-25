@@ -63,8 +63,9 @@ else
     CONFIGURE_FLAGS :=
 endif
 
-# Detect if we need sudo
-SUDO := $(shell if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then echo "sudo"; else echo ""; fi)
+# Use sudo when it exists. `sudo -n` is false on GitHub Actions ubuntu, and
+# libpostal's `make` downloads data into prefix (default /usr/local/share).
+SUDO := $(shell command -v sudo >/dev/null 2>&1 && echo sudo)
 
 # Installation target
 install:
@@ -102,11 +103,10 @@ install-libpostal:
 	cd libpostal && \
 	./bootstrap.sh && \
 	./configure $(CONFIGURE_FLAGS) && \
-	make -j$(JOBS) && \
 	if [ "$(detected_OS)" = "Windows" ]; then \
-		make install; \
+		make -j$(JOBS) && make install; \
 	else \
-		$(SUDO) make install; \
+		$(SUDO) make -j$(JOBS) && $(SUDO) make install; \
 	fi
 
 .PHONY: install install-linux install-macos install-windows install-libpostal
