@@ -11,7 +11,7 @@ menubar: docs-menu
 Extend Watchman's capabilities by ingesting your own datasets. The `POST /v2/ingest/{fileType}` endpoint enables seamless upload and processing of CSV files containing entity data (e.g., businesses or persons).
 Watchman parses the file according to your configured schema and integrates the entities into its search index as a dedicated list, maintaining separation from standard watchlists.
 
-If you persist ingested rows in your own database, store [record-linkage keys](/watchman/record-linkage/) (`linksim.Keys`) rather than raw names or identifiers. Prefix-filter `ADDR:` and `GOVID:` columns to bucket similar entities before calling Watchman search.
+If you persist ingested rows in your own database, store [record-linkage keys](/watchman/record-linkage/) (`recordlink.Keys`) rather than raw names or identifiers. Prefix-filter `ADDR:` and `GOVID:` columns to bucket similar entities before calling Watchman search.
 
 Ingest is served on the unauthenticated business API. Only `fileType` values defined in config are accepted; an unknown type does not create a new list. See [Network access](/watchman/network/).
 

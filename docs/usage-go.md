@@ -8,7 +8,9 @@ menubar: docs-menu
 
 # Go library
 
-Call a running Watchman over HTTP with `pkg/search`. Same query model as `/v2/search`. [Using Watchman](/watchman/using-watchman/) has the field and `minMatch` recipe.
+Call a running Watchman over HTTP with [`pkg/search`](https://pkg.go.dev/github.com/moov-io/watchman/pkg/search). Same query model as `/v2/search`. [Using Watchman](/watchman/using-watchman/) has the field and `minMatch` recipe.
+
+Hashed blocking keys for your own database: [`pkg/recordlink`](https://pkg.go.dev/github.com/moov-io/watchman/pkg/recordlink) (`Keys`, `Prefixes`). See [Record linkage](/watchman/record-linkage/).
 
 [![GoDoc](https://pkg.go.dev/badge/github.com/moov-io/watchman?utm_source=godoc)](https://pkg.go.dev/github.com/moov-io/watchman/pkg/search#Client)
 
