@@ -12,7 +12,7 @@ Watchman optionally uses **[libpostal](https://github.com/openvenues/libpostal)*
 
 To enable libpostal support, activate the **[PostalPool](/watchman/config/#postalpool)** option in Watchman’s configuration.
 
-Without PostalPool, Pre-built Watchman releases use libpostal/PostalPool. Otherwise Watchman uses a built-in US-oriented parser (`usaddress`).
+**Docker / OpenShift images** compile with `-tags libpostal`, so `ParseAddress` uses libpostal in-process. **GitHub release binaries** (`make dist`) and a normal `go build` / `go run` do not set that tag, so they use `usaddress`. PostalPool (`Watchman.PostalPool.Enabled`) is a separate, optional pool of `postal-server` processes; it is off by default even in the Docker image.
 
 ### Deepparse (optional)
 
