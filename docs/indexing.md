@@ -8,8 +8,7 @@ menubar: docs-menu
 
 # Advanced Search Indexing for Superior Performance
 
-Watchman maintains searchable entities in memory (with database options for ingested files) to deliver ultra-fast search responses.
-The index automatically rebuilds with each data refresh, ensuring your compliance checks are always based on the latest information.
+Downloaded lists (OFAC, EU, UK, UN, …) live in an in-memory corpus that rebuilds on each successful refresh. [Ingested files](/watchman/ingest/) are different: they are read from MySQL/Postgres at search time, have no inverted index, and only the first 1,000 rows of that source are scored.
 
 ## What is built on refresh
 

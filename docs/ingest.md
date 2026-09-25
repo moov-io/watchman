@@ -8,12 +8,13 @@ menubar: docs-menu
 
 ## Custom File Dataset Ingestion
 
-Extend Watchman's capabilities by ingesting your own datasets. The `POST /v2/ingest/{fileType}` endpoint enables seamless upload and processing of CSV files containing entity data (e.g., businesses or persons).
-Watchman parses the file according to your configured schema and integrates the entities into its search index as a dedicated list, maintaining separation from standard watchlists.
+`POST /v2/ingest/{fileType}` uploads a CSV or Senzing file that Watchman parses with a schema you define in YAML. The file type must already exist in config; an unknown name does not create a new list.
 
-If you persist ingested rows in your own database, store [record-linkage keys](/watchman/record-linkage/) (`recordlink.Keys`) rather than raw names or identifiers. Prefix-filter `ADDR:` and `GOVID:` columns to bucket similar entities before calling Watchman search.
+Rows are stored in MySQL or PostgreSQL when you configure `Database`. Without a database, ingest lives only in that process and is gone on restart.
 
-Ingest is served on the unauthenticated business API. Only `fileType` values defined in config are accepted; an unknown type does not create a new list. See [Network access](/watchman/network/).
+Downloaded lists (OFAC, EU, UK, UN) sit in the in-memory corpus with a name-token index and ID blocks. An ingested-only `fileType` is loaded from the database at search time with **no inverted index**, and only the **first 1,000 rows** of that source are scored (`ListBySource` with a hardcoded limit). Files larger than that are silently incomplete on `/v2/search`. Keep internal lists small, or filter candidates yourself with [record-linkage keys](/watchman/record-linkage/) (`recordlink.Keys`) before calling Watchman.
+
+Ingest is on the unauthenticated business API. Body cap is 32MiB by default (`413` if larger). See [Network access](/watchman/network/).
 
 ### Path Parameters
 
@@ -21,11 +22,9 @@ Ingest is served on the unauthenticated business API. Only `fileType` values def
 
 ### Request Body
 
-Watchman will expect a CSV file containing entity data, with headers matching the schema defined in the Watchman configuration.
+The body is CSV (headers matching the YAML mapping) or Senzing JSON/JSONL when `format: senzing` is set.
 
-The HTTP body is capped at 32MiB by default. Oversized uploads return `413`. Override with `Ingest.MaxBodyBytes` (YAML) or `INGEST_MAX_BODY_BYTES` (bytes). See [Network access](/watchman/network/).
-
-Senzing files can be ingested as well by specifying their format in the yaml config.
+Oversized uploads return `413`. Override the 32MiB default with `Ingest.MaxBodyBytes` or `INGEST_MAX_BODY_BYTES`.
 
 ```yaml
   Ingest:
@@ -143,7 +142,7 @@ Watchman:
 
 ### Schema Explanation
 
-- **`format`**: Specifies the file format. Currently, only `csv` is supported.
+- **`format`**: `csv` or `senzing` (JSON / JSONL). CSV uses `mapping` below. Senzing files skip the column mapping.
 - **`mapping`**: Defines how CSV columns map to entity fields. The mapping supports:
   - **`name`**: The entity’s name, either from a single `column` or `merge` of multiple columns (e.g., combining `first_name` and `last_name`).
   - **`sourceID`**: A unique identifier for the entity, mapped to a single `column`.
@@ -179,11 +178,13 @@ first_name,middle_name,last_name,suffix,tracking_number,alias_first_name,alias_m
 
 ### Search the File
 
-You can then perform searches against the ingested file.
+`fileType` is the **source**, not `type`. `type` is still the entity kind (`person`, `business`, …):
 
 ```
-GET /v2/search?type=fincen-person&name=John+Doe&type=person
+GET /v2/search?source=fincen-person&type=person&name=John+Doe&minMatch=0.80
 ```
+
+Only the first 1,000 rows of that ingested source are candidates. There is no name-token index on ingest-only lists.
 
 ### Exporting Ingested Data
 
