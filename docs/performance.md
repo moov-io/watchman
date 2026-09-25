@@ -16,7 +16,7 @@ A database is **optional**:
 |------|----------------|
 | Downloaded government lists | Memory only. No MySQL or Postgres required to search them. |
 | Restart | Lists load again from the origin, `INITIAL_DATA_DIRECTORY`, or [watchman-cache](/watchman/cache-data-files/). |
-| Ingested files | MySQL or Postgres if they must survive restart. On this release, search of an ingest-only source reads the database (first 1,000 rows). See [Ingest](/watchman/ingest/). |
+| Ingested files | Every row is loaded into a second in-memory corpus with the same indexes. MySQL or Postgres holds the rows and a per-source checksum so they survive restart and so search does not scan the table on every query. See [Ingest](/watchman/ingest/). |
 | Geocoding L2 / embeddings SQL cache | Optional database when you enable those features. |
 
 Knobs: [Configuration](/watchman/config/). How the index is built: [Indexing](/watchman/indexing/).
@@ -30,7 +30,7 @@ On startup Watchman downloads and prepares lists (OFAC people are reordered, `MA
 Each `/v2/search` request roughly follows this path:
 
 1. **Parse and normalize** the query (names, addresses, IDs).
-2. **Select candidates** from the in-memory corpus using prebuilt indexes (see [Indexing](/watchman/indexing/)).
+2. **Select candidates** from the in-memory corpus (downloaded lists, plus ingested files when those are loaded) using prebuilt indexes (see [Indexing](/watchman/indexing/)).
 3. **Admission control** (only when the candidate set is large — see below).
 4. **Score candidates** with Jaro-Winkler similarity (and optional TF-IDF weighting), in parallel when needed.
 5. **Keep a top-N heap** of the best matches above `minMatch` (by corpus index, then copy only those entities), then return JSON.
