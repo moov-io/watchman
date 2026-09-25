@@ -179,11 +179,13 @@ func DetailedSimilarityWithOpts[Q any, I any](w io.Writer, query Entity[Q], inde
 		}
 		return out
 	}
-	if query.Type != emptyEntityType {
-		if query.Type != index.Type {
+	if query.Type != emptyEntityType && query.Type != index.Type {
+		recast, ok := recastToType(query, index.Type)
+		if !ok {
 			out.Pieces = emptyPieces
 			return out
 		}
+		query = recast
 	}
 
 	// Stack-allocated piece buffer avoids per-comparison heap alloc of the slice header backing array
@@ -244,10 +246,12 @@ func scoreSimilarityFast[Q any, I any](query Entity[Q], index Entity[I], opts Si
 		}
 		return 0
 	}
-	if query.Type != emptyEntityType {
-		if query.Type != index.Type {
+	if query.Type != emptyEntityType && query.Type != index.Type {
+		recast, ok := recastToType(query, index.Type)
+		if !ok {
 			return 0
 		}
+		query = recast
 	}
 
 	// Unique identity keys (passport, IMO, crypto) can still skip name work.

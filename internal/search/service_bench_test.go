@@ -105,6 +105,35 @@ func Benchmark_SearchBusinessTokens(b *testing.B) {
 	}
 }
 
+func Benchmark_SearchUnknownTypeFanout(b *testing.B) {
+	svc := testService(b)
+	ctx := context.Background()
+	opts := SearchOpts{Limit: 10, MinMatch: 0.5}
+
+	named := search.Entity[search.Value]{
+		Name: "Khoroshev",
+		Type: search.EntityPerson,
+	}.Normalize()
+	unknown := named
+	unknown.Type = ""
+
+	b.ReportAllocs()
+	b.Run("type=person", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			results, err := svc.Search(ctx, named, opts)
+			require.NoError(b, err)
+			require.NotEmpty(b, results)
+		}
+	})
+	b.Run("type=empty-all-partitions", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			results, err := svc.Search(ctx, unknown, opts)
+			require.NoError(b, err)
+			_ = results
+		}
+	})
+}
+
 func Benchmark_SearchParallel(b *testing.B) {
 	svc := testService(b)
 	ctx := context.Background()
