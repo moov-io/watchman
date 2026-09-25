@@ -1,0 +1,144 @@
+[
+  {
+    "left": {
+      "id": "ofac-40604",
+      "caption": "Aliasghar Norouzi",
+      "schema": "Person",
+      "datasets": ["us_ofac_sdn"],
+      "properties": {
+        "name": ["Aliasghar Norouzi", "علی اصغر نوروزی"],
+        "alias": ["Ali Asghar Norowzi"],
+        "birthDate": ["1962-11-11"],
+        "nationality": ["ir"],
+        "passportNumber": ["Y53914915"],
+        "idNumber": ["4591967573"],
+        "gender": ["male"]
+      }
+    },
+    "right": {
+      "id": "gb-hmt-15851",
+      "caption": "Ali Asghar Nourouzi",
+      "schema": "Person",
+      "datasets": ["gb_hmt_sanctions"],
+      "properties": {
+        "name": ["Ali Asghar Nourouzi"],
+        "alias": ["علی اصغر نوروزی", "Ali Asghar Norouzi"],
+        "birthDate": ["1962-11-11"],
+        "nationality": ["ir"],
+        "passportNumber": ["Y53914915"],
+        "gender": ["male"]
+      }
+    },
+    "judgement": "positive"
+  },
+  {
+    "left": {
+      "id": "pk-cnic-1",
+      "caption": "Khalid Mehmood",
+      "schema": "Person",
+      "datasets": ["pk_proscribed"],
+      "properties": {
+        "name": ["Khalid Mehmood"],
+        "fatherName": ["Muhammad Khan"],
+        "idNumber": ["35201114139885"],
+        "address": ["LAHORE, Punjab"],
+        "country": ["pk"]
+      }
+    },
+    "right": {
+      "id": "pk-cnic-2",
+      "caption": "Khalid Mehmood",
+      "schema": "Person",
+      "datasets": ["pk_proscribed"],
+      "properties": {
+        "name": ["Khalid Mehmood"],
+        "fatherName": ["Haji Muhammad"],
+        "idNumber": ["3710502620181"],
+        "address": ["ATTOCK, Punjab"],
+        "country": ["pk"]
+      }
+    },
+    "judgement": "negative"
+  },
+  {
+    "left": {
+      "id": "ru-inn-7811550255",
+      "caption": "Vasha Toplivnaya Kompaniya",
+      "schema": "Company",
+      "datasets": ["ext_ru_egrul"],
+      "properties": {
+        "name": ["ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ \"ВАША ТОПЛИВНАЯ КОМПАНИЯ\""],
+        "innCode": ["7811550255"],
+        "ogrnCode": ["1137847171890"],
+        "jurisdiction": ["ru"]
+      }
+    },
+    "right": {
+      "id": "ua-nsdc-18984",
+      "caption": "Vasha palyvna kompaniia",
+      "schema": "Organization",
+      "datasets": ["ua_nsdc_sanctions"],
+      "properties": {
+        "name": ["Vasha Toplivnaya Kompaniya LLC", "Товариство з обмеженою відповідальністю \"Ваша паливна компанія\""],
+        "innCode": ["7811550255"],
+        "ogrnCode": ["1137847171890"],
+        "jurisdiction": ["ru"]
+      }
+    },
+    "judgement": "positive"
+  },
+  {
+    "left": {
+      "id": "koval-1",
+      "caption": "Oleg Valeryevich KOVAL",
+      "schema": "Person",
+      "datasets": ["gb_hmt_sanctions"],
+      "properties": {
+        "name": ["Oleg Valeryevich KOVAL"],
+        "firstName": ["Oleg"],
+        "lastName": ["KOVAL"],
+        "birthDate": ["1974-09-29"],
+        "nationality": ["ua"]
+      }
+    },
+    "right": {
+      "id": "ivaninsky-1",
+      "caption": "Oleg Ivanovich Ivaninsky",
+      "schema": "Person",
+      "datasets": ["us_ofac_sdn"],
+      "properties": {
+        "name": ["Oleg Ivanovich Ivaninsky"],
+        "firstName": ["Oleg"],
+        "lastName": ["Ivaninsky"],
+        "birthDate": ["1966-06-05"],
+        "nationality": ["ru"]
+      }
+    },
+    "judgement": "negative"
+  },
+  {
+    "left": {
+      "id": "occ-1",
+      "caption": "Occupancy",
+      "schema": "Occupancy",
+      "datasets": ["wd_peps"],
+      "properties": {
+        "holder": ["Q185945"],
+        "post": ["Q23901465"],
+        "startDate": ["2013-06-25"]
+      }
+    },
+    "right": {
+      "id": "occ-2",
+      "caption": "Occupancy",
+      "schema": "Occupancy",
+      "datasets": ["wd_categories"],
+      "properties": {
+        "holder": ["Q185945"],
+        "post": ["Q23901465"],
+        "startDate": ["2013-06-25"]
+      }
+    },
+    "judgement": "positive"
+  }
+]
