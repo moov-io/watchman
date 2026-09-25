@@ -272,12 +272,13 @@ func histogram(results []pairResult, positive bool) []int {
 		if (r.Judgement == "positive") != positive {
 			continue
 		}
-		idx := int(math.Floor(r.Score * 20))
-		if idx >= 20 {
-			idx = 19
+		if r.Score >= 1 {
+			buckets[len(buckets)-1]++
+			continue
 		}
-		if idx < 0 {
-			idx = 0
+		idx := int(math.Floor(r.Score * float64(len(buckets))))
+		if idx < 0 || idx >= len(buckets) {
+			continue
 		}
 		buckets[idx]++
 	}
