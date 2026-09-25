@@ -112,7 +112,7 @@ The paper's 1,000-pair sample (`seed=42`, 769 pos / 231 neg) is also reported af
 
 ## 6. Results by slice
 
-Unless noted, scores are Jaro-Winkler, no TF-IDF, no embeddings, threshold 0.80, after type fan-out for `LegalEntity`.
+**Published table (2026-09-25).** Jaro-Winkler, no TF-IDF, no embeddings, threshold 0.80. Scorer includes type fan-out for `LegalEntity`, exact unique-ID override, tax IDs as evidence, ID-conflict penalty, and person/org recast. Source: `research/opensanctions-pairs/out/final-jw.txt`.
 
 ### 6.1 Population counts
 
@@ -123,55 +123,53 @@ Unless noted, scores are Jaro-Winkler, no TF-IDF, no embeddings, threshold 0.80,
 | Cross-script | 127,829 | 94,224 | 33,605 |
 | Paper 1k sample, subjects | 626 | — | — |
 
-### 6.2 Jaro-Winkler headlines (type fan-out on, before ID-conflict tightening)
+### 6.2 Jaro-Winkler headlines
 
 | Slice | Thr | Acc | Prec | Rec | F1 | TP | FP | FN |
 |-------|----:|----:|-----:|----:|---:|---:|---:|---:|
-| All pairs | 0.80 | 0.875 | 0.983 | 0.853 | **0.913** | 495,783 | 8,813 | 85,366 |
-| All pairs, best F1 | 0.59 | 0.942 | 0.962 | 0.962 | **0.962** | 558,930 | 21,977 | 22,219 |
-| Subjects | 0.80 | 0.811 | 0.972 | 0.725 | **0.831** | 219,860 | 6,229 | 83,329 |
-| Subjects, best F1 | 0.59 | 0.918 | 0.940 | 0.933 | **0.936** | 282,863 | 18,213 | 20,326 |
-| Cross-script | 0.80 | 0.650 | 0.987 | 0.532 | **0.691** | 50,101 | 656 | 44,123 |
-| 1k sample, subjects | 0.80 | 0.808 | 0.973 | 0.719 | 0.827 | — | — | — |
-| 1k sample, subjects, best F1 | 0.58 | 0.923 | 0.944 | 0.935 | 0.939 | — | — | — |
+| All pairs | 0.80 | 0.865 | 0.989 | 0.834 | **0.905** | 484,827 | 5,539 | 96,322 |
+| All pairs, best F1 | 0.59 | 0.939 | 0.965 | 0.955 | **0.960** | 554,978 | 20,025 | 26,171 |
+| Subjects | 0.80 | 0.794 | 0.986 | 0.689 | **0.811** | 208,904 | 2,955 | 94,285 |
+| Subjects, best F1 | 0.59 | 0.914 | 0.945 | 0.920 | **0.932** | 278,911 | 16,261 | 24,278 |
+| Cross-script | 0.80 | 0.626 | 0.987 | 0.499 | **0.663** | 47,017 | 622 | 47,207 |
 
-Score separation on subjects at 0.80: positive mean/median **0.857 / 0.929**, negative **0.352 / 0.301**. When Watchman is looking at the same Latin-script person with overlapping IDs, it is usually sure. Misses concentrate in transliteration, stubs, and remaining type issues.
+Score separation on subjects at 0.80: positive mean/median **0.836 / 0.900**, negative **0.309 / 0.241**. Misses concentrate in transliteration, stubs, and pairs without unique IDs.
 
-After ID-override tightening and the conflict penalty, Jaro-Winkler on the full dump at 0.80 moved to F1 **0.905**, precision **0.989**, FP **5,539** (from 8,813). True positives also dropped (tax IDs no longer force 1.0). That is the scorer used in §7.
+Compared with the pre-policy JW run: false positives on the full dump fell 8,813 → **5,539** (tax IDs no longer force 1.0). True positives also fell (company/vessel pairs that only agreed on a shared tax/registration number).
 
 ### 6.3 By schema (threshold 0.80)
 
 | Schema | n | Acc | F1 | Prec | Rec | Pos mean | Neg mean |
 |--------|--:|----:|---:|-----:|----:|---------:|---------:|
-| Person/Person | 284,808 | 0.765 | 0.806 | 0.983 | 0.683 | 0.860 | 0.362 |
-| Company/Company | 70,885 | 0.849 | 0.816 | 0.882 | 0.759 | 0.800 | 0.341 |
-| Organization/Organization | 35,429 | 0.921 | 0.909 | 0.980 | 0.848 | 0.868 | 0.378 |
-| Organization/Company | 25,849 | 0.930 | 0.919 | 0.991 | 0.857 | 0.891 | 0.308 |
-| Company/Organization | 21,953 | 0.907 | 0.906 | 0.995 | 0.831 | 0.885 | 0.291 |
-| Vessel/Vessel | 7,550 | 0.990 | **0.993** | 0.998 | 0.988 | 0.991 | 0.286 |
-| LegalEntity/Person | 3,969 | 0.814 | 0.891 | 0.986 | 0.813 | 0.835 | 0.545 |
-| Person/LegalEntity | 466 | 0.639 | 0.749 | 0.936 | 0.623 | 0.769 | 0.641 |
+| Person/Person | 284,808 | 0.760 | 0.801 | 0.984 | 0.675 | 0.855 | 0.333 |
+| Company/Company | 70,885 | 0.849 | 0.793 | 0.990 | 0.662 | 0.755 | 0.255 |
+| Organization/Organization | 35,429 | 0.902 | 0.884 | 0.980 | 0.805 | 0.840 | 0.349 |
+| Organization/Company | 25,849 | 0.824 | 0.767 | 0.992 | 0.626 | 0.737 | 0.273 |
+| Company/Organization | 21,953 | 0.836 | 0.820 | 0.996 | 0.697 | 0.818 | 0.258 |
+| Vessel/Vessel | 7,550 | 0.876 | 0.903 | 0.998 | 0.825 | 0.917 | 0.202 |
+| LegalEntity/Person | 3,969 | 0.813 | 0.891 | 0.986 | 0.813 | 0.833 | 0.545 |
+| Person/LegalEntity | 466 | 0.639 | 0.748 | 0.940 | 0.621 | 0.755 | 0.635 |
 | Occupancy/Occupancy | 213,448 | 1.000 | 1.000 | 1.000 | 1.000 | 0.855 | — |
 | Succession/Succession | 33,607 | 1.000 | 1.000 | 1.000 | 1.000 | 0.855 | — |
-| Position/Position | 26,330 | 0.899 | 0.946 | 0.913 | 0.980 | 0.888 | 0.811 |
+| Position/Position | 26,330 | 0.899 | 0.946 | 0.913 | 0.980 | 0.888 | 0.777 |
 | Person/Company | 44 | 1.000 | 0.000 | — | 0.000 | 0.000 | — |
 | Organization/Person | 123 | 1.000 | 0.000 | — | 0.000 | 0.000 | — |
 
-Vessels are essentially solved (IMO/MMSI). Organization matching is strong once Company/Organization are coerced to `business`. Person/Person is the bulk of subject false negatives (64,536 of ~83k at 0.80), driven by cross-script names. `LegalEntity` vs `Person` recovered from F1 0.000 to **0.891** after type fan-out. Known-type mismatches (`Person` vs `Company`) stay 0: a client would not search `type=person` against companies.
+Person/Person is the bulk of subject false negatives (94,285 at 0.80), driven by transliteration. Company/Company **precision 0.990** (shared tax IDs no longer force 1.0); recall 0.662. Vessel/Vessel precision 0.998, recall 0.825 (pairs without IMO/MMSI on both sides fall through to names). `LegalEntity` vs `Person` remains F1 **0.891** after type fan-out. Known-type mismatches (`Person` vs `Company`) stay 0.
 
 Occupancy/Succession score ~0.855 because both captions are the schema name. They are 100% positive in the paper and inflate all-pairs F1. **Subjects is the screening number.**
 
-### 6.4 Threshold sweep (all pairs, Jaro-Winkler, type fan-out)
+### 6.4 Threshold sweep (all pairs, Jaro-Winkler)
 
 | Thr | Acc | F1 | Prec | Rec | FP | FN |
 |----:|----:|---:|-----:|----:|--:|--:|
-| 0.50 | 0.932 | 0.956 | 0.942 | 0.971 | 34,467 | 17,082 |
-| 0.55 | 0.938 | 0.960 | 0.954 | 0.966 | 27,093 | 19,631 |
-| 0.60 | 0.931 | 0.955 | 0.964 | 0.946 | 20,681 | 31,269 |
-| 0.70 | 0.920 | 0.946 | 0.979 | 0.916 | 11,695 | 48,736 |
-| 0.80 | 0.875 | 0.913 | 0.983 | 0.853 | 8,813 | 85,366 |
-| 0.85 | 0.857 | 0.899 | 0.988 | 0.824 | 5,640 | 102,031 |
-| 0.90 | 0.489 | 0.508 | 0.979 | 0.343 | 4,354 | 381,641 |
+| 0.50 | 0.930 | 0.955 | 0.943 | 0.966 | 33,706 | 19,545 |
+| 0.55 | 0.935 | 0.958 | 0.956 | 0.960 | 25,955 | 23,206 |
+| 0.60 | 0.929 | 0.953 | 0.967 | 0.939 | 18,545 | 35,272 |
+| 0.70 | 0.914 | 0.942 | 0.984 | 0.903 | 8,552 | 56,568 |
+| 0.80 | 0.865 | 0.905 | 0.989 | 0.834 | 5,539 | 96,322 |
+| 0.85 | 0.842 | 0.886 | 0.995 | 0.799 | 2,335 | 116,741 |
+| 0.90 | 0.470 | 0.475 | 0.994 | 0.312 | 1,021 | 399,704 |
 
 The cliff at 0.90 is occupancy-style ~0.855 scores and name-only positives falling out of the predicted-positive set (`highConfidenceThreshold` 0.95 / `exactMatchThreshold` 0.99).
 
@@ -241,7 +239,7 @@ The paper evaluates a **binary matcher** on pairwise records, including auto-mer
 | Constant-positive | Full dump, always yes | 0.870 | 0.769 | 1.00 |
 | RegressionV1 | Paper sample, thr 0.15 | 0.913 | 0.845 | 0.994 |
 | Watchman JW | Full dump @ 0.80 | 0.905 | 0.989 | 0.834 |
-| Watchman JW | Full dump, best F1 @ 0.59 | 0.960 | 0.960 | 0.960 |
+| Watchman JW | Full dump, best F1 @ 0.59 | 0.960 | 0.965 | 0.955 |
 | Watchman JW | Subjects @ 0.80 | 0.811 | 0.986 | 0.689 |
 | Watchman JW | Subjects, best F1 @ 0.59 | 0.932 | 0.945 | 0.920 |
 | Watchman embed-hybrid | Subjects @ 0.80 | 0.876 | 0.946 | 0.815 |

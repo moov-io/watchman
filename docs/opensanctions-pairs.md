@@ -47,13 +47,13 @@ The paper’s Table 3 uses **sampled** pair sets (about 1k–10k) and **includes
 | nomenklatura RegressionV1 | Paper sample, threshold 0.15 | 0.845 | 0.994 |
 | GPT-4o (0-shot) | Paper sample, yes/no from the full JSON record | 0.988 | 0.991 |
 | Watchman Jaro-Winkler | Full dump, threshold 0.80 | 0.989 | 0.834 |
-| Watchman Jaro-Winkler | Full dump, threshold 0.59 | 0.960 | 0.960 |
+| Watchman Jaro-Winkler | Full dump, threshold 0.59 | 0.965 | 0.955 |
 
 RegressionV1 is built to catch almost every merge and accept a large review queue. Watchman at 0.80 does the reverse: almost every hit is real, and more labeled positives stay below the cutoff. At 0.59, Watchman catches 96% of labeled positives on the full dump, with 96% of those hits real — higher precision than RegressionV1.
 
 GPT-4o is a different task. The model reads the entire record pair and emits yes/no. Watchman returns a ranked score from names, IDs, dates, and addresses for screening.
 
-Vessels (IMO/MMSI) catch 98.8% of labeled positives. Person/Person is where most remaining misses sit under Jaro-Winkler (recall 0.68 at 0.80), mainly transliteration.
+Vessels: precision 0.998, recall 0.825 (IMO/MMSI score 1.0 when both sides have them). Person/Person is where most remaining misses sit under Jaro-Winkler (recall 0.68 at 0.80), mainly transliteration.
 
 ## How Watchman scores identifiers
 

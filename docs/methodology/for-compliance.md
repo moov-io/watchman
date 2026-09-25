@@ -67,7 +67,7 @@ Read that as a **review-capacity vs miss-rate** trade:
 
 Name-algorithm swaps (Soundex, Double Metaphone, Beider-Morse, nsim, Editex) barely change precision or recall. They do not fix Arabic/Cyrillic/Latin pairs. That matches the paper: rule matchers over-fire on common Latin names; learned methods fail on transliteration unless you add a representation that is not character-based.
 
-**Vessels** (7,550 pairs): recall 0.988 — IMO/MMSI as unique keys.
+**Vessels** (7,550 pairs): precision 0.998, recall 0.825. IMO/MMSI still score 1.0 when both sides have them; pairs without those IDs go through name scoring.
 
 **Person/Person** (284,808 pairs): precision 0.983, recall 0.683 at 0.80 without embeddings. That is where most remaining misses live, and where embeddings earn their keep.
 

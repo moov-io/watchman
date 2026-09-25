@@ -44,7 +44,7 @@ go run ./research/opensanctions-pairs \
   -report research/opensanctions-pairs/out/full-report.json
 ```
 
-Results from that full run (2026-09-24, type fan-out for `LegalEntity`): **F1 0.913 at threshold 0.80**, **best F1 0.962 at 0.59** on all 755,540 pairs; **F1 0.831 / 0.936** on the 472,477 analyst-judged subject pairs. Configuration sweep (TF-IDF, name algorithms, Ollama embeddings) is in [Configuration comparison](#configuration-comparison) (that matrix was scored before type fan-out; Jaro-Winkler all-pairs F1 there is 0.910).
+Published Jaro-Winkler table (2026-09-25, current scorer): all 755,540 pairs at 0.80 — precision 0.989, recall 0.834, F1 0.905; subjects (472,477) — precision 0.986, recall 0.689, F1 0.811. Best F1 0.960 at 0.59 on the full dump. Config matrix: [Configuration comparison](#configuration-comparison).
 
 Sweep every scorer Watchman can turn on:
 
@@ -121,7 +121,7 @@ go run ./research/opensanctions-pairs -input ... -embed hybrid
 
 ## Full corpus results
 
-Run 2026-09-24 against `pairs-20251209.json.gz` (755,540 pairs, 581,149 positive / 174,391 negative — the paper's published counts). Pairwise `Similarity` with default Jaro-Winkler, cap of 20 alt names, no TF-IDF corpus weights. Occupancy / Position / Succession and other relational schemas are included in "all pairs" and dropped in "subjects".
+Published 2026-09-25 against `pairs-20251209.json.gz` (755,540 pairs, 581,149 positive / 174,391 negative). Current scorer: Jaro-Winkler, type fan-out, unique-ID override, tax-as-evidence, ID-conflict penalty, person/org recast. Occupancy / Position / Succession are in "all pairs" and dropped in "subjects".
 
 The paper’s Table 3 uses 1k–10k stratified samples (auto-merge included). RegressionV1: F1 score 0.913, precision 0.845, recall 0.994. GPT-4o: F1 score 0.990. Watchman numbers in this file are the full 755,540-pair dump.
 
@@ -129,20 +129,20 @@ The paper’s Table 3 uses 1k–10k stratified samples (auto-merge included). Re
 
 | Slice | n | pos / neg | threshold | Acc | Prec | Rec | F1 | TP | FP | FN |
 |-------|--:|----------:|----------:|----:|-----:|----:|---:|---:|---:|---:|
-| All pairs | 755,540 | 581,149 / 174,391 | 0.80 | 0.875 | 0.983 | 0.853 | **0.913** | 495,783 | 8,813 | 85,366 |
-| All pairs, best F1 | 755,540 | 581,149 / 174,391 | **0.59** | 0.942 | 0.962 | 0.962 | **0.962** | 558,930 | 21,977 | 22,219 |
-| Analyst-judged subjects | 472,477 | 303,189 / 169,288 | 0.80 | 0.811 | 0.972 | 0.725 | **0.831** | 219,860 | 6,229 | 83,329 |
-| Subjects, best F1 | 472,477 | 303,189 / 169,288 | **0.59** | 0.918 | 0.940 | 0.933 | **0.936** | 282,863 | 18,213 | 20,326 |
-| Cross-script | 127,829 | 94,224 / 33,605 | 0.80 | 0.648 | 0.988 | 0.530 | **0.689** | 49,887 | 627 | 44,337 |
+| All pairs | 755,540 | 581,149 / 174,391 | 0.80 | 0.865 | 0.989 | 0.834 | **0.905** | 484,827 | 5,539 | 96,322 |
+| All pairs, best F1 | 755,540 | 581,149 / 174,391 | **0.59** | 0.939 | 0.965 | 0.955 | **0.960** | 554,978 | 20,025 | 26,171 |
+| Analyst-judged subjects | 472,477 | 303,189 / 169,288 | 0.80 | 0.794 | 0.986 | 0.689 | **0.811** | 208,904 | 2,955 | 94,285 |
+| Subjects, best F1 | 472,477 | 303,189 / 169,288 | **0.59** | 0.914 | 0.945 | 0.920 | **0.932** | 278,911 | 16,261 | 24,278 |
+| Cross-script | 127,829 | 94,224 / 33,605 | 0.80 | 0.626 | 0.987 | 0.499 | **0.663** | 47,017 | 622 | 47,207 |
 
 Score distribution at the 0.80 cutoff:
 
 | Label | mean | median |
 |-------|-----:|-------:|
-| All pairs, positive | 0.849 | 0.855 |
-| All pairs, negative | 0.360 | 0.305 |
-| Subjects, positive | 0.845 | 0.928 |
-| Subjects, negative | 0.351 | 0.301 |
+| All pairs, positive | 0.844 | 0.855 |
+| All pairs, negative | 0.320 | 0.249 |
+| Subjects, positive | 0.836 | 0.900 |
+| Subjects, negative | 0.309 | 0.241 |
 
 The all-pairs F1 is pulled up by Occupancy (213,448), Succession (33,607), Family, Ownership, and similar auto-merge rows, which the paper marks 100% positive. Both sides often share the schema name as caption (`Occupancy`), so Watchman scores them ~0.855 and predicts positive at 0.80. **Subjects-only is the number that describes Watchman screening of people, companies, and vessels.**
 
@@ -174,7 +174,7 @@ Largest subject slices:
 | Organization/Organization | 35,429 | 0.921 | 0.909 | 0.980 | 0.848 | 0.868 | 0.378 |
 | Organization/Company | 25,849 | 0.930 | 0.919 | 0.991 | 0.857 | 0.891 | 0.308 |
 | Company/Organization | 21,953 | 0.907 | 0.906 | 0.995 | 0.831 | 0.885 | 0.291 |
-| Vessel/Vessel | 7,550 | 0.990 | 0.993 | 0.998 | 0.988 | 0.991 | 0.286 |
+| Vessel/Vessel | 7,550 | 0.876 | 0.903 | 0.998 | 0.825 | 0.917 | 0.202 |
 | Occupancy/Occupancy | 213,448 | 1.000 | 1.000 | 1.000 | 1.000 | 0.855 | — |
 | Succession/Succession | 33,607 | 1.000 | 1.000 | 1.000 | 1.000 | 0.855 | — |
 | Position/Position | 26,330 | 0.898 | 0.946 | 0.913 | 0.980 | 0.888 | 0.811 |
