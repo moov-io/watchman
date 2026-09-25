@@ -352,6 +352,104 @@ func isUniqueIdentityType(t GovernmentIDType) bool {
 	}
 }
 
+func hasIdentifierConflict[Q any, I any](query Entity[Q], index Entity[I]) bool {
+	if conflictingGovernmentIDs(governmentIDsOf(query), governmentIDsOf(index)) {
+		return true
+	}
+	if query.Vessel != nil && index.Vessel != nil && conflictingVesselIDs(query.Vessel, index.Vessel) {
+		return true
+	}
+	if query.Aircraft != nil && index.Aircraft != nil && conflictingAircraftIDs(query.Aircraft, index.Aircraft) {
+		return true
+	}
+	return false
+}
+
+func governmentIDsOf[T any](e Entity[T]) []GovernmentID {
+	if e.Person != nil && len(e.Person.GovernmentIDs) > 0 {
+		return e.Person.GovernmentIDs
+	}
+	if e.Business != nil && len(e.Business.GovernmentIDs) > 0 {
+		return e.Business.GovernmentIDs
+	}
+	if e.Organization != nil && len(e.Organization.GovernmentIDs) > 0 {
+		return e.Organization.GovernmentIDs
+	}
+	return nil
+}
+
+func conflictingGovernmentIDs(queryIDs, indexIDs []GovernmentID) bool {
+	if len(queryIDs) == 0 || len(indexIDs) == 0 {
+		return false
+	}
+	indexByType := make(map[GovernmentIDType][]GovernmentID)
+	for _, id := range indexIDs {
+		if id.Type == "" || id.Identifier == "" {
+			continue
+		}
+		indexByType[id.Type] = append(indexByType[id.Type], id)
+	}
+	seen := make(map[GovernmentIDType]struct{})
+	for _, qID := range queryIDs {
+		if qID.Type == "" || qID.Identifier == "" {
+			continue
+		}
+		if _, dup := seen[qID.Type]; dup {
+			continue
+		}
+		iIDs := indexByType[qID.Type]
+		if len(iIDs) == 0 {
+			continue
+		}
+		seen[qID.Type] = struct{}{}
+		if !sameTypeIdentifierMatch(qID.Type, queryIDs, iIDs) {
+			return true
+		}
+	}
+	return false
+}
+
+func sameTypeIdentifierMatch(idType GovernmentIDType, queryIDs, indexIDs []GovernmentID) bool {
+	for _, qID := range queryIDs {
+		if qID.Type != idType {
+			continue
+		}
+		for _, iID := range indexIDs {
+			if !countryCompatible(qID.Country, iID.Country) {
+				continue
+			}
+			if strings.EqualFold(normalizeIdentifier(qID.Identifier), normalizeIdentifier(iID.Identifier)) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func countryCompatible(a, b string) bool {
+	if a == "" || b == "" {
+		return true
+	}
+	return strings.EqualFold(a, b)
+}
+
+func conflictingVesselIDs(query, index *Vessel) bool {
+	if query.IMONumber != "" && index.IMONumber != "" && !strings.EqualFold(query.IMONumber, index.IMONumber) {
+		return true
+	}
+	if query.MMSI != "" && index.MMSI != "" && !strings.EqualFold(query.MMSI, index.MMSI) {
+		return true
+	}
+	return false
+}
+
+func conflictingAircraftIDs(query, index *Aircraft) bool {
+	if query.SerialNumber != "" && index.SerialNumber != "" && !strings.EqualFold(query.SerialNumber, index.SerialNumber) {
+		return true
+	}
+	return false
+}
+
 // compareExactGovernmentIDs compares government IDs across entity types
 func compareExactGovernmentIDs[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) ScorePiece {
 	switch query.Type {

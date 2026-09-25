@@ -366,6 +366,7 @@ YAML configuration (example with OpenAI):
 | `FINAL_SCORE_LOW_COVERAGE_MULTIPLIER`        | Multiplier applied when a query compares against too little of the indexed entity's available data.              | 0.95    |
 | `FINAL_SCORE_MIN_REQUIRED_FIELDS_MULTIPLIER` | Multiplier applied when a search compares fewer than two required fields, such as a name-only query.              | 0.90    |
 | `FINAL_SCORE_NAME_ONLY_MULTIPLIER`           | Multiplier applied to name-only matches when no IDs or addresses are present in the query.                    | 0.95    |
+| `ID_CONFLICT_PENALTY_MULTIPLIER`             | Multiplier applied when both records populate the same ID type (and country, if both set) with different values. `1` disables. | 0.70    |
 | `DISABLE_PHONETIC_FILTERING`       | Force comparing search tokens against every index token (skip first-letter phonetic filter inside Jaro-Winkler). Loaded at process start. | `false` |
 | `USE_SOUNDEX_MATCHING`             | Enable full Soundex phonetic code matching to optionally boost Jaro-Winkler scores for phonetically similar names (e.g. "Smith" vs "Smythe"). Loaded at process start. Per-request `?algorithm=soundex` (or MCP `algorithm`) overrides this for a single search. | `false` |
 | `SOUNDEX_BOOST_WEIGHT`             | When Soundex matching is enabled, the boost factor applied to pairs whose Soundex codes match (score *= 1+weight, capped at 1.0). Example: `0.12` for a 12% boost. Per-request `algorithm=soundex` uses `0.12` when this is unset. | `0.0`   |

@@ -176,3 +176,55 @@ func TestShouldExactOverride(t *testing.T) {
 		{PieceType: "name", FieldsCompared: 1, Score: 0.10},
 	}))
 }
+
+func TestIdentifierConflict_NationalIDsDiffer(t *testing.T) {
+	sameName := Entity[Value]{
+		Name: "Khalid Mehmood",
+		Type: EntityPerson,
+		Person: &Person{
+			Name: "Khalid Mehmood",
+			GovernmentIDs: []GovernmentID{
+				{Type: GovernmentIDNational, Country: "Pakistan", Identifier: "35201114139885"},
+			},
+		},
+	}.Normalize()
+	other := Entity[Value]{
+		Name: "Khalid Mehmood",
+		Type: EntityPerson,
+		Person: &Person{
+			Name: "Khalid Mehmood",
+			GovernmentIDs: []GovernmentID{
+				{Type: GovernmentIDNational, Country: "Pakistan", Identifier: "3710502620181"},
+			},
+		},
+	}.Normalize()
+
+	require.True(t, hasIdentifierConflict(sameName, other))
+	withConflict := Similarity(sameName, other)
+
+	matching := other
+	matching.Person.GovernmentIDs[0].Identifier = "35201114139885"
+	matching = matching.Normalize()
+	withoutConflict := Similarity(sameName, matching)
+	require.Less(t, withConflict, withoutConflict)
+	require.Less(t, withConflict, 0.80, "same name + conflicting national IDs should not look like a strong match")
+}
+
+func TestIdentifierConflict_MissingIDIsNotConflict(t *testing.T) {
+	withID := Entity[Value]{
+		Name: "Jane Doe",
+		Type: EntityPerson,
+		Person: &Person{
+			Name: "Jane Doe",
+			GovernmentIDs: []GovernmentID{
+				{Type: GovernmentIDPassport, Country: "US", Identifier: "A123"},
+			},
+		},
+	}.Normalize()
+	noID := Entity[Value]{
+		Name:   "Jane Doe",
+		Type:   EntityPerson,
+		Person: &Person{Name: "Jane Doe"},
+	}.Normalize()
+	require.False(t, hasIdentifierConflict(withID, noID))
+}
