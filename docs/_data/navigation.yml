@@ -1,3 +1,7 @@
+- name: Using Watchman
+  link: https://moov-io.github.io/watchman/using-watchman/
+- name: Search
+  link: https://moov-io.github.io/watchman/search/
 - name: API
   link: https://moov-io.github.io/watchman/api
 - name: Go

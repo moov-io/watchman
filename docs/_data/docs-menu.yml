@@ -11,44 +11,27 @@
   items:
     - name: Docker
       link: /usage-docker/
+    - name: Search options
+      link: /search/
     - name: Configuration
       link: /config/
     - name: Go library
       link: /usage-go/
+    - name: File Dataset Ingestion
+      link: /ingest/
     - name: MCP Server
       link: /mcp/
 
-- label: Watchman search
-  items:
-    - name: Search options
-      link: /search/
-    - name: Algorithm comparison
-      link: /algorithm-comparison/
-    - name: OpenSanctions Pairs
-      link: /opensanctions-pairs/
-    - name: Addresses
-      link: /addresses/
-    - name: Cross-Script Matching
-      link: /cross-script-matching/
-    - name: Data Preparation Pipeline
-      link: /pipeline/
-    - name: Indexing
-      link: /indexing/
-    - name: Record linkage
-      link: /record-linkage/
-    - name: Geocoding
-      link: /geocoding/
-    - name: File Dataset Ingestion
-      link: /ingest/
-
 - label: Risk Management
   items:
-    - name: Scoring Methodology
-      link: /methodology/
     - name: For compliance and risk
       link: /methodology/for-compliance/
+    - name: Scoring Methodology
+      link: /methodology/
     - name: OFAC portal comparison
       link: /methodology/pages/ofac-name-comparison/
+    - name: OpenSanctions Pairs
+      link: /opensanctions-pairs/
 
 - label: Production and monitoring
   items:
@@ -58,3 +41,20 @@
       link: /cache-data-files/
     - name: Performance
       link: /performance/
+
+- label: Search internals
+  items:
+    - name: Data Preparation Pipeline
+      link: /pipeline/
+    - name: Indexing
+      link: /indexing/
+    - name: Addresses
+      link: /addresses/
+    - name: Cross-Script Matching
+      link: /cross-script-matching/
+    - name: Geocoding
+      link: /geocoding/
+    - name: Record linkage
+      link: /record-linkage/
+    - name: Algorithm comparison
+      link: /algorithm-comparison/
