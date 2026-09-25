@@ -129,7 +129,8 @@ func (h *staticHandler) compressed(name string) ([]byte, error) {
 		if err != nil {
 			return
 		}
-		h.logger.Info().Logf("compressed %s from %d to %d bytes", name, info.Size(), len(cache.body))
+		// Omit the request path so this log is not a log-injection source (CWE-117).
+		h.logger.Info().Logf("compressed wasm from %d to %d bytes", info.Size(), len(cache.body))
 	})
 	return cache.body, cache.err
 }
