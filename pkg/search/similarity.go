@@ -26,6 +26,7 @@ var (
 	lowCoveragePenaltyMultiplier           = readFloat("FINAL_SCORE_LOW_COVERAGE_MULTIPLIER", 0.95)
 	minimumRequiredFieldsPenaltyMultiplier = readFloat("FINAL_SCORE_MIN_REQUIRED_FIELDS_MULTIPLIER", 0.90)
 	nameOnlyPenaltyMultiplier              = readFloat("FINAL_SCORE_NAME_ONLY_MULTIPLIER", 0.95)
+	idConflictPenaltyMultiplier            = readFloat("ID_CONFLICT_PENALTY_MULTIPLIER", 0.70)
 )
 
 func readFloat(envVar string, defaultValue float64) float64 {
@@ -219,7 +220,7 @@ func DetailedSimilarityWithOpts[Q any, I any](w io.Writer, query Entity[Q], inde
 	pieces[8] = compareSupportingInfo(w, query, index, supportingInfoWeight)
 
 	pieceSlice := pieces[:]
-	out.FinalScore = calculateFinalScore(w, pieceSlice, shouldExactOverride(pieceSlice), query, index)
+	out.FinalScore = calculateFinalScore(w, pieceSlice, shouldExactOverride(pieceSlice), query, index, hasIdentifierConflict(query, index))
 
 	// Only allocate a heap-backed Pieces slice when the caller needs details (debug writer)
 	// or when Exact override short pieces aren't used. Always copy for API stability of Details.
@@ -272,7 +273,7 @@ func scoreSimilarityFast[Q any, I any](query Entity[Q], index Entity[I], opts Si
 		compareSupportingInfo(nil, query, index, supportingInfoWeight),
 	}
 
-	return calculateFinalScore(nil, pieces[:], shouldExactOverride(pieces[:]), query, index)
+	return calculateFinalScore(nil, pieces[:], shouldExactOverride(pieces[:]), query, index, hasIdentifierConflict(query, index))
 }
 
 func uniqueIdentityExact(p ScorePiece) bool {
@@ -380,7 +381,7 @@ type entityFields struct {
 	hasAddress  bool
 }
 
-func calculateFinalScore[Q any, I any](w io.Writer, pieces []ScorePiece, exactOverride bool, query Entity[Q], index Entity[I]) float64 {
+func calculateFinalScore[Q any, I any](w io.Writer, pieces []ScorePiece, exactOverride bool, query Entity[Q], index Entity[I], idConflict bool) float64 {
 	if len(pieces) == 0 {
 		return 0
 	}
@@ -398,6 +399,7 @@ func calculateFinalScore[Q any, I any](w io.Writer, pieces []ScorePiece, exactOv
 	if w != nil {
 		debug(w, "calculateFinalScore:\n")
 		debug(w, "  exactOverride=%v\n", exactOverride)
+		debug(w, "  idConflict=%v\n", idConflict)
 		debug(w, "  fields=%#v\n", fields)
 		debug(w, "  coverage=%#v\n", coverage)
 		debug(w, "  baseScore=%v\n", baseScore)
@@ -405,6 +407,13 @@ func calculateFinalScore[Q any, I any](w io.Writer, pieces []ScorePiece, exactOv
 	}
 	if exactOverride {
 		return 1.0
+	}
+
+	if idConflict && idConflictPenaltyMultiplier > 0 && idConflictPenaltyMultiplier < 1 {
+		finalScore *= idConflictPenaltyMultiplier
+		if w != nil {
+			debug(w, "  id conflict penalty = %.2f\n", finalScore)
+		}
 	}
 
 	if math.IsNaN(finalScore) {
