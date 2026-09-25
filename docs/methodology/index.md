@@ -36,17 +36,19 @@ After `Normalize()` (case, punctuation, stopwords, phones, addresses), `Similari
 
 Empty query fields are not compared. The blended score is a coverage-aware weighted average (`FINAL_SCORE_*` multipliers). Name-only queries are down-ranked (`FINAL_SCORE_NAME_ONLY_MULTIPLIER`, default 0.95).
 
-### Exact override
+### When a match is 1.0
 
-A piece forces **1.0** only when it is **Exact** (identifier *and* country) **and** a unique identity key: passport, national ID, SSN-like IDs, IMO/MMSI, aircraft serial, or crypto address. Tax ID, business registration, commercial registry, email, and phone **never** override. They keep high weight in the blend so related companies that share an INN are not treated as the same legal person. Call-sign-only vessel matches do not override.
+A piece forces **1.0** only when it is **exact** (the identifier *and* country match) **and** the field is unique to one party: passport, national ID, IMO, MMSI, aircraft serial, or crypto address.
+
+A matching tax number, company registration, email, or phone **raises** the blended score. It does not force 1.0. Related companies often share a tax ID; two people can share an office email. A vessel call sign alone also does not force 1.0.
 
 ### Identifier conflict
 
-If both records populate the same ID type (and country, when both set) with **different** values, the blended score is multiplied by `ID_CONFLICT_PENALTY_MULTIPLIER` (default 0.70). Missing IDs on one side are not a conflict. Matching unique keys still short-circuit to 1.0 before this penalty.
+If both records have the same ID type (and country, when both set) with **different** values, the blended score is multiplied by `ID_CONFLICT_PENALTY_MULTIPLIER` (default 0.70). A missing ID on one side is not a conflict. A matching passport or IMO still scores 1.0 before this penalty.
 
-### Type recast
+### Entity type
 
-Person, business, and organization queries can be projected onto the index entity’s type instead of scoring 0. That covers FollowTheMoney `LegalEntity` records encoded as businesses. Vessel and aircraft mismatches stay 0. Typed `/v2/search?type=person` still only searches the person partition.
+A person query is compared to people, a business query to companies. If the query type is person, business, or organization and the list record is one of those three, Watchman still scores the pair (some source files store a person under a company-like type). A person query is not scored against a vessel or aircraft. `GET /v2/search?type=person` still only searches the person partition of the index.
 
 ## Name matching
 
@@ -118,12 +120,6 @@ Scoring runs only on candidates. See [Indexing](/watchman/indexing/) and [Perfor
 
 Empty type under a known source with no entities of that type returns nothing. Empty `type=` selects the all-types partition for that source.
 
-## What changed after OpenSanctions Pairs
+## Measured results
 
-Evaluating the production scorer on 755,540 labeled pairs led to three scoring-policy changes:
-
-1. Tax IDs and contact no longer force 1.0.
-2. Conflicting same-type IDs apply a 0.70 multiplier by default.
-3. Person/business/organization type mismatches recast instead of scoring 0 (~+100 ns and +1 alloc vs same-type scoring on Apple M4 Max).
-
-The research evaluator is `go run ./research/opensanctions-pairs`. Full tables: [RESULTS.md](https://github.com/moov-io/watchman/blob/master/research/opensanctions-pairs/RESULTS.md).
+A public labeled set of 755,540 sanctions/OSINT pairs is described in [OpenSanctions Pairs](/watchman/opensanctions-pairs/). The evaluator in this repo is `go run ./research/opensanctions-pairs`. Full tables: [RESULTS.md](https://github.com/moov-io/watchman/blob/master/research/opensanctions-pairs/RESULTS.md).

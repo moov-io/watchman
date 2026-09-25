@@ -18,7 +18,7 @@ Watchman downloads sanctions lists and scores customers and counterparties again
 
 **Search.** `GET /v2/search` (and JSON POST) with `type`, name, aliases, government IDs (`gov_passport=US:…`), dates, addresses, crypto, contact. Ranked hits with a score in `[0, 1]`. Optional Senzing JSON. WASM UI at `/`. Go client. Experimental [MCP](/watchman/mcp/).
 
-**Matcher.** Default Jaro–Winkler on normalized tokens, plus IDs, dates, and addresses. Unique identity keys (passport, IMO, crypto) can score 1.0. Tax IDs and email do not force a match. Conflicting same-type IDs lower the score. Optional TF-IDF and cross-script embeddings.
+**Matcher.** Names are compared token by token (Jaro–Winkler by default), then combined with IDs, dates, and addresses. A matching passport, IMO number, or crypto address can score 1.0. A matching tax number or email raises the score without forcing a match. Two IDs of the same type that disagree lower the score. Optional extras: TF-IDF (down-weight common words) and embeddings (better matches across writing systems).
 
 **Tuning.** `minMatch` is the policy cutoff. `algorithm` is per request. Embeddings, TF-IDF, ingest, address parsers, and geocoding are process-wide. See [Configuration](/watchman/config/).
 
@@ -48,7 +48,7 @@ That is why `nicolas maduro` hits `MADURO MOROS, Nicolas`. Details: [Pipeline](/
 
 ## Scoring in one paragraph
 
-Watchman does not do “Google-style search.” It tokenizes names, aligns tokens with Jaro–Winkler (optional phonetic or n-gram inner metric), then blends identifier, date, address, and contact pieces. Name-only queries are down-ranked. The score is built so you can log `debug=true` pieces and defend the hit. OpenSanctions Pairs (755,540 labeled pairs) is the public evidence set; see [OpenSanctions Pairs](/watchman/opensanctions-pairs/).
+Watchman is not a web search engine. It splits names into tokens, compares those tokens, then combines that result with IDs, dates, addresses, and contact. A name-only query is scored lower than the same name plus a date of birth or passport. Add `debug=true` to see which fields produced the score. A public labeled dataset we used to measure this is described in [OpenSanctions Pairs](/watchman/opensanctions-pairs/).
 
 ## Next
 

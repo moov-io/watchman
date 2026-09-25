@@ -22,7 +22,7 @@ Practical recipe: [Using Watchman](/watchman/using-watchman/).
  1. [Ingest](#ingest)
  1. [Included Lists](#included-lists)
 
-On 755,540 labeled OpenSanctions pairs, **per-request fields and `minMatch`** moved results more than Jaro–Winkler env flags. Recommended production shape: `INCLUDED_LISTS` named in the risk assessment, `minMatch=0.80` on `/v2/search`, embeddings on with `CROSS_SCRIPT_ONLY` if you screen non-Latin names. See [Using Watchman](/watchman/using-watchman/).
+The settings that matter most in production are **which lists you load**, **which fields you send on each search**, and **`minMatch`**. Name-algorithm environment flags change results very little. If you screen names in Arabic, Cyrillic, or Chinese, enable embeddings with `CROSS_SCRIPT_ONLY`. See [Using Watchman](/watchman/using-watchman/).
 
 #### Search Configuration
 

@@ -32,13 +32,13 @@ Moov Watchman is an open-source **sanctions screening engine**. It downloads OFA
 
 How to run it: [Using Watchman](https://moov-io.github.io/watchman/using-watchman/). For BSA/AML and sanctions officers: [For compliance and risk](https://moov-io.github.io/watchman/methodology/for-compliance/).
 
-On 755,540 analyst-labeled [OpenSanctions Pairs](https://moov-io.github.io/watchman/opensanctions-pairs/), Jaro–Winkler at `minMatch=0.80` had subject **precision 0.99**. With cross-script embeddings, subject recall rose from **0.69 to 0.82** while precision stayed **0.95**.
+We measured the matcher on a public labeled set of 755,540 sanctions pairs ([details](https://moov-io.github.io/watchman/opensanctions-pairs/)). At `minMatch=0.80`, almost every returned hit was a real match (precision 0.99). Enabling embeddings for names in different writing systems raised the share of true matches found from 0.69 to 0.82, with precision 0.95.
 
 ## Key Features
 
 - **Lists you can name** — OFAC SDN and Non-SDN, US CSL, FinCEN 311, EU, UK, UN, OpenSanctions Senzing files, plus CSV ingest
 - **Structured search** — `type` (person, business, organization, vessel, aircraft), name, aliases, government IDs, dates, addresses, crypto, contact
-- **Identity vs evidence** — matching passport / IMO / crypto (type + country + identifier) scores 1.0; tax IDs and email do not force a match; conflicting national IDs penalize the score
+- **How IDs work** — a matching passport, IMO number, or crypto address (with country) scores 1.0; a matching tax number or email raises the score; two national IDs that disagree lower the score
 - **You set the cutoff** — `minMatch` is policy (0.80 screening, ~0.59 high recall)
 - **Explainable hits** — `debug=true` returns field-level score pieces
 - **Fast candidate search** — source/type partitions, name-token and ID indexes, parallel scoring ([Performance](https://moov-io.github.io/watchman/performance/), [Indexing](https://moov-io.github.io/watchman/indexing/))

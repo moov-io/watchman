@@ -31,9 +31,13 @@ A usable engine has to move **both** numbers, and it has to show **why** a hit s
 
 **A score built from the fields CDD already collects.** FinCEN’s CDD rule expects institutions to know who they are dealing with. Watchman takes that same record — name, type, government IDs, date of birth, address, contact, vessel IMO — and scores it as a structured entity, not a single string. Name-only queries are down-ranked on purpose.
 
-**Identity keys vs evidence.** A matching **passport, national ID, IMO, MMSI, aircraft serial, or crypto address** (identifier *and* country) still scores **1.0**. A matching **tax ID, business registration, or email** does not. Shared INNs across related companies were a primary false-positive driver on OpenSanctions Pairs when every identifier forced 1.0. Watchman now keeps those as high-weight evidence. If both sides have the **same ID type and country with different values** (two Khalid Mehmoods, two CNICs), the score is cut by `ID_CONFLICT_PENALTY_MULTIPLIER` (default 0.70). That is the paper’s Figure 1 case: OpenSanctions’ production rule matcher scored 0.98; Watchman does not treat the name as identity when the national IDs disagree ([Smith et al., 2026](https://arxiv.org/abs/2603.11051)).
+**How identifiers affect the score.** Some identifiers are unique to one person or vessel. If the query and a list record share a **passport, national ID, IMO number, MMSI, aircraft serial, or crypto address**, and the country (where it applies) matches, Watchman returns **1.0** — treat this as the same party.
 
-**A threshold you set as policy.** `minMatch` is not a hidden neural cutoff. 0.80 is a high-precision screening line; ~0.59 is a high-recall line. You can document that choice in the risk assessment.
+Other identifiers are weaker. A **tax number, company registration, or email** can belong to more than one legal entity (a parent and a subsidiary, two people at the same office). Those fields raise the score. They do not, by themselves, declare a match.
+
+If both records have the **same kind of ID in the same country and the values differ** (two national ID numbers for “the same” name), Watchman **lowers** the score. The default multiplier is `ID_CONFLICT_PENALTY_MULTIPLIER=0.70`. Same name plus disagreeing passports is treated as two people.
+
+**A threshold you set as policy.** `minMatch` is the lowest score Watchman returns. 0.80 is a high-precision screening line; about 0.59 returns more possible matches. You can document that choice in the risk assessment.
 
 **An audit trail.** `debug=true` returns the pieces: which identifiers matched, what the name score was, whether an override or conflict penalty fired. That is the “effective challenge” artifact SR 11-7 asks for.
 

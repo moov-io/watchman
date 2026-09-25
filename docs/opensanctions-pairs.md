@@ -8,21 +8,21 @@ menubar: docs-menu
 
 # OpenSanctions Pairs evaluation
 
-Watchman was scored against [OpenSanctions Pairs](https://huggingface.co/datasets/sanctions-er-anon/opensanctions_pairs) (Smith, Sesodia, Lindenberg, Schroeder de Witt, 2026; arXiv:2603.11051): 755,540 analyst-labeled entity pairs from 293 sanctions and OSINT sources.
+This page reports how Watchman’s matcher behaved on a public labeled dataset. You do not need this page to run Watchman. It is here so you can see measured precision and recall.
 
-The full method, per-schema tables, configuration matrix, and paper comparison live in the repo at [`research/opensanctions-pairs/RESULTS.md`](https://github.com/moov-io/watchman/blob/master/research/opensanctions-pairs/RESULTS.md). The evaluator is `go run ./research/opensanctions-pairs`. This page is the short version.
+[OpenSanctions Pairs](https://huggingface.co/datasets/sanctions-er-anon/opensanctions_pairs) (Smith, Sesodia, Lindenberg, Schroeder de Witt, 2026; arXiv:2603.11051) is 755,540 pairs of records from sanctions and related lists. Analysts labeled each pair **positive** (same real-world person or company) or **negative**. Full tables: [`RESULTS.md`](https://github.com/moov-io/watchman/blob/master/research/opensanctions-pairs/RESULTS.md). Evaluator: `go run ./research/opensanctions-pairs`.
 
 ## What was measured
 
-The paper is **pairwise** matching (same real-world entity or not). Watchman is a **ranked screener**. The eval calls production `pkg/search.Similarity` on every labeled pair. It does not measure candidate blocking or coverage of Watchman's loaded OFAC/EU/UK/UN lists.
+Watchman is a **screener**: one query in, ranked list records out. The paper is **pairwise**: two records in, same-entity or not. We used Watchman’s production scorer (`Similarity`) on each labeled pair. We did not measure whether Watchman’s search index would have retrieved the pair, or whether both records appear on OFAC/EU/UK/UN.
 
-Predicted positive means `score >= threshold`. Default cutoff is 0.80 (`minMatch`). Occupancy/Succession auto-merge rows (100% positive in the paper) are dropped in the **subjects** slice (472,477 people, companies, vessels).
+A pair counts as a Watchman “hit” when `score >= threshold`. The usual cutoff is **0.80** (`minMatch` on `/v2/search`). Some rows in the dataset are occupancy/job records that are always labeled positive; those are omitted below. The remaining **472,477** pairs are people, companies, and vessels.
 
-## Screening pick
+## Recommended setup
 
-**Jaro-Winkler + cross-script embeddings (`qwen3-embedding:0.6b`, hybrid / `EMBEDDINGS_CROSS_SCRIPT_ONLY`), `minMatch=0.80`.**
+**Jaro-Winkler names, embeddings only when the two names use different writing systems (`EMBEDDINGS_CROSS_SCRIPT_ONLY`), `minMatch=0.80`.** Example embedding model: `qwen3-embedding:0.6b`.
 
-On subjects after scoring-policy updates:
+On those 472,477 people, companies, and vessels:
 
 | Configuration (threshold 0.80) | Precision | Recall | F1 score | Cross-script recall |
 |--------------------------------|----------:|-------:|---------:|--------------------:|
@@ -31,9 +31,9 @@ On subjects after scoring-policy updates:
 | **Jaro-Winkler + cross-script embeddings** | **0.946** | **0.815** | **0.876** | **0.91** |
 | Embeddings on every pair | 0.784 | 0.933 | 0.852 | 0.91 |
 
-Without embeddings, about half of cross-script true matches miss at 0.80. Hybrid costs more review (14k subject FPs vs 3k) and recovers ~38k false negatives. Name-algorithm swaps (Soundex, nsim, Editex, Beider-Morse) do not close that gap.
+Without embeddings, about half of true matches whose names use different writing systems (Latin vs Cyrillic, Arabic, and similar) score below 0.80. Adding embeddings for those pairs returns about 38,000 more true matches and about 11,000 more false hits. Changing the name algorithm (Soundex, nsim, and others) does not close that gap.
 
-If missing a hit is worse than extra review, drop hybrid `minMatch` to 0.59 (subjects prec 0.876, rec 0.942). If embeddings are off, use Jaro-Winkler at 0.59 rather than 0.80.
+If missing a designation is worse than extra review, use embeddings and `minMatch=0.59` (precision 0.876, recall 0.942 on this set). If embeddings are off, use Jaro-Winkler at 0.59 rather than 0.80.
 
 ## How Watchman compares to the paper
 
@@ -52,8 +52,8 @@ GPT-4o is a different task. The model reads the entire record pair and emits yes
 
 Vessels (IMO/MMSI) reach an F1 score of 0.993. Person/Person is where most remaining misses sit under Jaro-Winkler (recall 0.68 at 0.80), mainly transliteration.
 
-## Related scoring changes
+## How Watchman scores identifiers
 
-Work from this evaluation also tightened production scoring (separate PRs): unique identity keys (passport, IMO, crypto) still force 1.0; tax/registration IDs are evidence only; conflicting same-type IDs apply `ID_CONFLICT_PENALTY_MULTIPLIER`; person/business/organization type mismatches recast instead of scoring 0.
+A matching passport, IMO number, or crypto address (with country, when it applies) scores **1.0**. A matching tax number or email raises the score without forcing 1.0. If both records have the same ID type and country but different numbers, the score is multiplied by `ID_CONFLICT_PENALTY_MULTIPLIER` (default 0.70). Person, business, and organization records can still be compared to each other; a person query does not score against a vessel.
 
 See [For compliance and risk](/watchman/methodology/for-compliance/), [Search](/watchman/search/), [Performance](/watchman/performance/), [Cross-script matching](/watchman/cross-script-matching/), and [Configuration](/watchman/config/).

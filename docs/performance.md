@@ -59,7 +59,7 @@ On every list refresh Watchman builds:
 - Always send `type=` (and `source=` when you only need one list). This shrinks the partition before token lookup.
 - Prefer multi-token names when possible; shared tokens are intersected so common words do not pull in the rest of the partition.
 - Crypto-only queries use the exact address index and do **not** expand to a full partition scan.
-- Identifier-heavy queries: government IDs are exact; IMO/MMSI/serial/email/phone accept prefixes and a single QWERTY-adjacent typo. Critical exact ID matches still short-circuit similarity to a perfect score.
+- Identifier-heavy queries: government IDs are exact lookups; IMO, MMSI, serial, email, and phone also match prefixes and a single adjacent-keyboard typo. A matching passport or IMO still scores 1.0.
 
 ### Concurrency model
 

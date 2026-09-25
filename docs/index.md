@@ -10,21 +10,19 @@ menubar: docs-menu
 
 ![Moov Watchman Logo](https://repository-images.githubusercontent.com/163885848/41101f80-c6d9-11ea-9ab5-dc9f51b849df)
 
-Watchman is an open-source **sanctions screening engine**: download OFAC, EU, UK, UN, and related lists, index them in memory, and score each customer or counterparty with an inspectable multi-field matcher. HTTP API, Go library, WASM UI, optional MCP.
+Watchman is an open-source **sanctions screening engine**. It downloads government watchlists (OFAC, EU, UK, UN, and others), keeps them in memory, and compares each customer or counterparty you send to those lists. You get a ranked list of possible matches and a score from 0 to 1. HTTP API, Go library, browser UI, optional MCP.
 
-On **755,540** analyst-labeled OpenSanctions pairs, Jaro–Winkler at `minMatch=0.80` had **subject precision 0.99**. With cross-script embeddings, subject recall rose from **0.69 to 0.82** while precision stayed **0.95**. That is a production-shaped queue: few junk alerts, transliteration covered when embeddings are on.
-
-[Using Watchman](/watchman/using-watchman/) · [For compliance and risk](/watchman/methodology/for-compliance/) · [Docker](/watchman/usage-docker/)
+Start here: [Using Watchman](/watchman/using-watchman/) · [Docker](/watchman/usage-docker/) · [For compliance and risk](/watchman/methodology/for-compliance/)
 
 ## Why teams pick it
 
-- **Lists you can name** — OFAC SDN and Non-SDN, US CSL, FinCEN 311, EU, UK, UN, OpenSanctions Senzing files, plus CSV ingest of your own data.
-- **Structured search** — person, business, organization, vessel, aircraft. Names, aliases, government IDs, dates, addresses, crypto, contact.
-- **Identity vs evidence** — matching passport / IMO / crypto (type + country + identifier) scores 1.0. Shared tax IDs and emails do not force a match. Conflicting national IDs penalize the score.
-- **You set the cutoff** — `minMatch` is policy (0.80 default screening, ~0.59 high recall), not a hidden model parameter.
-- **Explainable hits** — `debug=true` returns field-level pieces for investigation and model-risk review.
-- **Fast enough for onboarding and refresh** — source/type partitions, name-token and ID candidate indexes, parallel scoring. Tight queries skip the admission queue.
-- **Apache 2.0** — read the scorer, pin a tag, run it in your VPC.
+- **Named lists** — OFAC SDN and Non-SDN, US Consolidated Screening List, FinCEN 311, EU, UK, UN, plus your own CSV files.
+- **Structured search** — person, business, organization, vessel, or aircraft, with name, aliases, IDs, dates, addresses, and contact.
+- **How IDs work** — a matching passport, IMO number, or crypto address (with country, when it applies) scores 1.0. A matching tax number or email raises the score; it does not declare a match by itself. Two national IDs that disagree lower the score.
+- **A cutoff you choose** — `minMatch` is the minimum score to return. 0.80 is a typical screening line; about 0.59 returns more possible hits.
+- **Explainable hits** — `debug=true` shows which fields drove the score.
+- **Built for onboarding and refresh** — lists are partitioned by source and type; name and ID indexes pick candidates before scoring.
+- **Apache 2.0** — read the scorer, pin a release tag, run it in your network.
 
 ## Included lists
 

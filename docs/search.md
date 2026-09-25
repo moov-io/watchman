@@ -8,7 +8,7 @@ menubar: docs-menu
 
 # Watchman Search Guide
 
-All screening goes through **`/v2/search`**. Send a structured entity (`type` + name and whatever CDD has: IDs, dates, address). Watchman returns ranked hits with a score in `[0, 1]`.
+All screening goes through **`/v2/search`**. Send a type, a name, and any IDs, dates, or addresses you have. Watchman returns ranked hits with a score from 0 to 1.
 
 Practical recipe: [Using Watchman](/watchman/using-watchman/).
 
@@ -77,9 +77,9 @@ The API requires specifying an entity type:
 
 > **Performance:** Always include `type` (and `source` when you only need one list). Watchman partitions the in-memory corpus by source and type and uses name-token, crypto, government-ID, and address blocking keys to select candidates before fuzzy scoring. IMO, MMSI, aircraft serial, email, and phone also match prefixes and single QWERTY-adjacent typos. Empty type partitions return no matches (they do not scan other lists). See [Performance](/watchman/performance/), [Indexing](/watchman/indexing/), and [Record linkage](/watchman/record-linkage/).
 
-Passport, national ID, IMO/MMSI, aircraft serial, and crypto addresses that match **exactly** (identifier and country) still short-circuit the score to 1.0. Tax IDs, business registrations, and email/phone never do — they stay in the weighted blend so related companies that share an INN are not treated as the same entity.
+When a **passport, national ID, IMO, MMSI, aircraft serial, or crypto address** matches on identifier and country, the score is **1.0**. A matching tax number, company registration, email, or phone raises the score; it does not force 1.0.
 
-`Similarity` recasts **person / business / organization** onto the index entity's type instead of returning 0. That covers FollowTheMoney `LegalEntity` records encoded as businesses (for example Medicaid exclusion lists). Vessel and aircraft mismatches stay a hard zero. Typed `/v2/search?type=person` is unchanged: candidates still come from that partition. See [OpenSanctions Pairs](/watchman/opensanctions-pairs/).
+A `type=person` search only looks at people on the list. Person, business, and organization records can still be compared to each other during scoring. A person is not scored against a vessel or aircraft.
 
 ### Advanced Entity Search Parameters
 
@@ -226,8 +226,8 @@ For detailed setup instructions, see [Cross-Script Name Matching](cross-script-m
 
 1. **Always send `type=`** (and `source=` when you only need one list). Partitions the corpus. Unknown type: person + business (and vessel/aircraft when those IDs exist).
 2. **Send IDs and dates from CDD.** `gov_passport=…` and `birthDate=` change the score more than any Jaro–Winkler env flag. Name-only is down-ranked.
-3. **Set `minMatch`.** 0.80 is the screening default from OpenSanctions Pairs (subjects precision 0.99 / 0.95 with embeddings). 0.59 trades review volume for recall.
-4. **Turn on embeddings for non-Latin names.** Algorithm swaps (Soundex, nsim) do not close transliteration. See [Cross-script matching](/watchman/cross-script-matching/).
+3. **Set `minMatch`.** 0.80 is a typical screening line (most hits are real). 0.59 returns more possible matches. Measured numbers: [OpenSanctions Pairs](/watchman/opensanctions-pairs/).
+4. **Turn on embeddings for names in Arabic, Cyrillic, Chinese, and similar scripts.** Soundex and other phonetic flags help little there. See [Cross-script matching](/watchman/cross-script-matching/).
 5. **Use `debug=true` on hits you investigate.** That is the exam artifact for why a score landed.
 
 ## List Information

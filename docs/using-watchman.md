@@ -8,13 +8,13 @@ menubar: docs-menu
 
 # Using Watchman
 
-A practical path from first search to a production screening setup. Technical scoring is in [Similarity methodology](/watchman/methodology/). Program language is in [For compliance and risk](/watchman/methodology/for-compliance/).
+This page is a path from first search to a production setup. How scoring works: [Similarity methodology](/watchman/methodology/). For BSA/AML and sanctions officers: [For compliance and risk](/watchman/methodology/for-compliance/).
 
 ## What you are running
 
-Watchman is a **list-driven screener**. It downloads OFAC, EU, UK, UN, US CSL, FinCEN 311, and optional OpenSanctions/Senzing files, indexes them in memory, and scores each query with a multi-field matcher. You get a ranked hit list and a score in `[0, 1]`. You decide what to do with hits.
+Watchman downloads government sanctions lists, keeps them in memory, and compares each query you send to those lists. Each possible match has a **score from 0 to 1**. You choose which scores become alerts (`minMatch`) and what your process does with them.
 
-That is the control Wolfsberg calls sanctions screening: compare customer/counterparty text (and IDs) to designated-party lists, then investigate.
+Lists include OFAC, EU, UK, UN, the US Consolidated Screening List, FinCEN 311, and optional extra files you ingest.
 
 ## Five-minute start
 
@@ -28,7 +28,7 @@ Open [http://localhost:8084](http://localhost:8084) for the WASM UI. Then:
 curl -s "http://localhost:8084/v2/search?type=person&name=Nicolas+Maduro&birthDate=1962-11-23&limit=5&minMatch=0.80" | jq .
 ```
 
-Always send **`type=`**. Add **IDs and dates when CDD has them**. `minMatch=0.80` is the production-shaped cutoff from the OpenSanctions Pairs evaluation.
+Always send **`type=`** (`person`, `business`, `vessel`, …). Include government IDs and dates of birth when you have them. `minMatch=0.80` means “only return hits that score at least 0.80.” That is a typical starting cutoff.
 
 Confirm lists with `GET /v2/listinfo` (counts, hashes, refresh window, version).
 
@@ -39,8 +39,8 @@ Admin metrics stay on **:9094**. Do not put Watchman on the public internet. See
 | Goal | How |
 |------|-----|
 | Catch designated parties | `type` + name + government IDs + DOB/address |
-| Keep the queue reviewable | `minMatch=0.80` (or 0.59 if miss-rate is the binding constraint) |
-| Transliteration (Arabic, Cyrillic, CJK) | Embeddings on, `EMBEDDINGS_CROSS_SCRIPT_ONLY=true` |
+| Keep the alert queue small | `minMatch=0.80` (try 0.59 if you would rather see more possible matches) |
+| Names in Arabic, Cyrillic, Chinese, etc. | Enable embeddings; keep `EMBEDDINGS_CROSS_SCRIPT_ONLY=true` |
 | One list only | `source=us_ofac` (faster) |
 | Exact SDN row | `sourceID=22790` |
 | Explain a hit | `debug=true` |
@@ -53,42 +53,47 @@ gov_national=PK:35201114139885
 gov_tax=RU:9709063550
 ```
 
-Format is `gov_<type>=COUNTRY:IDENTIFIER`. Passport / national ID / IMO still short-circuit to **1.0** when type, country, and identifier all match. Tax IDs and emails do **not** — they stay in the weighted blend so related companies sharing an INN are not treated as the same person.
+Format is `gov_<type>=COUNTRY:IDENTIFIER`. When a **passport, national ID, or IMO** matches on type, country, and number, the score is **1.0**. A matching **tax number or email** raises the score; it does not force 1.0, because those values are often shared.
 
 Unknown customer type: call `type=person` and `type=business` (and `vessel` / `aircraft` when IMO or serial is present). Empty `type=` is slower and is not the production path.
 
-## Thresholds (policy, not magic)
+## Thresholds
 
-On 472,477 analyst-judged OpenSanctions subject pairs (people, companies, vessels):
+`minMatch` is the lowest score Watchman will return. It is a policy choice.
+
+- **0.80** — typical screening line: most returned hits are real matches; some true matches stay below the line.
+- **0.59** — more possible matches returned; more items for analysts to review.
+
+**Precision** is the share of returned hits that are real matches. **Recall** is the share of real matches that were returned.
+
+On a public labeled set of 472,477 people, companies, and vessels ([OpenSanctions Pairs](/watchman/opensanctions-pairs/)):
 
 | `minMatch` | Precision | Recall | When to use |
 |-----------:|----------:|-------:|-------------|
-| **0.80** | 0.986 (JW) / 0.946 (hybrid) | 0.689 / 0.815 | Default production queue |
+| **0.80** | 0.986 without embeddings / 0.946 with cross-script embeddings | 0.689 / 0.815 | Default production queue |
 | **0.59** | 0.945 / 0.876 | 0.920 / 0.942 | When missing a designation is costlier than extra review |
 
-Precision = share of hits that are real. Recall = share of true matches you catch. Write the cutoff into the risk assessment. Full tables: [OpenSanctions Pairs](/watchman/opensanctions-pairs/).
+## Settings that matter most
 
-## Knobs that actually move results
+Small Jaro–Winkler environment flags (prefix size, Soundex) barely change those numbers. These settings do:
 
-Most Jaro–Winkler env flags (prefix size, length penalty, Soundex) moved **F1 by ~0.001** on the 755k-pair dump. Spend time here instead:
-
-| Knob | Default | Tip |
+| Setting | Default | Tip |
 |------|---------|-----|
 | Query fields | name only | Send IDs and dates. Name-only is down-ranked (`FINAL_SCORE_NAME_ONLY_MULTIPLIER=0.95`). |
 | `minMatch` | 0 | Set 0.80 in production. |
 | `type` / `source` | empty | Always set. Partitions the in-memory corpus. |
-| `EMBEDDINGS_*` | off | Largest recall win on non-Latin names. Use `qwen3-embedding:0.6b` (or similar) via Ollama; keep `CROSS_SCRIPT_ONLY=true`. |
-| `TFIDF_ENABLED` | false | Small recall bump, more false positives. Useful for ranking, not a substitute for embeddings. |
-| `algorithm` | jaro-winkler | Per-request. Phonetic boosts and n-gram scorers did not close transliteration. |
-| `ID_CONFLICT_PENALTY_MULTIPLIER` | 0.70 | Same ID type + country, different values (two CNICs). Set `1` to disable. |
-| `INCLUDED_LISTS` | all downloadable | Start with `us_ofac`. Add `us_csl`, `eu_csl`, `uk_csl`, `un_csl` as the risk assessment names them. |
+| `EMBEDDINGS_*` | off | Improves matching when one name is Latin and the other is Arabic, Cyrillic, Chinese, and similar. Example model: `qwen3-embedding:0.6b` via Ollama. Keep `CROSS_SCRIPT_ONLY=true`. |
+| `TFIDF_ENABLED` | false | Down-weights common words (`Limited`, `GmbH`). Slightly more true hits and slightly more false hits. |
+| `algorithm` | jaro-winkler | Per-request name metric. Phonetic options (Soundex, and others) help little on transliteration. |
+| `ID_CONFLICT_PENALTY_MULTIPLIER` | 0.70 | When both records have the same ID type and country but different numbers. Set `1` to turn this off. |
+| `INCLUDED_LISTS` | all downloadable | Start with `us_ofac`. Add `us_csl`, `eu_csl`, `uk_csl`, `un_csl` as needed. |
 | `SEARCH_MAX_IN_FLIGHT` | GOMAXPROCS | Caps concurrent *large* searches. Tight queries (≤100 candidates) skip the queue. |
 
 Full tables: [Configuration](/watchman/config/).
 
 ## Example queries
 
-Person with CDD fields:
+Person with IDs and date of birth:
 
 ```
 GET /v2/search?type=person&name=Aliasghar+Norouzi&birthDate=1962-11-11&gov_passport=IR:Y53914915&minMatch=0.80&limit=10
@@ -134,7 +139,7 @@ Add internal lists with [ingest](/watchman/ingest/) (`POST /v2/ingest/{fileType}
 
 ## Where it sits in the program
 
-Onboarding, periodic refresh, and (where required) pre-transaction screening against named lists. Hits go to investigation with score pieces. Watchman does not replace CDD, transaction monitoring, or beneficial-ownership analysis.
+Use Watchman when you onboard a customer, when you refresh that customer later, and when a payment or other transaction must be checked against sanctions lists. Send hits to investigation with the score details. Customer due diligence, transaction monitoring, and ownership analysis stay in your other systems.
 
 ## Next
 
