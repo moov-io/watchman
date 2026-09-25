@@ -27,6 +27,18 @@ ifdef ARCH
 	ARCH_PATH := ${ARCH}/
 endif
 
+# GitHub release binaries use libpostal (same as Docker). Override: make dist DIST_GOTAGS=
+# Windows releases stay usaddress: libpostal/CGO is not installed on that runner.
+# Keep these assignments unindented. A tab here would attach them to the previous
+# target's recipe (make clean then tries to exec DIST_GOTAGS).
+ifeq ($(OS),Windows_NT)
+DIST_GOTAGS ?=
+else
+DIST_GOTAGS ?= -tags libpostal
+endif
+
+JOBS := $(shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
+
 .PHONY: all run build docker check test
 
 all: build
@@ -90,7 +102,7 @@ install-libpostal:
 	cd libpostal && \
 	./bootstrap.sh && \
 	./configure $(CONFIGURE_FLAGS) && \
-	make -j$(shell nproc || echo 4) && \
+	make -j$(JOBS) && \
 	if [ "$(detected_OS)" = "Windows" ]; then \
 		make install; \
 	else \
@@ -148,16 +160,6 @@ ifeq ($(OS),Windows_NT)
 	@echo "Skipping cleanup on Windows, currently unsupported."
 else
 	@rm -rf ./bin/ cover.out coverage.txt lint-project.sh misspell* staticcheck* openapi-generator-cli-*.jar
-endif
-
-# GitHub release binaries use libpostal (same as Docker). Override: make dist DIST_GOTAGS=
-# Windows releases stay usaddress: libpostal/CGO is not installed on that runner.
-ifndef DIST_GOTAGS
-ifeq ($(OS),Windows_NT)
-	DIST_GOTAGS :=
-else
-	DIST_GOTAGS := -tags libpostal
-endif
 endif
 
 dist:
