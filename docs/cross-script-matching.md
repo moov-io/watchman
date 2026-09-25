@@ -8,37 +8,29 @@ menubar: docs-menu
 
 # Cross-Script Name Matching
 
-Watchman can match names across different writing systems — Arabic, Cyrillic, Chinese, etc. — using neural embeddings. So if someone searches for "محمد علي", we can find "Mohamed Ali" in the OFAC list.
+Watchman can match names across writing systems (Arabic, Cyrillic, Chinese, and others) using neural embeddings. A query of `محمد علي` can return `Mohamed Ali` on the OFAC list.
 
-## Why do we need this?
+Jaro-Winkler compares characters. Different scripts share almost no characters, so that pair scores near 0 even when they are the same name.
 
-Jaro-Winkler and other string algorithms compare characters. Different scripts = different characters = no match:
-
-```
-"محمد علي" vs "Mohamed Ali" → Jaro-Winkler says 0%
-```
-
-But they're the same name.
-
-## How it works
-
-We use a neural network (via API) that converts text into vectors. The key insight: similar names get similar vectors, regardless of script.
+Embeddings map each name to a numeric vector. The same name in two scripts lands near itself in that space. Watchman ranks those vectors with cosine similarity.
 
 ```
 "Mohamed Ali"  → [0.12, -0.45, 0.78, ...]
-"محمد علي"     → [0.11, -0.44, 0.79, ...]  ← almost identical!
+"محمد علي"     → [0.11, -0.44, 0.79, ...]
 ```
 
-Then we just compare vectors with cosine similarity. Done.
+On [OpenSanctions Pairs](/watchman/opensanctions-pairs/), this is what moves cross-script recall from about 0.50 to 0.91 at `minMatch=0.80`. Name-algorithm swaps (Soundex, and others) do not.
 
 ### Hybrid approach
 
-We don't use embeddings for everything — that would be slow. Instead:
+Embeddings are slower than Jaro-Winkler, so Watchman does not use them on every query. With `crossScriptOnly: true` (the default):
 
-- **Non-Latin query** (Arabic, Cyrillic, etc.) → use embeddings
-- **Latin query** → use Jaro-Winkler (faster, works great for Latin)
+- **Non-Latin query** (Arabic, Cyrillic, Chinese, …) also searches the vector index
+- **Latin query** stays on Jaro-Winkler
 
-Set `crossScriptOnly: true` (the default) to get this behavior.
+Using embeddings on every pair (embed-max / embed-only) over-fires on Latin names. Keep the cross-script gate on.
+
+The screening pick measured in this repo is Jaro-Winkler plus hybrid embeddings (`qwen3-embedding:0.6b` via Ollama) at `minMatch=0.80`. Embeddings are **off** until you enable them.
 
 ## Supported Providers
 
@@ -62,9 +54,9 @@ Install or [Download Ollama](https://ollama.com/download)
 curl -fsSL https://ollama.com/install.sh | sh
 ```
 
-Pull the model
+Pull the model used in the OpenSanctions evaluation:
 ```
-ollama pull qwen3-embedding
+ollama pull qwen3-embedding:0.6b
 ```
 
 **Option B: OpenAI (paid, best quality)**
@@ -119,22 +111,27 @@ ollama pull qwen3-embedding
 
 Cross-script name matching quality varies significantly between models. Models with [embedding support on Ollama](https://ollama.com/search?c=embedding&o=newest).
 
-Choose based on your accuracy requirements:
+The OpenSanctions subject numbers in this repo used `qwen3-embedding:0.6b` (1024-d). Larger models can be higher quality and are slower and more expensive.
 
-| Model                                                             | Provider            | Dimension | Cross-script Quality | Notes                                    |
-|-------------------------------------------------------------------|---------------------|-----------|----------------------|------------------------------------------|
-| [Qwen3 Embedding](https://huggingface.co/Qwen/Qwen3-Embedding-8B) | Ollama & OpenRouter | 4096      | Best                 | Open source router, easy to run.         |
-| `text-embedding-3-small`                                          | OpenAI              | 1536      | Best                 | Recommended for production               |
-| `text-embedding-3-large`                                          | OpenAI              | 3072      | Best                 | Higher accuracy, slower                  |
-| `multilingual-e5-large`                                           | Ollama              | 1024      | Good                 | Best open-source option                  |
-| `nomic-embed-text`                                                | Ollama              | 768       | Limited              | General-purpose, not optimized for names |
+| Model                                                             | Provider            | Dimension | Notes |
+|-------------------------------------------------------------------|---------------------|-----------|-------|
+| `qwen3-embedding:0.6b`                                            | Ollama              | 1024      | Screening pick in [OpenSanctions Pairs](/watchman/opensanctions-pairs/) |
+| [Qwen3 Embedding 8B](https://huggingface.co/Qwen/Qwen3-Embedding-8B) | Ollama & OpenRouter | 4096      | Larger local/router model |
+| `text-embedding-3-small`                                          | OpenAI              | 1536      | Hosted |
+| `text-embedding-3-large`                                          | OpenAI              | 3072      | Hosted, slower |
+| `multilingual-e5-large`                                           | Ollama              | 1024      | Open multilingual model |
+| `nomic-embed-text`                                                | Ollama              | 768       | General-purpose, weaker on names |
 
 ## API
 
-Nothing special — just search as usual. Embeddings kick in automatically for non-Latin queries:
+Search is still `GET /v2/search`. With embeddings enabled, a non-Latin `name` uses the vector index automatically:
 
 ```bash
-$ curl -s "http://localhost:8084/v2/search?type=person&limit=1&name=Владимир+Путин+PUTIN" | jq -r '.entities[] | .name,.match'
+curl -s --get "http://localhost:8084/v2/search" \
+  --data-urlencode "type=person" \
+  --data-urlencode "name=Владимир Путин" \
+  --data-urlencode "limit=1" \
+  | jq '{name: .entities[0].name, match: .entities[0].match}'
 ```
 ```
 Vladimir Vladimirovich PUTIN

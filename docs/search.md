@@ -18,10 +18,10 @@ Practical recipe: [Using Watchman](/watchman/using-watchman/).
 
 ## Search Endpoint
 
-Watchman provides multiple search endpoints and parameters to help you find the exact matches you need. Different search options access different combinations of watchlists.
+Screening is **`GET /v2/search`**. There is no JSON POST body on this path.
 
 ```
-GET /v2/search?type=person&name=nicolas+maduro&limit=1
+GET /v2/search?type=person&name=Dmitry+Khoroshev&limit=1
 ```
 
 ### Senzing Formatting
@@ -65,21 +65,27 @@ When `algorithm` is omitted, process-wide flags such as `USE_SOUNDEX_MATCHING` s
 
 ### Entity Types
 
-The API requires specifying an entity type:
+`type` is **not required**. Send it anyway.
 
 | Type | Description | Example Query |
 |------|-------------|---------------|
-| `person` | Individual persons | `?type=person&name=nicolas maduro` |
+| `person` | Individual persons | `?type=person&name=Dmitry+Khoroshev` |
 | `business` | Business entities | `?type=business&name=tidewater` |
 | `organization` | Non-business organizations | `?type=organization&name=hamas` |
 | `aircraft` | Aircraft registrations | `?type=aircraft&callSign=EP-GOM` |
 | `vessel` | Maritime vessels | `?type=vessel&imoNumber=9401598` |
 
-> **Performance:** Always include `type` (and `source` when you only need one list). Watchman partitions the in-memory corpus by source and type and uses name-token, crypto, government-ID, and address blocking keys to select candidates before fuzzy scoring. IMO, MMSI, aircraft serial, email, and phone also match prefixes and single QWERTY-adjacent typos. Empty type partitions return no matches (they do not scan other lists). See [Performance](/watchman/performance/), [Indexing](/watchman/indexing/), and [Record linkage](/watchman/record-linkage/).
+What the code does:
+
+- **Omitted `type`** — searches the all-types partition for that source. Slower. Name, address, email, phone, and crypto still apply. Person/business/vessel fields (`birthDate`, `gov_*`, `imoNumber`, `altNames`, …) are **not** read; sending them without `type` is HTTP 400 (unused query parameter).
+- **Correct `type`** — searches that source×type partition only. This is the production path.
+- **Wrong `type`** (`type=business` for a person) — searches only that partition. The designated party is missing from the page. Watchman does not fall back to other types.
+
+Person, business, and organization records can still be compared to each other *during scoring* when both sides are already candidates. A person query is not scored against a vessel or aircraft. An empty type partition (for example `type=aircraft` on a list with no aircraft) returns no matches.
+
+See [Performance](/watchman/performance/), [Indexing](/watchman/indexing/), and [Record linkage](/watchman/record-linkage/).
 
 When a **passport, national ID, IMO, MMSI, aircraft serial, or crypto address** matches on identifier and country, the score is **1.0**. A matching tax number, company registration, email, or phone raises the score; it does not force 1.0.
-
-A `type=person` search only looks at people on the list. Person, business, and organization records can still be compared to each other during scoring. A person is not scored against a vessel or aircraft.
 
 ### Advanced Entity Search Parameters
 
@@ -136,35 +142,26 @@ Each entity type supports specific search parameters:
 
 ### Search Response
 
-The API returns the original query plus a list of matched entities with match scores (0.0-1.0):
+The API returns the original query plus matched entities. Each element of `entities` **is** the list record, with `match` (0.0–1.0) on the same object:
 
 ```json
 {
   "query": {
-    "name": "nicolas maduro",
-    "entityType": "person",
-    ...
+    "name": "Dmitry Khoroshev",
+    "entityType": "person"
   },
   "entities": [
     {
-      "entity": {
-        "name": "MADURO MOROS, Nicolas",
-        "entityType": "person",
-        "sourceList": "us_ofac",
-        "sourceID": "22790",
-        "person": {
-          "name": "Nicolas MADURO MOROS",
-          "gender": "male",
-          "birthDate": "1962-11-23T00:00:00Z"
-        },
-        "addresses": [
-          {
-            "city": "Caracas",
-            "country": "VE"
-          }
-        ]
+      "name": "Dmitry Yuryevich KHOROSHEV",
+      "entityType": "person",
+      "sourceList": "us_ofac",
+      "sourceID": "48603",
+      "person": {
+        "name": "Dmitry Yuryevich KHOROSHEV",
+        "gender": "male",
+        "birthDate": "1993-04-17T00:00:00Z"
       },
-      "match": 0.9444444444444444
+      "match": 0.767
     }
   ]
 }
@@ -205,10 +202,11 @@ Watchman supports searching for names written in non-Latin scripts (Arabic, Cyri
 against Latin names in sanctions lists using neural network embeddings.
 
 ```bash
-# Arabic query finds "Mohamed Ali" in OFAC list
-curl -X POST http://localhost:8084/v2/search \
-  -H "Content-Type: application/json" \
-  -d '{"name": "محمد علي", "type": "person"}'
+# Arabic query finds "Mohamed Ali" in OFAC list (embeddings must be on)
+curl -s --get "http://localhost:8084/v2/search" \
+  --data-urlencode "type=person" \
+  --data-urlencode "name=محمد علي" \
+  --data-urlencode "limit=1"
 ```
 
 | Script   | Example Query  | Matches        | Score |
@@ -224,7 +222,7 @@ For detailed setup instructions, see [Cross-Script Name Matching](cross-script-m
 
 ## Best Practices
 
-1. **Always send `type=`** (and `source=` when you only need one list). Partitions the corpus. Unknown type: person + business (and vessel/aircraft when those IDs exist).
+1. **Always send `type=`** (and `source=` when you only need one list). It is optional in the API, but omitting it is slower and GET will reject person/business fields. Unknown type: call person and business (and vessel/aircraft when those IDs exist). A wrong type can miss the hit.
 2. **Send IDs and dates from CDD.** `gov_passport=…` and `birthDate=` change the score more than any Jaro–Winkler env flag. Name-only is down-ranked.
 3. **Set `minMatch`.** 0.80 is a typical screening line (most hits are real). 0.59 returns more possible matches. Measured numbers: [OpenSanctions Pairs](/watchman/opensanctions-pairs/).
 4. **Turn on embeddings for names in Arabic, Cyrillic, Chinese, and similar scripts.** Soundex and other phonetic flags help little there. See [Cross-script matching](/watchman/cross-script-matching/).

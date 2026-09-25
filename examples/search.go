@@ -32,7 +32,7 @@ func main() {
 	}
 	opts := search.SearchOpts{
 		Limit:    5,
-		MinMatch: 0.75,
+		MinMatch: 0.80,
 		Debug:    false,
 		// Algorithm: search.AlgorithmEditex, // optional; default is Jaro-Winkler.
 		// Also: AlgorithmSoundex, AlgorithmSoftBidist, AlgorithmSoftBisim,

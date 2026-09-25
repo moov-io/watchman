@@ -25,10 +25,11 @@ docker run -p 8084:8084 -e INCLUDED_LISTS=us_ofac moov/watchman
 Open [http://localhost:8084](http://localhost:8084) for the WASM UI. Then:
 
 ```
-curl -s "http://localhost:8084/v2/search?type=person&name=Nicolas+Maduro&birthDate=1962-11-23&limit=5&minMatch=0.80" | jq .
+curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&birthDate=1993-04-17&gov_passport=RU:2018278055&limit=5&minMatch=0.80" \
+  | jq '{name: .entities[0].name, match: .entities[0].match, sourceID: .entities[0].sourceID}'
 ```
 
-Always send **`type=`** (`person`, `business`, `vessel`, …). Include government IDs and dates of birth when you have them. `minMatch=0.80` means “only return hits that score at least 0.80.” That is a typical starting cutoff.
+Always send **`type=`** (`person`, `business`, `vessel`, …). It is not a required query parameter, but GET fields such as `birthDate` and `gov_*` are only read when `type` is set, and a wrong type searches only that partition. Include government IDs and dates of birth when you have them. `minMatch=0.80` means “only return hits that score at least 0.80.” That is a typical starting cutoff.
 
 Confirm lists with `GET /v2/listinfo` (counts, hashes, refresh window, version).
 
@@ -55,7 +56,7 @@ gov_tax=RU:9709063550
 
 Format is `gov_<type>=COUNTRY:IDENTIFIER`. When a **passport, national ID, or IMO** matches on type, country, and number, the score is **1.0**. A matching **tax number or email** raises the score; it does not force 1.0, because those values are often shared.
 
-Unknown customer type: call `type=person` and `type=business` (and `vessel` / `aircraft` when IMO or serial is present). Empty `type=` is slower and is not the production path.
+Unknown customer type: call `type=person` and `type=business` (and `vessel` / `aircraft` when IMO or serial is present). Empty `type=` searches every type (slower) and cannot take person/business fields on GET. A wrong type can miss the hit.
 
 ## Thresholds
 
@@ -82,7 +83,7 @@ Small Jaro–Winkler environment flags (prefix size, Soundex) barely change thos
 |------|---------|-----|
 | Query fields | name only | Send IDs and dates. Name-only is down-ranked (`FINAL_SCORE_NAME_ONLY_MULTIPLIER=0.95`). |
 | `minMatch` | 0 | Set 0.80 in production. |
-| `type` / `source` | empty | Always set. Partitions the in-memory corpus. |
+| `type` / `source` | empty | Always set. `type` is optional in the API; omitting it searches every type. A wrong type searches only that partition. |
 | `EMBEDDINGS_*` | off | Improves matching when one name is Latin and the other is Arabic, Cyrillic, Chinese, and similar. Example model: `qwen3-embedding:0.6b` via Ollama. Keep `CROSS_SCRIPT_ONLY=true`. |
 | `TFIDF_ENABLED` | false | Down-weights common words (`Limited`, `GmbH`). Slightly more true hits and slightly more false hits. With embeddings, the extra true hits are mostly Latin-script names; transliteration is already handled by embeddings. |
 | `algorithm` | jaro-winkler | Per-request name metric. Phonetic options (Soundex, and others) help little on transliteration. |
@@ -115,15 +116,16 @@ GET /v2/search?type=vessel&name=NS+LEADER&imoNumber=9339301
 Debug one hit:
 
 ```
-GET /v2/search?type=person&name=Nicolas+Maduro&minMatch=0.80&debug=true&limit=1
+GET /v2/search?type=person&name=Dmitry+Khoroshev&gov_passport=RU:2018278055&minMatch=0.80&debug=true&limit=1
 ```
 
-JSON body (UTF-8 names):
+UTF-8 names on GET (there is no JSON POST body on `/v2/search`):
 
 ```
-curl -s http://localhost:8084/v2/search \
-  -H 'Content-Type: application/json' \
-  -d '{"name":"محمد علي","type":"person"}'
+curl -s --get "http://localhost:8084/v2/search" \
+  --data-urlencode "type=person" \
+  --data-urlencode "name=محمد علي" \
+  --data-urlencode "limit=5"
 ```
 
 Senzing output: `Accept: senzing` or `?format=senzing`.
