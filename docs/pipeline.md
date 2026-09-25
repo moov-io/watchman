@@ -15,9 +15,9 @@ There are two layers:
 1. **List ingest** — extra steps some sources run when a file is loaded. OFAC is the main one.
 2. **`Normalize()`** — runs on every list entity after ingest and on every search query.
 
-## List ingest (OFAC)
+## List ingest
 
-When Watchman loads the OFAC SDN file it applies two name steps that other lists (EU, UK, UN) do not.
+When Watchman loads lists (like the OFAC SDN) it organizes the names and values into a common ordering.
 
 **Name reordering** (people only, `SDNType=individual`):
 

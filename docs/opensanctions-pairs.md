@@ -24,7 +24,9 @@ A pair counts as a Watchman “hit” when `score >= threshold`. The usual cutof
 
 On those 472,477 people, companies, and vessels:
 
-**Precision** is the share of returned hits that are real matches. **Recall** is the share of real matches that were returned. **Cross-script recall** is recall when the two names use different writing systems (for example Latin and Cyrillic).
+**Precision** is the share of returned hits that are real matches.
+**Recall** is the share of real matches that were returned.
+**Cross-script recall** is recall when the two names use different writing systems (for example Latin and Cyrillic).
 
 | Configuration (threshold 0.80) | Precision | Recall | Recall on different writing systems |
 |--------------------------------|----------:|-------:|------------------------------------:|

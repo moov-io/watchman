@@ -34,7 +34,7 @@ Confirm lists with `GET /v2/listinfo` (counts, hashes, refresh window, version).
 
 Admin metrics stay on **:9094**. Do not put Watchman on the public internet. See [Network access](/watchman/network/).
 
-## Recommended production search
+## Example
 
 | Goal | How |
 |------|-----|
@@ -64,14 +64,15 @@ Unknown customer type: call `type=person` and `type=business` (and `vessel` / `a
 - **0.80** — typical screening line: most returned hits are real matches; some true matches stay below the line.
 - **0.59** — more possible matches returned; more items for analysts to review.
 
-**Precision** is the share of returned hits that are real matches. **Recall** is the share of real matches that were returned.
+**Precision** is the share of returned hits that are real matches.
+**Recall** is the share of real matches that were returned.
 
 On a public labeled set of 472,477 people, companies, and vessels ([OpenSanctions Pairs](/watchman/opensanctions-pairs/)):
 
-| `minMatch` | Precision | Recall | When to use |
-|-----------:|----------:|-------:|-------------|
-| **0.80** | 0.986 without embeddings / 0.946 with cross-script embeddings | 0.689 / 0.815 | Default production queue |
-| **0.59** | 0.945 / 0.876 | 0.920 / 0.942 | When missing a designation is costlier than extra review |
+| `minMatch` | Precision |            Precision with Embeddings | Recall | Recall with Embeddings | When to use                                              |
+|-----------:|----------:|-------------------------------------:|--------|------------------------|----------------------------------------------------------|
+|   **0.80** |     0.986 | 0.946 (with cross-script embeddings) | 0.689  | 0.815                  | Default production queue                                 |
+|   **0.59** |     0.945 |                                0.876 | 0.920  | 0.942                  | When missing a designation is costlier than extra review |
 
 ## Settings that matter most
 
@@ -135,7 +136,9 @@ Add internal lists with [ingest](/watchman/ingest/) (`POST /v2/ingest/{fileType}
 
 ## Addresses and geocoding
 
-**Docker images and Linux/macOS GitHub releases** use libpostal (~3GB RAM for models). **Any deployment** can switch to deepparse (`Watchman.Deepparse.Enabled`). **Otherwise** (Windows `.exe`, `go run` without `-tags libpostal`) Watchman uses `usaddress`. Optional **geocoding** (OpenCage, Nominatim, Google) fills lat/long. See [Addresses](/watchman/addresses/) and [Geocoding](/watchman/geocoding/).
+**Docker images and Linux/macOS GitHub releases** use libpostal (~3GB RAM for models). **Any deployment** can switch to deepparse (`Watchman.Deepparse.Enabled`).
+
+**Otherwise** (Windows `.exe`, `go run` without `-tags libpostal`) Watchman uses `usaddress`. Optional **geocoding** (OpenCage, Nominatim, Google) fills lat/long. See [Addresses](/watchman/addresses/) and [Geocoding](/watchman/geocoding/).
 
 ## Where it sits in the program
 

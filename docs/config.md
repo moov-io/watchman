@@ -11,8 +11,8 @@ menubar: docs-menu
 Practical recipe: [Using Watchman](/watchman/using-watchman/).
 
  1. [File](#file)
-    1. [Environment Variables](#environment-variables)
-    1. [Metrics](#metrics)
+   1. [Environment Variables](#environment-variables)
+   1. [Metrics](#metrics)
  1. [Download](#download)
  1. [Search](#search)
  1. [Geocoding](#geocoding)
