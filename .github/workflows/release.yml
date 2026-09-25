@@ -43,6 +43,7 @@ jobs:
     needs: [tests, create_release]
     runs-on: ${{ matrix.runner }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - runner: ubuntu-latest
@@ -134,6 +135,7 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - arch: amd64
@@ -226,6 +228,7 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.QUAY_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - arch: amd64
