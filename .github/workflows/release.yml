@@ -35,8 +35,7 @@ jobs:
         else
           gh release create "$TAG" \
             --repo "$REPO" \
-            --title "Release $TAG" \
-            --prerelease
+            --title "Release $TAG"
         fi
 
   publish:
