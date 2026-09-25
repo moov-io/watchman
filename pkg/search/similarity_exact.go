@@ -37,6 +37,7 @@ func comparePersonExactIDs(w io.Writer, query *Person, index *Person, weight flo
 	totalWeight := 0.0
 	score := 0.0
 	hasMatch := false
+	uniqueIdentity := false
 
 	// Government IDs (extremely high weight for exact matches)
 	if len(query.GovernmentIDs) > 0 && len(index.GovernmentIDs) > 0 {
@@ -49,6 +50,7 @@ func comparePersonExactIDs(w io.Writer, query *Person, index *Person, weight flo
 					strings.EqualFold(normalizeIdentifier(qID.Identifier), normalizeIdentifier(iID.Identifier)) {
 					score += 15.0
 					hasMatch = true
+					uniqueIdentity = isUniqueIdentityType(qID.Type)
 					goto GovIDDone // Break both loops on first match
 				}
 			}
@@ -69,6 +71,7 @@ GovIDDone:
 		Exact:          finalScore > 0.99,
 		FieldsCompared: fieldsCompared,
 		PieceType:      "identifiers",
+		UniqueIdentity: uniqueIdentity,
 	}
 }
 
@@ -82,6 +85,7 @@ func compareBusinessExactIDs(w io.Writer, query *Business, index *Business, weig
 	totalWeight := 0.0
 	score := 0.0
 	hasMatch := false
+	uniqueIdentity := false
 
 	// Business Registration/Tax IDs
 	if len(query.GovernmentIDs) > 0 && len(index.GovernmentIDs) > 0 {
@@ -95,6 +99,7 @@ func compareBusinessExactIDs(w io.Writer, query *Business, index *Business, weig
 					strings.EqualFold(normalizeIdentifier(qID.Identifier), normalizeIdentifier(iID.Identifier)) {
 					score += 15.0
 					hasMatch = true
+					uniqueIdentity = isUniqueIdentityType(qID.Type)
 					goto IdentifierDone
 				}
 			}
@@ -115,6 +120,7 @@ IdentifierDone:
 		Exact:          finalScore > 0.99,
 		FieldsCompared: fieldsCompared,
 		PieceType:      "identifiers",
+		UniqueIdentity: uniqueIdentity,
 	}
 }
 
@@ -128,6 +134,7 @@ func compareOrgExactIDs(w io.Writer, query *Organization, index *Organization, w
 	totalWeight := 0.0
 	score := 0.0
 	hasMatch := false
+	uniqueIdentity := false
 
 	// Organization Registration/Tax IDs
 	if len(query.GovernmentIDs) > 0 && len(index.GovernmentIDs) > 0 {
@@ -141,6 +148,7 @@ func compareOrgExactIDs(w io.Writer, query *Organization, index *Organization, w
 					strings.EqualFold(normalizeIdentifier(qID.Identifier), normalizeIdentifier(iID.Identifier)) {
 					score += 15.0
 					hasMatch = true
+					uniqueIdentity = isUniqueIdentityType(qID.Type)
 					goto IdentifierDone
 				}
 			}
@@ -161,6 +169,7 @@ IdentifierDone:
 		Exact:          finalScore > 0.99,
 		FieldsCompared: fieldsCompared,
 		PieceType:      "identifiers",
+		UniqueIdentity: uniqueIdentity,
 	}
 }
 
@@ -174,6 +183,7 @@ func compareVesselExactIDs(w io.Writer, query *Vessel, index *Vessel, weight flo
 	totalWeight := 0.0
 	score := 0.0
 	hasMatch := false
+	uniqueIdentity := false
 
 	// IMO Number (highest weight)
 	if query.IMONumber != "" {
@@ -182,6 +192,7 @@ func compareVesselExactIDs(w io.Writer, query *Vessel, index *Vessel, weight flo
 		if strings.EqualFold(query.IMONumber, index.IMONumber) {
 			score += 15.0
 			hasMatch = true
+			uniqueIdentity = true
 		}
 	}
 
@@ -202,6 +213,7 @@ func compareVesselExactIDs(w io.Writer, query *Vessel, index *Vessel, weight flo
 		if strings.EqualFold(query.MMSI, index.MMSI) {
 			score += 12.0
 			hasMatch = true
+			uniqueIdentity = true
 		}
 	}
 
@@ -218,6 +230,7 @@ func compareVesselExactIDs(w io.Writer, query *Vessel, index *Vessel, weight flo
 		Exact:          finalScore > 0.99,
 		FieldsCompared: fieldsCompared,
 		PieceType:      "identifiers",
+		UniqueIdentity: uniqueIdentity,
 	}
 }
 
@@ -231,6 +244,7 @@ func compareAircraftExactIDs(w io.Writer, query *Aircraft, index *Aircraft, weig
 	totalWeight := 0.0
 	score := 0.0
 	hasMatch := false
+	uniqueIdentity := false
 
 	// Serial Number (highest weight)
 	if query.SerialNumber != "" {
@@ -239,6 +253,7 @@ func compareAircraftExactIDs(w io.Writer, query *Aircraft, index *Aircraft, weig
 		if strings.EqualFold(query.SerialNumber, index.SerialNumber) {
 			score += 15.0
 			hasMatch = true
+			uniqueIdentity = true
 		}
 	}
 
@@ -265,6 +280,7 @@ func compareAircraftExactIDs(w io.Writer, query *Aircraft, index *Aircraft, weig
 		Exact:          finalScore > 0.99,
 		FieldsCompared: fieldsCompared,
 		PieceType:      "identifiers",
+		UniqueIdentity: uniqueIdentity,
 	}
 }
 
@@ -323,6 +339,16 @@ Done:
 		Exact:          score > 0.99,
 		FieldsCompared: fieldsCompared,
 		PieceType:      "crypto-exact",
+		UniqueIdentity: hasMatch,
+	}
+}
+
+func isUniqueIdentityType(t GovernmentIDType) bool {
+	switch t {
+	case GovernmentIDTax, GovernmentIDBusinessRegisration, GovernmentIDCommercialRegistry:
+		return false
+	default:
+		return t != ""
 	}
 }
 
@@ -354,6 +380,7 @@ type idMatch struct {
 	found      bool
 	exact      bool
 	hasCountry bool
+	unique     bool
 }
 
 // compareIdentifiers handles the core logic of comparing two identifier values
@@ -400,6 +427,9 @@ func comparePersonGovernmentIDs(query *Person, index *Person, weight float64) Sc
 	for _, qID := range qIDs {
 		for _, iID := range iIDs {
 			match := compareIdentifiers(qID.Identifier, iID.Identifier, qID.Country, iID.Country)
+			if match.found {
+				match.unique = isUniqueIdentityType(qID.Type) && isUniqueIdentityType(iID.Type)
+			}
 			if match.found && match.score > bestMatch.score {
 				bestMatch = match
 			}
@@ -418,6 +448,7 @@ Done:
 		Exact:          bestMatch.exact,
 		FieldsCompared: fieldsCompared,
 		PieceType:      "gov-ids-exact",
+		UniqueIdentity: bestMatch.unique,
 	}
 }
 
@@ -440,6 +471,9 @@ func compareBusinessGovernmentIDs(query *Business, index *Business, weight float
 		for _, iID := range iIDs {
 			// For business, we'll check the identifier and country, ignoring name for now
 			match := compareIdentifiers(qID.Identifier, iID.Identifier, qID.Country, iID.Country)
+			if match.found {
+				match.unique = isUniqueIdentityType(qID.Type) && isUniqueIdentityType(iID.Type)
+			}
 			if match.found && match.score > bestMatch.score {
 				bestMatch = match
 			}
@@ -458,6 +492,7 @@ Done:
 		Exact:          bestMatch.exact,
 		FieldsCompared: fieldsCompared,
 		PieceType:      "gov-ids-exact",
+		UniqueIdentity: bestMatch.unique,
 	}
 }
 
@@ -480,6 +515,9 @@ func compareOrgGovernmentIDs(query *Organization, index *Organization, weight fl
 		for _, iID := range iIDs {
 			// For orgs, we'll check the identifier and country, ignoring name for now
 			match := compareIdentifiers(qID.Identifier, iID.Identifier, qID.Country, iID.Country)
+			if match.found {
+				match.unique = isUniqueIdentityType(qID.Type) && isUniqueIdentityType(iID.Type)
+			}
 			if match.found && match.score > bestMatch.score {
 				bestMatch = match
 			}
@@ -498,6 +536,7 @@ Done:
 		Exact:          bestMatch.exact,
 		FieldsCompared: fieldsCompared,
 		PieceType:      "gov-ids-exact",
+		UniqueIdentity: bestMatch.unique,
 	}
 }
 

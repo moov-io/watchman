@@ -93,7 +93,7 @@ Similarity scoring is allocation-conscious for bulk search:
 - Score pieces are computed on the stack for the non-debug path.
 - Jaro-Winkler token-pair scratch buffers are pooled across comparisons.
 - Alternate and historical names are skipped once the primary (or a prior alias) already scores at or above the exact-match threshold.
-- Critical exact matches (government IDs, crypto addresses, contact identifiers) **return 1.0 immediately** and skip expensive name/title/address comparison.
+- Unique identity keys (passport, national ID, IMO/MMSI, aircraft serial, crypto address) that match **exactly** (identifier and country) still return 1.0 immediately and skip name/title/address comparison. Tax IDs, business registrations, and contact (email/phone) are weighted evidence only — they never force 1.0.
 - Former names and related prepared fields are normalized at index time (and query normalize), not on every comparison.
 - Optional TF-IDF weights are attached to index entities when lists load; query weights are computed once per search.
 - Jaro-Winkler feature flags (`DISABLE_PHONETIC_FILTERING`, `USE_SOUNDEX_MATCHING`, `SOUNDEX_BOOST_WEIGHT`) are read at process start (see [Similarity Configuration](/watchman/config/#similarity-configuration)). Changing them requires a restart. Individual searches can still select `?algorithm=` without a restart (see [Algorithm comparison](/watchman/algorithm-comparison/)).

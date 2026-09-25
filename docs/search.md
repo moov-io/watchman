@@ -75,6 +75,8 @@ The API requires specifying an entity type:
 
 > **Performance:** Always include `type` (and `source` when you only need one list). Watchman partitions the in-memory corpus by source and type and uses name-token, crypto, government-ID, and address blocking keys to select candidates before fuzzy scoring. IMO, MMSI, aircraft serial, email, and phone also match prefixes and single QWERTY-adjacent typos. Empty type partitions return no matches (they do not scan other lists). See [Performance](/watchman/performance/), [Indexing](/watchman/indexing/), and [Record linkage](/watchman/record-linkage/).
 
+Passport, national ID, IMO/MMSI, aircraft serial, and crypto addresses that match **exactly** (identifier and country) still short-circuit the score to 1.0. Tax IDs, business registrations, and email/phone never do — they stay in the weighted blend so related companies that share an INN are not treated as the same entity. See [OpenSanctions Pairs](/watchman/opensanctions-pairs/).
+
 ### Advanced Entity Search Parameters
 
 Each entity type supports specific search parameters:

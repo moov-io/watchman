@@ -161,8 +161,6 @@ func DetailedSimilarityWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], ind
 func DetailedSimilarityWithOpts[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], opts SimilarityOpts) SimilarityScore {
 	var out SimilarityScore
 
-	var exactOverride bool
-
 	// Quick filters — these are free when the search service already partitioned,
 	// but remain here for direct Similarity() callers.
 	if query.Source != sourceEmpty && !query.Source.IsRequestType() {
@@ -192,35 +190,23 @@ func DetailedSimilarityWithOpts[Q any, I any](w io.Writer, query Entity[Q], inde
 
 	// Critical identifiers (highest weight)
 	pieces[0] = compareExactIdentifiers(w, query, index, criticalIdWeight)
-	if pieces[0].Matched && pieces[0].FieldsCompared > 0 {
-		exactOverride = true
-		if math.IsNaN(pieces[0].Score) {
-			pieces[0].Score = 1.0
-		}
+	if math.IsNaN(pieces[0].Score) {
+		pieces[0].Score = 1.0
 	}
 
 	pieces[1] = compareExactCryptoAddresses(w, query, index, criticalIdWeight)
-	if pieces[1].Matched && pieces[1].FieldsCompared > 0 {
-		exactOverride = true
-		if math.IsNaN(pieces[1].Score) {
-			pieces[1].Score = 1.0
-		}
+	if math.IsNaN(pieces[1].Score) {
+		pieces[1].Score = 1.0
 	}
 
 	pieces[2] = compareExactGovernmentIDs(w, query, index, criticalIdWeight)
-	if pieces[2].Matched && pieces[2].FieldsCompared > 0 {
-		exactOverride = true
-		if math.IsNaN(pieces[2].Score) {
-			pieces[2].Score = 1.0
-		}
+	if math.IsNaN(pieces[2].Score) {
+		pieces[2].Score = 1.0
 	}
 
 	pieces[3] = compareExactContactInfo(w, query, index, criticalIdWeight)
-	if pieces[3].Matched && pieces[3].FieldsCompared > 0 {
-		exactOverride = true
-		if math.IsNaN(pieces[3].Score) {
-			pieces[3].Score = 1.0
-		}
+	if math.IsNaN(pieces[3].Score) {
+		pieces[3].Score = 1.0
 	}
 
 	// Name comparison (second highest weight) - use TF-IDF if provided
@@ -233,7 +219,7 @@ func DetailedSimilarityWithOpts[Q any, I any](w io.Writer, query Entity[Q], inde
 	pieces[8] = compareSupportingInfo(w, query, index, supportingInfoWeight)
 
 	pieceSlice := pieces[:]
-	out.FinalScore = calculateFinalScore(w, pieceSlice, exactOverride, query, index)
+	out.FinalScore = calculateFinalScore(w, pieceSlice, shouldExactOverride(pieceSlice), query, index)
 
 	// Only allocate a heap-backed Pieces slice when the caller needs details (debug writer)
 	// or when Exact override short pieces aren't used. Always copy for API stability of Details.
@@ -263,21 +249,14 @@ func scoreSimilarityFast[Q any, I any](query Entity[Q], index Entity[I], opts Si
 		}
 	}
 
-	// Critical exact matches always force final score 1.0 — skip expensive name/address work.
+	// Unique identity keys (passport, IMO, crypto) can still skip name work.
+	// Tax/registration and contact matches fall through so a disagreeing name
+	// can block a 1.0 override.
 	p0 := compareExactIdentifiers(nil, query, index, criticalIdWeight)
-	if p0.Matched && p0.FieldsCompared > 0 {
-		return 1.0
-	}
 	p1 := compareExactCryptoAddresses(nil, query, index, criticalIdWeight)
-	if p1.Matched && p1.FieldsCompared > 0 {
-		return 1.0
-	}
 	p2 := compareExactGovernmentIDs(nil, query, index, criticalIdWeight)
-	if p2.Matched && p2.FieldsCompared > 0 {
-		return 1.0
-	}
 	p3 := compareExactContactInfo(nil, query, index, criticalIdWeight)
-	if p3.Matched && p3.FieldsCompared > 0 {
+	if uniqueIdentityExact(p0) || uniqueIdentityExact(p1) || uniqueIdentityExact(p2) {
 		return 1.0
 	}
 
@@ -293,7 +272,33 @@ func scoreSimilarityFast[Q any, I any](query Entity[Q], index Entity[I], opts Si
 		compareSupportingInfo(nil, query, index, supportingInfoWeight),
 	}
 
-	return calculateFinalScore(nil, pieces[:], false, query, index)
+	return calculateFinalScore(nil, pieces[:], shouldExactOverride(pieces[:]), query, index)
+}
+
+func uniqueIdentityExact(p ScorePiece) bool {
+	return p.FieldsCompared > 0 && p.Exact && p.UniqueIdentity
+}
+
+// shouldExactOverride reports whether a 1.0 final score is justified.
+// Only unique identity keys (passport, IMO, crypto, …) short-circuit, and only
+// when the piece is Exact (identifier and country). Tax IDs, business
+// registrations, and contact matches stay in the weighted blend.
+func shouldExactOverride(pieces []ScorePiece) bool {
+	for i := range pieces {
+		p := pieces[i]
+		if p.FieldsCompared == 0 || !p.Exact {
+			continue
+		}
+		switch p.PieceType {
+		case "crypto-exact":
+			return true
+		case "identifiers", "gov-ids-exact":
+			if p.UniqueIdentity {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // SimilarityScore gives detailed results of which fields matched and how they were scored against each other.
@@ -325,6 +330,10 @@ type ScorePiece struct {
 	Exact          bool    `json:"exact"`          // whether it's an exact match
 	FieldsCompared int     `json:"fieldsCompared"` // how many fields were actually compared
 	PieceType      string  `json:"pieceType"`      // e.g. "identifiers", "name", etc.
+	// UniqueIdentity is true when the matched identifier is unique to one
+	// legal person or asset (passport, IMO, crypto address) rather than a
+	// reusable tax or registration number.
+	UniqueIdentity bool `json:"uniqueIdentity,omitempty"`
 }
 
 func boolToScore(b bool) float64 {
@@ -420,7 +429,7 @@ func countFieldsByImportance(pieces []ScorePiece) entityFields {
 			if piece.PieceType == "name" {
 				fields.hasName = true
 			}
-			if piece.Exact && (piece.PieceType == "identifiers" || piece.PieceType == "gov-ids-exact") {
+			if piece.Exact && piece.UniqueIdentity && (piece.PieceType == "identifiers" || piece.PieceType == "gov-ids-exact" || piece.PieceType == "crypto-exact") {
 				fields.hasID = true
 			}
 			if piece.PieceType == "address" {
