@@ -132,7 +132,7 @@ Senzing output: `Accept: senzing` or `?format=senzing`.
 
 Watchman downloads and refreshes lists on `DATA_REFRESH_INTERVAL` (default 12h). `GET /v2/listinfo` is the freshness check for ops and exams.
 
-Add internal lists with [ingest](/watchman/ingest/) (`POST /v2/ingest/{fileType}`). OpenSanctions Senzing files are first-class via [config](/watchman/config/#open-sanctions).
+Add internal lists with [ingest](/watchman/ingest/) (`POST /v2/ingest/{fileType}`). Search of an ingested-only source scores the first 1,000 rows and does not use the name-token index. OpenSanctions Senzing files loaded as lists via [config](/watchman/config/#open-sanctions) are first-class in the in-memory corpus.
 
 ## Addresses and geocoding
 
