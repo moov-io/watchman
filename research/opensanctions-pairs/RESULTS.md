@@ -296,7 +296,7 @@ Watchman is built so a bank can turn pieces on without forking the scorer.
 | Concurrency | `SEARCH_MAX_IN_FLIGHT`, `SEARCH_GOROUTINE_COUNT` |
 | Lists | which files to download, `INITIAL_DATA_DIRECTORY`, refresh interval |
 | Ingest | CSV templates under `Watchman.Ingest.Files`; `POST /v2/ingest/{fileType}` |
-| Addresses | Docker images: libpostal in-process; GitHub binaries / `go run`: usaddress. Optional PostalPool or deepparse |
+| Addresses | Docker images: libpostal; GitHub binaries / `go run`: usaddress; any build can enable deepparse |
 | Geocoding | optional OpenCage |
 
 **What this benchmark actually exercised:** name algorithm, TF-IDF on/off, three embedding mixes, type fan-out, exact-ID policy, ID-conflict penalty. It did not exercise live list ingest, blocking quality, geocoding, or Senzing output.

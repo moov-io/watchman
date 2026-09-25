@@ -16,7 +16,7 @@ Practical recipe: [Using Watchman](/watchman/using-watchman/).
  1. [Download](#download)
  1. [Search](#search)
  1. [Geocoding](#geocoding)
- 1. [Postal Pool](#postalpool) (libpostal integration)
+ 1. [libpostal](#libpostal)
  1. [Deepparse](#deepparse) (optional alternative to libpostal)
  1. [MCP](#mcp)
  1. [Ingest](#ingest)
@@ -182,33 +182,9 @@ See [Performance](/watchman/performance/) for how admission control, per-search 
       L2Enabled: false # Uses the database connection for a persistent cache.
 ```
 
-#### PostalPool
+#### libpostal
 
-PostalPool is an experiment for improving address parsing via [libpostal](https://github.com/openvenues/libpostal) using [Senzing's updated classifier, data, and parser](https://github.com/Senzing/libpostal-data).
-
-> PostalPool is optional and may be removed in the future.
-
-```yaml
-  PostalPool:
-    Enabled: false
-    # CAUTION: The configuration below is intended for advanced libpostal usage only.
-    # It may provide performance and concurrency improvements on certain architectures,
-    # but is not required for most deployments.
-    #
-    # The "postal pool" is a set of libpostal binaries running on the host and managed
-    # by Watchman. On some systems, the libpostal data files are shared in memory,
-    # which can introduce a performance penalty when multiple libpostal processes
-    # access them simultaneously.
-    #
-    # For the vast majority of use cases, simply keep `CGOSelfInstances=1`
-    # (the default when the pool is Enabled) to achieve the best performance.
-    Instances: 0
-    StartingPort: 10000
-    StartupTimeout: "60s"
-    RequestTimeout: "10s"
-    BinaryPath: "" # POSTAL_SERVER_BIN_PATH is set in Dockerfile
-    CGOSelfInstances: 1
-```
+[libpostal](https://github.com/openvenues/libpostal) (with [Senzing’s data](https://github.com/Senzing/libpostal-data)) is how **Docker and OpenShift images** parse addresses. It loads about 3GB of models. GitHub release binaries and `go run` without `-tags libpostal` use `usaddress` instead.
 
 #### Deepparse
 
@@ -230,7 +206,7 @@ That runs `ghcr.io/graal-research/deepparse:0.11.0` on port `8000` (`docker comp
     Timeout: "10s"
 ```
 
-If both Deepparse and PostalPool are enabled, Watchman uses Deepparse and logs a warning.
+If Deepparse is enabled, Watchman uses it instead of libpostal or usaddress.
 
 ### MCP
 
