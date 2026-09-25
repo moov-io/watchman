@@ -46,7 +46,9 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 					EmailAddresses: []string{"khoroshev1@icloud.com"},
 				},
 			},
-			expected: 1.0,
+			// Name, DOB, and email agree, but email is not a unique identity key
+			// so the score is the weighted blend rather than a 1.0 short-circuit.
+			expected: 0.95,
 		},
 		{
 			name: "Partial match - Missing birthdate - Exact Email",
@@ -60,7 +62,7 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 					EmailAddresses: []string{"khoroshev1@icloud.com"},
 				},
 			},
-			expected: 1.0,
+			expected: 0.806,
 		},
 		{
 			name: "Name match only",
@@ -158,7 +160,7 @@ func TestSimilarity_OFAC_SDN_Business(t *testing.T) {
 					},
 				},
 			},
-			expected: 1.0,
+			expected: 0.95,
 		},
 		{
 			name: "Partial match - Fuzzy name, same identifier",
@@ -176,7 +178,7 @@ func TestSimilarity_OFAC_SDN_Business(t *testing.T) {
 					},
 				},
 			},
-			expected: 0.9647,
+			expected: 0.875,
 		},
 		{
 			name: "Alt name only + missing ID",
@@ -267,7 +269,7 @@ func TestSimilarity_OFAC_SDN_Vessel(t *testing.T) {
 						CallSign: "A8LU7",
 					},
 				},
-				expected: 1.0,
+				expected: 0.90,
 			},
 			{
 				name: "Similar name with matching identifiers",

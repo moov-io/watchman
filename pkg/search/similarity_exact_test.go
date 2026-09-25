@@ -31,6 +31,7 @@ func TestCompareBusinessExactIDs(t *testing.T) {
 				Exact:          true,
 				FieldsCompared: 1,
 				PieceType:      "identifiers",
+				UniqueIdentity: false,
 			},
 		},
 	}
