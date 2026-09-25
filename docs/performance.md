@@ -6,26 +6,24 @@ show_sidebar: false
 menubar: docs-menu
 ---
 
-## Watchman Performance Characteristics
+# Performance
 
-Watchman is designed to deliver fast, reliable sanctions and watchlist screening for financial services, balancing compliance needs with performance demands. By leveraging several key optimizations,
-Watchman ensures stable query times and efficient resource usage, even under heavy load. Customize these behaviors through the [Configuration Guide](/watchman/config/) to optimize for your specific environment.
-These performance traits make it a robust choice for production environments where speed and accuracy are critical.
+Watchman screens from an **in-memory index**. After OFAC (and EU, UK, UN, CSL, and the other downloaded lists) finish loading, `/v2/search` picks candidates from RAM — source/type partitions, name-token postings, ID blocks — and scores them in process. A typed name-and-passport query does not wait on a database round-trip. That is why onboarding and refresh stay fast when many searches run at once.
 
-One of Watchman’s core strengths is its **precomputation and normalization** of data. On startup, Watchman downloads and processes sanctions lists (like US OFAC and US/UK/EU Consolidated Screening)
-and applies transformations—such as reordering names (e.g., "MADURO MOROS, Nicolas" to "Nicolas MADURO MOROS") — to provide standardized results.
+A database is **optional**:
 
-Watchman can use the [libpostal](https://github.com/openvenues/libpostal) library (with [Senzing's updated classifier, data, and parser](https://github.com/Senzing/libpostal-data)) to parse and normalize postal addresses,
-improving match accuracy at the cost of higher memory usage. This upfront work ensures that searches are faster by reducing the need for on-the-fly processing, though it does introduce some memory overhead due to `libpostal`’s requirements.
+| What | Where it lives |
+|------|----------------|
+| Downloaded government lists | Memory only. No MySQL or Postgres required to search them. |
+| Restart | Lists load again from the origin, `INITIAL_DATA_DIRECTORY`, or [watchman-cache](/watchman/cache-data-files/). |
+| Ingested files | MySQL or Postgres if they must survive restart. On this release, search of an ingest-only source reads the database (first 1,000 rows). See [Ingest](/watchman/ingest/). |
+| Geocoding L2 / embeddings SQL cache | Optional database when you enable those features. |
 
-> Docker images load [libpostal](https://github.com/openvenues/libpostal), which uses about 3GB of memory. Size the host for that plus Watchman’s own working set.
+Knobs: [Configuration](/watchman/config/). How the index is built: [Indexing](/watchman/indexing/).
 
-Alternatively, [deepparse](/watchman/config/#deepparse) can parse query addresses over HTTP so Watchman does not load libpostal in-process. The sidecar image still needs CPU and model cache on first start.
+On startup Watchman downloads and prepares lists (OFAC people are reordered, `MADURO MOROS, Nicolas` → `Nicolas MADURO MOROS`). Search then uses those prepared fields. Scores are 0 to 1; `minMatch=0.80` is the usual screening line.
 
-Watchman operates entirely with **in-memory lists**, storing all sanction data in memory without disk persistence. This eliminates I/O bottlenecks, enabling rapid search operations.
-The trade-off is that data is reloaded on restart, but this ensures freshness and avoids stale data slowing down queries. Combined with a high-performance search implementation using the
-Jaro-Winkler algorithm, Watchman delivers quick and accurate fuzzy matching for names and addresses, with scoring from 0.0 (no match) to 1.0 (exact match).
-The in-memory approach, paired with precomputed indexes, allows Watchman to handle large query volumes without relying on an external database.
+**Docker images and Linux/macOS GitHub releases** parse addresses with [libpostal](https://github.com/openvenues/libpostal) (Senzing data), about **3GB of models**. Size the host for that plus the list corpus. [deepparse](/watchman/config/#deepparse) can parse query addresses over HTTP instead; the sidecar still needs CPU and a model cache on first start.
 
 ## How a search is executed
 
@@ -78,9 +76,7 @@ As shown in the first graph below, which tracks search requests per second (req/
 
 ![Graph 1: Stable query times with search req/s over time](../images/stable-response-times.png)
 
-The second graph illustrates how Watchman dynamically adjusts goroutine group sizes, optimizing for overall time to score and keeping response timings steady.
-This concurrency model was a significant improvement over earlier versions, where consistent load could cause slowdowns or crashes. The v0.5x series further refined this by consolidating to a single search model,
-encouraging richer query data for better performance.
+The second graph shows Watchman moving the per-search worker count as load changes, which keeps scoring time steady on shared hardware. Send `type` (and IDs when you have them): that shrinks the candidate set so more searches skip the admission queue.
 
 ![Graph 2: Dynamic adjustment of goroutine group sizes for optimal scoring time](../images/dynamic-goroutines.png)
 
