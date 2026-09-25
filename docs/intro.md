@@ -37,14 +37,7 @@ Watchman downloads sanctions lists and scores customers and counterparties again
 
 ## How names are prepared
 
-Before indexing (and on each query), Watchman normalizes:
-
-1. **SDN name order** — `MADURO MOROS, Nicolas` → `Nicolas MADURO MOROS`
-2. **Company suffixes** — strip `INC.`, `LLC`, and similar
-3. **Stopwords** — drop `and`, `the`, `of` unless `KEEP_STOPWORDS=true`
-4. **UTF-8** — lowercase, strip punctuation, fold diacritics (`Raúl` → `raul`)
-
-That is why `nicolas maduro` hits `MADURO MOROS, Nicolas`. Details: [Pipeline](/watchman/pipeline/).
+Every list record and every query is lowercased, punctuation is stripped, accents are folded (`Raúl` → `raul`), and common words like `of` / `the` are dropped. OFAC people are also reordered at ingest (`MADURO MOROS, Nicolas` → `Nicolas MADURO MOROS`) so a query of `nicolas maduro` can match. Full steps: [Pipeline](/watchman/pipeline/).
 
 ## Scoring in one paragraph
 
