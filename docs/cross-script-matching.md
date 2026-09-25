@@ -6,141 +6,96 @@ show_sidebar: false
 menubar: docs-menu
 ---
 
-# Cross-Script Name Matching
+# Cross-script name matching
 
-Watchman can match names across writing systems (Arabic, Cyrillic, Chinese, and others) using neural embeddings. A query of `محمد علي` can return `Mohamed Ali` on the OFAC list.
+Jaro–Winkler compares characters. A name in Arabic, Cyrillic, or Chinese shares almost no characters with its Latin spelling, so `محمد علي` versus `Mohamed Ali` scores near 0 even when they are the same person.
 
-Jaro-Winkler compares characters. Different scripts share almost no characters, so that pair scores near 0 even when they are the same name.
+Watchman can add **neural embeddings**: each name becomes a numeric vector, and similar names land near each other regardless of writing system. Cosine similarity on those vectors is combined with the usual matcher. This feature is **off** until you enable it.
 
-Embeddings map each name to a numeric vector. The same name in two scripts lands near itself in that space. Watchman ranks those vectors with cosine similarity.
+On [OpenSanctions Pairs](/watchman/opensanctions-pairs/), Jaro–Winkler at `minMatch=0.80` had cross-script recall about **0.50**. The hybrid below raised that to **0.91**, with subject precision 0.95 and recall 0.82. Soundex and other name-algorithm flags do not close that gap. See [Using Watchman](/watchman/using-watchman/) for the screening cutoff.
 
-```
-"Mohamed Ali"  → [0.12, -0.45, 0.78, ...]
-"محمد علي"     → [0.11, -0.44, 0.79, ...]
-```
+## Hybrid scoring
 
-On [OpenSanctions Pairs](/watchman/opensanctions-pairs/), this is what moves cross-script recall from about 0.50 to 0.91 at `minMatch=0.80`. Name-algorithm swaps (Soundex, and others) do not.
+Embeddings are slower than Jaro–Winkler, so Watchman does not use them on every query. With `EMBEDDINGS_CROSS_SCRIPT_ONLY=true` (the default when embeddings are on):
 
-### Hybrid approach
-
-Embeddings are slower than Jaro-Winkler, so Watchman does not use them on every query. With `crossScriptOnly: true` (the default):
-
-- **Non-Latin query** (Arabic, Cyrillic, Chinese, …) also searches the vector index
-- **Latin query** stays on Jaro-Winkler
+- A **non-Latin** query (Arabic, Cyrillic, Chinese, and similar) also searches the vector index.
+- A **Latin** query stays on Jaro–Winkler.
 
 Using embeddings on every pair (embed-max / embed-only) over-fires on Latin names. Keep the cross-script gate on.
 
-The screening pick measured in this repo is Jaro-Winkler plus hybrid embeddings (`qwen3-embedding:0.6b` via Ollama) at `minMatch=0.80`. Embeddings are **off** until you enable them.
+The screening pick measured in this repo is Jaro–Winkler plus hybrid embeddings (`qwen3-embedding:0.6b` via Ollama) at `minMatch=0.80`.
 
-## Supported Providers
+## Setup (Ollama)
 
-Watchman supports any OpenAI-compatible embeddings API:
+This is the configuration used for the OpenSanctions numbers above.
 
-| Provider                                                                                | Base URL                                  | Notes              |
-|-----------------------------------------------------------------------------------------|-------------------------------------------|--------------------|
-| [**Chutes**](https://chutes.ai/app?type=embedding)                                      | `https://{model}.chutes.ai/v1`            | Many models, paid  |
-| [**Ollama**](https://ollama.com/search?c=embedding) (local)                             | `http://localhost:11434/v1`               | Free, runs locally |
-| [**OpenAI**](https://developers.openai.com/api/docs/guides/embeddings#embedding-models) | `https://api.openai.com/v1`               | High quality, paid |
-| [**OpenRouter**](https://openrouter.ai/models?fmt=cards&output_modalities=embeddings)   | `https://openrouter.ai/api/v1`            | Many models, paid  |
+1. Install [Ollama](https://ollama.com/download).
+2. Pull the model (1024 dimensions, about 639MB):
 
-## Setup
-
-### Choose a provider
-
-**Option A: Ollama (local, open-source models)**
-
-Install or [Download Ollama](https://ollama.com/download)
-```bash
-curl -fsSL https://ollama.com/install.sh | sh
-```
-
-Pull the model used in the OpenSanctions evaluation:
 ```
 ollama pull qwen3-embedding:0.6b
 ```
 
-**Option B: OpenAI (paid, best quality)**
-```bash
+3. Enable embeddings in Watchman:
+
+```yaml
   Search:
-    # Tune these settings based on your available resources (CPUs, etc).
-    # Usually a multiple (i.e. 2x, 4x) of GOMAXPROCS is optimal.
-    Goroutines:
-      Default: 10
-      Min: 1
-      Max: 25
     Embeddings:
-      Enabled: true # Opt-in feature
+      Enabled: true
       Provider:
-        Name: "openrouter"                      # ollama, openai, openrouter, azure
-        BaseURL: "https://openrouter.ai/api/v1" # API endpoint (required when enabled)
-        APIKey: "<api-key>"                     # Can be set via EMBEDDINGS_API_KEY env var
-        Model: "qwen/qwen3-embedding-8b"        # Required: e.g., "text-embedding-3-small" (OpenAI)
-        Dimension: 4096                         # Required: must match model (e.g., 1536 for OpenAI, 1024 for e5-large)
-        NormalizeVectors: true                  # L2 normalize if API doesn't
+        Name: "ollama"
+        BaseURL: "http://localhost:11434/v1"
+        Model: "qwen3-embedding:0.6b"
+        Dimension: 1024
+        NormalizeVectors: true
         Timeout: "10s"
-        RateLimit:
-          RequestsPerSecond: 100
-          Burst: 75
-        Retry:
-          MaxRetries: 3
-          InitialBackoff: "1s"
-          MaxBackoff: "30s"
       Cache:
-        # Cache type can be one of Blank (disabled), memory, sql
-        Type: "sql"
-      CrossScriptOnly: true # Hybrid approach: embeddings for cross-script only
+        Type: "memory"
+      CrossScriptOnly: true
       SimilarityThreshold: 0.70
-      BatchSize: 32
-      IndexBuildTimeout: "10m"
 ```
 
-## Configuration
+`SimilarityThreshold` is the minimum **cosine** similarity for a vector hit. `minMatch` on `/v2/search` is still the Watchman score that decides what is returned. Use `minMatch=0.80` for a production-shaped queue.
 
-| Env Variable | Default | What it does |
-|--------------|---------|--------------|
-| `EMBEDDINGS_ENABLED` | `false` | Turn on/off |
-| `EMBEDDINGS_BASE_URL` | — | API endpoint (required) |
-| `EMBEDDINGS_API_KEY` | — | API key (optional for Ollama) |
-| `EMBEDDINGS_MODEL` | — | Model name (required) |
-| `EMBEDDINGS_DIMENSION` | — | Vector dimension (required, must match model) |
-| `EMBEDDINGS_CROSS_SCRIPT_ONLY` | `true` | Only use for non-Latin queries |
-| `EMBEDDINGS_SIMILARITY_THRESHOLD` | `0.7` | Min score to return a match |
-| `EMBEDDINGS_CACHE_SIZE` | `10000` | How many vectors to cache |
+Environment variables: [Configuration](/watchman/config/#cross-script-embeddings-configuration). `EMBEDDINGS_API_KEY` is optional for local Ollama.
 
-### Recommended models
+## Other providers
 
-Cross-script name matching quality varies significantly between models. Models with [embedding support on Ollama](https://ollama.com/search?c=embedding&o=newest).
+Watchman calls any OpenAI-compatible embeddings API.
 
-The OpenSanctions subject numbers in this repo used `qwen3-embedding:0.6b` (1024-d). Larger models can be higher quality and are slower and more expensive.
+| Provider | Base URL | Notes |
+|----------|----------|-------|
+| [Ollama](https://ollama.com/search?c=embedding) | `http://localhost:11434/v1` | Local. Use `qwen3-embedding:0.6b` for the measured pick. |
+| [OpenAI](https://developers.openai.com/api/docs/guides/embeddings#embedding-models) | `https://api.openai.com/v1` | Hosted. Example: `text-embedding-3-small` (1536-d). |
+| [OpenRouter](https://openrouter.ai/models?fmt=cards&output_modalities=embeddings) | `https://openrouter.ai/api/v1` | Hosted router. Set `EMBEDDINGS_API_KEY`. |
+| [Chutes](https://chutes.ai/app?type=embedding) | `https://{model}.chutes.ai/v1` | Hosted. |
 
-| Model                                                             | Provider            | Dimension | Notes |
-|-------------------------------------------------------------------|---------------------|-----------|-------|
-| `qwen3-embedding:0.6b`                                            | Ollama              | 1024      | Screening pick in [OpenSanctions Pairs](/watchman/opensanctions-pairs/) |
-| [Qwen3 Embedding 8B](https://huggingface.co/Qwen/Qwen3-Embedding-8B) | Ollama & OpenRouter | 4096      | Larger local/router model |
-| `text-embedding-3-small`                                          | OpenAI              | 1536      | Hosted |
-| `text-embedding-3-large`                                          | OpenAI              | 3072      | Hosted, slower |
-| `multilingual-e5-large`                                           | Ollama              | 1024      | Open multilingual model |
-| `nomic-embed-text`                                                | Ollama              | 768       | General-purpose, weaker on names |
+Larger models (for example Qwen3 Embedding 8B, 4096-d) can be higher quality and are slower and more expensive. Dimension in config must match the model.
 
-## API
+## Search
 
-Search is still `GET /v2/search`. With embeddings enabled, a non-Latin `name` uses the vector index automatically:
+Search is still `GET /v2/search`. With embeddings enabled, a non-Latin `name` uses the vector index. Wait until lists are loaded (`GET /v2/listinfo`).
 
-```bash
+```
 curl -s --get "http://localhost:8084/v2/search" \
   --data-urlencode "type=person" \
   --data-urlencode "name=Владимир Путин" \
+  --data-urlencode "minMatch=0.80" \
   --data-urlencode "limit=1" \
-  | jq '{name: .entities[0].name, match: .entities[0].match}'
-```
-```
-Vladimir Vladimirovich PUTIN
-0.949172991083859
+  | jq '{name: .entities[0].name, match: (.entities[0].match*1000|round/1000)}'
+# {"name":"Vladimir Vladimirovich PUTIN","match":0.949}
 ```
 
-## Known limitations
+The `match` field is the Watchman score in `[0, 1]`, the same field as a Latin query. It is not a separate cosine percentage.
 
-- First query is slower (API round-trip + model warm-up)
-- Very short names (1-2 chars) don't work well
-- Quality depends heavily on the model used
-- Some rare scripts may have lower accuracy
+UTF-8 names belong on the query string (`curl --get --data-urlencode`). There is no JSON POST body on `/v2/search`.
+
+## Limitations
+
+- Embeddings are off in the default `docker run`. Enable them before judging transliteration recall.
+- The first query after enable pays model warm-up and an API round-trip.
+- Very short names (one or two characters) score poorly.
+- Quality depends on the model. The published tables used `qwen3-embedding:0.6b`.
+- Rare scripts may recall less than Arabic, Cyrillic, or Chinese.
+
+Full tables: [OpenSanctions Pairs](/watchman/opensanctions-pairs/). Scoring: [Similarity methodology](/watchman/methodology/).

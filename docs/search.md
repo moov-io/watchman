@@ -198,29 +198,19 @@ Parameters:
 - `algorithm`: Per-request name metric (see above). Defaults to Jaro–Winkler.
 
 
-## Cross-Script Name Matching
+## Cross-script name matching
 
-Watchman supports searching for names written in non-Latin scripts (Arabic, Cyrillic, Chinese, etc.)
-against Latin names in sanctions lists using neural network embeddings.
+Jaro–Winkler scores near 0 when the query is Arabic, Cyrillic, or Chinese and the list name is Latin. Enable embeddings (`qwen3-embedding:0.6b` via Ollama is the measured pick) and keep `EMBEDDINGS_CROSS_SCRIPT_ONLY=true`. The `match` field is still 0 to 1.
 
-```bash
-# Arabic query finds "Mohamed Ali" in OFAC list (embeddings must be on)
+```
 curl -s --get "http://localhost:8084/v2/search" \
   --data-urlencode "type=person" \
   --data-urlencode "name=محمد علي" \
+  --data-urlencode "minMatch=0.80" \
   --data-urlencode "limit=1"
 ```
 
-| Script   | Example Query  | Matches        | Score |
-|----------|----------------|----------------|-------|
-| Arabic   | محمد علي       | Mohamed Ali    | 97%   |
-| Cyrillic | Владимир Путин | Vladimir Putin | 99.8% |
-| Chinese  | 金正恩         | Kim Jong Un    | 79%   |
-
-This feature requires:
-- Running an embeddings provider (Ollama, OpenAI, etc.)
-
-For detailed setup instructions, see [Cross-Script Name Matching](cross-script-matching.md).
+Setup, hybrid scoring, and OpenSanctions numbers: [Cross-script matching](/watchman/cross-script-matching/).
 
 ## Best Practices
 
