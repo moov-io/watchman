@@ -28,17 +28,21 @@ Moov's mission is to give developers an easy way to create and integrate bank pr
 
 ## What is Watchman?
 
-Moov Watchman is a high-performance sanctions screening and compliance tool that helps businesses meet their regulatory obligations. It provides an HTTP server, [Go library](https://pkg.go.dev/github.com/moov-io/watchman/pkg/search#Client), and secure [Model Context Protocol (MCP)](https://moov-io.github.io/watchman/mcp/) server for searching against multiple global sanctions and screening lists. Watchman offers a unified model for entities and queries for humans and agents.
+Moov Watchman is an open-source **sanctions screening engine**. It downloads OFAC, EU, UK, UN, and related lists, indexes them in memory, and scores each customer or counterparty with an inspectable multi-field matcher. Use the HTTP API, [Go client](https://pkg.go.dev/github.com/moov-io/watchman/pkg/search#Client), WASM UI, or experimental [MCP](https://moov-io.github.io/watchman/mcp/) server.
+
+How to run it: [Using Watchman](https://moov-io.github.io/watchman/using-watchman/). For BSA/AML and sanctions officers: [For compliance and risk](https://moov-io.github.io/watchman/methodology/for-compliance/).
+
+On 755,540 analyst-labeled [OpenSanctions Pairs](https://moov-io.github.io/watchman/opensanctions-pairs/), Jaro–Winkler at `minMatch=0.80` had subject **precision 0.99**. With cross-script embeddings, subject recall rose from **0.69 to 0.82** while precision stayed **0.95**.
 
 ## Key Features
 
-- **Geocoding**: Using one of the supported providers.
-- **Senzing Support**: Import data files in [senzing format](https://www.senzing.com/docs/entity_specification/) and get search responses as senzing entities.
-- **Comprehensive Coverage**: Integrates multiple global watchlists in one unified system
-- **High-Performance Search**: In-memory corpus with source/type partitions, name-token and crypto candidate indexes, admission control, and parallel Jaro-Winkler scoring (see [Performance](https://moov-io.github.io/watchman/performance/) and [Indexing](https://moov-io.github.io/watchman/indexing/))
-- **Flexible Integration**: HTTP API and Go library for easy integration into your systems
-- **Automated Updates**: Regular refreshes of watchlist data to ensure compliance
-- **Model Context Protocol**: Integrate AI agents into screening workflows with MCP.
+- **Lists you can name** — OFAC SDN and Non-SDN, US CSL, FinCEN 311, EU, UK, UN, OpenSanctions Senzing files, plus CSV ingest
+- **Structured search** — `type` (person, business, organization, vessel, aircraft), name, aliases, government IDs, dates, addresses, crypto, contact
+- **Identity vs evidence** — matching passport / IMO / crypto (type + country + identifier) scores 1.0; tax IDs and email do not force a match; conflicting national IDs penalize the score
+- **You set the cutoff** — `minMatch` is policy (0.80 screening, ~0.59 high recall)
+- **Explainable hits** — `debug=true` returns field-level score pieces
+- **Fast candidate search** — source/type partitions, name-token and ID indexes, parallel scoring ([Performance](https://moov-io.github.io/watchman/performance/), [Indexing](https://moov-io.github.io/watchman/indexing/))
+- **Optional** — TF-IDF, cross-script embeddings, geocoding, libpostal/deepparse, Senzing request/response format, MCP
 
 ## Included Lists
 
@@ -50,14 +54,10 @@ Watchman integrates the following lists to help you maintain global compliance. 
 | European Union    | [Consolidated Sanctions List](https://data.europa.eu/data/datasets/consolidated-list-of-persons-groups-and-entities-subject-to-eu-financial-sanctions?locale=en)                        |
 | US Government     | [Consolidated Screening List (CSL)](https://www.trade.gov/consolidated-screening-list), [FinCEN 311](https://home.treasury.gov/policy-issues/terrorism-and-illicit-finance/311-actions) |
 | US Treasury       | [Office of Foreign Assets Control (OFAC)](https://ofac.treasury.gov/sanctions-list-service) and Non-SDN list                                                                            |
-| United Kingdom    | [OFSI Sanctions List](https://www.gov.uk/government/publications/financial-sanctions-consolidated-list-of-targets/consolidated-list-of-targets#contents)                                |
+| United Kingdom    | [UK sanctions list](https://www.gov.uk/government/publications/the-uk-sanctions-list)                                                                                                    |
 | United Nations    | [Consolidated Sanctions List](https://www.un.org/sc/resources/sc-sanctions)                                                                                                             |
 
 When loading multiple OpenSanctions or custom Senzing-formatted lists, set the `SENZING_CONCURRENT_DOWNLOADS` environment variable to control parallelism during downloads (defaults to 5 concurrent).
-
-## Agents
-
-Watchman provides an HTTP `/mcp` endpoint with full Model Context Protocol (MCP) support, allowing agents to search the loaded lists.
 
 ## Project status
 
@@ -65,24 +65,22 @@ Moov Watchman is actively used in multiple production environments. Please star 
 
 ## Usage
 
-The Watchman project implements an HTTP server, [Go library](https://pkg.go.dev/github.com/moov-io/watchman/pkg/search#Client), and experimental [Model Context Protocol (MCP)](https://moov-io.github.io/watchman/mcp/) server for searching against Watchman.
-
-Government lists are downloaded (and refreshed), parsed, prepared, normalized, and indexed in-memory. On each refresh Watchman builds source/type partitions, inverted name-token indexes, exact-name maps, and crypto address lookups so searches score a **candidate set** (with safe fallback to a full *source/type partition* on name typos) rather than always scanning every entity. Candidate selection runs before admission control; tightly pruned queries (≤100 candidates) skip the queue. Prefer `type` and `source` on `/v2/search` for best latency—see [Performance](https://moov-io.github.io/watchman/performance/), [Indexing](https://moov-io.github.io/watchman/indexing/), and [Configuration](https://moov-io.github.io/watchman/config/#similarity-configuration) (`SEARCH_MAX_IN_FLIGHT`, `SEARCH_GOROUTINE_COUNT`).
+Always send `type` (and `source` when you only need one list). Candidate selection runs before admission control; queries with ≤100 candidates skip the queue. See [Using Watchman](https://moov-io.github.io/watchman/using-watchman/), [Performance](https://moov-io.github.io/watchman/performance/), and [Indexing](https://moov-io.github.io/watchman/indexing/).
 
 ### Docker
 
-We publish a [public Docker image `moov/watchman`](https://hub.docker.com/r/moov/watchman/) from Docker Hub or use this repository. No configuration is required to serve on `:8084`. We also have Docker images for [OpenShift](https://quay.io/repository/moov/watchman?tab=tags) published as `quay.io/moov/watchman`. Lastly, we offer a `moov/watchman:v2-static` Docker image with files from 2019. This image can be useful for faster local testing or consistent results.
+We publish [`moov/watchman`](https://hub.docker.com/r/moov/watchman/) on Docker Hub and [`quay.io/moov/watchman`](https://quay.io/repository/moov/watchman?tab=tags) for OpenShift. `moov/watchman:v2-static` ships frozen 2019 files for fast local tests. The WASM UI is at `/` on `:8084`.
 
 Start the Docker image [using a tag](https://hub.docker.com/r/moov/watchman/tags):
 ```
-docker run -p 8084:8084 moov/watchman
+docker run -p 8084:8084 -e INCLUDED_LISTS=us_ofac moov/watchman
 ```
 
 That example publishes only the business API (`:8084`). Do not expose Watchman on the public internet. See [Network access](#network-access).
 
 Run a search for an individual or business:
 ```
-curl -s "http://localhost:8084/v2/search?name=Nicolas+Maduro&type=person&limit=1&minMatch=0.75" | jq .
+curl -s "http://localhost:8084/v2/search?name=Nicolas+Maduro&type=person&limit=1&minMatch=0.80" | jq .
 ```
 
 <details>
