@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/moov-io/watchman/pkg/search"
 
@@ -14,51 +15,74 @@ import (
 )
 
 func TestGoogleGeocoder_Success(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		require.Contains(t, r.URL.RawQuery, "key=test-key")
-		require.Contains(t, r.URL.RawQuery, "address=")
+	t.Run("mock", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			require.Contains(t, r.URL.RawQuery, "key=test-key")
+			require.Contains(t, r.URL.RawQuery, "address=")
 
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{
-			"results": [{
-				"geometry": {
-					"location": {"lat": 40.762363, "lng": -73.8313912},
-					"location_type": "ROOFTOP"
-				}
-			}],
-			"status": "OK"
-		}`))
-	}))
-	defer server.Close()
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{
+				"results": [{
+					"geometry": {
+						"location": {"lat": 40.762363, "lng": -73.8313912},
+						"location_type": "ROOFTOP"
+					}
+				}],
+				"status": "OK"
+			}`))
+		}))
+		defer server.Close()
 
-	var apiKey string
-	if !testing.Short() {
-		apiKey = os.Getenv("GOOGLE_MAPS_API_KEY")
-	}
-	conf := ProviderConfig{
-		APIKey: cmp.Or(apiKey, "test-key"),
-	}
-	if apiKey == "" {
-		conf.BaseURL = server.URL
-	}
+		geocoder, err := NewGoogleGeocoder(ProviderConfig{
+			APIKey:  "test-key",
+			BaseURL: server.URL,
+		})
+		require.NoError(t, err)
 
-	geocoder, err := NewGoogleGeocoder(conf)
-	require.NoError(t, err)
+		addr := search.Address{
+			Line1:   "123 Main St",
+			City:    "New York",
+			State:   "NY",
+			Country: "US",
+		}
 
-	addr := search.Address{
-		Line1:   "123 Main St",
-		City:    "New York",
-		State:   "NY",
-		Country: "US",
-	}
+		coords, err := geocoder.Geocode(context.Background(), addr)
+		require.NoError(t, err)
+		require.NotNil(t, coords)
+		require.InDelta(t, 40.762363, coords.Latitude, 0.0001)
+		require.InDelta(t, -73.8313912, coords.Longitude, 0.0001)
+		require.Equal(t, "rooftop", coords.Accuracy)
+	})
 
-	coords, err := geocoder.Geocode(context.Background(), addr)
-	require.NoError(t, err)
-	require.NotNil(t, coords)
+	t.Run("live", func(t *testing.T) {
+		if testing.Short() {
+			t.Skip("-short flag provided")
+		}
+		apiKey := cmp.Or(os.Getenv("GOOGLE_MAPS_API_KEY"), os.Getenv("GOOGLE_API_KEY"))
+		if apiKey == "" {
+			t.Skip("GOOGLE_MAPS_API_KEY not set")
+		}
 
-	require.InDelta(t, 40.762363, coords.Latitude, 0.001)
-	require.InDelta(t, -73.8313912, coords.Longitude, 0.001)
-	require.Equal(t, "rooftop", coords.Accuracy)
+		geocoder, err := NewGoogleGeocoder(ProviderConfig{
+			APIKey:  apiKey,
+			Timeout: 30 * time.Second,
+		})
+		require.NoError(t, err)
+
+		addr := search.Address{
+			Line1:   "Statue of Liberty",
+			City:    "New York",
+			State:   "NY",
+			Country: "US",
+		}
+
+		coords, err := geocoder.Geocode(context.Background(), addr)
+		require.NoError(t, err)
+		require.NotNil(t, coords)
+		require.InDelta(t, 40.69, coords.Latitude, 0.01)
+		require.InDelta(t, -74.04, coords.Longitude, 0.01)
+		t.Logf("Google live: lat=%.6f lng=%.6f accuracy=%s", coords.Latitude, coords.Longitude, coords.Accuracy)
+	})
 }
 
 func TestGoogleGeocoder_ZeroResults(t *testing.T) {

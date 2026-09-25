@@ -1,66 +1,84 @@
 package geocoding
 
 import (
-	"cmp"
 	"context"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/moov-io/watchman/pkg/search"
 	"github.com/stretchr/testify/require"
 )
 
 func TestOpenCageGeocoder_Success(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		require.Contains(t, r.URL.RawQuery, "key=test-key")
-		require.Contains(t, r.URL.RawQuery, "q=123+Main+St+New+York+NY+US")
+	t.Run("mock", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			require.Contains(t, r.URL.RawQuery, "key=test-key")
+			require.Contains(t, r.URL.RawQuery, "q=123+Main+St+New+York+NY+US")
 
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{
-			"results": [{
-				"geometry": {"lat": 40.754057, "lng": -73.956462},
-				"confidence": 9
-			}],
-			"status": {"code": 200, "message": "OK"}
-		}`))
-	}))
-	defer server.Close()
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{
+				"results": [{
+					"geometry": {"lat": 40.754057, "lng": -73.956462},
+					"confidence": 9
+				}],
+				"status": {"code": 200, "message": "OK"}
+			}`))
+		}))
+		defer server.Close()
 
-	var apiKey string
-	if !testing.Short() {
-		apiKey = os.Getenv("OPENCAGE_API_KEY")
-	}
-	conf := ProviderConfig{
-		APIKey: cmp.Or(apiKey, "test-key"),
-	}
-	if apiKey == "" {
-		conf.BaseURL = server.URL
-	}
+		geocoder, err := NewOpenCageGeocoder(ProviderConfig{
+			APIKey:  "test-key",
+			BaseURL: server.URL,
+		})
+		require.NoError(t, err)
 
-	geocoder, err := NewOpenCageGeocoder(conf)
-	require.NoError(t, err)
+		addr := search.Address{
+			Line1:   "123 Main St",
+			City:    "New York",
+			State:   "NY",
+			Country: "US",
+		}
 
-	addr := search.Address{
-		Line1:   "123 Main St",
-		City:    "New York",
-		State:   "NY",
-		Country: "US",
-	}
+		coords, err := geocoder.Geocode(context.Background(), addr)
+		require.NoError(t, err)
+		require.NotNil(t, coords)
+		require.InDelta(t, 40.754057, coords.Latitude, 0.0001)
+		require.InDelta(t, -73.956462, coords.Longitude, 0.0001)
+		require.Equal(t, "rooftop", coords.Accuracy)
+	})
 
-	coords, err := geocoder.Geocode(context.Background(), addr)
-	require.NoError(t, err)
-	require.NotNil(t, coords)
+	t.Run("live", func(t *testing.T) {
+		if testing.Short() {
+			t.Skip("-short flag provided")
+		}
+		apiKey := os.Getenv("OPENCAGE_API_KEY")
+		if apiKey == "" {
+			t.Skip("OPENCAGE_API_KEY not set")
+		}
 
-	tolerance := 0.1
-	if apiKey == "" {
-		tolerance = 2.0 // without an API key results are far less accurate
-	}
+		geocoder, err := NewOpenCageGeocoder(ProviderConfig{
+			APIKey:  apiKey,
+			Timeout: 30 * time.Second,
+		})
+		require.NoError(t, err)
 
-	require.InDelta(t, 40.754057, coords.Latitude, tolerance)
-	require.InDelta(t, -72.6426519, coords.Longitude, tolerance)
-	require.Equal(t, "rooftop", coords.Accuracy)
+		addr := search.Address{
+			Line1:   "1600 Amphitheatre Parkway",
+			City:    "Mountain View",
+			State:   "CA",
+			Country: "US",
+		}
+
+		coords, err := geocoder.Geocode(context.Background(), addr)
+		require.NoError(t, err)
+		require.NotNil(t, coords)
+		require.InDelta(t, 37.42, coords.Latitude, 0.01)
+		require.InDelta(t, -122.08, coords.Longitude, 0.01)
+		t.Logf("OpenCage live: lat=%.6f lng=%.6f accuracy=%s", coords.Latitude, coords.Longitude, coords.Accuracy)
+	})
 }
 
 func TestOpenCageGeocoder_NoResults(t *testing.T) {
