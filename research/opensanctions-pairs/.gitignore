@@ -1,0 +1,5 @@
+data/
+out/
+*.jsonl
+*.gob
+*.tmp
