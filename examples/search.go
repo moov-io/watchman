@@ -20,15 +20,18 @@ func main() {
 	fmt.Printf("loaded %d list(s): %v\n\n", len(info.Lists), info.Lists)
 
 	// Search using the unified entity query model (mirrors /v2/search)
-	birthDate := time.Date(1962, time.November, 23, 0, 0, 0, 0, time.UTC)
+	birthDate := time.Date(1993, time.April, 17, 0, 0, 0, 0, time.UTC)
 	query := search.Entity[search.Value]{
-		Name: "Nicolas Maduro",
+		Name: "Dmitry Khoroshev",
 		Type: search.EntityPerson,
 		Person: &search.Person{
 			BirthDate: &birthDate,
-			Gender:    search.GenderMale,
+			GovernmentIDs: []search.GovernmentID{{
+				Type:       search.GovernmentIDPassport,
+				Country:    "RU",
+				Identifier: "2018278055",
+			}},
 		},
-		// Addresses, Contact, CryptoAddresses, Source, SourceID also supported
 	}
 	opts := search.SearchOpts{
 		Limit:    5,

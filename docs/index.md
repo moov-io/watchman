@@ -10,7 +10,7 @@ menubar: docs-menu
 
 ![Moov Watchman Logo](https://repository-images.githubusercontent.com/163885848/41101f80-c6d9-11ea-9ab5-dc9f51b849df)
 
-Watchman is an open-source **sanctions screening engine**. It downloads government watchlists (OFAC, EU, UK, UN, and others), keeps them in memory, and compares each customer or counterparty you send to those lists. You get a ranked list of possible matches and a score from 0 to 1. HTTP API, Go library, browser UI, optional MCP.
+Watchman is an open-source **sanctions screening engine**. One Docker command downloads OFAC (and EU, UK, UN, and others), keeps them in memory, and scores each customer or counterparty. You get a ranked hit and a score from 0 to 1 — Apache 2.0, in your network, with a scorer you can read. HTTP API, Go library, browser UI, optional MCP.
 
 Start here: [Using Watchman](/watchman/using-watchman/) · [Docker](/watchman/usage-docker/) · [For compliance and risk](/watchman/methodology/for-compliance/)
 
@@ -41,11 +41,19 @@ Use `INCLUDED_LISTS` or the [config file](/watchman/config/#included-lists) to c
 
 ```
 docker run -p 8084:8084 -e INCLUDED_LISTS=us_ofac moov/watchman
-curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&gov_passport=RU:2018278055&minMatch=0.80&limit=1" \
-  | jq '{name: .entities[0].name, match: .entities[0].match}'
 ```
 
-UI at `http://localhost:8084`. Production checklist: [Using Watchman](/watchman/using-watchman/). API: [Search](/watchman/search/). Knobs: [Configuration](/watchman/config/).
+In another terminal, wait until OFAC is indexed, then screen at a production cutoff (`minMatch=0.80`). OFAC SDN 48603, Russian passport → **1.0**:
+
+```
+until curl -sf http://localhost:8084/v2/listinfo | jq -e '.lists.us_ofac > 0' >/dev/null; do sleep 2; done
+
+curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&gov_passport=RU:2018278055&minMatch=0.80&limit=1" \
+  | jq '{name: .entities[0].name, match: .entities[0].match, sourceID: .entities[0].sourceID}'
+# {"name":"Dmitry Yuryevich KHOROSHEV","match":1,"sourceID":"48603"}
+```
+
+The same name without an ID returns no rows at 0.80. Send the passport, date of birth, or IMO you already have. UI at `http://localhost:8084`. Full recipe: [Using Watchman](/watchman/using-watchman/). API: [Search](/watchman/search/). Knobs: [Configuration](/watchman/config/).
 
 ## About Moov
 

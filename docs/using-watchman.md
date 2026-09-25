@@ -22,18 +22,25 @@ Lists include OFAC, EU, UK, UN, the US Consolidated Screening List, FinCEN 311, 
 docker run -p 8084:8084 -e INCLUDED_LISTS=us_ofac moov/watchman
 ```
 
-Open [http://localhost:8084](http://localhost:8084) for the WASM UI. Then:
+Open [http://localhost:8084](http://localhost:8084) for the WASM UI. In another terminal, wait until OFAC is indexed (the first download can take a minute):
 
 ```
-curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&birthDate=1993-04-17&gov_passport=RU:2018278055&limit=5&minMatch=0.80" \
+until curl -sf http://localhost:8084/v2/listinfo | jq -e '.lists.us_ofac > 0' >/dev/null; do sleep 2; done
+```
+
+Screen OFAC SDN 48603 at a production cutoff. The Russian passport is an identity key, so the score is **1.0**:
+
+```
+curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&gov_passport=RU:2018278055&minMatch=0.80&limit=1" \
   | jq '{name: .entities[0].name, match: .entities[0].match, sourceID: .entities[0].sourceID}'
+# {"name":"Dmitry Yuryevich KHOROSHEV","match":1,"sourceID":"48603"}
 ```
 
-Always send **`type=`** (`person`, `business`, `vessel`, …). It is not a required query parameter, but GET fields such as `birthDate` and `gov_*` are only read when `type` is set, and a wrong type searches only that partition. Include government IDs and dates of birth when you have them. `minMatch=0.80` means “only return hits that score at least 0.80.” That is a typical starting cutoff.
+`GET /v2/listinfo` is the freshness check (counts, hashes, refresh window, version). Admin metrics stay on **:9094**. Do not put Watchman on the public internet. See [Network access](/watchman/network/).
 
-Confirm lists with `GET /v2/listinfo` (counts, hashes, refresh window, version).
+Always send **`type=`** (`person`, `business`, `vessel`, …). It is not a required query parameter, but GET fields such as `birthDate` and `gov_*` are only read when `type` is set, and a wrong type searches only that partition. Include government IDs and dates of birth when you have them. `minMatch=0.80` means “only return hits that score at least 0.80.”
 
-Admin metrics stay on **:9094**. Do not put Watchman on the public internet. See [Network access](/watchman/network/).
+The same name without an ID scores 0.767 and returns no rows at 0.80. Add date of birth (`birthDate=1993-04-17`) and the hit comes back at about 0.867. Send the fields CDD already collects.
 
 ## Example
 

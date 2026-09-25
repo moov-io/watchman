@@ -16,7 +16,17 @@ Business API on **:8084**. Admin/metrics on **:9094**. Do not expose Watchman on
 docker run -p 8084:8084 -e INCLUDED_LISTS=us_ofac moov/watchman
 ```
 
-WASM UI: [http://localhost:8084](http://localhost:8084). Full recipe: [Using Watchman](/watchman/using-watchman/). Env vars: [Configuration](/watchman/config/).
+WASM UI: [http://localhost:8084](http://localhost:8084). In another terminal, wait until OFAC is indexed, then screen at a production cutoff:
+
+```
+until curl -sf http://localhost:8084/v2/listinfo | jq -e '.lists.us_ofac > 0' >/dev/null; do sleep 2; done
+
+curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&gov_passport=RU:2018278055&minMatch=0.80&limit=1" \
+  | jq '{name: .entities[0].name, match: .entities[0].match, sourceID: .entities[0].sourceID}'
+# {"name":"Dmitry Yuryevich KHOROSHEV","match":1,"sourceID":"48603"}
+```
+
+That is OFAC SDN 48603. The passport is an identity key, so the score is **1.0** at `minMatch=0.80`. Full recipe: [Using Watchman](/watchman/using-watchman/). Env vars: [Configuration](/watchman/config/).
 
 For an optional [deepparse](/watchman/config/#deepparse) sidecar used in tests and examples:
 
@@ -24,23 +34,17 @@ For an optional [deepparse](/watchman/config/#deepparse) sidecar used in tests a
 make setup-deepparse
 ```
 
-Search is `GET /v2/search`. Send `type`. Adding fields raises the score (OFAC SDN 48603):
+The same name without an ID is below the screening line. Date of birth clears it; the passport is 1.0:
 
 ```
-# Name only
-curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&limit=1" \
-  | jq '{name: .entities[0].name, match: (.entities[0].match*1000|round/1000)}'
-# {"name":"Dmitry Yuryevich KHOROSHEV","match":0.767}
+# Name only — empty at minMatch=0.80
+curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&minMatch=0.80&limit=1" | jq .entities
+# []
 
 # Name + date of birth
-curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&birthDate=1993-04-17&limit=1" \
+curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&birthDate=1993-04-17&minMatch=0.80&limit=1" \
   | jq '{name: .entities[0].name, match: (.entities[0].match*1000|round/1000)}'
 # {"name":"Dmitry Yuryevich KHOROSHEV","match":0.867}
-
-# Name + passport → 1.0
-curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&gov_passport=RU:2018278055&limit=1" \
-  | jq '{name: .entities[0].name, match: .entities[0].match}'
-# {"name":"Dmitry Yuryevich KHOROSHEV","match":1}
 ```
 
-`minMatch=0.80` is a typical production cutoff. The name-only query would return no rows at that cutoff; the passport query would. Each result is the list record with `match` on the same object. Full recipe: [Using Watchman](/watchman/using-watchman/).
+Each result is the list record with `match` on the same object.

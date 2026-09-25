@@ -21,7 +21,7 @@
 title: Moov Watchman
 email: oss@moov.io
 description: >- # this means to ignore newlines until "baseurl:"
- Moov Watchman is an HTTP API and Go library that offers download, parse, and search functions over numerous trade sanction lists from the United States, agencies, and nonprofits for complying with regional laws.
+ Moov Watchman is an open-source sanctions screening engine. It downloads OFAC, EU, UK, UN, and related lists and scores customers and counterparties on GET /v2/search.
 url: "https://moov-io.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 baseurl: "/watchman" # the subpath of your site, e.g. /blog
 source_code: https://github.com/moov-io/watchman

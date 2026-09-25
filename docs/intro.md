@@ -10,6 +10,8 @@ menubar: docs-menu
 
 Watchman downloads sanctions lists and scores customers and counterparties against them with an inspectable, multi-field matcher. It is the watchlist engine in a BSA/AML stack: onboarding, periodic refresh, and (where required) pre-transaction screening.
 
+A production query of OFAC SDN 48603 with a passport scores **1.0** at `minMatch=0.80`. The same name without an ID scores 0.767 and stays off the alert queue. Send the IDs and dates CDD already collects.
+
 [Using Watchman](/watchman/using-watchman/) · [For compliance and risk](/watchman/methodology/for-compliance/) · [Similarity methodology](/watchman/methodology/)
 
 ## What you get

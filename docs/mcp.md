@@ -35,14 +35,14 @@ Searches for entities in sanctions lists using the same powerful matching algori
 
 #### Parameters
 
-- **request** (string, required): JSON string representing the search request, identical to the `/v2/search` HTTP endpoint
+- **request** (object, required): Entity query with the same fields as `GET /v2/search` (`name`, `entityType`, `person`, IDs, addresses, …). Search itself is GET query parameters; this tool takes the entity as JSON.
 - **limit** (number, optional): Maximum number of results to return (default: 10)
-- **minMatch** (number, optional): Minimum match score threshold (default: 0.0)
+- **minMatch** (number, optional): Minimum match score threshold (default: 0.0). Use **0.80** for a production-shaped queue.
 - **algorithm** (string, optional): String matching algorithm. Same values as the HTTP `?algorithm=` query parameter (`jaro-winkler`, `soundex`, `soft-bidist`, `soft-bisim`, `editex`, `nsim`, `nsim-3`, `double-metaphone`, `beider-morse`).
 
 #### Request Format
 
-The `request` parameter accepts the same JSON structure as the HTTP `/v2/search` endpoint:
+The `request` parameter is the entity to screen (`name`, `entityType`, and optional person/business fields):
 
 ```json
 {
@@ -53,11 +53,16 @@ The `request` parameter accepts the same JSON structure as the HTTP `/v2/search`
         "name": "search_entities",
         "arguments": {
             "request": {
-                "name": "john",
-                "entityType": "person"
+                "name": "Dmitry Khoroshev",
+                "entityType": "person",
+                "person": {
+                    "governmentIDs": [
+                        {"type": "passport", "country": "RU", "identifier": "2018278055"}
+                    ]
+                }
             },
             "limit": 1,
-            "minMatch": 0.25,
+            "minMatch": 0.80,
             "algorithm": "jaro-winkler"
         }
     }
@@ -170,11 +175,16 @@ Returns a JSON object with search results:
         "name": "search_entities",
         "arguments": {
             "request": {
-                "name": "Nicholas Maduro",
-                "entityType": "person"
+                "name": "Dmitry Khoroshev",
+                "entityType": "person",
+                "person": {
+                    "governmentIDs": [
+                        {"type": "passport", "country": "RU", "identifier": "2018278055"}
+                    ]
+                }
             },
             "limit": 1,
-            "minMatch": 0.25
+            "minMatch": 0.80
         }
     }
 }
@@ -195,7 +205,7 @@ Returns a JSON object with search results:
                 "entityType": "business"
             },
             "limit": 1,
-            "minMatch": 0.25
+            "minMatch": 0.80
         }
     }
 }
@@ -224,7 +234,7 @@ Returns a JSON object with search results:
                 ]
             },
             "limit": 1,
-            "minMatch": 0.25
+            "minMatch": 0.80
         }
     }
 }
@@ -298,11 +308,18 @@ func main() {
 		Name: "search_entities",
 		Arguments: map[string]any{
 			"request": search.Entity[search.Value]{
-				Name: "John",
+				Name: "Dmitry Khoroshev",
 				Type: search.EntityPerson,
+				Person: &search.Person{
+					GovernmentIDs: []search.GovernmentID{{
+						Type:       search.GovernmentIDPassport,
+						Country:    "RU",
+						Identifier: "2018278055",
+					}},
+				},
 			},
 			"limit":    1,
-			"minMatch": 0.25,
+			"minMatch": 0.80,
 		},
 	})
 	if err != nil {
@@ -334,11 +351,16 @@ curl -s -X POST "http://localhost:8084/mcp" \
         "name": "search_entities",
         "arguments": {
             "request": {
-                "name": "john",
-                "entityType": "person"
+                "name": "Dmitry Khoroshev",
+                "entityType": "person",
+                "person": {
+                    "governmentIDs": [
+                        {"type": "passport", "country": "RU", "identifier": "2018278055"}
+                    ]
+                }
             },
             "limit": 1,
-            "minMatch": 0.25
+            "minMatch": 0.80
         }
     }
 }'

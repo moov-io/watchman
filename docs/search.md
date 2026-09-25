@@ -21,8 +21,10 @@ Practical recipe: [Using Watchman](/watchman/using-watchman/).
 Screening is **`GET /v2/search`**. There is no JSON POST body on this path.
 
 ```
-GET /v2/search?type=person&name=Dmitry+Khoroshev&limit=1
+GET /v2/search?type=person&name=Dmitry+Khoroshev&gov_passport=RU:2018278055&minMatch=0.80&limit=1
 ```
+
+Wait until `GET /v2/listinfo` shows `us_ofac` (or your lists) before the first search. A matching passport scores **1.0**; the same name without an ID is below 0.80.
 
 ### Senzing Formatting
 
@@ -69,7 +71,7 @@ When `algorithm` is omitted, process-wide flags such as `USE_SOUNDEX_MATCHING` s
 
 | Type | Description | Example Query |
 |------|-------------|---------------|
-| `person` | Individual persons | `?type=person&name=Dmitry+Khoroshev` |
+| `person` | Individual persons | `?type=person&name=Dmitry+Khoroshev&gov_passport=RU:2018278055&minMatch=0.80` |
 | `business` | Business entities | `?type=business&name=tidewater` |
 | `organization` | Non-business organizations | `?type=organization&name=hamas` |
 | `aircraft` | Aircraft registrations | `?type=aircraft&callSign=EP-GOM` |
@@ -161,7 +163,7 @@ The API returns the original query plus matched entities. Each element of `entit
         "gender": "male",
         "birthDate": "1993-04-17T00:00:00Z"
       },
-      "match": 0.767
+      "match": 1
     }
   ]
 }

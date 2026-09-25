@@ -28,11 +28,13 @@ Moov's mission is to give developers an easy way to create and integrate bank pr
 
 ## What is Watchman?
 
-Moov Watchman is an open-source **sanctions screening engine**. It downloads OFAC, EU, UK, UN, and related lists, indexes them in memory, and scores each customer or counterparty with an inspectable multi-field matcher. Use the HTTP API, [Go client](https://pkg.go.dev/github.com/moov-io/watchman/pkg/search#Client), WASM UI, or experimental [MCP](https://moov-io.github.io/watchman/mcp/) server.
+Moov Watchman is an open-source **sanctions screening engine**. One Docker command downloads OFAC (and EU, UK, UN, and related lists), indexes them in memory, and scores each customer or counterparty with an inspectable multi-field matcher. You get a ranked hit and a score from 0 to 1 — Apache 2.0, in your network, with a scorer you can read.
+
+HTTP API, [Go client](https://pkg.go.dev/github.com/moov-io/watchman/pkg/search#Client), browser UI, experimental [MCP](https://moov-io.github.io/watchman/mcp/).
 
 How to run it: [Using Watchman](https://moov-io.github.io/watchman/using-watchman/). For BSA/AML and sanctions officers: [For compliance and risk](https://moov-io.github.io/watchman/methodology/for-compliance/).
 
-We measured the matcher on 472,477 labeled people, companies, and vessels from [OpenSanctions Pairs](https://moov-io.github.io/watchman/opensanctions-pairs/). At `minMatch=0.80`, almost every returned hit was a real match (precision 0.99). Enabling embeddings for names in different writing systems raised the share of true matches found from 0.69 to 0.82, with precision 0.95.
+On 472,477 labeled people, companies, and vessels ([OpenSanctions Pairs](https://moov-io.github.io/watchman/opensanctions-pairs/)), Jaro–Winkler at `minMatch=0.80` had precision **0.99**. Cross-script embeddings raised recall from 0.69 to 0.82, with precision 0.95. That is a production-shaped queue: almost every alert is real.
 
 ## Key Features
 
@@ -63,43 +65,48 @@ When loading multiple OpenSanctions or custom Senzing-formatted lists, set the `
 
 Moov Watchman is actively used in multiple production environments. Please star the project if you are interested in its progress. If you have layers above Watchman to simplify tasks, perform business operations, or found bugs we would appreciate an issue or pull request. Thanks!
 
-## Usage
+## Try it
 
-Send `type` (`person`, `business`, `vessel`, …) on every search. It is not a required query parameter: omitting it searches every type, which is slower. A wrong type searches only that partition, so the designated party can be missing from the page. On GET, fields such as `birthDate` and `gov_*` are only read when `type` is set; sending them without `type` is HTTP 400.
-
-See [Using Watchman](https://moov-io.github.io/watchman/using-watchman/), [Search](https://moov-io.github.io/watchman/search/), [Performance](https://moov-io.github.io/watchman/performance/), and [Indexing](https://moov-io.github.io/watchman/indexing/).
-
-### Docker
-
-We publish [`moov/watchman`](https://hub.docker.com/r/moov/watchman/) on Docker Hub and [`quay.io/moov/watchman`](https://quay.io/repository/moov/watchman?tab=tags) for OpenShift. `moov/watchman:v2-static` ships frozen 2019 files for fast local tests. The WASM UI is at `/` on `:8084`.
-
-Start the Docker image [using a tag](https://hub.docker.com/r/moov/watchman/tags):
 ```
 docker run -p 8084:8084 -e INCLUDED_LISTS=us_ofac moov/watchman
 ```
 
-That example publishes only the business API (`:8084`). Do not expose Watchman on the public internet. See [Network access](#network-access).
-
-Search is `GET /v2/search`. Adding fields raises the score. These queries use OFAC SDN 48603 (Dmitry Yuryevich KHOROSHEV). `jq` prints the top hit:
+In another terminal, wait until OFAC is indexed (the first download can take a minute):
 
 ```
-# Name only — often under the 0.80 screening line
-curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&limit=1" \
-  | jq '{name: .entities[0].name, match: (.entities[0].match*1000|round/1000)}'
-# {"name":"Dmitry Yuryevich KHOROSHEV","match":0.767}
+until curl -sf http://localhost:8084/v2/listinfo | jq -e '.lists.us_ofac > 0' >/dev/null; do sleep 2; done
+```
+
+Screen a designated person at a **production cutoff**. This is OFAC SDN 48603. The Russian passport is an identity key, so the score is **1.0**:
+
+```
+curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&gov_passport=RU:2018278055&minMatch=0.80&limit=1" \
+  | jq '{name: .entities[0].name, match: .entities[0].match, sourceID: .entities[0].sourceID}'
+# {"name":"Dmitry Yuryevich KHOROSHEV","match":1,"sourceID":"48603"}
+```
+
+Browser UI: [http://localhost:8084](http://localhost:8084). Always send `type`. `minMatch=0.80` is the usual screening line (precision ~0.99 on a public labeled set).
+
+The same name without an ID scores **0.767** and returns nothing at that cutoff. Add date of birth and it clears 0.80. Watchman is built so the fields CDD already collects change the score:
+
+```
+# Name only — below the screening line
+curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&minMatch=0.80&limit=1" | jq .entities
+# []
 
 # Name + date of birth
-curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&birthDate=1993-04-17&limit=1" \
+curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&birthDate=1993-04-17&minMatch=0.80&limit=1" \
   | jq '{name: .entities[0].name, match: (.entities[0].match*1000|round/1000)}'
 # {"name":"Dmitry Yuryevich KHOROSHEV","match":0.867}
-
-# Name + passport (unique identity key → 1.0)
-curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&gov_passport=RU:2018278055&limit=1" \
-  | jq '{name: .entities[0].name, match: .entities[0].match}'
-# {"name":"Dmitry Yuryevich KHOROSHEV","match":1}
 ```
 
-`minMatch=0.80` is a typical production cutoff. The name-only query above would return no rows at that cutoff; the passport query would. Each entity in `entities` is the list record with a `match` field (0 to 1) on the same object.
+Add `debug=true` to see which fields produced the score. Full recipe: [Using Watchman](https://moov-io.github.io/watchman/using-watchman/). Search API: [Search](https://moov-io.github.io/watchman/search/).
+
+### Docker
+
+Images: [`moov/watchman`](https://hub.docker.com/r/moov/watchman/) on Docker Hub, [`quay.io/moov/watchman`](https://quay.io/repository/moov/watchman?tab=tags) for OpenShift. `moov/watchman:v2-static` ships frozen 2019 files for fast local tests (not the live SDN). The WASM UI is at `/` on `:8084`.
+
+That `docker run` publishes only the business API (`:8084`). Do not expose Watchman on the public internet. See [Network access](#network-access). Each result in `entities` is the list record with a `match` field (0 to 1) on the same object.
 
 ### Network access
 
@@ -172,6 +179,8 @@ Run `make setup-deepparse` to start an optional [deepparse](https://github.com/G
 ## Related projects
 
 As part of Moov's initiative to offer open source fintech infrastructure, we have a large collection of active projects you may find useful:
+
+- [moov-io/watchman-cache](https://github.com/moov-io/watchman-cache) is an nginx cache in front of OFAC and other list downloads so Watchman keeps serving when government sites are down.
 
 - [Moov Fed](https://github.com/moov-io/fed) implements utility services for searching the United States Federal Reserve System such as ABA routing numbers, financial institution name lookup, and FedACH and Fedwire routing information.
 
