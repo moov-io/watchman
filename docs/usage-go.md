@@ -6,11 +6,9 @@ show_sidebar: false
 menubar: docs-menu
 ---
 
-# Seamless Integration with Go Library
+# Go library
 
-> For documentation on older releases of Watchman (v0.31.x series), please visit the [older docs website](https://github.com/moov-io/watchman/tree/v0.31.3/docs) in our GitHub repository.
-
-Embed Watchman's powerful screening capabilities directly into your Go applications for efficient, programmatic compliance checks.
+Call a running Watchman over HTTP with `pkg/search`. Same query model as `/v2/search`. [Using Watchman](/watchman/using-watchman/) has the field and `minMatch` recipe. v0.31 docs: [v0.31.3](https://github.com/moov-io/watchman/tree/v0.31.3/docs).
 
 [![GoDoc](https://pkg.go.dev/badge/github.com/moov-io/watchman?utm_source=godoc)](https://pkg.go.dev/github.com/moov-io/watchman/pkg/search#Client)
 

@@ -8,7 +8,7 @@ menubar: docs-menu
 
 ## Configuration
 
-> For documentation on older releases of Watchman (v0.31.x series), please visit the [older docs website](https://github.com/moov-io/watchman/tree/v0.31.3/docs) in our GitHub repository.
+v0.31 docs: [v0.31.3](https://github.com/moov-io/watchman/tree/v0.31.3/docs). Practical recipe: [Using Watchman](/watchman/using-watchman/).
 
  1. [File](#file)
     1. [Environment Variables](#environment-variables)
@@ -21,6 +21,8 @@ menubar: docs-menu
  1. [MCP](#mcp)
  1. [Ingest](#ingest)
  1. [Included Lists](#included-lists)
+
+On 755,540 labeled OpenSanctions pairs, **per-request fields and `minMatch`** moved results more than Jaro–Winkler env flags. Recommended production shape: `INCLUDED_LISTS` named in the risk assessment, `minMatch=0.80` on `/v2/search`, embeddings on with `CROSS_SCRIPT_ONLY` if you screen non-Latin names. See [Using Watchman](/watchman/using-watchman/).
 
 #### Search Configuration
 

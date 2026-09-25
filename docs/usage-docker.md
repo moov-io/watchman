@@ -8,16 +8,15 @@ menubar: docs-menu
 
 # Quick Start with Docker
 
-> For documentation on older releases of Watchman (v0.31.x series), please visit the [older docs website](https://github.com/moov-io/watchman/tree/v0.31.3/docs) in our GitHub repository.
+Images: [`moov/watchman`](https://hub.docker.com/r/moov/watchman/) on Docker Hub, [`quay.io/moov/watchman`](https://quay.io/repository/moov/watchman?tab=tags) for OpenShift. `moov/watchman:v2-static` ships frozen 2019 files for fast local tests. Older **v0.31** API docs: [v0.31.3](https://github.com/moov-io/watchman/tree/v0.31.3/docs).
 
-Deploy Watchman effortlessly using our pre-built Docker images. Perfect for rapid testing, development, and production environments. Customize behavior via environment variables detailed in the [Configuration Guide](/watchman/config/).
+Business API on **:8084**. Admin/metrics on **:9094**. Do not expose Watchman on the public internet. See [Network access](/watchman/network/).
 
-We publish a [public Docker image `moov/watchman`](https://hub.docker.com/r/moov/watchman/) from Docker Hub or use this repository. No configuration is required to serve on `:8084`. We also have Docker images for [OpenShift](https://quay.io/repository/moov/watchman?tab=tags) published as `quay.io/moov/watchman`. Lastly, we offer a `moov/watchman:v2-static` Docker image with files from 2019. This image can be useful for faster local testing or consistent results.
-
-Start the Docker image [using a tag](https://hub.docker.com/r/moov/watchman/tags):
 ```
-docker run -p 8084:8084 moov/watchman
+docker run -p 8084:8084 -e INCLUDED_LISTS=us_ofac moov/watchman
 ```
+
+WASM UI: [http://localhost:8084](http://localhost:8084). Full recipe: [Using Watchman](/watchman/using-watchman/). Env vars: [Configuration](/watchman/config/).
 
 For an optional [deepparse](/watchman/config/#deepparse) sidecar used in tests and examples:
 
@@ -25,14 +24,10 @@ For an optional [deepparse](/watchman/config/#deepparse) sidecar used in tests a
 make setup-deepparse
 ```
 
-That example publishes only the business API (`:8084`). Do not expose Watchman on the public internet. The admin port (`:9094`) is separate so it can stay unpublished. See [Network access](/watchman/network/).
-
-A web-based UI (WASM) is served at the root (`/`) for interactive searching and list inspection. Open http://localhost:8084 in a browser.
-
-Get information about a company using their entity ID:
+Search a person (always include `type`; prefer `minMatch=0.80`):
 
 ```
-curl -s "http://localhost:8084/v2/search?name=Nicolas+Maduro&type=person&limit=1&minMatch=0.75" | jq .
+curl -s "http://localhost:8084/v2/search?name=Nicolas+Maduro&type=person&limit=1&minMatch=0.80" | jq .
 ```
 ```json
 {

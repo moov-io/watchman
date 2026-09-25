@@ -6,116 +6,50 @@ show_sidebar: false
 menubar: docs-menu
 ---
 
-# Introduction to Moov Watchman
+# What Watchman is
 
-Watchman downloads sanctions lists and scores customers and counterparties against them with an inspectable, multi-field matcher.
+Watchman downloads sanctions lists and scores customers and counterparties against them with an inspectable, multi-field matcher. It is the watchlist engine in a BSA/AML stack: onboarding, periodic refresh, and (where required) pre-transaction screening.
 
-Program-level briefing: [For compliance and risk](/watchman/methodology/for-compliance/). Technical scorer: [Similarity methodology](/watchman/methodology/).
+[Using Watchman](/watchman/using-watchman/) · [For compliance and risk](/watchman/methodology/for-compliance/) · [Similarity methodology](/watchman/methodology/)
 
-## Core Functionality
+## What you get
 
-Watchman delivers enterprise-grade compliance screening with:
+**Lists.** OFAC SDN and Non-SDN, US CSL, FinCEN 311, EU, UK, UN, OpenSanctions Senzing files, CSV ingest. Refresh on an interval or `POST /v2/data/refresh`. `GET /v2/listinfo` reports counts, hashes, and timestamps.
 
-1. **Data Management**:
-   - Automatic downloading of sanctions lists (US OFAC, US CSL, UK, EU, etc.)
-   - Regular refreshing of data to maintain compliance
-   - Custom data file support for specialized screening needs
+**Search.** `GET /v2/search` (and JSON POST) with `type`, name, aliases, government IDs (`gov_passport=US:…`), dates, addresses, crypto, contact. Ranked hits with a score in `[0, 1]`. Optional Senzing JSON. WASM UI at `/`. Go client. Experimental [MCP](/watchman/mcp/).
 
-2. **Search Capabilities**:
-   - High-performance in-memory indexing (source/type partitions, name-token and crypto candidates, optional TF-IDF)
-   - Advanced fuzzy matching (Jaro-Winkler by default, with exact-ID short-circuit)
-   - Multi-field search with entity type filtering, admission control, and concurrent scoring
+**Matcher.** Default Jaro–Winkler on normalized tokens, plus IDs, dates, and addresses. Unique identity keys (passport, IMO, crypto) can score 1.0. Tax IDs and email do not force a match. Conflicting same-type IDs lower the score. Optional TF-IDF and cross-script embeddings.
 
- 3. **Integration Options**:
-    - HTTP API for web and service integration
-    - Native Go library for direct implementation
-    - [Experimental Model Context Protocol (MCP) server](/watchman/mcp/) for AI agent integration
-    - Webhook notifications for automated workflows
+**Tuning.** `minMatch` is the policy cutoff. `algorithm` is per request. Embeddings, TF-IDF, ingest, address parsers, and geocoding are process-wide. See [Configuration](/watchman/config/).
 
-## Included List Sources
+## Lists
 
-Watchman integrates the following lists to help you maintain global compliance:
+| Source | List |
+|--------|------|
+| **OpenSanctions** | [Senzing-formatted datasets](https://www.opensanctions.org/datasets/) |
+| European Union | [Consolidated financial sanctions](https://data.europa.eu/data/datasets/consolidated-list-of-persons-groups-and-entities-subject-to-eu-financial-sanctions?locale=en) |
+| US Government | [CSL](https://www.trade.gov/consolidated-screening-list), [FinCEN 311](https://home.treasury.gov/policy-issues/terrorism-and-illicit-finance/311-actions) |
+| US Treasury | [OFAC](https://ofac.treasury.gov/sanctions-list-service) SDN and Non-SDN |
+| United Kingdom | [UK sanctions list](https://www.gov.uk/government/publications/the-uk-sanctions-list) |
+| United Nations | [UN consolidated list](https://www.un.org/sc/resources/sc-sanctions) |
 
-| Source            | List                                                                                                                                                                                    |
-|-------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **OpenSanctions** | [Any Senzing formatted list from OpenSanctions](https://www.opensanctions.org/datasets/)                                                                                                |
-| European Union    | [Consolidated Sanctions List](https://data.europa.eu/data/datasets/consolidated-list-of-persons-groups-and-entities-subject-to-eu-financial-sanctions?locale=en)                        |
-| US Government     | [Consolidated Screening List (CSL)](https://www.trade.gov/consolidated-screening-list), [FinCEN 311](https://home.treasury.gov/policy-issues/terrorism-and-illicit-finance/311-actions) |
-| US Treasury       | [Office of Foreign Assets Control (OFAC)](https://ofac.treasury.gov/sanctions-list-service) and Non-SDN list                                                                            |
-| United Kingdom    | [OFSI Sanctions List](https://www.gov.uk/government/publications/financial-sanctions-consolidated-list-of-targets/consolidated-list-of-targets#contents)                                |
-| United Nations    | [Consolidated Sanctions List](https://www.un.org/sc/resources/sc-sanctions)                                                                                                             |
+`INCLUDED_LISTS=us_ofac,eu_csl,uk_csl,un_csl` to load a subset.
 
-## Search Methodology
+## How names are prepared
 
-### Jaro-Winkler Similarity Algorithm
+Before indexing (and on each query), Watchman normalizes:
 
-Watchman uses the [Jaro-Winkler distance](https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance) algorithm on cleaned and normalized data to score the similarity between search queries and list entries. This approach:
+1. **SDN name order** — `MADURO MOROS, Nicolas` → `Nicolas MADURO MOROS`
+2. **Company suffixes** — strip `INC.`, `LLC`, and similar
+3. **Stopwords** — drop `and`, `the`, `of` unless `KEEP_STOPWORDS=true`
+4. **UTF-8** — lowercase, strip punctuation, fold diacritics (`Raúl` → `raul`)
 
-- Matches the methodology used by [US Treasury's OFAC Search](https://ofac.treasury.gov/faqs/892), but with improved scoring
-- Is specifically optimized for person names and other proper nouns
-- Produces scores from 0.0 (completely different) to 1.0 (exact match)
-- Has been validated by [academic research](https://www.wseas.org/multimedia/journals/computers/2015/a965705-699.pdf) as effective for compliance screening
+That is why `nicolas maduro` hits `MADURO MOROS, Nicolas`. Details: [Pipeline](/watchman/pipeline/).
 
-Jaro-Winkler is the default. Optional `?algorithm=` scorers are compared in [Algorithm comparison](/watchman/algorithm-comparison/).
+## Scoring in one paragraph
 
-### Search Customization
+Watchman does not do “Google-style search.” It tokenizes names, aligns tokens with Jaro–Winkler (optional phonetic or n-gram inner metric), then blends identifier, date, address, and contact pieces. Name-only queries are down-ranked. The score is built so you can log `debug=true` pieces and defend the hit. OpenSanctions Pairs (755,540 labeled pairs) is the public evidence set; see [OpenSanctions Pairs](/watchman/opensanctions-pairs/).
 
-Watchman offers environment variables to adjust search behavior:
+## Next
 
-- `EXACT_MATCH_FAVORITISM`: Controls weight given to exact matches (recommended values: 0.1, 0.25, or 0.5)
-
-## Common Questions
-
-### What's the difference between Watchman's search and standard text search?
-
-Standard text search typically relies on exact matches or simple wildcards, which can:
-- Miss alternative spellings
-- Fail to handle name inversions
-- Be overly sensitive to typos
-- Require multiple manual searches
-
-Watchman's fuzzy matching approach allows for:
-- Identification of similar names despite variations
-- Tolerance for typographical errors
-- Handling of word order differences
-- Normalization of international character sets
-- Confidence scoring to prioritize results
-
-This produces more comprehensive screening with fewer false negatives while still providing the tools to manage false positives effectively.
-
-## List Specific Questions
-
-### How are OFAC entities prepared for the search index?
-
-Entities undergo a multi-step preparation process before being indexed:
-
-1. **SDN Name Reordering**
-   ```
-   "MADURO MOROS, Nicolas" → "Nicolas MADURO MOROS"
-   ```
-
-2. **Company Name Cleanup**
-   ```
-   "ACME CORPORATION, INC." → "ACME CORPORATION"
-   ```
-   *Legal suffixes like "CO.", "INC.", "L.L.C." are removed*
-
-3. **Stopword Removal**
-   ```
-   "TREES AND EQUIPMENT LTD" → "TREES EQUIPMENT LTD"
-   ```
-   *Common words like "and", "the", "of" are removed*
-
-4. **UTF-8 Normalization**
-   ```
-   "Raúl Castro" → "raul castro"
-   ```
-   *Punctuation is removed, text is lowercased, and diacritical marks are normalized*
-
-The resulting normalized names enable more accurate matching across different formats and variations of the same entity.
-
-## Next Steps
-
-- See the [Search Documentation](/watchman/search/) for detailed query options
-- Explore the [Scoring Methodology](/watchman/methodology/)
-- Check the [Configuration Guide](/watchman/config/) for deployment options
+[Using Watchman](/watchman/using-watchman/) · [Search](/watchman/search/) · [Docker](/watchman/usage-docker/) · [Configuration](/watchman/config/)

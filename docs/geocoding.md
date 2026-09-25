@@ -8,8 +8,7 @@ menubar: docs-menu
 
 ## Enhance Address Matching with Geocoding
 
-Watchman supports multiple geocoding providers to precisely determine coordinates for addresses, significantly improving the accuracy of location-based
-compliance screening. This feature, introduced in v0.57.0, populates Latitude and Longitude fields for all entity addresses.
+Watchman can geocode entity addresses (latitude/longitude) through OpenCage, Nominatim, or Google Maps. This is optional and off by default. It was added in v0.57.0.
 
 Refer to the [file configuration](/watchman/config/#file) section for more information.
 

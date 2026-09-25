@@ -8,7 +8,9 @@ menubar: docs-menu
 
 # Watchman Search Guide
 
-> For documentation on older releases of Watchman (v0.31.x series), please visit the [older docs website](https://github.com/moov-io/watchman/tree/v0.31.3/docs) in our GitHub repository.
+All screening goes through **`/v2/search`**. Send a structured entity (`type` + name and whatever CDD has: IDs, dates, address). Watchman returns ranked hits with a score in `[0, 1]`.
+
+Practical recipe: [Using Watchman](/watchman/using-watchman/). Older v0.31 `/search` docs: [v0.31.3](https://github.com/moov-io/watchman/tree/v0.31.3/docs).
 
 ## Overview
 
@@ -87,15 +89,17 @@ Each entity type supports specific search parameters:
 - `name`: Primary name
 - `altNames[]`: Alternative names
 - `gender`: Gender (male/female/unknown)
-- `birthDate`: Date of birth (YYYY-MM-DD)
-- `deathDate`: Date of death (YYYY-MM-DD)
+- `birthDate`: Date of birth (`YYYY-MM-DD`, `YYYY-MM`, or `YYYY`)
+- `deathDate`: Date of death
 - `titles[]`: Professional titles
+- `gov_<type>`: Government IDs as `COUNTRY:IDENTIFIER` (e.g. `gov_passport=IR:Y53914915`, `gov_national=US:1234`, `gov_tax=RU:9709063550`)
 
 #### Business/Organization Parameters
 - `name`: Entity name
 - `altNames[]`: Alternative names
-- `created`: Formation date (YYYY-MM-DD)
-- `dissolved`: Dissolution date (YYYY-MM-DD)
+- `created`: Formation date (`YYYY-MM-DD`, `YYYY-MM`, or `YYYY`)
+- `dissolved`: Dissolution date
+- `gov_<type>`: Registration / tax IDs as `COUNTRY:IDENTIFIER` (evidence, not a 1.0 identity key)
 
 #### Aircraft Parameters
 - `name`: Aircraft name/identifier
@@ -121,12 +125,14 @@ Each entity type supports specific search parameters:
 - `owner`: Vessel owner
 
 #### Common Parameters for All Entity Types
+- `source`: Restrict to one list (`us_ofac`, `eu_csl`, `uk_csl`, `un_csl`, `us_csl`, …)
+- `sourceID`: Exact record id on that list (OFAC entity ID, etc.)
 - `address[]`: Physical addresses
 - `email[]`, `emailAddress[]`, `emailAddresses[]`: Email addresses
 - `phone[]`, `phoneNumber[]`, `phoneNumbers[]`: Phone numbers
 - `fax[]`, `faxNumber[]`, `faxNumbers[]`: Fax numbers
 - `website[]`, `websites[]`: Associated websites
-- `cryptoAddress[]`: Cryptocurrency addresses (format: `currency:address`)
+- `cryptoAddress[]`: Cryptocurrency addresses (`currency:address`)
 
 ### Search Response
 
@@ -164,41 +170,19 @@ The API returns the original query plus a list of matched entities with match sc
 }
 ```
 
-## Name Search
+## Name, alias, and address
 
-The name search targets primary entity names across key watchlists:
-
-```
-GET /search?name=maduro&limit=2
-```
-
-**Use this when**: You're specifically looking for matches against primary entity names.
-
-## Alternate Name Search
-
-Many sanctioned entities operate under aliases or alternate names. This search targets those specifically:
+Aliases are searched with the primary name. Pass extras as `altNames`:
 
 ```
-GET /search?altNames=NATIONAL+BANK+OF+CUBA
+GET /v2/search?type=business&name=NATIONAL+BANK+OF+CUBA&altNames=BANCO+NACIONAL+DE+CUBA&minMatch=0.80
 ```
 
-**Use this when**: You're looking for entities that might be using known aliases.
-
-## Address Search
-
-Address search helps identify entities associated with specific locations:
+Addresses are free-text on `address` (parsed with usaddress by default):
 
 ```
-GET /search?address=first+st&province=harare&country=zimbabwe
+GET /v2/search?type=person&name=maduro&address=Caracas,+Venezuela&minMatch=0.80
 ```
-
-Available address parameters:
-- `address`: Street address or general location
-- `city`: City name
-- `state`: State or region
-- `province`: Province name
-- `zip`: Postal or ZIP code
-- `country`: Country name
 
 ## Filtering Results
 
@@ -209,9 +193,10 @@ GET /v2/search?type=person&name=maduro&minMatch=0.8
 ```
 
 Parameters:
-- `minMatch`: Minimum match score (0.0-1.0) to include in results
-- `limit`: Maximum number of results to return (default: 10, max: 100)
-- `debug`: Include detailed scoring information when set to "true"
+- `minMatch`: Minimum match score (0.0–1.0). Use **0.80** for a production-shaped queue; **~0.59** when missing a designation is costlier than extra review. See [Using Watchman](/watchman/using-watchman/).
+- `limit`: Maximum results (default 10, max 100)
+- `debug`: When `true`, include field-level score pieces (identifiers, name, dates, override/conflict). Log these for investigations and model-risk review.
+- `algorithm`: Per-request name metric (see above). Defaults to Jaro–Winkler.
 
 
 ## Cross-Script Name Matching
@@ -239,23 +224,11 @@ For detailed setup instructions, see [Cross-Script Name Matching](cross-script-m
 
 ## Best Practices
 
-Optimize your Watchman searches for maximum accuracy and efficiency:
-
-1. **Leverage Specific Identifiers**
-   - Prioritize ID-based searches for the highest confidence matches
-   - Use `sourceID=...` for exact record lookup or `gov_<type>=COUNTRY:ID` (e.g. `gov_passport=US:1234`, `gov_ssn=...`) for government-issued IDs. See parameters above.
-
-2. **Combine Multiple Parameters**
-   - Enhance match quality by including names with addresses or other details
-   - Example: `?type=person&name=maduro&address=caracas&country=VE`
-
-3. **Fine-Tune Match Thresholds**
-   - Use `minMatch` to filter low-confidence results effectively
-   - Customize global matching behavior, including favoritism, through configuration options in the [Configuration Guide](/watchman/config/)
-
-4. **Incorporate Contextual Data**
-   - Include dates, addresses, and additional identifiers when available
-   - This approach significantly reduces false positives and boosts match confidence
+1. **Always send `type=`** (and `source=` when you only need one list). Partitions the corpus. Unknown type: person + business (and vessel/aircraft when those IDs exist).
+2. **Send IDs and dates from CDD.** `gov_passport=…` and `birthDate=` change the score more than any Jaro–Winkler env flag. Name-only is down-ranked.
+3. **Set `minMatch`.** 0.80 is the screening default from OpenSanctions Pairs (subjects precision 0.99 / 0.95 with embeddings). 0.59 trades review volume for recall.
+4. **Turn on embeddings for non-Latin names.** Algorithm swaps (Soundex, nsim) do not close transliteration. See [Cross-script matching](/watchman/cross-script-matching/).
+5. **Use `debug=true` on hits you investigate.** That is the exam artifact for why a score landed.
 
 ## List Information
 
@@ -267,7 +240,7 @@ Optimize your Watchman searches for maximum accuracy and efficiency:
   "listHashes": { "us_ofac": "0629...9aab", ... },
   "startedAt": "2025-...",
   "endedAt": "2025-...",
-  "version": "v0.52.x"
+  "version": "v0.69.0"
 }
 ```
 

@@ -4,6 +4,8 @@
       link: /
     - name: What is Watchman?
       link: /intro/
+    - name: Using Watchman
+      link: /using-watchman/
 
 - label: Usage
   items:
