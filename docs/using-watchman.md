@@ -130,7 +130,7 @@ Add internal lists with [ingest](/watchman/ingest/) (`POST /v2/ingest/{fileType}
 
 ## Addresses and geocoding
 
-**Docker images** (`moov/watchman`) are built with libpostal in-process (~3GB RAM for models). **GitHub release binaries** and `go run` without `-tags libpostal` use the built-in US-oriented `usaddress` parser. Optional **PostalPool** (extra `postal-server` processes) and **deepparse** (HTTP sidecar) are off by default. Optional **geocoding** (OpenCage, Nominatim, Google) fills lat/long. See [Addresses](/watchman/addresses/) and [Geocoding](/watchman/geocoding/).
+**Docker images** use libpostal in-process (~3GB RAM for models). **Any deployment** can switch to deepparse (`Watchman.Deepparse.Enabled`). **Otherwise** (GitHub binaries, `go run`) Watchman uses `usaddress`. Optional **geocoding** (OpenCage, Nominatim, Google) fills lat/long. See [Addresses](/watchman/addresses/) and [Geocoding](/watchman/geocoding/).
 
 ## Where it sits in the program
 

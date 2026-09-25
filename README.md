@@ -42,7 +42,7 @@ On 755,540 analyst-labeled [OpenSanctions Pairs](https://moov-io.github.io/watch
 - **You set the cutoff** — `minMatch` is policy (0.80 screening, ~0.59 high recall)
 - **Explainable hits** — `debug=true` returns field-level score pieces
 - **Fast candidate search** — source/type partitions, name-token and ID indexes, parallel scoring ([Performance](https://moov-io.github.io/watchman/performance/), [Indexing](https://moov-io.github.io/watchman/indexing/))
-- **Optional** — TF-IDF, cross-script embeddings, geocoding, PostalPool/deepparse, Senzing request/response format, MCP. Docker images include libpostal; GitHub binaries use usaddress unless built with `-tags libpostal`.
+- **Optional** — TF-IDF, cross-script embeddings, geocoding, deepparse, Senzing request/response format, MCP. Docker images parse addresses with libpostal; GitHub binaries use usaddress; any build can enable deepparse.
 
 ## Included Lists
 

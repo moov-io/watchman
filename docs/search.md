@@ -178,7 +178,7 @@ Aliases are searched with the primary name. Pass extras as `altNames`:
 GET /v2/search?type=business&name=NATIONAL+BANK+OF+CUBA&altNames=BANCO+NACIONAL+DE+CUBA&minMatch=0.80
 ```
 
-Addresses are free-text on `address` (parsed with usaddress by default):
+Addresses are free-text on `address` (libpostal in Docker images, usaddress otherwise, deepparse if enabled):
 
 ```
 GET /v2/search?type=person&name=maduro&address=Caracas,+Venezuela&minMatch=0.80
