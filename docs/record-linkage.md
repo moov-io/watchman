@@ -36,7 +36,7 @@ This is **not encryption**. Anyone who can guess the input can recompute the dig
 
 ## Prefix filters
 
-`internal/linksim.Prefixes` walks a key at `|` boundaries, coarse to fine:
+`recordlink.Prefixes` walks a key at `|` boundaries, coarse to fine:
 
 ```
 ADDR:Caaaaaaa1|Sbbbbbbb2|Pcccccccc|Ydddddddd|Leeeeeeee
@@ -79,16 +79,25 @@ On each list refresh the corpus indexes every key and every prefix. Candidate se
 | Address, no name tokens | Finest `ADDR:` prefix that still prunes the partition. Too broad or empty → fall back. |
 | Name tokens | Distinctive-token intersection by document frequency in this partition (no language-specific suffix list). |
 
-Call `linksim.Keys(entity)` after `entity.Normalize()`.
+Call `recordlink.Keys(entity)`. The entity is normalized inside Keys.
 
 ## Go
 
 ```go
-import "github.com/moov-io/watchman/internal/linksim"
+import (
+    "github.com/moov-io/watchman/pkg/recordlink"
+    "github.com/moov-io/watchman/pkg/search"
+)
 
-keys := linksim.Keys(entity.Normalize())
+entity := search.Entity[search.Value]{
+    Name: "John Smith",
+    Type: search.EntityPerson,
+    // ...
+}
+
+keys := recordlink.Keys(entity)
 for _, key := range keys {
-    for _, prefix := range linksim.Prefixes(key) {
+    for _, prefix := range recordlink.Prefixes(key) {
         _ = prefix // store / probe
     }
 }
