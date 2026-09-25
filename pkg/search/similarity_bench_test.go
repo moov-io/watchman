@@ -75,3 +75,42 @@ func BenchmarkDebugSimilarity(b *testing.B) {
 	bench(b, "aircraft", aircraft, false)
 	bench(b, "aircraft", aircraft, true)
 }
+
+func BenchmarkSimilarity_TypeRecast(b *testing.B) {
+	person := ofactest.EntityForBenchmark(b, "48603") // Dmitry Khoroshev
+	same := person
+	asBusiness := person
+	asBusiness.Type = search.EntityBusiness
+	asBusiness.Person = nil
+	asBusiness.Business = &search.Business{
+		Name:          person.Name,
+		AltNames:      nil,
+		GovernmentIDs: nil,
+	}
+	if person.Person != nil {
+		asBusiness.Business.Name = person.Person.Name
+		asBusiness.Business.AltNames = person.Person.AltNames
+		asBusiness.Business.GovernmentIDs = person.Person.GovernmentIDs
+	}
+	asBusiness = asBusiness.Normalize()
+
+	vessel := ofactest.EntityForBenchmark(b, "47371")
+
+	b.ReportAllocs()
+
+	b.Run("same-type-person", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			search.Similarity(same, person)
+		}
+	})
+	b.Run("legalentity-as-business-vs-person", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			search.Similarity(asBusiness, person)
+		}
+	})
+	b.Run("person-vs-vessel-hard-zero", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			search.Similarity(same, vessel)
+		}
+	})
+}
