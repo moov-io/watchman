@@ -177,7 +177,7 @@ The cliff at 0.90 is occupancy-style ~0.855 scores and name-only positives falli
 
 ## 7. Configuration matrix (current scorer)
 
-Full dump, 13 configs, after exact-ID tightening, tax-as-evidence, ID-conflict penalty, and person/org recast. Embeddings: local Ollama `qwen3-embedding:0.6b` (1024-d, 368,359 unique primary names). Each non-embed config scored the 755,540 pairs in ~44s on an M4 Max.
+Full dump after exact-ID tightening, tax-as-evidence, ID-conflict penalty, and person/org recast. Embeddings: local Ollama `qwen3-embedding:0.6b` (1024-d, 368,359 unique primary names). Each config scored the 755,540 pairs in ~45s on an M4 Max. A second pass added TF-IDF on embeddings and on the remaining name algorithms.
 
 `embed-hybrid` = Similarity, then `max(sim, cosine)` on cross-script pairs (production `CrossScriptOnly`). `embed-max` = always max. `embed-only` = cosine of primary names, IDs ignored.
 
@@ -194,8 +194,14 @@ Full dump, 13 configs, after exact-ID tightening, tax-as-evidence, ID-conflict p
 | nsim | 0.861 | 0.902 | 0.989 | 0.829 | **0.961** | 0.59 | 5,313 | 99,612 |
 | editex | 0.862 | 0.902 | 0.989 | 0.830 | 0.961 | 0.59 | 5,358 | 98,917 |
 | **embed-hybrid** | **0.901** | **0.933** | 0.969 | 0.900 | 0.946 | 0.59 | 16,598 | **58,108** |
+| embed-hybrid+tfidf | 0.902 | 0.934 | 0.962 | 0.908 | 0.940 | 0.65 | 20,654 | 53,648 |
 | embed-max | 0.863 | 0.915 | 0.873 | **0.962** | 0.924 | 0.90 | 81,331 | 22,049 |
+| embed-max+tfidf | 0.864 | 0.916 | 0.872 | 0.966 | 0.928 | 0.90 | 82,629 | 19,979 |
 | embed-only | 0.846 | 0.904 | 0.871 | 0.940 | 0.907 | 0.87 | 81,024 | 35,084 |
+| soft-bidist+tfidf | 0.866 | 0.906 | 0.979 | 0.843 | 0.950 | 0.59 | 10,269 | 91,166 |
+| nsim+tfidf | 0.863 | 0.904 | 0.980 | 0.839 | 0.952 | 0.59 | 9,964 | 93,284 |
+| editex+tfidf | 0.864 | 0.905 | 0.980 | 0.840 | 0.952 | 0.59 | 10,045 | 92,724 |
+| beider-morse+tfidf | 0.866 | 0.907 | 0.979 | 0.844 | 0.950 | 0.59 | 10,572 | 90,405 |
 
 ### 7.2 Subjects (472,477) and cross-script (127,829) @ 0.80
 
@@ -206,8 +212,11 @@ Full dump, 13 configs, after exact-ID tightening, tax-as-evidence, ID-conflict p
 | soundex / dmetaphone | 0.813 | 0.986 | 0.691 | 0.933 | 0.666 | 0.503 | ~3,020 | ~93,560 |
 | nsim | 0.804 | 0.987 | 0.678 | 0.934 | 0.656 | 0.491 | 2,788 | 97,517 |
 | **embed-hybrid** | **0.876** | 0.946 | **0.815** | 0.908 | **0.892** | **0.905** | 14,014 | **56,072** |
+| embed-hybrid+tfidf | 0.879 | 0.935 | 0.829 | 0.895 | 0.894 | 0.910 | 17,437 | 51,697 |
 | embed-max | 0.852 | 0.784 | 0.933 | 0.861 | 0.892 | 0.905 | 78,141 | 20,179 |
+| embed-max+tfidf | 0.854 | 0.783 | 0.940 | 0.869 | 0.894 | 0.910 | 79,146 | 18,109 |
 | embed-only | 0.829 | 0.776 | 0.890 | 0.831 | 0.878 | 0.879 | 77,853 | 33,213 |
+| soft-bidist+tfidf / nsim+tfidf / editex+tfidf / bmpm+tfidf | 0.812–0.818 | 0.967–0.969 | 0.699–0.708 | 0.914–0.918 | 0.668–0.675 | 0.510–0.518 | ~7k | ~89–91k |
 
 At subjects best-F1 (~0.59): Jaro-Winkler prec 0.945 rec 0.920; hybrid prec 0.876 rec 0.942.
 
@@ -215,11 +224,13 @@ At subjects best-F1 (~0.59): Jaro-Winkler prec 0.945 rec 0.920; hybrid prec 0.87
 
 **Name algorithms** are within 0.001–0.003 F1 of Jaro-Winkler. Phonetic boosts recover ~700–800 extra true positives. nsim/editex trade a little recall for a little precision. None of them move cross-script recall off ~0.50.
 
-**TF-IDF** is a small recall bump and a precision cost (subjects FP 2,955 → 7,129). Common legal-form tokens lose weight, so related companies look more alike and some rare-token true matches recover. Useful for ranking, not a headline F1 win here.
+**TF-IDF** is a small recall bump and a precision cost (subjects FP 2,955 → 7,129 without embeddings). Common legal-form tokens lose weight, so related companies look more alike and some rare-token true matches recover.
 
-**Embeddings are the only lever that moves transliteration.** Hybrid takes cross-script recall from 0.50 to **0.91** (subject FN 94k → 56k) at precision 0.95. That is the paper's complementary failure mode: rules miss Latin/Cyrillic/Arabic pairs; hybrid catches them and accepts more lookalikes.
+**Embeddings + TF-IDF** (hybrid+tfidf vs hybrid): subject recall 0.815 → **0.829** (FN 56,072 → 51,697), precision 0.946 → 0.935 (FP 14,014 → 17,437). Cross-script recall is already 0.91 from embeddings; TF-IDF adds almost nothing there (0.905 → 0.910). The extra true matches are mostly Latin-script name pairs. Name-algorithm+TF-IDF (nsim, editex, soft-bidist, beider-morse) tracks jaro-winkler+tfidf.
 
-`embed-max` / `embed-only` over-fire on Latin pairs (~78k subject FPs). Cosine likes Occupancy stubs and similar company names, and it cannot use ID short-circuits. Keep embeddings behind the cross-script gate.
+**Embeddings are the only lever that moves transliteration.** Hybrid takes cross-script recall from 0.50 to **0.91** (subject FN 94k → 56k) at precision 0.95.
+
+`embed-max` / `embed-only` over-fire on Latin pairs (~78k subject FPs), with or without TF-IDF. Keep embeddings behind the cross-script gate.
 
 ## 8. Comparison with the paper
 
@@ -260,9 +271,9 @@ Figure 1 of the paper (two Khalid Mehmoods, same name, different CNICs and fathe
 
 ## 10. Screening recommendation
 
-Use **Jaro-Winkler + embed-hybrid (`qwen3-embedding:0.6b`, cross-script only), `minMatch=0.80`.**
+Use **Jaro-Winkler + embed-hybrid (`qwen3-embedding:0.6b`, cross-script only), `minMatch=0.80`.** Optional `TFIDF_ENABLED` on top of that: about 4,400 more true subject matches and 3,400 more false positives. Cross-script recall stays ~0.91 either way.
 
-It is the only config that closes transliteration without flooding review: subjects precision 0.946, recall 0.815, F1 0.876, cross-script recall 0.905.
+Hybrid without TF-IDF: subjects precision 0.946, recall 0.815, cross-script recall 0.905.
 
 If missing a designated party is worse than extra review, drop hybrid to **0.59** (subjects prec 0.876, rec 0.942). If embeddings are unavailable, use **Jaro-Winkler at 0.59** (prec 0.945, rec 0.920), not 0.80.
 

@@ -58,11 +58,12 @@ We scored the **entire dump** with Watchman’s production `Similarity` (pairwis
 | Jaro–Winkler | **0.986** | 0.689 | 0.50 |
 | Jaro–Winkler + TF-IDF | 0.968 | 0.707 | 0.52 |
 | **Jaro–Winkler + embeddings for different writing systems** | 0.946 | **0.815** | **0.91** |
+| Same embeddings + TF-IDF | 0.935 | 0.829 | 0.91 |
 
 Read that as a **review-capacity vs miss-rate** trade:
 
 - Default Jaro–Winkler at 0.80: about **3,000** subject false positives and **94,000** missed labeled positives. Precision is exam-friendly; recall is not, especially on transliteration.
-- Adding **cross-script embeddings** (`qwen3-embedding:0.6b`, used only when scripts differ — the production `EMBEDDINGS_CROSS_SCRIPT_ONLY` analog): about **14,000** false positives and **56,000** misses. Precision stays **0.95**. Cross-script recall goes from **half the true matches** to **91%**.
+- Adding **embeddings for different writing systems** (`qwen3-embedding:0.6b`, used only when scripts differ): about **14,000** false positives and **56,000** misses. Precision stays **0.95**. Recall on those pairs goes from **half** to **91%**. Adding TF-IDF on top of that: about 4,400 more true matches and 3,400 more false hits; recall on different writing systems stays 0.91.
 
 Name-algorithm swaps (Soundex, Double Metaphone, Beider-Morse, nsim, Editex) barely change precision or recall. They do not fix Arabic/Cyrillic/Latin pairs. That matches the paper: rule matchers over-fire on common Latin names; learned methods fail on transliteration unless you add a representation that is not character-based.
 

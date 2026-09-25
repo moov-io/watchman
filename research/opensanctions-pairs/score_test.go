@@ -76,6 +76,17 @@ func TestParseCompareSpec(t *testing.T) {
 	cfg, err = parseCompareSpec("embed-hybrid", base, nil, emb)
 	require.NoError(t, err)
 	require.Equal(t, "hybrid", cfg.embedMode)
+
+	idx := buildTFIDF([]Pair{{
+		Left:      FTMEntity{Caption: "Alpha Ltd", Schema: "Company", Properties: map[string][]string{"name": {"Alpha Ltd"}}},
+		Right:     FTMEntity{Caption: "Alpha Limited", Schema: "Company", Properties: map[string][]string{"name": {"Alpha Limited"}}},
+		Judgement: "positive",
+	}}, 5)
+	cfg, err = parseCompareSpec("embed-hybrid+tfidf", base, idx, emb)
+	require.NoError(t, err)
+	require.Equal(t, "hybrid", cfg.embedMode)
+	require.True(t, cfg.tfidf.Enabled())
+	require.Equal(t, "embed-hybrid+tfidf", cfg.label())
 }
 
 func TestMixEmbed(t *testing.T) {

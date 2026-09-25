@@ -217,7 +217,8 @@ That is the only config that closes the transliteration hole without flooding re
 | Jaro-Winkler | **0.986** | 0.689 | 0.811 | 2,955 | 94,286 | 0.499 |
 | Jaro-Winkler + TF-IDF | 0.968 | 0.707 | 0.817 | 7,129 | 88,785 | 0.516 |
 | Soundex / Double Metaphone / Beider-Morse | 0.986 | 0.691 | 0.813 | ~3,000 | ~93,500 | 0.503 |
-| **Jaro-Winkler + cross-script embeddings** | 0.946 | **0.815** | **0.876** | 14,014 | **56,072** | **0.905** |
+| **Jaro-Winkler + embeddings for different writing systems** | 0.946 | **0.815** | **0.876** | 14,014 | **56,072** | **0.905** |
+| Same embeddings + TF-IDF | 0.935 | 0.829 | 0.879 | 17,437 | 51,697 | 0.910 |
 | Embeddings on every pair | 0.784 | 0.933 | 0.852 | 78,141 | 20,179 | 0.905 |
 
 Without embeddings, half of cross-script true matches miss at 0.80. Hybrid trades ~11k extra subject FPs for ~38k fewer FNs and takes cross-script recall from 0.50 to 0.91. Precision stays 0.95.

@@ -31,9 +31,10 @@ On those 472,477 people, companies, and vessels:
 | Jaro-Winkler | 0.986 | 0.689 | 0.50 |
 | Jaro-Winkler + TF-IDF | 0.968 | 0.707 | 0.52 |
 | **Jaro-Winkler + embeddings for different writing systems** | **0.946** | **0.815** | **0.91** |
+| Same embeddings + TF-IDF | 0.935 | 0.829 | 0.91 |
 | Embeddings on every pair | 0.784 | 0.933 | 0.91 |
 
-Without embeddings, about half of true matches whose names use different writing systems (Latin vs Cyrillic, Arabic, and similar) score below 0.80. Adding embeddings for those pairs returns about 38,000 more true matches and about 11,000 more false hits. Changing the name algorithm (Soundex, nsim, and others) does not close that gap.
+Without embeddings, about half of true matches whose names use different writing systems (Latin vs Cyrillic, Arabic, and similar) score below 0.80. Adding embeddings for those pairs returns about 38,000 more true matches and about 11,000 more false hits. Adding TF-IDF on top of that embeddings setup returns about 4,400 more true matches and 3,400 more false hits; recall on different writing systems stays 0.91. Changing the name algorithm (Soundex, nsim, and others), with or without TF-IDF, does not close the transliteration gap.
 
 If missing a designation is worse than extra review, use embeddings and `minMatch=0.59` (precision 0.876, recall 0.942 on this set). If embeddings are off, use Jaro-Winkler at 0.59 rather than 0.80.
 

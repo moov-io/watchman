@@ -35,11 +35,17 @@ func defaultCompareSpecs() []string {
 		"double-metaphone",
 		"double-metaphone+tfidf",
 		"soft-bidist",
+		"soft-bidist+tfidf",
 		"nsim",
+		"nsim+tfidf",
 		"editex",
+		"editex+tfidf",
 		"beider-morse",
+		"beider-morse+tfidf",
 		"embed-hybrid",
+		"embed-hybrid+tfidf",
 		"embed-max",
+		"embed-max+tfidf",
 		"embed-only",
 	}
 }
@@ -50,33 +56,51 @@ func parseCompareSpec(spec string, base evalConfig, idx *tfidf.Index, emb *embed
 	cfg.name = spec
 	cfg.debugErrors = 0
 
-	switch spec {
+	wantTFIDF := false
+	rest := spec
+	if strings.Contains(rest, "+tfidf") {
+		wantTFIDF = true
+		rest = strings.ReplaceAll(rest, "+tfidf", "")
+	}
+	if strings.HasSuffix(rest, "+name-only") {
+		cfg.nameOnly = true
+		rest = strings.TrimSuffix(rest, "+name-only")
+	}
+	rest = strings.Trim(rest, "+")
+
+	switch rest {
 	case "embed-hybrid":
 		cfg.embed = emb
 		cfg.embedMode = "hybrid"
 		cfg.algorithm = search.AlgorithmJaroWinkler
+		if wantTFIDF {
+			if idx == nil {
+				return cfg, fmt.Errorf("compare spec %q needs a TF-IDF index", spec)
+			}
+			cfg.tfidf = idx
+		}
 		return cfg, nil
 	case "embed-max":
 		cfg.embed = emb
 		cfg.embedMode = "max"
 		cfg.algorithm = search.AlgorithmJaroWinkler
+		if wantTFIDF {
+			if idx == nil {
+				return cfg, fmt.Errorf("compare spec %q needs a TF-IDF index", spec)
+			}
+			cfg.tfidf = idx
+		}
 		return cfg, nil
 	case "embed-only":
 		cfg.embed = emb
 		cfg.embedMode = "only"
+		if wantTFIDF {
+			return cfg, fmt.Errorf("compare spec %q: embed-only ignores Similarity/TF-IDF", spec)
+		}
 		return cfg, nil
 	}
 
-	wantTFIDF := false
-	algoPart := spec
-	if strings.HasSuffix(spec, "+tfidf") {
-		wantTFIDF = true
-		algoPart = strings.TrimSuffix(spec, "+tfidf")
-	}
-	if strings.HasSuffix(algoPart, "+name-only") {
-		cfg.nameOnly = true
-		algoPart = strings.TrimSuffix(algoPart, "+name-only")
-	}
+	algoPart := rest
 	algo, err := search.ParseStringMatchAlgorithm(algoPart)
 	if err != nil {
 		return cfg, fmt.Errorf("compare spec %q: %w", spec, err)
