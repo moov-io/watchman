@@ -24,12 +24,12 @@ Predicted positive means `score >= threshold`. Default cutoff is 0.80 (`minMatch
 
 On subjects after scoring-policy updates:
 
-| Config @ 0.80 | Prec | Rec | F1 | Cross-script rec |
-|---------------|-----:|----:|---:|-----------------:|
+| Configuration (threshold 0.80) | Precision | Recall | F1 score | Cross-script recall |
+|--------------------------------|----------:|-------:|---------:|--------------------:|
 | Jaro-Winkler | 0.986 | 0.689 | 0.811 | 0.50 |
 | Jaro-Winkler + TF-IDF | 0.968 | 0.707 | 0.817 | 0.52 |
-| **Embed-hybrid** | **0.946** | **0.815** | **0.876** | **0.91** |
-| Embed-max | 0.784 | 0.933 | 0.852 | 0.91 |
+| **Jaro-Winkler + cross-script embeddings** | **0.946** | **0.815** | **0.876** | **0.91** |
+| Embeddings on every pair | 0.784 | 0.933 | 0.852 | 0.91 |
 
 Without embeddings, about half of cross-script true matches miss at 0.80. Hybrid costs more review (14k subject FPs vs 3k) and recovers ~38k false negatives. Name-algorithm swaps (Soundex, nsim, Editex, Beider-Morse) do not close that gap.
 

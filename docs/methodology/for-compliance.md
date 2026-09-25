@@ -47,8 +47,8 @@ We scored the **entire dump** with Watchman’s production `Similarity` (pairwis
 
 **Subjects** (472,477 people, companies, vessels — Occupancy/Succession auto-merge dropped) at threshold **0.80**:
 
-| Configuration | Precision | Recall | F1 | Cross-script recall |
-|---------------|----------:|-------:|---:|--------------------:|
+| Configuration (threshold 0.80) | Precision | Recall | F1 score | Cross-script recall |
+|--------------------------------|----------:|-------:|---------:|--------------------:|
 | Jaro–Winkler | **0.986** | 0.689 | 0.811 | 0.50 |
 | Jaro–Winkler + TF-IDF | 0.968 | 0.707 | 0.817 | 0.52 |
 | **Jaro–Winkler + cross-script embeddings** | 0.946 | **0.815** | **0.876** | **0.91** |
@@ -66,8 +66,8 @@ Name-algorithm swaps (Soundex, Double Metaphone, Beider-Morse, nsim, Editex) mov
 
 **Threshold as a documented control.** Same Jaro–Winkler scorer, subjects only:
 
-| `minMatch` | Precision | Recall | F1 |
-|-----------:|----------:|-------:|---:|
+| `minMatch` | Precision | Recall | F1 score |
+|-----------:|----------:|-------:|---------:|
 | 0.80 | 0.986 | 0.689 | 0.811 |
 | 0.59 | 0.945 | 0.920 | 0.932 |
 
