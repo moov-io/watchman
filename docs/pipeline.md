@@ -51,7 +51,7 @@ Digits are kept and, when possible, normalized with a country guess (`+1 (555) 0
 
 ### Addresses
 
-1. Free-text `address=` on the query is parsed into line, city, state, postal code, country. **Docker images** use libpostal. **GitHub binaries / `go run`** use usaddress. **Any build** can enable deepparse. See [Addresses](/watchman/addresses/).
+1. Free-text `address=` on the query is parsed into line, city, state, postal code, country. **Docker images and Linux/macOS GitHub releases** use libpostal. **Windows `.exe` and `go run`** use usaddress unless built with `-tags libpostal`. **Any build** can enable deepparse. See [Addresses](/watchman/addresses/).
 2. Parsed fields are lowercased. Commas are stripped from street lines. Country codes (`US`, `USA`) fold to a common name (`United States`).
 3. Street, city, and similar fields are split into tokens for scoring.
 

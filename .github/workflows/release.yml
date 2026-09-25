@@ -48,7 +48,7 @@ jobs:
         include:
           - runner: ubuntu-latest
             arch: amd64
-          - runner: ubuntu-latest
+          - runner: ubuntu-24.04-arm
             arch: arm64
           - runner: macos-latest
             arch: arm64
@@ -73,15 +73,20 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgl1-mesa-dev libwayland-dev libxkbcommon-dev xorg-dev
+        sudo apt-get install -y curl autoconf automake libtool pkg-config
 
     - name: Setup Windows Dependencies
       if: runner.os == 'Windows'
       run: |
         choco install -y make mingw
 
-    - name: Install Fyne
-      run: make setup-webui
+    - name: Install libpostal
+      if: runner.os != 'Windows'
+      run: |
+        make install-libpostal
+        if [ "${{ runner.os }}" = "Linux" ]; then
+          sudo ldconfig
+        fi
 
     - name: Distribute
       run: make dist

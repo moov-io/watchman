@@ -184,7 +184,7 @@ See [Performance](/watchman/performance/) for how admission control, per-search 
 
 #### libpostal
 
-[libpostal](https://github.com/openvenues/libpostal) (with [Senzing’s data](https://github.com/Senzing/libpostal-data)) is how **Docker and OpenShift images** parse addresses. It loads about 3GB of models. GitHub release binaries and `go run` without `-tags libpostal` use `usaddress` instead.
+[libpostal](https://github.com/openvenues/libpostal) (with [Senzing’s data](https://github.com/Senzing/libpostal-data)) is how **Docker images and Linux/macOS GitHub release binaries** parse addresses. It loads about 3GB of models. Windows GitHub `.exe` files and `go run` without `-tags libpostal` use `usaddress` instead. `make dist` builds with libpostal by default (`DIST_GOTAGS=` to skip).
 
 Settings live under `Watchman.PostalPool` in the config file (or matching environment variables). `Enabled: false` is in-process libpostal in the Docker image. Set `Enabled: true` to run extra libpostal worker processes for concurrency:
 

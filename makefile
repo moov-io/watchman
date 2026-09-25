@@ -150,11 +150,22 @@ else
 	@rm -rf ./bin/ cover.out coverage.txt lint-project.sh misspell* staticcheck* openapi-generator-cli-*.jar
 endif
 
+# GitHub release binaries use libpostal (same as Docker). Override: make dist DIST_GOTAGS=
+# Windows releases stay usaddress: libpostal/CGO is not installed on that runner.
+ifndef DIST_GOTAGS
+ifeq ($(OS),Windows_NT)
+	DIST_GOTAGS :=
+else
+	DIST_GOTAGS := -tags libpostal
+endif
+endif
+
 dist:
 ifeq ($(OS),Windows_NT)
-	GOOS=windows go build -o bin/watchman.exe github.com/moov-io/watchman/cmd/server
+	go build ${DIST_GOTAGS} -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o bin/watchman.exe github.com/moov-io/watchman/cmd/server
 else
-	GOOS=${PLATFORM} go build -o bin/watchman-${PLATFORM}-${ARCH} github.com/moov-io/watchman/cmd/server
+	PKG_CONFIG_PATH="$(PKG_CONFIG_PATH):/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig" \
+	CGO_ENABLED=1 GOOS=${PLATFORM} go build ${DIST_GOTAGS} -ldflags "-X github.com/moov-io/watchman.Version=${VERSION}" -o bin/watchman-${PLATFORM}-${ARCH} github.com/moov-io/watchman/cmd/server
 endif
 
 docker: clean docker-hub docker-openshift

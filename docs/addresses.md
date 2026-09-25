@@ -10,9 +10,9 @@ menubar: docs-menu
 
 Watchman parses free-text addresses on ingest and on `/v2/search`.
 
-- **Docker and OpenShift images** (`moov/watchman`, `quay.io/moov/watchman`) are built with [libpostal](https://github.com/openvenues/libpostal) (Senzing data). Address parse is in-process libpostal.
+- **Docker images, OpenShift images, and Linux/macOS GitHub release binaries** are built with [libpostal](https://github.com/openvenues/libpostal) (Senzing data). Address parse is in-process libpostal (~3GB RAM for models).
 - **Any build** can use [deepparse](https://github.com/GRAAL-Research/deepparse) instead: set `Watchman.Deepparse.Enabled: true` and run the HTTP sidecar.
-- **Otherwise** (GitHub release binaries, `go build` / `go run` without `-tags libpostal`) Watchman uses the built-in US-oriented parser (`usaddress`).
+- **Otherwise** (Windows GitHub `.exe`, `go build` / `go run` without `-tags libpostal`) Watchman uses the built-in US-oriented parser (`usaddress`).
 
 libpostal settings are under `Watchman.PostalPool` in the [config file](/watchman/config/#libpostal). Leave `Enabled: false` for in-process parse in Docker. Set `Enabled: true` if you need extra libpostal worker processes.
 
