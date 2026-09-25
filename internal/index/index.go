@@ -24,6 +24,8 @@ type Lists interface {
 	Update(latest download.Stats)
 	LatestStats() download.Stats
 	GetTFIDFIndex() *tfidf.Index
+	// RefreshIngest rebuilds the ingested-file corpus from the repository.
+	RefreshIngest(ctx context.Context) error
 }
 
 func NewLists(ingestRepository ingest.Repository) Lists {
@@ -37,86 +39,159 @@ type lists struct {
 	latestStats download.Stats
 	corpus      *corpus
 
-	ingestRepository ingest.Repository
+	ingestRepository  ingest.Repository
+	ingestMu          sync.Mutex // serializes ingest corpus rebuilds
+	ingestCorpus      *corpus
+	ingestFingerprint string
+	ingestCounts      map[string]int
+	ingestHashes      map[string]string
+}
+
+func (l *lists) downloadedSource(source search.SourceList) bool {
+	if source.IsRequestType() {
+		return true
+	}
+	src := string(source)
+	if src == "" {
+		return true
+	}
+	_, ok := l.latestStats.Lists[src]
+	return ok
 }
 
 func (l *lists) GetEntities(ctx context.Context, source search.SourceList) ([]search.Entity[search.Value], error) {
+	if err := l.prepareIngest(ctx, source); err != nil {
+		return nil, err
+	}
+
 	l.mu.RLock()
 	defer l.mu.RUnlock()
 
-	_, exists := l.latestStats.Lists[string(source)]
+	src := string(source)
+	downloaded := l.downloadedSource(source)
 
-	// Let api-request use our inmem entities
-	exists = exists || source.IsRequestType()
-	if string(source) == "" {
-		exists = true
-	}
-
-	if exists {
+	if src == "" {
+		var out []search.Entity[search.Value]
 		if l.corpus != nil {
-			// Prefer partitioned view when a specific source is requested.
-			// Always return the partition (even if empty) so we never leak entities
-			// from other sources when the requested partition has no rows.
-			if src := string(source); src != "" && !source.IsRequestType() {
-				idxs, _ := l.corpus.partitionIndices(source, "")
-				return l.corpus.materialize(idxs), nil
-			}
-			return l.corpus.entities, nil
+			out = append(out, l.corpus.entities...)
+		}
+		if l.ingestCorpus != nil {
+			out = append(out, l.ingestCorpus.entities...)
+		}
+		if out != nil {
+			return out, nil
 		}
 		return l.latestStats.Entities, nil
 	}
 
-	// Check the repository
+	if downloaded && !source.IsRequestType() && l.corpus != nil {
+		idxs, _ := l.corpus.partitionIndices(source, "")
+		return l.corpus.materialize(idxs), nil
+	}
+	if source.IsRequestType() && l.corpus != nil {
+		return l.corpus.entities, nil
+	}
+	if l.ingestLoaded(source) {
+		idxs, _ := l.ingestCorpus.partitionIndices(source, "")
+		return l.ingestCorpus.materialize(idxs), nil
+	}
+	if downloaded && l.corpus != nil {
+		return l.corpus.entities, nil
+	}
 	if l.ingestRepository != nil {
-		// TODO(adam): need to support pagination
-		return l.ingestRepository.ListBySource(ctx, "", source, 1000)
+		return nil, nil
 	}
 
 	return nil, fmt.Errorf("source %s not found", source)
 }
 
 func (l *lists) SelectCandidates(ctx context.Context, query search.Entity[search.Value]) (Candidates, error) {
+	source := query.Source
+	if err := l.prepareIngest(ctx, source); err != nil {
+		return Candidates{}, err
+	}
+
 	l.mu.RLock()
 	defer l.mu.RUnlock()
 
-	source := query.Source
-	_, exists := l.latestStats.Lists[string(source)]
-	exists = exists || source.IsRequestType() || string(source) == ""
+	downloaded := l.downloadedSource(source)
+	ingested := l.ingestLoaded(source)
 
-	if exists && l.corpus != nil {
-		return l.corpus.selectCandidates(query, CandidateOpts{}), nil
-	}
-
-	// Ingested-only source: pull from repository and return as-is (no inverted index)
-	if !exists && l.ingestRepository != nil {
-		ents, err := l.ingestRepository.ListBySource(ctx, "", source, 1000)
-		if err != nil {
-			return Candidates{}, err
+	if string(source) == "" {
+		var dl, ing Candidates
+		if l.corpus != nil {
+			dl = l.corpus.selectCandidates(query, CandidateOpts{})
 		}
-		return candidatesFromEntities(ents, nil), nil
-	}
-
-	if exists {
-		// Corpus not built yet — return full list
+		if l.ingestCorpus != nil && l.ingestFingerprint != "" {
+			ing = l.ingestCorpus.selectCandidates(query, CandidateOpts{})
+		}
+		merged := mergeCandidates(dl, ing)
+		if merged.Len() > 0 || l.corpus != nil || l.ingestCorpus != nil {
+			return merged, nil
+		}
 		return candidatesFromEntities(l.latestStats.Entities, l.latestStats.TFIDFIndex), nil
 	}
 
+	if downloaded && l.corpus != nil {
+		return l.corpus.selectCandidates(query, CandidateOpts{}), nil
+	}
+	if ingested {
+		return l.ingestCorpus.selectCandidates(query, CandidateOpts{}), nil
+	}
+	if downloaded {
+		return candidatesFromEntities(l.latestStats.Entities, l.latestStats.TFIDFIndex), nil
+	}
+	if l.ingestRepository != nil {
+		return Candidates{}, nil
+	}
+
 	return Candidates{}, fmt.Errorf("source %s not found", source)
+}
+
+func (l *lists) prepareIngest(ctx context.Context, source search.SourceList) error {
+	if l.ingestRepository == nil {
+		return nil
+	}
+	src := string(source)
+	if src != "" && !source.IsRequestType() {
+		l.mu.RLock()
+		_, downloaded := l.latestStats.Lists[src]
+		l.mu.RUnlock()
+		if downloaded {
+			return nil
+		}
+	}
+	return l.ensureIngest(ctx)
 }
 
 func (l *lists) LatestStats() download.Stats {
 	l.mu.RLock()
 	defer l.mu.RUnlock()
 
-	// Only bring over what fields we need
-	out := download.Stats{
-		Lists:      l.latestStats.Lists,
-		ListHashes: l.latestStats.ListHashes,
+	lists := l.latestStats.Lists
+	hashes := l.latestStats.ListHashes
+	if len(l.ingestCounts) > 0 {
+		lists = copyStringInt(l.latestStats.Lists)
+		hashes = copyStringString(l.latestStats.ListHashes)
+		if lists == nil {
+			lists = make(map[string]int, len(l.ingestCounts))
+		}
+		if hashes == nil {
+			hashes = make(map[string]string, len(l.ingestHashes))
+		}
+		for src, n := range l.ingestCounts {
+			lists[src] = n
+			hashes[src] = l.ingestHashes[src]
+		}
+	}
+
+	return download.Stats{
+		Lists:      lists,
+		ListHashes: hashes,
 		StartedAt:  l.latestStats.StartedAt,
 		EndedAt:    l.latestStats.EndedAt,
 		Version:    watchman.Version,
 	}
-	return out
 }
 
 // Update replaces the searchable corpus with a newly downloaded generation.

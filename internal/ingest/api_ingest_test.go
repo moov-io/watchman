@@ -183,7 +183,7 @@ func setupIngestAPITest(t *testing.T, fn func(ingestApiSetup)) {
 		require.NoError(t, err)
 
 		ingestService := ingest.NewService(logger, ingestConf.Ingest, ingestRepository)
-		controller := ingest.NewController(logger, ingestService, ingestConf.Ingest)
+		controller := ingest.NewController(logger, ingestService, ingestConf.Ingest, indexedLists)
 
 		router := mux.NewRouter()
 		controller.AppendRoutes(router)
@@ -230,7 +230,7 @@ func (s *recordingIngestService) GetEntitiesBySource(context.Context, string) ([
 func TestIngestFile_MaxBodyBytes(t *testing.T) {
 	logger := log.NewTestLogger()
 	svc := &recordingIngestService{}
-	controller := ingest.NewController(logger, svc, ingest.Config{MaxBodyBytes: 64})
+	controller := ingest.NewController(logger, svc, ingest.Config{MaxBodyBytes: 64}, nil)
 
 	router := mux.NewRouter()
 	controller.AppendRoutes(router)

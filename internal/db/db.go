@@ -23,9 +23,19 @@ type DB interface {
 	Ping() error
 	Close() error
 
+	BeginTx(ctx context.Context, opts *sql.TxOptions) (Tx, error)
 	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
 	QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
 	QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row
+}
+
+// Tx is a database transaction. Callers must Commit or Rollback.
+type Tx interface {
+	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
+	QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
+	QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row
+	Commit() error
+	Rollback() error
 }
 
 const (
@@ -116,6 +126,63 @@ func (db *db) Ping() error {
 
 func (db *db) Close() error {
 	return db.db.Close()
+}
+
+func (db *db) BeginTx(ctx context.Context, opts *sql.TxOptions) (Tx, error) {
+	ctx, span := telemetry.StartSpan(ctx, "sql-begin-tx")
+	defer span.End()
+
+	sqlTx, err := db.db.BeginTx(ctx, opts)
+	if err != nil {
+		return nil, err
+	}
+	return &tx{tx: sqlTx, onQuery: db.onQuery}, nil
+}
+
+type tx struct {
+	tx      *sql.Tx
+	onQuery func(query string) string
+}
+
+func (t *tx) ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error) {
+	query = t.onQuery(query)
+
+	ctx, span := telemetry.StartSpan(ctx, "sql-tx-exec", trace.WithAttributes(
+		attribute.String("query", query),
+	))
+	defer span.End()
+
+	return t.tx.ExecContext(ctx, query, args...)
+}
+
+func (t *tx) QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error) {
+	query = t.onQuery(query)
+
+	ctx, span := telemetry.StartSpan(ctx, "sql-tx-query", trace.WithAttributes(
+		attribute.String("query", query),
+	))
+	defer span.End()
+
+	return t.tx.QueryContext(ctx, query, args...) //nolint:sqlclosecheck
+}
+
+func (t *tx) QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row {
+	query = t.onQuery(query)
+
+	ctx, span := telemetry.StartSpan(ctx, "sql-tx-query-row", trace.WithAttributes(
+		attribute.String("query", query),
+	))
+	defer span.End()
+
+	return t.tx.QueryRowContext(ctx, query, args...)
+}
+
+func (t *tx) Commit() error {
+	return t.tx.Commit()
+}
+
+func (t *tx) Rollback() error {
+	return t.tx.Rollback()
 }
 
 func (db *db) ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error) {

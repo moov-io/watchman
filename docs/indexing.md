@@ -8,7 +8,7 @@ menubar: docs-menu
 
 # Advanced Search Indexing for Superior Performance
 
-Downloaded lists (OFAC, EU, UK, UN, …) live in an in-memory corpus that rebuilds on each successful refresh. [Ingested files](/watchman/ingest/) are different: they are read from MySQL/Postgres at search time, have no inverted index, and only the first 1,000 rows of that source are scored.
+Downloaded lists (OFAC, EU, UK, UN, …) live in an in-memory corpus that rebuilds on each successful refresh. [Ingested files](/watchman/ingest/) use a second corpus with the same indexes. A per-source checksum from the database decides whether that corpus is still current, so search does not reread every ingested row on each query.
 
 ## What is built on refresh
 

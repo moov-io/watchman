@@ -37,7 +37,8 @@ func testAPI(tb testing.TB) testSetup {
 	logger := log.NewTestLogger()
 
 	searchConfig := search.DefaultConfig()
-	indexedLists := index.NewLists(nil) // only in-mem
+	ingestRepository := &ingest.MockRepository{}
+	indexedLists := index.NewLists(ingestRepository)
 	searchService, err := search.NewService(logger, searchConfig, nil, indexedLists)
 	require.NoError(tb, err)
 
@@ -50,11 +51,10 @@ func testAPI(tb testing.TB) testSetup {
 	conf, err := config.LoadConfig(logger)
 	require.NoError(tb, err)
 
-	ingestRepository := &ingest.MockRepository{}
 	ingestService := ingest.NewService(logger, conf.Ingest, ingestRepository)
 
 	searchController := search.NewController(logger, searchService, nil)
-	ingestController := ingest.NewController(logger, ingestService, conf.Ingest)
+	ingestController := ingest.NewController(logger, ingestService, conf.Ingest, indexedLists)
 
 	router := mux.NewRouter()
 	searchController.AppendRoutes(router)

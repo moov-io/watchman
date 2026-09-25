@@ -240,7 +240,7 @@ When enabled, Watchman will serve MCP endpoints at `/mcp` (streamable HTTP) in a
 
 ### Ingest
 
-`POST /v2/ingest/{fileType}` reads the request body into a configured file schema. The body is capped to limit memory use:
+`POST /v2/ingest/{fileType}` reads the request body into a configured file schema and loads every parsed row into the search index. A checksum of each ingested source is stored so search does not scan the table on every query. The body is capped to limit memory use:
 
 ```yaml
   Ingest:

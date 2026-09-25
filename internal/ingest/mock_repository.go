@@ -3,6 +3,7 @@ package ingest
 import (
 	"context"
 	"slices"
+	"sort"
 	"sync"
 
 	"github.com/moov-io/watchman/pkg/search"
@@ -28,7 +29,11 @@ func (r *MockRepository) Upsert(ctx context.Context, fileType string, entities [
 	if r.entities == nil {
 		r.entities = make(map[string][]search.Entity[search.Value])
 	}
-	r.entities[fileType] = slices.Clone(entities)
+	cloned := slices.Clone(entities)
+	for i := range cloned {
+		cloned[i].Source = search.SourceList(fileType)
+	}
+	r.entities[fileType] = cloned
 
 	return nil
 }
@@ -90,4 +95,55 @@ func (r *MockRepository) ListBySource(ctx context.Context, lastSourceID string, 
 	}
 
 	return slices.Clone(entities[startIdx:endIdx]), nil
+}
+
+func (r *MockRepository) ListAll(ctx context.Context) ([]search.Entity[search.Value], error) {
+	if r.Err != nil {
+		return nil, r.Err
+	}
+
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	var all []search.Entity[search.Value]
+	for _, entities := range r.entities {
+		all = append(all, entities...)
+	}
+	sort.Slice(all, func(i, j int) bool {
+		if all[i].Source != all[j].Source {
+			return all[i].Source < all[j].Source
+		}
+		return all[i].SourceID < all[j].SourceID
+	})
+	return slices.Clone(all), nil
+}
+
+func (r *MockRepository) Checksums(ctx context.Context) ([]SourceChecksum, error) {
+	if r.Err != nil {
+		return nil, r.Err
+	}
+
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	sources := make([]string, 0, len(r.entities))
+	for src := range r.entities {
+		sources = append(sources, src)
+	}
+	sort.Strings(sources)
+
+	out := make([]SourceChecksum, 0, len(sources))
+	for _, src := range sources {
+		ents := r.entities[src]
+		sum, err := checksumEntities(ents)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, SourceChecksum{
+			Source:      src,
+			EntityCount: len(ents),
+			Checksum:    sum,
+		})
+	}
+	return out, nil
 }

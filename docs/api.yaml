@@ -612,8 +612,10 @@ paths:
     post:
       summary: Import a file as a dataset
       description: |
-        Import a file as an in-memory dataset for use in searches.
-        Request bodies are capped (32MiB by default; see Ingest.MaxBodyBytes / INGEST_MAX_BODY_BYTES).
+        Import a CSV or Senzing file as a named dataset. Rows are stored (MySQL/Postgres
+        when configured) and loaded into the in-memory search index. A per-source checksum
+        avoids scanning the table on every search. Request bodies are capped (32MiB by
+        default; see Ingest.MaxBodyBytes / INGEST_MAX_BODY_BYTES).
       parameters:
         - name: fileType
           in: path
