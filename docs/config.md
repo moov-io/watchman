@@ -186,6 +186,21 @@ See [Performance](/watchman/performance/) for how admission control, per-search 
 
 [libpostal](https://github.com/openvenues/libpostal) (with [Senzing’s data](https://github.com/Senzing/libpostal-data)) is how **Docker and OpenShift images** parse addresses. It loads about 3GB of models. GitHub release binaries and `go run` without `-tags libpostal` use `usaddress` instead.
 
+Settings live under `Watchman.PostalPool` in the config file (or matching environment variables). `Enabled: false` is in-process libpostal in the Docker image. Set `Enabled: true` to run extra libpostal worker processes for concurrency:
+
+```yaml
+  PostalPool:
+    Enabled: false
+    # Extra libpostal worker processes. Most deployments keep this false
+    # (in-process parse in the Docker image).
+    Instances: 0
+    StartingPort: 10000
+    StartupTimeout: "60s"
+    RequestTimeout: "10s"
+    BinaryPath: "" # POSTAL_SERVER_BIN_PATH is set in the Dockerfile
+    CGOSelfInstances: 1
+```
+
 #### Deepparse
 
 Deepparse is an optional HTTP client for [GRAAL-Research/deepparse](https://github.com/GRAAL-Research/deepparse), a neural-network address parser that runs outside Watchman. Default parsers (usaddress / libpostal) are unchanged until this is enabled.

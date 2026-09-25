@@ -51,29 +51,31 @@ We scored the **entire dump** with Watchman’s production `Similarity` (pairwis
 
 **Subjects** (472,477 people, companies, vessels — Occupancy/Succession auto-merge dropped) at threshold **0.80**:
 
-| Configuration (threshold 0.80) | Precision | Recall | F1 score | Cross-script recall |
-|--------------------------------|----------:|-------:|---------:|--------------------:|
-| Jaro–Winkler | **0.986** | 0.689 | 0.811 | 0.50 |
-| Jaro–Winkler + TF-IDF | 0.968 | 0.707 | 0.817 | 0.52 |
-| **Jaro–Winkler + cross-script embeddings** | 0.946 | **0.815** | **0.876** | **0.91** |
+**Precision** is the share of returned hits that are real matches. **Recall** is the share of real matches that were returned.
+
+| Configuration (threshold 0.80) | Precision | Recall | Recall on different writing systems |
+|--------------------------------|----------:|-------:|------------------------------------:|
+| Jaro–Winkler | **0.986** | 0.689 | 0.50 |
+| Jaro–Winkler + TF-IDF | 0.968 | 0.707 | 0.52 |
+| **Jaro–Winkler + embeddings for different writing systems** | 0.946 | **0.815** | **0.91** |
 
 Read that as a **review-capacity vs miss-rate** trade:
 
 - Default Jaro–Winkler at 0.80: about **3,000** subject false positives and **94,000** missed labeled positives. Precision is exam-friendly; recall is not, especially on transliteration.
 - Adding **cross-script embeddings** (`qwen3-embedding:0.6b`, used only when scripts differ — the production `EMBEDDINGS_CROSS_SCRIPT_ONLY` analog): about **14,000** false positives and **56,000** misses. Precision stays **0.95**. Cross-script recall goes from **half the true matches** to **91%**.
 
-Name-algorithm swaps (Soundex, Double Metaphone, Beider-Morse, nsim, Editex) moved F1 by about **0.001**. They do not fix Arabic/Cyrillic/Latin pairs. That matches the paper: rule matchers over-fire on common Latin names; learned methods fail on transliteration unless you add a representation that is not character-based.
+Name-algorithm swaps (Soundex, Double Metaphone, Beider-Morse, nsim, Editex) barely change precision or recall. They do not fix Arabic/Cyrillic/Latin pairs. That matches the paper: rule matchers over-fire on common Latin names; learned methods fail on transliteration unless you add a representation that is not character-based.
 
-**Vessels** (7,550 pairs): F1 **0.993**, recall 0.988 — IMO/MMSI as unique keys.
+**Vessels** (7,550 pairs): recall 0.988 — IMO/MMSI as unique keys.
 
 **Person/Person** (284,808 pairs): precision 0.983, recall 0.683 at 0.80 without embeddings. That is where most remaining misses live, and where embeddings earn their keep.
 
 **Threshold as a documented control.** Same Jaro–Winkler scorer, subjects only:
 
-| `minMatch` | Precision | Recall | F1 score |
-|-----------:|----------:|-------:|---------:|
-| 0.80 | 0.986 | 0.689 | 0.811 |
-| 0.59 | 0.945 | 0.920 | 0.932 |
+| `minMatch` | Precision | Recall |
+|-----------:|----------:|-------:|
+| 0.80 | 0.986 | 0.689 |
+| 0.59 | 0.945 | 0.920 |
 
 If the risk assessment says “we would rather review more alerts than miss a designation,” write down 0.59. If analyst capacity is the binding constraint, write down 0.80 and turn on cross-script embeddings.
 
@@ -81,14 +83,14 @@ If the risk assessment says “we would rather review more alerts than miss a de
 
 The paper reports sampled sets (about 1k–10k pairs) and includes auto-merge rows. Watchman figures here are the full 755,540-pair dump.
 
-| System | F1 score | Precision | Recall | Notes |
-|--------|---------:|----------:|-------:|-------|
-| nomenklatura RegressionV1 (paper sample) | 0.913 | 0.845 | 0.994 | High recall, large review queue |
-| GPT-4o 0-shot (paper sample) | 0.990 | 0.988 | 0.991 | Binary same-entity label from the full JSON record |
-| Watchman Jaro-Winkler at 0.80 | 0.905 | 0.989 | 0.834 | Screening-shaped queue |
-| Watchman Jaro-Winkler at 0.59 | 0.960 | 0.960 | 0.960 | Higher recall, still inspectable scores |
+| System | Precision | Recall | Notes |
+|--------|----------:|-------:|-------|
+| nomenklatura RegressionV1 (paper sample) | 0.845 | 0.994 | High recall, large review queue |
+| GPT-4o 0-shot (paper sample) | 0.988 | 0.991 | Yes/no from the full JSON record |
+| Watchman Jaro-Winkler at 0.80 | 0.989 | 0.834 | Screening-shaped queue |
+| Watchman Jaro-Winkler at 0.59 | 0.960 | 0.960 | Higher recall, still inspectable scores |
 
-GPT-4o’s F1 score is a ceiling on pairwise identity when the model sees every field. Watchman is the list-driven control you can threshold, log, and defend. Wolfsberg still applies: screening compares names, IDs, and dates; it does not decide beneficial ownership.
+GPT-4o is a ceiling on pairwise identity when the model sees every field. Watchman is the list-driven control you can threshold, log, and defend. Wolfsberg still applies: screening compares names, IDs, and dates; it does not decide beneficial ownership.
 
 Full tables: [OpenSanctions Pairs evaluation](/watchman/opensanctions-pairs/) and [`RESULTS.md`](https://github.com/moov-io/watchman/blob/master/research/opensanctions-pairs/RESULTS.md).
 

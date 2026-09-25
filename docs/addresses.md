@@ -14,6 +14,8 @@ Watchman parses free-text addresses on ingest and on `/v2/search`.
 - **Any build** can use [deepparse](https://github.com/GRAAL-Research/deepparse) instead: set `Watchman.Deepparse.Enabled: true` and run the HTTP sidecar.
 - **Otherwise** (GitHub release binaries, `go build` / `go run` without `-tags libpostal`) Watchman uses the built-in US-oriented parser (`usaddress`).
 
+libpostal settings are under `Watchman.PostalPool` in the [config file](/watchman/config/#libpostal). Leave `Enabled: false` for in-process parse in Docker. Set `Enabled: true` if you need extra libpostal worker processes.
+
 ### Deepparse (optional)
 
 [GRAAL-Research/deepparse](https://github.com/GRAAL-Research/deepparse) is a multinational neural address parser that runs as an HTTP sidecar. Watchman calls it with [deepparse-go](https://github.com/adamdecaf/deepparse-go).
