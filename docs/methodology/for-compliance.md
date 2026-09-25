@@ -75,9 +75,16 @@ If the risk assessment says “we would rather review more alerts than miss a de
 
 ### How this sits next to the paper’s baselines
 
-OpenSanctions’ production rule matcher (nomenklatura RegressionV1) on their sampled sets: F1 91.3, **precision 84.5, recall 99.4** — catch everything, pay in review. GPT-4o pairwise: F1 99.0. That LLM number is a **binary judgment on the full FollowTheMoney JSON**, not a ranked screener with a 20 ms budget. Watchman at 0.80 is the other side of the curve (precision 0.99, recall 0.83 on the full dump). At 0.59, full-dump F1 is **0.960** with precision still above 0.96.
+The paper reports sampled sets (about 1k–10k pairs) and includes auto-merge rows. Watchman figures here are the full 755,540-pair dump.
 
-Use the LLM paper as a ceiling on **pairwise identity**, not as a replacement for an inspectable, list-driven control. Wolfsberg’s point still holds: screening compares strings (and, here, IDs and dates); it does not decide beneficial ownership.
+| System | F1 score | Precision | Recall | Notes |
+|--------|---------:|----------:|-------:|-------|
+| nomenklatura RegressionV1 (paper sample) | 0.913 | 0.845 | 0.994 | High recall, large review queue |
+| GPT-4o 0-shot (paper sample) | 0.990 | 0.988 | 0.991 | Binary same-entity label from the full JSON record |
+| Watchman Jaro-Winkler at 0.80 | 0.905 | 0.989 | 0.834 | Screening-shaped queue |
+| Watchman Jaro-Winkler at 0.59 | 0.960 | 0.960 | 0.960 | Higher recall, still inspectable scores |
+
+GPT-4o’s F1 score is a ceiling on pairwise identity when the model sees every field. Watchman is the list-driven control you can threshold, log, and defend. Wolfsberg still applies: screening compares names, IDs, and dates; it does not decide beneficial ownership.
 
 Full tables: [OpenSanctions Pairs evaluation](/watchman/opensanctions-pairs/) and [`RESULTS.md`](https://github.com/moov-io/watchman/blob/master/research/opensanctions-pairs/RESULTS.md).
 

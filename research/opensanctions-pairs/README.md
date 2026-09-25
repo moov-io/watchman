@@ -123,7 +123,7 @@ go run ./research/opensanctions-pairs -input ... -embed hybrid
 
 Run 2026-09-24 against `pairs-20251209.json.gz` (755,540 pairs, 581,149 positive / 174,391 negative — the paper's published counts). Pairwise `Similarity` with default Jaro-Winkler, cap of 20 alt names, no TF-IDF corpus weights. Occupancy / Position / Succession and other relational schemas are included in "all pairs" and dropped in "subjects".
 
-Paper Table 3 for context (their 10k/1k stratified samples, not this exact full-corpus cut): nomenklatura RegressionV1 **F1 91.33** (prec 84.46, rec 99.42); GPT-4o **F1 98.95**.
+The paper’s Table 3 uses 1k–10k stratified samples (auto-merge included). RegressionV1: F1 score 0.913, precision 0.845, recall 0.994. GPT-4o: F1 score 0.990. Watchman numbers in this file are the full 755,540-pair dump.
 
 ### Headline metrics
 
