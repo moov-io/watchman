@@ -304,6 +304,7 @@ func (e Entity[T]) Normalize() Entity[T] {
 	// Name
 	e.PreparedFields.Name = prepareEntityName(e.Name, e.Type)
 	e.PreparedFields.NameFields = removeStopwords(e.PreparedFields.Name)
+	extraFormer := prepare.ExNames(e.Name)
 
 	// Entity Type
 	if e.Person != nil {
@@ -330,21 +331,27 @@ func (e Entity[T]) Normalize() Entity[T] {
 		}
 	}
 
-	// Historical former names (precompute for search hot path)
-	if len(e.HistoricalInfo) > 0 {
-		var names []string
-		var fields [][]string
-		for _, hist := range e.HistoricalInfo {
-			if !strings.EqualFold(hist.Type, "Former Name") || hist.Value == "" {
-				continue
-			}
-			prepared := prepareEntityName(hist.Value, e.Type)
-			names = append(names, prepared)
-			fields = append(fields, removeStopwords(prepared))
+	// Historical former names (precompute for search hot path), plus "(ex-…)" from the primary name.
+	var names []string
+	var fields [][]string
+	for _, hist := range e.HistoricalInfo {
+		if !strings.EqualFold(hist.Type, "Former Name") || hist.Value == "" {
+			continue
 		}
-		e.PreparedFields.HistoricalNames = names
-		e.PreparedFields.HistoricalNameFields = fields
+		prepared := prepareEntityName(hist.Value, e.Type)
+		names = append(names, prepared)
+		fields = append(fields, removeStopwords(prepared))
 	}
+	for _, former := range extraFormer {
+		prepared := prepareEntityName(former, e.Type)
+		if prepared == "" {
+			continue
+		}
+		names = append(names, prepared)
+		fields = append(fields, removeStopwords(prepared))
+	}
+	e.PreparedFields.HistoricalNames = names
+	e.PreparedFields.HistoricalNameFields = fields
 
 	// Contact
 	e.PreparedFields.Contact.PhoneNumbers = normalizePhoneNumbers(e.Contact.PhoneNumbers)
@@ -377,6 +384,7 @@ func normalizeNames(altNames []string, typ EntityType) []string {
 
 func prepareEntityName(name string, typ EntityType) string {
 	name = prepare.StripLeadingPartyLabels(name)
+	name, _ = prepare.SplitExNames(name)
 	if typ == EntityVessel {
 		name = prepare.StripTrailingVesselPlace(name)
 	}

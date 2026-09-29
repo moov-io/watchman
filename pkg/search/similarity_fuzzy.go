@@ -59,6 +59,16 @@ func compareNameWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Enti
 	// Check primary name
 	bestMatch := compareNameTermsWeighted(queryTerms, index.PreparedFields.NameFields, queryWeights, index.PreparedFields.NameWeights, opts.TFIDF, cfg)
 
+	take := func(candidate nameMatch, historical bool) {
+		if historical {
+			candidate.score *= 0.95
+			candidate.isHistorical = true
+		}
+		if candidate.score > bestMatch.score {
+			bestMatch = candidate
+		}
+	}
+
 	// Check alternate names unless the primary is already an exact-quality match.
 	if bestMatch.score < exactMatchThreshold {
 		for idx := range index.PreparedFields.AltNameFields {
@@ -66,28 +76,59 @@ func compareNameWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Enti
 			if idx < len(index.PreparedFields.AltNameWeights) {
 				indexWeights = index.PreparedFields.AltNameWeights[idx]
 			}
-			altMatch := compareNameTermsWeighted(queryTerms, index.PreparedFields.AltNameFields[idx], queryWeights, indexWeights, opts.TFIDF, cfg)
-			if altMatch.score > bestMatch.score {
-				bestMatch = altMatch
-				if bestMatch.score >= exactMatchThreshold {
-					break
-				}
+			take(compareNameTermsWeighted(queryTerms, index.PreparedFields.AltNameFields[idx], queryWeights, indexWeights, opts.TFIDF, cfg), false)
+			if bestMatch.score >= exactMatchThreshold {
+				break
 			}
 		}
 	}
 
-	// Check historical names with penalty (precomputed at Normalize time)
+	// Index former names (query primary vs list historical)
 	if bestMatch.score < exactMatchThreshold {
 		for idx := range index.PreparedFields.HistoricalNameFields {
 			var indexWeights []float64
 			if idx < len(index.PreparedFields.HistoricalNameWeights) {
 				indexWeights = index.PreparedFields.HistoricalNameWeights[idx]
 			}
-			histMatch := compareNameTermsWeighted(queryTerms, index.PreparedFields.HistoricalNameFields[idx], queryWeights, indexWeights, opts.TFIDF, cfg)
-			histMatch.score *= 0.95 // Apply penalty for historical names
-			histMatch.isHistorical = true
-			if histMatch.score > bestMatch.score {
-				bestMatch = histMatch
+			take(compareNameTermsWeighted(queryTerms, index.PreparedFields.HistoricalNameFields[idx], queryWeights, indexWeights, opts.TFIDF, cfg), true)
+			if bestMatch.score >= exactMatchThreshold {
+				break
+			}
+		}
+	}
+
+	// Query former names (query historical vs list primary / alt / historical).
+	// Needed when the query is "Ocean Pioneer (ex-Cape Diamond)" and the list row is "Cape Diamond".
+	if bestMatch.score < exactMatchThreshold {
+		for qIdx := range query.PreparedFields.HistoricalNameFields {
+			var qHistWeights []float64
+			if qIdx < len(query.PreparedFields.HistoricalNameWeights) {
+				qHistWeights = query.PreparedFields.HistoricalNameWeights[qIdx]
+			}
+			qHistTerms := query.PreparedFields.HistoricalNameFields[qIdx]
+			take(compareNameTermsWeighted(qHistTerms, index.PreparedFields.NameFields, qHistWeights, index.PreparedFields.NameWeights, opts.TFIDF, cfg), true)
+			if bestMatch.score >= exactMatchThreshold {
+				break
+			}
+			for idx := range index.PreparedFields.AltNameFields {
+				var indexWeights []float64
+				if idx < len(index.PreparedFields.AltNameWeights) {
+					indexWeights = index.PreparedFields.AltNameWeights[idx]
+				}
+				take(compareNameTermsWeighted(qHistTerms, index.PreparedFields.AltNameFields[idx], qHistWeights, indexWeights, opts.TFIDF, cfg), true)
+				if bestMatch.score >= exactMatchThreshold {
+					break
+				}
+			}
+			if bestMatch.score >= exactMatchThreshold {
+				break
+			}
+			for idx := range index.PreparedFields.HistoricalNameFields {
+				var indexWeights []float64
+				if idx < len(index.PreparedFields.HistoricalNameWeights) {
+					indexWeights = index.PreparedFields.HistoricalNameWeights[idx]
+				}
+				take(compareNameTermsWeighted(qHistTerms, index.PreparedFields.HistoricalNameFields[idx], qHistWeights, indexWeights, opts.TFIDF, cfg), true)
 				if bestMatch.score >= exactMatchThreshold {
 					break
 				}
@@ -95,9 +136,12 @@ func compareNameWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Enti
 		}
 	}
 
-	// Apply additional criteria for match quality
-	bestMatch.score = adjustScoreBasedOnQuality(bestMatch, len(queryTerms))
-	if !isNameCloseEnough(query.PreparedFields, index.PreparedFields) {
+	termCount := len(queryTerms)
+	if bestMatch.isHistorical && termCount < minMatchingTerms {
+		termCount = bestMatch.totalTerms
+	}
+	bestMatch.score = adjustScoreBasedOnQuality(bestMatch, termCount)
+	if !bestMatch.isHistorical && !isNameCloseEnough(query.PreparedFields, index.PreparedFields) {
 		bestMatch.score *= 0.85
 	}
 

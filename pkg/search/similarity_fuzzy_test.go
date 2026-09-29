@@ -91,6 +91,22 @@ func TestCompareName(t *testing.T) {
 			exact:         false,
 		},
 		{
+			name: "query ex-former name matches index primary",
+			query: Entity[any]{
+				Name:     "Ocean Pioneer (ex-Cape Diamond)",
+				Type:     EntityBusiness,
+				Business: &Business{Name: "Ocean Pioneer (ex-Cape Diamond)"},
+			},
+			index: Entity[any]{
+				Name:     "Cape Diamond",
+				Type:     EntityBusiness,
+				Business: &Business{Name: "Cape Diamond"},
+			},
+			expectedScore: 0.90,
+			shouldMatch:   true,
+			exact:         true,
+		},
+		{
 			name: "historical name match",
 			query: Entity[any]{
 				Name: "OLD AEROCARIBBEAN",
