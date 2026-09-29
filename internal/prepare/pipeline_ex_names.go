@@ -48,14 +48,32 @@ func SplitExNames(s string) (cleaned string, former []string) {
 }
 
 func cutExPrefix(inner string) (string, bool) {
-	if len(inner) < 2 {
+	rest, ok := splitExPrefix(inner)
+	if !ok {
+		return "", false
+	}
+	return rest, rest != ""
+}
+
+func splitExPrefix(inner string) (string, bool) {
+	inner = strings.TrimSpace(inner)
+	if len(inner) < 3 {
 		return "", false
 	}
 	if !strings.EqualFold(inner[:2], "ex") {
 		return "", false
 	}
-	rest := strings.TrimLeft(inner[2:], "-–— \t")
-	return strings.TrimSpace(rest), true
+	switch inner[2] {
+	case '-', ' ', '\t':
+		return strings.TrimSpace(inner[3:]), true
+	}
+	if strings.HasPrefix(inner[2:], "–") {
+		return strings.TrimSpace(inner[2+len("–"):]), true
+	}
+	if strings.HasPrefix(inner[2:], "—") {
+		return strings.TrimSpace(inner[2+len("—"):]), true
+	}
+	return "", false
 }
 
 // ExNames returns former names encoded as "(ex-…)" in s.

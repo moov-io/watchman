@@ -25,6 +25,8 @@ func TestSplitExNames(t *testing.T) {
 		{"", "", nil},
 		{"Foo (ex-Bar) (ex-Baz)", "Foo", []string{"Bar", "Baz"}},
 		{"Foo (EX Cape Diamond)", "Foo", []string{"Cape Diamond"}},
+		{"Ocean Pioneer (example)", "Ocean Pioneer (example)", nil},
+		{"Star Voyager (ex)", "Star Voyager (ex)", nil},
 	}
 	for _, tc := range cases {
 		t.Run(tc.in, func(t *testing.T) {
