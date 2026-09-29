@@ -14,12 +14,20 @@ import (
 )
 
 const (
-	cascadePairsFile    = "testdata/cascade-name-pairs.csv"
-	cascadePairsDocFile = "testdata/cascade-name-pairs.md"
-
 	cascadeScoreSummaryBegin = "<!-- cascade-score-summary -->"
 	cascadeScoreSummaryEnd   = "<!-- /cascade-score-summary -->"
 )
+
+type cascadeFixture struct {
+	file string
+	doc  string
+	rows int
+}
+
+var cascadeFixtures = []cascadeFixture{
+	{file: "testdata/cascade-name-pairs.csv", doc: "testdata/cascade-name-pairs.md", rows: 300},
+	{file: "testdata/cascade-name-pairs-2.csv", doc: "testdata/cascade-name-pairs-2.md", rows: 185},
+}
 
 type cascadePair struct {
 	caseGroup string
@@ -38,46 +46,50 @@ type cascadePair struct {
 }
 
 func TestCascadeNamePairs(t *testing.T) {
-	pairs := loadCascadePairs(t)
-	require.Len(t, pairs, 300)
-
 	update := strings.EqualFold(os.Getenv("UPDATE_CASCADE_SCORES"), "yes")
-	var mismatches int
 
-	for i := range pairs {
-		p := &pairs[i]
-		got := cascadePairScore(p)
-		t.Run(fmt.Sprintf("%03d_%s", i+1, p.category), func(t *testing.T) {
-			if update {
-				if !p.hasBase {
-					p.baseline = roundCascadeScore(got)
-					p.hasBase = true
+	for _, fx := range cascadeFixtures {
+		t.Run(fx.file, func(t *testing.T) {
+			pairs := loadCascadePairs(t, fx.file)
+			require.Len(t, pairs, fx.rows)
+
+			var mismatches int
+			for i := range pairs {
+				p := &pairs[i]
+				got := cascadePairScore(p)
+				t.Run(fmt.Sprintf("%03d_%s", i+1, p.category), func(t *testing.T) {
+					if update {
+						if !p.hasBase {
+							p.baseline = roundCascadeScore(got)
+							p.hasBase = true
+						}
+						p.score = roundCascadeScore(got)
+						p.hasScore = true
+						return
+					}
+
+					require.True(t, p.hasScore, "row %d (%s) missing score; run UPDATE_CASCADE_SCORES=yes", p.line, p.category)
+					require.InDelta(t, p.score, got, 0.00015, "%s %q vs %q", p.category, p.name1, p.name2)
+					require.InDelta(t, got, scoreSimilarityFast(cascadeEntity(p.schema, p.name1), cascadeEntity(p.schema, p.name2), SimilarityOpts{}), 0.00015)
+				})
+				if !update && p.hasScore && math.Abs(p.score-got) > 0.00015 {
+					mismatches++
 				}
-				p.score = roundCascadeScore(got)
-				p.hasScore = true
-				return
 			}
 
-			require.True(t, p.hasScore, "row %d (%s) missing score; run UPDATE_CASCADE_SCORES=yes", p.line, p.category)
-			require.InDelta(t, p.score, got, 0.00015, "%s %q vs %q", p.category, p.name1, p.name2)
-			require.InDelta(t, got, scoreSimilarityFast(cascadeEntity(p.schema, p.name1), cascadeEntity(p.schema, p.name2), SimilarityOpts{}), 0.00015)
+			if update {
+				writeCascadePairs(t, fx.file, pairs)
+				writeCascadeScoreSummary(t, fx.doc, pairs)
+			}
+
+			t.Logf("%s: %d rows, %d score mismatches vs fixture", fx.file, len(pairs), mismatches)
+			t.Log("\n" + cascadeCategoryTable(pairs))
 		})
-		if !update && p.hasScore && math.Abs(p.score-got) > 0.00015 {
-			mismatches++
-		}
 	}
-
-	if update {
-		writeCascadePairs(t, pairs)
-		writeCascadeScoreSummary(t, pairs)
-	}
-
-	t.Logf("cascade name pairs: %d rows, %d score mismatches vs fixture", len(pairs), mismatches)
-	t.Log("\n" + cascadeCategoryTable(pairs))
 }
 
 func TestCascadeNamePairs_VesselOwnerIsTypedZero(t *testing.T) {
-	pairs := loadCascadePairs(t)
+	pairs := loadCascadePairs(t, "testdata/cascade-name-pairs.csv")
 
 	var checked int
 	for i := range pairs {
@@ -113,10 +125,10 @@ func cascadeEntity(schema, name string) Entity[Value] {
 	return e.Normalize()
 }
 
-func loadCascadePairs(t *testing.T) []cascadePair {
+func loadCascadePairs(t *testing.T, path string) []cascadePair {
 	t.Helper()
 
-	f, err := os.Open(cascadePairsFile)
+	f, err := os.Open(path)
 	require.NoError(t, err)
 	defer f.Close()
 
@@ -193,10 +205,10 @@ func csvFloat(t *testing.T, row []string, idx, line int, name string) (float64, 
 	return n, true
 }
 
-func writeCascadePairs(t *testing.T, pairs []cascadePair) {
+func writeCascadePairs(t *testing.T, path string, pairs []cascadePair) {
 	t.Helper()
 
-	f, err := os.Create(cascadePairsFile)
+	f, err := os.Create(path)
 	require.NoError(t, err)
 	defer f.Close()
 
@@ -223,15 +235,15 @@ func writeCascadePairs(t *testing.T, pairs []cascadePair) {
 	require.NoError(t, w.Error())
 }
 
-func writeCascadeScoreSummary(t *testing.T, pairs []cascadePair) {
+func writeCascadeScoreSummary(t *testing.T, path string, pairs []cascadePair) {
 	t.Helper()
 
-	body, err := os.ReadFile(cascadePairsDocFile)
+	body, err := os.ReadFile(path)
 	require.NoError(t, err)
 	text := string(body)
 	start := strings.Index(text, cascadeScoreSummaryBegin)
 	end := strings.Index(text, cascadeScoreSummaryEnd)
-	require.GreaterOrEqual(t, start, 0, "missing %s in %s", cascadeScoreSummaryBegin, cascadePairsDocFile)
+	require.GreaterOrEqual(t, start, 0, "missing %s in %s", cascadeScoreSummaryBegin, path)
 	require.Greater(t, end, start)
 
 	var b strings.Builder
@@ -241,7 +253,7 @@ func writeCascadeScoreSummary(t *testing.T, pairs []cascadePair) {
 	b.WriteString(cascadeCategoryTable(pairs))
 	b.WriteString("\n")
 	b.WriteString(text[end:])
-	require.NoError(t, os.WriteFile(cascadePairsDocFile, []byte(b.String()), 0o600))
+	require.NoError(t, os.WriteFile(path, []byte(b.String()), 0o600))
 }
 
 func cascadeCategoryTable(pairs []cascadePair) string {

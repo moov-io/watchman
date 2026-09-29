@@ -4,6 +4,8 @@ Labelled name pairs from [Cascade Screening](https://github.com/ArslaneSempai-ui
 
 Source file: [`cascade-name-pairs.csv`](https://github.com/ArslaneSempai-ui/cascade-screening/blob/main/contrib/opensanctions/cascade-name-pairs.csv)
 
+A second lot of 185 Hebrew, Burmese, and former-name pairs is [`cascade-name-pairs-2.csv`](cascade-name-pairs-2.csv). Notes for that file are in [`cascade-name-pairs-2.md`](cascade-name-pairs-2.md).
+
 The original 300 rows are MIT-licensed. Watchman testdata adds `baseline` and `score` columns:
 
 - `baseline` — `pkg/search.Similarity` on name-only entities the first time this fixture was recorded. Frozen.
