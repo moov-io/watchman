@@ -46,6 +46,8 @@ A matching tax number, company registration, email, or phone **raises** the blen
 
 If both records have the same ID type (and country, when both set) with **different** values, the blended score is multiplied by `ID_CONFLICT_PENALTY_MULTIPLIER` (default 0.70). A missing ID on one side is not a conflict. A matching passport or IMO still scores 1.0 before this penalty.
 
+If both prepared names contain a numeral (a digit token, roman I–XII, or a spelled one–twenty) and those numerals disagree, the blended score is multiplied by `NAME_NUMERAL_CONFLICT_PENALTY_MULTIPLIER` (default 0.70). `Hoshikaze Maru No. 8` vs `No. 6` is a conflict; `NS LEADER` vs `NS LEADER II` is not, because one side has no numeral. A matching IMO still scores 1.0 before this penalty.
+
 ### Entity type
 
 A person query is compared to people, a business query to companies. If the query type is person, business, or organization and the list record is one of those three, Watchman still scores the pair (some source files store a person under a company-like type). A person query is not scored against a vessel or aircraft. `GET /v2/search?type=person` still only searches the person partition of the index.

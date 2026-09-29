@@ -95,6 +95,7 @@ Small Jaro–Winkler environment flags (prefix size, Soundex) barely change thos
 | `TFIDF_ENABLED` | false | Down-weights common words (`Limited`, `GmbH`). Slightly more true hits and slightly more false hits. With embeddings, the extra true hits are mostly Latin-script names; transliteration is already handled by embeddings. |
 | `algorithm` | jaro-winkler | Per-request name metric. Phonetic options (Soundex, and others) help little on transliteration. |
 | `ID_CONFLICT_PENALTY_MULTIPLIER` | 0.70 | When both records have the same ID type and country but different numbers. Set `1` to turn this off. |
+| `NAME_NUMERAL_CONFLICT_PENALTY_MULTIPLIER` | 0.70 | When both names contain a numeral and they disagree (`No. 8` vs `No. 6`). A missing numeral on one side is not a conflict. Set `1` to turn this off. |
 | `INCLUDED_LISTS` | all downloadable | Start with `us_ofac`. Add `us_csl`, `eu_csl`, `uk_csl`, `un_csl` as needed. |
 | `SEARCH_MAX_IN_FLIGHT` | GOMAXPROCS | Caps concurrent *large* searches. Tight queries (≤100 candidates) skip the queue. |
 
