@@ -302,24 +302,24 @@ type PreparedAddress struct {
 
 func (e Entity[T]) Normalize() Entity[T] {
 	// Name
-	e.PreparedFields.Name = prepare.LowerAndRemovePunctuation(e.Name)
+	e.PreparedFields.Name = prepareEntityName(e.Name, e.Type)
 	e.PreparedFields.NameFields = removeStopwords(e.PreparedFields.Name)
 
 	// Entity Type
 	if e.Person != nil {
-		e.PreparedFields.AltNames = normalizeNames(e.Person.AltNames)
+		e.PreparedFields.AltNames = normalizeNames(e.Person.AltNames, e.Type)
 	}
 	if e.Business != nil {
-		e.PreparedFields.AltNames = normalizeNames(e.Business.AltNames)
+		e.PreparedFields.AltNames = normalizeNames(e.Business.AltNames, e.Type)
 	}
 	if e.Organization != nil {
-		e.PreparedFields.AltNames = normalizeNames(e.Organization.AltNames)
+		e.PreparedFields.AltNames = normalizeNames(e.Organization.AltNames, e.Type)
 	}
 	if e.Aircraft != nil {
-		e.PreparedFields.AltNames = normalizeNames(e.Aircraft.AltNames)
+		e.PreparedFields.AltNames = normalizeNames(e.Aircraft.AltNames, e.Type)
 	}
 	if e.Vessel != nil {
-		e.PreparedFields.AltNames = normalizeNames(e.Vessel.AltNames)
+		e.PreparedFields.AltNames = normalizeNames(e.Vessel.AltNames, e.Type)
 	}
 
 	// Alt Names
@@ -338,7 +338,7 @@ func (e Entity[T]) Normalize() Entity[T] {
 			if !strings.EqualFold(hist.Type, "Former Name") || hist.Value == "" {
 				continue
 			}
-			prepared := prepare.LowerAndRemovePunctuation(hist.Value)
+			prepared := prepareEntityName(hist.Value, e.Type)
 			names = append(names, prepared)
 			fields = append(fields, removeStopwords(prepared))
 		}
@@ -363,14 +363,22 @@ func removeStopwords(input string) []string {
 	return strings.Fields(prepare.RemoveStopwords(input))
 }
 
-func normalizeNames(altNames []string) []string {
+func normalizeNames(altNames []string, typ EntityType) []string {
 	if len(altNames) == 0 {
 		return nil
 	}
 
 	out := make([]string, len(altNames))
 	for idx := range altNames {
-		out[idx] = prepare.LowerAndRemovePunctuation(altNames[idx])
+		out[idx] = prepareEntityName(altNames[idx], typ)
+	}
+	return out
+}
+
+func prepareEntityName(name string, typ EntityType) string {
+	out := prepare.LowerAndRemovePunctuation(name)
+	if typ == EntityVessel {
+		out = prepare.StripVesselNamePrefixes(out)
 	}
 	return out
 }

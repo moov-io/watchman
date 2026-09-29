@@ -175,6 +175,33 @@ func TestEntity_Normalize(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "vessel prefixes stripped from prepared name",
+			input: Entity[Value]{
+				Name: "MV Solenne Harbour",
+				Type: EntityVessel,
+				Vessel: &Vessel{
+					Name:     "MV Solenne Harbour",
+					AltNames: []string{"M/T Solenne Harbour"},
+				},
+			},
+			expected: Entity[Value]{
+				Name: "MV Solenne Harbour",
+				Type: "vessel",
+				Vessel: &Vessel{
+					Name:     "MV Solenne Harbour",
+					AltNames: []string{"M/T Solenne Harbour"},
+				},
+				PreparedFields: PreparedFields{
+					Name:       "solenne harbour",
+					NameFields: []string{"solenne", "harbour"},
+					AltNames:   []string{"solenne harbour"},
+					AltNameFields: [][]string{
+						{"solenne", "harbour"},
+					},
+				},
+			},
+		},
 	}
 
 	for _, tc := range cases {
