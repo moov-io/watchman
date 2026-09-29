@@ -195,10 +195,10 @@ cascade_entities,Company,HALVERSTONE SPIRIT V.214W (Marshall Islands flag),Halve
 cascade_entities,Company,M/T Ondara Leigh (ex-Pelican Morrow),ONDARA LEIGH,true,,annotation,Cascade Screening authored pairs (paires-entites-6.json),0.3506,0.3506
 cascade_entities,Company,"Rancho Vercel Importadora S.A. de C.V. c/o Aduanas Pedraza, Nuevo Laredo",Rancho Vercel Importadora SA de CV,true,,annotation,Cascade Screening authored pairs (paires-entites-6.json),0.5166,0.5166
 cascade_entities,Company,"Tidewell Process Equipment Inc, 12250 Brevard Ln, Pasadena TX 77506","Tidewell Process Equipment, Inc.",true,,annotation,Cascade Screening authored pairs (paires-entites-6.json),0.3707,0.3707
-cascade_entities,Vessel,"MV Fraternité des Mers, port d'Abidjan",MV Fraternité des Mers,true,,port-of-registry-appended,Cascade Screening authored pairs (paires-entites-16.json),0.5236,0.4284
-cascade_entities,Vessel,MV Soja Paranaense,"MV Soja Paranaense, Santos",true,,port-of-registry-appended,Cascade Screening authored pairs (paires-entites-16.json),0.8200,0.8165
-cascade_entities,Vessel,N/M Bahia Trader,"N/M Bahia Trader, Paranaguá",true,,port-of-registry-appended,Cascade Screening authored pairs (paires-entites-16.json),0.8025,0.7973
-cascade_entities,Vessel,MV Costa do Marfim,"MV Costa do Marfim, port d'Abidjan",true,,port-of-registry-appended,Cascade Screening authored pairs (paires-entites-16.json),0.7756,0.6138
+cascade_entities,Vessel,"MV Fraternité des Mers, port d'Abidjan",MV Fraternité des Mers,true,,port-of-registry-appended,Cascade Screening authored pairs (paires-entites-16.json),0.5236,0.8550
+cascade_entities,Vessel,MV Soja Paranaense,"MV Soja Paranaense, Santos",true,,port-of-registry-appended,Cascade Screening authored pairs (paires-entites-16.json),0.8200,0.8550
+cascade_entities,Vessel,N/M Bahia Trader,"N/M Bahia Trader, Paranaguá",true,,port-of-registry-appended,Cascade Screening authored pairs (paires-entites-16.json),0.8025,0.8550
+cascade_entities,Vessel,MV Costa do Marfim,"MV Costa do Marfim, port d'Abidjan",true,,port-of-registry-appended,Cascade Screening authored pairs (paires-entites-16.json),0.7756,0.8550
 cascade_entities,Company,Kalcic Trgovina d.o.o.,Kalčić Trgovina d.o.o.,true,,accent-diacritic-dropped,Cascade Screening authored pairs (paires-entites-18.json),0.8550,0.8550
 cascade_entities,Company,Škerlj Trgovina in Storitve d.o.o.,Skerlj Trgovina in Storitve d.o.o.,true,,accent-diacritic-dropped,Cascade Screening authored pairs (paires-entites-18.json),0.8550,0.8550
 cascade_entities,Company,"Hrastnik Gradbeništvo d.o.o., MŠ 5834219000","Hrastnik Gradbenistvo d.o.o., maticna stevilka 5834219000",true,,accent-diacritic-dropped,Cascade Screening authored pairs (paires-entites-18.json),0.7927,0.7927
@@ -283,10 +283,10 @@ cascade_entities,Company,ရွှေပုလဲ ကုန်သွယ်ရေ
 cascade_entities,Company,ရတနာမင်္ဂလာ ပို့ဆောင်ရေး ကုမ္ပဏီလီမိတက်,"Yadanar Mingalar Logistics Co., Ltd.",true,,burmese-script-vs-latin,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
 cascade_entities,Company,အောင်ကြယ် ဆန်စက် ကုမ္ပဏီလီမိတက်,"Aung Kyal Rice Mill Co., Ltd.",true,,burmese-script-vs-latin,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
 cascade_entities,Company,ဦးကျော်ဇော်ထွန်း ကုန်သွယ်ရေး,U Kyaw Zaw Htun Trading,true,,burmese-script-vs-latin,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
-cascade_entities,Vessel,"MV SIAM ORCHID 7, Bangkok",SIAM ORCHID 7,true,,vessel-prefix-and-port,Cascade Screening authored pairs (paires-entites-22.json),0.4966,0.5333
-cascade_entities,Vessel,M.T. THONG NAWA 3 (Laem Chabang),THONG NAWA NO.3,true,,vessel-prefix-and-port,Cascade Screening authored pairs (paires-entites-22.json),0.4416,0.4861
-cascade_entities,Vessel,"T/B CHAO LE 8, Sihanoukville",CHAO LE NO. 8,true,,vessel-prefix-and-port,Cascade Screening authored pairs (paires-entites-22.json),0.4864,0.5224
-cascade_entities,Vessel,"MT GOLDEN KINNAREE, Laem Chabang",GOLDEN KINNAREE,true,,vessel-prefix-and-port,Cascade Screening authored pairs (paires-entites-22.json),0.4917,0.5169
+cascade_entities,Vessel,"MV SIAM ORCHID 7, Bangkok",SIAM ORCHID 7,true,,vessel-prefix-and-port,Cascade Screening authored pairs (paires-entites-22.json),0.4966,0.8550
+cascade_entities,Vessel,M.T. THONG NAWA 3 (Laem Chabang),THONG NAWA NO.3,true,,vessel-prefix-and-port,Cascade Screening authored pairs (paires-entites-22.json),0.4416,0.8336
+cascade_entities,Vessel,"T/B CHAO LE 8, Sihanoukville",CHAO LE NO. 8,true,,vessel-prefix-and-port,Cascade Screening authored pairs (paires-entites-22.json),0.4864,0.6662
+cascade_entities,Vessel,"MT GOLDEN KINNAREE, Laem Chabang",GOLDEN KINNAREE,true,,vessel-prefix-and-port,Cascade Screening authored pairs (paires-entites-22.json),0.4917,0.8550
 cascade_entities,Company,Zakłady Mięsne Wiśniewski Sp. z o.o. S.K.A.,Zaklady Miesne Wisniewski spolka z ograniczona odpowiedzialnoscia spolka komandytowo-akcyjna,true,,legal-form-spelt-out,Cascade Screening authored pairs (paires-entites-23.json),0.5236,0.5236
 cascade_entities,Company,Łączyńska Wytwórnia Łodzi Sp. j.,LACZYNSKA WYTWORNIA LODZI SPOLKA JAWNA,true,,legal-form-spelt-out,Cascade Screening authored pairs (paires-entites-23.json),0.3762,0.3762
 cascade_entities,Company,Spedycja Wisłoujście Sp. z o.o. Sp. k.,Spedycja Wisloujscie spolka z ograniczona odpowiedzialnoscia spolka komandytowa,true,,legal-form-spelt-out,Cascade Screening authored pairs (paires-entites-23.json),0.5351,0.5351

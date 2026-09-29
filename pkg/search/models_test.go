@@ -178,7 +178,7 @@ func TestEntity_Normalize(t *testing.T) {
 		{
 			name: "vessel prefixes stripped from prepared name",
 			input: Entity[Value]{
-				Name: "MV Solenne Harbour",
+				Name: "MV Solenne Harbour, Bangkok",
 				Type: EntityVessel,
 				Vessel: &Vessel{
 					Name:     "MV Solenne Harbour",
@@ -186,7 +186,7 @@ func TestEntity_Normalize(t *testing.T) {
 				},
 			},
 			expected: Entity[Value]{
-				Name: "MV Solenne Harbour",
+				Name: "MV Solenne Harbour, Bangkok",
 				Type: "vessel",
 				Vessel: &Vessel{
 					Name:     "MV Solenne Harbour",
