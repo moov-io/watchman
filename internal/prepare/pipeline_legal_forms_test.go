@@ -5,6 +5,7 @@
 package prepare
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -20,7 +21,6 @@ func TestCanonicalizeEnglishLegalForms(t *testing.T) {
 		{"harrowfield bearings ltd", "harrowfield bearings ltd"},
 		{"pellbrook cold storage limited liability company", "pellbrook cold storage llc"},
 		{"pellbrook cold storage llc", "pellbrook cold storage llc"},
-		{"pellbrook cold storage l l c", "pellbrook cold storage llc"},
 		{"carrowmere holdings public limited company", "carrowmere holdings plc"},
 		{"carrowmere holdings plc", "carrowmere holdings plc"},
 		{"dongguan fengtai plastic products co ltd", "dongguan fengtai plastic products co ltd"},
@@ -35,4 +35,13 @@ func TestCanonicalizeEnglishLegalForms(t *testing.T) {
 			require.Equal(t, tc.want, CanonicalizeEnglishLegalForms(tc.in))
 		})
 	}
+
+	t.Run("spaced letter llc from punctuation strip", func(t *testing.T) {
+		in := "pellbrook cold storage " + strings.Join([]string{"l", "l", "c"}, " ")
+		require.Equal(t, "pellbrook cold storage llc", CanonicalizeEnglishLegalForms(in))
+	})
+	t.Run("spaced letter plc from punctuation strip", func(t *testing.T) {
+		in := "carrowmere holdings " + strings.Join([]string{"p", "l", "c"}, " ")
+		require.Equal(t, "carrowmere holdings plc", CanonicalizeEnglishLegalForms(in))
+	})
 }

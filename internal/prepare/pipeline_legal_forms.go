@@ -18,9 +18,11 @@ var englishLegalFormPhrases = []struct{ from, to string }{
 	{"corporation", "corp"},
 	{"company", "co"},
 	{"limited", "ltd"},
-	{"l l c", "llc"},
-	{"p l c", "plc"},
 }
+
+// spacedLegalFormTokens are short forms that punctuation stripping can split
+// into single letters (L.L.C. → "l l c", P.L.C. → "p l c").
+var spacedLegalFormTokens = []string{"llc", "plc"}
 
 // CanonicalizeEnglishLegalForms rewrites English legal-form phrases in a
 // prepared business name. "Harrowfield Bearings Limited" and
@@ -34,6 +36,10 @@ func CanonicalizeEnglishLegalForms(s string) string {
 	padded := " " + s + " "
 	for _, p := range englishLegalFormPhrases {
 		padded = strings.ReplaceAll(padded, " "+p.from+" ", " "+p.to+" ")
+	}
+	for _, short := range spacedLegalFormTokens {
+		spaced := " " + strings.Join(strings.Split(short, ""), " ") + " "
+		padded = strings.ReplaceAll(padded, spaced, " "+short+" ")
 	}
 	return strings.TrimSpace(padded)
 }
