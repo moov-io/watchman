@@ -376,6 +376,7 @@ func normalizeNames(altNames []string, typ EntityType) []string {
 }
 
 func prepareEntityName(name string, typ EntityType) string {
+	name = prepare.StripLeadingPartyLabels(name)
 	if typ == EntityVessel {
 		name = prepare.StripTrailingVesselPlace(name)
 	}

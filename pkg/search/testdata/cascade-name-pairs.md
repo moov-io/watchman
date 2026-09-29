@@ -20,6 +20,7 @@ Each scoring change rewrites `score` and the summary table. `baseline` stays at 
 | baseline | 0.5574 | 0.6279 |
 | strip vessel prefixes (`MV`, `M/T`, `SS`, …) | 0.5574 | 0.6296 |
 | strip trailing vessel port/place | 0.5710 | 0.6296 |
+| strip leading SHIPPER:/BENEFICIARY:/MESSRS./FIELD 59: | 0.5784 | 0.6296 |
 
 Rewrite `score` (and fill `baseline` when empty) with:
 
@@ -33,8 +34,8 @@ Recorded `Similarity` on 300 name-only pairs (schema → Watchman type).
 
 | Slice | N | Matches | Mean score | Mean baseline | Mean delta | Min | Max |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| all | 300 | 140 | 0.6022 | 0.5950 | +0.0073 | 0.0000 | 0.8550 |
-| is_match=true | 140 | 140 | 0.5710 | 0.5574 | +0.0136 | 0.0000 | 0.8550 |
+| all | 300 | 140 | 0.6057 | 0.5950 | +0.0107 | 0.0000 | 0.8550 |
+| is_match=true | 140 | 140 | 0.5784 | 0.5574 | +0.0209 | 0.0000 | 0.8550 |
 | is_match=false | 160 | 0 | 0.6296 | 0.6279 | +0.0017 | 0.0000 | 0.8550 |
 | abbreviation | 4 | 4 | 0.6052 | 0.6052 | +0.0000 | 0.4538 | 0.8408 |
 | abbreviation-expanded | 4 | 4 | 0.6942 | 0.6942 | +0.0000 | 0.5577 | 0.8311 |
@@ -83,7 +84,7 @@ Recorded `Similarity` on 300 name-only pairs (schema → Watchman type).
 | punctuation-spacing | 4 | 4 | 0.7672 | 0.7672 | +0.0000 | 0.5845 | 0.8550 |
 | punctuation-spacing-legal-form | 4 | 4 | 0.8536 | 0.8536 | +0.0000 | 0.8494 | 0.8550 |
 | registry-written-out | 4 | 4 | 0.6348 | 0.6348 | +0.0000 | 0.5599 | 0.7865 |
-| residue-party-label | 4 | 4 | 0.5951 | 0.5951 | +0.0000 | 0.5143 | 0.7697 |
+| residue-party-label | 4 | 4 | 0.8444 | 0.5951 | +0.2492 | 0.8173 | 0.8550 |
 | romanisation | 4 | 4 | 0.8137 | 0.8137 | +0.0000 | 0.7956 | 0.8415 |
 | romanisation-variant | 4 | 4 | 0.6853 | 0.6853 | +0.0000 | 0.5224 | 0.8380 |
 | russian-based-spelling | 4 | 4 | 0.1257 | 0.1257 | +0.0000 | 0.0000 | 0.5028 |
@@ -99,7 +100,7 @@ Recorded `Similarity` on 300 name-only pairs (schema → Watchman type).
 | translation | 4 | 4 | 0.5718 | 0.5718 | +0.0000 | 0.3514 | 0.8059 |
 | transliteration | 4 | 4 | 0.6133 | 0.6133 | +0.0000 | 0.3716 | 0.8143 |
 | two-words-differ | 4 | 0 | 0.5112 | 0.5112 | +0.0000 | 0.3872 | 0.5810 |
-| uppercase-export | 4 | 4 | 0.8475 | 0.8475 | +0.0000 | 0.8251 | 0.8550 |
+| uppercase-export | 4 | 4 | 0.8550 | 0.8475 | +0.0075 | 0.8550 | 0.8550 |
 | vessel-numeral | 4 | 0 | 0.7899 | 0.7899 | +0.0000 | 0.6674 | 0.8336 |
 | vessel-other-word | 4 | 0 | 0.5045 | 0.4959 | +0.0086 | 0.0000 | 0.7981 |
 | vessel-plural | 4 | 0 | 0.7921 | 0.7921 | +0.0000 | 0.7772 | 0.8192 |

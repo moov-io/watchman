@@ -263,12 +263,12 @@ cascade_entities,Company,沧澜远洋航运有限公司,"Canglan Ocean Shipping 
 cascade_entities,Company,雾山精密机械股份有限公司,"Wushan Precision Machinery Co., Ltd.",true,,native-vs-english,Cascade Screening authored pairs (paires-entites-8.json),0.0000,0.0000
 cascade_entities,Company,株式会社霜月水産,"Shimotsuki Suisan Co., Ltd.",true,,native-vs-english,Cascade Screening authored pairs (paires-entites-8.json),0.0000,0.0000
 cascade_entities,Company,새벽별물류 주식회사,"Saebyeokbyeol Logistics Co., Ltd.",true,,native-vs-english,Cascade Screening authored pairs (paires-entites-8.json),0.0000,0.0000
-cascade_entities,Company,SHIPPER: TRANSPORTES REFRIGERADOS DEL SURESTE SA DE CV,"Transportes Refrigerados del Sureste, S.A. de C.V.",true,,residue-party-label,Cascade Screening authored pairs (paires-entites-11.json),0.7697,0.7697
-cascade_entities,Company,BENEFICIARY: Sarıkaya Hububat Ltd. Şti.,Sarikaya Hububat Ltd Sti,true,,residue-party-label,Cascade Screening authored pairs (paires-entites-12.json),0.5206,0.5206
-cascade_entities,Company,ORDERING CUSTOMER: KALLIOSAARI TRADING OY,Kalliosaari Trading Oy,true,,residue-party-label,Cascade Screening authored pairs (paires-entites-12.json),0.5143,0.5143
-cascade_entities,Company,MESSRS. BALTIC TIMBERLINE OU,Baltic Timberline OÜ,true,,residue-party-label,Cascade Screening authored pairs (paires-entites-12.json),0.5760,0.5760
+cascade_entities,Company,SHIPPER: TRANSPORTES REFRIGERADOS DEL SURESTE SA DE CV,"Transportes Refrigerados del Sureste, S.A. de C.V.",true,,residue-party-label,Cascade Screening authored pairs (paires-entites-11.json),0.7697,0.8501
+cascade_entities,Company,BENEFICIARY: Sarıkaya Hububat Ltd. Şti.,Sarikaya Hububat Ltd Sti,true,,residue-party-label,Cascade Screening authored pairs (paires-entites-12.json),0.5206,0.8173
+cascade_entities,Company,ORDERING CUSTOMER: KALLIOSAARI TRADING OY,Kalliosaari Trading Oy,true,,residue-party-label,Cascade Screening authored pairs (paires-entites-12.json),0.5143,0.8550
+cascade_entities,Company,MESSRS. BALTIC TIMBERLINE OU,Baltic Timberline OÜ,true,,residue-party-label,Cascade Screening authored pairs (paires-entites-12.json),0.5760,0.8550
 cascade_entities,Company,Ranjit Cotton Traders Pvt. Ltd.,RANJIT COTTON TRADERS PVT LTD,true,,uppercase-export,Cascade Screening authored pairs (paires-entites-13.json),0.8550,0.8550
-cascade_entities,Company,Blackwood Cattle Co Pty Ltd,FIELD 59: BLACKWOOD CATTLE CO PTY LTD,true,,uppercase-export,Cascade Screening authored pairs (paires-entites-13.json),0.8251,0.8251
+cascade_entities,Company,Blackwood Cattle Co Pty Ltd,FIELD 59: BLACKWOOD CATTLE CO PTY LTD,true,,uppercase-export,Cascade Screening authored pairs (paires-entites-13.json),0.8251,0.8550
 cascade_entities,Company,Deshpande Textiles Pvt. Ltd.,DESHPANDE TEXTILES PVT LTD,true,,uppercase-export,Cascade Screening authored pairs (paires-entites-13.json),0.8550,0.8550
 cascade_entities,Company,Chopra Bros. Enterprises,CHOPRA BROS ENTERPRISES,true,,uppercase-export,Cascade Screening authored pairs (paires-entites-13.json),0.8550,0.8550
 cascade_entities,Company,GIE Femmes de Korhogo,G.I.E. Femmes de Korhogo,true,,case-punctuation-spacing,Cascade Screening authored pairs (paires-entites-16.json),0.8058,0.8058
