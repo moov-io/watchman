@@ -202,6 +202,29 @@ func TestEntity_Normalize(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "ex-former name lifted into historical prepared fields",
+			input: Entity[Value]{
+				Name: "Ocean Pioneer (ex-Cape Diamond)",
+				Type: EntityBusiness,
+				Business: &Business{
+					Name: "Ocean Pioneer (ex-Cape Diamond)",
+				},
+			},
+			expected: Entity[Value]{
+				Name: "Ocean Pioneer (ex-Cape Diamond)",
+				Type: "business",
+				Business: &Business{
+					Name: "Ocean Pioneer (ex-Cape Diamond)",
+				},
+				PreparedFields: PreparedFields{
+					Name:                 "ocean pioneer",
+					NameFields:           []string{"ocean", "pioneer"},
+					HistoricalNames:      []string{"cape diamond"},
+					HistoricalNameFields: [][]string{{"cape", "diamond"}},
+				},
+			},
+		},
 	}
 
 	for _, tc := range cases {

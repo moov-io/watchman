@@ -37,11 +37,12 @@ A query is **not** reordered or suffix-stripped. You can search `Nicolas Maduro`
 ### Names
 
 1. Drop a leading trade-document role marker (`SHIPPER:`, `BENEFICIARY:`, `ORDERING CUSTOMER:`, `MESSRS.`, `FIELD 59:`).
-2. Trim, lowercase, turn `.` `,` `-` and other punctuation/symbols into spaces.
-3. Unicode NFD → strip combining marks → NFC, so `Raúl` and `raul` match.
-4. For **vessels**, drop a trailing port or place (`MV SIAM ORCHID 7, Bangkok` → `MV SIAM ORCHID 7`; a final `(Laem Chabang)` is dropped, `(ex-…)` is kept), then drop leading ship-type markers (`MV`, `M/V`, `M/T`, `SS`, `N/M`, `T/B`, and the same after punctuation becomes spaces). `MV Solenne Harbour` and `Solenne Harbour` compare as the same prepared name.
-5. Split on whitespace into tokens.
-6. Drop **stopwords** (`of`, `the`, `and`, and the same idea in other languages). Language is guessed from the name. Numeric tokens (`11420`) are kept. Set `KEEP_STOPWORDS=true` to skip this step.
+2. Treat `(ex-Cape Diamond)` as a former name (same path as `HistoricalInfo`) and drop that parenthetical from the primary name.
+3. Trim, lowercase, turn `.` `,` `-` and other punctuation/symbols into spaces.
+4. Unicode NFD → strip combining marks → NFC, so `Raúl` and `raul` match.
+5. For **vessels**, drop a trailing port or place (`MV SIAM ORCHID 7, Bangkok` → `MV SIAM ORCHID 7`; a final `(Laem Chabang)` is dropped), then drop leading ship-type markers (`MV`, `M/V`, `M/T`, `SS`, `N/M`, `T/B`, and the same after punctuation becomes spaces). `MV Solenne Harbour` and `Solenne Harbour` compare as the same prepared name.
+6. Split on whitespace into tokens.
+7. Drop **stopwords** (`of`, `the`, `and`, and the same idea in other languages). Language is guessed from the name. Numeric tokens (`11420`) are kept. Set `KEEP_STOPWORDS=true` to skip this step.
 
 The same steps run on the primary name, aliases, and former names (`HistoricalInfo` of type `Former Name`).
 

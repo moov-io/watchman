@@ -167,10 +167,10 @@ cascade_entities,Company,Fratelli Brunaccini S.n.c.,F.lli Brunaccini snc,true,,w
 cascade_entities,Company,Compañía Minera Huallacocha S.A.C.,Cía. Minera Huallacocha SAC,true,,word-abbreviation,Cascade Screening authored pairs (paires-entites-3.json),0.6064,0.6064
 cascade_entities,Company,Tecelagem Serra Azulina Indústria e Comércio Ltda.,TECELAGEM SERRA AZULINA IND. E COM. LTDA,true,,word-abbreviation,Cascade Screening authored pairs (paires-entites-3.json),0.5678,0.5678
 cascade_entities,Company,Venkatadri Forgings & Engg. Works Pvt Ltd,Venkatadri Forgings and Engineering Works Private Limited,true,,word-abbreviation,Cascade Screening authored pairs (paires-entites-3.json),0.5622,0.5622
-cascade_entities,Company,Ocean Pioneer (ex-Cape Diamond),Cape Diamond,true,,ex-name-alias,Cascade Screening authored pairs (paires-entites-13.json),0.4400,0.4400
-cascade_entities,Company,Star Voyager (ex-Southern Glory),Southern Glory,true,,ex-name-alias,Cascade Screening authored pairs (paires-entites-13.json),0.4800,0.4800
-cascade_entities,Company,Pacific Endeavour (ex-Grand Wheatland),Grand Wheatland,true,,ex-name-alias,Cascade Screening authored pairs (paires-entites-13.json),0.4383,0.4383
-cascade_entities,Company,Wheatland Glory (ex-Pacific Sower),Pacific Sower,true,,ex-name-alias,Cascade Screening authored pairs (paires-entites-13.json),0.4320,0.4320
+cascade_entities,Company,Ocean Pioneer (ex-Cape Diamond),Cape Diamond,true,,ex-name-alias,Cascade Screening authored pairs (paires-entites-13.json),0.4400,0.8122
+cascade_entities,Company,Star Voyager (ex-Southern Glory),Southern Glory,true,,ex-name-alias,Cascade Screening authored pairs (paires-entites-13.json),0.4800,0.8122
+cascade_entities,Company,Pacific Endeavour (ex-Grand Wheatland),Grand Wheatland,true,,ex-name-alias,Cascade Screening authored pairs (paires-entites-13.json),0.4383,0.8122
+cascade_entities,Company,Wheatland Glory (ex-Pacific Sower),Pacific Sower,true,,ex-name-alias,Cascade Screening authored pairs (paires-entites-13.json),0.4320,0.8122
 cascade_entities,Company,SARL Ivoire Négoce,SARL Ivoire Negoce,true,,accent-variant,Cascade Screening authored pairs (paires-entites-16.json),0.8550,0.8550
 cascade_entities,Company,Société Camerounaise de Cacao,Societe Camerounaise de Cacao,true,,accent-variant,Cascade Screening authored pairs (paires-entites-16.json),0.8550,0.8550
 cascade_entities,Company,Ets Fakhoury Frères,Ets Fakhoury Freres,true,,accent-variant,Cascade Screening authored pairs (paires-entites-16.json),0.8550,0.8550
@@ -192,7 +192,7 @@ cascade_entities,Company,Kisumu Lakeside Motors Ltd (Kakamega Branch),Kisumu Lak
 cascade_entities,Company,Muheza Sisal Estates Ltd,Muheza Sisal Estates Ltd (Korogwe Branch),true,,branch-same-entity,Cascade Screening authored pairs (paires-entites-15.json),0.8060,0.8060
 cascade_entities,Company,"Sindh Agro Chemicals (Pvt) Ltd, Sukkur Branch",Sindh Agro Chemicals (Private) Limited,true,,branch-same-entity,Cascade Screening authored pairs (paires-entites-15.json),0.5040,0.5040
 cascade_entities,Company,HALVERSTONE SPIRIT V.214W (Marshall Islands flag),Halverstone Spirit,true,,annotation,Cascade Screening authored pairs (paires-entites-6.json),0.3597,0.3597
-cascade_entities,Company,M/T Ondara Leigh (ex-Pelican Morrow),ONDARA LEIGH,true,,annotation,Cascade Screening authored pairs (paires-entites-6.json),0.3506,0.3506
+cascade_entities,Company,M/T Ondara Leigh (ex-Pelican Morrow),ONDARA LEIGH,true,,annotation,Cascade Screening authored pairs (paires-entites-6.json),0.3506,0.7837
 cascade_entities,Company,"Rancho Vercel Importadora S.A. de C.V. c/o Aduanas Pedraza, Nuevo Laredo",Rancho Vercel Importadora SA de CV,true,,annotation,Cascade Screening authored pairs (paires-entites-6.json),0.5166,0.5166
 cascade_entities,Company,"Tidewell Process Equipment Inc, 12250 Brevard Ln, Pasadena TX 77506","Tidewell Process Equipment, Inc.",true,,annotation,Cascade Screening authored pairs (paires-entites-6.json),0.3707,0.3707
 cascade_entities,Vessel,"MV Fraternité des Mers, port d'Abidjan",MV Fraternité des Mers,true,,port-of-registry-appended,Cascade Screening authored pairs (paires-entites-16.json),0.5236,0.8550

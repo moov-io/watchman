@@ -21,6 +21,7 @@ Each scoring change rewrites `score` and the summary table. `baseline` stays at 
 | strip vessel prefixes (`MV`, `M/T`, `SS`, …) | 0.5574 | 0.6296 |
 | strip trailing vessel port/place | 0.5710 | 0.6296 |
 | strip leading SHIPPER:/BENEFICIARY:/MESSRS./FIELD 59: | 0.5784 | 0.6296 |
+| treat (ex-Name) as a former name on the query and the list | 0.5919 | 0.6296 |
 
 Rewrite `score` (and fill `baseline` when empty) with:
 
@@ -34,14 +35,14 @@ Recorded `Similarity` on 300 name-only pairs (schema → Watchman type).
 
 | Slice | N | Matches | Mean score | Mean baseline | Mean delta | Min | Max |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| all | 300 | 140 | 0.6057 | 0.5950 | +0.0107 | 0.0000 | 0.8550 |
-| is_match=true | 140 | 140 | 0.5784 | 0.5574 | +0.0209 | 0.0000 | 0.8550 |
+| all | 300 | 140 | 0.6120 | 0.5950 | +0.0170 | 0.0000 | 0.8550 |
+| is_match=true | 140 | 140 | 0.5919 | 0.5574 | +0.0345 | 0.0000 | 0.8550 |
 | is_match=false | 160 | 0 | 0.6296 | 0.6279 | +0.0017 | 0.0000 | 0.8550 |
 | abbreviation | 4 | 4 | 0.6052 | 0.6052 | +0.0000 | 0.4538 | 0.8408 |
 | abbreviation-expanded | 4 | 4 | 0.6942 | 0.6942 | +0.0000 | 0.5577 | 0.8311 |
 | accent-diacritic-dropped | 4 | 4 | 0.8394 | 0.8394 | +0.0000 | 0.7927 | 0.8550 |
 | accent-variant | 4 | 4 | 0.8550 | 0.8550 | +0.0000 | 0.8550 | 0.8550 |
-| annotation | 4 | 4 | 0.3994 | 0.3994 | +0.0000 | 0.3506 | 0.5166 |
+| annotation | 4 | 4 | 0.5077 | 0.3994 | +0.1083 | 0.3597 | 0.7837 |
 | branch-same-entity | 4 | 4 | 0.6003 | 0.6003 | +0.0000 | 0.5040 | 0.8060 |
 | burmese-script-vs-latin | 4 | 4 | 0.0000 | 0.0000 | +0.0000 | 0.0000 | 0.0000 |
 | case-punctuation-spacing | 4 | 4 | 0.8427 | 0.8427 | +0.0000 | 0.8058 | 0.8550 |
@@ -55,7 +56,7 @@ Recorded `Similarity` on 300 name-only pairs (schema → Watchman type).
 | different-surname-same-form-chat | 4 | 0 | 0.4049 | 0.4049 | +0.0000 | 0.3226 | 0.5340 |
 | different-trade-word | 4 | 0 | 0.6262 | 0.6262 | +0.0000 | 0.5264 | 0.8037 |
 | doubled-letter | 4 | 4 | 0.8350 | 0.8350 | +0.0000 | 0.8240 | 0.8404 |
-| ex-name-alias | 4 | 4 | 0.4476 | 0.4476 | +0.0000 | 0.4320 | 0.4800 |
+| ex-name-alias | 4 | 4 | 0.8122 | 0.4476 | +0.3646 | 0.8122 | 0.8122 |
 | family-name-different-person | 4 | 0 | 0.6329 | 0.6329 | +0.0000 | 0.5546 | 0.8173 |
 | foreign-subsidiary | 4 | 0 | 0.7463 | 0.7463 | +0.0000 | 0.5931 | 0.8200 |
 | generic-words-only | 4 | 0 | 0.5664 | 0.5664 | +0.0000 | 0.5450 | 0.5942 |
