@@ -140,11 +140,11 @@ cascade_entities_2,Vessel,MV Karachi Crescent (ex Mandvi Bay),MV Mandvi Bay II,f
 cascade_entities_2,Vessel,Pakri Seal (ex Liivi Runner),Liivi Rider,false,,ex-name-other-word,Cascade Screening authored pairs (paires-entites-23.json),0.5455,0.5455
 cascade_entities_2,Vessel,Kalliopi Dawn (ex-Orion Tanager),Orion Tanager II,false,,ex-name-vs-numbered-name,Cascade Screening authored pairs (paires-entites-17.json),0.7948,0.7948
 cascade_entities_2,Vessel,Chrysoula M (ex-Kardelen Nur 5),Kardelen Nur 6,false,,ex-name-vs-other-numeral,Cascade Screening authored pairs (paires-entites-17.json),0.8122,0.8122
-cascade_entities_2,Company,Tamarind Crest Commodities Pte. Ltd. (formerly Tamarind Crest Resources Pte. Ltd.),Tamarind Crest Resources (Australia) Pty Ltd,false,,former-name-trap,Cascade Screening authored pairs (paires-entites-9.json),0.4353,0.4353
+cascade_entities_2,Company,Tamarind Crest Commodities Pte. Ltd. (formerly Tamarind Crest Resources Pte. Ltd.),Tamarind Crest Resources (Australia) Pty Ltd,false,,former-name-trap,Cascade Screening authored pairs (paires-entites-9.json),0.4353,0.7677
 cascade_entities_2,Vessel,SEA PEARL 3 (ex-CHAO PHRAYA STAR),CHAO PHRAYA STAR 2,false,,vessel-ex-name-numeral,Cascade Screening authored pairs (paires-entites-22.json),0.5629,0.5629
-cascade_entities_2,Vessel,M/T Rosalind Meadow (f.k.a. Meadow Spirit),Meadow Spirit,true,,alias-fka,Cascade Screening authored pairs (paires-entites-8.json),0.3996,0.3996
-cascade_entities_2,Company,Nordbryggen Marine Coatings AS (f.k.a. Bryggen Paint AS),Bryggen Paint AS,true,,alias-fka,Cascade Screening authored pairs (paires-entites-8.json),0.2818,0.2818
-cascade_entities_2,Company,Ostrowski Grain Partners LLC (f.k.a. Ostrowski Feed & Grain LLC),Ostrowski Feed & Grain LLC,true,,alias-fka,Cascade Screening authored pairs (paires-entites-8.json),0.4320,0.4320
+cascade_entities_2,Vessel,M/T Rosalind Meadow (f.k.a. Meadow Spirit),Meadow Spirit,true,,alias-fka,Cascade Screening authored pairs (paires-entites-8.json),0.3996,0.8122
+cascade_entities_2,Company,Nordbryggen Marine Coatings AS (f.k.a. Bryggen Paint AS),Bryggen Paint AS,true,,alias-fka,Cascade Screening authored pairs (paires-entites-8.json),0.2818,0.8122
+cascade_entities_2,Company,Ostrowski Grain Partners LLC (f.k.a. Ostrowski Feed & Grain LLC),Ostrowski Feed & Grain LLC,true,,alias-fka,Cascade Screening authored pairs (paires-entites-8.json),0.4320,0.8122
 cascade_entities_2,Vessel,MTC 8801 (ex LMT 22),LMT 22,true,,barge-former-name-alias,Cascade Screening authored pairs (paires-entites-20.json),0.5686,0.5686
 cascade_entities_2,Vessel,Grand Marais Trader (ex Keweenaw Spirit),M/V Grand Marais Trader,true,,current-name-with-ex-residue,Cascade Screening authored pairs (paires-entites-20.json),0.8550,0.8550
 cascade_entities_2,Vessel,ARBEL EXPRESS (ex-SARONIC EXPRESS),SARONIC EXPRESS,true,,ex-name,Cascade Screening authored pairs (paires-entites-21.json),0.8122,0.8122
@@ -154,33 +154,33 @@ cascade_entities_2,Vessel,Akçakoca Güneşi (ex-Azov Lantern),Azov Lantern,true
 cascade_entities_2,Vessel,BALTRIDGE CARRIER II (ex HAVGULL BIRK),Havgull Birk,true,,ex-name-alias,Cascade Screening authored pairs (paires-entites-23.json),0.8122,0.8122
 cascade_entities_2,Vessel,Barka NOGAT 12 (ex WARTA 7),Warta 7,true,,ex-name-alias,Cascade Screening authored pairs (paires-entites-23.json),0.5686,0.5686
 cascade_entities_2,Vessel,MV Pate Island Trader (ex Astral Kestrel II),Astral Kestrel II,true,,ex-name-alias-with-numeral,Cascade Screening authored pairs (paires-entites-15.json),0.8122,0.8122
-cascade_entities_2,Vessel,COASTAL DEFENDER EX ATLA,Coastal Defender (ex-Atlas Runner),true,,ex-name-annotation,Cascade Screening authored pairs (paires-entites-7.json),0.5746,0.5746
-cascade_entities_2,Vessel,"MV Karachi Crescent (ex Mandvi Bay, ex Wanshan Pearl)",Wanshan Pearl,true,,ex-name-chain,Cascade Screening authored pairs (paires-entites-15.json),0.1604,0.1604
+cascade_entities_2,Vessel,COASTAL DEFENDER EX ATLA,Coastal Defender (ex-Atlas Runner),true,,ex-name-annotation,Cascade Screening authored pairs (paires-entites-7.json),0.5746,0.8550
+cascade_entities_2,Vessel,"MV Karachi Crescent (ex Mandvi Bay, ex Wanshan Pearl)",Wanshan Pearl,true,,ex-name-chain,Cascade Screening authored pairs (paires-entites-15.json),0.1604,0.8122
 cascade_entities_2,Vessel,KASHUBIAN HERON (ex-AMBER TERN),M/V KASHUBIAN HERON,true,,ex-name-current,Cascade Screening authored pairs (paires-entites-23.json),0.8550,0.8550
 cascade_entities_2,Vessel,Nurhayat Ana,NURHAYAT ANA (ex-Çoruh Işığı),true,,ex-name-on-other-side,Cascade Screening authored pairs (paires-entites-17.json),0.8550,0.8550
 cascade_entities_2,Vessel,Samsun Dalgası,SAMSUN DALGASI (ex-Pontic Dawn),true,,ex-name-on-other-side,Cascade Screening authored pairs (paires-entites-17.json),0.8013,0.8013
-cascade_entities_2,Vessel,Theodosia K (ex-Lindos Harrier until 2019),Lindos Harrier,true,,ex-name-with-date,Cascade Screening authored pairs (paires-entites-17.json),0.5081,0.5081
-cascade_entities_2,Vessel,Kalliopi Dawn ex Orion Tanager,Kalliopi Dawn (Malta),true,,ex-name-without-parentheses,Cascade Screening authored pairs (paires-entites-17.json),0.4623,0.4623
-cascade_entities_2,Company,"BEIRUT CEDAR TRADING SAL, f.k.a. LEBANON CEDAR IMPORT EXPORT SAL",Lebanon Cedar Import Export SAL,true,,fka-former-name-match,Cascade Screening authored pairs (paires-entites-7.json),0.4985,0.4985
-cascade_entities_2,Company,"Dalgleish Rope Works Ltd, formerly Dalgleish & Muir Ropes Ltd",Dalgleish & Muir Ropes Ltd,true,,former-name,Cascade Screening authored pairs (paires-entites-8.json),0.4697,0.4697
+cascade_entities_2,Vessel,Theodosia K (ex-Lindos Harrier until 2019),Lindos Harrier,true,,ex-name-with-date,Cascade Screening authored pairs (paires-entites-17.json),0.5081,0.8122
+cascade_entities_2,Vessel,Kalliopi Dawn ex Orion Tanager,Kalliopi Dawn (Malta),true,,ex-name-without-parentheses,Cascade Screening authored pairs (paires-entites-17.json),0.4623,0.8550
+cascade_entities_2,Company,"BEIRUT CEDAR TRADING SAL, f.k.a. LEBANON CEDAR IMPORT EXPORT SAL",Lebanon Cedar Import Export SAL,true,,fka-former-name-match,Cascade Screening authored pairs (paires-entites-7.json),0.4985,0.8122
+cascade_entities_2,Company,"Dalgleish Rope Works Ltd, formerly Dalgleish & Muir Ropes Ltd",Dalgleish & Muir Ropes Ltd,true,,former-name,Cascade Screening authored pairs (paires-entites-8.json),0.4697,0.8122
 cascade_entities_2,Vessel,Bar Trader (ex Crnogorka),Crnogorka,true,,former-name-alias,Cascade Screening authored pairs (paires-entites-18.json),0.6498,0.6498
 cascade_entities_2,Vessel,Danube Pioneer,Dunav Pionir (ex Danube Pioneer),true,,former-name-alias,Cascade Screening authored pairs (paires-entites-18.json),0.8122,0.8122
 cascade_entities_2,Vessel,Dunav Empress (ex Sava Duchess),Sava Duchess,true,,former-name-alias,Cascade Screening authored pairs (paires-entites-18.json),0.8122,0.8122
-cascade_entities_2,Company,Olmsbury Grain Corporation f/k/a Olmsbury Milling Corporation,Olmsbury Grain Corp.,true,,former-name-appended,Cascade Screening authored pairs (paires-entites-4.json),0.4371,0.4371
+cascade_entities_2,Company,Olmsbury Grain Corporation f/k/a Olmsbury Milling Corporation,Olmsbury Grain Corp.,true,,former-name-appended,Cascade Screening authored pairs (paires-entites-4.json),0.4371,0.8550
 cascade_entities_2,Vessel,Nour Al Mafazat,M/T Nour Al Mafazat (ex Tarfa Breeze),true,,hull-current-name-with-former-name,Cascade Screening authored pairs (paires-entites-14.json),0.8550,0.8550
-cascade_entities_2,Vessel,Qamar Al Khaleej ex-Rimal Star,QAMAR AL KHALEEJ,true,,hull-current-name-with-former-name,Cascade Screening authored pairs (paires-entites-14.json),0.5219,0.5219
+cascade_entities_2,Vessel,Qamar Al Khaleej ex-Rimal Star,QAMAR AL KHALEEJ,true,,hull-current-name-with-former-name,Cascade Screening authored pairs (paires-entites-14.json),0.5219,0.8550
 cascade_entities_2,Vessel,Rijnkrekel,MTS RIJNKREKEL (ex Noordgouw),true,,hull-current-name-with-former-name,Cascade Screening authored pairs (paires-entites-14.json),0.8254,0.8254
 cascade_entities_2,Vessel,Amerbaars (ex Gouwezeef),Gouwezeef,true,,hull-former-name-alias,Cascade Screening authored pairs (paires-entites-14.json),0.8122,0.8122
 cascade_entities_2,Vessel,MS Hiltje Geertruida (ex Amstelgors),Amstelgors,true,,hull-former-name-alias,Cascade Screening authored pairs (paires-entites-14.json),0.6498,0.6498
 cascade_entities_2,Vessel,MT Gulf Mahara (ex Hadeel Pearl),Hadeel Pearl,true,,hull-former-name-alias,Cascade Screening authored pairs (paires-entites-14.json),0.8122,0.8122
-cascade_entities_2,Company,Kenari Food Distribution Sdn. Bhd. (formerly known as Kenari Frozen Foods Sdn. Bhd.),Kenari Frozen Foods Sdn. Bhd.,true,,registry-former-name,Cascade Screening authored pairs (paires-entites-9.json),0.4192,0.4192
-cascade_entities_2,Company,Tamarind Crest Commodities Pte. Ltd. (formerly Tamarind Crest Resources Pte. Ltd.),Tamarind Crest Resources Pte Ltd,true,,registry-former-name,Cascade Screening authored pairs (paires-entites-9.json),0.4600,0.4600
-cascade_entities_2,Vessel,"MV Stamatia Horizon (ex-Elenitsa Z, ex-Aegean Lynx)",Aegean Lynx,true,,second-ex-name-alias,Cascade Screening authored pairs (paires-entites-17.json),0.3546,0.3546
-cascade_entities_2,Vessel,"Superior Harvester (ex Duluth Harvester, ex Iron Range Harvester)",Iron Range Harvester,true,,second-former-name-alias,Cascade Screening authored pairs (paires-entites-20.json),0.4745,0.4745
+cascade_entities_2,Company,Kenari Food Distribution Sdn. Bhd. (formerly known as Kenari Frozen Foods Sdn. Bhd.),Kenari Frozen Foods Sdn. Bhd.,true,,registry-former-name,Cascade Screening authored pairs (paires-entites-9.json),0.4192,0.8122
+cascade_entities_2,Company,Tamarind Crest Commodities Pte. Ltd. (formerly Tamarind Crest Resources Pte. Ltd.),Tamarind Crest Resources Pte Ltd,true,,registry-former-name,Cascade Screening authored pairs (paires-entites-9.json),0.4600,0.8122
+cascade_entities_2,Vessel,"MV Stamatia Horizon (ex-Elenitsa Z, ex-Aegean Lynx)",Aegean Lynx,true,,second-ex-name-alias,Cascade Screening authored pairs (paires-entites-17.json),0.3546,0.8122
+cascade_entities_2,Vessel,"Superior Harvester (ex Duluth Harvester, ex Iron Range Harvester)",Iron Range Harvester,true,,second-former-name-alias,Cascade Screening authored pairs (paires-entites-20.json),0.4745,0.8122
 cascade_entities_2,Vessel,Bahía Serena (ex Serene Bay),MV Serene Bay,true,,trap-former-name-alias,Cascade Screening authored pairs (paires-entites-11.json),0.8122,0.8122
 cascade_entities_2,Vessel,MV Aurora del Istmo (ex Northern Aurora),Northern Aurora,true,,trap-former-name-alias,Cascade Screening authored pairs (paires-entites-11.json),0.8122,0.8122
 cascade_entities_2,Vessel,AYEYAR PRIDE (ex ANDAMAN WREN),ANDAMAN WREN,true,,vessel-ex-name,Cascade Screening authored pairs (paires-entites-22.json),0.8122,0.8122
 cascade_entities_2,Vessel,Dalmuri Ho (ex Ferry Mizukagami),Ferry Mizukagami,true,,vessel-ex-name,Cascade Screening authored pairs (paires-entites-19.json),0.8122,0.8122
 cascade_entities_2,Vessel,FV KIM HOCK LEONG 33 (EX KIM SOON 23),KIM SOON 23,true,,vessel-ex-name,Cascade Screening authored pairs (paires-entites-9.json),0.5686,0.5686
-cascade_entities_2,Vessel,MT QUINTARA SPIRIT EX PALOMERA,Quintara Spirit,true,,vessel-ex-name-appended,Cascade Screening authored pairs (paires-entites-4.json),0.5363,0.5363
+cascade_entities_2,Vessel,MT QUINTARA SPIRIT EX PALOMERA,Quintara Spirit,true,,vessel-ex-name-appended,Cascade Screening authored pairs (paires-entites-4.json),0.5363,0.8550
 cascade_entities_2,Vessel,MV Lagos Pearl (ex Atlantic Palm),MV Lagos Pearl,true,,vessel-ex-name-rename,Cascade Screening authored pairs (paires-entites-10.json),0.8550,0.8550

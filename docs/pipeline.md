@@ -37,7 +37,7 @@ A query is **not** reordered or suffix-stripped. You can search `Nicolas Maduro`
 ### Names
 
 1. Drop a leading trade-document role marker (`SHIPPER:`, `BENEFICIARY:`, `ORDERING CUSTOMER:`, `MESSRS.`, `FIELD 59:`).
-2. Treat `(ex-Cape Diamond)` as a former name (same path as `HistoricalInfo`) and drop that parenthetical from the primary name.
+2. Treat former-name markers as `HistoricalInfo` and drop them from the primary name: `(ex-Cape Diamond)`, `(f.k.a. …)`, `(formerly …)`, `(formerly known as …)`, inline `f.k.a.` / `f/k/a` / `formerly`, and an `ex` token with a separator (`Kalliopi Dawn ex Orion Tanager`). Chained `(ex A, ex B)` becomes two former names. A trailing year on the former name (`, 2020` or `until 2019`) is dropped. `(example)` stays on the primary name.
 3. Trim, lowercase, turn `.` `,` `-` and other punctuation/symbols into spaces.
 4. Unicode NFD → strip combining marks → NFC, so `Raúl` and `raul` match.
 5. For **vessels**, drop a trailing port or place (`MV SIAM ORCHID 7, Bangkok` → `MV SIAM ORCHID 7`; a final `(Laem Chabang)` is dropped), then drop leading ship-type markers (`MV`, `M/V`, `M/T`, `SS`, `N/M`, `T/B`, and the same after punctuation becomes spaces). `MV Solenne Harbour` and `Solenne Harbour` compare as the same prepared name.

@@ -246,6 +246,29 @@ func TestEntity_Normalize(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "f.k.a. former name lifted into historical prepared fields",
+			input: Entity[Value]{
+				Name: "Ostrowski Grain Partners LLC (f.k.a. Ostrowski Feed & Grain LLC)",
+				Type: EntityBusiness,
+				Business: &Business{
+					Name: "Ostrowski Grain Partners LLC (f.k.a. Ostrowski Feed & Grain LLC)",
+				},
+			},
+			expected: Entity[Value]{
+				Name: "Ostrowski Grain Partners LLC (f.k.a. Ostrowski Feed & Grain LLC)",
+				Type: "business",
+				Business: &Business{
+					Name: "Ostrowski Grain Partners LLC (f.k.a. Ostrowski Feed & Grain LLC)",
+				},
+				PreparedFields: PreparedFields{
+					Name:                 "ostrowski grain partners llc",
+					NameFields:           []string{"ostrowski", "grain", "partners", "llc"},
+					HistoricalNames:      []string{"ostrowski feed grain llc"},
+					HistoricalNameFields: [][]string{{"ostrowski", "feed", "grain", "llc"}},
+				},
+			},
+		},
 	}
 
 	for _, tc := range cases {

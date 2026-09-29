@@ -42,7 +42,7 @@ func stripTrailingParen(s string) (string, bool) {
 		return s, false
 	}
 	inner := strings.TrimSpace(s[start+1 : len(s)-1])
-	if _, ok := splitExPrefix(inner); ok {
+	if _, ok := cutFormerInner(inner); ok {
 		return s, false
 	}
 	return strings.TrimSpace(s[:start]), true
