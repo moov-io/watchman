@@ -64,9 +64,9 @@ cascade_entities,Vessel,Coaster Mtwara Dawn,Coaster Mtwara Dusk,false,,sister-sh
 cascade_entities,Vessel,Hamriya Moon,Hamriya Sun,false,,sister-ship,Cascade Screening authored pairs (paires-entites-15.json),0.5348,0.5348
 cascade_entities,Vessel,MSV Sahil-e-Sindh,MSV Sahil-e-Balochistan,false,,sister-ship,Cascade Screening authored pairs (paires-entites-15.json),0.4992,0.3648
 cascade_entities,Vessel,第八星風丸,第十八星風丸,false,,vessel-numeral,Cascade Screening authored pairs (paires-entites-19.json),0.6674,0.6674
-cascade_entities,Vessel,Hoshikaze Maru No. 8,Hoshikaze Maru No. 6,false,,vessel-numeral,Cascade Screening authored pairs (paires-entites-19.json),0.8336,0.8336
-cascade_entities,Vessel,No.8 Hoshikaze Maru,No.3 Hoshikaze Maru,false,,vessel-numeral,Cascade Screening authored pairs (paires-entites-19.json),0.8265,0.8265
-cascade_entities,Vessel,Namisuke Maru No. 11,Namisuke Maru No. 1,false,,vessel-numeral,Cascade Screening authored pairs (paires-entites-19.json),0.8320,0.8320
+cascade_entities,Vessel,Hoshikaze Maru No. 8,Hoshikaze Maru No. 6,false,,vessel-numeral,Cascade Screening authored pairs (paires-entites-19.json),0.8336,0.5835
+cascade_entities,Vessel,No.8 Hoshikaze Maru,No.3 Hoshikaze Maru,false,,vessel-numeral,Cascade Screening authored pairs (paires-entites-19.json),0.8265,0.5786
+cascade_entities,Vessel,Namisuke Maru No. 11,Namisuke Maru No. 1,false,,vessel-numeral,Cascade Screening authored pairs (paires-entites-19.json),0.8320,0.5824
 cascade_entities,Company,Spedycja Wisłoujście Sp. z o.o. Sp. k.,Żegluga Wisłoujście Sp. z o.o. Sp. k.,false,,different-trade-word,Cascade Screening authored pairs (paires-entites-23.json),0.5894,0.5894
 cascade_entities,Company,Piekarnia Rodzinna Kamińscy Sp. j.,Cukiernia Rodzinna Kamińscy Sp. j.,false,,different-trade-word,Cascade Screening authored pairs (paires-entites-23.json),0.5264,0.5264
 cascade_entities,Company,Wojciechowski Agro Sp. j.,Wojciechowski Auto Sp. j.,false,,different-trade-word,Cascade Screening authored pairs (paires-entites-23.json),0.8037,0.8037
@@ -127,10 +127,10 @@ cascade_entities,Company,"Owashi Seiko Co., Ltd.","Otaka Seiko Co., Ltd.",false,
 cascade_entities,Company,株式会社八雲堂,株式会社八重堂,false,,other-proper-name,Cascade Screening authored pairs (paires-entites-19.json),0.6991,0.6991
 cascade_entities,Company,月岡繊維株式会社,月見繊維株式会社,false,,other-proper-name,Cascade Screening authored pairs (paires-entites-19.json),0.6844,0.6844
 cascade_entities,Company,Marushin Juki K.K.,Maruyoshi Juki K.K.,false,,other-proper-name,Cascade Screening authored pairs (paires-entites-19.json),0.8046,0.8046
-cascade_entities,Company,Brasskey Shipping Three Inc.,Brasskey Shipping Five Inc.,false,,numbered-spv,Cascade Screening authored pairs (paires-entites-3.json),0.8550,0.8550
-cascade_entities,Company,Marrowgate Leasing 3 Ltd,Marrowgate Leasing 6 Ltd,false,,numbered-spv,Cascade Screening authored pairs (paires-entites-3.json),0.8387,0.8387
-cascade_entities,Company,Seraphine Navigation II S.A.,Seraphine Navigation IX S.A.,false,,numbered-spv,Cascade Screening authored pairs (paires-entites-3.json),0.8395,0.8395
-cascade_entities,Company,Golden Lotus Investment No. 3 Ltd,Golden Lotus Investment No. 8 Ltd,false,,numbered-spv,Cascade Screening authored pairs (paires-entites-5.json),0.8550,0.8550
+cascade_entities,Company,Brasskey Shipping Three Inc.,Brasskey Shipping Five Inc.,false,,numbered-spv,Cascade Screening authored pairs (paires-entites-3.json),0.8550,0.5985
+cascade_entities,Company,Marrowgate Leasing 3 Ltd,Marrowgate Leasing 6 Ltd,false,,numbered-spv,Cascade Screening authored pairs (paires-entites-3.json),0.8387,0.5871
+cascade_entities,Company,Seraphine Navigation II S.A.,Seraphine Navigation IX S.A.,false,,numbered-spv,Cascade Screening authored pairs (paires-entites-3.json),0.8395,0.5876
+cascade_entities,Company,Golden Lotus Investment No. 3 Ltd,Golden Lotus Investment No. 8 Ltd,false,,numbered-spv,Cascade Screening authored pairs (paires-entites-5.json),0.8550,0.5985
 cascade_entities,Company,Cecotti Srl,Comelli Srl,false,,different-surname-same-form-chat,Cascade Screening authored pairs (paires-entites-18.json),0.5340,0.5340
 cascade_entities,Company,Rossetti Sped.,Bassanese Sped.,false,,different-surname-same-form-chat,Cascade Screening authored pairs (paires-entites-18.json),0.3226,0.3226
 cascade_entities,Company,Comelli Coop,Bulfon Coop,false,,different-surname-same-form-chat,Cascade Screening authored pairs (paires-entites-18.json),0.3494,0.3494
@@ -139,10 +139,10 @@ cascade_entities,Company,Wrightstone Freight Inc.,Rightstone Freight Inc.,false,
 cascade_entities,Company,Pier Nine Logistics LLC,Peer Nine Logistics LLC,false,,homophone,Cascade Screening authored pairs (paires-entites-3.json),0.8293,0.8293
 cascade_entities,Company,Sole Source Footwear Inc.,Soul Source Footwear Inc.,false,,homophone,Cascade Screening authored pairs (paires-entites-3.json),0.8333,0.8333
 cascade_entities,Company,Compagnie du Verre Vassalien,Compagnie du Vert Vassalien,false,,homophone,Cascade Screening authored pairs (paires-entites-3.json),0.8256,0.8256
-cascade_entities,Company,Sino Iron I,Sino Iron II,false,,numeral-changed,Cascade Screening authored pairs (paires-entites-13.json),0.8175,0.8175
-cascade_entities,Company,Wattle Star II,Wattle Star III,false,,numeral-changed,Cascade Screening authored pairs (paires-entites-13.json),0.8242,0.8242
-cascade_entities,Company,Kaiyo Maru No. 8,Kaiyo Maru No. 9,false,,numeral-changed,Cascade Screening authored pairs (paires-entites-13.json),0.8265,0.8265
-cascade_entities,Company,Seif Feeder 12,Seif Feeder 13,false,,numeral-changed,Cascade Screening authored pairs (paires-entites-15.json),0.8075,0.8075
+cascade_entities,Company,Sino Iron I,Sino Iron II,false,,numeral-changed,Cascade Screening authored pairs (paires-entites-13.json),0.8175,0.5723
+cascade_entities,Company,Wattle Star II,Wattle Star III,false,,numeral-changed,Cascade Screening authored pairs (paires-entites-13.json),0.8242,0.5770
+cascade_entities,Company,Kaiyo Maru No. 8,Kaiyo Maru No. 9,false,,numeral-changed,Cascade Screening authored pairs (paires-entites-13.json),0.8265,0.5786
+cascade_entities,Company,Seif Feeder 12,Seif Feeder 13,false,,numeral-changed,Cascade Screening authored pairs (paires-entites-15.json),0.8075,0.5652
 cascade_entities,Vessel,Takanami Star,Takanami Moon,false,,vessel-sister-ship,Cascade Screening authored pairs (paires-entites-19.json),0.5198,0.5198
 cascade_entities,Vessel,Umisachi Ace,Yamasachi Ace,false,,vessel-sister-ship,Cascade Screening authored pairs (paires-entites-19.json),0.5450,0.5450
 cascade_entities,Vessel,LNG Tsukuyomi,LNG Tsukiakari,false,,vessel-sister-ship,Cascade Screening authored pairs (paires-entites-19.json),0.5858,0.5858

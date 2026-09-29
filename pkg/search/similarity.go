@@ -420,6 +420,13 @@ func calculateFinalScore[Q any, I any](w io.Writer, pieces []ScorePiece, exactOv
 		}
 	}
 
+	if hasNameNumeralConflict(query, index) && nameNumeralConflictPenaltyMultiplier > 0 && nameNumeralConflictPenaltyMultiplier < 1 {
+		finalScore *= nameNumeralConflictPenaltyMultiplier
+		if w != nil {
+			debug(w, "  name numeral conflict penalty = %.2f\n", finalScore)
+		}
+	}
+
 	if math.IsNaN(finalScore) {
 		return 1.0
 	}

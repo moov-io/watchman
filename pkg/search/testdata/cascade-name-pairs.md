@@ -22,6 +22,7 @@ Each scoring change rewrites `score` and the summary table. `baseline` stays at 
 | strip trailing vessel port/place | 0.5710 | 0.6296 |
 | strip leading SHIPPER:/BENEFICIARY:/MESSRS./FIELD 59: | 0.5784 | 0.6296 |
 | treat (ex-Name) as a former name on the query and the list | 0.5919 | 0.6296 |
+| penalize disagreeing name numerals (digit, roman, spelled) | 0.5919 | 0.6124 |
 
 Rewrite `score` (and fill `baseline` when empty) with:
 
@@ -35,9 +36,9 @@ Recorded `Similarity` on 300 name-only pairs (schema → Watchman type).
 
 | Slice | N | Matches | Mean score | Mean baseline | Mean delta | Min | Max |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| all | 300 | 140 | 0.6120 | 0.5950 | +0.0170 | 0.0000 | 0.8550 |
+| all | 300 | 140 | 0.6028 | 0.5950 | +0.0078 | 0.0000 | 0.8550 |
 | is_match=true | 140 | 140 | 0.5919 | 0.5574 | +0.0345 | 0.0000 | 0.8550 |
-| is_match=false | 160 | 0 | 0.6296 | 0.6279 | +0.0017 | 0.0000 | 0.8550 |
+| is_match=false | 160 | 0 | 0.6124 | 0.6279 | -0.0155 | 0.0000 | 0.8451 |
 | abbreviation | 4 | 4 | 0.6052 | 0.6052 | +0.0000 | 0.4538 | 0.8408 |
 | abbreviation-expanded | 4 | 4 | 0.6942 | 0.6942 | +0.0000 | 0.5577 | 0.8311 |
 | accent-diacritic-dropped | 4 | 4 | 0.8394 | 0.8394 | +0.0000 | 0.7927 | 0.8550 |
@@ -70,8 +71,8 @@ Recorded `Similarity` on 300 name-only pairs (schema → Watchman type).
 | native-vs-english | 4 | 4 | 0.0000 | 0.0000 | +0.0000 | 0.0000 | 0.0000 |
 | near-string | 4 | 0 | 0.7090 | 0.7090 | +0.0000 | 0.5742 | 0.8384 |
 | near-string-real-words | 4 | 0 | 0.7108 | 0.7108 | +0.0000 | 0.5688 | 0.8415 |
-| numbered-spv | 4 | 0 | 0.8470 | 0.8470 | +0.0000 | 0.8387 | 0.8550 |
-| numeral-changed | 4 | 0 | 0.8189 | 0.8189 | +0.0000 | 0.8075 | 0.8265 |
+| numbered-spv | 4 | 0 | 0.5929 | 0.8470 | -0.2541 | 0.5871 | 0.5985 |
+| numeral-changed | 4 | 0 | 0.5733 | 0.8189 | -0.2457 | 0.5652 | 0.5786 |
 | one-word-sibling | 4 | 0 | 0.5922 | 0.5922 | +0.0000 | 0.4954 | 0.8112 |
 | one-word-sibling-activity | 4 | 0 | 0.5580 | 0.5580 | +0.0000 | 0.5180 | 0.6118 |
 | other-business-word | 4 | 0 | 0.6530 | 0.6530 | +0.0000 | 0.5198 | 0.7866 |
@@ -102,7 +103,7 @@ Recorded `Similarity` on 300 name-only pairs (schema → Watchman type).
 | transliteration | 4 | 4 | 0.6133 | 0.6133 | +0.0000 | 0.3716 | 0.8143 |
 | two-words-differ | 4 | 0 | 0.5112 | 0.5112 | +0.0000 | 0.3872 | 0.5810 |
 | uppercase-export | 4 | 4 | 0.8550 | 0.8475 | +0.0075 | 0.8550 | 0.8550 |
-| vessel-numeral | 4 | 0 | 0.7899 | 0.7899 | +0.0000 | 0.6674 | 0.8336 |
+| vessel-numeral | 4 | 0 | 0.6030 | 0.7899 | -0.1869 | 0.5786 | 0.6674 |
 | vessel-other-word | 4 | 0 | 0.5045 | 0.4959 | +0.0086 | 0.0000 | 0.7981 |
 | vessel-plural | 4 | 0 | 0.7921 | 0.7921 | +0.0000 | 0.7772 | 0.8192 |
 | vessel-prefix | 4 | 4 | 0.8550 | 0.8265 | +0.0285 | 0.8550 | 0.8550 |
