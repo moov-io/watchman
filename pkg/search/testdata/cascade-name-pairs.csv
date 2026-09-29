@@ -1,0 +1,301 @@
+case_group,schema,name1,name2,is_match,quality,category,notes,baseline,score
+cascade_entities,Company,Mwangi & Sons Ltd,Mwangi & Daughters Ltd,false,,other-word,Cascade Screening authored pairs (paires-entites-15.json),0.5177,0.5177
+cascade_entities,Company,Kilifi Coastal Traders Ltd,Kilifi Coastal Transporters Ltd,false,,other-word,Cascade Screening authored pairs (paires-entites-15.json),0.6100,0.6100
+cascade_entities,Company,Kibaha Cement Traders Ltd,Kibaha Cement Products Ltd,false,,other-word,Cascade Screening authored pairs (paires-entites-15.json),0.5257,0.5257
+cascade_entities,Company,Kisumu Lakeside Motors Ltd,Kisumu Lakeside Motor Spares Ltd,false,,other-word,Cascade Screening authored pairs (paires-entites-15.json),0.8110,0.8110
+cascade_entities,Company,Brennock Steel Tubes Ltd,Brennock Steel Wires Ltd,false,,sibling-one-word,Cascade Screening authored pairs (paires-entites-3.json),0.5704,0.5704
+cascade_entities,Company,Castellan Agro Exports Pvt. Ltd.,Castellan Agro Imports Pvt. Ltd.,false,,sibling-one-word,Cascade Screening authored pairs (paires-entites-3.json),0.8112,0.8112
+cascade_entities,Company,Marbury Cold Chain Logistics LLC,Marbury Cold Chain Engineering LLC,false,,sibling-one-word,Cascade Screening authored pairs (paires-entites-3.json),0.5226,0.5226
+cascade_entities,Company,Tolvane Petroleum Trading FZE,Tolvane Petroleum Refining FZE,false,,sibling-one-word,Cascade Screening authored pairs (paires-entites-3.json),0.5519,0.5519
+cascade_entities,Company,Groupe Diarra Import-Export,Groupe Diakité Import-Export,false,,different-surname,Cascade Screening authored pairs (paires-entites-16.json),0.6142,0.6142
+cascade_entities,Company,SUARL Traoré Commerce,SUARL Touré Commerce,false,,different-surname,Cascade Screening authored pairs (paires-entites-16.json),0.7855,0.7855
+cascade_entities,Company,Ets Diallo et Fils,Ets Baldé et Fils,false,,different-surname,Cascade Screening authored pairs (paires-entites-16.json),0.5898,0.5898
+cascade_entities,Company,Ets Ouattara et Cie,Ets Ouédraogo et Cie,false,,different-surname,Cascade Screening authored pairs (paires-entites-16.json),0.5171,0.5171
+cascade_entities,Company,Tak Shing Trading Company Limited,Tak Hing Trading Company Limited,false,,near-string-real-words,Cascade Screening authored pairs (paires-entites-5.json),0.8402,0.8402
+cascade_entities,Company,"Guangzhou Lixing Cosmetics Co., Ltd.","Guangzhou Lixin Cosmetics Co., Ltd.",false,,near-string-real-words,Cascade Screening authored pairs (paires-entites-5.json),0.8415,0.8415
+cascade_entities,Company,"Yu Hsin Machinery Co., Ltd.","Yu Hsing Machinery Co., Ltd.",false,,near-string-real-words,Cascade Screening authored pairs (paires-entites-5.json),0.5926,0.5926
+cascade_entities,Company,"Anping Jinqiao Wire Mesh Products Co., Ltd.","Anping Yinqiao Wire Mesh Products Co., Ltd.",false,,near-string-real-words,Cascade Screening authored pairs (paires-entites-5.json),0.5688,0.5688
+cascade_entities,Company,Odhiambo & Otieno Enterprises Ltd,Odhiambo & Onyango Enterprises Ltd,false,,other-surname,Cascade Screening authored pairs (paires-entites-15.json),0.7800,0.7800
+cascade_entities,Company,Karimi Fresh Produce,Kariuki Fresh Produce,false,,other-surname,Cascade Screening authored pairs (paires-entites-15.json),0.8161,0.8161
+cascade_entities,Company,Njoroge wa Kamau Hardware Ltd,Njoroge wa Kimani Hardware Ltd,false,,other-surname,Cascade Screening authored pairs (paires-entites-15.json),0.7970,0.7970
+cascade_entities,Company,Mavroyenis Marine Insurance Brokers,Mavromatis Marine Insurance Brokers,false,,other-surname,Cascade Screening authored pairs (paires-entites-17.json),0.8229,0.8229
+cascade_entities,Company,株式会社風松ホールディングス,風松工業株式会社,false,,holding-vs-operating,Cascade Screening authored pairs (paires-entites-19.json),0.0000,0.0000
+cascade_entities,Company,Soryu Kagaku Holdings K.K.,Soryu Kagaku Kogyo K.K.,false,,holding-vs-operating,Cascade Screening authored pairs (paires-entites-19.json),0.5276,0.5276
+cascade_entities,Company,대륜중공업 주식회사,대륜홀딩스 주식회사,false,,holding-vs-operating,Cascade Screening authored pairs (paires-entites-19.json),0.5489,0.5489
+cascade_entities,Company,Ruiz-Montalvo Trucking LLC,Ruiz-Montalvo Trucking Holdings LLC,false,,holding-vs-operating,Cascade Screening authored pairs (paires-entites-20.json),0.8219,0.8219
+cascade_entities,Company,"Ningbo Jiangbei Xinhua Fastener Co., Ltd.","Ningbo Jiangbei Xinhua Valve Co., Ltd.",false,,one-word-sibling-activity,Cascade Screening authored pairs (paires-entites-5.json),0.6118,0.6118
+cascade_entities,Company,"Zhejiang Yongxu Chemical Co., Ltd.","Zhejiang Yongxu Pharmaceutical Co., Ltd.",false,,one-word-sibling-activity,Cascade Screening authored pairs (paires-entites-5.json),0.5180,0.5180
+cascade_entities,Company,"Dai Nam Steel Co., Ltd.","Dai Nam Cement Co., Ltd.",false,,one-word-sibling-activity,Cascade Screening authored pairs (paires-entites-5.json),0.5811,0.5811
+cascade_entities,Company,"Fuzhou Sanhe Foods Co., Ltd.","Fuzhou Sanhe Packaging Co., Ltd.",false,,one-word-sibling-activity,Cascade Screening authored pairs (paires-entites-5.json),0.5210,0.5210
+cascade_entities,Company,Olvetra GmbH,Olvetra Polska Sp. z o.o.,false,,subsidiary-by-country,Cascade Screening authored pairs (paires-entites-4.json),0.5128,0.5128
+cascade_entities,Company,Kessendorf AG,Kessendorf do Brasil Ltda.,false,,subsidiary-by-country,Cascade Screening authored pairs (paires-entites-4.json),0.5752,0.5752
+cascade_entities,Company,Marrowby Chemicals Ltd,"Marrowby Chemicals (Thailand) Co., Ltd.",false,,subsidiary-by-country,Cascade Screening authored pairs (paires-entites-4.json),0.5984,0.5984
+cascade_entities,Company,Tovarro Industries Inc.,"Tovarro Industries de México, S.A. de C.V.",false,,subsidiary-by-country,Cascade Screening authored pairs (paires-entites-4.json),0.5959,0.5959
+cascade_entities,Vessel,MV KARADENİZ ŞAHİNİ,Karadeniz Şahini Denizcilik Ltd. Şti.,false,,vessel-vs-owner,Cascade Screening authored pairs (paires-entites-12.json),0.5916,0.5916
+cascade_entities,Vessel,M/V SAMSUN YILDIZI,Samsun Yıldızı Gemi İşletmeciliği A.Ş.,false,,vessel-vs-owner,Cascade Screening authored pairs (paires-entites-12.json),0.4729,0.4729
+cascade_entities,Vessel,MV DENİZ KARTALI,Deniz Kartalı Denizcilik A.Ş.,false,,vessel-vs-owner,Cascade Screening authored pairs (paires-entites-12.json),0.5478,0.5478
+cascade_entities,Vessel,KAPITAN GUSEYNOV,Kapitan Guseynov Shipping Ltd,false,,vessel-vs-owner,Cascade Screening authored pairs (paires-entites-12.json),0.8007,0.8007
+cascade_entities,Company,Kitakusu Kaiun K.K.,Kitakusu Kisen K.K.,false,,other-business-word,Cascade Screening authored pairs (paires-entites-19.json),0.7866,0.7866
+cascade_entities,Company,星ノ浦物産株式会社,星ノ浦商事株式会社,false,,other-business-word,Cascade Screening authored pairs (paires-entites-19.json),0.6345,0.6345
+cascade_entities,Company,Hoshinoura Bussan K.K.,Hoshinoura Sangyo K.K.,false,,other-business-word,Cascade Screening authored pairs (paires-entites-19.json),0.5198,0.5198
+cascade_entities,Company,風松工業株式会社,風松建設株式会社,false,,other-business-word,Cascade Screening authored pairs (paires-entites-19.json),0.6710,0.6710
+cascade_entities,Company,Mwalimu wa Pwani Sacco Ltd,Mwalimu wa Nyanza Sacco Ltd,false,,other-place,Cascade Screening authored pairs (paires-entites-15.json),0.6020,0.6020
+cascade_entities,Company,MV Ras Kitau,MV Ras Kiambone,false,,other-place,Cascade Screening authored pairs (paires-entites-15.json),0.5233,0.5233
+cascade_entities,Company,MV Salaam Dar,MV Salaam Zanzibar,false,,other-place,Cascade Screening authored pairs (paires-entites-15.json),0.5528,0.5528
+cascade_entities,Company,Lefkada Bulk Carriers S.A.,Lefkosia Bulk Carriers S.A.,false,,other-place,Cascade Screening authored pairs (paires-entites-17.json),0.7980,0.7980
+cascade_entities,Company,Akinyi Textiles Ltd,Atieno Textiles Ltd,false,,other-name,Cascade Screening authored pairs (paires-entites-15.json),0.6035,0.6035
+cascade_entities,Company,Wanjiru & Wambui Advocates,Wanjiru & Wanjiku Advocates,false,,other-name,Cascade Screening authored pairs (paires-entites-15.json),0.6117,0.6117
+cascade_entities,Company,Haji Muhammad Ashraf & Sons,Haji Muhammad Asghar & Sons,false,,other-name,Cascade Screening authored pairs (paires-entites-15.json),0.8218,0.8218
+cascade_entities,Company,Chaudhry Nazir Ahmad & Co.,Chaudhry Nazir Hussain & Co.,false,,other-name,Cascade Screening authored pairs (paires-entites-15.json),0.5583,0.5583
+cascade_entities,Company,Adriatica Legnami S.r.l.,Adriatica Metalli S.r.l.,false,,different-business-sector-word,Cascade Screening authored pairs (paires-entites-18.json),0.5143,0.5143
+cascade_entities,Company,Jadranska Plovba d.o.o.,Jadranska Ribolov d.o.o.,false,,different-business-sector-word,Cascade Screening authored pairs (paires-entites-18.json),0.5170,0.5170
+cascade_entities,Company,Bevk Mizarstvo d.o.o.,Bevk Kovaštvo d.o.o.,false,,different-business-sector-word,Cascade Screening authored pairs (paires-entites-18.json),0.4032,0.4032
+cascade_entities,Company,Zanier Impianti Società Cooperativa,Zanier Servizi Società Cooperativa,false,,different-business-sector-word,Cascade Screening authored pairs (paires-entites-18.json),0.5664,0.5664
+cascade_entities,Company,SARL Ivoire Négoce,SARL Ivoire Négoce Sénégal,false,,different-country-registration,Cascade Screening authored pairs (paires-entites-16.json),0.8160,0.8160
+cascade_entities,Company,Société Sénégalaise d'Arachide,Société Malienne d'Arachide,false,,different-country-registration,Cascade Screening authored pairs (paires-entites-16.json),0.5090,0.5090
+cascade_entities,Company,Compagnie Ivoirienne de Cajou,Compagnie Ghanéenne de Cajou,false,,different-country-registration,Cascade Screening authored pairs (paires-entites-16.json),0.4994,0.4994
+cascade_entities,Company,Société Malienne du Bétail,Société Guinéenne du Bétail,false,,different-country-registration,Cascade Screening authored pairs (paires-entites-16.json),0.5127,0.5127
+cascade_entities,Company,Tarquessa Pharmaceuticals Inc.,Tarquessa Marine Salvage Ltd.,false,,same-word-unrelated-business,Cascade Screening authored pairs (paires-entites-3.json),0.2766,0.2766
+cascade_entities,Company,Obsidiana Mining S.A.,Obsidiana Boutique Hotels S.L.,false,,same-word-unrelated-business,Cascade Screening authored pairs (paires-entites-3.json),0.4894,0.4894
+cascade_entities,Company,Kalvenstrand Logistics AB,Kalvenstrand Dental Clinic AB,false,,same-word-unrelated-business,Cascade Screening authored pairs (paires-entites-3.json),0.5071,0.5071
+cascade_entities,Company,Vardonis Agro Chemicals Pvt Ltd,Vardonis Software Solutions Inc.,false,,same-word-unrelated-business,Cascade Screening authored pairs (paires-entites-3.json),0.3074,0.3074
+cascade_entities,Vessel,MV Kilindini Star,MV Kilindini Sun,false,,sister-ship,Cascade Screening authored pairs (paires-entites-15.json),0.5995,0.5995
+cascade_entities,Vessel,Coaster Mtwara Dawn,Coaster Mtwara Dusk,false,,sister-ship,Cascade Screening authored pairs (paires-entites-15.json),0.6035,0.6035
+cascade_entities,Vessel,Hamriya Moon,Hamriya Sun,false,,sister-ship,Cascade Screening authored pairs (paires-entites-15.json),0.5348,0.5348
+cascade_entities,Vessel,MSV Sahil-e-Sindh,MSV Sahil-e-Balochistan,false,,sister-ship,Cascade Screening authored pairs (paires-entites-15.json),0.4992,0.4992
+cascade_entities,Vessel,第八星風丸,第十八星風丸,false,,vessel-numeral,Cascade Screening authored pairs (paires-entites-19.json),0.6674,0.6674
+cascade_entities,Vessel,Hoshikaze Maru No. 8,Hoshikaze Maru No. 6,false,,vessel-numeral,Cascade Screening authored pairs (paires-entites-19.json),0.8336,0.8336
+cascade_entities,Vessel,No.8 Hoshikaze Maru,No.3 Hoshikaze Maru,false,,vessel-numeral,Cascade Screening authored pairs (paires-entites-19.json),0.8265,0.8265
+cascade_entities,Vessel,Namisuke Maru No. 11,Namisuke Maru No. 1,false,,vessel-numeral,Cascade Screening authored pairs (paires-entites-19.json),0.8320,0.8320
+cascade_entities,Company,Spedycja Wisłoujście Sp. z o.o. Sp. k.,Żegluga Wisłoujście Sp. z o.o. Sp. k.,false,,different-trade-word,Cascade Screening authored pairs (paires-entites-23.json),0.5894,0.5894
+cascade_entities,Company,Piekarnia Rodzinna Kamińscy Sp. j.,Cukiernia Rodzinna Kamińscy Sp. j.,false,,different-trade-word,Cascade Screening authored pairs (paires-entites-23.json),0.5264,0.5264
+cascade_entities,Company,Wojciechowski Agro Sp. j.,Wojciechowski Auto Sp. j.,false,,different-trade-word,Cascade Screening authored pairs (paires-entites-23.json),0.8037,0.8037
+cascade_entities,Company,Łączyńska Wytwórnia Łodzi Sp. j.,Łączyńska Wytwórnia Sieci Sp. j.,false,,different-trade-word,Cascade Screening authored pairs (paires-entites-23.json),0.5852,0.5852
+cascade_entities,Company,Orvanta Leasing plc,Orvanta Insurance plc,false,,subsidiary-by-activity,Cascade Screening authored pairs (paires-entites-4.json),0.4954,0.4954
+cascade_entities,Company,Belcastrino Costruzioni S.p.A.,Belcastrino Cementi S.p.A.,false,,subsidiary-by-activity,Cascade Screening authored pairs (paires-entites-4.json),0.5456,0.5456
+cascade_entities,Company,Anduvar Shipping Inc.,Anduvar Ship Finance Inc.,false,,subsidiary-by-activity,Cascade Screening authored pairs (paires-entites-4.json),0.5148,0.5148
+cascade_entities,Company,Rimsdale Power Generation LLC,Rimsdale Energy Trading LLC,false,,subsidiary-by-activity,Cascade Screening authored pairs (paires-entites-4.json),0.3933,0.3933
+cascade_entities,Vessel,mv haci sukru reis,Hacı Şükrü Kaptan,false,,vessel-other-word,Cascade Screening authored pairs (paires-entites-17.json),0.3968,0.3968
+cascade_entities,Vessel,霧雨丸,春雨丸,false,,vessel-other-word,Cascade Screening authored pairs (paires-entites-19.json),0.0000,0.0000
+cascade_entities,Vessel,Cobalt Hibari,Cobalt Hibiki,false,,vessel-other-word,Cascade Screening authored pairs (paires-entites-19.json),0.7885,0.7885
+cascade_entities,Vessel,Shirane Glory,Shirane Gloria,false,,vessel-other-word,Cascade Screening authored pairs (paires-entites-19.json),0.7981,0.7981
+cascade_entities,Company,Korvessa Industrial GmbH,Korvessa Industrial Sdn. Bhd.,false,,same-name-other-jurisdiction,Cascade Screening authored pairs (paires-entites-3.json),0.7714,0.7714
+cascade_entities,Company,Altamura Ferrostampi S.r.l.,Altamura Ferrostampi Pte. Ltd.,false,,same-name-other-jurisdiction,Cascade Screening authored pairs (paires-entites-3.json),0.7785,0.7785
+cascade_entities,Company,Tessaline Trade OOO,Tessaline Trade Ltda.,false,,same-name-other-jurisdiction,Cascade Screening authored pairs (paires-entites-3.json),0.5972,0.5972
+cascade_entities,Company,Qordova Petroleum FZE,Qordova Petroleum S.A. de C.V.,false,,same-name-other-jurisdiction,Cascade Screening authored pairs (paires-entites-3.json),0.5984,0.5984
+cascade_entities,Company,Brevanti Trading LLC,Brevanti Logistics LLC,false,,one-word-sibling,Cascade Screening authored pairs (paires-entites-4.json),0.5093,0.5093
+cascade_entities,Company,Korvath Shipping Ltd,Korvath Chartering Ltd,false,,one-word-sibling,Cascade Screening authored pairs (paires-entites-4.json),0.5529,0.5529
+cascade_entities,Company,Halsworth Steel Inc.,Halsworth Scrap Inc.,false,,one-word-sibling,Cascade Screening authored pairs (paires-entites-4.json),0.4954,0.4954
+cascade_entities,Company,Drummelin Agro Exports Pvt. Ltd.,Drummelin Agro Imports Pvt. Ltd.,false,,one-word-sibling,Cascade Screening authored pairs (paires-entites-4.json),0.8112,0.8112
+cascade_entities,Company,Kraška Avtoprevozništvo d.d.,Notranjska Avtoprevozništvo d.d.,false,,different-place-same-business-word,Cascade Screening authored pairs (paires-entites-18.json),0.5549,0.5549
+cascade_entities,Company,Obalna Špedicija d.o.o.,Soška Špedicija d.o.o.,false,,different-place-same-business-word,Cascade Screening authored pairs (paires-entites-18.json),0.5689,0.5689
+cascade_entities,Company,Adriatica Serramenti S.p.A.,Istriana Serramenti S.p.A.,false,,different-place-same-business-word,Cascade Screening authored pairs (paires-entites-18.json),0.5908,0.5908
+cascade_entities,Company,Radcliffe Adriatica S.p.A.,Radcliffe Istriana S.p.A.,false,,different-place-same-business-word,Cascade Screening authored pairs (paires-entites-18.json),0.5842,0.5842
+cascade_entities,Company,Varsk Global Trading LLC,Tollmere Global Trading LLC,false,,generic-words-only,Cascade Screening authored pairs (paires-entites-3.json),0.5620,0.5620
+cascade_entities,Company,Kaverin International Freight Services Inc.,Oduya International Freight Services Inc.,false,,generic-words-only,Cascade Screening authored pairs (paires-entites-3.json),0.5942,0.5942
+cascade_entities,Company,United Heshen Marine Supply Co.,United Cardew Marine Supply Co.,false,,generic-words-only,Cascade Screening authored pairs (paires-entites-3.json),0.5643,0.5643
+cascade_entities,Company,Amberlo General Trading LLC,Dirwaz General Trading LLC,false,,generic-words-only,Cascade Screening authored pairs (paires-entites-3.json),0.5450,0.5450
+cascade_entities,Company,Nadwiślańskie Kruszywa Sp. z o.o.,Nadodrzańskie Kruszywa Sp. z o.o.,false,,different-place,Cascade Screening authored pairs (paires-entites-23.json),0.7825,0.7825
+cascade_entities,Company,Elbląskie Formy Stalowe Sp. z o.o.,Olsztyńskie Formy Stalowe Sp. z o.o.,false,,different-place,Cascade Screening authored pairs (paires-entites-23.json),0.5911,0.5911
+cascade_entities,Company,Kaszubskie Kruszywa Sp. z o.o.,Kujawskie Kruszywa Sp. z o.o.,false,,different-place,Cascade Screening authored pairs (paires-entites-23.json),0.7830,0.7830
+cascade_entities,Company,Kaszubska Wytwórnia Pierogów Bielawa Sp. z o.o.,Kaszubska Wytwórnia Pierogów Białogóra Sp. z o.o.,false,,different-place,Cascade Screening authored pairs (paires-entites-23.json),0.7810,0.7810
+cascade_entities,Company,Chłodnia Rybna Szkuner Sp. z o.o.,Chłodnia Rybna Szkwał Sp. z o.o.,false,,different-name-word,Cascade Screening authored pairs (paires-entites-23.json),0.7936,0.7936
+cascade_entities,Company,Przeds. Handl. Lipowa Dolina Sp. z o.o.,Przeds. Handl. Jodłowa Dolina Sp. z o.o.,false,,different-name-word,Cascade Screening authored pairs (paires-entites-23.json),0.5778,0.5778
+cascade_entities,Company,Lewandowski i Wspólnicy Sp. k.,Lewandowski i Synowie Sp. k.,false,,different-name-word,Cascade Screening authored pairs (paires-entites-23.json),0.6063,0.6063
+cascade_entities,Company,P.U.P. Nabrzeże Sp. z o.o.,P.U.P. Wybrzeże Sp. z o.o.,false,,different-name-word,Cascade Screening authored pairs (paires-entites-23.json),0.7909,0.7909
+cascade_entities,Company,Ahmad Rostamian Trading Est.,Karim Rostamian Trading Est.,false,,family-name-different-person,Cascade Screening authored pairs (paires-entites-4.json),0.5856,0.5856
+cascade_entities,Company,Hans Oberwald GmbH,Petra Oberwald GmbH,false,,family-name-different-person,Cascade Screening authored pairs (paires-entites-4.json),0.8173,0.8173
+cascade_entities,Company,Ramesh Gopalkrishnan Exports,Suresh Gopalkrishnan Exports,false,,family-name-different-person,Cascade Screening authored pairs (paires-entites-4.json),0.5742,0.5742
+cascade_entities,Company,Transportes Ibáñez Colmenar S.L.,Transportes Ibáñez Robledo S.L.,false,,family-name-different-person,Cascade Screening authored pairs (paires-entites-4.json),0.5546,0.5546
+cascade_entities,Company,Ditta Cecotti Import Export S.r.l.,Ditta Comelli Import Export S.r.l.,false,,different-surname-same-form,Cascade Screening authored pairs (paires-entites-18.json),0.7700,0.7700
+cascade_entities,Company,Alpina Trasporti S.a.s. di Qualizza Renzo & C.,Alpina Trasporti S.a.s. di Petris Renzo & C.,false,,different-surname-same-form,Cascade Screening authored pairs (paires-entites-18.json),0.5646,0.5646
+cascade_entities,Company,Carnica Trasporti S.n.c. di Bront Livio & C.,Carnica Trasporti S.n.c. di Molaro Livio & C.,false,,different-surname-same-form,Cascade Screening authored pairs (paires-entites-18.json),0.6135,0.6135
+cascade_entities,Company,Hrastnik Gradbeništvo d.o.o.,Rupnik Gradbeništvo d.o.o.,false,,different-surname-same-form,Cascade Screening authored pairs (paires-entites-18.json),0.5169,0.5169
+cascade_entities,Company,Nakamura Precision Tooling Inc.,Nakamura Precision Tooling Canada Ltd.,false,,foreign-subsidiary,Cascade Screening authored pairs (paires-entites-20.json),0.8200,0.8200
+cascade_entities,Company,Mbeki-Sandoval Environmental Services LLC,"Mbeki-Sandoval Environmental Services de México, S.A. de C.V.",false,,foreign-subsidiary,Cascade Screening authored pairs (paires-entites-20.json),0.7932,0.7932
+cascade_entities,Company,Lundqvist Hydraulics Inc.,Lundqvist Hydraulics (UK) Ltd.,false,,foreign-subsidiary,Cascade Screening authored pairs (paires-entites-20.json),0.5931,0.5931
+cascade_entities,Company,Wieczorek Machine Works Inc.,Wieczorek Machine Works GmbH,false,,foreign-subsidiary,Cascade Screening authored pairs (paires-entites-20.json),0.7788,0.7788
+cascade_entities,Vessel,YILDIZ KAPTAN,YILDIZ KAPTANLAR,false,,vessel-plural,Cascade Screening authored pairs (paires-entites-12.json),0.7790,0.7790
+cascade_entities,Vessel,KARADENIZ SAHINI,KARADENIZ SAHINLERI,false,,vessel-plural,Cascade Screening authored pairs (paires-entites-12.json),0.7928,0.7928
+cascade_entities,Vessel,DENIZ KARTALI,DENIZ KARTALLARI,false,,vessel-plural,Cascade Screening authored pairs (paires-entites-12.json),0.7772,0.7772
+cascade_entities,Vessel,ALTAIR STAR,ALTAIR STARS,false,,vessel-plural,Cascade Screening authored pairs (paires-entites-12.json),0.8192,0.8192
+cascade_entities,Company,Shah Bros. Ltd,Shah & Shah Ltd,false,,two-words-differ,Cascade Screening authored pairs (paires-entites-15.json),0.5295,0.5295
+cascade_entities,Company,Msasani Fisheries (T) Ltd,Msasani Fish Processors (T) Ltd,false,,two-words-differ,Cascade Screening authored pairs (paires-entites-15.json),0.5810,0.5810
+cascade_entities,Company,Haji Abdalla & Sons Ltd,Haji Abdulla Hardware Ltd,false,,two-words-differ,Cascade Screening authored pairs (paires-entites-15.json),0.5470,0.5470
+cascade_entities,Company,Popat Brothers (K) Ltd,Popat & Popat Advocates,false,,two-words-differ,Cascade Screening authored pairs (paires-entites-15.json),0.3872,0.3872
+cascade_entities,Company,"Owashi Seiko Co., Ltd.","Otaka Seiko Co., Ltd.",false,,other-proper-name,Cascade Screening authored pairs (paires-entites-19.json),0.5745,0.5745
+cascade_entities,Company,株式会社八雲堂,株式会社八重堂,false,,other-proper-name,Cascade Screening authored pairs (paires-entites-19.json),0.6991,0.6991
+cascade_entities,Company,月岡繊維株式会社,月見繊維株式会社,false,,other-proper-name,Cascade Screening authored pairs (paires-entites-19.json),0.6844,0.6844
+cascade_entities,Company,Marushin Juki K.K.,Maruyoshi Juki K.K.,false,,other-proper-name,Cascade Screening authored pairs (paires-entites-19.json),0.8046,0.8046
+cascade_entities,Company,Brasskey Shipping Three Inc.,Brasskey Shipping Five Inc.,false,,numbered-spv,Cascade Screening authored pairs (paires-entites-3.json),0.8550,0.8550
+cascade_entities,Company,Marrowgate Leasing 3 Ltd,Marrowgate Leasing 6 Ltd,false,,numbered-spv,Cascade Screening authored pairs (paires-entites-3.json),0.8387,0.8387
+cascade_entities,Company,Seraphine Navigation II S.A.,Seraphine Navigation IX S.A.,false,,numbered-spv,Cascade Screening authored pairs (paires-entites-3.json),0.8395,0.8395
+cascade_entities,Company,Golden Lotus Investment No. 3 Ltd,Golden Lotus Investment No. 8 Ltd,false,,numbered-spv,Cascade Screening authored pairs (paires-entites-5.json),0.8550,0.8550
+cascade_entities,Company,Cecotti Srl,Comelli Srl,false,,different-surname-same-form-chat,Cascade Screening authored pairs (paires-entites-18.json),0.5340,0.5340
+cascade_entities,Company,Rossetti Sped.,Bassanese Sped.,false,,different-surname-same-form-chat,Cascade Screening authored pairs (paires-entites-18.json),0.3226,0.3226
+cascade_entities,Company,Comelli Coop,Bulfon Coop,false,,different-surname-same-form-chat,Cascade Screening authored pairs (paires-entites-18.json),0.3494,0.3494
+cascade_entities,Company,Nikolić Prevoz,Stanković Prevoz,false,,different-surname-same-form-chat,Cascade Screening authored pairs (paires-entites-18.json),0.4138,0.4138
+cascade_entities,Company,Wrightstone Freight Inc.,Rightstone Freight Inc.,false,,homophone,Cascade Screening authored pairs (paires-entites-3.json),0.3676,0.3676
+cascade_entities,Company,Pier Nine Logistics LLC,Peer Nine Logistics LLC,false,,homophone,Cascade Screening authored pairs (paires-entites-3.json),0.8293,0.8293
+cascade_entities,Company,Sole Source Footwear Inc.,Soul Source Footwear Inc.,false,,homophone,Cascade Screening authored pairs (paires-entites-3.json),0.8333,0.8333
+cascade_entities,Company,Compagnie du Verre Vassalien,Compagnie du Vert Vassalien,false,,homophone,Cascade Screening authored pairs (paires-entites-3.json),0.8256,0.8256
+cascade_entities,Company,Sino Iron I,Sino Iron II,false,,numeral-changed,Cascade Screening authored pairs (paires-entites-13.json),0.8175,0.8175
+cascade_entities,Company,Wattle Star II,Wattle Star III,false,,numeral-changed,Cascade Screening authored pairs (paires-entites-13.json),0.8242,0.8242
+cascade_entities,Company,Kaiyo Maru No. 8,Kaiyo Maru No. 9,false,,numeral-changed,Cascade Screening authored pairs (paires-entites-13.json),0.8265,0.8265
+cascade_entities,Company,Seif Feeder 12,Seif Feeder 13,false,,numeral-changed,Cascade Screening authored pairs (paires-entites-15.json),0.8075,0.8075
+cascade_entities,Vessel,Takanami Star,Takanami Moon,false,,vessel-sister-ship,Cascade Screening authored pairs (paires-entites-19.json),0.5198,0.5198
+cascade_entities,Vessel,Umisachi Ace,Yamasachi Ace,false,,vessel-sister-ship,Cascade Screening authored pairs (paires-entites-19.json),0.5450,0.5450
+cascade_entities,Vessel,LNG Tsukuyomi,LNG Tsukiakari,false,,vessel-sister-ship,Cascade Screening authored pairs (paires-entites-19.json),0.5858,0.5858
+cascade_entities,Vessel,Seohae Lumina,Donghae Lumina,false,,vessel-sister-ship,Cascade Screening authored pairs (paires-entites-19.json),0.4412,0.4412
+cascade_entities,Company,MV Cacaueiro do Atlântico,MV Cacaueiros do Atlântico,false,,plural-vs-singular,Cascade Screening authored pairs (paires-entites-16.json),0.8315,0.8315
+cascade_entities,Company,MV Fraternité des Mers,MV Fraternités des Mers,false,,plural-vs-singular,Cascade Screening authored pairs (paires-entites-16.json),0.8451,0.8451
+cascade_entities,Company,MV Espoir d'Abidjan,MV Espoirs d'Abidjan,false,,plural-vs-singular,Cascade Screening authored pairs (paires-entites-16.json),0.8314,0.8314
+cascade_entities,Company,N/M Rio Paranaguá,N/M Rio Paranaguás,false,,plural-vs-singular,Cascade Screening authored pairs (paires-entites-16.json),0.8438,0.8438
+cascade_entities,Company,Ashcorran Mining Supplies Ltd,Ashcorran Dining Supplies Ltd,false,,near-string,Cascade Screening authored pairs (paires-entites-2.json),0.5742,0.5742
+cascade_entities,Company,Halvern Rail Services Ltd,Halvern Mail Services Ltd,false,,near-string,Cascade Screening authored pairs (paires-entites-2.json),0.5988,0.5988
+cascade_entities,Company,Pellmoor Timber Exports Ltd,Pellmoor Timber Experts Ltd,false,,near-string,Cascade Screening authored pairs (paires-entites-2.json),0.8384,0.8384
+cascade_entities,Company,Northgrave Paint Co.,Northgrave Plant Co.,false,,near-string,Cascade Screening authored pairs (paires-entites-2.json),0.8248,0.8248
+cascade_entities,Vessel,PRIAZOVYE-1204,Priazovye Shipmanagement LLC,false,,vessel-vs-manager,Cascade Screening authored pairs (paires-entites-12.json),0.5313,0.5313
+cascade_entities,Vessel,MV LUMINAR KESTREL,Luminar Ship Management Pte. Ltd.,false,,vessel-vs-manager,Cascade Screening authored pairs (paires-entites-4.json),0.3728,0.3728
+cascade_entities,Vessel,HARVELLO SPIRIT,Harvello Shipmanagement S.A.,false,,vessel-vs-manager,Cascade Screening authored pairs (paires-entites-4.json),0.5388,0.5388
+cascade_entities,Vessel,DORVANTIS PRIDE,Dorvantis Maritime Services Ltd,false,,vessel-vs-manager,Cascade Screening authored pairs (paires-entites-4.json),0.5061,0.5061
+cascade_entities,Company,"Quillmont Hydraulics, Inc.",Quillmont Hydraulics Incorporated,true,,legal-form-abbreviated,Cascade Screening authored pairs (paires-entites-3.json),0.6142,0.6142
+cascade_entities,Company,"Pellbrook Cold Storage, Limited Liability Company",PELLBROOK COLD STORAGE LLC,true,,legal-form-abbreviated,Cascade Screening authored pairs (paires-entites-3.json),0.4808,0.4808
+cascade_entities,Company,Harrowfield Bearings Limited,HARROWFIELD BEARINGS LTD.,true,,legal-form-abbreviated,Cascade Screening authored pairs (paires-entites-3.json),0.5996,0.5996
+cascade_entities,Company,Carrowmere Holdings plc,Carrowmere Holdings Public Limited Company,true,,legal-form-abbreviated,Cascade Screening authored pairs (paires-entites-3.json),0.5902,0.5902
+cascade_entities,Company,Fratelli Brunaccini S.n.c.,F.lli Brunaccini snc,true,,word-abbreviation,Cascade Screening authored pairs (paires-entites-3.json),0.5751,0.5751
+cascade_entities,Company,Compañía Minera Huallacocha S.A.C.,Cía. Minera Huallacocha SAC,true,,word-abbreviation,Cascade Screening authored pairs (paires-entites-3.json),0.6064,0.6064
+cascade_entities,Company,Tecelagem Serra Azulina Indústria e Comércio Ltda.,TECELAGEM SERRA AZULINA IND. E COM. LTDA,true,,word-abbreviation,Cascade Screening authored pairs (paires-entites-3.json),0.5678,0.5678
+cascade_entities,Company,Venkatadri Forgings & Engg. Works Pvt Ltd,Venkatadri Forgings and Engineering Works Private Limited,true,,word-abbreviation,Cascade Screening authored pairs (paires-entites-3.json),0.5622,0.5622
+cascade_entities,Company,Ocean Pioneer (ex-Cape Diamond),Cape Diamond,true,,ex-name-alias,Cascade Screening authored pairs (paires-entites-13.json),0.4400,0.4400
+cascade_entities,Company,Star Voyager (ex-Southern Glory),Southern Glory,true,,ex-name-alias,Cascade Screening authored pairs (paires-entites-13.json),0.4800,0.4800
+cascade_entities,Company,Pacific Endeavour (ex-Grand Wheatland),Grand Wheatland,true,,ex-name-alias,Cascade Screening authored pairs (paires-entites-13.json),0.4383,0.4383
+cascade_entities,Company,Wheatland Glory (ex-Pacific Sower),Pacific Sower,true,,ex-name-alias,Cascade Screening authored pairs (paires-entites-13.json),0.4320,0.4320
+cascade_entities,Company,SARL Ivoire Négoce,SARL Ivoire Negoce,true,,accent-variant,Cascade Screening authored pairs (paires-entites-16.json),0.8550,0.8550
+cascade_entities,Company,Société Camerounaise de Cacao,Societe Camerounaise de Cacao,true,,accent-variant,Cascade Screening authored pairs (paires-entites-16.json),0.8550,0.8550
+cascade_entities,Company,Ets Fakhoury Frères,Ets Fakhoury Freres,true,,accent-variant,Cascade Screening authored pairs (paires-entites-16.json),0.8550,0.8550
+cascade_entities,Company,SARL Nassif et Associés,SARL Nassif et Associes,true,,accent-variant,Cascade Screening authored pairs (paires-entites-16.json),0.8550,0.8550
+cascade_entities,Company,Levitsky Packaging Solutions Ltd,Levitskiy Packaging Solutions Ltd,true,,romanisation,Cascade Screening authored pairs (paires-entites-21.json),0.8415,0.8415
+cascade_entities,Company,Khoury Stone Works Ltd,Khouri Stone Works Limited,true,,romanisation,Cascade Screening authored pairs (paires-entites-21.json),0.7956,0.7956
+cascade_entities,Company,Rabinovich Medical Logistics Ltd,Rabinowitz Medical Logistics Ltd,true,,romanisation,Cascade Screening authored pairs (paires-entites-21.json),0.8196,0.8196
+cascade_entities,Company,Rachamim Ohayon Import & Marketing Ltd,Rakhamim Ohayon Import and Marketing Ltd,true,,romanisation,Cascade Screening authored pairs (paires-entites-21.json),0.7980,0.7980
+cascade_entities,Company,"האחים חדאד חומרי בניין בע""מ",Haddad Brothers Building Materials Ltd,true,,script-translation,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities,Company,"נחמיאס תוצרת טרייה בע""מ",Nakhmias Fresh Produce Ltd,true,,script-translation,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities,Company,"גורביץ' חלקים מדויקים בע""מ",Gurevich Precision Parts Ltd,true,,script-translation,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities,Company,"צור אמיתי לוגיסטיקה בע""מ",Tzur Amitai Logistics Ltd,true,,script-translation,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities,Company,Zhelvinsky Sudoremontny Zavod,Jelvinskiy Sudoremontnyi Zavod,true,,transliteration,Cascade Screening authored pairs (paires-entites-2.json),0.8076,0.8076
+cascade_entities,Company,Kholmogrant-Stroy OOO,Holmogrant-Stroi OOO,true,,transliteration,Cascade Screening authored pairs (paires-entites-2.json),0.3716,0.3716
+cascade_entities,Company,Verkhnyaya Strelka Agro,Werchnjaja Strelka Agro,true,,transliteration,Cascade Screening authored pairs (paires-entites-2.json),0.4596,0.4596
+cascade_entities,Company,Qasr Al Ghazalat General Trading,Kasr El Ghazalat General Trading,true,,transliteration,Cascade Screening authored pairs (paires-entites-2.json),0.8143,0.8143
+cascade_entities,Company,Coastline Agro Supplies Ltd - Malindi Branch,Coastline Agro Supplies Ltd,true,,branch-same-entity,Cascade Screening authored pairs (paires-entites-15.json),0.5673,0.5673
+cascade_entities,Company,Kisumu Lakeside Motors Ltd (Kakamega Branch),Kisumu Lakeside Motors Limited,true,,branch-same-entity,Cascade Screening authored pairs (paires-entites-15.json),0.5238,0.5238
+cascade_entities,Company,Muheza Sisal Estates Ltd,Muheza Sisal Estates Ltd (Korogwe Branch),true,,branch-same-entity,Cascade Screening authored pairs (paires-entites-15.json),0.8060,0.8060
+cascade_entities,Company,"Sindh Agro Chemicals (Pvt) Ltd, Sukkur Branch",Sindh Agro Chemicals (Private) Limited,true,,branch-same-entity,Cascade Screening authored pairs (paires-entites-15.json),0.5040,0.5040
+cascade_entities,Company,HALVERSTONE SPIRIT V.214W (Marshall Islands flag),Halverstone Spirit,true,,annotation,Cascade Screening authored pairs (paires-entites-6.json),0.3597,0.3597
+cascade_entities,Company,M/T Ondara Leigh (ex-Pelican Morrow),ONDARA LEIGH,true,,annotation,Cascade Screening authored pairs (paires-entites-6.json),0.3506,0.3506
+cascade_entities,Company,"Rancho Vercel Importadora S.A. de C.V. c/o Aduanas Pedraza, Nuevo Laredo",Rancho Vercel Importadora SA de CV,true,,annotation,Cascade Screening authored pairs (paires-entites-6.json),0.5166,0.5166
+cascade_entities,Company,"Tidewell Process Equipment Inc, 12250 Brevard Ln, Pasadena TX 77506","Tidewell Process Equipment, Inc.",true,,annotation,Cascade Screening authored pairs (paires-entites-6.json),0.3707,0.3707
+cascade_entities,Vessel,"MV Fraternité des Mers, port d'Abidjan",MV Fraternité des Mers,true,,port-of-registry-appended,Cascade Screening authored pairs (paires-entites-16.json),0.5236,0.5236
+cascade_entities,Vessel,MV Soja Paranaense,"MV Soja Paranaense, Santos",true,,port-of-registry-appended,Cascade Screening authored pairs (paires-entites-16.json),0.8200,0.8200
+cascade_entities,Vessel,N/M Bahia Trader,"N/M Bahia Trader, Paranaguá",true,,port-of-registry-appended,Cascade Screening authored pairs (paires-entites-16.json),0.8025,0.8025
+cascade_entities,Vessel,MV Costa do Marfim,"MV Costa do Marfim, port d'Abidjan",true,,port-of-registry-appended,Cascade Screening authored pairs (paires-entites-16.json),0.7756,0.7756
+cascade_entities,Company,Kalcic Trgovina d.o.o.,Kalčić Trgovina d.o.o.,true,,accent-diacritic-dropped,Cascade Screening authored pairs (paires-entites-18.json),0.8550,0.8550
+cascade_entities,Company,Škerlj Trgovina in Storitve d.o.o.,Skerlj Trgovina in Storitve d.o.o.,true,,accent-diacritic-dropped,Cascade Screening authored pairs (paires-entites-18.json),0.8550,0.8550
+cascade_entities,Company,"Hrastnik Gradbeništvo d.o.o., MŠ 5834219000","Hrastnik Gradbenistvo d.o.o., maticna stevilka 5834219000",true,,accent-diacritic-dropped,Cascade Screening authored pairs (paires-entites-18.json),0.7927,0.7927
+cascade_entities,Company,Sinožić Ribolov d.o.o.,Sinozic Ribolov d.o.o.,true,,accent-diacritic-dropped,Cascade Screening authored pairs (paires-entites-18.json),0.8550,0.8550
+cascade_entities,Company,Kaszubska Wytwórnia Pierogów Bielawa Sp. z o.o.,Kaszubska Wytwornia Pierogow Bielawa Limited Liability Company,true,,legal-form-translated,Cascade Screening authored pairs (paires-entites-23.json),0.6079,0.6079
+cascade_entities,Company,AS „Mangaļsalas Doki“,Mangalsalas Doki JSC,true,,legal-form-translated,Cascade Screening authored pairs (paires-entites-23.json),0.7815,0.7815
+cascade_entities,Company,Tõrva Puidutöö OÜ,Tõrva Puidutöö Ltd,true,,legal-form-translated,Cascade Screening authored pairs (paires-entites-23.json),0.8310,0.8310
+cascade_entities,Company,UAB „Šiaurės Vėjo Logistika“,Siaures Vejo Logistika Ltd,true,,legal-form-translated,Cascade Screening authored pairs (paires-entites-23.json),0.7798,0.7798
+cascade_entities,Vessel,MV Solenne Harbour,Solenne Harbour,true,,vessel-prefix,Cascade Screening authored pairs (paires-entites-2.json),0.7980,0.7980
+cascade_entities,Vessel,M/T Ardrevan Pearl,MT Ardrevan Pearl,true,,vessel-prefix,Cascade Screening authored pairs (paires-entites-2.json),0.8550,0.8550
+cascade_entities,Vessel,SS Maltrevor Queen,Maltrevor Queen,true,,vessel-prefix,Cascade Screening authored pairs (paires-entites-2.json),0.7980,0.7980
+cascade_entities,Vessel,M.V. Pelgarra Glory,M/V PELGARRA GLORY,true,,vessel-prefix,Cascade Screening authored pairs (paires-entites-2.json),0.8550,0.8550
+cascade_entities,Company,Kipkorir Cereals Ltd,Kipkorrir Cereals Ltd,true,,doubled-letter,Cascade Screening authored pairs (paires-entites-15.json),0.8240,0.8240
+cascade_entities,Company,Shabbir Cotton Waste Traders,Shabir Cotton Waste Traders,true,,doubled-letter,Cascade Screening authored pairs (paires-entites-15.json),0.8391,0.8391
+cascade_entities,Company,Amani Bora Enterprisses Ltd,Amani Bora Enterprises Ltd,true,,doubled-letter,Cascade Screening authored pairs (paires-entites-15.json),0.8404,0.8404
+cascade_entities,Company,Comercio de Graos Rossetti,Comercioo de Graos Rossetti,true,,doubled-letter,Cascade Screening authored pairs (paires-entites-16.json),0.8365,0.8365
+cascade_entities,Company,Shamji Hardware Ltd,Shamjee Hardware Ltd,true,,romanisation-variant,Cascade Screening authored pairs (paires-entites-15.json),0.5224,0.5224
+cascade_entities,Company,Haji Abdalla & Sons Ltd,Haji Abdulla and Sons Limited,true,,romanisation-variant,Cascade Screening authored pairs (paires-entites-15.json),0.5668,0.5668
+cascade_entities,Company,Husain Brothers Industries,Hussain Brothers Industries,true,,romanisation-variant,Cascade Screening authored pairs (paires-entites-15.json),0.8380,0.8380
+cascade_entities,Company,Qureshi Leather Works (Pvt) Ltd,Quraishi Leather Works (Pvt) Ltd,true,,romanisation-variant,Cascade Screening authored pairs (paires-entites-15.json),0.8140,0.8140
+cascade_entities,Company,Harrowvane International Freight Services,Harrowvane Intl Freight Svcs,true,,abbreviation,Cascade Screening authored pairs (paires-entites-2.json),0.5474,0.5474
+cascade_entities,Company,Delancourt Brothers Manufacturing Co.,Delancourt Bros. Mfg. Co.,true,,abbreviation,Cascade Screening authored pairs (paires-entites-2.json),0.4538,0.4538
+cascade_entities,Company,Fendrake & Mollory Logistics,Fendrake and Mollory Logistics,true,,abbreviation,Cascade Screening authored pairs (paires-entites-2.json),0.8408,0.8408
+cascade_entities,Company,Vassendra Property Management Associates,Vassendra Property Mgmt. Assoc.,true,,abbreviation,Cascade Screening authored pairs (paires-entites-2.json),0.5789,0.5789
+cascade_entities,Company,"Dongguan Fengtai Plastic Products Co., Ltd.",Dongguan Fengtai Plastic Products Company Limited,true,,legal-form-spelled-out,Cascade Screening authored pairs (paires-entites-5.json),0.6136,0.6136
+cascade_entities,Company,Northgate Valve Supply Corp.,Northgate Valve Supply Corporation,true,,legal-form-spelled-out,Cascade Screening authored pairs (paires-entites-5.json),0.7865,0.7865
+cascade_entities,Company,Tamarind Bay Seafood Co.,Tamarind Bay Seafood Company,true,,legal-form-spelled-out,Cascade Screening authored pairs (paires-entites-5.json),0.7928,0.7928
+cascade_entities,Company,Marlow Down Textiles PLC,Marlow Down Textiles Public Limited Company,true,,legal-form-spelled-out,Cascade Screening authored pairs (paires-entites-5.json),0.5181,0.5181
+cascade_entities,Company,Tagumpay Agri Supplies Corp.,TAGUMPAY AGRI SUPPLIES CORPORATION,true,,registry-written-out,Cascade Screening authored pairs (paires-entites-9.json),0.7865,0.7865
+cascade_entities,Company,PT Sinar Kenari Abadi,PERSEROAN TERBATAS SINAR KENARI ABADI,true,,registry-written-out,Cascade Screening authored pairs (paires-entites-9.json),0.5599,0.5599
+cascade_entities,Company,CV Cahaya Bintang Timur Jaya,Commanditaire Vennootschap Cahaya Bintang Timur Jaya,true,,registry-written-out,Cascade Screening authored pairs (paires-entites-9.json),0.6018,0.6018
+cascade_entities,Company,Harum Manis Bakery Supplies Sdn. Bhd.,HARUM MANIS BAKERY SUPPLIES SENDIRIAN BERHAD,true,,registry-written-out,Cascade Screening authored pairs (paires-entites-9.json),0.5912,0.5912
+cascade_entities,Company,Ramesh Kumar Sharma Pvt. Ltd.,Ramesh Kumar Sharma Private Limited,true,,suffix-abbreviation,Cascade Screening authored pairs (paires-entites-13.json),0.5905,0.5905
+cascade_entities,Company,Deccan Agro Traders Pvt. Ltd.,Deccan Agro Traders Private Limited,true,,suffix-abbreviation,Cascade Screening authored pairs (paires-entites-13.json),0.5905,0.5905
+cascade_entities,Company,Konkan Spice Exports Pvt. Ltd.,Konkan Spice Exports Private Limited,true,,suffix-abbreviation,Cascade Screening authored pairs (paires-entites-13.json),0.5940,0.5940
+cascade_entities,Company,Whitfield Mining Pty Ltd,Whitfield Mining Pty. Limited,true,,suffix-abbreviation,Cascade Screening authored pairs (paires-entites-13.json),0.7984,0.7984
+cascade_entities,Company,Patel-Desai Traders,Patel Desai Traders,true,,punctuation-spacing,Cascade Screening authored pairs (paires-entites-13.json),0.8550,0.8550
+cascade_entities,Company,N.K. Bansal & Co.,N K Bansal and Co,true,,punctuation-spacing,Cascade Screening authored pairs (paires-entites-13.json),0.7744,0.7744
+cascade_entities,Company,O'Doyle Grazing Co Pty Ltd,O Doyle Grazing Co Pty Ltd,true,,punctuation-spacing,Cascade Screening authored pairs (paires-entites-13.json),0.8550,0.8550
+cascade_entities,Company,Wirralong Downs Pty Ltd,Wirra-long Downs Pty Ltd,true,,punctuation-spacing,Cascade Screening authored pairs (paires-entites-13.json),0.5845,0.5845
+cascade_entities,Company,F.lli Pittino S.n.c. di Pittino Aldo e Bruno,Fratelli Pittino S.n.c. di Pittino Aldo e Bruno,true,,abbreviation-expanded,Cascade Screening authored pairs (paires-entites-18.json),0.7742,0.7742
+cascade_entities,Company,Comm. Bront Silvano S.a.s.,Commendator Bront Silvano S.a.s.,true,,abbreviation-expanded,Cascade Screening authored pairs (paires-entites-18.json),0.6139,0.6139
+cascade_entities,Company,Qualizza Impianti Termoidraulici S.a.s. di Qualizza R.,Qualizza Impianti Termoidraulici S.a.s. di Qualizza Renzo,true,,abbreviation-expanded,Cascade Screening authored pairs (paires-entites-18.json),0.8311,0.8311
+cascade_entities,Company,Tisza Kereskedelmi Kft.,Tisza Kereskedelmi Korlátolt Felelősségű Társaság,true,,abbreviation-expanded,Cascade Screening authored pairs (paires-entites-18.json),0.5577,0.5577
+cascade_entities,Vessel,M/V MZIURI (Batumi),მზიური,true,,vessel-script,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities,Vessel,MT KHOBI LADY,ხობი ლედი,true,,vessel-script,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities,Vessel,GURIA SPIRIT,გურია სპირიტი,true,,vessel-script,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities,Vessel,KINNERET DAWN,כנרת דון,true,,vessel-script,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities,Vessel,KAPITAN ZAVYALOV,KAPITAN ZAVJALOV,true,,vessel-transliteration,Cascade Screening authored pairs (paires-entites-12.json),0.8284,0.8284
+cascade_entities,Vessel,MEKHANIK KHARITONOV,MEHANIK HARITONOV,true,,vessel-transliteration,Cascade Screening authored pairs (paires-entites-12.json),0.3680,0.3680
+cascade_entities,Vessel,KERCHENSKIY PROLIV-3,KERCHENSKY PROLIV 3,true,,vessel-transliteration,Cascade Screening authored pairs (paires-entites-12.json),0.7183,0.7183
+cascade_entities,Vessel,GENERAL KHOTINTSEV,GENERAL HOTINCEV,true,,vessel-transliteration,Cascade Screening authored pairs (paires-entites-12.json),0.3864,0.3864
+cascade_entities,Company,Shaltiel Hovalot Ltd,Shaltiel Transport Limited,true,,translation,Cascade Screening authored pairs (paires-entites-21.json),0.3514,0.3514
+cascade_entities,Company,Chobanyan Kat LLC,Chobanyan Milk LLC,true,,translation,Cascade Screening authored pairs (paires-entites-21.json),0.5852,0.5852
+cascade_entities,Company,Gyumri Metagh LLC,Gyumri Metal LLC,true,,translation,Cascade Screening authored pairs (paires-entites-21.json),0.8059,0.8059
+cascade_entities,Company,Tsiklauri Gvino LLC,Tsiklauri Wine LLC,true,,translation,Cascade Screening authored pairs (paires-entites-21.json),0.5448,0.5448
+cascade_entities,Company,PrAT Zhytomyrskyi Kakhelnyi Zavod,ChAO Zhitomirskiy Kafelnyi Zavod,true,,russian-based-spelling,Cascade Screening authored pairs (paires-entites-23.json),0.5028,0.5028
+cascade_entities,Company,ФОП Мороз Василь Іванович,FOP Moroz Vasilii Ivanovich,true,,russian-based-spelling,Cascade Screening authored pairs (paires-entites-23.json),0.0000,0.0000
+cascade_entities,Company,ТОВ «Бриз Одеса»,Briz Odessa LLC,true,,russian-based-spelling,Cascade Screening authored pairs (paires-entites-23.json),0.0000,0.0000
+cascade_entities,Company,ІП Уладзімір Жаўнерчык,IP Vladimir Zhovnerchik,true,,russian-based-spelling,Cascade Screening authored pairs (paires-entites-23.json),0.0000,0.0000
+cascade_entities,Company,沧澜远洋航运有限公司,"Canglan Ocean Shipping Co., Ltd.",true,,native-vs-english,Cascade Screening authored pairs (paires-entites-8.json),0.0000,0.0000
+cascade_entities,Company,雾山精密机械股份有限公司,"Wushan Precision Machinery Co., Ltd.",true,,native-vs-english,Cascade Screening authored pairs (paires-entites-8.json),0.0000,0.0000
+cascade_entities,Company,株式会社霜月水産,"Shimotsuki Suisan Co., Ltd.",true,,native-vs-english,Cascade Screening authored pairs (paires-entites-8.json),0.0000,0.0000
+cascade_entities,Company,새벽별물류 주식회사,"Saebyeokbyeol Logistics Co., Ltd.",true,,native-vs-english,Cascade Screening authored pairs (paires-entites-8.json),0.0000,0.0000
+cascade_entities,Company,SHIPPER: TRANSPORTES REFRIGERADOS DEL SURESTE SA DE CV,"Transportes Refrigerados del Sureste, S.A. de C.V.",true,,residue-party-label,Cascade Screening authored pairs (paires-entites-11.json),0.7697,0.7697
+cascade_entities,Company,BENEFICIARY: Sarıkaya Hububat Ltd. Şti.,Sarikaya Hububat Ltd Sti,true,,residue-party-label,Cascade Screening authored pairs (paires-entites-12.json),0.5206,0.5206
+cascade_entities,Company,ORDERING CUSTOMER: KALLIOSAARI TRADING OY,Kalliosaari Trading Oy,true,,residue-party-label,Cascade Screening authored pairs (paires-entites-12.json),0.5143,0.5143
+cascade_entities,Company,MESSRS. BALTIC TIMBERLINE OU,Baltic Timberline OÜ,true,,residue-party-label,Cascade Screening authored pairs (paires-entites-12.json),0.5760,0.5760
+cascade_entities,Company,Ranjit Cotton Traders Pvt. Ltd.,RANJIT COTTON TRADERS PVT LTD,true,,uppercase-export,Cascade Screening authored pairs (paires-entites-13.json),0.8550,0.8550
+cascade_entities,Company,Blackwood Cattle Co Pty Ltd,FIELD 59: BLACKWOOD CATTLE CO PTY LTD,true,,uppercase-export,Cascade Screening authored pairs (paires-entites-13.json),0.8251,0.8251
+cascade_entities,Company,Deshpande Textiles Pvt. Ltd.,DESHPANDE TEXTILES PVT LTD,true,,uppercase-export,Cascade Screening authored pairs (paires-entites-13.json),0.8550,0.8550
+cascade_entities,Company,Chopra Bros. Enterprises,CHOPRA BROS ENTERPRISES,true,,uppercase-export,Cascade Screening authored pairs (paires-entites-13.json),0.8550,0.8550
+cascade_entities,Company,GIE Femmes de Korhogo,G.I.E. Femmes de Korhogo,true,,case-punctuation-spacing,Cascade Screening authored pairs (paires-entites-16.json),0.8058,0.8058
+cascade_entities,Company,SARL Traoré Commerce,SARL TRAORE COMMERCE,true,,case-punctuation-spacing,Cascade Screening authored pairs (paires-entites-16.json),0.8550,0.8550
+cascade_entities,Company,Groupe Diarra Import-Export,Groupe Diarra Import Export,true,,case-punctuation-spacing,Cascade Screening authored pairs (paires-entites-16.json),0.8550,0.8550
+cascade_entities,Company,SUARL Keita Distribution,Keita Distribution SUARL,true,,case-punctuation-spacing,Cascade Screening authored pairs (paires-entites-16.json),0.8550,0.8550
+cascade_entities,Company,"שאלתיאל הובלות בע""מ",Shaltiel Hovalot Ltd,true,,script,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities,Company,«Ծատուրյան Շին» ՍՊԸ,Tsaturyan Shin LLC,true,,script,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities,Company,შპს კვინიკაძე მეტალი,Kvinikadze Metali LLC,true,,script,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities,Company,«Ջանոյան Էքսպրես» ՍՊԸ,Janoyan Express LLC,true,,script,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities,Company,ရွှေပုလဲ ကုန်သွယ်ရေး ကုမ္ပဏီလီမိတက်,"Shwe Pale Trading Co., Ltd.",true,,burmese-script-vs-latin,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities,Company,ရတနာမင်္ဂလာ ပို့ဆောင်ရေး ကုမ္ပဏီလီမိတက်,"Yadanar Mingalar Logistics Co., Ltd.",true,,burmese-script-vs-latin,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities,Company,အောင်ကြယ် ဆန်စက် ကုမ္ပဏီလီမိတက်,"Aung Kyal Rice Mill Co., Ltd.",true,,burmese-script-vs-latin,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities,Company,ဦးကျော်ဇော်ထွန်း ကုန်သွယ်ရေး,U Kyaw Zaw Htun Trading,true,,burmese-script-vs-latin,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities,Vessel,"MV SIAM ORCHID 7, Bangkok",SIAM ORCHID 7,true,,vessel-prefix-and-port,Cascade Screening authored pairs (paires-entites-22.json),0.4966,0.4966
+cascade_entities,Vessel,M.T. THONG NAWA 3 (Laem Chabang),THONG NAWA NO.3,true,,vessel-prefix-and-port,Cascade Screening authored pairs (paires-entites-22.json),0.4416,0.4416
+cascade_entities,Vessel,"T/B CHAO LE 8, Sihanoukville",CHAO LE NO. 8,true,,vessel-prefix-and-port,Cascade Screening authored pairs (paires-entites-22.json),0.4864,0.4864
+cascade_entities,Vessel,"MT GOLDEN KINNAREE, Laem Chabang",GOLDEN KINNAREE,true,,vessel-prefix-and-port,Cascade Screening authored pairs (paires-entites-22.json),0.4917,0.4917
+cascade_entities,Company,Zakłady Mięsne Wiśniewski Sp. z o.o. S.K.A.,Zaklady Miesne Wisniewski spolka z ograniczona odpowiedzialnoscia spolka komandytowo-akcyjna,true,,legal-form-spelt-out,Cascade Screening authored pairs (paires-entites-23.json),0.5236,0.5236
+cascade_entities,Company,Łączyńska Wytwórnia Łodzi Sp. j.,LACZYNSKA WYTWORNIA LODZI SPOLKA JAWNA,true,,legal-form-spelt-out,Cascade Screening authored pairs (paires-entites-23.json),0.3762,0.3762
+cascade_entities,Company,Spedycja Wisłoujście Sp. z o.o. Sp. k.,Spedycja Wisloujscie spolka z ograniczona odpowiedzialnoscia spolka komandytowa,true,,legal-form-spelt-out,Cascade Screening authored pairs (paires-entites-23.json),0.5351,0.5351
+cascade_entities,Company,Bursztynowa Przystań Sp. z o.o.,BURSZTYNOWA PRZYSTAN SPOLKA Z OGRANICZONA ODPOWIEDZIALNOSCIA,true,,legal-form-spelt-out,Cascade Screening authored pairs (paires-entites-23.json),0.5616,0.5616
+cascade_entities,Company,EtsKoffietFreres,Ets Koffi et Freres,true,,missing-space,Cascade Screening authored pairs (paires-entites-16.json),0.5202,0.5202
+cascade_entities,Company,Ets Diallo,EtsDiallo,true,,missing-space,Cascade Screening authored pairs (paires-entites-16.json),0.8550,0.8550
+cascade_entities,Company,GroupeDiarraImportExport,Groupe Diarra Import Export,true,,missing-space,Cascade Screening authored pairs (paires-entites-16.json),0.4473,0.4473
+cascade_entities,Company,Ets Sanogo et Traoré,EtsSanogoetTraore,true,,missing-space,Cascade Screening authored pairs (paires-entites-16.json),0.3869,0.3869
+cascade_entities,Company,Fabjan Prevozi d.o.o.,Fabjan Prevozi d. o. o.,true,,punctuation-spacing-legal-form,Cascade Screening authored pairs (paires-entites-18.json),0.8550,0.8550
+cascade_entities,Company,Rupnik Transport in Logistika d.o.o.,"Rupnik Transport in Logistika, d. o. o.",true,,punctuation-spacing-legal-form,Cascade Screening authored pairs (paires-entites-18.json),0.8550,0.8550
+cascade_entities,Company,Impresa Cecotti & Bront S.n.c.,Impresa Cecotti e Bront S.n.c.,true,,punctuation-spacing-legal-form,Cascade Screening authored pairs (paires-entites-18.json),0.8494,0.8494
+cascade_entities,Company,Jadran Brodogradnja d.d.,"Jadran Brodogradnja, d. d.",true,,punctuation-spacing-legal-form,Cascade Screening authored pairs (paires-entites-18.json),0.8550,0.8550
