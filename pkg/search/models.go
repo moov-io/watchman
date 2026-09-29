@@ -392,6 +392,9 @@ func prepareEntityName(name string, typ EntityType) string {
 	if typ == EntityVessel {
 		out = prepare.StripVesselNamePrefixes(out)
 	}
+	if typ == EntityBusiness || typ == EntityOrganization {
+		out = prepare.CanonicalizeEnglishLegalForms(out)
+	}
 	return out
 }
 
