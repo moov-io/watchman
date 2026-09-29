@@ -376,6 +376,9 @@ func normalizeNames(altNames []string, typ EntityType) []string {
 }
 
 func prepareEntityName(name string, typ EntityType) string {
+	if typ == EntityVessel {
+		name = prepare.StripTrailingVesselPlace(name)
+	}
 	out := prepare.LowerAndRemovePunctuation(name)
 	if typ == EntityVessel {
 		out = prepare.StripVesselNamePrefixes(out)
