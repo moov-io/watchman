@@ -137,8 +137,8 @@ func TestEntity_Normalize(t *testing.T) {
 					AltNames: []string{"Acme Industries", "ACME Holdings"},
 				},
 				PreparedFields: PreparedFields{
-					Name:       "acme corporation",
-					NameFields: []string{"acme", "corporation"},
+					Name:       "acme corp",
+					NameFields: []string{"acme", "corp"},
 					AltNames:   []string{"acme industries", "acme holdings"},
 					AltNameFields: [][]string{
 						{"acme", "industries"},
@@ -199,6 +199,27 @@ func TestEntity_Normalize(t *testing.T) {
 					AltNameFields: [][]string{
 						{"solenne", "harbour"},
 					},
+				},
+			},
+		},
+		{
+			name: "english legal-form expansions canonicalized on businesses",
+			input: Entity[Value]{
+				Name: "Harrowfield Bearings Limited",
+				Type: EntityBusiness,
+				Business: &Business{
+					Name: "Harrowfield Bearings Limited",
+				},
+			},
+			expected: Entity[Value]{
+				Name: "Harrowfield Bearings Limited",
+				Type: "business",
+				Business: &Business{
+					Name: "Harrowfield Bearings Limited",
+				},
+				PreparedFields: PreparedFields{
+					Name:       "harrowfield bearings ltd",
+					NameFields: []string{"harrowfield", "bearings", "ltd"},
 				},
 			},
 		},

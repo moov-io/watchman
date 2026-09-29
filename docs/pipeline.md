@@ -41,8 +41,9 @@ A query is **not** reordered or suffix-stripped. You can search `Nicolas Maduro`
 3. Trim, lowercase, turn `.` `,` `-` and other punctuation/symbols into spaces.
 4. Unicode NFD → strip combining marks → NFC, so `Raúl` and `raul` match.
 5. For **vessels**, drop a trailing port or place (`MV SIAM ORCHID 7, Bangkok` → `MV SIAM ORCHID 7`; a final `(Laem Chabang)` is dropped), then drop leading ship-type markers (`MV`, `M/V`, `M/T`, `SS`, `N/M`, `T/B`, and the same after punctuation becomes spaces). `MV Solenne Harbour` and `Solenne Harbour` compare as the same prepared name.
-6. Split on whitespace into tokens.
-7. Drop **stopwords** (`of`, `the`, `and`, and the same idea in other languages). Language is guessed from the name. Numeric tokens (`11420`) are kept. Set `KEEP_STOPWORDS=true` to skip this step.
+6. For **businesses and organizations**, rewrite English legal-form phrases to the short token (`incorporated` → `inc`, `limited` → `ltd`, `limited liability company` → `llc`, `public limited company` → `plc`, `corporation` → `corp`, `company` → `co`). `Harrowfield Bearings Limited` and `HARROWFIELD BEARINGS LTD.` compare as the same prepared name. Jurisdiction-specific forms (`GmbH`, `Sdn. Bhd.`) are left as they are.
+7. Split on whitespace into tokens.
+8. Drop **stopwords** (`of`, `the`, `and`, and the same idea in other languages). Language is guessed from the name. Numeric tokens (`11420`) are kept. Set `KEEP_STOPWORDS=true` to skip this step.
 
 The same steps run on the primary name, aliases, and former names (`HistoricalInfo` of type `Former Name`).
 
@@ -71,7 +72,7 @@ Query IDs are `gov_<type>=COUNTRY:IDENTIFIER` (for example `gov_passport=IR:Y539
 - Case, accents, and punctuation do not need to match the list file: `José` and `jose` compare as the same letters.
 - Common words can be omitted: `Bank of America` and `Bank America`.
 - For **OFAC people**, list names in `SURNAME, Given` order are stored as `Given SURNAME`, so a natural-order query works.
-- For **OFAC companies**, `Inc.` / `LLC` on the list name is stripped at ingest. A query of `Acme Inc` still has `inc` as a token unless you omit it; it is a weak token, not a blocker.
+- For **OFAC companies**, `Inc.` / `LLC` on the list name is stripped at ingest. A query of `Acme Inc` still has `inc` as a token unless you omit it; it is a weak token, not a blocker. English legal-form expansions on the query (`Incorporated`, `Limited`) are rewritten to the same short tokens as `Inc.` / `Ltd.` during `Normalize()`.
 - Send IDs and dates when you have them. Preparation does not invent them.
 
 ## Debugging

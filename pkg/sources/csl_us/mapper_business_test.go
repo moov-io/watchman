@@ -39,9 +39,9 @@ func TestMapBusiness_Sinobright(t *testing.T) {
 	require.ElementsMatch(t, expected, entity.SanctionsInfo.Programs)
 
 	// Prepared fields
-	require.Equal(t, "sinobright import and export company", entity.PreparedFields.Name)
+	require.Equal(t, "sinobright import and export co", entity.PreparedFields.Name)
 
-	expected = []string{"sinobright", "import", "export", "company"}
+	expected = []string{"sinobright", "import", "export"}
 	require.ElementsMatch(t, expected, entity.PreparedFields.NameFields)
 
 	// Source data
@@ -101,9 +101,9 @@ func TestMapBusiness_ChinaElectronicsTechnologyGroup(t *testing.T) {
 	require.Empty(t, entity.SanctionsInfo.Programs)
 
 	// Prepared fields
-	require.Equal(t, "china electronics technology group corporation 13th research institute", entity.PreparedFields.Name)
+	require.Equal(t, "china electronics technology group corp 13th research institute", entity.PreparedFields.Name)
 
-	expected = []string{"china", "electronics", "technology", "group", "corporation", "13th", "research", "institute"}
+	expected = []string{"china", "electronics", "technology", "group", "corp", "13th", "research", "institute"}
 	require.ElementsMatch(t, expected, entity.PreparedFields.NameFields)
 
 	// Source data

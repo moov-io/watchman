@@ -23,6 +23,7 @@ Each scoring change rewrites `score` and the summary table. `baseline` stays at 
 | strip leading SHIPPER:/BENEFICIARY:/MESSRS./FIELD 59: | 0.5784 | 0.6296 |
 | treat (ex-Name) as a former name on the query and the list | 0.5919 | 0.6296 |
 | penalize disagreeing name numerals (digit, roman, spelled) | 0.5919 | 0.6124 |
+| canonicalize English legal-form phrases (`Limited`→`ltd`, …) | 0.6149 | 0.6123 |
 
 Rewrite `score` (and fill `baseline` when empty) with:
 
@@ -36,15 +37,15 @@ Recorded `Similarity` on 300 name-only pairs (schema → Watchman type).
 
 | Slice | N | Matches | Mean score | Mean baseline | Mean delta | Min | Max |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| all | 300 | 140 | 0.6028 | 0.5950 | +0.0078 | 0.0000 | 0.8550 |
-| is_match=true | 140 | 140 | 0.5919 | 0.5574 | +0.0345 | 0.0000 | 0.8550 |
-| is_match=false | 160 | 0 | 0.6124 | 0.6279 | -0.0155 | 0.0000 | 0.8451 |
+| all | 300 | 140 | 0.6135 | 0.5950 | +0.0185 | 0.0000 | 0.8550 |
+| is_match=true | 140 | 140 | 0.6149 | 0.5574 | +0.0575 | 0.0000 | 0.8550 |
+| is_match=false | 160 | 0 | 0.6123 | 0.6279 | -0.0155 | 0.0000 | 0.8451 |
 | abbreviation | 4 | 4 | 0.6052 | 0.6052 | +0.0000 | 0.4538 | 0.8408 |
 | abbreviation-expanded | 4 | 4 | 0.6942 | 0.6942 | +0.0000 | 0.5577 | 0.8311 |
 | accent-diacritic-dropped | 4 | 4 | 0.8394 | 0.8394 | +0.0000 | 0.7927 | 0.8550 |
 | accent-variant | 4 | 4 | 0.8550 | 0.8550 | +0.0000 | 0.8550 | 0.8550 |
 | annotation | 4 | 4 | 0.5077 | 0.3994 | +0.1083 | 0.3597 | 0.7837 |
-| branch-same-entity | 4 | 4 | 0.6003 | 0.6003 | +0.0000 | 0.5040 | 0.8060 |
+| branch-same-entity | 4 | 4 | 0.6165 | 0.6003 | +0.0162 | 0.5332 | 0.8060 |
 | burmese-script-vs-latin | 4 | 4 | 0.0000 | 0.0000 | +0.0000 | 0.0000 | 0.0000 |
 | case-punctuation-spacing | 4 | 4 | 0.8427 | 0.8427 | +0.0000 | 0.8058 | 0.8550 |
 | different-business-sector-word | 4 | 0 | 0.5002 | 0.5002 | +0.0000 | 0.4032 | 0.5664 |
@@ -63,14 +64,14 @@ Recorded `Similarity` on 300 name-only pairs (schema → Watchman type).
 | generic-words-only | 4 | 0 | 0.5664 | 0.5664 | +0.0000 | 0.5450 | 0.5942 |
 | holding-vs-operating | 4 | 0 | 0.4746 | 0.4746 | +0.0000 | 0.0000 | 0.8219 |
 | homophone | 4 | 0 | 0.7140 | 0.7140 | +0.0000 | 0.3676 | 0.8333 |
-| legal-form-abbreviated | 4 | 4 | 0.5712 | 0.5712 | +0.0000 | 0.4808 | 0.6142 |
-| legal-form-spelled-out | 4 | 4 | 0.6777 | 0.6777 | +0.0000 | 0.5181 | 0.7928 |
+| legal-form-abbreviated | 4 | 4 | 0.8550 | 0.5712 | +0.2838 | 0.8550 | 0.8550 |
+| legal-form-spelled-out | 4 | 4 | 0.8550 | 0.6777 | +0.1772 | 0.8550 | 0.8550 |
 | legal-form-spelt-out | 4 | 4 | 0.4991 | 0.4991 | +0.0000 | 0.3762 | 0.5616 |
-| legal-form-translated | 4 | 4 | 0.7500 | 0.7500 | +0.0000 | 0.6079 | 0.8310 |
+| legal-form-translated | 4 | 4 | 0.7980 | 0.7500 | +0.0479 | 0.7798 | 0.8310 |
 | missing-space | 4 | 4 | 0.5524 | 0.5524 | +0.0000 | 0.3869 | 0.8550 |
 | native-vs-english | 4 | 4 | 0.0000 | 0.0000 | +0.0000 | 0.0000 | 0.0000 |
 | near-string | 4 | 0 | 0.7090 | 0.7090 | +0.0000 | 0.5742 | 0.8384 |
-| near-string-real-words | 4 | 0 | 0.7108 | 0.7108 | +0.0000 | 0.5688 | 0.8415 |
+| near-string-real-words | 4 | 0 | 0.7091 | 0.7108 | -0.0017 | 0.5688 | 0.8415 |
 | numbered-spv | 4 | 0 | 0.5929 | 0.8470 | -0.2541 | 0.5871 | 0.5985 |
 | numeral-changed | 4 | 0 | 0.5733 | 0.8189 | -0.2457 | 0.5652 | 0.5786 |
 | one-word-sibling | 4 | 0 | 0.5922 | 0.5922 | +0.0000 | 0.4954 | 0.8112 |
@@ -85,10 +86,10 @@ Recorded `Similarity` on 300 name-only pairs (schema → Watchman type).
 | port-of-registry-appended | 4 | 4 | 0.8550 | 0.7304 | +0.1246 | 0.8550 | 0.8550 |
 | punctuation-spacing | 4 | 4 | 0.7672 | 0.7672 | +0.0000 | 0.5845 | 0.8550 |
 | punctuation-spacing-legal-form | 4 | 4 | 0.8536 | 0.8536 | +0.0000 | 0.8494 | 0.8550 |
-| registry-written-out | 4 | 4 | 0.6348 | 0.6348 | +0.0000 | 0.5599 | 0.7865 |
+| registry-written-out | 4 | 4 | 0.6520 | 0.6348 | +0.0171 | 0.5599 | 0.8550 |
 | residue-party-label | 4 | 4 | 0.8444 | 0.5951 | +0.2492 | 0.8173 | 0.8550 |
-| romanisation | 4 | 4 | 0.8137 | 0.8137 | +0.0000 | 0.7956 | 0.8415 |
-| romanisation-variant | 4 | 4 | 0.6853 | 0.6853 | +0.0000 | 0.5224 | 0.8380 |
+| romanisation | 4 | 4 | 0.8183 | 0.8137 | +0.0046 | 0.7980 | 0.8415 |
+| romanisation-variant | 4 | 4 | 0.7473 | 0.6853 | +0.0620 | 0.5224 | 0.8380 |
 | russian-based-spelling | 4 | 4 | 0.1257 | 0.1257 | +0.0000 | 0.0000 | 0.5028 |
 | same-name-other-jurisdiction | 4 | 0 | 0.6864 | 0.6864 | +0.0000 | 0.5972 | 0.7785 |
 | same-word-unrelated-business | 4 | 0 | 0.3951 | 0.3951 | +0.0000 | 0.2766 | 0.5071 |
@@ -98,8 +99,8 @@ Recorded `Similarity` on 300 name-only pairs (schema → Watchman type).
 | sister-ship | 4 | 0 | 0.5223 | 0.5593 | -0.0370 | 0.3648 | 0.6035 |
 | subsidiary-by-activity | 4 | 0 | 0.4873 | 0.4873 | +0.0000 | 0.3933 | 0.5456 |
 | subsidiary-by-country | 4 | 0 | 0.5706 | 0.5706 | +0.0000 | 0.5128 | 0.5984 |
-| suffix-abbreviation | 4 | 4 | 0.6433 | 0.6433 | +0.0000 | 0.5905 | 0.7984 |
-| translation | 4 | 4 | 0.5718 | 0.5718 | +0.0000 | 0.3514 | 0.8059 |
+| suffix-abbreviation | 4 | 4 | 0.7966 | 0.6433 | +0.1533 | 0.7762 | 0.8550 |
+| translation | 4 | 4 | 0.6113 | 0.5718 | +0.0395 | 0.5093 | 0.8059 |
 | transliteration | 4 | 4 | 0.6133 | 0.6133 | +0.0000 | 0.3716 | 0.8143 |
 | two-words-differ | 4 | 0 | 0.5112 | 0.5112 | +0.0000 | 0.3872 | 0.5810 |
 | uppercase-export | 4 | 4 | 0.8550 | 0.8475 | +0.0075 | 0.8550 | 0.8550 |
@@ -113,6 +114,6 @@ Recorded `Similarity` on 300 name-only pairs (schema → Watchman type).
 | vessel-transliteration | 4 | 4 | 0.5753 | 0.5753 | +0.0000 | 0.3680 | 0.8284 |
 | vessel-vs-manager | 4 | 0 | 0.5151 | 0.4872 | +0.0278 | 0.4841 | 0.5388 |
 | vessel-vs-owner | 4 | 0 | 0.6717 | 0.6032 | +0.0684 | 0.5055 | 0.8007 |
-| word-abbreviation | 4 | 4 | 0.5779 | 0.5779 | +0.0000 | 0.5622 | 0.6064 |
+| word-abbreviation | 4 | 4 | 0.5810 | 0.5779 | +0.0031 | 0.5678 | 0.6064 |
 
 <!-- /cascade-score-summary -->
