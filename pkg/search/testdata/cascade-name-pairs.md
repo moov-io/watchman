@@ -18,6 +18,7 @@ Each scoring change rewrites `score` and the summary table. `baseline` stays at 
 | Step | Match mean | Non-match mean |
 |---|---:|---:|
 | baseline | 0.5574 | 0.6279 |
+| strip vessel prefixes (`MV`, `M/T`, `SS`, …) | 0.5574 | 0.6296 |
 
 Rewrite `score` (and fill `baseline` when empty) with:
 
@@ -31,9 +32,9 @@ Recorded `Similarity` on 300 name-only pairs (schema → Watchman type).
 
 | Slice | N | Matches | Mean score | Mean baseline | Mean delta | Min | Max |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| all | 300 | 140 | 0.5950 | 0.5950 | +0.0000 | 0.0000 | 0.8550 |
-| is_match=true | 140 | 140 | 0.5574 | 0.5574 | +0.0000 | 0.0000 | 0.8550 |
-| is_match=false | 160 | 0 | 0.6279 | 0.6279 | +0.0000 | 0.0000 | 0.8550 |
+| all | 300 | 140 | 0.5959 | 0.5950 | +0.0009 | 0.0000 | 0.8550 |
+| is_match=true | 140 | 140 | 0.5574 | 0.5574 | -0.0001 | 0.0000 | 0.8550 |
+| is_match=false | 160 | 0 | 0.6296 | 0.6279 | +0.0017 | 0.0000 | 0.8550 |
 | abbreviation | 4 | 4 | 0.6052 | 0.6052 | +0.0000 | 0.4538 | 0.8408 |
 | abbreviation-expanded | 4 | 4 | 0.6942 | 0.6942 | +0.0000 | 0.5577 | 0.8311 |
 | accent-diacritic-dropped | 4 | 4 | 0.8394 | 0.8394 | +0.0000 | 0.7927 | 0.8550 |
@@ -77,7 +78,7 @@ Recorded `Similarity` on 300 name-only pairs (schema → Watchman type).
 | other-surname | 4 | 0 | 0.8040 | 0.8040 | +0.0000 | 0.7800 | 0.8229 |
 | other-word | 4 | 0 | 0.6161 | 0.6161 | +0.0000 | 0.5177 | 0.8110 |
 | plural-vs-singular | 4 | 0 | 0.8379 | 0.8379 | +0.0000 | 0.8314 | 0.8451 |
-| port-of-registry-appended | 4 | 4 | 0.7304 | 0.7304 | +0.0000 | 0.5236 | 0.8200 |
+| port-of-registry-appended | 4 | 4 | 0.6640 | 0.7304 | -0.0664 | 0.4284 | 0.8165 |
 | punctuation-spacing | 4 | 4 | 0.7672 | 0.7672 | +0.0000 | 0.5845 | 0.8550 |
 | punctuation-spacing-legal-form | 4 | 4 | 0.8536 | 0.8536 | +0.0000 | 0.8494 | 0.8550 |
 | registry-written-out | 4 | 4 | 0.6348 | 0.6348 | +0.0000 | 0.5599 | 0.7865 |
@@ -90,7 +91,7 @@ Recorded `Similarity` on 300 name-only pairs (schema → Watchman type).
 | script | 4 | 4 | 0.0000 | 0.0000 | +0.0000 | 0.0000 | 0.0000 |
 | script-translation | 4 | 4 | 0.0000 | 0.0000 | +0.0000 | 0.0000 | 0.0000 |
 | sibling-one-word | 4 | 0 | 0.6140 | 0.6140 | +0.0000 | 0.5226 | 0.8112 |
-| sister-ship | 4 | 0 | 0.5593 | 0.5593 | +0.0000 | 0.4992 | 0.6035 |
+| sister-ship | 4 | 0 | 0.5223 | 0.5593 | -0.0370 | 0.3648 | 0.6035 |
 | subsidiary-by-activity | 4 | 0 | 0.4873 | 0.4873 | +0.0000 | 0.3933 | 0.5456 |
 | subsidiary-by-country | 4 | 0 | 0.5706 | 0.5706 | +0.0000 | 0.5128 | 0.5984 |
 | suffix-abbreviation | 4 | 4 | 0.6433 | 0.6433 | +0.0000 | 0.5905 | 0.7984 |
@@ -99,15 +100,15 @@ Recorded `Similarity` on 300 name-only pairs (schema → Watchman type).
 | two-words-differ | 4 | 0 | 0.5112 | 0.5112 | +0.0000 | 0.3872 | 0.5810 |
 | uppercase-export | 4 | 4 | 0.8475 | 0.8475 | +0.0000 | 0.8251 | 0.8550 |
 | vessel-numeral | 4 | 0 | 0.7899 | 0.7899 | +0.0000 | 0.6674 | 0.8336 |
-| vessel-other-word | 4 | 0 | 0.4959 | 0.4959 | +0.0000 | 0.0000 | 0.7981 |
+| vessel-other-word | 4 | 0 | 0.5045 | 0.4959 | +0.0086 | 0.0000 | 0.7981 |
 | vessel-plural | 4 | 0 | 0.7921 | 0.7921 | +0.0000 | 0.7772 | 0.8192 |
-| vessel-prefix | 4 | 4 | 0.8265 | 0.8265 | +0.0000 | 0.7980 | 0.8550 |
-| vessel-prefix-and-port | 4 | 4 | 0.4791 | 0.4791 | +0.0000 | 0.4416 | 0.4966 |
+| vessel-prefix | 4 | 4 | 0.8550 | 0.8265 | +0.0285 | 0.8550 | 0.8550 |
+| vessel-prefix-and-port | 4 | 4 | 0.5147 | 0.4791 | +0.0356 | 0.4861 | 0.5333 |
 | vessel-script | 4 | 4 | 0.0000 | 0.0000 | +0.0000 | 0.0000 | 0.0000 |
 | vessel-sister-ship | 4 | 0 | 0.5229 | 0.5229 | +0.0000 | 0.4412 | 0.5858 |
 | vessel-transliteration | 4 | 4 | 0.5753 | 0.5753 | +0.0000 | 0.3680 | 0.8284 |
-| vessel-vs-manager | 4 | 0 | 0.4872 | 0.4872 | +0.0000 | 0.3728 | 0.5388 |
-| vessel-vs-owner | 4 | 0 | 0.6032 | 0.6032 | +0.0000 | 0.4729 | 0.8007 |
+| vessel-vs-manager | 4 | 0 | 0.5151 | 0.4872 | +0.0278 | 0.4841 | 0.5388 |
+| vessel-vs-owner | 4 | 0 | 0.6717 | 0.6032 | +0.0684 | 0.5055 | 0.8007 |
 | word-abbreviation | 4 | 4 | 0.5779 | 0.5779 | +0.0000 | 0.5622 | 0.6064 |
 
 <!-- /cascade-score-summary -->

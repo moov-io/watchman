@@ -38,8 +38,9 @@ A query is **not** reordered or suffix-stripped. You can search `Nicolas Maduro`
 
 1. Trim, lowercase, turn `.` `,` `-` and other punctuation/symbols into spaces.
 2. Unicode NFD → strip combining marks → NFC, so `Raúl` and `raul` match.
-3. Split on whitespace into tokens.
-4. Drop **stopwords** (`of`, `the`, `and`, and the same idea in other languages). Language is guessed from the name. Numeric tokens (`11420`) are kept. Set `KEEP_STOPWORDS=true` to skip this step.
+3. For **vessels**, drop leading ship-type markers (`MV`, `M/V`, `M/T`, `SS`, `N/M`, `T/B`, and the same after punctuation becomes spaces). `MV Solenne Harbour` and `Solenne Harbour` compare as the same prepared name.
+4. Split on whitespace into tokens.
+5. Drop **stopwords** (`of`, `the`, `and`, and the same idea in other languages). Language is guessed from the name. Numeric tokens (`11420`) are kept. Set `KEEP_STOPWORDS=true` to skip this step.
 
 The same steps run on the primary name, aliases, and former names (`HistoricalInfo` of type `Former Name`).
 
