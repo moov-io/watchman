@@ -1,0 +1,186 @@
+case_group,schema,name1,name2,is_match,quality,category,notes,baseline,score
+cascade_entities_2,Company,צפרירים קירור ומיזוג בע״מ,Zafririm Kirur Umizug Ltd,true,,translit-convention,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,Yekhezkeli Shivuk Khomrei Gelem Ltd,"יחזקאלי שיווק חומרי גלם בע""מ",true,,translit-convention,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,קדמי תעשיות עץ בע״מ,Qadmi Taasiyot Etz Ltd,true,,translit-convention,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,כוכבי שחרית שירותי ניקיון בע״מ,Kokhvei Shaharit Sherutei Nikayon Ltd,true,,translit-convention,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,רוח קדים,RUAH QADIM,true,,translit-convention,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,גבעת הרקפות משתלות בע״מ,Givat Ha-Rakafot Mishtalot Ltd,true,,article-joined vs split,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,Emek Haarazim Earthworks Ltd,עמק הארזים עבודות עפר בע״מ,true,,article-joined vs split,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,צוקי הים שירותי צלילה בע״מ,Tsukei ha Yam Diving Services Ltd,true,,article-joined vs split,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,"אבני ברקת ריצוף בע""מ",Avnei Bareket Ritzuf B.M.,true,,legal-form,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,Nachshon Tziyud Refui Limited,נחשון ציוד רפואי בע״מ,true,,legal-form,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,"משק זכאי בע""מ",Meshek Zakai Co. Ltd,true,,legal-form,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,ברזילי תעשיות מתכת בע״מ,Barzilai Metal Industries Ltd,true,,translated-generic-word,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,Elmakayes Trading & Marketing Ltd.,"אלמקייס סחר ושיווק בע""מ",true,,translated-generic-word,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,שקמה ספנות והובלה ימית בע״מ,Shikma Shipping and Marine Transport Ltd,true,,translated-generic-word,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,Grinshpan Paper Products Ltd,גרינשפן מוצרי נייר בע״מ,true,,translated-generic-word,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,מנחם גולדפרב ובניו בע״מ,Goldfarb M. & Sons Ltd,true,,word-order or abbreviation found on documents,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,מ.ח.ק. מערכות חשמל ובקרה בע״מ,M.H.K. Electrical & Control Systems Ltd,true,,word-order or abbreviation found on documents,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,Nachum Marble Works Ltd,מפעלי שיש נחום בע״מ,true,,word-order or abbreviation found on documents,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,שחף הצפון,SHACHAF HATZAFON,true,,vessel-name-hebrew-vs-latin-caps,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,ALMOG ADOM,אלמוג אדום,true,,vessel-name-hebrew-vs-latin-caps,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,נחשול 3,NAHSHOL III,true,,vessel-name-hebrew-vs-latin-caps,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,KESHET BAANAN,קשת בענן,true,,vessel-name-hebrew-vs-latin-caps,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,אנפה לבנה,ANAFA LEVANA,true,,vessel-name-hebrew-vs-latin-caps,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,OGEN HAZAHAV,עוגן הזהב,true,,vessel-name-hebrew-vs-latin-caps,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,נטף הסעות בע״מ,Nataf Hashkaot Ltd,false,,cross-script-other-word,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,Eshel Mazon Ltd,אשל מיזוג אוויר בע״מ,false,,cross-script-other-word,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,Tchelet Metal Works Ltd,תכלת מתקני משחקים בע״מ,false,,cross-script-other-word,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,גפנים עבודות אלומיניום בע״מ,Gefanim Avodot Etz Ltd,false,,cross-script-other-word,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,עמרני זגגות קריית גת בע״מ,Amrani Glazing Kiryat Malachi Ltd,false,,cross-script-place,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,הדקל מסגרות יבנאל בע״מ,HaDekel Misgarot Yavne Ltd,false,,cross-script-place,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,Givon Printing Or Akiva Ltd,גבעון דפוס אור יהודה בע״מ,false,,cross-script-place,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,מאפיית אל-ואחה כפר קאסם בע״מ,Al-Waha Bakery Kafr Qara Ltd,false,,cross-script-place,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,צוריאל נכסים (2011) בע״מ,Tzuriel Nekhasim (2016) Ltd,false,,cross-script-numeral,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0738,0.0738
+cascade_entities_2,Company,Migdalei Harduf Aleph Ltd,מגדלי הרדוף ב׳ בע״מ,false,,cross-script-numeral,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,אוהל אירועים בע״מ,Ochel Events Ltd,false,,cross-script-close-root,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,Tapuz HaEmek Packing House Ltd,תפוח העמק בית אריזה בע״מ,false,,cross-script-close-root,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,רימון מיצים טבעיים בע״מ,Limon Natural Juices Ltd,false,,cross-script-close-root,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,הדר קירור בע״מ,Cheder Kirur Ltd,false,,cross-script-close-root,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,אלמליח החזקות בע״מ,Elmaliach Industries Ltd,false,,subsidiary-or-parent,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,Ben Tovim Holdings Ltd,בן טובים תעשיות בע״מ,false,,subsidiary-or-parent,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,צופית ספנות בע״מ,Tzofit Shipping Holdings Ltd,false,,subsidiary-or-parent,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,גל כחול,GAL LAVAN,false,,vessel-sister-ship,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,SHIKMONA PRIDE,שקמונה ספיריט,false,,vessel-sister-ship,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,אלה הערבה,ALON HAARAVA,false,,vessel-sister-ship,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,SHIRAT HAYAM,שירת הגלים,false,,vessel-sister-ship,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,ברקאי 2,BARKAI 3,false,,cross-script-numeral,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,NACHLIELI BET,נחליאלי א׳,false,,cross-script-numeral,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,חוחית 1,CHOCHIT 11,false,,cross-script-numeral,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0742,0.0742
+cascade_entities_2,Company,"מעגן סוכנויות ספנות (1998) בע""מ",Ma'agan Shipping Agencies (1998) Ltd,true,,script-translation,Cascade Screening authored pairs (paires-entites-21.json),0.0932,0.0932
+cascade_entities_2,Company,"מנסור בית בד כפר כנא בע""מ",Mansour Olive Press Kafr Kanna Ltd,true,,script-translation,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities_2,Company,"יצחק בן עמי חשמל בע""מ",Yitzhak Ben Ami Electric Ltd,true,,script-translation,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities_2,Company,"אור הגלים פירות ים בע""מ",Or Hagalim Seafood Ltd,true,,script-translation,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities_2,Vessel,ZOHAR BAY,זוהר ביי,true,,vessel-script,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities_2,Vessel,YARKON STAR,ירקון סטאר,true,,vessel-script,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities_2,Vessel,ARBEL EXPRESS,ארבל אקספרס,true,,vessel-script,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities_2,Company,Galim Shuttle Lines Ltd,"גלים שאטל ליינס בע""מ",true,,company-script,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities_2,Vessel,אופירה סאנרייז,OFIRA SUNRISE,true,,vessel-script,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities_2,Vessel,HADAR HACARMEL,הדר הכרמל,true,,vessel-script,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities_2,Company,"שטרן מזון כשר בע""מ",Shtern Kosher Foods Ltd,true,,script-translation,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities_2,Company,DOVRAT PLASTICS LTD,"דוברת פלסטיק בע""מ",true,,script-translation,Cascade Screening authored pairs (paires-entites-21.json),0.0000,0.0000
+cascade_entities_2,Company,שחר הגליל בע״מ,Shachar HaGalil Ltd.,true,,script-variant,Cascade Screening authored pairs (paires-entites-6.json),0.0000,0.0000
+cascade_entities_2,Company,אורות הנגב תעשיות בע״מ,Orot HaNegev Industries Ltd.,true,,native-vs-english,Cascade Screening authored pairs (paires-entites-8.json),0.0000,0.0000
+cascade_entities_2,Company,ရတနာမြိုင် ကြွေပြား ကုမ္ပဏီလီမိတက်,"Yadana Myaing Ceramic Tiles Co., Ltd.",true,,romanization-variant,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,"Zeya Linn Pharmaceutical Co., Ltd.",ဇေယျာလင်း ဆေးဝါး ကုမ္ပဏီလီမိတက်,true,,romanization-variant,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,နေထွန်း စက်ပစ္စည်း ကုမ္ပဏီလီမိတက်,"Nay Tun Machinery Co., Ltd.",true,,romanization-variant,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,"Mya Khine Garment Co., Ltd.",မြခိုင် အထည်ချုပ် ကုမ္ပဏီလီမိတက်,true,,romanization-variant,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,မင်္ဂလာဝင်း ဆီစက်,Mingala Win Oil Mill,true,,romanization-variant,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,Kaung Myat Htet Company Limited,ကောင်းမြတ်ထက် ကုမ္ပဏီလီမိတက်,true,,legal-form,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,သဇင်လှိုင် လီမိတက်,Thazin Hlaing Limited,true,,legal-form,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,Win Naing Oo Trading Co Ltd,ဝင်းနိုင်ဦး ကုန်သွယ်ရေး ကုမ္ပဏီလီမိတက်,true,,legal-form,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,ဖြိုးသီရိ ကုမ္ပဏီလီမိတက်,PHYO THIRI COMPANY LIMITED,true,,legal-form,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,ဟိန်းမြတ် ကုန်သွယ်ရေး ကုမ္ပဏီလီမိတက်,"Hein Myat Trading Co., Ltd.",true,,translated-generic-word,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,"Aung Linn Htet Industries Co., Ltd.",အောင်လင်းထက် စက်မှုလုပ်ငန်း ကုမ္ပဏီလီမိတက်,true,,translated-generic-word,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,ငွေလှိုင်း ရေကြောင်းပို့ဆောင်ရေး ကုမ္ပဏီလီမိတက်,"Ngwe Hlaing Shipping Co., Ltd.",true,,translated-generic-word,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,"Kyaw Myat Naing Shipyard Co., Ltd.",ကျော်မြတ်နိုင် သင်္ဘောကျင်း ကုမ္ပဏီလီမိတက်,true,,translated-generic-word,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,ငြိမ်းချမ်းအောင် ဆောက်လုပ်ရေး ကုမ္ပဏီလီမိတက်,"Nyein Chan Aung Construction Co., Ltd.",true,,translated-generic-word,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,Thitsar Win Printing House,သစ္စာဝင်း ပုံနှိပ်တိုက်,true,,translated-generic-word,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,လှိုင်သာယာ ပလတ်စတစ် စက်မှုလုပ်ငန်း ကုမ္ပဏီလီမိတက်,"Hlaingtharyar Plastic Industries Co., Ltd.",true,,spacing,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,"Shwepyithar Steel Co., Ltd.",ရွှေပြည်သာ သံမဏိ ကုမ္ပဏီလီမိတက်,true,,spacing,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,တောင်ကြီး လက်ဖက်ခြောက် ကုမ္ပဏီလီမိတက်,"Taung Gyi Tea Co., Ltd.",true,,spacing,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,Waiyan Linn Purified Drinking Water,ဝေယံလင်း သောက်ရေသန့်,true,,spacing,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,ငွေဟင်္သာ ၁၂,NGWE HINTHA 12,true,,vessel-name-burmese-vs-latin-caps,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,MYAT THUKHA 7,မြတ်သုခ ၇,true,,vessel-name-burmese-vs-latin-caps,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,သီဟမြတ် ၆,THIHA MYAT 6,true,,vessel-name-burmese-vs-latin-caps,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,AYEYAR HLAING 10,ဧရာလှိုင်း ၁၀,true,,vessel-name-burmese-vs-latin-caps,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,ဇင်ယော်ဖြူ ၅,ZIN YAW PHYU 5,true,,vessel-name-burmese-vs-latin-caps,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,SHWE LA MIN 16,ရွှေလမင်း ၁၆,true,,vessel-name-burmese-vs-latin-caps,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,မြကြာ ၁,MYA KYAR 1,true,,vessel-name-burmese-vs-latin-caps,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,အောင်လင်းထက် စက်မှုလုပ်ငန်း ကုမ္ပဏီလီမိတက်,"Aung Linn Naing Industries Co., Ltd.",false,,cross-script-other-word,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,ငွေလှိုင်း ရေကြောင်းပို့ဆောင်ရေး ကုမ္ပဏီလီမိတက်,"Ngwe Hlaing Fishery Co., Ltd.",false,,cross-script-other-word,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,"Mya Khaing Footwear Co., Ltd.",မြခိုင် အထည်ချုပ် ကုမ္ပဏီလီမိတက်,false,,cross-script-other-word,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,နေထွန်း စက်ပစ္စည်း ကုမ္ပဏီလီမိတက်,"Nay Myo Machinery Co., Ltd.",false,,cross-script-other-word,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,မိုးဇော် လျှပ်စစ်ပစ္စည်း ကုမ္ပဏီလီမိတက်,"Myo Zaw Electrical Co., Ltd.",false,,cross-script-close-syllable,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,Ngwe Hla Hotel,ငွေလ ဟိုတယ်,false,,cross-script-close-syllable,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,မြိတ် ပုလဲ ကုမ္ပဏီလီမိတက်,"Kawthaung Pearl Co., Ltd.",false,,cross-script-place,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,Hinthada Rice and Paddy Trading,ပုသိမ် ဆန်စပါး ကုန်သွယ်ရေး,false,,cross-script-place,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,မော်လမြိုင် ရော်ဘာ စက်မှုလုပ်ငန်း ကုမ္ပဏီလီမိတက်,"Thaton Rubber Industries Co., Ltd.",false,,cross-script-place,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,"Kalaw Coffee Co., Ltd.",ပြင်ဦးလွင် ကော်ဖီ ကုမ္ပဏီလီမိတက်,false,,cross-script-place,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,မကွေး နှမ်းဆီ ကုမ္ပဏီလီမိတက်,"Sagaing Sesame Oil Co., Ltd.",false,,cross-script-place,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,ဟိန်းမြတ် ကုမ္ပဏီများအုပ်စု,"Hein Myat Trading Co., Ltd.",false,,subsidiary-or-parent,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,"Kyaw Myat Naing Holdings Co., Ltd.",ကျော်မြတ်နိုင် သင်္ဘောကျင်း ကုမ္ပဏီလီမိတက်,false,,subsidiary-or-parent,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,ဖြိုးသီရိ ဆောက်လုပ်ရေး ကုမ္ပဏီလီမိတက်,Phyo Thiri Group of Companies,false,,subsidiary-or-parent,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,"Zeyar Linn Pharmaceutical Co., Ltd.",ဇေယျာလင်း ကုမ္ပဏီများအုပ်စု,false,,subsidiary-or-parent,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,NGWE HINTHA 21,ငွေဟင်္သာ ၁၂,false,,cross-script-numeral,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,မြတ်သုခ ၈,MYAT THUKHA 7,false,,cross-script-numeral,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,THIHA MYAT 16,သီဟမြတ် ၆,false,,cross-script-numeral,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,ဧရာလှိုင်း ၁,AYEYAR HLAING 10,false,,cross-script-numeral,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,ရွှေနေမင်း,SHWE LA MIN,false,,vessel-sister-ship,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,MYA SABAI,မြကြာ,false,,vessel-sister-ship,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Vessel,ဗျိုင်းဖြူ,ZIN YAW PHYU,false,,vessel-sister-ship,"Cascade Screening lot 2, written for this lot on 2026-09-29",0.0000,0.0000
+cascade_entities_2,Company,မြင့်လှိုင် သစ်လုပ်ငန်း ကုမ္ပဏီလီမိတက်,"Myint Hlaing Timber Co., Ltd.",true,,burmese-script-vs-latin,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities_2,Company,ဒေါ်ခင်နွယ်အေး ငါးလုပ်ငန်း,Daw Khin Nwe Aye Fishery,true,,burmese-script-vs-latin,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities_2,Company,သီရိဇေယျာ ဘိလပ်မြေ ကုမ္ပဏီလီမိတက်,"Thiri Zeyar Cement Co., Ltd.",true,,burmese-script-vs-latin,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities_2,Company,မြတ်သူထက် စားသောက်ကုန် ကုမ္ပဏီလီမိတက်,"Myat Thu Htet Foodstuff Co., Ltd.",true,,burmese-script-vs-latin,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities_2,Company,ငွေမြို့ ရေနံ ကုမ္ပဏီလီမိတက်,"Ngwe Myo Petroleum Co., Ltd.",true,,burmese-script-vs-latin,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities_2,Company,ဖြိုးပြည့်စုံ ကုမ္ပဏီလီမိတက်,"Phyo Pyae Sone Co., Ltd.",true,,burmese-script-vs-latin,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities_2,Company,ဧရာမြေ စိုက်ပျိုးရေး ကုမ္ပဏီလီမိတက်,"Ayeyar Myay Agriculture Co., Ltd.",true,,burmese-script-vs-latin,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities_2,Company,နဂါးနီ ရေကြောင်း ဝန်ဆောင်မှု ကုမ္ပဏီလီမိတက်,"Naga Ni Marine Services Co., Ltd.",true,,burmese-script-vs-latin,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities_2,Company,ပုလဲကျွန်း ငါးလုပ်ငန်း ကုမ္ပဏီလီမိတက်,"Pa Le Kyun Fishery Co., Ltd.",true,,burmese-script-vs-latin,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities_2,Company,ရွှေပုလဲ ကုန်သွယ်ရေး ကုမ္ပဏီလီမိတက်,"Shwe Pale Transport Co., Ltd.",false,,cross-script-other-word,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities_2,Company,ဦးကျော်ဇော်ထွန်း ကုန်သွယ်ရေး,U Kyaw Min Htun Trading,false,,cross-script-other-name,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities_2,Company,သီရိဇေယျာ ဘိလပ်မြေ ကုမ္ပဏီလီမိတက်,"Thiri Mingalar Cement Co., Ltd.",false,,cross-script-other-word,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities_2,Company,ငွေမြို့ ရေနံ ကုမ္ပဏီလီမိတက်,"Ngwe Myo Gas Co., Ltd.",false,,cross-script-other-word,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities_2,Company,ဧရာမြေ စိုက်ပျိုးရေး ကုမ္ပဏီလီမိတက်,"Ayeyar Myay Fertilizer Co., Ltd.",false,,cross-script-other-word,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities_2,Vessel,SHWE NADI 5,ရွှေနဒီ ၅,true,,vessel-burmese-script,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities_2,Vessel,ရတနာနီလာ,YADANAR NILAR,true,,vessel-burmese-script,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities_2,Vessel,ရွှေနဒီ ၅,SHWE NADI 15,false,,vessel-cross-script-numeral,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities_2,Vessel,ရတနာနီလာ,YADANAR MYA,false,,vessel-cross-script-other-word,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities_2,Company,မေတ္တာရွှေလင်း ကုမ္ပဏီ,MYITTAR SHWE LINN CO LTD,true,,chat-burmese-script,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities_2,Company,မေတ္တာရွှေလင်း ကုမ္ပဏီ,MYITTAR SHWE MYINT CO LTD,false,,cross-script-other-name,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
+cascade_entities_2,Vessel,"MV Apapa Falcon (ex Warri Osprey, 2020)","MV Onne Pelican (ex Warri Osprey, 2006)",false,,ex-name-collision-different-vessel,Cascade Screening authored pairs (paires-entites-10.json),0.8122,0.8122
+cascade_entities_2,Vessel,"MV Durban Horizon (ex Bonny Trader, 2012)","MV Tema Fortune (ex Bonny Trader, 1999)",false,,ex-name-collision-different-vessel,Cascade Screening authored pairs (paires-entites-10.json),0.8122,0.8122
+cascade_entities_2,Vessel,FV KIM HOCK LEONG 33 (EX KIM SOON 23),FV KIM SOON 28,false,,ex-name-lookalike,Cascade Screening authored pairs (paires-entites-9.json),0.5121,0.5121
+cascade_entities_2,Vessel,MT LOTUS MERIDIAN (EX-PACIFIC TAMARIND),PACIFIC TAMARIND II,false,,ex-name-lookalike,Cascade Screening authored pairs (paires-entites-9.json),0.7979,0.7979
+cascade_entities_2,Vessel,Barka NOGAT 12 (ex WARTA 7),WARTA 1,false,,ex-name-numeral,Cascade Screening authored pairs (paires-entites-23.json),0.4032,0.4032
+cascade_entities_2,Vessel,SANDACZ 5 (ex LESZCZ 2),LESZCZ 3,false,,ex-name-numeral,Cascade Screening authored pairs (paires-entites-23.json),0.4549,0.4549
+cascade_entities_2,Vessel,MV Bahari Tamu (ex Gulf Sunbird),MV Gulf Sunbird II,false,,ex-name-numeral-trap,Cascade Screening authored pairs (paires-entites-15.json),0.7935,0.7935
+cascade_entities_2,Vessel,MV Karachi Crescent (ex Mandvi Bay),MV Mandvi Bay II,false,,ex-name-numeral-trap,Cascade Screening authored pairs (paires-entites-15.json),0.7901,0.7901
+cascade_entities_2,Vessel,Pakri Seal (ex Liivi Runner),Liivi Rider,false,,ex-name-other-word,Cascade Screening authored pairs (paires-entites-23.json),0.5455,0.5455
+cascade_entities_2,Vessel,Kalliopi Dawn (ex-Orion Tanager),Orion Tanager II,false,,ex-name-vs-numbered-name,Cascade Screening authored pairs (paires-entites-17.json),0.7948,0.7948
+cascade_entities_2,Vessel,Chrysoula M (ex-Kardelen Nur 5),Kardelen Nur 6,false,,ex-name-vs-other-numeral,Cascade Screening authored pairs (paires-entites-17.json),0.8122,0.8122
+cascade_entities_2,Company,Tamarind Crest Commodities Pte. Ltd. (formerly Tamarind Crest Resources Pte. Ltd.),Tamarind Crest Resources (Australia) Pty Ltd,false,,former-name-trap,Cascade Screening authored pairs (paires-entites-9.json),0.4353,0.4353
+cascade_entities_2,Vessel,SEA PEARL 3 (ex-CHAO PHRAYA STAR),CHAO PHRAYA STAR 2,false,,vessel-ex-name-numeral,Cascade Screening authored pairs (paires-entites-22.json),0.5629,0.5629
+cascade_entities_2,Vessel,M/T Rosalind Meadow (f.k.a. Meadow Spirit),Meadow Spirit,true,,alias-fka,Cascade Screening authored pairs (paires-entites-8.json),0.3996,0.3996
+cascade_entities_2,Company,Nordbryggen Marine Coatings AS (f.k.a. Bryggen Paint AS),Bryggen Paint AS,true,,alias-fka,Cascade Screening authored pairs (paires-entites-8.json),0.2818,0.2818
+cascade_entities_2,Company,Ostrowski Grain Partners LLC (f.k.a. Ostrowski Feed & Grain LLC),Ostrowski Feed & Grain LLC,true,,alias-fka,Cascade Screening authored pairs (paires-entites-8.json),0.4320,0.4320
+cascade_entities_2,Vessel,MTC 8801 (ex LMT 22),LMT 22,true,,barge-former-name-alias,Cascade Screening authored pairs (paires-entites-20.json),0.5686,0.5686
+cascade_entities_2,Vessel,Grand Marais Trader (ex Keweenaw Spirit),M/V Grand Marais Trader,true,,current-name-with-ex-residue,Cascade Screening authored pairs (paires-entites-20.json),0.8550,0.8550
+cascade_entities_2,Vessel,ARBEL EXPRESS (ex-SARONIC EXPRESS),SARONIC EXPRESS,true,,ex-name,Cascade Screening authored pairs (paires-entites-21.json),0.8122,0.8122
+cascade_entities_2,Vessel,CHOROKHI PRIDE (ex-TRAKYA PRIDE),TRAKYA PRIDE,true,,ex-name,Cascade Screening authored pairs (paires-entites-21.json),0.8122,0.8122
+cascade_entities_2,Vessel,ENGURI GLORY (ex-MARMARA GLORY),MARMARA GLORY,true,,ex-name,Cascade Screening authored pairs (paires-entites-21.json),0.8122,0.8122
+cascade_entities_2,Vessel,Akçakoca Güneşi (ex-Azov Lantern),Azov Lantern,true,,ex-name-alias,Cascade Screening authored pairs (paires-entites-17.json),0.8122,0.8122
+cascade_entities_2,Vessel,BALTRIDGE CARRIER II (ex HAVGULL BIRK),Havgull Birk,true,,ex-name-alias,Cascade Screening authored pairs (paires-entites-23.json),0.8122,0.8122
+cascade_entities_2,Vessel,Barka NOGAT 12 (ex WARTA 7),Warta 7,true,,ex-name-alias,Cascade Screening authored pairs (paires-entites-23.json),0.5686,0.5686
+cascade_entities_2,Vessel,MV Pate Island Trader (ex Astral Kestrel II),Astral Kestrel II,true,,ex-name-alias-with-numeral,Cascade Screening authored pairs (paires-entites-15.json),0.8122,0.8122
+cascade_entities_2,Vessel,COASTAL DEFENDER EX ATLA,Coastal Defender (ex-Atlas Runner),true,,ex-name-annotation,Cascade Screening authored pairs (paires-entites-7.json),0.5746,0.5746
+cascade_entities_2,Vessel,"MV Karachi Crescent (ex Mandvi Bay, ex Wanshan Pearl)",Wanshan Pearl,true,,ex-name-chain,Cascade Screening authored pairs (paires-entites-15.json),0.1604,0.1604
+cascade_entities_2,Vessel,KASHUBIAN HERON (ex-AMBER TERN),M/V KASHUBIAN HERON,true,,ex-name-current,Cascade Screening authored pairs (paires-entites-23.json),0.8550,0.8550
+cascade_entities_2,Vessel,Nurhayat Ana,NURHAYAT ANA (ex-Çoruh Işığı),true,,ex-name-on-other-side,Cascade Screening authored pairs (paires-entites-17.json),0.8550,0.8550
+cascade_entities_2,Vessel,Samsun Dalgası,SAMSUN DALGASI (ex-Pontic Dawn),true,,ex-name-on-other-side,Cascade Screening authored pairs (paires-entites-17.json),0.8013,0.8013
+cascade_entities_2,Vessel,Theodosia K (ex-Lindos Harrier until 2019),Lindos Harrier,true,,ex-name-with-date,Cascade Screening authored pairs (paires-entites-17.json),0.5081,0.5081
+cascade_entities_2,Vessel,Kalliopi Dawn ex Orion Tanager,Kalliopi Dawn (Malta),true,,ex-name-without-parentheses,Cascade Screening authored pairs (paires-entites-17.json),0.4623,0.4623
+cascade_entities_2,Company,"BEIRUT CEDAR TRADING SAL, f.k.a. LEBANON CEDAR IMPORT EXPORT SAL",Lebanon Cedar Import Export SAL,true,,fka-former-name-match,Cascade Screening authored pairs (paires-entites-7.json),0.4985,0.4985
+cascade_entities_2,Company,"Dalgleish Rope Works Ltd, formerly Dalgleish & Muir Ropes Ltd",Dalgleish & Muir Ropes Ltd,true,,former-name,Cascade Screening authored pairs (paires-entites-8.json),0.4697,0.4697
+cascade_entities_2,Vessel,Bar Trader (ex Crnogorka),Crnogorka,true,,former-name-alias,Cascade Screening authored pairs (paires-entites-18.json),0.6498,0.6498
+cascade_entities_2,Vessel,Danube Pioneer,Dunav Pionir (ex Danube Pioneer),true,,former-name-alias,Cascade Screening authored pairs (paires-entites-18.json),0.8122,0.8122
+cascade_entities_2,Vessel,Dunav Empress (ex Sava Duchess),Sava Duchess,true,,former-name-alias,Cascade Screening authored pairs (paires-entites-18.json),0.8122,0.8122
+cascade_entities_2,Company,Olmsbury Grain Corporation f/k/a Olmsbury Milling Corporation,Olmsbury Grain Corp.,true,,former-name-appended,Cascade Screening authored pairs (paires-entites-4.json),0.4371,0.4371
+cascade_entities_2,Vessel,Nour Al Mafazat,M/T Nour Al Mafazat (ex Tarfa Breeze),true,,hull-current-name-with-former-name,Cascade Screening authored pairs (paires-entites-14.json),0.8550,0.8550
+cascade_entities_2,Vessel,Qamar Al Khaleej ex-Rimal Star,QAMAR AL KHALEEJ,true,,hull-current-name-with-former-name,Cascade Screening authored pairs (paires-entites-14.json),0.5219,0.5219
+cascade_entities_2,Vessel,Rijnkrekel,MTS RIJNKREKEL (ex Noordgouw),true,,hull-current-name-with-former-name,Cascade Screening authored pairs (paires-entites-14.json),0.8254,0.8254
+cascade_entities_2,Vessel,Amerbaars (ex Gouwezeef),Gouwezeef,true,,hull-former-name-alias,Cascade Screening authored pairs (paires-entites-14.json),0.8122,0.8122
+cascade_entities_2,Vessel,MS Hiltje Geertruida (ex Amstelgors),Amstelgors,true,,hull-former-name-alias,Cascade Screening authored pairs (paires-entites-14.json),0.6498,0.6498
+cascade_entities_2,Vessel,MT Gulf Mahara (ex Hadeel Pearl),Hadeel Pearl,true,,hull-former-name-alias,Cascade Screening authored pairs (paires-entites-14.json),0.8122,0.8122
+cascade_entities_2,Company,Kenari Food Distribution Sdn. Bhd. (formerly known as Kenari Frozen Foods Sdn. Bhd.),Kenari Frozen Foods Sdn. Bhd.,true,,registry-former-name,Cascade Screening authored pairs (paires-entites-9.json),0.4192,0.4192
+cascade_entities_2,Company,Tamarind Crest Commodities Pte. Ltd. (formerly Tamarind Crest Resources Pte. Ltd.),Tamarind Crest Resources Pte Ltd,true,,registry-former-name,Cascade Screening authored pairs (paires-entites-9.json),0.4600,0.4600
+cascade_entities_2,Vessel,"MV Stamatia Horizon (ex-Elenitsa Z, ex-Aegean Lynx)",Aegean Lynx,true,,second-ex-name-alias,Cascade Screening authored pairs (paires-entites-17.json),0.3546,0.3546
+cascade_entities_2,Vessel,"Superior Harvester (ex Duluth Harvester, ex Iron Range Harvester)",Iron Range Harvester,true,,second-former-name-alias,Cascade Screening authored pairs (paires-entites-20.json),0.4745,0.4745
+cascade_entities_2,Vessel,Bahía Serena (ex Serene Bay),MV Serene Bay,true,,trap-former-name-alias,Cascade Screening authored pairs (paires-entites-11.json),0.8122,0.8122
+cascade_entities_2,Vessel,MV Aurora del Istmo (ex Northern Aurora),Northern Aurora,true,,trap-former-name-alias,Cascade Screening authored pairs (paires-entites-11.json),0.8122,0.8122
+cascade_entities_2,Vessel,AYEYAR PRIDE (ex ANDAMAN WREN),ANDAMAN WREN,true,,vessel-ex-name,Cascade Screening authored pairs (paires-entites-22.json),0.8122,0.8122
+cascade_entities_2,Vessel,Dalmuri Ho (ex Ferry Mizukagami),Ferry Mizukagami,true,,vessel-ex-name,Cascade Screening authored pairs (paires-entites-19.json),0.8122,0.8122
+cascade_entities_2,Vessel,FV KIM HOCK LEONG 33 (EX KIM SOON 23),KIM SOON 23,true,,vessel-ex-name,Cascade Screening authored pairs (paires-entites-9.json),0.5686,0.5686
+cascade_entities_2,Vessel,MT QUINTARA SPIRIT EX PALOMERA,Quintara Spirit,true,,vessel-ex-name-appended,Cascade Screening authored pairs (paires-entites-4.json),0.5363,0.5363
+cascade_entities_2,Vessel,MV Lagos Pearl (ex Atlantic Palm),MV Lagos Pearl,true,,vessel-ex-name-rename,Cascade Screening authored pairs (paires-entites-10.json),0.8550,0.8550
