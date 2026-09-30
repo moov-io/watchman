@@ -20,7 +20,7 @@ Start here: [Using Watchman](/watchman/using-watchman/) · [Docker](/watchman/us
 - **Structured search** — person, business, organization, vessel, or aircraft, with name, aliases, IDs, dates, addresses, and contact.
 - **How IDs work** — a matching passport, IMO number, or crypto address (with country, when it applies) scores 1.0. A matching tax number or email raises the score; it does not declare a match by itself. Two national IDs that disagree lower the score.
 - **A cutoff you choose** — `minMatch` is the minimum score to return. 0.80 is a typical screening line; about 0.59 returns more possible hits.
-- **Explainable hits** — `debug=true` shows which fields drove the score.
+- **Explainable hits** — `debug=true` or `debug=0.80` shows which fields drove the score.
 - **Built for onboarding and refresh** — lists are partitioned by source and type; name and ID indexes pick candidates before scoring.
 - **Apache 2.0** — read the scorer, pin a release tag, run it in your network.
 

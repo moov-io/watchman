@@ -66,8 +66,7 @@ func SearchContainer(ctx context.Context, env Environment) fyne.CanvasObject {
 	minMatchEntry := widget.NewEntry()
 	minMatchEntry.PlaceHolder = "0.00–1.00, or a percent"
 
-	// Debug scoring writes a breakdown for every candidate. It used to be on
-	// for every search and the UI never rendered it.
+	// Debug scoring writes a breakdown for returned hits after ranking.
 	debugCheck := widget.NewCheck("Include score breakdown", nil)
 
 	warning := widget.NewLabel("")

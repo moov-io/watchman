@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-retryablehttp"
@@ -258,10 +259,14 @@ func (s *SearchResponse) UnmarshalJSON(data []byte) error {
 }
 
 type SearchOpts struct {
-	Limit     int
-	MinMatch  float64
-	Debug     bool
-	Algorithm StringMatchAlgorithm
+	Limit    int
+	MinMatch float64
+	// Debug attaches field-level score pieces to every returned hit (?debug=yes).
+	Debug bool
+	// DebugMinMatch attaches debug only to returned hits whose Match is at least
+	// this value (?debug=0.80). When set, it takes precedence over Debug.
+	DebugMinMatch float64
+	Algorithm     StringMatchAlgorithm
 }
 
 // SearchByEntity searches for entities (e.g., individuals, businesses) using the provided query fields and
@@ -311,7 +316,9 @@ func SetSearchOpts(q url.Values, opts SearchOpts) url.Values {
 	if opts.MinMatch > 0.00 {
 		q.Set("minMatch", fmt.Sprintf("%.2f", opts.MinMatch))
 	}
-	if opts.Debug {
+	if opts.DebugMinMatch > 0 {
+		q.Set("debug", formatDebugThreshold(opts.DebugMinMatch))
+	} else if opts.Debug {
 		q.Set("debug", "yes")
 	}
 	if opts.Algorithm != "" {
@@ -319,6 +326,14 @@ func SetSearchOpts(q url.Values, opts SearchOpts) url.Values {
 	}
 
 	return q
+}
+
+func formatDebugThreshold(n float64) string {
+	s := strconv.FormatFloat(n, 'f', -1, 64)
+	if !strings.Contains(s, ".") {
+		s += ".0"
+	}
+	return s
 }
 
 func BuildQueryParameters(q url.Values, entity Entity[Value]) url.Values {

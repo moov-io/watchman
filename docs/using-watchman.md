@@ -51,7 +51,7 @@ The same name without an ID scores 0.767 and returns no rows at 0.80. Add date o
 | Names in Arabic, Cyrillic, Chinese, etc. | Enable embeddings; keep `EMBEDDINGS_CROSS_SCRIPT_ONLY=true` |
 | One list only | `source=us_ofac` (faster) |
 | Exact SDN row | `sourceID=22790` |
-| Explain a hit | `debug=true` |
+| Explain a hit | `debug=true` or `debug=0.80` |
 
 Government IDs on the query string:
 
@@ -124,7 +124,7 @@ GET /v2/search?type=vessel&name=NS+LEADER&imoNumber=9339301
 Debug one hit:
 
 ```
-GET /v2/search?type=person&name=Dmitry+Khoroshev&gov_passport=RU:2018278055&minMatch=0.80&debug=true&limit=1
+GET /v2/search?type=person&name=Dmitry+Khoroshev&gov_passport=RU:2018278055&minMatch=0.80&debug=0.80&limit=1
 ```
 
 UTF-8 names on GET (there is no JSON POST body on `/v2/search`):

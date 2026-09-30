@@ -15,6 +15,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestFormatDebugThreshold(t *testing.T) {
+	t.Parallel()
+
+	require.Equal(t, "0.8", formatDebugThreshold(0.8))
+	require.Equal(t, "0.75", formatDebugThreshold(0.75))
+	require.Equal(t, "1.0", formatDebugThreshold(1))
+	require.Equal(t, "0.81", formatDebugThreshold(0.81))
+}
+
 func TestClient_buildQueryParameters(t *testing.T) {
 	cases := []struct {
 		entity   Entity[Value]
@@ -79,8 +88,9 @@ func TestClient_buildQueryParameters(t *testing.T) {
 				},
 			},
 			opts: SearchOpts{
-				Limit:    5,
-				MinMatch: 0.925,
+				Limit:         5,
+				MinMatch:      0.925,
+				DebugMinMatch: 0.80,
 			},
 			expected: map[string][]string{
 				"name":          []string{"Acme Crypto Corp"},
@@ -94,6 +104,38 @@ func TestClient_buildQueryParameters(t *testing.T) {
 				"cryptoAddress": []string{"XBT:abc12345"},
 				"limit":         []string{"5"},
 				"minMatch":      []string{"0.93"}, // rounded
+				"debug":         []string{"0.8"},
+			},
+		},
+		{
+			entity: Entity[Value]{
+				Name: "debug boolean",
+				Type: EntityPerson,
+			},
+			opts: SearchOpts{
+				Limit: 1,
+				Debug: true,
+			},
+			expected: map[string][]string{
+				"name":  []string{"debug boolean"},
+				"type":  []string{"person"},
+				"limit": []string{"1"},
+				"debug": []string{"yes"},
+			},
+		},
+		{
+			entity: Entity[Value]{
+				Name: "debug exact",
+				Type: EntityPerson,
+			},
+			opts: SearchOpts{
+				Debug:         true,
+				DebugMinMatch: 1,
+			},
+			expected: map[string][]string{
+				"name":  []string{"debug exact"},
+				"type":  []string{"person"},
+				"debug": []string{"1.0"},
 			},
 		},
 	}

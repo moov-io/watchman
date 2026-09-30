@@ -57,6 +57,42 @@ func Benchmark_Search(b *testing.B) {
 	})
 }
 
+// Benchmark_SearchDebug measures debug cost on a typed name search.
+// "off" is cheap Similarity only. "debug_all_returned" re-runs DebugSimilarity
+// for the returned top-K. "debug_threshold_0.80" re-runs it only for hits
+// with match >= 0.80.
+func Benchmark_SearchDebug(b *testing.B) {
+	svc := testService(b)
+	ctx := context.Background()
+	query := search.Entity[search.Value]{
+		Name: "Mohammad",
+		Type: search.EntityPerson,
+	}.Normalize()
+
+	b.Setenv("SEARCH_GOROUTINE_COUNT", "10")
+
+	run := func(b *testing.B, opts SearchOpts) {
+		b.Helper()
+		b.ReportAllocs()
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			results, err := svc.Search(ctx, query, opts)
+			require.NoError(b, err)
+			require.NotEmpty(b, results)
+		}
+	}
+
+	b.Run("off", func(b *testing.B) {
+		run(b, SearchOpts{Limit: 10, MinMatch: 0.01})
+	})
+	b.Run("debug_all_returned", func(b *testing.B) {
+		run(b, SearchOpts{Limit: 10, MinMatch: 0.01, Debug: true})
+	})
+	b.Run("debug_threshold_0.80", func(b *testing.B) {
+		run(b, SearchOpts{Limit: 10, MinMatch: 0.01, Debug: true, DebugMinMatch: 0.80})
+	})
+}
+
 func Benchmark_SearchVesselIMO(b *testing.B) {
 	svc := testService(b)
 	ctx := context.Background()
