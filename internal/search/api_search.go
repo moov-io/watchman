@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"context"
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -68,7 +69,6 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 	defer span.End()
 
 	queryParams := api.NewQueryParams(r.URL)
-	debug := strx.Yes(queryParams.Get("debug"))
 
 	req, err := readSearchRequest(ctx, c.addressParser, queryParams)
 	if err != nil {
@@ -84,11 +84,19 @@ func (c *controller) search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	debug, debugMinMatch, err := extractSearchDebug(queryParams)
+	if err != nil {
+		err = c.logger.Error().LogErrorf("problem reading v2 search request: %w", err).Err()
+		api.ErrorResponse(w, err)
+		return
+	}
+
 	opts := SearchOpts{
 		Limit:          extractSearchLimit(queryParams),
 		MinMatch:       extractSearchMinMatch(queryParams),
 		RequestID:      queryParams.Get("requestID"),
 		Debug:          debug,
+		DebugMinMatch:  debugMinMatch,
 		DebugSourceIDs: strings.Split(queryParams.Get("debugSourceIDs"), ","),
 		Algorithm:      algorithm,
 	}
@@ -168,6 +176,50 @@ func extractSearchMinMatch(q *api.QueryParams) float64 {
 		return n
 	}
 	return 0.00
+}
+
+func extractSearchDebug(q *api.QueryParams) (bool, float64, error) {
+	return parseSearchDebug(q.Get("debug"))
+}
+
+// parseSearchDebug reads ?debug=.
+//
+// Boolean true/yes/1 attaches field-level debug to every returned hit.
+// A value with a decimal point (0.80, 1.0) is a match threshold: debug is
+// attached only when match is at least that score. debug=1 stays boolean so
+// existing clients keep the old "all returned hits" behavior.
+func parseSearchDebug(raw string) (bool, float64, error) {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return false, 0, nil
+	}
+
+	if strings.Contains(raw, ".") {
+		n, err := strconv.ParseFloat(raw, 64)
+		if err != nil || math.IsNaN(n) || math.IsInf(n, 0) {
+			return false, 0, fmt.Errorf("invalid debug threshold %q", raw)
+		}
+		if n < 0 || n > 1 {
+			return false, 0, fmt.Errorf("debug threshold must be between 0.0 and 1.0")
+		}
+		return true, n, nil
+	}
+
+	if strx.Yes(raw) {
+		return true, 0, nil
+	}
+	if isSearchDebugOff(raw) {
+		return false, 0, nil
+	}
+	return false, 0, fmt.Errorf("invalid debug value %q", raw)
+}
+
+func isSearchDebugOff(raw string) bool {
+	switch strings.ToLower(raw) {
+	case "0", "f", "false", "n", "no", "off":
+		return true
+	}
+	return false
 }
 
 func extractAlgorithm(q *api.QueryParams) (search.StringMatchAlgorithm, error) {

@@ -8,8 +8,9 @@ type SearchedEntity[T any] struct {
 	// Debug is an optional base64 encoded humand-readable field that contains
 	// detailed field-level match scores and weight adjustments.
 	//
-	// Adding ?debug to /v2/search will populated this field, but more memory
-	// will be used for each request.
+	// Adding ?debug=true (or ?debug=0.80) to /v2/search populates this field
+	// for returned hits that meet the threshold. Debug is computed after
+	// ranking, only for those hits.
 	//
 	// The format will change over time and should not be parsed by machines.
 	Debug string `json:"debug,omitempty"`

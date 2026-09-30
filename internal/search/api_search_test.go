@@ -83,6 +83,56 @@ func (s stubAddressParser) ParseAddress(ctx context.Context, input string) (sear
 	return s.addr, s.err
 }
 
+func TestParseSearchDebug(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		in          string
+		debug       bool
+		minMatch    float64
+		errContains string
+	}{
+		{in: ""},
+		{in: "yes", debug: true},
+		{in: "true", debug: true},
+		{in: "TRUE", debug: true},
+		{in: "1", debug: true},
+		{in: "t", debug: true},
+		{in: "false"},
+		{in: "0"},
+		{in: "no"},
+		{in: "off"},
+		{in: "0.80", debug: true, minMatch: 0.80},
+		{in: "0.8", debug: true, minMatch: 0.8},
+		{in: ".8", debug: true, minMatch: 0.8},
+		{in: "1.0", debug: true, minMatch: 1.0},
+		{in: "0.0", debug: true, minMatch: 0.0},
+		{in: " 0.75 ", debug: true, minMatch: 0.75},
+		{in: "maybe", errContains: "invalid debug value"},
+		{in: "80", errContains: "invalid debug value"},
+		{in: "1.5", errContains: "debug threshold must be between"},
+		{in: "-0.1", errContains: "debug threshold must be between"},
+		{in: "NaN.", errContains: "invalid debug threshold"},
+	}
+	for _, tc := range cases {
+		name := tc.in
+		if name == "" {
+			name = "empty"
+		}
+		t.Run(name, func(t *testing.T) {
+			debug, minMatch, err := parseSearchDebug(tc.in)
+			if tc.errContains != "" {
+				require.Error(t, err)
+				require.Contains(t, err.Error(), tc.errContains)
+				return
+			}
+			require.NoError(t, err)
+			require.Equal(t, tc.debug, debug)
+			require.InDelta(t, tc.minMatch, minMatch, 0.0000001)
+		})
+	}
+}
+
 func TestAPI_readSearchRequest(t *testing.T) {
 	ctx := context.Background()
 
@@ -257,6 +307,132 @@ func TestAPI_Search(t *testing.T) {
 		}
 	})
 
+	t.Run("debug=1 boolean still attaches all", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=2&debug=1", nil)
+
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+
+		require.Equal(t, http.StatusOK, w.Code)
+
+		var response search.SearchResponse
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		require.NoError(t, err)
+		require.Len(t, response.Entities, 2)
+		require.NotEmpty(t, response.Entities[0].Debug)
+		require.NotEmpty(t, response.Entities[1].Debug)
+	})
+
+	t.Run("debug threshold attaches only qualifying hits", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=5&debug=0.90", nil)
+
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+
+		require.Equal(t, http.StatusOK, w.Code)
+
+		var response search.SearchResponse
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		require.NoError(t, err)
+		require.NotEmpty(t, response.Entities)
+
+		for _, ent := range response.Entities {
+			if ent.Match >= 0.90 {
+				require.NotEmpty(t, ent.Debug, "match=%.4f should include debug", ent.Match)
+				require.NotEmpty(t, ent.Details.Pieces)
+			} else {
+				require.Empty(t, ent.Debug, "match=%.4f should omit debug", ent.Match)
+				require.Empty(t, ent.Details.Pieces)
+			}
+		}
+	})
+
+	t.Run("minMatch 0.75 with debug 0.80", func(t *testing.T) {
+		searchJSON := func(url string) search.SearchResponse {
+			t.Helper()
+			req := httptest.NewRequest("GET", url, nil)
+			w := httptest.NewRecorder()
+			env.router.ServeHTTP(w, req)
+			require.Equal(t, http.StatusOK, w.Code)
+
+			var resp search.SearchResponse
+			require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+			return resp
+		}
+
+		assertDebugByThreshold := func(resp search.SearchResponse) (belowDebug, withPieces int) {
+			t.Helper()
+			require.NotEmpty(t, resp.Entities)
+			for _, ent := range resp.Entities {
+				require.GreaterOrEqual(t, ent.Match, 0.75)
+				if ent.Match >= 0.80 {
+					require.NotEmpty(t, ent.Debug, "match=%.4f should include debug", ent.Match)
+					require.NotEmpty(t, ent.Details.Pieces)
+					withPieces++
+				} else {
+					require.Empty(t, ent.Debug, "match=%.4f should omit debug", ent.Match)
+					require.Empty(t, ent.Details.Pieces)
+					belowDebug++
+				}
+			}
+			return belowDebug, withPieces
+		}
+
+		withoutDebug := searchJSON("/v2/search?name=Dmitry+Khoroshev&type=person&limit=10&minMatch=0.75")
+		withDebug := searchJSON("/v2/search?name=Dmitry+Khoroshev&type=person&limit=10&minMatch=0.75&debug=0.80")
+		require.Len(t, withDebug.Entities, len(withoutDebug.Entities))
+		for i, ent := range withDebug.Entities {
+			require.Equal(t, withoutDebug.Entities[i].SourceID, ent.SourceID)
+			require.InDelta(t, withoutDebug.Entities[i].Match, ent.Match, 0.0001)
+			require.Empty(t, withoutDebug.Entities[i].Debug)
+		}
+		belowDebug, withPieces := assertDebugByThreshold(withDebug)
+		require.Greater(t, belowDebug, 0, "name-only Khoroshev should return a hit in [0.75, 0.80)")
+		require.Equal(t, 0, withPieces)
+	})
+
+	t.Run("debug=1.0 only exact matches", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=2&debug=1.0", nil)
+
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+
+		require.Equal(t, http.StatusOK, w.Code)
+
+		var response search.SearchResponse
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		require.NoError(t, err)
+		require.Len(t, response.Entities, 2)
+
+		for _, ent := range response.Entities {
+			if ent.Match >= 1.0 {
+				require.NotEmpty(t, ent.Debug)
+			} else {
+				require.Empty(t, ent.Debug)
+			}
+		}
+	})
+
+	t.Run("debug invalid value", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&debug=maybe", nil)
+
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+
+		require.Equal(t, http.StatusBadRequest, w.Code)
+		require.Contains(t, w.Body.String(), "invalid debug value")
+	})
+
+	t.Run("debug threshold out of range", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&debug=1.5", nil)
+
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+
+		require.Equal(t, http.StatusBadRequest, w.Code)
+		require.Contains(t, w.Body.String(), "debug threshold must be between 0.0 and 1.0")
+	})
+
 	t.Run("algorithm soundex", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=2&algorithm=soundex", nil)
 
@@ -427,6 +603,19 @@ func BenchmarkAPI_Search(b *testing.B) {
 
 	b.Run("debug", func(b *testing.B) {
 		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=5&debug=true", nil)
+
+		for b.Loop() {
+			w := httptest.NewRecorder()
+			env.router.ServeHTTP(w, req)
+
+			if w.Code != http.StatusOK {
+				b.Fatalf("unexpected %v status code", w.Code)
+			}
+		}
+	})
+
+	b.Run("debug-threshold", func(b *testing.B) {
+		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=5&debug=0.80", nil)
 
 		for b.Loop() {
 			w := httptest.NewRecorder()

@@ -18,11 +18,95 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestAttachDebugDetails_ThresholdInsideReturnedSet(t *testing.T) {
+	query := search.Entity[search.Value]{
+		Name: "Ada Lovelace",
+		Type: search.EntityPerson,
+		Person: &search.Person{
+			Name: "Ada Lovelace",
+		},
+	}.Normalize()
+
+	out := []search.SearchedEntity[search.Value]{
+		{Entity: query, Match: 0.75},
+		{Entity: query, Match: 0.79},
+		{Entity: query, Match: 0.80},
+		{Entity: query, Match: 0.91},
+	}
+
+	attachDebugDetails(query, nil, SearchOpts{Debug: true, DebugMinMatch: 0.80}, out)
+
+	require.Empty(t, out[0].Debug)
+	require.Empty(t, out[0].Details.Pieces)
+	require.Empty(t, out[1].Debug)
+	require.Empty(t, out[1].Details.Pieces)
+
+	require.NotEmpty(t, out[2].Debug)
+	require.NotEmpty(t, out[2].Details.Pieces)
+	require.NotEmpty(t, out[3].Debug)
+	require.NotEmpty(t, out[3].Details.Pieces)
+}
+
 func TestService_Search(t *testing.T) {
 	ctx := context.Background()
 	opts := SearchOpts{Limit: 10, MinMatch: 0.01, Debug: testing.Verbose()}
 
 	svc := testService(t)
+
+	t.Run("minMatch 0.75 with debug 0.80", func(t *testing.T) {
+		query := search.Entity[search.Value]{
+			Name: "Mohammad",
+			Type: search.EntityPerson,
+		}.Normalize()
+
+		results, err := svc.Search(ctx, query, SearchOpts{
+			Limit:         20,
+			MinMatch:      0.75,
+			Debug:         true,
+			DebugMinMatch: 0.80,
+		})
+		require.NoError(t, err)
+		require.NotEmpty(t, results)
+
+		var belowDebug int
+		for _, ent := range results {
+			require.GreaterOrEqual(t, ent.Match, 0.75)
+			if ent.Match >= 0.80 {
+				require.NotEmpty(t, ent.Debug, "match=%.4f should include debug", ent.Match)
+				require.NotEmpty(t, ent.Details.Pieces)
+			} else {
+				require.Empty(t, ent.Debug, "match=%.4f should omit debug", ent.Match)
+				require.Empty(t, ent.Details.Pieces)
+				belowDebug++
+			}
+		}
+		require.Greater(t, belowDebug, 0, "Mohammad should return hits in [0.75, 0.80) without debug")
+
+		exact, err := svc.Search(ctx, search.Entity[search.Value]{
+			Name: "Dmitry Yuryevich Khoroshev",
+			Type: search.EntityPerson,
+		}.Normalize(), SearchOpts{
+			Limit:         5,
+			MinMatch:      0.75,
+			Debug:         true,
+			DebugMinMatch: 0.80,
+		})
+		require.NoError(t, err)
+		require.NotEmpty(t, exact)
+
+		var withPieces int
+		for _, ent := range exact {
+			require.GreaterOrEqual(t, ent.Match, 0.75)
+			if ent.Match >= 0.80 {
+				require.NotEmpty(t, ent.Debug, "match=%.4f should include debug", ent.Match)
+				require.NotEmpty(t, ent.Details.Pieces)
+				withPieces++
+			} else {
+				require.Empty(t, ent.Debug, "match=%.4f should omit debug", ent.Match)
+			}
+		}
+		require.Greater(t, withPieces, 0, "full-name Khoroshev should attach debug on hits >= 0.80")
+	})
 
 	t.Run("basic", func(t *testing.T) {
 		query := search.Entity[search.Value]{

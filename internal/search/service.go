@@ -92,6 +92,7 @@ func (s *service) Search(ctx context.Context, query search.Entity[search.Value],
 		attribute.String("query.source_id", string(query.SourceID)),
 		attribute.String("request_id", opts.RequestID),
 		attribute.Bool("query.debug", opts.Debug),
+		attribute.Float64("query.debug_min_match", opts.DebugMinMatch),
 		attribute.StringSlice("query.debug_source_ids", opts.DebugSourceIDs),
 		attribute.String("opts.algorithm", opts.Algorithm.Name()),
 	))
@@ -199,6 +200,10 @@ func (s *service) performEmbeddingSearch(ctx context.Context, query search.Entit
 
 	span.SetAttributes(attribute.Int("results_count", len(out)))
 
+	if opts.Debug {
+		attachDebugDetails(query, nil, opts, out)
+	}
+
 	return out, nil
 }
 
@@ -206,18 +211,17 @@ type SearchOpts struct {
 	Limit    int
 	MinMatch float64
 
-	RequestID      string
+	RequestID string
+	// Debug attaches field-level score pieces after ranking. When DebugMinMatch
+	// is 0, every returned hit is included. Otherwise only hits with Match at
+	// least DebugMinMatch get debug details.
 	Debug          bool
+	DebugMinMatch  float64
 	DebugSourceIDs []string
 
 	// Algorithm selects the name-matching algorithm. Empty uses the default
 	// Jaro-Winkler setup (process env flags still apply).
 	Algorithm search.StringMatchAlgorithm
-}
-
-type debugRespone struct {
-	scores search.SimilarityScore
-	buffer *bytes.Buffer
 }
 
 func (s *service) performSearch(ctx context.Context, query search.Entity[search.Value], opts SearchOpts) ([]search.SearchedEntity[search.Value], error) {
@@ -279,26 +283,15 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	}
 
 	items := largest.NewItems[int](opts.Limit, opts.MinMatch)
-	var debugs *largest.Items[debugRespone]
-	if opts.Debug {
-		debugs = largest.NewItems[debugRespone](opts.Limit, opts.MinMatch)
-	}
 
 	if numWorkers <= 1 {
 		// Common path after candidate pruning: score directly, no local heaps/merge.
-		scoreEntities(cands.Entities, cands.Indices, query, tfidfIndex, opts, hasDebugIDs, s.logger, items, debugs)
+		scoreEntities(cands.Entities, cands.Indices, query, tfidfIndex, opts, hasDebugIDs, s.logger, items)
 	} else {
 		// Per-worker local top-K (no shared mutex on the hot path), then merge
 		localItems := make([]*largest.Items[int], numWorkers)
-		var localDebugs []*largest.Items[debugRespone]
-		if opts.Debug {
-			localDebugs = make([]*largest.Items[debugRespone], numWorkers)
-		}
 		for i := 0; i < numWorkers; i++ {
 			localItems[i] = largest.NewItems[int](opts.Limit, opts.MinMatch)
-			if opts.Debug {
-				localDebugs[i] = largest.NewItems[debugRespone](opts.Limit, opts.MinMatch)
-			}
 		}
 
 		chunkSize := (cands.Len() + numWorkers - 1) / numWorkers
@@ -315,20 +308,13 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 			wg.Add(1)
 			go func(w, start, end int) {
 				defer wg.Done()
-				var debugLocal *largest.Items[debugRespone]
-				if opts.Debug {
-					debugLocal = localDebugs[w]
-				}
-				scoreEntities(cands.Entities, cands.Indices[start:end], query, tfidfIndex, opts, hasDebugIDs, s.logger, localItems[w], debugLocal)
+				scoreEntities(cands.Entities, cands.Indices[start:end], query, tfidfIndex, opts, hasDebugIDs, s.logger, localItems[w])
 			}(worker, startIdx, endIdx)
 		}
 		wg.Wait()
 
 		for i := range localItems {
 			items.Merge(localItems[i])
-			if opts.Debug {
-				debugs.Merge(localDebugs[i])
-			}
 		}
 	}
 
@@ -342,36 +328,48 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 	)
 
 	results := items.Items()
-	var debugLogs []largest.Item[debugRespone]
-	if debugs != nil {
-		debugLogs = debugs.Items()
-	}
 	var out []search.SearchedEntity[search.Value]
 
-	for idx, res := range results {
+	for _, res := range results {
 		ent := cands.Entities[res.Value]
 		if ent.SourceID == "" || res.Weight <= 0.001 {
 			continue
 		}
 
-		searched := search.SearchedEntity[search.Value]{
+		out = append(out, search.SearchedEntity[search.Value]{
 			Entity: ent,
 			Match:  res.Weight,
-		}
+		})
+	}
 
-		if len(debugLogs) > idx {
-			scores := debugLogs[idx].Value
-			searched.Details = scores.scores
-
-			if scores.buffer != nil {
-				searched.Debug = base64.StdEncoding.EncodeToString(scores.buffer.Bytes())
-			}
-		}
-
-		out = append(out, searched)
+	if opts.Debug {
+		attachDebugDetails(query, tfidfIndex, opts, out)
 	}
 
 	return out, nil
+}
+
+// attachDebugDetails runs the allocating debug scorer only for returned hits
+// that meet DebugMinMatch. Ranking already used the cheap Similarity path.
+func attachDebugDetails(query search.Entity[search.Value], tfidfIndex *tfidf.Index, opts SearchOpts, out []search.SearchedEntity[search.Value]) {
+	simOpts := search.SimilarityOpts{
+		TFIDF:     tfidfIndex,
+		Algorithm: opts.Algorithm,
+	}
+
+	var buf bytes.Buffer
+	buf.Grow(1700)
+
+	for i := range out {
+		if out[i].Match < opts.DebugMinMatch {
+			continue
+		}
+
+		buf.Reset()
+		scores := search.DebugSimilarityWithOpts(&buf, query, out[i].Entity, simOpts)
+		out[i].Details = scores
+		out[i].Debug = base64.StdEncoding.EncodeToString(buf.Bytes())
+	}
 }
 
 func scoreEntities(
@@ -383,8 +381,12 @@ func scoreEntities(
 	hasDebugIDs bool,
 	logger log.Logger,
 	items *largest.Items[int],
-	debugs *largest.Items[debugRespone],
 ) {
+	simOpts := search.SimilarityOpts{
+		TFIDF:     tfidfIndex,
+		Algorithm: opts.Algorithm,
+	}
+
 	for _, idx := range idxs {
 		indexEntity := entities[idx]
 		isDebugEntity := hasDebugIDs && slices.Contains(opts.DebugSourceIDs, indexEntity.SourceID)
@@ -395,40 +397,22 @@ func scoreEntities(
 			}).Logf("indexed entity: %#v", indexEntity)
 		}
 
-		simOpts := search.SimilarityOpts{
-			TFIDF:     tfidfIndex,
-			Algorithm: opts.Algorithm,
-		}
+		score := search.SimilarityWithOpts(query, indexEntity, simOpts)
 
-		var score float64
-		if !opts.Debug {
-			score = search.SimilarityWithOpts(query, indexEntity, simOpts)
-		} else {
+		// DebugSourceIDs may not make the top-K; score them in detail so logs
+		// still explain a miss. This is a handful of IDs, not the candidate set.
+		if isDebugEntity && opts.Debug {
 			var buf bytes.Buffer
-			buf.Grow(1700) // approximate size of debug logs
+			buf.Grow(1700)
 
 			scores := search.DebugSimilarityWithOpts(&buf, query, indexEntity, simOpts)
-			score = scores.FinalScore
+			logger.Debug().With(log.Fields{
+				"debug_source_id": log.String(indexEntity.SourceID),
+			}).Logf("similarity score: %#v", scores)
 
-			if isDebugEntity {
-				logger.Debug().With(log.Fields{
-					"debug_source_id": log.String(indexEntity.SourceID),
-				}).Logf("similarity score: %#v", scores)
-
-				logger.Debug().With(log.Fields{
-					"debug_source_id": log.String(indexEntity.SourceID),
-				}).Logf("scoring debug: %#v", buf.String())
-			}
-
-			if debugs != nil {
-				debugs.AddLocal(largest.Item[debugRespone]{
-					Value: debugRespone{
-						scores: scores,
-						buffer: &buf,
-					},
-					Weight: score,
-				})
-			}
+			logger.Debug().With(log.Fields{
+				"debug_source_id": log.String(indexEntity.SourceID),
+			}).Logf("scoring debug: %#v", buf.String())
 		}
 
 		if isDebugEntity {

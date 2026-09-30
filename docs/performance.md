@@ -93,7 +93,7 @@ Similarity scoring is allocation-conscious for bulk search:
 - Optional TF-IDF weights are attached to index entities when lists load; query weights are computed once per search.
 - Jaro-Winkler feature flags (`DISABLE_PHONETIC_FILTERING`, `USE_SOUNDEX_MATCHING`, `SOUNDEX_BOOST_WEIGHT`) are read at process start (see [Similarity Configuration](/watchman/config/#similarity-configuration)). Changing them requires a restart. Individual searches can still select `?algorithm=` without a restart (see [Algorithm comparison](/watchman/algorithm-comparison/)).
 
-Debug mode (`debug=true`) is substantially more expensive (extra buffers and detailed score pieces) and should stay off in production traffic.
+Debug mode (`debug=true` or `debug=0.80`) computes field-level score pieces after ranking, and only for returned hits that meet the threshold. It still allocates extra buffers per attached hit, so leave it off unless you need the breakdown.
 
 ## Related configuration
 

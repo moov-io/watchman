@@ -194,7 +194,7 @@ GET /v2/search?type=person&name=maduro&minMatch=0.8
 Parameters:
 - `minMatch`: Minimum match score (0.0–1.0). Use **0.80** for a production-shaped queue; **~0.59** when missing a designation is costlier than extra review. See [Using Watchman](/watchman/using-watchman/).
 - `limit`: Maximum results (default 10, max 100)
-- `debug`: When `true`, include field-level score pieces (identifiers, name, dates, override/conflict). Log these for investigations and model-risk review.
+- `debug`: Include field-level score pieces (identifiers, name, dates, override/conflict). `true`/`yes`/`1` attaches debug to every returned hit. A number such as `0.80` attaches debug only when `match` is at least that score. Debug is computed after ranking, only for those hits.
 - `algorithm`: Per-request name metric (see above). Defaults to Jaro–Winkler.
 
 
@@ -218,7 +218,7 @@ Setup, hybrid scoring, and OpenSanctions numbers: [Cross-script matching](/watch
 2. **Send IDs and dates from CDD.** `gov_passport=…` and `birthDate=` change the score more than any Jaro–Winkler env flag. Name-only is down-ranked.
 3. **Set `minMatch`.** 0.80 is a typical screening line (most hits are real). 0.59 returns more possible matches. Measured numbers: [OpenSanctions Pairs](/watchman/opensanctions-pairs/).
 4. **Turn on embeddings for names in Arabic, Cyrillic, Chinese, and similar scripts.** Soundex and other phonetic flags help little there. See [Cross-script matching](/watchman/cross-script-matching/).
-5. **Use `debug=true` on hits you investigate.** That is the exam artifact for why a score landed.
+5. **Use `debug=true` or `debug=0.80` on hits you investigate.** That is the exam artifact for why a score landed. A numeric threshold lets screening attach pieces only to stored hits.
 
 ## List Information
 

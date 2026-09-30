@@ -43,7 +43,7 @@ Every list record and every query is lowercased, punctuation is stripped, accent
 
 ## Scoring in one paragraph
 
-Watchman is not a web search engine. It splits names into tokens, compares those tokens, then combines that result with IDs, dates, addresses, and contact. A name-only query is scored lower than the same name plus a date of birth or passport. Add `debug=true` to see which fields produced the score. A public labeled dataset we used to measure this is described in [OpenSanctions Pairs](/watchman/opensanctions-pairs/).
+Watchman is not a web search engine. It splits names into tokens, compares those tokens, then combines that result with IDs, dates, addresses, and contact. A name-only query is scored lower than the same name plus a date of birth or passport. Add `debug=true` or `debug=0.80` to see which fields produced the score. A public labeled dataset we used to measure this is described in [OpenSanctions Pairs](/watchman/opensanctions-pairs/).
 
 ## Next
 

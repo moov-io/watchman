@@ -39,7 +39,7 @@ If both records have the **same kind of ID in the same country and the values di
 
 **A threshold you set as policy.** `minMatch` is the lowest score Watchman returns. 0.80 is a high-precision screening line; about 0.59 returns more possible matches. You can document that choice in the risk assessment.
 
-**An audit trail.** `debug=true` returns the pieces: which identifiers matched, what the name score was, whether an override or conflict penalty fired. That is the “effective challenge” artifact SR 11-7 asks for.
+**An audit trail.** `debug=true` or `debug=0.80` returns the pieces: which identifiers matched, what the name score was, whether an override or conflict penalty fired. That is the “effective challenge” artifact SR 11-7 asks for.
 
 **Open source.** Apache 2.0. The scorer is Go you can read, test, and pin. You are not locked to a vendor’s unpublished matcher.
 

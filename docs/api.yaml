@@ -176,10 +176,19 @@ paths:
             type: string
         - name: debug
           in: query
-          description: Enable debug mode for additional information
+          description: |
+            Include field-level score pieces on returned hits.
+            `true`/`yes`/`1` attaches debug to every returned result.
+            A number such as `0.80` attaches debug only when match is at least that score.
+            Debug is computed after ranking, only for those hits.
           required: false
           schema:
-            type: boolean
+            oneOf:
+              - type: boolean
+              - type: number
+                format: float
+                minimum: 0
+                maximum: 1
         - name: debugSourceIDs
           in: query
           description: Comma-separated list of source IDs to debug
@@ -1138,7 +1147,7 @@ components:
               description: Match score for this entity against the query
             debug:
               type: string
-              description: Base64-encoded field-level match details (only set when ?debug=true)
+              description: Base64-encoded field-level match details (set when ?debug=true or ?debug meets the match threshold)
             details:
               $ref: '#/components/schemas/SimilarityScore'
               description: Field-level scoring breakdown

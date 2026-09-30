@@ -77,7 +77,7 @@ Query IDs are `gov_<type>=COUNTRY:IDENTIFIER` (for example `gov_passport=IR:Y539
 
 ## Debugging
 
-`debug=true` on `/v2/search` returns **score pieces** (name, identifiers, dates, addresses), not a dump of these pipeline stages. If a name does not match, check type (`person` vs `business`), whether you sent the same fields as the list record, and the prepared tokens implied above.
+`debug=true` (or `debug=0.80`) on `/v2/search` returns **score pieces** (name, identifiers, dates, addresses), not a dump of these pipeline stages. If a name does not match, check type (`person` vs `business`), whether you sent the same fields as the list record, and the prepared tokens implied above.
 
 ## Related
 
