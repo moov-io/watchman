@@ -16,10 +16,10 @@ require (
 	github.com/abadojack/whatlanggo v1.0.1
 	github.com/adamdecaf/deepparse-go v0.2.0
 	github.com/adamdecaf/merge v0.2.2
-	github.com/antchfx/htmlquery v1.3.6
+	github.com/antchfx/htmlquery v1.3.7
 	github.com/bbalet/stopwords v1.0.0
 	github.com/ccoveille/go-safecast/v2 v2.0.1
-	github.com/dongri/phonenumber v0.1.12
+	github.com/dongri/phonenumber v0.1.13
 	github.com/felixge/httpsnoop v1.1.0
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-retryablehttp v0.7.8
@@ -64,7 +64,7 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.33.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.56.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.56.0 // indirect
-	github.com/antchfx/xpath v1.3.6 // indirect
+	github.com/antchfx/xpath v1.3.9 // indirect
 	github.com/anthonynsimon/bild v0.14.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
