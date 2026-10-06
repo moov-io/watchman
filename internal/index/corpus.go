@@ -34,11 +34,12 @@ type corpus struct {
 
 	// Plaintext identifier indexes for prefix and QWERTY-near queries.
 	// Hashed linksim keys cannot match a typed prefix.
-	imo   idIndex
-	mmsi  idIndex
-	air   idIndex
-	email idIndex
-	phone idIndex
+	imo     idIndex
+	mmsi    idIndex
+	air     idIndex
+	email   idIndex
+	phone   idIndex
+	website idIndex
 }
 
 // buildCorpus constructs partitions and inverted indexes from the entity list.
@@ -136,6 +137,7 @@ func buildCorpus(entities []search.Entity[search.Value], tfidfIndex *tfidf.Index
 	c.air.sort()
 	c.email.sort()
 	c.phone.sort()
+	c.website.sort()
 
 	return c
 }
@@ -285,7 +287,7 @@ func candidatesFromEntities(entities []search.Entity[search.Value], tfidfIndex *
 // Strategy (name typos with no token hits still scan the partition):
 //  1. Restrict to source/type partition.
 //  2. Crypto and government-ID hits are exact. IMO, MMSI, aircraft serial,
-//     email, and phone also match prefixes and single QWERTY-adjacent typos.
+//     email, phone, and website also match prefixes and single QWERTY-adjacent typos.
 //     Identifier hits are merged with name-token hits when the query has a name.
 //  3. Name-token inverted index: intersect distinctive tokens using document
 //     frequency in this partition (no language-specific suffix list). Extra

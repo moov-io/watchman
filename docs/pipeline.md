@@ -53,6 +53,10 @@ Example: `BANK OF AMERICA` → tokens `bank`, `america`.
 
 Digits are kept and, when possible, normalized with a country guess (`+1 (555) 010-0100` and `555-010-0100` can compare).
 
+### Websites
+
+`website=` values and listed websites are reduced to a host for indexing and scoring. Scheme (`http://`, `https://`), userinfo, path, query, fragment, default ports (`:80`, `:443`), a trailing dot, and a leading `www.` are dropped. `https://www.gicdf.org/about` and listed `www.gicdf.org` compare as `gicdf.org`. The original string stays on `contact.websites` in the JSON.
+
 ### Addresses
 
 1. Free-text `address=` on the query is parsed into line, city, state, postal code, country. **Docker images and Linux/macOS GitHub releases** use libpostal. **Windows `.exe` and `go run`** use usaddress unless built with `-tags libpostal`. **Any build** can enable deepparse. See [Addresses](/watchman/addresses/).

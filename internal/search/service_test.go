@@ -148,6 +148,22 @@ func TestService_Search(t *testing.T) {
 		res := results[0]
 		require.InDelta(t, 1.00, res.Match, 0.001) // 36216
 	})
+
+	t.Run("website", func(t *testing.T) {
+		query := search.Entity[search.Value]{
+			Type: search.EntityBusiness,
+			Contact: search.ContactInfo{
+				Websites: []string{"https://www.suex.io/"},
+			},
+		}
+
+		results, err := svc.Search(ctx, query.Normalize(), opts)
+		require.NoError(t, err)
+		require.NotEmpty(t, results)
+		require.Equal(t, "33151", results[0].SourceID)
+		require.Greater(t, results[0].Match, 0.0)
+		require.Less(t, results[0].Match, 1.0)
+	})
 }
 
 func testService(tb testing.TB) Service {

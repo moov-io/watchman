@@ -499,6 +499,7 @@ func TestCorpus_ExactIdentifiers(t *testing.T) {
 		Contact: search.ContactInfo{
 			EmailAddresses: []string{"info@example.com"},
 			PhoneNumbers:   []string{"+1-202-555-0100"},
+			Websites:       []string{"www.example.com"},
 		},
 	})
 	otherPerson := mustNorm(search.Entity[search.Value]{
@@ -612,6 +613,35 @@ func TestCorpus_ExactIdentifiers(t *testing.T) {
 			Source: search.SourceUSOFAC,
 			Contact: search.ContactInfo{
 				EmailAddresses: []string{"info@"},
+			},
+		})
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "p1", cands.At(0).SourceID)
+	})
+
+	t.Run("website-only query does not scan other persons", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:   search.EntityPerson,
+			Source: search.SourceUSOFAC,
+			Contact: search.ContactInfo{
+				Websites: []string{"https://www.example.com/about"},
+			},
+		})
+		require.Empty(t, query.PreparedFields.NameFields)
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "p1", cands.At(0).SourceID)
+	})
+
+	t.Run("website host query matches listed www host", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:   search.EntityPerson,
+			Source: search.SourceUSOFAC,
+			Contact: search.ContactInfo{
+				Websites: []string{"example.com"},
 			},
 		})
 		cands, err := idx.SelectCandidates(ctx, query)

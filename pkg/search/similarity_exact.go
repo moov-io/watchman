@@ -682,7 +682,7 @@ func compareExactSourceList[Q any, I any](w io.Writer, query Entity[Q], index En
 	}
 }
 
-// contactFieldMatch handles matching logic for a single contact field type (email, phone, fax)
+// contactFieldMatch handles matching logic for a single contact field type (email, phone, fax, website)
 type contactFieldMatch struct {
 	matches    int
 	totalQuery int
@@ -712,6 +712,13 @@ func compareExactContactInfo[Q any, I any](w io.Writer, query Entity[Q], index E
 	if len(query.PreparedFields.Contact.FaxNumbers) > 0 && len(index.PreparedFields.Contact.FaxNumbers) > 0 {
 		fieldsCompared++
 		matches = append(matches, compareContactField(query.PreparedFields.Contact.FaxNumbers, index.PreparedFields.Contact.FaxNumbers))
+	}
+
+	queryWebsites := contactWebsites(query)
+	indexWebsites := contactWebsites(index)
+	if len(queryWebsites) > 0 && len(indexWebsites) > 0 {
+		fieldsCompared++
+		matches = append(matches, compareContactField(queryWebsites, indexWebsites))
 	}
 
 	if fieldsCompared == 0 {
@@ -769,4 +776,11 @@ func compareContactField(queryValues, indexValues []string) contactFieldMatch {
 		totalQuery: len(queryValues),
 		score:      score,
 	}
+}
+
+func contactWebsites[T any](e Entity[T]) []string {
+	if len(e.PreparedFields.Contact.Websites) > 0 {
+		return e.PreparedFields.Contact.Websites
+	}
+	return e.Contact.Websites
 }
