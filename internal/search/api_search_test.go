@@ -433,6 +433,37 @@ func TestAPI_Search(t *testing.T) {
 		require.Contains(t, w.Body.String(), "debug threshold must be between 0.0 and 1.0")
 	})
 
+	t.Run("website only finds listed business", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?type=business&website=suex.io&limit=5", nil)
+
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+
+		require.Equal(t, http.StatusOK, w.Code)
+
+		var response search.SearchResponse
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		require.NoError(t, err)
+		require.NotEmpty(t, response.Entities)
+		require.Equal(t, "33151", response.Entities[0].SourceID)
+		require.Greater(t, response.Entities[0].Match, 0.0)
+	})
+
+	t.Run("website url matches listed www host", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?type=business&website=https://www.gicdf.org/about&limit=5", nil)
+
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+
+		require.Equal(t, http.StatusOK, w.Code)
+
+		var response search.SearchResponse
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		require.NoError(t, err)
+		require.NotEmpty(t, response.Entities)
+		require.Equal(t, "12685", response.Entities[0].SourceID)
+	})
+
 	t.Run("algorithm soundex", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/v2/search?name=Mohammad&type=person&limit=2&algorithm=soundex", nil)
 

@@ -49,7 +49,7 @@ On every list refresh Watchman builds:
 | **Name-token inverted index** | Entities whose prepared primary, alt, or former names contain a query token. Search intersects **distinctive** tokens by document frequency in this partition (no language-specific suffix list), so extra common legal-form words in any language do not drop a DBA that omits them. |
 | **Exact prepared-name map** | Fast path when the full prepared name matches exactly |
 | **Crypto address map** | Exact `CURRENCY:address` lookup for crypto-only (or crypto+name) queries |
-| **Blocking keys** | Hashed `GOVID:` / `ADDR:` postings, plus plaintext IMO/MMSI/serial/email/phone indexes for prefix and QWERTY-near typed queries (see [Record linkage](/watchman/record-linkage/)) |
+| **Blocking keys** | Hashed `GOVID:` / `ADDR:` postings, plus plaintext IMO/MMSI/serial/email/phone/website indexes for prefix and QWERTY-near typed queries (see [Record linkage](/watchman/record-linkage/)) |
 | **TF-IDF term weights** (optional) | Precomputed per-entity weights so search does not recompute IDF on every comparison |
 
 **Tips for faster queries**
@@ -57,7 +57,7 @@ On every list refresh Watchman builds:
 - Always send `type=` (and `source=` when you only need one list). This shrinks the partition before token lookup.
 - Prefer multi-token names when possible; shared tokens are intersected so common words do not pull in the rest of the partition.
 - Crypto-only queries use the exact address index and do **not** expand to a full partition scan.
-- Identifier-heavy queries: government IDs are exact lookups; IMO, MMSI, serial, email, and phone also match prefixes and a single adjacent-keyboard typo. A matching passport or IMO still scores 1.0.
+- Identifier-heavy queries: government IDs are exact lookups; IMO, MMSI, serial, email, phone, and website also match prefixes and a single adjacent-keyboard typo. A matching passport or IMO still scores 1.0.
 
 ### Concurrency model
 
@@ -87,7 +87,7 @@ Similarity scoring is allocation-conscious for bulk search:
 - Score pieces are computed on the stack for the non-debug path.
 - Jaro-Winkler token-pair scratch buffers are pooled across comparisons.
 - Alternate and historical names are skipped once the primary (or a prior alias) already scores at or above the exact-match threshold.
-- Unique identity keys (passport, national ID, IMO/MMSI, aircraft serial, crypto address) that match **exactly** (identifier and country) still return 1.0 immediately and skip name/title/address comparison. Tax IDs, business registrations, and contact (email/phone) are weighted evidence only — they never force 1.0. When both records populate the same ID type (and country, if both set) with **different** values, the blended score is multiplied by `ID_CONFLICT_PENALTY_MULTIPLIER` (default 0.70).
+- Unique identity keys (passport, national ID, IMO/MMSI, aircraft serial, crypto address) that match **exactly** (identifier and country) still return 1.0 immediately and skip name/title/address comparison. Tax IDs, business registrations, and contact (email/phone/website) are weighted evidence only — they never force 1.0. When both records populate the same ID type (and country, if both set) with **different** values, the blended score is multiplied by `ID_CONFLICT_PENALTY_MULTIPLIER` (default 0.70).
 - Person/business/organization type mismatches recast the query onto the index type (~+100 ns and +1 alloc vs same-type scoring on Apple M4 Max). Vessel/aircraft mismatches still return 0 with no alloc. Typed search partitions are unchanged.
 - Former names and related prepared fields are normalized at index time (and query normalize), not on every comparison.
 - Optional TF-IDF weights are attached to index entities when lists load; query weights are computed once per search.

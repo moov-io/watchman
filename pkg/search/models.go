@@ -356,6 +356,7 @@ func (e Entity[T]) Normalize() Entity[T] {
 	// Contact
 	e.PreparedFields.Contact.PhoneNumbers = normalizePhoneNumbers(e.Contact.PhoneNumbers)
 	e.PreparedFields.Contact.FaxNumbers = normalizePhoneNumbers(e.Contact.FaxNumbers)
+	e.PreparedFields.Contact.Websites = normalizeWebsites(e.Contact.Websites)
 
 	// Addresses
 	e.PreparedFields.Addresses = normalizeAddresses(e.Addresses)
@@ -407,6 +408,30 @@ func normalizePhoneNumbers(numbers []string) []string {
 	for idx := range numbers {
 		// TODO(adam): pass in Country codes to help normalize phone numbers
 		out[idx] = norm.PhoneNumber(numbers[idx])
+	}
+	return out
+}
+
+func normalizeWebsites(sites []string) []string {
+	if len(sites) == 0 {
+		return nil
+	}
+
+	out := make([]string, 0, len(sites))
+	seen := make(map[string]struct{}, len(sites))
+	for _, site := range sites {
+		n := norm.Website(site)
+		if n == "" {
+			continue
+		}
+		if _, dup := seen[n]; dup {
+			continue
+		}
+		seen[n] = struct{}{}
+		out = append(out, n)
+	}
+	if len(out) == 0 {
+		return nil
 	}
 	return out
 }

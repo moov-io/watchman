@@ -42,8 +42,8 @@ func (c *corpus) cryptoHits(query search.Entity[search.Value], partition []int) 
 }
 
 // identifierHits returns crypto, government-ID, IMO, MMSI, aircraft serial,
-// and contact (email/phone) hits in the partition. Government IDs and crypto
-// are exact. IMO/MMSI/serial/email/phone also match prefixes and single
+// and contact (email/phone/website) hits in the partition. Government IDs and crypto
+// are exact. IMO/MMSI/serial/email/phone/website also match prefixes and single
 // QWERTY-adjacent typos.
 func (c *corpus) identifierHits(query search.Entity[search.Value], partition []int) []int {
 	var hits []int

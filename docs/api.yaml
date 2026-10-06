@@ -418,7 +418,7 @@ paths:
           explode: true
         - name: website
           in: query
-          description: Website of the entity
+          description: Website of the entity. Scheme, path, and a leading www. are ignored so https://www.example.com/about matches a listed www.example.com.
           required: false
           schema:
             type: array
@@ -427,7 +427,7 @@ paths:
           explode: true
         - name: websites
           in: query
-          description: Alternative parameter for websites of the entity
+          description: Alternative parameter for websites of the entity. Same host matching as website.
           required: false
           schema:
             type: array

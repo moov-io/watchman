@@ -14,11 +14,12 @@ import (
 // Minimum query length before prefix/QWERTY lookup is used. Shorter values
 // match too much of the partition to be useful as a typed filter.
 const (
-	minIMOPrefix    = 4
-	minMMSIPrefix   = 4
-	minSerialPrefix = 4
-	minEmailPrefix  = 3
-	minPhonePrefix  = 4
+	minIMOPrefix     = 4
+	minMMSIPrefix    = 4
+	minSerialPrefix  = 4
+	minEmailPrefix   = 3
+	minPhonePrefix   = 4
+	minWebsitePrefix = 3
 )
 
 type idEntry struct {
@@ -133,6 +134,13 @@ func (c *corpus) indexPlainIdentifiers(e search.Entity[search.Value], idx int) {
 	for _, phone := range phones {
 		c.phone.add(phone, idx)
 	}
+	websites := e.PreparedFields.Contact.Websites
+	if len(websites) == 0 {
+		websites = e.Contact.Websites
+	}
+	for _, website := range websites {
+		c.website.add(website, idx)
+	}
 }
 
 func (c *corpus) plainIdentifierHits(query search.Entity[search.Value]) []int {
@@ -153,6 +161,13 @@ func (c *corpus) plainIdentifierHits(query search.Entity[search.Value]) []int {
 	}
 	for _, phone := range phones {
 		hits = append(hits, c.phone.match(phone, minPhonePrefix)...)
+	}
+	websites := query.PreparedFields.Contact.Websites
+	if len(websites) == 0 {
+		websites = query.Contact.Websites
+	}
+	for _, website := range websites {
+		hits = append(hits, c.website.match(website, minWebsitePrefix)...)
 	}
 	if len(hits) == 0 {
 		return nil

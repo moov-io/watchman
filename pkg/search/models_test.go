@@ -247,6 +247,36 @@ func TestEntity_Normalize(t *testing.T) {
 			},
 		},
 		{
+			name: "websites prepared from urls",
+			input: Entity[Value]{
+				Name: "SUEX OTC",
+				Type: EntityBusiness,
+				Business: &Business{
+					Name: "SUEX OTC",
+				},
+				Contact: ContactInfo{
+					Websites: []string{"https://www.suex.io/about", "WWW.SUEX.IO", "suex.io"},
+				},
+			},
+			expected: Entity[Value]{
+				Name: "SUEX OTC",
+				Type: "business",
+				Business: &Business{
+					Name: "SUEX OTC",
+				},
+				Contact: ContactInfo{
+					Websites: []string{"https://www.suex.io/about", "WWW.SUEX.IO", "suex.io"},
+				},
+				PreparedFields: PreparedFields{
+					Name:       "suex otc",
+					NameFields: []string{"suex", "otc"},
+					Contact: ContactInfo{
+						Websites: []string{"suex.io"},
+					},
+				},
+			},
+		},
+		{
 			name: "f.k.a. former name lifted into historical prepared fields",
 			input: Entity[Value]{
 				Name: "Ostrowski Grain Partners LLC (f.k.a. Ostrowski Feed & Grain LLC)",
