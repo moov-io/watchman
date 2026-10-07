@@ -650,6 +650,35 @@ func TestCorpus_ExactIdentifiers(t *testing.T) {
 		require.Equal(t, "p1", cands.At(0).SourceID)
 	})
 
+	t.Run("domain subdomain query matches listed eTLD+1", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:   search.EntityPerson,
+			Source: search.SourceUSOFAC,
+			Contact: search.ContactInfo{
+				Domains: []string{"mail.example.com"},
+			},
+		})
+		require.Empty(t, query.PreparedFields.NameFields)
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "p1", cands.At(0).SourceID)
+	})
+
+	t.Run("domain query matches listed email host", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:   search.EntityPerson,
+			Source: search.SourceUSOFAC,
+			Contact: search.ContactInfo{
+				Domains: []string{"example.com"},
+			},
+		})
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "p1", cands.At(0).SourceID)
+	})
+
 	t.Run("short IMO prefix falls back to the vessel partition", func(t *testing.T) {
 		query := mustNorm(search.Entity[search.Value]{
 			Type:   search.EntityVessel,
@@ -671,6 +700,49 @@ func TestCorpus_ExactIdentifiers(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 2, cands.Len(), "no blocking-key hits must not drop recall")
 	})
+}
+
+func TestCorpus_PublicMailNotIndexedAsDomain(t *testing.T) {
+	gmailOnly := mustNorm(search.Entity[search.Value]{
+		Name:     "Gmail Person",
+		Type:     search.EntityPerson,
+		Source:   search.SourceUSOFAC,
+		SourceID: "g1",
+		Person:   &search.Person{Name: "Gmail Person"},
+		Contact: search.ContactInfo{
+			EmailAddresses: []string{"user@gmail.com"},
+		},
+	})
+	org := mustNorm(search.Entity[search.Value]{
+		Name:     "Org Person",
+		Type:     search.EntityPerson,
+		Source:   search.SourceUSOFAC,
+		SourceID: "o1",
+		Person:   &search.Person{Name: "Org Person"},
+		Contact: search.ContactInfo{
+			EmailAddresses: []string{"info@gicdf.org"},
+		},
+	})
+	require.Empty(t, gmailOnly.PreparedFields.Domains)
+	require.Equal(t, []string{"gicdf.org"}, org.PreparedFields.Domains)
+
+	idx := NewLists(nil)
+	idx.Update(download.Stats{
+		Entities: []search.Entity[search.Value]{gmailOnly, org},
+		Lists:    map[string]int{string(search.SourceUSOFAC): 2},
+	})
+	ctx := context.Background()
+
+	query := mustNorm(search.Entity[search.Value]{
+		Type:   search.EntityPerson,
+		Source: search.SourceUSOFAC,
+		Contact: search.ContactInfo{
+			Domains: []string{"gmail.com"},
+		},
+	})
+	cands, err := idx.SelectCandidates(ctx, query)
+	require.NoError(t, err)
+	require.Equal(t, 2, cands.Len(), "gmail.com is not indexed from consumer mail, so domain-only falls back to the partition")
 }
 
 func mustNorm(e search.Entity[search.Value]) search.Entity[search.Value] {

@@ -21,7 +21,8 @@ When lists finish downloading and preparing, Watchman constructs an in-memory **
 5. **Crypto address index** — exact lookup by `CURRENCY:address` for fast crypto screening.
 6. **Blocking keys** — PII-safe composite hashes (`GOVID:`, `ADDR:`, hashed Soundex `NAME:` tokens, and related kinds) plus their coarse-to-fine prefixes. Government-ID queries use exact `GOVID:` lookup; address-only queries use the finest `ADDR:` prefix that still prunes the partition. The keys never store names, ID numbers, or addresses. See [Record linkage](/watchman/record-linkage/).
 7. **Plaintext identifier indexes** — IMO, MMSI, aircraft serial, email, phone, and website values for prefix and QWERTY-near typed queries. Websites are stored as the prepared host (scheme, path, `www.`, and default ports removed).
-8. **Optional TF-IDF weights** — when enabled, term weights for each entity’s name fields are stored on the entity so search does not recompute them per comparison.
+8. **Domain index** — exact lookup of DNS names extracted from websites and email hosts (consumer mail providers skipped). Each host is stored at every label down to eTLD+1 (Public Suffix List). Dots are kept. Public suffixes themselves are not stored.
+9. **Optional TF-IDF weights** — when enabled, term weights for each entity’s name fields are stored on the entity so search does not recompute them per comparison.
 
 These structures are immutable for readers until the next successful refresh replaces the corpus atomically. Search scores candidate **indices** against that generation and copies entity values only for the top-N results.
 
@@ -40,6 +41,7 @@ Before Jaro-Winkler scoring, Watchman selects a **candidate set**:
 | Crypto + name tokens | Union of crypto hits and name-token candidates |
 | Government ID (no name) | Exact hashed `GOVID:` hits; if none, fall back to the partition |
 | IMO / MMSI / aircraft serial / email / phone / website (no name) | Prefix and single QWERTY-adjacent typo on the normalized identifier (min length 3–4). If none, fall back to the partition |
+| Domain (no name) | Exact match on each PSL-walked label down to eTLD+1. If none, fall back to the partition |
 | Those identifiers + name tokens | Union of identifier hits and name-token candidates |
 | Address only (no name tokens) | Finest hashed `ADDR:` prefix that still prunes the partition; otherwise the partition |
 | Exact prepared name (no tokens after stopwords) | Binary-search exact-name postings against the partition |

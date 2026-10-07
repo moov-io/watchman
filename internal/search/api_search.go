@@ -309,6 +309,7 @@ func readSearchRequest(ctx context.Context, addressParser address.Parser, q *api
 	req.Contact.PhoneNumbers = readStrings(q.GetAll("phone"), q.GetAll("phoneNumber"), q.GetAll("phoneNumbers"))
 	req.Contact.FaxNumbers = readStrings(q.GetAll("fax"), q.GetAll("faxNumber"), q.GetAll("faxNumbers"))
 	req.Contact.Websites = readStrings(q.GetAll("website"), q.GetAll("websites"))
+	req.Contact.Domains = readStrings(q.GetAll("domain"), q.GetAll("domains"))
 
 	addresses := readStrings(q.GetAll("address"), q.GetAll("addresses"))
 	req.Addresses = readAddresses(ctx, addressParser, addresses)

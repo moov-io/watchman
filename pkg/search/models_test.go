@@ -273,6 +273,42 @@ func TestEntity_Normalize(t *testing.T) {
 					Contact: ContactInfo{
 						Websites: []string{"suex.io"},
 					},
+					Domains: []string{"suex.io"},
+				},
+			},
+		},
+		{
+			name: "domains prepared from websites and org emails",
+			input: Entity[Value]{
+				Name: "GADDAFI INTERNATIONAL CHARITY AND DEVELOPMENT FOUNDATION",
+				Type: EntityBusiness,
+				Business: &Business{
+					Name: "GADDAFI INTERNATIONAL CHARITY AND DEVELOPMENT FOUNDATION",
+				},
+				Contact: ContactInfo{
+					EmailAddresses: []string{"info@gicdf.org", "khoroshev1@icloud.com"},
+					Websites:       []string{"https://www.gicdf.org/about"},
+					Domains:        []string{"mail.gicdf.org"},
+				},
+			},
+			expected: Entity[Value]{
+				Name: "GADDAFI INTERNATIONAL CHARITY AND DEVELOPMENT FOUNDATION",
+				Type: "business",
+				Business: &Business{
+					Name: "GADDAFI INTERNATIONAL CHARITY AND DEVELOPMENT FOUNDATION",
+				},
+				Contact: ContactInfo{
+					EmailAddresses: []string{"info@gicdf.org", "khoroshev1@icloud.com"},
+					Websites:       []string{"https://www.gicdf.org/about"},
+					Domains:        []string{"mail.gicdf.org"},
+				},
+				PreparedFields: PreparedFields{
+					Name:       "gaddafi international charity and development foundation",
+					NameFields: []string{"gaddafi", "international", "charity", "development", "foundation"},
+					Contact: ContactInfo{
+						Websites: []string{"gicdf.org"},
+					},
+					Domains: []string{"mail.gicdf.org", "gicdf.org"},
 				},
 			},
 		},

@@ -287,7 +287,7 @@ func uniqueIdentityExact(p ScorePiece) bool {
 // shouldExactOverride reports whether a 1.0 final score is justified.
 // Only unique identity keys (passport, IMO, crypto, …) short-circuit, and only
 // when the piece is Exact (identifier and country). Tax IDs, business
-// registrations, and contact (email/phone/website) matches stay in the weighted blend.
+// registrations, and contact (email/phone/website/domain) matches stay in the weighted blend.
 func shouldExactOverride(pieces []ScorePiece) bool {
 	for i := range pieces {
 		p := pieces[i]

@@ -165,7 +165,7 @@ func TestAPI_readSearchRequest(t *testing.T) {
 	t.Run("contact info", func(t *testing.T) {
 		address := "/v2/search?type=business&emailAddress=a@corp.com&phone=1234567890"
 		address += "&faxNumber=3334445566&email=b@corp.com&phone=9876543210"
-		address += "&website=corp.com&website=corp2.com"
+		address += "&website=corp.com&website=corp2.com&domain=mail.corp.com"
 
 		req := httptest.NewRequest("GET", address, nil)
 		q := &api.QueryParams{Values: req.URL.Query()}
@@ -179,11 +179,15 @@ func TestAPI_readSearchRequest(t *testing.T) {
 			PhoneNumbers:   []string{"1234567890", "9876543210"},
 			FaxNumbers:     []string{"3334445566"},
 			Websites:       []string{"corp.com", "corp2.com"},
+			Domains:        []string{"mail.corp.com"},
 		}
 		require.ElementsMatch(t, expected.EmailAddresses, query.Contact.EmailAddresses)
 		require.ElementsMatch(t, expected.PhoneNumbers, query.Contact.PhoneNumbers)
 		require.ElementsMatch(t, expected.FaxNumbers, query.Contact.FaxNumbers)
 		require.ElementsMatch(t, expected.Websites, query.Contact.Websites)
+		require.ElementsMatch(t, expected.Domains, query.Contact.Domains)
+		require.Contains(t, query.PreparedFields.Domains, "corp.com")
+		require.Contains(t, query.PreparedFields.Domains, "mail.corp.com")
 	})
 
 	t.Run("crypto addresses", func(t *testing.T) {
@@ -451,6 +455,38 @@ func TestAPI_Search(t *testing.T) {
 
 	t.Run("website url matches listed www host", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/v2/search?type=business&website=https://www.gicdf.org/about&limit=5", nil)
+
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+
+		require.Equal(t, http.StatusOK, w.Code)
+
+		var response search.SearchResponse
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		require.NoError(t, err)
+		require.NotEmpty(t, response.Entities)
+		require.Equal(t, "12685", response.Entities[0].SourceID)
+	})
+
+	t.Run("domain subdomain finds listed suex.io", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?type=business&domain=pay.suex.io&limit=5", nil)
+
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+
+		require.Equal(t, http.StatusOK, w.Code)
+
+		var response search.SearchResponse
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		require.NoError(t, err)
+		require.NotEmpty(t, response.Entities)
+		require.Equal(t, "33151", response.Entities[0].SourceID)
+		require.Greater(t, response.Entities[0].Match, 0.0)
+		require.Less(t, response.Entities[0].Match, 1.0)
+	})
+
+	t.Run("domain finds listed email host", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?type=business&domain=mail.gicdf.org&limit=5", nil)
 
 		w := httptest.NewRecorder()
 		env.router.ServeHTTP(w, req)

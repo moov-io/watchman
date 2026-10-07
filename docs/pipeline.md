@@ -57,6 +57,10 @@ Digits are kept and, when possible, normalized with a country guess (`+1 (555) 0
 
 `website=` values and listed websites are reduced to a host for indexing and scoring. Scheme (`http://`, `https://`), userinfo, path, query, fragment, default ports (`:80`, `:443`), a trailing dot, and a leading `www.` are dropped. `https://www.gicdf.org/about` and listed `www.gicdf.org` compare as `gicdf.org`. The original string stays on `contact.websites` in the JSON.
 
+### Domains
+
+`domain=` values, listed websites, and email hosts are walked from the FQDN down to eTLD+1 using the Public Suffix List. `mail.suex.io` and listed `suex.io` share `suex.io`. Public suffixes (`co.uk`, `ru`) are not indexed or queried. Email hosts at consumer providers (gmail, yahoo, mail.ru, icloud, …) are skipped so those providers are not treated as an entity domain. `website=` still scores the prepared host exactly; listed websites also feed the domain index, so a subdomain on either `website=` or `domain=` can match a listed eTLD+1.
+
 ### Addresses
 
 1. Free-text `address=` on the query is parsed into line, city, state, postal code, country. **Docker images and Linux/macOS GitHub releases** use libpostal. **Windows `.exe` and `go run`** use usaddress unless built with `-tags libpostal`. **Any build** can enable deepparse. See [Addresses](/watchman/addresses/).

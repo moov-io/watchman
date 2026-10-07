@@ -115,7 +115,7 @@ On 472,477 analyst-judged OpenSanctions subject pairs, Jaro–Winkler at 0.80 ha
 Scoring runs only on candidates. See [Indexing](/watchman/indexing/) and [Performance](/watchman/performance/).
 
 1. Partition by source and type.
-2. Exact crypto / government-ID hits; prefix and QWERTY-near indexes on IMO, MMSI, serial, email, phone.
+2. Exact crypto / government-ID hits; prefix and QWERTY-near indexes on IMO, MMSI, serial, email, phone, website; exact PSL domain keys.
 3. Name-token inverted index: intersect distinctive tokens; fall back to the union or the full partition.
 4. Address prefix blocks for address-only queries.
 5. Searches with ≤100 candidates skip the admission queue; larger searches take `SEARCH_MAX_IN_FLIGHT`.

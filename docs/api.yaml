@@ -434,6 +434,24 @@ paths:
             items:
               type: string
           explode: true
+        - name: domain
+          in: query
+          description: DNS name to match against websites and email hosts. Every label from the query host down to eTLD+1 (Public Suffix List) is tried, so mail.suex.io matches a listed suex.io. Public suffixes (co.uk, ru) are ignored. Consumer mail hosts extracted from emails (gmail, yahoo, mail.ru) are not indexed.
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
+        - name: domains
+          in: query
+          description: Alternative parameter for domain. Same Public Suffix List matching as domain.
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
 
         # Address parameters
         - name: address
@@ -845,6 +863,11 @@ components:
             type: string
           type: array
           description: Websites associated with the entity
+        domains:
+          items:
+            type: string
+          type: array
+          description: Query-only DNS names (?domain=). List records leave this empty; prepared keys are not serialized.
       type: object
     CryptoAddress:
       properties:

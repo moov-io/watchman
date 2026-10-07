@@ -682,7 +682,7 @@ func compareExactSourceList[Q any, I any](w io.Writer, query Entity[Q], index En
 	}
 }
 
-// contactFieldMatch handles matching logic for a single contact field type (email, phone, fax, website)
+// contactFieldMatch handles matching logic for a single contact field type (email, phone, fax, website, domain)
 type contactFieldMatch struct {
 	matches    int
 	totalQuery int
@@ -719,6 +719,11 @@ func compareExactContactInfo[Q any, I any](w io.Writer, query Entity[Q], index E
 	if len(queryWebsites) > 0 && len(indexWebsites) > 0 {
 		fieldsCompared++
 		matches = append(matches, compareContactField(queryWebsites, indexWebsites))
+	}
+
+	if len(query.PreparedFields.Domains) > 0 && len(index.PreparedFields.Domains) > 0 {
+		fieldsCompared++
+		matches = append(matches, compareDomainField(query.PreparedFields.Domains, index.PreparedFields.Domains))
 	}
 
 	if fieldsCompared == 0 {
@@ -783,4 +788,28 @@ func contactWebsites[T any](e Entity[T]) []string {
 		return e.PreparedFields.Contact.Websites
 	}
 	return e.Contact.Websites
+}
+
+// compareDomainField scores PSL-walked keys. Any shared name is a full match
+// for this field so a more specific query (mail.suex.io) is not penalized
+// against a listed eTLD+1 (suex.io).
+func compareDomainField(queryValues, indexValues []string) contactFieldMatch {
+	indexSet := make(map[string]struct{}, len(indexValues))
+	for _, v := range indexValues {
+		indexSet[v] = struct{}{}
+	}
+	for _, q := range queryValues {
+		if _, ok := indexSet[q]; ok {
+			return contactFieldMatch{
+				matches:    1,
+				totalQuery: len(queryValues),
+				score:      1.0,
+			}
+		}
+	}
+	return contactFieldMatch{
+		matches:    0,
+		totalQuery: len(queryValues),
+		score:      0,
+	}
 }
