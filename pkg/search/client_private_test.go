@@ -70,6 +70,7 @@ func TestClient_buildQueryParameters(t *testing.T) {
 					EmailAddresses: []string{"press@acmecrypto.com"},
 					PhoneNumbers:   []string{"123-456-7890"},
 					Websites:       []string{"acmecrypto.com"},
+					Domains:        []string{"mail.acmecrypto.com"},
 				},
 				Addresses: []Address{
 					{
@@ -100,6 +101,7 @@ func TestClient_buildQueryParameters(t *testing.T) {
 				"emailAddress":  []string{"press@acmecrypto.com"},
 				"phoneNumber":   []string{"123-456-7890"},
 				"website":       []string{"acmecrypto.com"},
+				"domain":        []string{"mail.acmecrypto.com"},
 				"address":       []string{"123 Acme St Acmetown 54321 AC US"},
 				"cryptoAddress": []string{"XBT:abc12345"},
 				"limit":         []string{"5"},

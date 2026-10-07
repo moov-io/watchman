@@ -61,7 +61,9 @@ gov_national=PK:35201114139885
 gov_tax=RU:9709063550
 ```
 
-Format is `gov_<type>=COUNTRY:IDENTIFIER`. When a **passport, national ID, or IMO** matches on type, country, and number, the score is **1.0**. A matching **tax number, email, or website** raises the score; it does not force 1.0, because those values are often shared.
+Format is `gov_<type>=COUNTRY:IDENTIFIER`. When a **passport, national ID, or IMO** matches on type, country, and number, the score is **1.0**. A matching **tax number, email, website, or domain** raises the score; it does not force 1.0, because those values are often shared.
+
+Certificate hostnames and similar DNS names use `domain=`. Every label down to eTLD+1 is tried, so `domain=mail.suex.io` matches a listed `suex.io`. Public suffixes (`ru`, `co.uk`) are ignored. Consumer mail hosts taken from emails are not indexed.
 
 Unknown customer type: call `type=person` and `type=business` (and `vessel` / `aircraft` when IMO or serial is present). Empty `type=` searches every type (slower) and cannot take person/business fields on GET. A wrong type can miss the hit.
 

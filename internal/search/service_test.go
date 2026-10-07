@@ -164,6 +164,38 @@ func TestService_Search(t *testing.T) {
 		require.Greater(t, results[0].Match, 0.0)
 		require.Less(t, results[0].Match, 1.0)
 	})
+
+	t.Run("domain", func(t *testing.T) {
+		query := search.Entity[search.Value]{
+			Type: search.EntityBusiness,
+			Contact: search.ContactInfo{
+				Domains: []string{"pay.suex.io"},
+			},
+		}
+
+		results, err := svc.Search(ctx, query.Normalize(), opts)
+		require.NoError(t, err)
+		require.NotEmpty(t, results)
+		require.Equal(t, "33151", results[0].SourceID)
+		require.Greater(t, results[0].Match, 0.0)
+		require.Less(t, results[0].Match, 1.0)
+	})
+
+	t.Run("domain multi-label public suffix", func(t *testing.T) {
+		query := search.Entity[search.Value]{
+			Type: search.EntityBusiness,
+			Contact: search.ContactInfo{
+				Domains: []string{"mail.nitc.co.ir"},
+			},
+		}
+
+		results, err := svc.Search(ctx, query.Normalize(), opts)
+		require.NoError(t, err)
+		require.NotEmpty(t, results)
+		require.Equal(t, "15117", results[0].SourceID)
+		require.Greater(t, results[0].Match, 0.0)
+		require.Less(t, results[0].Match, 1.0)
+	})
 }
 
 func testService(tb testing.TB) Service {

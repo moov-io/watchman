@@ -141,6 +141,7 @@ func (e *Entity[T]) merge(other Entity[T]) Entity[T] {
 	out.Contact.PhoneNumbers = mergeStrings(e.Contact.PhoneNumbers, other.Contact.PhoneNumbers)
 	out.Contact.FaxNumbers = mergeStrings(e.Contact.FaxNumbers, other.Contact.FaxNumbers)
 	out.Contact.Websites = mergeStrings(e.Contact.Websites, other.Contact.Websites)
+	out.Contact.Domains = mergeStrings(e.Contact.Domains, other.Contact.Domains)
 
 	out.Addresses = mergeAddresses(e.Addresses, other.Addresses)
 	out.CryptoAddresses = mergeCryptoAddresses(e.CryptoAddresses, other.CryptoAddresses)

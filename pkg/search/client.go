@@ -538,6 +538,9 @@ func setContactInfo(q url.Values, info ContactInfo) {
 	for _, website := range info.Websites {
 		q.Add("website", website)
 	}
+	for _, domain := range info.Domains {
+		q.Add("domain", domain)
+	}
 }
 
 func setAddresses(q url.Values, addresses []Address) {

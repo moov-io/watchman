@@ -141,6 +141,12 @@ func (c *corpus) indexPlainIdentifiers(e search.Entity[search.Value], idx int) {
 	for _, website := range websites {
 		c.website.add(website, idx)
 	}
+	for _, domain := range e.PreparedFields.Domains {
+		if domain == "" {
+			continue
+		}
+		c.domainKeys[domain] = append(c.domainKeys[domain], idx)
+	}
 }
 
 func (c *corpus) plainIdentifierHits(query search.Entity[search.Value]) []int {
@@ -168,6 +174,9 @@ func (c *corpus) plainIdentifierHits(query search.Entity[search.Value]) []int {
 	}
 	for _, website := range websites {
 		hits = append(hits, c.website.match(website, minWebsitePrefix)...)
+	}
+	for _, domain := range query.PreparedFields.Domains {
+		hits = append(hits, c.domainKeys[domain]...)
 	}
 	if len(hits) == 0 {
 		return nil

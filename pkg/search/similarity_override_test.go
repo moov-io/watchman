@@ -158,6 +158,29 @@ func TestExactOverride_ContactDoesNotForceOne(t *testing.T) {
 	require.Less(t, got, 1.0, "shared email must not force 1.0")
 }
 
+func TestExactOverride_DomainDoesNotForceOne(t *testing.T) {
+	query := Entity[Value]{
+		Name: "Alpha LLC",
+		Type: EntityBusiness,
+		Business: &Business{
+			Name: "Alpha LLC",
+		},
+		Contact: ContactInfo{Domains: []string{"mail.example.com"}},
+	}.Normalize()
+	index := Entity[Value]{
+		Name: "Beta GmbH",
+		Type: EntityBusiness,
+		Business: &Business{
+			Name: "Beta GmbH",
+		},
+		Contact: ContactInfo{Websites: []string{"example.com"}},
+	}.Normalize()
+
+	got := Similarity(query, index)
+	require.Greater(t, got, 0.0, "matching domain must raise the score")
+	require.Less(t, got, 1.0, "shared domain must not force 1.0")
+}
+
 func TestExactOverride_WebsiteDoesNotForceOne(t *testing.T) {
 	query := Entity[Value]{
 		Name: "Alpha LLC",

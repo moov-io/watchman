@@ -265,6 +265,7 @@ All search parameters from the HTTP `/v2/search` endpoint are supported:
 - `addresses`: Array of address objects
 - `phoneNumbers`: Phone numbers
 - `emailAddresses`: Email addresses
+- `domains`: DNS names (`domain=`), matched against listed websites and email hosts via the Public Suffix List
 - `cryptoAddresses`: Cryptocurrency addresses
 - `governmentIDs`: Government-issued IDs (passports, tax IDs, etc.)
 - `algorithm`: String matching algorithm (same values as HTTP `?algorithm=`)

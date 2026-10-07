@@ -102,6 +102,9 @@ type ContactInfo struct {
 	PhoneNumbers   []string `json:"phoneNumbers"`
 	FaxNumbers     []string `json:"faxNumbers"`
 	Websites       []string `json:"websites"`
+	// Domains is a query-only field (?domain=). List records leave it empty.
+	// Prepared domain keys live on PreparedFields.Domains.
+	Domains []string `json:"domains,omitempty"`
 }
 
 // TODO(adam):
@@ -283,6 +286,11 @@ type PreparedFields struct {
 
 	Contact   ContactInfo
 	Addresses []PreparedAddress
+
+	// Domains are DNS names extracted from websites, email hosts (skipping
+	// public mail providers), and query domain= values, each walked from the
+	// FQDN down to eTLD+1 (publicsuffix).
+	Domains []string
 }
 
 type PreparedAddress struct {
@@ -357,6 +365,7 @@ func (e Entity[T]) Normalize() Entity[T] {
 	e.PreparedFields.Contact.PhoneNumbers = normalizePhoneNumbers(e.Contact.PhoneNumbers)
 	e.PreparedFields.Contact.FaxNumbers = normalizePhoneNumbers(e.Contact.FaxNumbers)
 	e.PreparedFields.Contact.Websites = normalizeWebsites(e.Contact.Websites)
+	e.PreparedFields.Domains = normalizeDomains(e.Contact.Domains, e.Contact.Websites, e.Contact.EmailAddresses)
 
 	// Addresses
 	e.PreparedFields.Addresses = normalizeAddresses(e.Addresses)
@@ -432,6 +441,33 @@ func normalizeWebsites(sites []string) []string {
 	}
 	if len(out) == 0 {
 		return nil
+	}
+	return out
+}
+
+func normalizeDomains(domains, websites, emails []string) []string {
+	var out []string
+	seen := make(map[string]struct{})
+	add := func(keys []string) {
+		for _, key := range keys {
+			if key == "" {
+				continue
+			}
+			if _, dup := seen[key]; dup {
+				continue
+			}
+			seen[key] = struct{}{}
+			out = append(out, key)
+		}
+	}
+	for _, d := range domains {
+		add(norm.DomainKeys(d))
+	}
+	for _, site := range websites {
+		add(norm.DomainKeys(site))
+	}
+	for _, email := range emails {
+		add(norm.DomainKeysFromEmail(email))
 	}
 	return out
 }
