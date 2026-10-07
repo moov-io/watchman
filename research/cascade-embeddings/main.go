@@ -62,7 +62,7 @@ func run() error {
 		renderReports("Results", reports)
 
 	if *out == "" {
-		fmt.Print(body)
+		fmt.Fprint(os.Stdout, body)
 		return nil
 	}
 	return os.WriteFile(*out, []byte(body), 0o600)
