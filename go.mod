@@ -61,7 +61,6 @@ require (
 	fyne.io/systray v1.12.3-0.20260810170012-af4e8e793ec4 // indirect
 	github.com/BurntSushi/toml v1.6.0 // indirect
 	github.com/GoogleCloudPlatform/grpc-gcp-go/grpcgcp v1.6.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.34.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.62.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.62.0 // indirect
 	github.com/antchfx/xpath v1.3.9 // indirect

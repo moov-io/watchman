@@ -1,0 +1,7 @@
+Watchman:
+  Servers:
+    Pprof:
+      Enabled: true
+      Secret: "test-pprof-secret"
+      Block: true
+      Mutex: true

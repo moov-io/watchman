@@ -28,6 +28,8 @@ The admin HTTP server is a **separate port** (`AdminAddress`, `:9094` by default
 
 Prometheus metrics (`/metrics`) and `/version` live on the admin server on purpose and are unauthenticated. Unauthenticated `/metrics` on that port is expected.
 
+`GET /debug/pprof/` is also on the admin port by default (historical moov-io/base behavior). Those handlers can dump process memory, including loaded list records. Set `Watchman.Servers.Pprof.Enabled` to false to omit them, or set `Pprof.Secret` so callers must send `Authorization: Bearer <secret>` or `X-Pprof-Token: <secret>`. See [Configuration](/watchman/config/).
+
 See [issue #875](https://github.com/moov-io/watchman/issues/875).
 
 ## Download URLs

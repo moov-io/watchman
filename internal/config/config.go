@@ -14,6 +14,7 @@ import (
 	"github.com/moov-io/watchman/internal/search"
 	"github.com/moov-io/watchman/internal/webui"
 
+	"github.com/moov-io/base/admin"
 	"github.com/moov-io/base/config"
 	"github.com/moov-io/base/database"
 	"github.com/moov-io/base/log"
@@ -46,6 +47,8 @@ type Config struct {
 type ServerConfig struct {
 	BindAddress  string
 	AdminAddress string
+
+	Pprof *admin.Pprof
 
 	TLSCertFile string
 	TLSKeyFile  string

@@ -2,6 +2,13 @@ Watchman:
   Servers:
     BindAddress: ":8084"
     AdminAddress: ":9094"
+    # /debug/pprof on the admin port. Omitted keeps historical behavior
+    # (all profiles, unauthenticated). Disable in production, or set Secret.
+    # Pprof:
+    #   Enabled: false
+    #   Secret: ""
+    #   Block: false
+    #   Mutex: false
 
   Telemetry:
     ServiceName: "watchman"
