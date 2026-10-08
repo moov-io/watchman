@@ -12,6 +12,7 @@ permissions:
 jobs:
   build:
     name: Go Build
+    if: github.repository == 'moov-io/watchman'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
