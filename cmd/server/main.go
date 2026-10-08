@@ -180,7 +180,8 @@ func main() {
 
 	// Start Admin server (with Prometheus metrics)
 	adminServer, err := admin.New(admin.Opts{
-		Addr: conf.Servers.AdminAddress,
+		Addr:  conf.Servers.AdminAddress,
+		Pprof: conf.Servers.Pprof,
 	})
 	if err != nil {
 		errs <- fmt.Errorf("problem starting admin server: %v", err)

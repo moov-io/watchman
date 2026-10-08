@@ -51,6 +51,13 @@ Watchman:
   Servers:
     BindAddress: ":8084"
     AdminAddress: ":9094"
+    # /debug/pprof on the admin port. Omitted keeps historical behavior
+    # (all profiles, unauthenticated). Disable in production, or set Secret.
+    # Pprof:
+    #   Enabled: false
+    #   Secret: ""
+    #   Block: false
+    #   Mutex: false
 
   Telemetry:
     ServiceName: "watchman"
@@ -72,14 +79,19 @@ Watchman:
   #       MaxIdleTime: "60s"
 ```
 
-`BindAddress` is the business API. `AdminAddress` is a **separate port** for Prometheus metrics and `/version` so deployments can firewall, bind internally, or block admin without touching search. Watchman is not designed to be served directly on the internet. See [Network access](/watchman/network/).
+`BindAddress` is the business API. `AdminAddress` is a **separate port** for Prometheus metrics, `/version`, and `/debug/pprof` so deployments can firewall, bind internally, or block admin without touching search. Watchman is not designed to be served directly on the internet. See [Network access](/watchman/network/).
+
+Omitting `Servers.Pprof` keeps historical behavior: every Go pprof handler is registered on the admin port with no authentication, and block/mutex sampling follow the `PPROF_BLOCK` / `PPROF_MUTEX` environment variables. Heap and goroutine profiles can include in-memory list data, so production should set `Enabled: false` or a non-empty `Secret`. A secret requires `Authorization: Bearer <secret>` or `X-Pprof-Token: <secret>`. Put `Secret` in `APP_CONFIG_SECRETS` rather than the main config file.
+
+`Enabled: true` with `Block` / `Mutex` left false turns those two profiles off even if `PPROF_BLOCK` or `PPROF_MUTEX` is set. Per-profile `PPROF_*` variables (for example `PPROF_ALLOCS=no`) still apply when pprof is enabled.
 
 ### Metrics
 
 The admin server (`AdminAddress`, `:9094` by default) serves Prometheus metrics at
 `/metrics`, including Go runtime and process collectors plus a duration histogram for
-every request the API server handles. Metrics on this port are unauthenticated by design;
-do not expose `:9094` on the public internet.
+every request the API server handles. Metrics on this port are unauthenticated by design.
+`/debug/pprof` is also on this port unless `Servers.Pprof.Enabled` is false. Do not
+expose `:9094` on the public internet.
 
 ```
 watchman_http_request_duration_seconds_bucket{method="GET",route="/v2/search",code="200",le="0.25"}

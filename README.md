@@ -111,7 +111,7 @@ That `docker run` publishes only the business API (`:8084`). Do not expose Watch
 
 Watchman is not designed to be served directly on the internet. Run it on a private network or behind a reverse proxy / API gateway. Authentication, ACLs, and rate limiting belong at the edge of the deployment, not inside Watchman.
 
-The HTTP API (`BindAddress`, `:8084`) is unauthenticated by design (search, ingest, export, refresh, web UI, MCP). The admin server (`AdminAddress`, `:9094`) is a **separate port** so you can firewall it, bind it to an internal interface, or block it entirely. Prometheus `/metrics` and `/version` live on the admin port on purpose and are unauthenticated.
+The HTTP API (`BindAddress`, `:8084`) is unauthenticated by design (search, ingest, export, refresh, web UI, MCP). The admin server (`AdminAddress`, `:9094`) is a **separate port** so you can firewall it, bind it to an internal interface, or block it entirely. Prometheus `/metrics` and `/version` live on the admin port on purpose and are unauthenticated. `/debug/pprof` is on that port by default; disable it with `Servers.Pprof.Enabled: false` or require a token with `Servers.Pprof.Secret`.
 
 Download URLs (`file://` locations, `*_DOWNLOAD_TEMPLATE`, `*_DOWNLOAD_URL`) are operator configuration, not API input. Watchman does not allowlist hosts or jail `file://` paths.
 
