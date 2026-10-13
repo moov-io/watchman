@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/moov-io/watchman/internal/norm"
 	"github.com/moov-io/watchman/pkg/search"
 )
 
@@ -20,6 +21,7 @@ const (
 	minEmailPrefix   = 3
 	minPhonePrefix   = 4
 	minWebsitePrefix = 3
+	minSwiftPrefix   = 4
 )
 
 type idEntry struct {
@@ -147,6 +149,26 @@ func (c *corpus) indexPlainIdentifiers(e search.Entity[search.Value], idx int) {
 		}
 		c.domainKeys[domain] = append(c.domainKeys[domain], idx)
 	}
+	bics := e.PreparedFields.SwiftBICs
+	if len(bics) == 0 {
+		bics = e.SwiftBICs
+	}
+	seen := make(map[string]struct{})
+	addSwift := func(value string) {
+		value = normalizeID(value)
+		if value == "" {
+			return
+		}
+		if _, dup := seen[value]; dup {
+			return
+		}
+		seen[value] = struct{}{}
+		c.swift.add(value, idx)
+	}
+	for _, bic := range bics {
+		addSwift(bic)
+		addSwift(norm.SwiftBIC8(bic))
+	}
 }
 
 func (c *corpus) plainIdentifierHits(query search.Entity[search.Value]) []int {
@@ -177,6 +199,16 @@ func (c *corpus) plainIdentifierHits(query search.Entity[search.Value]) []int {
 	}
 	for _, domain := range query.PreparedFields.Domains {
 		hits = append(hits, c.domainKeys[domain]...)
+	}
+	bics := query.PreparedFields.SwiftBICs
+	if len(bics) == 0 {
+		bics = query.SwiftBICs
+	}
+	for _, bic := range bics {
+		hits = append(hits, c.swift.match(bic, minSwiftPrefix)...)
+		if b8 := norm.SwiftBIC8(bic); b8 != "" {
+			hits = append(hits, c.swift.match(b8, minSwiftPrefix)...)
+		}
 	}
 	if len(hits) == 0 {
 		return nil

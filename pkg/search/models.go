@@ -33,6 +33,9 @@ type Entity[T Value] struct {
 
 	CryptoAddresses []CryptoAddress `json:"cryptoAddresses"`
 
+	// SwiftBICs are ISO 9362 SWIFT/BIC codes (8 or 11 characters).
+	SwiftBICs []string `json:"swiftBICs,omitempty"`
+
 	Affiliations   []Affiliation    `json:"affiliations"`
 	SanctionsInfo  *SanctionsInfo   `json:"sanctionsInfo"`
 	HistoricalInfo []HistoricalInfo `json:"historicalInfo"`
@@ -287,6 +290,9 @@ type PreparedFields struct {
 	Contact   ContactInfo
 	Addresses []PreparedAddress
 
+	// SwiftBICs are canonical ISO 9362 codes (XXX branch stripped).
+	SwiftBICs []string
+
 	// Domains are DNS names extracted from websites, email hosts (skipping
 	// public mail providers), and query domain= values, each walked from the
 	// FQDN down to eTLD+1 (publicsuffix).
@@ -365,6 +371,7 @@ func (e Entity[T]) Normalize() Entity[T] {
 	e.PreparedFields.Contact.PhoneNumbers = normalizePhoneNumbers(e.Contact.PhoneNumbers)
 	e.PreparedFields.Contact.FaxNumbers = normalizePhoneNumbers(e.Contact.FaxNumbers)
 	e.PreparedFields.Contact.Websites = normalizeWebsites(e.Contact.Websites)
+	e.PreparedFields.SwiftBICs = normalizeSwiftBICs(e.SwiftBICs)
 	e.PreparedFields.Domains = normalizeDomains(e.Contact.Domains, e.Contact.Websites, e.Contact.EmailAddresses)
 
 	// Addresses
@@ -419,6 +426,10 @@ func normalizePhoneNumbers(numbers []string) []string {
 		out[idx] = norm.PhoneNumber(numbers[idx])
 	}
 	return out
+}
+
+func normalizeSwiftBICs(codes []string) []string {
+	return norm.ParseSwiftBICs(codes...)
 }
 
 func normalizeWebsites(sites []string) []string {

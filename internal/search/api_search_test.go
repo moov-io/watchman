@@ -33,8 +33,8 @@ func TestAPI_ListInfo(t *testing.T) {
 	require.Equal(t, http.StatusOK, w.Code)
 
 	body := w.Body.String()
-	require.Contains(t, body, `"lists":{"us_ofac":17}`)
-	require.Contains(t, body, `"listHashes":{"us_ofac":"b9d56301`)
+	require.Contains(t, body, `"lists":{"us_ofac":18}`)
+	require.Contains(t, body, `"listHashes":{"us_ofac":"0dbca966`)
 }
 
 type testSetup struct {
@@ -189,6 +189,27 @@ func TestAPI_readSearchRequest(t *testing.T) {
 		require.ElementsMatch(t, expected.Domains, query.Contact.Domains)
 		require.Contains(t, query.PreparedFields.Domains, "corp.com")
 		require.Contains(t, query.PreparedFields.Domains, "mail.corp.com")
+	})
+
+	t.Run("swift and bic aliases", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?swift=HNRBBY2X&bic=RUDVRUMM", nil)
+		q := &api.QueryParams{Values: req.URL.Query()}
+
+		query, err := readSearchRequest(ctx, nil, q)
+		require.NoError(t, err)
+		require.Empty(t, query.Type)
+		require.ElementsMatch(t, []string{"HNRBBY2X", "RUDVRUMM"}, query.SwiftBICs)
+		require.ElementsMatch(t, []string{"HNRBBY2X", "RUDVRUMM"}, query.PreparedFields.SwiftBICs)
+	})
+
+	t.Run("swift 11-character XXX prepared as BIC8", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?type=business&swift=HNRBBY2XXXX", nil)
+		q := &api.QueryParams{Values: req.URL.Query()}
+
+		query, err := readSearchRequest(ctx, nil, q)
+		require.NoError(t, err)
+		require.Equal(t, []string{"HNRBBY2XXXX"}, query.SwiftBICs)
+		require.Equal(t, []string{"HNRBBY2X"}, query.PreparedFields.SwiftBICs)
 	})
 
 	t.Run("crypto addresses", func(t *testing.T) {
@@ -437,6 +458,39 @@ func TestAPI_Search(t *testing.T) {
 
 		require.Equal(t, http.StatusBadRequest, w.Code)
 		require.Contains(t, w.Body.String(), "debug threshold must be between 0.0 and 1.0")
+	})
+
+	t.Run("swift only finds listed bank", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?swift=HNRBBY2X&minMatch=0.80&limit=5", nil)
+
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+
+		require.Equal(t, http.StatusOK, w.Code)
+
+		var response search.SearchResponse
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		require.NoError(t, err)
+		require.NotEmpty(t, response.Entities)
+		require.Equal(t, "12028", response.Entities[0].SourceID)
+		require.InDelta(t, 1.0, response.Entities[0].Match, 0.001)
+		require.Contains(t, response.Entities[0].SwiftBICs, "HNRBBY2X")
+	})
+
+	t.Run("bic alias matches listed SWIFT/BIC", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/v2/search?type=business&bic=HNRBBY2XXXX&minMatch=0.80&limit=5", nil)
+
+		w := httptest.NewRecorder()
+		env.router.ServeHTTP(w, req)
+
+		require.Equal(t, http.StatusOK, w.Code)
+
+		var response search.SearchResponse
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		require.NoError(t, err)
+		require.NotEmpty(t, response.Entities)
+		require.Equal(t, "12028", response.Entities[0].SourceID)
+		require.InDelta(t, 1.0, response.Entities[0].Match, 0.001)
 	})
 
 	t.Run("website only finds listed business", func(t *testing.T) {

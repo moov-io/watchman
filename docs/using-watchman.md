@@ -61,7 +61,13 @@ gov_national=PK:35201114139885
 gov_tax=RU:9709063550
 ```
 
-Format is `gov_<type>=COUNTRY:IDENTIFIER`. When a **passport, national ID, or IMO** matches on type, country, and number, the score is **1.0**. A matching **tax number, email, website, or domain** raises the score; it does not force 1.0, because those values are often shared.
+Format is `gov_<type>=COUNTRY:IDENTIFIER`. When a **passport, national ID, or IMO** matches on type, country, and number, or a **SWIFT/BIC** matches, the score is **1.0**. A matching **tax number, email, website, or domain** raises the score; it does not force 1.0, because those values are often shared.
+
+SWIFT/BIC uses `swift=` or `bic=` (aliases). Country is characters 5–6 of the code. Omit `type` for a BIC-only query so OFAC businesses and US CSL organizations are both searched:
+
+```
+GET /v2/search?swift=HNRBBY2X&minMatch=0.80
+```
 
 Certificate hostnames and similar DNS names use `domain=`. Every label down to eTLD+1 is tried, so `domain=mail.suex.io` matches a listed `suex.io`. Public suffixes (`ru`, `co.uk`) are ignored. Consumer mail hosts taken from emails are not indexed.
 
@@ -121,6 +127,13 @@ Vessel:
 
 ```
 GET /v2/search?type=vessel&name=NS+LEADER&imoNumber=9339301
+```
+
+Bank SWIFT/BIC:
+
+```
+GET /v2/search?swift=HNRBBY2X&minMatch=0.80
+GET /v2/search?type=business&bic=HNRBBY2XXXX&minMatch=0.80
 ```
 
 Debug one hit:

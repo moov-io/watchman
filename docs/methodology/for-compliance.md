@@ -31,7 +31,7 @@ A usable engine has to move **both** numbers, and it has to show **why** a hit s
 
 **A score built from the fields CDD already collects.** FinCEN’s CDD rule expects institutions to know who they are dealing with. Watchman takes that same record — name, type, government IDs, date of birth, address, contact, vessel IMO — and scores it as a structured entity, not a single string. Name-only queries are down-ranked on purpose.
 
-**How identifiers affect the score.** Some identifiers are unique to one person or vessel. If the query and a list record share a **passport, national ID, IMO number, MMSI, aircraft serial, or crypto address**, and the country (where it applies) matches, Watchman returns **1.0** — treat this as the same party.
+**How identifiers affect the score.** Some identifiers are unique to one person, vessel, or bank. If the query and a list record share a **passport, national ID, IMO number, MMSI, aircraft serial, crypto address, or SWIFT/BIC**, and the country (where it applies) matches, Watchman returns **1.0** — treat this as the same party.
 
 Other identifiers are weaker. A **tax number, company registration, or email** can belong to more than one legal entity (a parent and a subsidiary, two people at the same office). Those fields raise the score. They do not, by themselves, declare a match.
 

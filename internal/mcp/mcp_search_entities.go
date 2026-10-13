@@ -30,6 +30,7 @@ type SearchEntityRequest struct {
 	Contact         pubsearch.ContactInfo     `json:"contact,omitempty" jsonschema:"Contact information"`
 	Addresses       []pubsearch.Address       `json:"addresses,omitempty" jsonschema:"Addresses"`
 	CryptoAddresses []pubsearch.CryptoAddress `json:"cryptoAddresses,omitempty" jsonschema:"Crypto addresses"`
+	SwiftBICs       []string                  `json:"swiftBICs,omitempty" jsonschema:"ISO 9362 SWIFT/BIC codes"`
 
 	Affiliations   []pubsearch.Affiliation    `json:"affiliations,omitempty" jsonschema:"Affiliations"`
 	SanctionsInfo  *pubsearch.SanctionsInfo   `json:"sanctionsInfo,omitempty" jsonschema:"Sanctions information"`
@@ -63,6 +64,7 @@ func (s *Server) HandleSearchEntities(ctx context.Context, req *mcp.CallToolRequ
 		Contact:         args.Request.Contact,
 		Addresses:       args.Request.Addresses,
 		CryptoAddresses: args.Request.CryptoAddresses,
+		SwiftBICs:       args.Request.SwiftBICs,
 		Affiliations:    args.Request.Affiliations,
 		SanctionsInfo:   args.Request.SanctionsInfo,
 		HistoricalInfo:  args.Request.HistoricalInfo,

@@ -15,6 +15,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestMapOrganization_SMEBankSwift(t *testing.T) {
+	entity := cslustest.FindEntity(t, "18283")
+
+	require.Equal(t, "SME BANK", entity.Name)
+	require.Equal(t, search.EntityOrganization, entity.Type)
+	require.Equal(t, search.SourceUSCSL, entity.Source)
+	require.Equal(t, []string{"RUDVRUMM"}, entity.SwiftBICs)
+	require.Equal(t, []string{"RUDVRUMM"}, entity.PreparedFields.SwiftBICs)
+}
+
 func TestMapBusiness_Sinobright(t *testing.T) {
 	entity := cslustest.FindEntity(t, "233a4d725770c81fb561ffe3842c14010c2201971d6be62eca1e613b")
 

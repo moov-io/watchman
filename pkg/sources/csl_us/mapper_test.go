@@ -135,6 +135,77 @@ func TestMapSanctionsProgramsFromCSV(t *testing.T) {
 	require.Equal(t, "NS-PLC", got.Programs[0], "expected program to be NS-PLC")
 }
 
+func TestToEntity_SwiftBIC(t *testing.T) {
+	t.Run("type-first SWIFT/BIC", func(t *testing.T) {
+		got := ToEntity(SanctionsEntry{
+			ID:   "18283",
+			Name: "SME BANK",
+			Type: "Entity",
+			IDs:  "Public Registration Number, 1027739108649; SWIFT/BIC, RUDVRUMM; Website, mspbank.ru",
+		})
+		require.Equal(t, []string{"RUDVRUMM"}, got.SwiftBICs)
+		require.Equal(t, search.EntityOrganization, got.Type)
+	})
+
+	t.Run("value-first SWIFT/BIC", func(t *testing.T) {
+		got := ToEntity(SanctionsEntry{
+			ID:   "15268",
+			Name: "BANK OF KUNLUN CO LTD",
+			Type: "Entity",
+			IDs:  "CKLBCNBJ, SWIFT/BIC",
+		})
+		require.Equal(t, []string{"CKLBCNBJ"}, got.SwiftBICs)
+	})
+
+	t.Run("Gazprombank GAZPRUMM", func(t *testing.T) {
+		got := ToEntity(SanctionsEntry{
+			ID:   "17016",
+			Name: "GAZPROMBANK OAO",
+			Type: "Entity",
+			IDs:  "09807684, Government Gazette Number; 7744001497, Tax ID No.; GAZPRUMM, SWIFT/BIC",
+		})
+		require.Equal(t, []string{"GAZPRUMM"}, got.SwiftBICs)
+	})
+}
+
+func TestToEntity_SwiftBICFromTestdata(t *testing.T) {
+	ctx := context.Background()
+	logger := log.NewTestLogger()
+
+	wd, err := os.Getwd()
+	require.NoError(t, err)
+
+	files, err := Download(ctx, logger, filepath.Join(wd, "testdata"))
+	require.NoError(t, err)
+
+	data, err := Read(files)
+	require.NoError(t, err)
+
+	want := map[string][]string{
+		"15268": {"CKLBCNBJ"},
+		"18283": {"RUDVRUMM"},
+		"17016": {"GAZPRUMM"},
+	}
+
+	found := 0
+	withBIC := 0
+	for _, row := range data.SanctionsData {
+		e := ToEntity(row)
+		if len(e.SwiftBICs) > 0 {
+			withBIC++
+		}
+		expect, ok := want[e.SourceID]
+		if !ok {
+			continue
+		}
+		require.Equal(t, expect, e.SwiftBICs, e.SourceID)
+		require.Equal(t, expect, e.PreparedFields.SwiftBICs, e.SourceID)
+		found++
+	}
+	require.Equal(t, len(want), found)
+	require.Greater(t, withBIC, 20)
+}
+
 func TestMapIDTypeFromCSV(t *testing.T) {
 	// Create a sample SanctionsEntry with IDs
 	entry := SanctionsEntry{

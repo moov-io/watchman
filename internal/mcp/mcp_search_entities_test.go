@@ -105,6 +105,28 @@ func TestSearchEntities_IncludeDetails_FalseOmitsPieces(t *testing.T) {
 	}
 }
 
+func TestSearchEntities_SwiftBIC(t *testing.T) {
+	srv := newTestServer(t)
+
+	minMatch := 0.80
+	limit := 5
+	result, _, err := srv.HandleSearchEntities(context.Background(), &mcpsdk.CallToolRequest{}, SearchEntitiesRequest{
+		Request:  SearchEntityRequest{SwiftBICs: []string{"HNRBBY2X"}},
+		Limit:    &limit,
+		MinMatch: &minMatch,
+	})
+	require.NoError(t, err)
+	require.Len(t, result.Content, 1)
+
+	text := result.Content[0].(*mcpsdk.TextContent).Text
+	var resp pubsearch.SearchResponse
+	require.NoError(t, json.Unmarshal([]byte(text), &resp))
+	require.NotEmpty(t, resp.Entities)
+	require.Equal(t, "12028", resp.Entities[0].SourceID)
+	require.InDelta(t, 1.0, resp.Entities[0].Match, 0.001)
+	require.Contains(t, resp.Entities[0].SwiftBICs, "HNRBBY2X")
+}
+
 func TestSearchEntities_AlgorithmSoundex(t *testing.T) {
 	srv := newTestServer(t)
 

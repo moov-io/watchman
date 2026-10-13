@@ -368,6 +368,7 @@ func BuildQueryParameters(q url.Values, entity Entity[Value]) url.Values {
 	setContactInfo(q, entity.Contact)
 	setAddresses(q, entity.Addresses)
 	setCryptoAddresses(q, entity.CryptoAddresses)
+	setSwiftBICs(q, entity.SwiftBICs)
 
 	return q
 }
@@ -552,6 +553,14 @@ func setAddresses(q url.Values, addresses []Address) {
 func setCryptoAddresses(q url.Values, cryptoAddresses []CryptoAddress) {
 	for _, addr := range cryptoAddresses {
 		q.Add("cryptoAddress", fmt.Sprintf("%s:%s", addr.Currency, addr.Address))
+	}
+}
+
+func setSwiftBICs(q url.Values, codes []string) {
+	for _, code := range codes {
+		if strings.TrimSpace(code) != "" {
+			q.Add("swift", code)
+		}
 	}
 }
 

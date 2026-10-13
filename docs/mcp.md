@@ -267,6 +267,7 @@ All search parameters from the HTTP `/v2/search` endpoint are supported:
 - `emailAddresses`: Email addresses
 - `domains`: DNS names (`domain=`), matched against listed websites and email hosts via the Public Suffix List
 - `cryptoAddresses`: Cryptocurrency addresses
+- `swiftBICs`: ISO 9362 SWIFT/BIC codes (`swift=` / `bic=` on HTTP)
 - `governmentIDs`: Government-issued IDs (passports, tax IDs, etc.)
 - `algorithm`: String matching algorithm (same values as HTTP `?algorithm=`)
 

@@ -509,11 +509,27 @@ func TestCorpus_ExactIdentifiers(t *testing.T) {
 		SourceID: "p2",
 		Person:   &search.Person{Name: "John Smith"},
 	})
+	bank := mustNorm(search.Entity[search.Value]{
+		Name:      "ONERBANK ZAO",
+		Type:      search.EntityBusiness,
+		Source:    search.SourceUSOFAC,
+		SourceID:  "b1",
+		Business:  &search.Business{Name: "ONERBANK ZAO"},
+		SwiftBICs: []string{"HNRBBY2X"},
+	})
+	otherBank := mustNorm(search.Entity[search.Value]{
+		Name:      "SME BANK",
+		Type:      search.EntityOrganization,
+		Source:    search.SourceUSOFAC,
+		SourceID:  "b2",
+		Organization: &search.Organization{Name: "SME BANK"},
+		SwiftBICs: []string{"RUDVRUMM"},
+	})
 
 	idx := NewLists(nil)
 	idx.Update(download.Stats{
-		Entities: []search.Entity[search.Value]{vessel, otherVessel, aircraft, contact, otherPerson},
-		Lists:    map[string]int{string(search.SourceUSOFAC): 5},
+		Entities: []search.Entity[search.Value]{vessel, otherVessel, aircraft, contact, otherPerson, bank, otherBank},
+		Lists:    map[string]int{string(search.SourceUSOFAC): 7},
 	})
 	ctx := context.Background()
 
@@ -677,6 +693,54 @@ func TestCorpus_ExactIdentifiers(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 1, cands.Len())
 		require.Equal(t, "p1", cands.At(0).SourceID)
+	})
+
+	t.Run("SWIFT-only query does not scan other businesses", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:      search.EntityBusiness,
+			Source:    search.SourceUSOFAC,
+			SwiftBICs: []string{"HNRBBY2X"},
+		})
+		require.Empty(t, query.PreparedFields.NameFields)
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "b1", cands.At(0).SourceID)
+	})
+
+	t.Run("BIC alias 11-character XXX matches listed BIC8", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:      search.EntityBusiness,
+			Source:    search.SourceUSOFAC,
+			SwiftBICs: []string{"HNRBBY2XXXX"},
+		})
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "b1", cands.At(0).SourceID)
+	})
+
+	t.Run("SWIFT query without type finds the bank", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Source:    search.SourceUSOFAC,
+			SwiftBICs: []string{"RUDVRUMM"},
+		})
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "b2", cands.At(0).SourceID)
+	})
+
+	t.Run("SWIFT prefix query matches the bank", func(t *testing.T) {
+		query := mustNorm(search.Entity[search.Value]{
+			Type:      search.EntityBusiness,
+			Source:    search.SourceUSOFAC,
+			SwiftBICs: []string{"HNRB"},
+		})
+		cands, err := idx.SelectCandidates(ctx, query)
+		require.NoError(t, err)
+		require.Equal(t, 1, cands.Len())
+		require.Equal(t, "b1", cands.At(0).SourceID)
 	})
 
 	t.Run("short IMO prefix falls back to the vessel partition", func(t *testing.T) {

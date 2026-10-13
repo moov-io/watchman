@@ -254,7 +254,7 @@ func scoreSimilarityFast[Q any, I any](query Entity[Q], index Entity[I], opts Si
 		query = recast
 	}
 
-	// Unique identity keys (passport, IMO, crypto) can still skip name work.
+	// Unique identity keys (passport, IMO, SWIFT/BIC, crypto) can still skip name work.
 	// Tax/registration and contact (email/phone/website) matches fall through so a disagreeing name
 	// can block a 1.0 override.
 	p0 := compareExactIdentifiers(nil, query, index, criticalIdWeight)
@@ -285,7 +285,7 @@ func uniqueIdentityExact(p ScorePiece) bool {
 }
 
 // shouldExactOverride reports whether a 1.0 final score is justified.
-// Only unique identity keys (passport, IMO, crypto, …) short-circuit, and only
+// Only unique identity keys (passport, IMO, SWIFT/BIC, crypto, …) short-circuit, and only
 // when the piece is Exact (identifier and country). Tax IDs, business
 // registrations, and contact (email/phone/website/domain) matches stay in the weighted blend.
 func shouldExactOverride(pieces []ScorePiece) bool {
@@ -621,6 +621,9 @@ func countCommonFields[I any](index Entity[I]) int {
 		count++
 	}
 	if len(index.CryptoAddresses) > 0 {
+		count++
+	}
+	if len(index.SwiftBICs) > 0 {
 		count++
 	}
 	if len(index.Affiliations) > 0 {
