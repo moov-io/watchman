@@ -124,6 +124,7 @@ func TestParseSearchDebug(t *testing.T) {
 			if tc.errContains != "" {
 				require.Error(t, err)
 				require.Contains(t, err.Error(), tc.errContains)
+				require.NotContains(t, err.Error(), tc.in)
 				return
 			}
 			require.NoError(t, err)
@@ -425,6 +426,7 @@ func TestAPI_Search(t *testing.T) {
 
 		require.Equal(t, http.StatusBadRequest, w.Code)
 		require.Contains(t, w.Body.String(), "invalid debug value")
+		require.NotContains(t, w.Body.String(), "maybe")
 	})
 
 	t.Run("debug threshold out of range", func(t *testing.T) {

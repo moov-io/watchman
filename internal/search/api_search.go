@@ -197,7 +197,8 @@ func parseSearchDebug(raw string) (bool, float64, error) {
 	if strings.Contains(raw, ".") {
 		n, err := strconv.ParseFloat(raw, 64)
 		if err != nil || math.IsNaN(n) || math.IsInf(n, 0) {
-			return false, 0, fmt.Errorf("invalid debug threshold %q", raw)
+			// Omit the raw value so HTTP error logs are not a log-injection source.
+			return false, 0, fmt.Errorf("invalid debug threshold")
 		}
 		if n < 0 || n > 1 {
 			return false, 0, fmt.Errorf("debug threshold must be between 0.0 and 1.0")
@@ -211,7 +212,8 @@ func parseSearchDebug(raw string) (bool, float64, error) {
 	if isSearchDebugOff(raw) {
 		return false, 0, nil
 	}
-	return false, 0, fmt.Errorf("invalid debug value %q", raw)
+	// Omit the raw value so HTTP error logs are not a log-injection source.
+	return false, 0, fmt.Errorf("invalid debug value")
 }
 
 func isSearchDebugOff(raw string) bool {
