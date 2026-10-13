@@ -276,6 +276,8 @@ Watchman integrates the following lists to help you maintain global compliance.
 | `us_non_sdn`      | US Office of Foreign Assets Control (OFAC)  | [URL](https://ofac.treasury.gov/sanctions-list-service)                                                                                  |
 | `us_ofac`         | US Office of Foreign Assets Control (OFAC)  | [URL](https://ofac.treasury.gov/sanctions-list-service)                                                                                  |
 
+The US CSL Nonproliferation Sanctions source code is `ACN` (Bureau of Arms Control and Nonproliferation). Files published before that rename used `ISN`. Watchman maps both labels as Nonproliferation Sanctions and keeps the original `source` string on `sourceData`.
+
 ### Environment Variables
 
 | Environmental Variable         | Description                                                                                                                          | Default                                     |

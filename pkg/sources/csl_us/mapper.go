@@ -78,7 +78,7 @@ func ToEntity(src SanctionsEntry) search.Entity[search.Value] {
 			// Otherwise they're an individual
 			goto individual
 
-		case strings.Contains(src.Source, "Nonproliferation Sanctions"):
+		case isNonproliferationSanctions(src.Source):
 			goto business
 
 		case strings.Contains(src.Source, "Denied Persons List"):
@@ -108,6 +108,20 @@ common:
 	entity.SanctionsInfo = mapSanctionsInfo(src)
 
 	return entity.Normalize()
+}
+
+// isNonproliferationSanctions reports whether the CSL source column is the
+// State Department Nonproliferation Sanctions list. Trade.gov renamed the
+// source code from ISN (Bureau of International Security and Nonproliferation)
+// to ACN (Bureau of Arms Control and Nonproliferation). Cached files may still
+// use ISN. The original source string is kept on SourceData.
+func isNonproliferationSanctions(source string) bool {
+	if strings.Contains(source, "Nonproliferation Sanctions") {
+		return true
+	}
+	// Source code ACN (formerly ISN) on State Department rows.
+	return strings.Contains(source, "State Department") &&
+		(strings.Contains(source, "(ACN)") || strings.Contains(source, "(ISN)"))
 }
 
 var (

@@ -17,6 +17,65 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestToEntity_NonproliferationSanctions(t *testing.T) {
+	cases := []struct {
+		name   string
+		source string
+	}{
+		{
+			name:   "legacy ISN source code",
+			source: "Nonproliferation Sanctions (ISN) - State Department",
+		},
+		{
+			name:   "ACN source code",
+			source: "Nonproliferation Sanctions (ACN) - State Department",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			entity := ToEntity(SanctionsEntry{
+				ID:       "test-id",
+				Source:   tc.source,
+				Name:     "Sinobright Import and Export Company",
+				Programs: "INKSNA",
+			})
+
+			require.Equal(t, search.EntityBusiness, entity.Type)
+			require.Equal(t, search.SourceUSCSL, entity.Source)
+			require.Equal(t, "test-id", entity.SourceID)
+			require.NotNil(t, entity.Business)
+			require.Nil(t, entity.Person)
+			require.Equal(t, "Sinobright Import and Export Company", entity.Name)
+
+			us, ok := entity.SourceData.(SanctionsEntry)
+			require.True(t, ok)
+			require.Equal(t, tc.source, us.Source)
+		})
+	}
+}
+
+func TestIsNonproliferationSanctions(t *testing.T) {
+	cases := []struct {
+		source string
+		want   bool
+	}{
+		{source: "Nonproliferation Sanctions (ISN) - State Department", want: true},
+		{source: "Nonproliferation Sanctions (ACN) - State Department", want: true},
+		{source: "(ACN) - State Department", want: true},
+		{source: "(ISN) - State Department", want: true},
+		{source: "Denied Persons List (DPL) - Bureau of Industry and Security", want: false},
+		{source: "Entity List (EL) - Bureau of Industry and Security", want: false},
+		{source: "ITAR Debarred (DTC) - State Department", want: false},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.source, func(t *testing.T) {
+			require.Equal(t, tc.want, isNonproliferationSanctions(tc.source))
+		})
+	}
+}
+
 func TestGetAllNamesFromCSV(t *testing.T) {
 	// Create a sample SanctionsEntry with alternate names
 	entry := SanctionsEntry{

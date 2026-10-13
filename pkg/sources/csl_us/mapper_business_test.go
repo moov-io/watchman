@@ -49,6 +49,8 @@ func TestMapBusiness_Sinobright(t *testing.T) {
 	require.True(t, ok)
 
 	require.Equal(t, "233a4d725770c81fb561ffe3842c14010c2201971d6be62eca1e613b", us.ID)
+	// Fixture snapshot still uses the pre-rename ISN source code. Live CSL files
+	// use ACN; ToEntity accepts both.
 	require.Equal(t, "Nonproliferation Sanctions (ISN) - State Department", us.Source)
 	require.Equal(t, "INKSNA", us.Programs)
 	require.Equal(t, "Sinobright Import and Export Company; and any successor, sub-unit, or subsidiary thereof", us.Name)
