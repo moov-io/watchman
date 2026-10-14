@@ -13,6 +13,15 @@ import (
 )
 
 func TestMapperBusiness__FromSource(t *testing.T) {
+	t.Run("12028 - SWIFT/BIC", func(t *testing.T) {
+		found := ofactest.FindEntity(t, "12028")
+		require.Equal(t, "ONERBANK ZAO", found.Name)
+		require.Equal(t, search.EntityBusiness, found.Type)
+		require.Equal(t, search.SourceUSOFAC, found.Source)
+		require.Equal(t, []string{"HNRBBY2X"}, found.SwiftBICs)
+		require.Equal(t, []string{"HNRBBY2X"}, found.PreparedFields.SwiftBICs)
+	})
+
 	t.Run("33151 - crypto addresses", func(t *testing.T) {
 		found := ofactest.FindEntity(t, "33151")
 		require.Equal(t, "SUEX OTC, S.R.O.", found.Name)
@@ -193,6 +202,40 @@ func TestMapperBusiness__FromSource(t *testing.T) {
 		require.Equal(t, "AUTONOMOUS NON-PROFIT ORGANIZATION DIALOG REGIONS", sdn.SDNName)
 
 	})
+}
+
+func TestMapper__SwiftBICRemarks(t *testing.T) {
+	cases := []struct {
+		name    string
+		remarks string
+		want    []string
+	}{
+		{
+			name:    "primary SWIFT/BIC",
+			remarks: "SWIFT/BIC HNRBBY2X; Registration ID 807000227 (Belarus) issued 16 Oct 2009; all offices worldwide.",
+			want:    []string{"HNRBBY2X"},
+		},
+		{
+			name:    "alt SWIFT/BIC",
+			remarks: "SWIFT/BIC IREPRUMM; alt. SWIFT/BIC VVBKRU2Y",
+			want:    []string{"IREPRUMM", "VVBKRU2Y"},
+		},
+		{
+			name:    "11-character BIC",
+			remarks: "SWIFT/BIC SOMRRUM1KST",
+			want:    []string{"SOMRRUM1KST"},
+		},
+		{
+			name:    "no SWIFT",
+			remarks: "Website www.gicdf.org; Email Address info@gicdf.org",
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			e := ofac.ToEntity(ofac.SDN{SDNName: "TEST BANK", SDNType: "-0-", Remarks: tc.remarks}, nil, nil, nil)
+			require.Equal(t, tc.want, e.SwiftBICs)
+		})
+	}
 }
 
 func TestMapper__CompleteBusiness(t *testing.T) {

@@ -40,6 +40,7 @@ type corpus struct {
 	email   idIndex
 	phone   idIndex
 	website idIndex
+	swift   idIndex
 
 	// domainKeys maps each PSL-walked DNS name (FQDN down to eTLD+1) to
 	// entity indices. Keys keep dots. Public suffixes are never stored.
@@ -143,6 +144,7 @@ func buildCorpus(entities []search.Entity[search.Value], tfidfIndex *tfidf.Index
 	c.email.sort()
 	c.phone.sort()
 	c.website.sort()
+	c.swift.sort()
 	for key, idxs := range c.domainKeys {
 		slices.Sort(idxs)
 		c.domainKeys[key] = slices.Compact(idxs)
@@ -296,7 +298,7 @@ func candidatesFromEntities(entities []search.Entity[search.Value], tfidfIndex *
 // Strategy (name typos with no token hits still scan the partition):
 //  1. Restrict to source/type partition.
 //  2. Crypto and government-ID hits are exact. IMO, MMSI, aircraft serial,
-//     email, phone, and website also match prefixes and single QWERTY-adjacent typos.
+//     email, phone, website, and SWIFT/BIC also match prefixes and single QWERTY-adjacent typos.
 //     Domain keys match exactly at every DNS label down to eTLD+1.
 //     Identifier hits are merged with name-token hits when the query has a name.
 //  3. Name-token inverted index: intersect distinctive tokens using document

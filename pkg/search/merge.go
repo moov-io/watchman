@@ -145,6 +145,7 @@ func (e *Entity[T]) merge(other Entity[T]) Entity[T] {
 
 	out.Addresses = mergeAddresses(e.Addresses, other.Addresses)
 	out.CryptoAddresses = mergeCryptoAddresses(e.CryptoAddresses, other.CryptoAddresses)
+	out.SwiftBICs = mergeStrings(e.SwiftBICs, other.SwiftBICs)
 
 	out.Affiliations = mergeAffiliations(e.Affiliations, other.Affiliations)
 	out.HistoricalInfo = mergeHistoricalInfo(e.HistoricalInfo, other.HistoricalInfo)

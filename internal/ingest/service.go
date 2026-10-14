@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/moov-io/base/log"
+	"github.com/moov-io/watchman/internal/norm"
 	"github.com/moov-io/watchman/pkg/search"
 	"github.com/moov-io/watchman/pkg/sources/senzing"
 )
@@ -178,6 +179,12 @@ func (s *service) readEntitiesFromCSVFile(ctx context.Context, name string, sche
 		entity.Contact.PhoneNumbers = readColumnArrayDef(headers, schema.Mapping.Contact.PhoneNumbers, row)
 
 		entity.Addresses = readAddresses(headers, schema.Mapping.Addresses, row)
+
+		swiftCols := append(
+			readColumnArrayDef(headers, schema.Mapping.Swift, row),
+			readColumnArrayDef(headers, schema.Mapping.BIC, row)...,
+		)
+		entity.SwiftBICs = norm.ParseSwiftBICs(swiftCols...)
 
 		out.Entities = append(out.Entities, entity.Normalize())
 	}

@@ -319,6 +319,8 @@ func readSearchRequest(ctx context.Context, addressParser address.Parser, q *api
 	cryptoAddresses := readStrings(q.GetAll("cryptoAddress"), q.GetAll("cryptoAddresses"))
 	req.CryptoAddresses = readCryptoCurrencyAddresses(cryptoAddresses)
 
+	req.SwiftBICs = readStrings(q.GetAll("swift"), q.GetAll("bic"))
+
 	// TODO(adam):
 	// Affiliations   []Affiliation    `json:"affiliations"`
 	// SanctionsInfo  *SanctionsInfo   `json:"sanctionsInfo"`

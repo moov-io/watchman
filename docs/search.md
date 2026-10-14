@@ -79,7 +79,7 @@ When `algorithm` is omitted, process-wide flags such as `USE_SOUNDEX_MATCHING` s
 
 What the code does:
 
-- **Omitted `type`** — searches the all-types partition for that source. Slower. Name, address, email, phone, website, domain, and crypto still apply. Person/business/vessel fields (`birthDate`, `gov_*`, `imoNumber`, `altNames`, …) are **not** read; sending them without `type` is HTTP 400 (unused query parameter).
+- **Omitted `type`** — searches the all-types partition for that source. Slower. Name, address, email, phone, website, domain, crypto, and SWIFT/BIC still apply. Person/business/vessel fields (`birthDate`, `gov_*`, `imoNumber`, `altNames`, …) are **not** read; sending them without `type` is HTTP 400 (unused query parameter).
 - **Correct `type`** — searches that source×type partition only. This is the production path.
 - **Wrong `type`** (`type=business` for a person) — searches only that partition. The designated party is missing from the page. Watchman does not fall back to other types.
 
@@ -87,7 +87,7 @@ Person, business, and organization records can still be compared to each other *
 
 See [Performance](/watchman/performance/), [Indexing](/watchman/indexing/), and [Record linkage](/watchman/record-linkage/).
 
-When a **passport, national ID, IMO, MMSI, aircraft serial, or crypto address** matches on identifier and country, the score is **1.0**. A matching tax number, company registration, email, phone, website, or domain raises the score; it does not force 1.0.
+When a **passport, national ID, IMO, MMSI, aircraft serial, crypto address, or SWIFT/BIC** matches on identifier and country, the score is **1.0**. A matching tax number, company registration, email, phone, website, or domain raises the score; it does not force 1.0.
 
 ### Advanced Entity Search Parameters
 
@@ -142,6 +142,7 @@ Each entity type supports specific search parameters:
 - `website[]`, `websites[]`: Associated websites (host match after dropping scheme, path, and `www.`)
 - `domain[]`, `domains[]`: DNS names matched against listed websites and email hosts. Every label from the query host down to eTLD+1 (Public Suffix List) is tried, so `mail.suex.io` matches a listed `suex.io`. Public suffixes (`co.uk`, `ru`) are ignored. Consumer mail hosts taken from emails (gmail, yahoo, mail.ru) are not indexed.
 - `cryptoAddress[]`: Cryptocurrency addresses (`currency:address`)
+- `swift[]`, `bic[]`: ISO 9362 SWIFT/BIC codes. Aliases for the same field. Always read, including when `type` is omitted (OFAC banks are `business`; US CSL banks are `organization`). 8- and 11-character forms match on the first eight characters (`XXX` is the head office). A matching SWIFT/BIC scores **1.0**. Prefix queries (for example `HNRB`) only select candidates; scoring needs a full BIC.
 
 ### Search Response
 

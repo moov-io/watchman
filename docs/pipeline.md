@@ -61,6 +61,10 @@ Digits are kept and, when possible, normalized with a country guess (`+1 (555) 0
 
 `domain=` values, listed websites, and email hosts are walked from the FQDN down to eTLD+1 using the Public Suffix List. `mail.suex.io` and listed `suex.io` share `suex.io`. Public suffixes (`co.uk`, `ru`) are not indexed or queried. Email hosts at consumer providers (gmail, yahoo, mail.ru, icloud, …) are skipped so those providers are not treated as an entity domain. `website=` still scores the prepared host exactly; listed websites also feed the domain index, so a subdomain on either `website=` or `domain=` can match a listed eTLD+1.
 
+### SWIFT/BIC
+
+`swift=` and `bic=` are aliases for ISO 9362 codes. Letters are uppercased, spaces, hyphens, and periods are stripped, and an `XXX` branch suffix is dropped so the 8-character head-office form is stored. 8- and 11-character forms match on the first eight characters. OFAC SDN remarks (`SWIFT/BIC HNRBBY2X`, `alt. SWIFT/BIC VVBKRU2Y`) and US CSL IDs (`SWIFT/BIC, RUDVRUMM` and `CKLBCNBJ, SWIFT/BIC`) are extracted into `swiftBICs`. Ingest YAML can map `swift` and `bic` columns the same way. The original query string stays on `swiftBICs` in the JSON; prepared values are canonical.
+
 ### Addresses
 
 1. Free-text `address=` on the query is parsed into line, city, state, postal code, country. **Docker images and Linux/macOS GitHub releases** use libpostal. **Windows `.exe` and `go run`** use usaddress unless built with `-tags libpostal`. **Any build** can enable deepparse. See [Addresses](/watchman/addresses/).

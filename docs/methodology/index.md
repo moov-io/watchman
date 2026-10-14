@@ -24,7 +24,7 @@ After `Normalize()` (case, punctuation, stopwords, phones, addresses), `Similari
 
 | Piece | Weight | Compared fields |
 |-------|-------:|-----------------|
-| Exact identifiers | 50 | Type + country + identifier (passport, tax ID, IMO/MMSI, serial, …) |
+| Exact identifiers | 50 | Type + country + identifier (passport, tax ID, IMO/MMSI, serial, SWIFT/BIC, …) |
 | Crypto addresses | 50 | Currency + address |
 | Government IDs (loose) | 50 | Identifier with optional country (0.7–1.0) |
 | Contact | 50 | Email, phone, fax |
@@ -38,13 +38,13 @@ Empty query fields are not compared. The blended score is a coverage-aware weigh
 
 ### When a match is 1.0
 
-A piece forces **1.0** only when it is **exact** (the identifier *and* country match) **and** the field is unique to one party: passport, national ID, IMO, MMSI, aircraft serial, or crypto address.
+A piece forces **1.0** only when it is **exact** (the identifier *and* country match) **and** the field is unique to one party: passport, national ID, IMO, MMSI, aircraft serial, crypto address, or SWIFT/BIC.
 
 A matching tax number, company registration, email, or phone **raises** the blended score. It does not force 1.0. Related companies often share a tax ID; two people can share an office email. A vessel call sign alone also does not force 1.0.
 
 ### Identifier conflict
 
-If both records have the same ID type (and country, when both set) with **different** values, the blended score is multiplied by `ID_CONFLICT_PENALTY_MULTIPLIER` (default 0.70). A missing ID on one side is not a conflict. A matching passport or IMO still scores 1.0 before this penalty.
+If both records have the same ID type (and country, when both set) with **different** values, the blended score is multiplied by `ID_CONFLICT_PENALTY_MULTIPLIER` (default 0.70). A missing ID on one side is not a conflict. A matching passport, IMO, or SWIFT/BIC still scores 1.0 before this penalty.
 
 If both prepared names contain a numeral (a digit token, roman I–XII, or a spelled one–twenty) and those numerals disagree, the blended score is multiplied by `NAME_NUMERAL_CONFLICT_PENALTY_MULTIPLIER` (default 0.70). `Hoshikaze Maru No. 8` vs `No. 6` is a conflict; `NS LEADER` vs `NS LEADER II` is not, because one side has no numeral. A matching IMO still scores 1.0 before this penalty.
 
@@ -115,7 +115,7 @@ On 472,477 analyst-judged OpenSanctions subject pairs, Jaro–Winkler at 0.80 ha
 Scoring runs only on candidates. See [Indexing](/watchman/indexing/) and [Performance](/watchman/performance/).
 
 1. Partition by source and type.
-2. Exact crypto / government-ID hits; prefix and QWERTY-near indexes on IMO, MMSI, serial, email, phone, website; exact PSL domain keys.
+2. Exact crypto / government-ID hits; prefix and QWERTY-near indexes on IMO, MMSI, serial, email, phone, website, SWIFT/BIC; exact PSL domain keys.
 3. Name-token inverted index: intersect distinctive tokens; fall back to the union or the full partition.
 4. Address prefix blocks for address-only queries.
 5. Searches with ≤100 candidates skip the admission queue; larger searches take `SEARCH_MAX_IN_FLIGHT`.

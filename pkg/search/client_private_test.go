@@ -87,6 +87,7 @@ func TestClient_buildQueryParameters(t *testing.T) {
 						Address:  "abc12345",
 					},
 				},
+				SwiftBICs: []string{"HNRBBY2X"},
 			},
 			opts: SearchOpts{
 				Limit:         5,
@@ -104,6 +105,7 @@ func TestClient_buildQueryParameters(t *testing.T) {
 				"domain":        []string{"mail.acmecrypto.com"},
 				"address":       []string{"123 Acme St Acmetown 54321 AC US"},
 				"cryptoAddress": []string{"XBT:abc12345"},
+				"swift":         []string{"HNRBBY2X"},
 				"limit":         []string{"5"},
 				"minMatch":      []string{"0.93"}, // rounded
 				"debug":         []string{"0.8"},

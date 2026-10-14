@@ -452,6 +452,24 @@ paths:
             items:
               type: string
           explode: true
+        - name: swift
+          in: query
+          description: ISO 9362 SWIFT/BIC code. 8- and 11-character forms match on the first eight characters (XXX is the head office). Always read, including when type is omitted. Alias of bic. A matching SWIFT/BIC scores 1.0.
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
+        - name: bic
+          in: query
+          description: Alias of swift. ISO 9362 SWIFT/BIC code.
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
 
         # Address parameters
         - name: address
@@ -904,6 +922,11 @@ components:
             $ref: '#/components/schemas/CryptoAddress'
           type: array
           description: Cryptocurrency addresses associated with the entity
+        swiftBICs:
+          items:
+            type: string
+          type: array
+          description: ISO 9362 SWIFT/BIC codes (8 or 11 characters). XXX branch codes are stored as the 8-character head-office form.
         entityType:
           enum:
           - unknown

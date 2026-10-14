@@ -60,6 +60,7 @@ type businessForm struct {
 	created       *widget.Entry
 	dissolved     *widget.Entry
 	governmentIDs *widget.Entry
+	swiftBICs     *widget.Entry
 	root          fyne.CanvasObject
 }
 
@@ -69,12 +70,14 @@ func newBusinessForm() businessForm {
 		created:       singleEntry("YYYY-MM-DD"),
 		dissolved:     singleEntry("YYYY-MM-DD"),
 		governmentIDs: multiEntry("ID type:number:country, one per line"),
+		swiftBICs:     multiEntry("SWIFT/BIC codes, one per line"),
 	}
 	f.root = formOf(
 		widget.NewFormItem("Alt names", f.altNames),
 		widget.NewFormItem("Created", f.created),
 		widget.NewFormItem("Dissolved", f.dissolved),
 		widget.NewFormItem("Government IDs", f.governmentIDs),
+		widget.NewFormItem("SWIFT/BIC", f.swiftBICs),
 	)
 	return f
 }
@@ -94,6 +97,7 @@ type organizationForm struct {
 	created       *widget.Entry
 	dissolved     *widget.Entry
 	governmentIDs *widget.Entry
+	swiftBICs     *widget.Entry
 	root          fyne.CanvasObject
 }
 
@@ -103,12 +107,14 @@ func newOrganizationForm() organizationForm {
 		created:       singleEntry("YYYY-MM-DD"),
 		dissolved:     singleEntry("YYYY-MM-DD"),
 		governmentIDs: multiEntry("ID type:number:country, one per line"),
+		swiftBICs:     multiEntry("SWIFT/BIC codes, one per line"),
 	}
 	f.root = formOf(
 		widget.NewFormItem("Alt names", f.altNames),
 		widget.NewFormItem("Created", f.created),
 		widget.NewFormItem("Dissolved", f.dissolved),
 		widget.NewFormItem("Government IDs", f.governmentIDs),
+		widget.NewFormItem("SWIFT/BIC", f.swiftBICs),
 	)
 	return f
 }

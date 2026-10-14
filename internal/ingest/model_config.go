@@ -59,6 +59,10 @@ type Mapping struct {
 
 	Contact   Contact
 	Addresses Addresses
+
+	// Swift and BIC are aliases for ISO 9362 codes on the entity.
+	Swift ColumnArrayDef
+	BIC   ColumnArrayDef
 }
 
 type ColumnDef struct {

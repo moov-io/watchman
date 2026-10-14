@@ -247,6 +247,30 @@ func TestEntity_Normalize(t *testing.T) {
 			},
 		},
 		{
+			name: "swift bic prepared from 8 and 11 character forms",
+			input: Entity[Value]{
+				Name: "ONERBANK ZAO",
+				Type: EntityBusiness,
+				Business: &Business{
+					Name: "ONERBANK ZAO",
+				},
+				SwiftBICs: []string{"HNRBBY2XXXX", "hnrbby2x"},
+			},
+			expected: Entity[Value]{
+				Name: "ONERBANK ZAO",
+				Type: "business",
+				Business: &Business{
+					Name: "ONERBANK ZAO",
+				},
+				SwiftBICs: []string{"HNRBBY2XXXX", "hnrbby2x"},
+				PreparedFields: PreparedFields{
+					Name:       "onerbank zao",
+					NameFields: []string{"onerbank", "zao"},
+					SwiftBICs:  []string{"HNRBBY2X"},
+				},
+			},
+		},
+		{
 			name: "websites prepared from urls",
 			input: Entity[Value]{
 				Name: "SUEX OTC",

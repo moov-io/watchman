@@ -3,23 +3,109 @@ package search
 import (
 	"io"
 	"strings"
+
+	"github.com/moov-io/watchman/internal/norm"
 )
 
-// compareExactIdentifiers covers exact matches for identifiers across all entity types
+// compareExactIdentifiers covers exact matches for identifiers across all entity types.
+// SWIFT/BIC is scored here (not as a tenth piece) so DebugSimilarity still sees 9 pieces.
 func compareExactIdentifiers[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) ScorePiece {
+	swift := compareExactSwiftBICs(query, index)
+	if uniqueIdentityExact(swift) {
+		swift.Weight = weight
+		return swift
+	}
+
+	var typed ScorePiece
 	switch query.Type {
 	case EntityPerson:
-		return comparePersonExactIDs(w, query.Person, index.Person, weight)
+		typed = comparePersonExactIDs(w, query.Person, index.Person, weight)
 	case EntityBusiness:
-		return compareBusinessExactIDs(w, query.Business, index.Business, weight)
+		typed = compareBusinessExactIDs(w, query.Business, index.Business, weight)
 	case EntityOrganization:
-		return compareOrgExactIDs(w, query.Organization, index.Organization, weight)
+		typed = compareOrgExactIDs(w, query.Organization, index.Organization, weight)
 	case EntityVessel:
-		return compareVesselExactIDs(w, query.Vessel, index.Vessel, weight)
+		typed = compareVesselExactIDs(w, query.Vessel, index.Vessel, weight)
 	case EntityAircraft:
-		return compareAircraftExactIDs(w, query.Aircraft, index.Aircraft, weight)
+		typed = compareAircraftExactIDs(w, query.Aircraft, index.Aircraft, weight)
 	default:
-		return ScorePiece{Score: 0, Weight: 0, FieldsCompared: 0, PieceType: "identifiers"}
+		typed = ScorePiece{Score: 0, Weight: 0, FieldsCompared: 0, PieceType: "identifiers"}
+	}
+	if uniqueIdentityExact(typed) {
+		return typed
+	}
+	return mergeIdentifierPieces(swift, typed, weight)
+}
+
+func compareExactSwiftBICs[Q any, I any](query Entity[Q], index Entity[I]) ScorePiece {
+	q := swiftBICsOf(query)
+	i := swiftBICsOf(index)
+	if len(q) == 0 || len(i) == 0 {
+		return ScorePiece{PieceType: "identifiers"}
+	}
+
+	matched := false
+	for _, qb := range q {
+		for _, ib := range i {
+			if norm.EqualSwiftBIC(qb, ib) {
+				matched = true
+				break
+			}
+		}
+		if matched {
+			break
+		}
+	}
+
+	return ScorePiece{
+		Score:          boolScore(matched),
+		Matched:        matched,
+		Required:       true,
+		Exact:          matched,
+		FieldsCompared: 1,
+		PieceType:      "identifiers",
+		UniqueIdentity: matched,
+	}
+}
+
+func boolScore(ok bool) float64 {
+	if ok {
+		return 1.0
+	}
+	return 0
+}
+
+func swiftBICsOf[T any](e Entity[T]) []string {
+	if len(e.PreparedFields.SwiftBICs) > 0 {
+		return e.PreparedFields.SwiftBICs
+	}
+	return e.SwiftBICs
+}
+
+func mergeIdentifierPieces(swift, typed ScorePiece, weight float64) ScorePiece {
+	fields := swift.FieldsCompared + typed.FieldsCompared
+	if fields == 0 {
+		return ScorePiece{PieceType: "identifiers"}
+	}
+
+	score := 0.0
+	if swift.FieldsCompared > 0 {
+		score += swift.Score * float64(swift.FieldsCompared)
+	}
+	if typed.FieldsCompared > 0 {
+		score += typed.Score * float64(typed.FieldsCompared)
+	}
+	score /= float64(fields)
+
+	return ScorePiece{
+		Score:          score,
+		Weight:         weight,
+		Matched:        swift.Matched || typed.Matched,
+		Required:       true,
+		Exact:          score > 0.99,
+		FieldsCompared: fields,
+		PieceType:      "identifiers",
+		UniqueIdentity: swift.UniqueIdentity || typed.UniqueIdentity,
 	}
 }
 
@@ -362,7 +448,24 @@ func hasIdentifierConflict[Q any, I any](query Entity[Q], index Entity[I]) bool 
 	if query.Aircraft != nil && index.Aircraft != nil && conflictingAircraftIDs(query.Aircraft, index.Aircraft) {
 		return true
 	}
+	if conflictingSwiftBICs(swiftBICsOf(query), swiftBICsOf(index)) {
+		return true
+	}
 	return false
+}
+
+func conflictingSwiftBICs(query, index []string) bool {
+	if len(query) == 0 || len(index) == 0 {
+		return false
+	}
+	for _, qb := range query {
+		for _, ib := range index {
+			if norm.EqualSwiftBIC(qb, ib) {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func governmentIDsOf[T any](e Entity[T]) []GovernmentID {

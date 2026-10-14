@@ -39,7 +39,7 @@ On 472,477 labeled people, companies, and vessels ([OpenSanctions Pairs](https:/
 
 - **Lists you can name** — OFAC SDN and Non-SDN, US CSL, FinCEN 311, EU, UK, UN, OpenSanctions Senzing files, plus CSV ingest
 - **Structured search** — `type` (person, business, organization, vessel, aircraft), name, aliases, government IDs, dates, addresses, crypto, contact
-- **How IDs work** — a matching passport, IMO number, or crypto address (with country) scores 1.0; a matching tax number or email raises the score; two national IDs that disagree lower the score
+- **How IDs work** — a matching passport, IMO number, SWIFT/BIC, or crypto address (with country) scores 1.0; a matching tax number or email raises the score; two national IDs that disagree lower the score
 - **You set the cutoff** — `minMatch` is policy (0.80 screening, ~0.59 high recall)
 - **Explainable hits** — `debug=true` returns field-level score pieces
 - **Fast candidate search** — source/type partitions, name-token and ID indexes, parallel scoring ([Performance](https://moov-io.github.io/watchman/performance/), [Indexing](https://moov-io.github.io/watchman/indexing/))

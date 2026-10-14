@@ -209,6 +209,9 @@ func entityDetails(entity search.SearchedEntity[search.Value]) fyne.CanvasObject
 		}
 	}
 
+	if len(entity.SwiftBICs) > 0 {
+		content.Add(swiftBICCard(entity.SwiftBICs))
+	}
 	if hasContactInfo(entity.Contact) {
 		content.Add(contactCard(entity.Contact))
 	}
@@ -325,6 +328,12 @@ func vesselCard(vessel search.Vessel) fyne.CanvasObject {
 	appendText(form, "Call sign", vessel.CallSign)
 	appendText(form, "Owner", vessel.Owner)
 	return widget.NewCard("Vessel", "", form)
+}
+
+func swiftBICCard(codes []string) fyne.CanvasObject {
+	form := widget.NewForm()
+	appendLines(form, "SWIFT/BIC", codes)
+	return widget.NewCard("SWIFT/BIC", "", form)
 }
 
 func contactCard(contact search.ContactInfo) fyne.CanvasObject {

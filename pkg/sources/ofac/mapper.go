@@ -124,6 +124,7 @@ func ToEntity(sdn SDN, addresses []Address, comments []SDNComments, altIds []Alt
 	out.SanctionsInfo = sanctionsInfo
 	out.HistoricalInfo = historicalInfo
 	out.CryptoAddresses = parseCryptoAddresses(remarks)
+	out.SwiftBICs = norm.ParseSwiftBICs(remarks...)
 
 	// Extract common fields regardless of entity type
 	out.Contact = parseContactInfo(remarks)

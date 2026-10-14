@@ -107,6 +107,10 @@ Watchman:
               columns: zip
             country:
               columns: country
+          swift:
+            columns: swift_code
+          bic:
+            columns: bic
       fincen-person:
         format: csv
         mapping:
@@ -158,6 +162,7 @@ Watchman:
     - `governmentIDs`: Government-issued IDs, with `type` (e.g., `tax-id`) and `identifier` mapped to columns.
   - **`contact`**: Contact information, currently supporting `phoneNumbers` mapped to a `columns` field.
   - **`addresses`**: Physical addresses, with fields like `line1`, `city`, `state`, `postalCode`, and `country`, each mapped to a `columns` field.
+  - **`swift`** / **`bic`**: ISO 9362 SWIFT/BIC codes. Aliases for the same entity field. Values are parsed like OFAC/CSL remarks (`HNRBBY2X`, `SWIFT/BIC HNRBBY2X`).
 
 ### CSV File Requirements
 
@@ -186,6 +191,7 @@ first_name,middle_name,last_name,suffix,tracking_number,alias_first_name,alias_m
 
 ```
 GET /v2/search?source=fincen-person&type=person&name=John+Doe&minMatch=0.80
+GET /v2/search?source=fincen-business&swift=HNRBBY2X&minMatch=0.80
 ```
 
 All ingested rows of that source are in the search index. Cross-script embeddings still apply to downloaded lists; ingested files score with the same Jaro–Winkler / identifier matcher.

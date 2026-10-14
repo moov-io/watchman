@@ -106,6 +106,7 @@ common:
 	entity.Addresses = mapAddresses(src)
 	entity.Affiliations = mapAffiliations(src)
 	entity.SanctionsInfo = mapSanctionsInfo(src)
+	entity.SwiftBICs = norm.ParseSwiftBICs(src.IDs, src.Remarks)
 
 	return entity.Normalize()
 }

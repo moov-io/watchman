@@ -201,9 +201,11 @@ func buildQuery(
 	case "Business":
 		entity.Type = search.EntityBusiness
 		entity.Business = business.fields(name)
+		entity.SwiftBICs = linesOf(business.swiftBICs.Text)
 	case "Organization":
 		entity.Type = search.EntityOrganization
 		entity.Organization = organization.fields(name)
+		entity.SwiftBICs = linesOf(organization.swiftBICs.Text)
 	case "Aircraft":
 		entity.Type = search.EntityAircraft
 		entity.Aircraft = aircraft.fields(name)

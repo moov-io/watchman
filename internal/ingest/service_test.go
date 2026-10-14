@@ -17,6 +17,50 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestService_ReadEntitiesFromFile_SwiftBIC(t *testing.T) {
+	logger := log.NewTestLogger()
+	svc := ingest.NewService(logger, ingest.Config{
+		Files: map[string]ingest.File{
+			"banks": {
+				Format: ingest.FormatCSV,
+				Mapping: ingest.Mapping{
+					Name:     ingest.ColumnDef{Column: "name"},
+					SourceID: ingest.ColumnDef{Column: "id"},
+					Type:     ingest.Type{Default: "business"},
+					Swift:    ingest.ColumnArrayDef{Columns: "swift"},
+					BIC:      ingest.ColumnArrayDef{Columns: "bic"},
+				},
+			},
+		},
+	}, &ingest.MockRepository{})
+
+	body := `id,name,swift,bic
+1,ONERBANK ZAO,HNRBBY2XXXX,
+2,SME BANK,,rudvrumm
+3,No Code,,
+`
+	parsed, err := svc.ReadEntitiesFromFile(context.Background(), "banks", strings.NewReader(body))
+	require.NoError(t, err)
+	require.Equal(t, "banks", parsed.FileType)
+	require.Len(t, parsed.Entities, 3)
+
+	byID := make(map[string]search.Entity[search.Value], len(parsed.Entities))
+	for _, entity := range parsed.Entities {
+		byID[entity.SourceID] = entity
+	}
+
+	onerbank := byID["1"]
+	require.Equal(t, "ONERBANK ZAO", onerbank.Name)
+	require.Equal(t, []string{"HNRBBY2X"}, onerbank.SwiftBICs)
+	require.Equal(t, []string{"HNRBBY2X"}, onerbank.PreparedFields.SwiftBICs)
+
+	sme := byID["2"]
+	require.Equal(t, []string{"RUDVRUMM"}, sme.SwiftBICs)
+	require.Equal(t, []string{"RUDVRUMM"}, sme.PreparedFields.SwiftBICs)
+
+	require.Empty(t, byID["3"].SwiftBICs)
+}
+
 func TestService_MergePerson12_09_2025(t *testing.T) {
 	t.Setenv("APP_CONFIG_SECRETS", filepath.Join("testdata", "fincen-config.yml"))
 
