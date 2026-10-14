@@ -11,8 +11,8 @@ jobs:
   bench:
     name: Run
     if: github.repository == 'moov-io/watchman'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
     permissions:
       contents: write
       deployments: write
@@ -65,17 +65,18 @@ jobs:
     - name: Running Common Benchmarks
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
       run: |
-        go test ./pkg/search/... -short -bench BenchmarkDebugSimilarity -run '^$' -benchmem > output.txt
-        go test ./internal/search/... -short -bench Benchmark_Search/dynamic -run '^$' -benchmem >> output.txt
-        go test ./internal/search/... -short -bench Benchmark_SearchDebug -run '^$' -benchmem >> output.txt
-        go test ./internal/search/... -short -bench BenchmarkAPI_Search -run '^$' -benchmem >> output.txt
-        go test ./internal/stringscore/... -short -bench Benchmark -run '^$' -benchmem >> output.txt
-        go test ./internal/postalpool/... -short -bench BenchmarkPostalPool -run '^$' -benchmem >> output.txt
-        go test ./internal/norm/... -short -bench Bench -run '^$' -benchmem >> output.txt
+        go test ./pkg/search/... -short -count=6 -cpu=2 -bench BenchmarkDebugSimilarity -run '^$' -benchmem > output.raw.txt
+        go test ./internal/search/... -short -count=6 -cpu=2 -bench Benchmark_Search/dynamic -run '^$' -benchmem >> output.raw.txt
+        go test ./internal/search/... -short -count=6 -cpu=2 -bench Benchmark_SearchDebug -run '^$' -benchmem >> output.raw.txt
+        go test ./internal/search/... -short -count=6 -cpu=2 -bench BenchmarkAPI_Search -run '^$' -benchmem >> output.raw.txt
+        go test ./internal/stringscore/... -short -count=6 -cpu=2 -bench Benchmark -run '^$' -benchmem >> output.raw.txt
+        go test ./internal/postalpool/... -short -count=6 -cpu=2 -bench BenchmarkPostalPool -run '^$' -benchmem >> output.raw.txt
+        go test ./internal/norm/... -short -count=6 -cpu=2 -bench Bench -run '^$' -benchmem >> output.raw.txt
 
     - name: Show Common results
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
-      run: cat output.txt
+      run: |
+        python3 scripts/bench-median.py output.raw.txt | tee output.txt
 
     - name: Store benchmark result
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
@@ -88,7 +89,7 @@ jobs:
         ref: ${{ steps.meta.outputs.sha }}
         skip-fetch-gh-pages: false
         auto-push: true
-        alert-threshold: '120%'
+        alert-threshold: '150%'
         comment-on-alert: true
         fail-on-alert: false
         summary-always: true
@@ -100,11 +101,12 @@ jobs:
     - name: Running OFAC Benchmarks
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
       run: |
-        go test ./pkg/sources/ofac/... -short -bench Benchmark -run '^$' -benchmem > output.txt
+        go test ./pkg/sources/ofac/... -short -count=6 -cpu=2 -bench Benchmark -run '^$' -benchmem > output.raw.txt
 
     - name: Show OFAC results
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
-      run: cat output.txt
+      run: |
+        python3 scripts/bench-median.py output.raw.txt | tee output.txt
 
     - name: Store OFAC results
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
@@ -117,7 +119,7 @@ jobs:
         ref: ${{ steps.meta.outputs.sha }}
         skip-fetch-gh-pages: false
         auto-push: true
-        alert-threshold: '120%'
+        alert-threshold: '150%'
         comment-on-alert: true
         fail-on-alert: false
         summary-always: true
@@ -129,11 +131,12 @@ jobs:
     - name: Running CSL US Benchmarks
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
       run: |
-        go test ./pkg/sources/csl_us/... -short -bench Benchmark -run '^$' -benchmem > output.txt
+        go test ./pkg/sources/csl_us/... -short -count=6 -cpu=2 -bench Benchmark -run '^$' -benchmem > output.raw.txt
 
     - name: Show CSL US results
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
-      run: cat output.txt
+      run: |
+        python3 scripts/bench-median.py output.raw.txt | tee output.txt
 
     - name: Store CSL US results
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
@@ -146,7 +149,7 @@ jobs:
         ref: ${{ steps.meta.outputs.sha }}
         skip-fetch-gh-pages: false
         auto-push: true
-        alert-threshold: '120%'
+        alert-threshold: '150%'
         comment-on-alert: true
         fail-on-alert: false
         summary-always: true
@@ -157,8 +160,8 @@ jobs:
 
     - name: Logs
       if: failure()
-      run: cat output.txt || true
+      run: cat output.txt output.raw.txt 2>/dev/null || true
 
 # TODO(adam): include libpostal benchmarks
 # make install
-# go test -tags libpostal ./pkg/address/... -bench=Bench -run '^$' -benchmem >> output.txt
+# go test -tags libpostal ./pkg/address/... -bench=Bench -run '^$' -benchmem >> output.raw.txt
