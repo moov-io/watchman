@@ -5,24 +5,23 @@ on:
   schedule:
     - cron: "0 12 * * *"
 
-permissions:
-  deployments: write
-  contents: write
+permissions: {}
 
 jobs:
-  build:
-    name: Go Build
+  bench:
+    name: Run
     if: github.repository == 'moov-io/watchman'
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      deployments: write
     steps:
-    - name: Check out code into the Go module directory
+    - name: Check out code
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
+        fetch-depth: 50
 
     - name: Setup Linux Dependencies
       run: |
@@ -38,26 +37,45 @@ jobs:
     - name: Should Run Benchmarks
       id: should_run_benchmarks
       run: |
-        if git show -s --format=%ae HEAD | grep -q "[^@]*\.github\.com"; then
-           echo "should_run=false" >> $GITHUB_OUTPUT
+        # Skip only the bot's own "benchmark result" commits. Renovate and
+        # other .github.com authors are code changes and should still run.
+        if git log -1 --format=%s | grep -q 'benchmark result'; then
+          echo "should_run=false" >> "$GITHUB_OUTPUT"
         else
-           echo "should_run=true" >> $GITHUB_OUTPUT
+          echo "should_run=true" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Resolve code commit
+      id: meta
+      run: |
+        sha=$(git log -1 --format=%H --invert-grep --grep='benchmark result' || true)
+        if [ -z "${sha}" ]; then
+          sha="${GITHUB_SHA}"
+        fi
+        echo "sha=${sha}" >> "${GITHUB_OUTPUT}"
+
+    - name: Ensure bench-data branch
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        if ! gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/bench-data" >/dev/null 2>&1; then
+          gh api "repos/${GITHUB_REPOSITORY}/git/refs" -f ref="refs/heads/bench-data" -f sha="${GITHUB_SHA}"
         fi
 
     - name: Running Common Benchmarks
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
       run: |
-        go test ./pkg/search/... -short -bench BenchmarkDebugSimilarity -run BenchmarkDebugSimilarity -benchmem > output.txt
-        go test ./internal/search/... -short -bench Benchmark_Search/dynamic -run Benchmark_Search -benchmem >> output.txt
-        go test ./internal/search/... -short -bench Benchmark_SearchDebug -run Benchmark_SearchDebug -benchmem >> output.txt
-        go test ./internal/search/... -short -bench BenchmarkAPI_Search -run BenchmarkAPI_Search -benchmem >> output.txt
-        go test ./internal/stringscore/... -short -bench Benchmark -run Benchmark -benchmem >> output.txt
-        go test ./internal/postalpool/... -short -bench BenchmarkPostalPool -run BenchmarkPostalPool -benchmem >> output.txt
-        go test ./internal/norm/... -short -bench Bench -run Bench -benchmem >> output.txt
+        go test ./pkg/search/... -short -bench BenchmarkDebugSimilarity -run '^$' -benchmem > output.txt
+        go test ./internal/search/... -short -bench Benchmark_Search/dynamic -run '^$' -benchmem >> output.txt
+        go test ./internal/search/... -short -bench Benchmark_SearchDebug -run '^$' -benchmem >> output.txt
+        go test ./internal/search/... -short -bench BenchmarkAPI_Search -run '^$' -benchmem >> output.txt
+        go test ./internal/stringscore/... -short -bench Benchmark -run '^$' -benchmem >> output.txt
+        go test ./internal/postalpool/... -short -bench BenchmarkPostalPool -run '^$' -benchmem >> output.txt
+        go test ./internal/norm/... -short -bench Bench -run '^$' -benchmem >> output.txt
 
-    - name: Log Failure
-      if: ${{ failure() }}
-      run: cat ./output.txt || true
+    - name: Show Common results
+      if: steps.should_run_benchmarks.outputs.should_run == 'true'
+      run: cat output.txt
 
     - name: Store benchmark result
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
@@ -67,26 +85,26 @@ jobs:
         tool: 'go'
         output-file-path: "./output.txt"
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        skip-fetch-gh-pages: true
+        ref: ${{ steps.meta.outputs.sha }}
+        skip-fetch-gh-pages: false
         auto-push: true
-        # Show alert with commit comment on detecting possible performance regression
         alert-threshold: '120%'
         comment-on-alert: true
-        fail-on-alert: true
+        fail-on-alert: false
+        summary-always: true
         alert-comment-cc-users: '@adamdecaf'
         max-items-in-chart: 25
-        # Update files on master branch
-        gh-pages-branch: master
+        gh-pages-branch: bench-data
         benchmark-data-dir-path: "docs/bench/common/"
 
     - name: Running OFAC Benchmarks
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
       run: |
-        go test ./pkg/sources/ofac/... -short -bench Benchmark -run Benchmark -benchmem > output.txt
+        go test ./pkg/sources/ofac/... -short -bench Benchmark -run '^$' -benchmem > output.txt
 
-    - name: Log Failure
-      if: ${{ failure() }}
-      run: cat ./output.txt || true
+    - name: Show OFAC results
+      if: steps.should_run_benchmarks.outputs.should_run == 'true'
+      run: cat output.txt
 
     - name: Store OFAC results
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
@@ -96,26 +114,26 @@ jobs:
         tool: 'go'
         output-file-path: "./output.txt"
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        skip-fetch-gh-pages: true
+        ref: ${{ steps.meta.outputs.sha }}
+        skip-fetch-gh-pages: false
         auto-push: true
-        # Show alert with commit comment on detecting possible performance regression
         alert-threshold: '120%'
         comment-on-alert: true
-        fail-on-alert: true
+        fail-on-alert: false
+        summary-always: true
         alert-comment-cc-users: '@adamdecaf'
         max-items-in-chart: 25
-        # Update files on master branch
-        gh-pages-branch: master
+        gh-pages-branch: bench-data
         benchmark-data-dir-path: "docs/bench/sources/ofac/"
 
     - name: Running CSL US Benchmarks
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
       run: |
-        go test ./pkg/sources/csl_us/... -short -bench Benchmark -run Benchmark -benchmem > output.txt
+        go test ./pkg/sources/csl_us/... -short -bench Benchmark -run '^$' -benchmem > output.txt
 
-    - name: Log Failure
-      if: ${{ failure() }}
-      run: cat ./output.txt || true
+    - name: Show CSL US results
+      if: steps.should_run_benchmarks.outputs.should_run == 'true'
+      run: cat output.txt
 
     - name: Store CSL US results
       if: steps.should_run_benchmarks.outputs.should_run == 'true'
@@ -125,18 +143,22 @@ jobs:
         tool: 'go'
         output-file-path: "./output.txt"
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        skip-fetch-gh-pages: true
+        ref: ${{ steps.meta.outputs.sha }}
+        skip-fetch-gh-pages: false
         auto-push: true
-        # Show alert with commit comment on detecting possible performance regression
         alert-threshold: '120%'
         comment-on-alert: true
-        fail-on-alert: true
+        fail-on-alert: false
+        summary-always: true
         alert-comment-cc-users: '@adamdecaf'
         max-items-in-chart: 25
-        # Update files on master branch
-        gh-pages-branch: master
+        gh-pages-branch: bench-data
         benchmark-data-dir-path: "docs/bench/sources/csl_us/"
+
+    - name: Logs
+      if: failure()
+      run: cat output.txt || true
 
 # TODO(adam): include libpostal benchmarks
 # make install
-# go test -tags libpostal ./pkg/address/... -bench=Bench -run Bench -benchmem >> output.txt
+# go test -tags libpostal ./pkg/address/... -bench=Bench -run '^$' -benchmem >> output.txt
