@@ -6,7 +6,7 @@ toolchain go1.27.3
 
 require (
 	fyne.io/fyne/v2 v2.8.2
-	github.com/OpenRouterTeam/go-sdk v0.9.69
+	github.com/OpenRouterTeam/go-sdk v0.9.80
 	github.com/PhonoGrams/beider_morse v0.1.0
 	github.com/PhonoGrams/double_metaphone v0.1.0
 	github.com/PhonoGrams/editex v0.1.0
@@ -26,7 +26,7 @@ require (
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/modelcontextprotocol/go-sdk v1.8.0
-	github.com/moov-io/base v0.64.0
+	github.com/moov-io/base v0.66.0
 	github.com/moov-io/gopostal v0.1.2
 	github.com/moov-io/iso3166 v0.4.0
 	github.com/pariz/gountries v0.1.6
@@ -49,14 +49,14 @@ require (
 	cel.dev/expr v0.25.3 // indirect
 	cloud.google.com/go v0.123.0 // indirect
 	cloud.google.com/go/alloydb v1.31.0 // indirect
-	cloud.google.com/go/alloydbconn v1.19.1 // indirect
+	cloud.google.com/go/alloydbconn v1.19.2 // indirect
 	cloud.google.com/go/auth v0.24.1-0.20261001053825-dbc26066f70a // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.3.0 // indirect
 	cloud.google.com/go/compute/metadata v0.10.0 // indirect
 	cloud.google.com/go/iam v1.14.0 // indirect
 	cloud.google.com/go/longrunning v1.3.0 // indirect
 	cloud.google.com/go/monitoring v1.31.0 // indirect
-	cloud.google.com/go/spanner v1.96.0 // indirect
+	cloud.google.com/go/spanner v1.96.1 // indirect
 	filippo.io/edwards25519 v1.2.0 // indirect
 	fyne.io/systray v1.12.3-0.20260810170012-af4e8e793ec4 // indirect
 	github.com/BurntSushi/toml v1.6.0 // indirect
@@ -97,8 +97,8 @@ require (
 	github.com/google/s2a-go v0.1.11 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.23 // indirect
-	github.com/googleapis/gax-go/v2 v2.26.2 // indirect
-	github.com/googleapis/go-sql-spanner v1.26.0 // indirect
+	github.com/googleapis/gax-go/v2 v2.27.0 // indirect
+	github.com/googleapis/go-sql-spanner v1.27.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.31.0 // indirect
 	github.com/hack-pad/go-indexeddb v0.3.2 // indirect
 	github.com/hack-pad/safejs v0.1.0 // indirect
@@ -156,10 +156,10 @@ require (
 	golang.org/x/image v0.43.0 // indirect
 	golang.org/x/oauth2 v0.37.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
-	google.golang.org/api v0.301.0 // indirect
-	google.golang.org/genproto v0.0.0-20261005182115-fad411399dd8 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20261005182115-fad411399dd8 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20261005182115-fad411399dd8 // indirect
+	google.golang.org/api v0.304.0 // indirect
+	google.golang.org/genproto v0.0.0-20261012220534-4341edf3f941 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20261012220534-4341edf3f941 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20261012220534-4341edf3f941 // indirect
 	google.golang.org/grpc v1.84.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
