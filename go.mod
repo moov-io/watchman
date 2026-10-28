@@ -6,7 +6,7 @@ toolchain go1.27.3
 
 require (
 	fyne.io/fyne/v2 v2.8.2
-	github.com/OpenRouterTeam/go-sdk v0.9.80
+	github.com/OpenRouterTeam/go-sdk v0.9.82
 	github.com/PhonoGrams/beider_morse v0.1.0
 	github.com/PhonoGrams/double_metaphone v0.1.0
 	github.com/PhonoGrams/editex v0.1.0
@@ -39,7 +39,7 @@ require (
 	go.opentelemetry.io/otel v1.47.0
 	go.opentelemetry.io/otel/trace v1.47.0
 	go.uber.org/automaxprocs v1.6.0
-	golang.org/x/net v0.61.0
+	golang.org/x/net v0.62.0
 	golang.org/x/sync v0.24.0
 	golang.org/x/text v0.43.0
 	golang.org/x/time v0.16.0
