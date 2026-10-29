@@ -1,12 +1,12 @@
 module github.com/moov-io/watchman
 
-go 1.26.0
+go 1.26.10
 
 toolchain go1.27.3
 
 require (
 	fyne.io/fyne/v2 v2.8.2
-	github.com/OpenRouterTeam/go-sdk v0.9.87
+	github.com/OpenRouterTeam/go-sdk v0.9.88
 	github.com/PhonoGrams/beider_morse v0.1.0
 	github.com/PhonoGrams/double_metaphone v0.1.0
 	github.com/PhonoGrams/editex v0.1.0
