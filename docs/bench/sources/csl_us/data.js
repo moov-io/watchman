@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793467228246,
+  "lastUpdate": 1793556141033,
   "repoUrl": "https://github.com/moov-io/watchman",
   "entries": {
     "moov-io/watchman CSL US Benchmarks": [
@@ -1540,6 +1540,76 @@ window.BENCHMARK_DATA = {
             "value": 11481,
             "unit": "allocs/op",
             "extra": "198 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "renovate[bot]",
+            "username": "renovate[bot]",
+            "email": "29139614+renovate[bot]@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "4a267799df71b5d8e156427b2e5798f875ef0e0d",
+          "message": "fix(deps): update module github.com/openrouterteam/go-sdk to v0.9.101 (#998)\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>",
+          "timestamp": "2026-10-31T06:15:33Z",
+          "url": "https://github.com/moov-io/watchman/commit/4a267799df71b5d8e156427b2e5798f875ef0e0d"
+        },
+        "date": 1793556140605,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "BenchmarkRead",
+            "value": 32765319,
+            "unit": "ns/op\t58558216 B/op\t46933 allocs/op",
+            "extra": "36 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkRead - ns/op",
+            "value": 32765319,
+            "unit": "ns/op",
+            "extra": "36 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkRead - B/op",
+            "value": 58558216,
+            "unit": "B/op",
+            "extra": "36 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkRead - allocs/op",
+            "value": 46933,
+            "unit": "allocs/op",
+            "extra": "36 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity",
+            "value": 3656163.5,
+            "unit": "ns/op\t2102292 B/op\t11480 allocs/op",
+            "extra": "332 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity - ns/op",
+            "value": 3656163.5,
+            "unit": "ns/op",
+            "extra": "332 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity - B/op",
+            "value": 2102292,
+            "unit": "B/op",
+            "extra": "332 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity - allocs/op",
+            "value": 11480,
+            "unit": "allocs/op",
+            "extra": "332 times\n2 procs"
           }
         ]
       }
