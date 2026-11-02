@@ -11,7 +11,7 @@ services:
   # root-owned on first create, so an init container chowns it first.
   deepparse-cache-init:
     profiles: ["deepparse"]
-    image: ghcr.io/graal-research/deepparse:0.11.0
+    image: ghcr.io/graal-research/deepparse:1.0.0
     user: "0"
     volumes:
       - deepparse-cache:/home/appuser/.cache
@@ -19,7 +19,7 @@ services:
 
   deepparse:
     profiles: ["deepparse"]
-    image: ghcr.io/graal-research/deepparse:0.11.0
+    image: ghcr.io/graal-research/deepparse:1.0.0
     depends_on:
       deepparse-cache-init:
         condition: service_completed_successfully
