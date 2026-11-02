@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793556141033,
+  "lastUpdate": 1793656203210,
   "repoUrl": "https://github.com/moov-io/watchman",
   "entries": {
     "moov-io/watchman CSL US Benchmarks": [
@@ -1610,6 +1610,76 @@ window.BENCHMARK_DATA = {
             "value": 11480,
             "unit": "allocs/op",
             "extra": "332 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "renovate[bot]",
+            "username": "renovate[bot]",
+            "email": "29139614+renovate[bot]@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "fc33d52ebbd1d547462757ecf53b82146395ce37",
+          "message": "fix(deps): update module github.com/adamdecaf/deepparse-go to v0.3.0 (#1000)\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>",
+          "timestamp": "2026-11-02T18:18:30Z",
+          "url": "https://github.com/moov-io/watchman/commit/fc33d52ebbd1d547462757ecf53b82146395ce37"
+        },
+        "date": 1793656202602,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "BenchmarkRead",
+            "value": 54524650.5,
+            "unit": "ns/op\t58558218 B/op\t46933 allocs/op",
+            "extra": "21 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkRead - ns/op",
+            "value": 54524650.5,
+            "unit": "ns/op",
+            "extra": "21 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkRead - B/op",
+            "value": 58558218,
+            "unit": "B/op",
+            "extra": "21 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkRead - allocs/op",
+            "value": 46933,
+            "unit": "allocs/op",
+            "extra": "21 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity",
+            "value": 6080222.5,
+            "unit": "ns/op\t2103586 B/op\t11481 allocs/op",
+            "extra": "198 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity - ns/op",
+            "value": 6080222.5,
+            "unit": "ns/op",
+            "extra": "198 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity - B/op",
+            "value": 2103586,
+            "unit": "B/op",
+            "extra": "198 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity - allocs/op",
+            "value": 11481,
+            "unit": "allocs/op",
+            "extra": "198 times\n2 procs"
           }
         ]
       }
