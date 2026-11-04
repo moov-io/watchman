@@ -1,8 +1,11 @@
-"""Start the deepparse FastAPI app without downloading unused FastText models.
+"""Start the deepparse FastAPI app with only the BPEmb parsers Watchman uses.
 
-The published image's lifespan calls download_models() for every model, including
-the 6.8GB FastText embeddings, then skips initializing those parsers. Watchman
-only uses BPEmb over HTTP, so skip the unused downloads.
+The published 1.0.0 image's lifespan calls download_models() for every model,
+including the 6.8GB FastText embeddings and Model2Vec, then initializes every
+non-FastText parser. Watchman only calls BPEmb over HTTP, so drop the other
+MODEL_MAPPING_CHOICES keys before uvicorn loads the app. That skips the unused
+downloads and stops AddressParser(offline=True) from failing on Model2Vec
+weights that are not in the cache.
 """
 
 import deepparse.download_tools as download_tools
@@ -17,7 +20,12 @@ def download_models(saving_cache_path=None):
 
 download_tools.download_models = download_models
 
+for key in list(download_tools.MODEL_MAPPING_CHOICES):
+    if key not in _BP_EMB_MODELS:
+        del download_tools.MODEL_MAPPING_CHOICES[key]
+
 import uvicorn
 
 if __name__ == "__main__":
     uvicorn.run("deepparse.app.app:app", host="0.0.0.0", port=8000)
+

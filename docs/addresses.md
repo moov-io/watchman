@@ -18,7 +18,7 @@ libpostal settings are under `Watchman.PostalPool` in the [config file](/watchma
 
 ### Deepparse (optional)
 
-[GRAAL-Research/deepparse](https://github.com/GRAAL-Research/deepparse) is a multinational neural address parser that runs as an HTTP sidecar. Watchman calls it with [deepparse-go](https://github.com/adamdecaf/deepparse-go).
+[GRAAL-Research/deepparse](https://github.com/GRAAL-Research/deepparse) is a multinational neural address parser that runs as an HTTP sidecar. Watchman calls it with [deepparse-go](https://github.com/adamdecaf/deepparse-go). `make setup-deepparse` runs `ghcr.io/graal-research/deepparse:1.0.0` and loads BPEmb only.
 
 Start a local instance from this repo:
 

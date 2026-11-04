@@ -11,8 +11,8 @@ type Config struct {
 	// "http://localhost:8000". Overridable with DEEPPARSE_URL.
 	BaseURL string
 
-	// Model is the deepparse path segment (bpemb, bpemb-attention, fasttext, ...).
-	// The published Docker image loads BPEmb models.
+	// Model is the deepparse path segment (bpemb, bpemb-attention, model2vec-8m, ...).
+	// The compose sidecar loads BPEmb models only.
 	Model string
 
 	Timeout time.Duration

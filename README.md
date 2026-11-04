@@ -173,7 +173,7 @@ Building Watchman's source code follows standard Go commands. You can use `make 
 
 Run `make install` to setup [gopostal](https://github.com/moov-io/gopostal) / [libpostal](https://github.com/openvenues/libpostal) for Watchman.
 
-Run `make setup-deepparse` to start an optional [deepparse](https://github.com/GRAAL-Research/deepparse) HTTP sidecar (`ghcr.io/graal-research/deepparse:0.11.0`) as an alternative address parser. It is disabled by default.
+Run `make setup-deepparse` to start an optional [deepparse](https://github.com/GRAAL-Research/deepparse) HTTP sidecar (`ghcr.io/graal-research/deepparse:1.0.0`) as an alternative address parser. It is disabled by default.
 
 ## Related projects
 

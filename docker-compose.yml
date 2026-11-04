@@ -5,13 +5,15 @@ services:
   # Optional address parser sidecar. Not started by default (make setup).
   #   docker compose --profile deepparse up -d
   # Then set Watchman.Deepparse.Enabled=true and BaseURL=http://localhost:8000
-  # (or DEEPPARSE_URL). Image: ghcr.io/graal-research/deepparse:0.11.0
+  # (or DEEPPARSE_URL). Image: ghcr.io/graal-research/deepparse:1.0.0
+  # (linux/amd64). The entrypoint loads BPEmb only.
   #
   # The image runs as uid 1000 (appuser). A named volume over ~/.cache is
   # root-owned on first create, so an init container chowns it first.
   deepparse-cache-init:
     profiles: ["deepparse"]
-    image: ghcr.io/graal-research/deepparse:0.11.0
+    image: ghcr.io/graal-research/deepparse:1.0.0
+    platform: linux/amd64
     user: "0"
     volumes:
       - deepparse-cache:/home/appuser/.cache
@@ -19,7 +21,8 @@ services:
 
   deepparse:
     profiles: ["deepparse"]
-    image: ghcr.io/graal-research/deepparse:0.11.0
+    image: ghcr.io/graal-research/deepparse:1.0.0
+    platform: linux/amd64
     depends_on:
       deepparse-cache-init:
         condition: service_completed_successfully
@@ -44,6 +47,7 @@ services:
     environment:
       HF_HOME: /home/appuser/.cache/huggingface
       TRANSFORMERS_CACHE: /home/appuser/.cache/huggingface
+      HF_TOKEN: ${HF_TOKEN:-}
     networks:
       - intranet
 
