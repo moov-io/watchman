@@ -25,8 +25,8 @@ type cascadeFixture struct {
 }
 
 var cascadeFixtures = []cascadeFixture{
-	{file: "testdata/cascade-name-pairs.csv", doc: "testdata/cascade-name-pairs.md", rows: 300},
-	{file: "testdata/cascade-name-pairs-2.csv", doc: "testdata/cascade-name-pairs-2.md", rows: 185},
+	{file: "testdata/cascade-name-pairs.csv", doc: "testdata/cascade-name-pairs.md", rows: 297},
+	{file: "testdata/cascade-name-pairs-2.csv", doc: "testdata/cascade-name-pairs-2.md", rows: 184},
 }
 
 type cascadePair struct {

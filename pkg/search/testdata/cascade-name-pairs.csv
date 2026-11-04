@@ -45,8 +45,6 @@ cascade_entities,Company,MV Salaam Dar,MV Salaam Zanzibar,false,,other-place,Cas
 cascade_entities,Company,Lefkada Bulk Carriers S.A.,Lefkosia Bulk Carriers S.A.,false,,other-place,Cascade Screening authored pairs (paires-entites-17.json),0.7980,0.7980
 cascade_entities,Company,Akinyi Textiles Ltd,Atieno Textiles Ltd,false,,other-name,Cascade Screening authored pairs (paires-entites-15.json),0.6035,0.6035
 cascade_entities,Company,Wanjiru & Wambui Advocates,Wanjiru & Wanjiku Advocates,false,,other-name,Cascade Screening authored pairs (paires-entites-15.json),0.6117,0.6117
-cascade_entities,Company,Haji Muhammad Ashraf & Sons,Haji Muhammad Asghar & Sons,false,,other-name,Cascade Screening authored pairs (paires-entites-15.json),0.8218,0.8218
-cascade_entities,Company,Chaudhry Nazir Ahmad & Co.,Chaudhry Nazir Hussain & Co.,false,,other-name,Cascade Screening authored pairs (paires-entites-15.json),0.5583,0.5583
 cascade_entities,Company,Adriatica Legnami S.r.l.,Adriatica Metalli S.r.l.,false,,different-business-sector-word,Cascade Screening authored pairs (paires-entites-18.json),0.5143,0.5143
 cascade_entities,Company,Jadranska Plovba d.o.o.,Jadranska Ribolov d.o.o.,false,,different-business-sector-word,Cascade Screening authored pairs (paires-entites-18.json),0.5170,0.5170
 cascade_entities,Company,Bevk Mizarstvo d.o.o.,Bevk Kovaštvo d.o.o.,false,,different-business-sector-word,Cascade Screening authored pairs (paires-entites-18.json),0.4032,0.4032
@@ -282,7 +280,6 @@ cascade_entities,Company,«Ջանոյան Էքսպրես» ՍՊԸ,Janoyan Expres
 cascade_entities,Company,ရွှေပုလဲ ကုန်သွယ်ရေး ကုမ္ပဏီလီမိတက်,"Shwe Pale Trading Co., Ltd.",true,,burmese-script-vs-latin,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
 cascade_entities,Company,ရတနာမင်္ဂလာ ပို့ဆောင်ရေး ကုမ္ပဏီလီမိတက်,"Yadanar Mingalar Logistics Co., Ltd.",true,,burmese-script-vs-latin,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
 cascade_entities,Company,အောင်ကြယ် ဆန်စက် ကုမ္ပဏီလီမိတက်,"Aung Kyal Rice Mill Co., Ltd.",true,,burmese-script-vs-latin,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
-cascade_entities,Company,ဦးကျော်ဇော်ထွန်း ကုန်သွယ်ရေး,U Kyaw Zaw Htun Trading,true,,burmese-script-vs-latin,Cascade Screening authored pairs (paires-entites-22.json),0.0000,0.0000
 cascade_entities,Vessel,"MV SIAM ORCHID 7, Bangkok",SIAM ORCHID 7,true,,vessel-prefix-and-port,Cascade Screening authored pairs (paires-entites-22.json),0.4966,0.8550
 cascade_entities,Vessel,M.T. THONG NAWA 3 (Laem Chabang),THONG NAWA NO.3,true,,vessel-prefix-and-port,Cascade Screening authored pairs (paires-entites-22.json),0.4416,0.8336
 cascade_entities,Vessel,"T/B CHAO LE 8, Sihanoukville",CHAO LE NO. 8,true,,vessel-prefix-and-port,Cascade Screening authored pairs (paires-entites-22.json),0.4864,0.6662

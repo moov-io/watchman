@@ -1,17 +1,17 @@
 # Cascade company and vessel name pairs (lot 2)
 
-Labelled name pairs from [Cascade Screening](https://github.com/ArslaneSempai-ui/cascade-screening/tree/main/contrib/opensanctions), offered for Watchman in [discussion #919](https://github.com/moov-io/watchman/discussions/919) after the first 300-row fixture.
+Labelled name pairs from [Cascade Screening](https://github.com/ArslaneSempai-ui/cascade-screening/tree/main/contrib/opensanctions), offered for Watchman in [discussion #919](https://github.com/moov-io/watchman/discussions/919) after the first 297-row fixture.
 
 Source file: [`cascade-name-pairs-2.csv`](https://github.com/ArslaneSempai-ui/cascade-screening/blob/main/contrib/opensanctions/cascade-name-pairs-2.csv)
 
-The original 185 rows are MIT-licensed. Watchman testdata adds `baseline` and `score` columns:
+The original 184 rows are MIT-licensed. Watchman testdata adds `baseline` and `score` columns:
 
 - `baseline` — `pkg/search.Similarity` on name-only entities the first time this fixture was recorded. Frozen.
 - `score` — the same measurement after later scoring changes. Tests assert this column.
 
 Both sides of a row use the CSV `schema` (`Company` → `business`, `Vessel` → `vessel`). Queries are name-only (no IDs, dates, or addresses), so an exact name lands around 0.855. Cross-script positives score 0 without embeddings.
 
-Lot 2 is 118 matches and 67 non-matches, written as a yardstick for leftover Hebrew/Latin, Burmese/Latin, and former-name shapes (`ex-`, `f.k.a.`, `formerly`). Near-miss non-matches share a word, root, or numeral across scripts.
+Lot 2 is 118 matches and 66 non-matches, written as a yardstick for leftover Hebrew/Latin, Burmese/Latin, and former-name shapes (`ex-`, `f.k.a.`, `formerly`). Near-miss non-matches share a word, root, or numeral across scripts.
 
 ## Score history
 
@@ -30,13 +30,13 @@ UPDATE_CASCADE_SCORES=yes go test ./pkg/search -run TestCascadeNamePairs -count=
 
 <!-- cascade-score-summary -->
 
-Recorded `Similarity` on 185 name-only pairs (schema → Watchman type).
+Recorded `Similarity` on 184 name-only pairs (schema → Watchman type).
 
 | Slice | N | Matches | Mean score | Mean baseline | Mean delta | Min | Max |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| all | 185 | 118 | 0.2302 | 0.1948 | +0.0354 | 0.0000 | 0.8550 |
+| all | 184 | 118 | 0.2315 | 0.1959 | +0.0356 | 0.0000 | 0.8550 |
 | is_match=true | 118 | 118 | 0.2846 | 0.2319 | +0.0527 | 0.0000 | 0.8550 |
-| is_match=false | 67 | 0 | 0.1344 | 0.1295 | +0.0050 | 0.0000 | 0.8122 |
+| is_match=false | 66 | 0 | 0.1365 | 0.1314 | +0.0050 | 0.0000 | 0.8122 |
 | alias-fka | 3 | 3 | 0.8122 | 0.3711 | +0.4411 | 0.8122 | 0.8122 |
 | article-joined vs split | 3 | 3 | 0.0000 | 0.0000 | +0.0000 | 0.0000 | 0.0000 |
 | barge-former-name-alias | 1 | 1 | 0.5686 | 0.5686 | +0.0000 | 0.5686 | 0.5686 |
@@ -46,7 +46,7 @@ Recorded `Similarity` on 185 name-only pairs (schema → Watchman type).
 | cross-script-close-root | 4 | 0 | 0.0000 | 0.0000 | +0.0000 | 0.0000 | 0.0000 |
 | cross-script-close-syllable | 2 | 0 | 0.0000 | 0.0000 | +0.0000 | 0.0000 | 0.0000 |
 | cross-script-numeral | 9 | 0 | 0.0164 | 0.0164 | +0.0000 | 0.0000 | 0.0742 |
-| cross-script-other-name | 2 | 0 | 0.0000 | 0.0000 | +0.0000 | 0.0000 | 0.0000 |
+| cross-script-other-name | 1 | 0 | 0.0000 | 0.0000 | +0.0000 | 0.0000 | 0.0000 |
 | cross-script-other-word | 12 | 0 | 0.0000 | 0.0000 | +0.0000 | 0.0000 | 0.0000 |
 | cross-script-place | 9 | 0 | 0.0000 | 0.0000 | +0.0000 | 0.0000 | 0.0000 |
 | current-name-with-ex-residue | 1 | 1 | 0.8550 | 0.8550 | +0.0000 | 0.8550 | 0.8550 |

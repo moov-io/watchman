@@ -4,9 +4,9 @@ Labelled name pairs from [Cascade Screening](https://github.com/ArslaneSempai-ui
 
 Source file: [`cascade-name-pairs.csv`](https://github.com/ArslaneSempai-ui/cascade-screening/blob/main/contrib/opensanctions/cascade-name-pairs.csv)
 
-A second lot of 185 Hebrew, Burmese, and former-name pairs is [`cascade-name-pairs-2.csv`](cascade-name-pairs-2.csv). Notes for that file are in [`cascade-name-pairs-2.md`](cascade-name-pairs-2.md).
+A second lot of 184 Hebrew, Burmese, and former-name pairs is [`cascade-name-pairs-2.csv`](cascade-name-pairs-2.csv). Notes for that file are in [`cascade-name-pairs-2.md`](cascade-name-pairs-2.md).
 
-The original 300 rows are MIT-licensed. Watchman testdata adds `baseline` and `score` columns:
+The original 297 rows are MIT-licensed. Watchman testdata adds `baseline` and `score` columns:
 
 - `baseline` — `pkg/search.Similarity` on name-only entities the first time this fixture was recorded. Frozen.
 - `score` — the same measurement after later scoring changes. Tests assert this column.
@@ -35,20 +35,20 @@ UPDATE_CASCADE_SCORES=yes go test ./pkg/search -run TestCascadeNamePairs -count=
 
 <!-- cascade-score-summary -->
 
-Recorded `Similarity` on 300 name-only pairs (schema → Watchman type).
+Recorded `Similarity` on 297 name-only pairs (schema → Watchman type).
 
 | Slice | N | Matches | Mean score | Mean baseline | Mean delta | Min | Max |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| all | 300 | 140 | 0.6135 | 0.5950 | +0.0185 | 0.0000 | 0.8550 |
-| is_match=true | 140 | 140 | 0.6149 | 0.5574 | +0.0575 | 0.0000 | 0.8550 |
-| is_match=false | 160 | 0 | 0.6123 | 0.6279 | -0.0155 | 0.0000 | 0.8451 |
+| all | 297 | 139 | 0.6151 | 0.5964 | +0.0187 | 0.0000 | 0.8550 |
+| is_match=true | 139 | 139 | 0.6193 | 0.5614 | +0.0579 | 0.0000 | 0.8550 |
+| is_match=false | 158 | 0 | 0.6114 | 0.6271 | -0.0157 | 0.0000 | 0.8451 |
 | abbreviation | 4 | 4 | 0.6052 | 0.6052 | +0.0000 | 0.4538 | 0.8408 |
 | abbreviation-expanded | 4 | 4 | 0.6942 | 0.6942 | +0.0000 | 0.5577 | 0.8311 |
 | accent-diacritic-dropped | 4 | 4 | 0.8394 | 0.8394 | +0.0000 | 0.7927 | 0.8550 |
 | accent-variant | 4 | 4 | 0.8550 | 0.8550 | +0.0000 | 0.8550 | 0.8550 |
 | annotation | 4 | 4 | 0.5077 | 0.3994 | +0.1083 | 0.3597 | 0.7837 |
 | branch-same-entity | 4 | 4 | 0.6165 | 0.6003 | +0.0162 | 0.5332 | 0.8060 |
-| burmese-script-vs-latin | 4 | 4 | 0.0000 | 0.0000 | +0.0000 | 0.0000 | 0.0000 |
+| burmese-script-vs-latin | 3 | 3 | 0.0000 | 0.0000 | +0.0000 | 0.0000 | 0.0000 |
 | case-punctuation-spacing | 4 | 4 | 0.8427 | 0.8427 | +0.0000 | 0.8058 | 0.8550 |
 | different-business-sector-word | 4 | 0 | 0.5002 | 0.5002 | +0.0000 | 0.4032 | 0.5664 |
 | different-country-registration | 4 | 0 | 0.5843 | 0.5843 | +0.0000 | 0.4994 | 0.8160 |
@@ -79,7 +79,7 @@ Recorded `Similarity` on 300 name-only pairs (schema → Watchman type).
 | one-word-sibling | 4 | 0 | 0.5922 | 0.5922 | +0.0000 | 0.4954 | 0.8112 |
 | one-word-sibling-activity | 4 | 0 | 0.5580 | 0.5580 | +0.0000 | 0.5180 | 0.6118 |
 | other-business-word | 4 | 0 | 0.6530 | 0.6530 | +0.0000 | 0.5198 | 0.7866 |
-| other-name | 4 | 0 | 0.6488 | 0.6488 | +0.0000 | 0.5583 | 0.8218 |
+| other-name | 2 | 0 | 0.6076 | 0.6076 | +0.0000 | 0.6035 | 0.6117 |
 | other-place | 4 | 0 | 0.6190 | 0.6190 | +0.0000 | 0.5233 | 0.7980 |
 | other-proper-name | 4 | 0 | 0.6906 | 0.6906 | +0.0000 | 0.5745 | 0.8046 |
 | other-surname | 4 | 0 | 0.8040 | 0.8040 | +0.0000 | 0.7800 | 0.8229 |

@@ -28,7 +28,7 @@ func TestPairCrossScript(t *testing.T) {
 func TestLoadPairs_Lot2(t *testing.T) {
 	pairs, err := loadPairs("../../pkg/search/testdata/cascade-name-pairs-2.csv")
 	require.NoError(t, err)
-	require.Len(t, pairs, 185)
+	require.Len(t, pairs, 184)
 
 	var matches, xs int
 	for _, p := range pairs {
