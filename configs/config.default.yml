@@ -101,7 +101,7 @@ Watchman:
   Deepparse:
     Enabled: false
     BaseURL: "http://localhost:8000" # DEEPPARSE_URL overrides
-    Model: "bpemb-attention"         # bpemb, bpemb-attention; image skips FastText
+    Model: "bpemb-attention"         # bpemb, bpemb-attention; sidecar skips FastText and Model2Vec
     Timeout: "10s"
 
   Geocoding:

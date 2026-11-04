@@ -225,13 +225,13 @@ Start the published image from this repository without pulling it into the defau
 make setup-deepparse
 ```
 
-That runs `ghcr.io/graal-research/deepparse:0.11.0` on port `8000` (`docker compose --profile deepparse`). First start downloads models and can take several minutes.
+That runs `ghcr.io/graal-research/deepparse:1.0.0` on port `8000` (`docker compose --profile deepparse`). First start downloads BPEmb models and can take several minutes. The sidecar skips FastText and Model2Vec; Watchman's default model is `bpemb-attention`.
 
 ```yaml
   Deepparse:
     Enabled: false
     BaseURL: "http://localhost:8000"  # or DEEPPARSE_URL
-    Model: "bpemb-attention"          # bpemb, bpemb-attention; the image skips FastText
+    Model: "bpemb-attention"          # bpemb, bpemb-attention; sidecar skips FastText and Model2Vec
     Timeout: "10s"
 ```
 
