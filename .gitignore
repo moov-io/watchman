@@ -42,6 +42,10 @@ openapi-generator*jar
 
 makefile.dev
 
+# Jekyll
+/docs/_site/
+/docs/.jekyll-cache/
+
 # Python
 venv/
 __pycache__/
