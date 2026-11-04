@@ -275,6 +275,7 @@ All search parameters from the HTTP `/v2/search` endpoint are supported:
 
 ### Go Client Example
 
+{% raw %}
 ```go
 package main
 
@@ -336,6 +337,7 @@ func main() {
 	}
 }
 ```
+{% endraw %}
 
 ### cURL Examples
 

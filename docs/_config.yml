@@ -28,10 +28,12 @@ source_code: https://github.com/moov-io/watchman
 permalink: pretty
 
 # Build settings
-remote_theme: moov-io/bulma-clean-theme
+# Theme 1.x needs Jekyll 4.3+ and is deployed with GitHub Actions, not
+# the classic Pages build (which stays on Jekyll 3.9).
+theme: bulma-clean-theme
+force_theme: light
 plugins:
   - jekyll-feed
-  - jekyll-remote-theme
 
 # Exclude from processing.
 # The following items will not be processed, by default.

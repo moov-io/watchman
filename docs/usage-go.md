@@ -22,6 +22,7 @@ INCLUDED_LISTS=us_ofac go run ./cmd/server
 
 Then run this example code (e.g. `go run ./examples/search.go`).
 
+{% raw %}
 ```go
 package main
 
@@ -79,3 +80,4 @@ func main() {
 	}
 }
 ```
+{% endraw %}
