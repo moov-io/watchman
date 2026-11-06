@@ -1,150 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793908755442,
+  "lastUpdate": 1793993045058,
   "repoUrl": "https://github.com/moov-io/watchman",
   "entries": {
     "moov-io/watchman OFAC Benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "name": "user.email",
-            "username": "adamdecaf",
-            "email": "adamkshannon@gmail.com"
-          },
-          "committer": {
-            "name": "user.email",
-            "username": "adamdecaf",
-            "email": "adamkshannon@gmail.com"
-          },
-          "id": "e9f80f8b047b47db4f63012313de0db2c0dc9590",
-          "message": "ci: keep bench.yml on ubuntu-24.04\n\nRenovate automerged ubuntu-26.04 onto the benchmark workflow. Pin\n24.04 again and ignore that package in bench.yml so nightly samples\nstay comparable.",
-          "timestamp": "2026-10-14T14:59:54Z",
-          "url": "https://github.com/moov-io/watchman/commit/e9f80f8b047b47db4f63012313de0db2c0dc9590"
-        },
-        "date": 1791991455447,
-        "tool": "go",
-        "benches": [
-          {
-            "name": "BenchmarkReader/SDN",
-            "value": 19569119.5,
-            "unit": "ns/op\t39928888 B/op\t57160 allocs/op",
-            "extra": "60 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkReader/SDN - ns/op",
-            "value": 19569119.5,
-            "unit": "ns/op",
-            "extra": "60 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkReader/SDN - B/op",
-            "value": 39928888,
-            "unit": "B/op",
-            "extra": "60 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkReader/SDN - allocs/op",
-            "value": 57160,
-            "unit": "allocs/op",
-            "extra": "60 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkReader/Addresses",
-            "value": 9885451.5,
-            "unit": "ns/op\t8635457 B/op\t43803 allocs/op",
-            "extra": "122 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkReader/Addresses - ns/op",
-            "value": 9885451.5,
-            "unit": "ns/op",
-            "extra": "122 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkReader/Addresses - B/op",
-            "value": 8635457,
-            "unit": "B/op",
-            "extra": "122 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkReader/Addresses - allocs/op",
-            "value": 43803,
-            "unit": "allocs/op",
-            "extra": "122 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkReader/AlternateIdentities",
-            "value": 7653253,
-            "unit": "ns/op\t6164544 B/op\t31188 allocs/op",
-            "extra": "156 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkReader/AlternateIdentities - ns/op",
-            "value": 7653253,
-            "unit": "ns/op",
-            "extra": "156 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkReader/AlternateIdentities - B/op",
-            "value": 6164544,
-            "unit": "B/op",
-            "extra": "156 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkReader/AlternateIdentities - allocs/op",
-            "value": 31188,
-            "unit": "allocs/op",
-            "extra": "156 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkReader/Comments",
-            "value": 253565.5,
-            "unit": "ns/op\t190872 B/op\t140 allocs/op",
-            "extra": "4916 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkReader/Comments - ns/op",
-            "value": 253565.5,
-            "unit": "ns/op",
-            "extra": "4916 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkReader/Comments - B/op",
-            "value": 190872,
-            "unit": "B/op",
-            "extra": "4916 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkReader/Comments - allocs/op",
-            "value": 140,
-            "unit": "allocs/op",
-            "extra": "4916 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkFindEntity",
-            "value": 2785577749.5,
-            "unit": "ns/op\t583507636 B/op\t4748586 allocs/op",
-            "extra": "1 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkFindEntity - ns/op",
-            "value": 2785577749.5,
-            "unit": "ns/op",
-            "extra": "1 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkFindEntity - B/op",
-            "value": 583507636,
-            "unit": "B/op",
-            "extra": "1 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkFindEntity - allocs/op",
-            "value": 4748586,
-            "unit": "allocs/op",
-            "extra": "1 times\n2 procs"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -3548,6 +3406,148 @@ window.BENCHMARK_DATA = {
           {
             "name": "BenchmarkFindEntity - allocs/op",
             "value": 4748530,
+            "unit": "allocs/op",
+            "extra": "1 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "renovate[bot]",
+            "username": "renovate[bot]",
+            "email": "29139614+renovate[bot]@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "99afeeaf7668b899ed20f72895e2018bd571ec23",
+          "message": "fix(deps): update module github.com/moov-io/base to v0.68.1 (#1012)\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>",
+          "timestamp": "2026-11-06T02:50:34Z",
+          "url": "https://github.com/moov-io/watchman/commit/99afeeaf7668b899ed20f72895e2018bd571ec23"
+        },
+        "date": 1793993044458,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "BenchmarkReader/SDN",
+            "value": 29185883.5,
+            "unit": "ns/op\t39928891 B/op\t57160 allocs/op",
+            "extra": "40 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkReader/SDN - ns/op",
+            "value": 29185883.5,
+            "unit": "ns/op",
+            "extra": "40 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkReader/SDN - B/op",
+            "value": 39928891,
+            "unit": "B/op",
+            "extra": "40 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkReader/SDN - allocs/op",
+            "value": 57160,
+            "unit": "allocs/op",
+            "extra": "40 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkReader/Addresses",
+            "value": 14829218.5,
+            "unit": "ns/op\t8635456 B/op\t43803 allocs/op",
+            "extra": "70 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkReader/Addresses - ns/op",
+            "value": 14829218.5,
+            "unit": "ns/op",
+            "extra": "70 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkReader/Addresses - B/op",
+            "value": 8635456,
+            "unit": "B/op",
+            "extra": "70 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkReader/Addresses - allocs/op",
+            "value": 43803,
+            "unit": "allocs/op",
+            "extra": "70 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkReader/AlternateIdentities",
+            "value": 11034682.5,
+            "unit": "ns/op\t6164544 B/op\t31188 allocs/op",
+            "extra": "100 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkReader/AlternateIdentities - ns/op",
+            "value": 11034682.5,
+            "unit": "ns/op",
+            "extra": "100 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkReader/AlternateIdentities - B/op",
+            "value": 6164544,
+            "unit": "B/op",
+            "extra": "100 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkReader/AlternateIdentities - allocs/op",
+            "value": 31188,
+            "unit": "allocs/op",
+            "extra": "100 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkReader/Comments",
+            "value": 342460,
+            "unit": "ns/op\t190872 B/op\t140 allocs/op",
+            "extra": "3247 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkReader/Comments - ns/op",
+            "value": 342460,
+            "unit": "ns/op",
+            "extra": "3247 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkReader/Comments - B/op",
+            "value": 190872,
+            "unit": "B/op",
+            "extra": "3247 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkReader/Comments - allocs/op",
+            "value": 140,
+            "unit": "allocs/op",
+            "extra": "3247 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity",
+            "value": 3661322620,
+            "unit": "ns/op\t583529692 B/op\t4748584 allocs/op",
+            "extra": "1 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity - ns/op",
+            "value": 3661322620,
+            "unit": "ns/op",
+            "extra": "1 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity - B/op",
+            "value": 583529692,
+            "unit": "B/op",
+            "extra": "1 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity - allocs/op",
+            "value": 4748584,
             "unit": "allocs/op",
             "extra": "1 times\n2 procs"
           }
