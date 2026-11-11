@@ -236,7 +236,7 @@ Setup, hybrid scoring, and OpenSanctions numbers: [Cross-script matching](/watch
 }
 ```
 
-This is useful for monitoring data freshness and which lists are active. The Go client exposes this via `ListInfo(ctx)`.
+This is useful for monitoring data freshness and which lists are active. The Go client exposes this via `ListInfo(ctx)`. `listHashes` is also the `ref` used by [list history](/watchman/list-history/) when a database is configured (`GET /v2/lists`, `GET /v2/lists/{listName}/diff`).
 
 ## API Documentation
 

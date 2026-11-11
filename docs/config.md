@@ -41,6 +41,7 @@ The settings that matter most in production are **which lists you load**, **whic
 
 1. [Download reliability](#download-reliability)
 1. [Persistence Disclaimer](#data-persistence)
+1. [List history](/watchman/list-history/)
 
 ### File
 
@@ -461,6 +462,6 @@ This approach is complementary to the `INITIAL_DATA_DIRECTORY` feature (see [Cac
 
 Watchman **does not store search queries**. There is no screening log inside the process. Your application must retain who was screened, when, against which list hashes (`GET /v2/listinfo`), at which `minMatch`, and what was returned. Restarting Watchman does not replay past searches.
 
-Downloaded government lists live **in memory**. On restart Watchman loads them again from the origin, from `INITIAL_DATA_DIRECTORY`, or from [watchman-cache](/watchman/cache-data-files/). No in-memory encryption is performed.
+Downloaded government lists live **in memory** for search. On restart Watchman loads them again from the origin, from `INITIAL_DATA_DIRECTORY`, or from [watchman-cache](/watchman/cache-data-files/). No in-memory encryption is performed.
 
-**Ingested files** can be stored in MySQL or PostgreSQL if you uncomment the `Database` block above. That is how ingest survives a restart and how multiple Watchman processes share the same uploaded rows. Without a database, ingest exists only in that process and is gone when it exits. See [File Dataset Ingestion](/watchman/ingest/).
+Uncomment the `Database` block above to store **ingested files**, the geocoding L2 cache, the embeddings SQL cache, and **list history** (per-refresh deltas keyed by list hash). History endpoints are documented in [List history](/watchman/list-history/). Without a database those endpoints return HTTP 501, ingest exists only in that process, and it is gone when the process exits. See [File Dataset Ingestion](/watchman/ingest/).
