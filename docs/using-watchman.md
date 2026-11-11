@@ -155,7 +155,7 @@ Senzing output: `Accept: senzing` or `?format=senzing`.
 
 ## Lists and ingest
 
-Watchman downloads and refreshes lists on `DATA_REFRESH_INTERVAL` (default 12h). `GET /v2/listinfo` is the freshness check for ops and exams.
+Watchman downloads and refreshes lists on `DATA_REFRESH_INTERVAL` (default 12h). `GET /v2/listinfo` is the freshness check for ops and exams (counts, hashes, refresh window). With MySQL or PostgreSQL, [list history](/watchman/list-history/) stores a delta after each refresh so you can see when a list actually changed and which `sourceID`s were added, removed, or updated.
 
 Add internal lists with [ingest](/watchman/ingest/) (`POST /v2/ingest/{fileType}`). Ingested rows join the in-memory search index (all rows; a checksum avoids a full table scan on every search). OpenSanctions Senzing files loaded as lists via [config](/watchman/config/#open-sanctions) are also first-class in that corpus.
 

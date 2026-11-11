@@ -120,7 +120,7 @@ See [Network access](https://moov-io.github.io/watchman/network/), [issue #875](
 ### Data persistence
 
 By design, Watchman **does not persist** search queries. Your application must retain screening logs (who was screened, when, against which list hashes, at which cutoff). Watchman can store ingested files (the individual records) in
-a MySQL or PostgreSQL database for concurrent access. External lists that are downloaded on startup (and refreshed periodically) are only kept in memory. No encryption of data in-memory
+a MySQL or PostgreSQL database for concurrent access. External lists that are downloaded on startup (and refreshed periodically) are kept in memory for search. With that same database Watchman also stores a history of each list refresh (list hash, per-entity hashes, and diffs) so callers can re-screen only when a list actually changed. See [List history](https://moov-io.github.io/watchman/list-history/). No encryption of data in-memory
 is performed.
 
 ### Download reliability
