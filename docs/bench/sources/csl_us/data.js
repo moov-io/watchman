@@ -1,78 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794598751434,
+  "lastUpdate": 1794679367275,
   "repoUrl": "https://github.com/moov-io/watchman",
   "entries": {
     "moov-io/watchman CSL US Benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "name": "renovate[bot]",
-            "username": "renovate[bot]",
-            "email": "29139614+renovate[bot]@users.noreply.github.com"
-          },
-          "committer": {
-            "name": "GitHub",
-            "username": "web-flow",
-            "email": "noreply@github.com"
-          },
-          "id": "bea69b6c311e7c74898daa668a571cd96fb2e38a",
-          "message": "chore(deps): update go toolchain directive to v1.27.3 (#977)\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>",
-          "timestamp": "2026-10-20T14:03:08Z",
-          "url": "https://github.com/moov-io/watchman/commit/bea69b6c311e7c74898daa668a571cd96fb2e38a"
-        },
-        "date": 1792515415403,
-        "tool": "go",
-        "benches": [
-          {
-            "name": "BenchmarkRead",
-            "value": 50666116.5,
-            "unit": "ns/op\t58558216 B/op\t46933 allocs/op",
-            "extra": "22 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkRead - ns/op",
-            "value": 50666116.5,
-            "unit": "ns/op",
-            "extra": "22 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkRead - B/op",
-            "value": 58558216,
-            "unit": "B/op",
-            "extra": "22 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkRead - allocs/op",
-            "value": 46933,
-            "unit": "allocs/op",
-            "extra": "22 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkFindEntity",
-            "value": 5637714.5,
-            "unit": "ns/op\t2098924 B/op\t11480 allocs/op",
-            "extra": "213 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkFindEntity - ns/op",
-            "value": 5637714.5,
-            "unit": "ns/op",
-            "extra": "213 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkFindEntity - B/op",
-            "value": 2098924,
-            "unit": "B/op",
-            "extra": "213 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkFindEntity - allocs/op",
-            "value": 11480,
-            "unit": "allocs/op",
-            "extra": "213 times\n2 procs"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -1750,6 +1680,76 @@ window.BENCHMARK_DATA = {
             "value": 11480,
             "unit": "allocs/op",
             "extra": "196 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "renovate[bot]",
+            "username": "renovate[bot]",
+            "email": "29139614+renovate[bot]@users.noreply.github.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "86ed83f3480489d2a7df797739c6e9d48a952ce3",
+          "message": "chore(deps): update go toolchain directive to v1.27.4 (#1017)\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>",
+          "timestamp": "2026-11-10T20:56:31Z",
+          "url": "https://github.com/moov-io/watchman/commit/86ed83f3480489d2a7df797739c6e9d48a952ce3"
+        },
+        "date": 1794679366859,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "BenchmarkRead",
+            "value": 50914142.5,
+            "unit": "ns/op\t58558218 B/op\t46933 allocs/op",
+            "extra": "22 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkRead - ns/op",
+            "value": 50914142.5,
+            "unit": "ns/op",
+            "extra": "22 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkRead - B/op",
+            "value": 58558218,
+            "unit": "B/op",
+            "extra": "22 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkRead - allocs/op",
+            "value": 46933,
+            "unit": "allocs/op",
+            "extra": "22 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity",
+            "value": 5716092.5,
+            "unit": "ns/op\t2099932 B/op\t11480 allocs/op",
+            "extra": "210 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity - ns/op",
+            "value": 5716092.5,
+            "unit": "ns/op",
+            "extra": "210 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity - B/op",
+            "value": 2099932,
+            "unit": "B/op",
+            "extra": "210 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity - allocs/op",
+            "value": 11480,
+            "unit": "allocs/op",
+            "extra": "210 times\n2 procs"
           }
         ]
       }
