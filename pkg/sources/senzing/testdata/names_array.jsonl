@@ -1,0 +1,4 @@
+{"DATA_SOURCE":"US_DOD_1260H","RECORD_ID":"1260h-dji","RECORD_TYPE":"ORGANIZATION","NAMES":[{"NAME_TYPE":"PRIMARY","NAME_ORG":"Shenzhen DJI Innovation Technology Co., Ltd."},{"NAME_TYPE":"ALIAS","NAME_ORG":"Shenzhen DJI Technology Co., Ltd."},{"NAME_TYPE":"ALIAS","NAME_ORG":"DJI"}],"COUNTRIES":[{"COUNTRY_OF_ASSOCIATION":"cn"}],"URL":"https://www.federalregister.gov/d/2026-11571"}
+{"DATA_SOURCE":"US_DHS_UFLPA","RECORD_ID":"uflpa-1","FEATURES":[{"RECORD_TYPE":"ORGANIZATION"},{"NAME_TYPE":"PRIMARY","NAME_ORG":"Xinjiang Production and Construction Corps"},{"NAME_TYPE":"ALIAS","NAME_ORG":"XPCC"},{"COUNTRY_OF_ASSOCIATION":"cn"}]}
+{"DATA_SOURCE":"US_FCC_COVERED","RECORD_ID":"fcc-1","FEATURES":[{"RECORD_TYPE":"ORGANIZATION"},{"NAME_TYPE":"ALIAS","NAME_ORG":"Hytera Communications Corporation"}]}
+{"DATA_SOURCE":"PEPS","RECORD_ID":"pep-1","RECORD_TYPE":"PERSON","NAMES":[{"NAME_TYPE":"ALIAS","NAME_FULL":"Bob Smith"},{"NAME_TYPE":"PRIMARY","NAME_FULL":"Robert Smith"}]}
