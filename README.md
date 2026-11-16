@@ -58,6 +58,8 @@ Watchman integrates the following lists to help you maintain global compliance. 
 | United Kingdom    | [UK sanctions list](https://www.gov.uk/government/publications/the-uk-sanctions-list)                                                                                                    |
 | United Nations    | [Consolidated Sanctions List](https://www.un.org/sc/resources/sc-sanctions)                                                                                                             |
 
+Look for additional data sources in [moov-io/awesome-fintech](https://github.com/moov-io/awesome-fintech#compliance--sanctions).
+
 When loading multiple OpenSanctions or custom Senzing-formatted lists, set the `SENZING_CONCURRENT_DOWNLOADS` environment variable to control parallelism during downloads (defaults to 5 concurrent).
 
 ## Project status

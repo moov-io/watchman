@@ -21,6 +21,7 @@ Practical recipe: [Using Watchman](/watchman/using-watchman/).
  1. [MCP](#mcp)
  1. [Ingest](#ingest)
  1. [Included Lists](#included-lists)
+ 1. [Additional data sources](#additional-data-sources)
 
 The settings that matter most in production are **which lists you load**, **which fields you send on each search**, and **`minMatch`**. Name-algorithm environment flags change results very little. If you screen names in Arabic, Cyrillic, or Chinese, enable embeddings with `CROSS_SCRIPT_ONLY`. See [Using Watchman](/watchman/using-watchman/).
 
@@ -142,6 +143,8 @@ sum(rate(watchman_http_request_duration_seconds_count[5m])) by (route)
     #       Location: https://data.opensanctions.org/datasets/latest/us_congress/senzing.json
 
     # Include any senzing formatted lists in Watchman's corpus
+    # Look for additional data sources in moov-io/awesome-fintech:
+    # https://github.com/moov-io/awesome-fintech#compliance--sanctions
     # Senzing:
     #   - SourceList: "senzing-persons"
     #     Location: "file://pkg/sources/senzing/testdata/persons.jsonl"
@@ -277,6 +280,14 @@ Watchman integrates the following lists to help you maintain global compliance.
 | `us_ofac`         | US Office of Foreign Assets Control (OFAC)  | [URL](https://ofac.treasury.gov/sanctions-list-service)                                                                                  |
 
 The US CSL Nonproliferation Sanctions source code is `ACN` (Bureau of Arms Control and Nonproliferation). Files published before that rename used `ISN`. Watchman maps both labels as Nonproliferation Sanctions and keeps the original `source` string on `sourceData`.
+
+### Additional data sources
+
+Look for more lists in [moov-io/awesome-fintech](https://github.com/moov-io/awesome-fintech#compliance--sanctions). Custom Senzing JSON/JSONL files load with `Download.Senzing`.
+
+Community feeds:
+
+- [US Restricted Parties](https://github.com/Mattbusel/us-restricted-parties) (Matt Busel). DoD 1260H, UFLPA, FCC Covered List, and Section 889. Daily Senzing JSON Lines, CC BY 4.0.
 
 ### Environment Variables
 

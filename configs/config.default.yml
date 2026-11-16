@@ -49,6 +49,8 @@ Watchman:
     #       Location: https://data.opensanctions.org/datasets/latest/gb_fcdo_sanctions/senzing.json
 
     # Include any senzing formatted lists in Watchman's corpus
+    # Look for additional data sources in moov-io/awesome-fintech:
+    # https://github.com/moov-io/awesome-fintech#compliance--sanctions
     # Senzing:
     #   - SourceList: "senzing-persons"
     #     Location: "file://pkg/sources/senzing/testdata/persons.jsonl"

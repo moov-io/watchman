@@ -37,6 +37,8 @@ Use `INCLUDED_LISTS` or the [config file](/watchman/config/#included-lists) to c
 | United Kingdom | [UK sanctions list](https://www.gov.uk/government/publications/the-uk-sanctions-list) |
 | United Nations | [UN consolidated list](https://www.un.org/sc/resources/sc-sanctions) |
 
+Look for additional data sources in [moov-io/awesome-fintech](https://github.com/moov-io/awesome-fintech#compliance--sanctions).
+
 ## Start here
 
 ```
