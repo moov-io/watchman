@@ -149,6 +149,15 @@ func ToWatchmanEntity(rec SenzingRecord, sourceList search.SourceList) (search.E
 		}
 	}
 
+	// Keep the non-primary names (NAME_TYPE ALIAS, AKA, ...) as alt names
+	altNames := extractAltNames(rec, entity.Name)
+	switch {
+	case entity.Person != nil:
+		entity.Person.AltNames = altNames
+	case entity.Business != nil:
+		entity.Business.AltNames = altNames
+	}
+
 	// Extract addresses
 	entity.Addresses = extractAddresses(normalized)
 
@@ -183,8 +192,21 @@ func populateBusinessEntity(entity *search.Entity[search.Value], rec SenzingReco
 func normalizeRecord(rec SenzingRecord) SenzingRecord {
 	out := rec
 
-	// Flatten FEATURES if present
+	// Flatten FEATURES if present. Name features typed as something other than
+	// PRIMARY are aliases: they are read by extractAltNames and must not overwrite
+	// the primary name. The first alias only stands in when a record has no other name.
+	var features, aliases []map[string]any
 	for _, feature := range rec.Features {
+		if isAliasFeature(feature) {
+			aliases = append(aliases, feature)
+		} else {
+			features = append(features, feature)
+		}
+	}
+	if len(aliases) > 0 && !hasNameFeature(features) {
+		features = append(features, aliases[0])
+	}
+	for _, feature := range features {
 		for key, val := range feature {
 			strVal, ok := val.(string)
 			if !ok {
@@ -275,15 +297,17 @@ func normalizeRecord(rec SenzingRecord) SenzingRecord {
 
 	// Flatten array formats if flat fields are empty
 	if out.NameFull == "" && len(rec.Names) > 0 {
+		// Fallback to first name if no primary
+		primary := rec.Names[0]
 		for _, name := range rec.Names {
 			if strings.ToUpper(name.NameType) == "PRIMARY" {
-				out.NameFull = name.NameFull
+				primary = name
 				break
 			}
 		}
-		if out.NameFull == "" {
-			// Fallback to first name if no primary
-			out.NameFull = rec.Names[0].NameFull
+		out.NameFull = primary.NameFull
+		if out.NameOrg == "" {
+			out.NameOrg = primary.NameOrg
 		}
 	}
 
@@ -314,6 +338,74 @@ func normalizeRecord(rec SenzingRecord) SenzingRecord {
 		// Add more if needed
 	}
 
+	return out
+}
+
+// isAliasFeature reports whether a FEATURES entry is a name whose NAME_TYPE is set to
+// something other than PRIMARY (ALIAS, AKA, ...).
+func isAliasFeature(feature map[string]any) bool {
+	for key, val := range feature {
+		if strings.ToUpper(key) == "NAME_TYPE" {
+			nameType, _ := val.(string)
+			return nameType != "" && strings.ToUpper(nameType) != "PRIMARY"
+		}
+	}
+	return false
+}
+
+// hasNameFeature reports whether any FEATURES entry carries a name field.
+func hasNameFeature(features []map[string]any) bool {
+	for _, feature := range features {
+		if featureName(feature) != "" {
+			return true
+		}
+	}
+	return false
+}
+
+// featureName returns the name held by one FEATURES entry, if any.
+func featureName(feature map[string]any) string {
+	var rec SenzingRecord
+	for key, val := range feature {
+		strVal, _ := val.(string)
+		switch strings.ToUpper(key) {
+		case FieldNameOrg:
+			rec.NameOrg = strVal
+		case FieldNameFull:
+			rec.NameFull = strVal
+		case FieldNameFirst:
+			rec.NameFirst = strVal
+		case FieldNameMiddle:
+			rec.NameMiddle = strVal
+		case FieldNameLast:
+			rec.NameLast = strVal
+		}
+	}
+	return cmp.Or(rec.NameOrg, buildPersonName(rec))
+}
+
+// extractAltNames returns every name on the record other than primary, from the
+// NAMES array and from FEATURES entries typed as aliases, without duplicates.
+func extractAltNames(rec SenzingRecord, primary string) []string {
+	var out []string
+	seen := map[string]bool{strings.ToLower(strings.TrimSpace(primary)): true}
+	add := func(name string) {
+		name = strings.TrimSpace(name)
+		key := strings.ToLower(name)
+		if name == "" || seen[key] {
+			return
+		}
+		seen[key] = true
+		out = append(out, name)
+	}
+	for _, name := range rec.Names {
+		add(cmp.Or(name.NameOrg, name.NameFull))
+	}
+	for _, feature := range rec.Features {
+		if isAliasFeature(feature) {
+			add(featureName(feature))
+		}
+	}
 	return out
 }
 

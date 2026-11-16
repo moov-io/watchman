@@ -87,6 +87,7 @@ type SenzingRecord struct {
 type NameEntry struct {
 	NameType string `json:"NAME_TYPE"`
 	NameFull string `json:"NAME_FULL"`
+	NameOrg  string `json:"NAME_ORG,omitempty"` // organization names, e.g. OpenSanctions exports
 }
 
 type DateEntry map[string]string // e.g., {"DATE_OF_BIRTH": "1980"}

@@ -63,6 +63,35 @@ func TestReadEntities_WithFeatures(t *testing.T) {
 	require.Equal(t, "NV", entities[0].Addresses[0].State)
 }
 
+func TestReadEntities_NameTypes(t *testing.T) {
+	fd, err := os.Open(filepath.Join("testdata", "names_array.jsonl"))
+	require.NoError(t, err)
+	t.Cleanup(func() { fd.Close() })
+
+	entities, err := ReadEntities(fd, "test")
+	require.NoError(t, err)
+	require.Len(t, entities, 4)
+
+	// NAMES array with NAME_ORG, the shape OpenSanctions exports for organizations
+	require.Equal(t, search.EntityBusiness, entities[0].Type)
+	require.Equal(t, "Shenzhen DJI Innovation Technology Co., Ltd.", entities[0].Name)
+	require.Equal(t, []string{"Shenzhen DJI Technology Co., Ltd.", "DJI"}, entities[0].Business.AltNames)
+
+	// FEATURES: the ALIAS name must not overwrite the PRIMARY name
+	require.Equal(t, search.EntityBusiness, entities[1].Type)
+	require.Equal(t, "Xinjiang Production and Construction Corps", entities[1].Name)
+	require.Equal(t, []string{"XPCC"}, entities[1].Business.AltNames)
+
+	// FEATURES with only an ALIAS name: it stands in as the name
+	require.Equal(t, "Hytera Communications Corporation", entities[2].Name)
+	require.Empty(t, entities[2].Business.AltNames)
+
+	// Person with the PRIMARY name listed second
+	require.Equal(t, search.EntityPerson, entities[3].Type)
+	require.Equal(t, "Robert Smith", entities[3].Name)
+	require.Equal(t, []string{"Bob Smith"}, entities[3].Person.AltNames)
+}
+
 func TestReadEntities_GovernmentIDs(t *testing.T) {
 	input := `{"DATA_SOURCE":"TEST","RECORD_ID":"1001","RECORD_TYPE":"PERSON","NAME_FIRST":"John","NAME_LAST":"Doe","SSN":"123-45-6789","PASSPORT_NUMBER":"AB123456","PASSPORT_COUNTRY":"US","TAX_ID_NUMBER":"98-7654321","DRIVERS_LICENSE_NUMBER":"D1234567","DRIVERS_LICENSE_STATE":"CA"}`
 
