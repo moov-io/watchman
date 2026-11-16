@@ -172,8 +172,14 @@ endif
 
 docker: clean docker-hub docker-openshift
 
+# Buildx on GitHub-hosted runners attaches provenance attestations by default.
+# That makes ${VERSION}.amd64 a manifest list, and `docker manifest create`
+# fails with "is a manifest list". Keep each arch tag as a single image, and
+# combine them with imagetools so ${VERSION} is linux/amd64 + linux/arm64.
+DOCKER_BUILD_FLAGS ?= --provenance=false --sbom=false
+
 docker-hub:
-	docker build --pull --build-arg VERSION=${VERSION} -t moov/watchman:${VERSION}.${ARCH} -f ./build/Dockerfile .
+	docker build --pull ${DOCKER_BUILD_FLAGS} --build-arg VERSION=${VERSION} -t moov/watchman:${VERSION}.${ARCH} -f ./build/Dockerfile .
 
 docker-hub-push:
 	docker push moov/watchman:${VERSION}.${ARCH}
@@ -183,11 +189,10 @@ docker-hub-manifest:
 		echo "error: docker tag already exists: moov/watchman:${VERSION}" >&2; \
 		exit 1; \
 	fi
-	docker manifest create moov/watchman:${VERSION} moov/watchman:${VERSION}.arm64 moov/watchman:${VERSION}.amd64
-	docker manifest push moov/watchman:${VERSION}
+	docker buildx imagetools create -t moov/watchman:${VERSION} moov/watchman:${VERSION}.arm64 moov/watchman:${VERSION}.amd64
 
 docker-openshift:
-	docker build --pull --build-arg VERSION=${VERSION} -t quay.io/moov/watchman:${VERSION}.${ARCH} -f ./build/Dockerfile.openshift .
+	docker build --pull ${DOCKER_BUILD_FLAGS} --build-arg VERSION=${VERSION} -t quay.io/moov/watchman:${VERSION}.${ARCH} -f ./build/Dockerfile.openshift .
 
 docker-openshift-push:
 	docker push quay.io/moov/watchman:${VERSION}.${ARCH}
@@ -197,11 +202,10 @@ docker-openshift-manifest:
 		echo "error: docker tag already exists: quay.io/moov/watchman:${VERSION}" >&2; \
 		exit 1; \
 	fi
-	docker manifest create quay.io/moov/watchman:${VERSION} quay.io/moov/watchman:${VERSION}.arm64 quay.io/moov/watchman:${VERSION}.amd64
-	docker manifest push quay.io/moov/watchman:${VERSION}
+	docker buildx imagetools create -t quay.io/moov/watchman:${VERSION} quay.io/moov/watchman:${VERSION}.arm64 quay.io/moov/watchman:${VERSION}.amd64
 
 docker-static:
-	docker build --pull --build-arg VERSION=${VERSION} --build-arg ARCH=${ARCH} -t moov/watchman:v2-static.${ARCH} -f ./build/Dockerfile.static .
+	docker build --pull ${DOCKER_BUILD_FLAGS} --build-arg VERSION=${VERSION} --build-arg ARCH=${ARCH} -t moov/watchman:v2-static.${ARCH} -f ./build/Dockerfile.static .
 
 docker-static-push:
 	docker push moov/watchman:v2-static.${ARCH}
