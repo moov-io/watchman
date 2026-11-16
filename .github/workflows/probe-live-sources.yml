@@ -1,0 +1,39 @@
+# Use https://app.stepsecurity.io/ to improve workflow security
+name: Probe live sources
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 20:00 UTC ≈ 2pm America/Chicago (2pm CST / 3pm CDT)
+    - cron: "0 20 * * *"
+
+permissions: {}
+
+jobs:
+  probe:
+    name: ${{ matrix.name }}
+    if: github.repository == 'moov-io/watchman'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: FinCEN 311
+            package: ./pkg/sources/fincen_311
+            run: ^TestFullPipeline$
+    steps:
+      - name: Check out code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Go 1.x
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable
+
+      - name: Download and parse live origin
+        run: go test "${{ matrix.package }}" -count=1 -timeout 3m -v -run '${{ matrix.run }}'
