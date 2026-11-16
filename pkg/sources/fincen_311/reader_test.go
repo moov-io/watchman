@@ -146,6 +146,66 @@ func TestParseHTMLContents_NoTable(t *testing.T) {
 	require.Contains(t, err.Error(), "no table rows found")
 }
 
+func TestParseHTMLContents_MetaRefresh(t *testing.T) {
+	tests := []struct {
+		name string
+		html string
+		want string
+	}{
+		{
+			name: "fincen stub",
+			html: `<!doctype html><html lang=en-us><head><title>/resources/statutes-and-regulations/special-measures/</title><link rel=canonical href=https://www.fincen.gov/resources/statutes-and-regulations/special-measures/><meta charset=utf-8><meta name=robots content="noindex"><meta http-equiv=refresh content="0; url=/resources/statutes-and-regulations/special-measures/"></head><body><a href="/resources/statutes-and-regulations/special-measures/">Continue to Special Measures</a></body></html>`,
+			want: "no table rows found: page is a meta-refresh to https://www.fincen.gov/resources/statutes-and-regulations/special-measures/",
+		},
+		{
+			name: "quoted attributes",
+			html: `<html><head><meta http-equiv="Refresh" content="5; URL='https://www.fincen.gov/resources/statutes-and-regulations/special-measures/'"></head><body><p>moved</p></body></html>`,
+			want: "no table rows found: page is a meta-refresh to https://www.fincen.gov/resources/statutes-and-regulations/special-measures/",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			reader := &testReadCloser{Reader: strings.NewReader(tc.html)}
+			_, err := parseHTMLContents(reader)
+			require.EqualError(t, err, "extracting special measures: "+tc.want)
+		})
+	}
+}
+
+func TestParseRefreshURL(t *testing.T) {
+	tests := []struct {
+		name    string
+		content string
+		want    string
+	}{
+		{"relative with spaces", "0; url=/resources/statutes-and-regulations/special-measures/", "/resources/statutes-and-regulations/special-measures/"},
+		{"relative compact", "0;url=/foo", "/foo"},
+		{"absolute single quotes", `5; URL='https://www.fincen.gov/foo'`, "https://www.fincen.gov/foo"},
+		{"relative double quotes", `0; URL="/bar/"`, "/bar/"},
+		{"delay only", "0", ""},
+		{"empty", "", ""},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			require.Equal(t, tc.want, parseRefreshURL(tc.content))
+		})
+	}
+}
+
+func TestAbsoluteFinCENURL(t *testing.T) {
+	require.Equal(t, "https://www.fincen.gov/resources/statutes-and-regulations/special-measures/",
+		absoluteFinCENURL("/resources/statutes-and-regulations/special-measures/"))
+	require.Equal(t, "https://example.com/x", absoluteFinCENURL("https://example.com/x"))
+	require.Equal(t, "https://www.fincen.gov/foo", absoluteFinCENURL("foo"))
+	require.Equal(t, "", absoluteFinCENURL(" "))
+}
+
+func TestPublicFinCEN311URL(t *testing.T) {
+	require.Equal(t, "https://www.fincen.gov/resources/statutes-and-regulations/special-measures/", publicFinCEN311URL)
+}
+
 func TestParseHTMLContents_EmptyTable(t *testing.T) {
 	sampleHTML := `
 <!DOCTYPE html>

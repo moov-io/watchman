@@ -272,7 +272,7 @@ Watchman integrates the following lists to help you maintain global compliance.
 | `uk_csl`          | UK Sanctions List                           | [URL](https://www.gov.uk/government/publications/the-uk-sanctions-list)                                                                  |
 | `un_csl`          | United Nations Consolidated Sanctions List  | [URL](https://www.un.org/sc/resources/sc-sanctions)                                                                                      |
 | `us_csl`          | Consolidated Screening List (CSL)           | [URL](https://www.trade.gov/consolidated-screening-list)                                                                                 |
-| `us_fincen_311`   | US FinCEN 311 Actions                       | [URL](https://home.treasury.gov/policy-issues/terrorism-and-illicit-finance/311-actions)                                                 |
+| `us_fincen_311`   | US FinCEN 311 Actions                       | [URL](https://www.fincen.gov/resources/statutes-and-regulations/special-measures/)                                                       |
 | `us_non_sdn`      | US Office of Foreign Assets Control (OFAC)  | [URL](https://ofac.treasury.gov/sanctions-list-service)                                                                                  |
 | `us_ofac`         | US Office of Foreign Assets Control (OFAC)  | [URL](https://ofac.treasury.gov/sanctions-list-service)                                                                                  |
 
@@ -397,7 +397,7 @@ YAML configuration (example with OpenAI):
 | `US_CSL_DOWNLOAD_URL`    | Use an alternate URL for downloading US Consolidated Screening List | Subresource of `data.trade.gov`                                                 |
 | `US_CSL_DOWNLOAD_TEMPLATE` | Same as `US_CSL_DOWNLOAD_URL`                                     |                                                                                 |
 | `US_NON_SDN_DOWNLOAD_TEMPLATE` | Use an alternate URL for downloading US OFAC Non-SDN list     | Subresource of OFAC publication endpoint                                        |
-| `FINCEN_311_DOWNLOAD_URL` | Use an alternate URL for the FinCEN 311 Special Measures page    | Public FinCEN 311 page                                                          |
+| `FINCEN_311_DOWNLOAD_URL` | Use an alternate URL for the FinCEN 311 Special Measures page    | `https://www.fincen.gov/resources/statutes-and-regulations/special-measures/` |
 
 ##### European Union
 

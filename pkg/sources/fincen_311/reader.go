@@ -73,6 +73,9 @@ func extractSpecialMeasures(doc *html.Node) ([]SpecialMeasure, error) {
 	}
 
 	if len(rows) == 0 {
+		if loc := metaRefreshLocation(doc); loc != "" {
+			return nil, fmt.Errorf("no table rows found: page is a meta-refresh to %s", absoluteFinCENURL(loc))
+		}
 		return nil, errors.New("no table rows found - HTML structure may have changed")
 	}
 
@@ -147,7 +150,7 @@ func extractLinkAndDate(cell *html.Node) (url, date string) {
 				url = attr.Val
 				// Make relative URLs absolute
 				if strings.HasPrefix(url, "/") {
-					url = "https://www.fincen.gov" + url
+					url = fincenGovOrigin + url
 				}
 				break
 			}
@@ -161,6 +164,53 @@ func extractLinkAndDate(cell *html.Node) (url, date string) {
 	}
 
 	return url, date
+}
+
+func metaRefreshLocation(doc *html.Node) string {
+	nodes, err := htmlquery.QueryAll(doc, `//meta`)
+	if err != nil {
+		return ""
+	}
+	for _, n := range nodes {
+		if !strings.EqualFold(attrValue(n, "http-equiv"), "refresh") {
+			continue
+		}
+		if loc := parseRefreshURL(attrValue(n, "content")); loc != "" {
+			return loc
+		}
+	}
+	return ""
+}
+
+func attrValue(n *html.Node, key string) string {
+	for _, attr := range n.Attr {
+		if strings.EqualFold(attr.Key, key) {
+			return attr.Val
+		}
+	}
+	return ""
+}
+
+func parseRefreshURL(content string) string {
+	idx := strings.Index(strings.ToLower(content), "url=")
+	if idx < 0 {
+		return ""
+	}
+	return strings.Trim(strings.TrimSpace(content[idx+4:]), `"'`)
+}
+
+func absoluteFinCENURL(loc string) string {
+	loc = strings.TrimSpace(loc)
+	switch {
+	case loc == "":
+		return ""
+	case strings.HasPrefix(loc, "https://"), strings.HasPrefix(loc, "http://"):
+		return loc
+	case strings.HasPrefix(loc, "/"):
+		return fincenGovOrigin + loc
+	default:
+		return fincenGovOrigin + "/" + loc
+	}
 }
 
 func classifyEntityType(name string) SMType {

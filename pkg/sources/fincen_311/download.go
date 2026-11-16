@@ -12,8 +12,12 @@ import (
 	"github.com/moov-io/watchman/pkg/download"
 )
 
+const fincenGovOrigin = "https://www.fincen.gov"
+
 var (
-	publicFinCEN311URL = "https://www.fincen.gov/resources/statutes-and-regulations/311-and-9714-special-measures"
+	// FinCEN retired /311-and-9714-special-measures in November 2026; that
+	// path is now an HTTP 200 meta-refresh stub with no table.
+	publicFinCEN311URL = fincenGovOrigin + "/resources/statutes-and-regulations/special-measures/"
 	fincen311URL       = strx.Or(os.Getenv("FINCEN_311_DOWNLOAD_URL"), publicFinCEN311URL)
 )
 
