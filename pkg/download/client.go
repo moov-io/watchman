@@ -54,11 +54,17 @@ func New(logger log.Logger, httpClient *http.Client, options ...Option) *Downloa
 	if httpClient == nil {
 		httpClient, _ = DefaultHTTPClient()
 	}
-	return &Downloader{
+	dl := &Downloader{
 		HTTP:              httpClient,
 		Logger:            logger,
 		additionalHeaders: make(map[string]string),
 	}
+	for _, opt := range options {
+		if opt != nil {
+			opt(dl)
+		}
+	}
+	return dl
 }
 
 // Downloader will download and cache DPL files in a temp directory.
