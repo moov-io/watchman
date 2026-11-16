@@ -157,7 +157,7 @@ Senzing output: `Accept: senzing` or `?format=senzing`.
 
 Watchman downloads and refreshes lists on `DATA_REFRESH_INTERVAL` (default 12h). `GET /v2/listinfo` is the freshness check for ops and exams.
 
-Add internal lists with [ingest](/watchman/ingest/) (`POST /v2/ingest/{fileType}`). Ingested rows join the in-memory search index (all rows; a checksum avoids a full table scan on every search). OpenSanctions Senzing files loaded as lists via [config](/watchman/config/#open-sanctions) are also first-class in that corpus.
+Add internal lists with [ingest](/watchman/ingest/) (`POST /v2/ingest/{fileType}`). Ingested rows join the in-memory search index (all rows; a checksum avoids a full table scan on every search). OpenSanctions Senzing files loaded as lists via [config](/watchman/config/#open-sanctions) are first-class in that corpus. Custom `Download.Senzing` files load the same way. Look for additional data sources in [moov-io/awesome-fintech](https://github.com/moov-io/awesome-fintech#compliance--sanctions) and [Configuration](/watchman/config/#additional-data-sources).
 
 ## Addresses and geocoding
 

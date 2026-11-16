@@ -35,6 +35,8 @@ A production query of OFAC SDN 48603 with a passport scores **1.0** at `minMatch
 | United Kingdom | [UK sanctions list](https://www.gov.uk/government/publications/the-uk-sanctions-list) |
 | United Nations | [UN consolidated list](https://www.un.org/sc/resources/sc-sanctions) |
 
+Look for additional data sources in [moov-io/awesome-fintech](https://github.com/moov-io/awesome-fintech#compliance--sanctions).
+
 `INCLUDED_LISTS=us_ofac,eu_csl,uk_csl,un_csl` to load a subset.
 
 ## How names are prepared
