@@ -288,7 +288,10 @@ Look for more lists in [moov-io/awesome-fintech](https://github.com/moov-io/awes
 Community feeds:
 
 - [US Restricted Parties](https://github.com/Mattbusel/us-restricted-parties) (Matt Busel). DoD 1260H, UFLPA, FCC Covered List, and Section 889. Daily Senzing JSON Lines, CC BY 4.0.
-   - [Companies that SDN, Entity List and MEU List parties own or control](https://github.com/Mattbusel/us-restricted-parties/blob/main/docs/affiliates.md), derived daily from GLEIF ownership links with the OFAC 50 Percent Rule and the BIS Affiliates Rule. Each record has a verdict and proof path and is evidence for review, not a determination. Load `https://github.com/Mattbusel/us-restricted-parties/releases/latest/download/affiliates.covered.senzing.jsonl` (owned 50 percent or more, or possibly so) with `Download.Senzing`. `affiliates.review.senzing.jsonl` (control without a 50 percent share, which the rules do not reach) is optional; give it its own `SourceList` so its hits can go to review.
+   - [Companies that SDN, Entity List and MEU List parties own or control](https://github.com/Mattbusel/us-restricted-parties/blob/main/docs/affiliates.md), derived daily from GLEIF ownership links with the OFAC 50 Percent Rule and the BIS Affiliates Rule.
+   - Each record has a verdict and proof path and is evidence for review, not a determination.
+      - `affiliates.covered.senzing.jsonl` (owned 50 percent or more, or possibly so)
+      - `affiliates.review.senzing.jsonl` (control without a 50 percent share, which the rules do not reach)
 
 ### Environment Variables
 
