@@ -88,6 +88,17 @@ Watchman:
       SimilarityThreshold: 0.70
       BatchSize: 32
       IndexBuildTimeout: "10m"
+    # Optional Jev-style decision model. After scoring, Watchman POSTs the
+    # query and top hits to POST {BaseURL}/systemone and attaches advisories
+    # on each entity. Match scores are unchanged. Fail-open on API errors.
+    Decisions:
+      Enabled: false
+      BaseURL: "http://localhost:11434/v1" # Ollama; hosted TypeSafe: https://api.typesafe.ai/v1
+      APIKey: ""                           # DECISIONS_API_KEY; optional for local Ollama
+      Model: "nimble"                      # ollama: nimble, tev1; hosted: jev-latest
+      Timeout: "5s"
+      MaxEntities: 10                      # annotate at most this many top hits
+      MinMatch: 0.00                       # skip weaker hits
 
   PostalPool:
     Enabled: false

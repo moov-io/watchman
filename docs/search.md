@@ -171,6 +171,27 @@ The API returns the original query plus matched entities. Each element of `entit
 }
 ```
 
+### Decision model
+
+Optional. Off by default. After Watchman scores hits, it can POST the query and those entities to a Jev-style System One API (`/v1/systemone` on Ollama or a hosted TypeSafe-compatible endpoint) and attach a `decision` object on each hit. `match` is unchanged. If the API fails, search still returns.
+
+```json
+"decision": {
+  "sameEntity": 0.97,
+  "action": "clear_hit",
+  "actionProbabilities": {
+    "clear_hit": 0.91,
+    "needs_review": 0.07,
+    "likely_false_positive": 0.02
+  },
+  "matchQuality": 2.8,
+  "confidence": 0.88,
+  "model": "nimble"
+}
+```
+
+`action` is one of `clear_hit`, `needs_review`, `likely_false_positive`. `sameEntity` is a 0–1 probability. Treat this as an advisory for review queues, not as a replacement for `minMatch`. Setup: [Decision model](/watchman/config/#decision-model).
+
 ## Name, alias, and address
 
 Aliases are searched with the primary name. Pass extras as `altNames`:

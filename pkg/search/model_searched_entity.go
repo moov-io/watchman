@@ -20,4 +20,9 @@ type SearchedEntity[T any] struct {
 	// The fields returned may change as the general similarity algorithm and scoring methodologies evolve.
 	// There is no API stability guarantee for Details or SimilarityScore.
 	Details SimilarityScore `json:"details,omitempty,omitzero"`
+
+	// Decision is an optional advisory from a Jev-style decision model.
+	// Omitted when the decision model is disabled or the call failed.
+	// Watchman match scores are unchanged.
+	Decision *EntityDecision `json:"decision,omitempty"`
 }

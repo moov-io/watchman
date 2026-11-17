@@ -3,11 +3,16 @@ package search
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
+	"github.com/moov-io/watchman/internal/decisions"
 	"github.com/moov-io/watchman/internal/download"
 	"github.com/moov-io/watchman/internal/fshelp"
 	"github.com/moov-io/watchman/internal/index"
@@ -198,8 +203,100 @@ func TestService_Search(t *testing.T) {
 	})
 }
 
+func TestService_Search_AttachesDecisions(t *testing.T) {
+	t.Setenv("DECISIONS_ENABLED", "")
+	t.Setenv("DECISIONS_BASE_URL", "")
+	t.Setenv("DECISIONS_API_KEY", "")
+	t.Setenv("DECISIONS_MODEL", "")
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		require.Equal(t, "/v1/systemone", r.URL.Path)
+
+		var req decisions.Request
+		require.NoError(t, json.NewDecoder(r.Body).Decode(&req))
+		require.NotEmpty(t, req.Questions)
+
+		answers := make(map[string]decisions.Answer, len(req.Questions))
+		for name, question := range req.Questions {
+			switch question.Type {
+			case "noul":
+				answers[name] = decisions.Answer{Type: "noul", Noul: 0.93}
+			case "choice":
+				answers[name] = decisions.Answer{Type: "choice", Choice: search.DecisionActionNeedsReview}
+			case "score":
+				answers[name] = decisions.Answer{Type: "score", Score: 2.0}
+			}
+		}
+		require.NoError(t, json.NewEncoder(w).Encode(decisions.Response{
+			Model:   "nimble",
+			Answers: answers,
+		}))
+	}))
+	t.Cleanup(server.Close)
+
+	svc := testServiceWithDecisions(t, decisions.Config{
+		Enabled: true,
+		BaseURL: server.URL,
+		Model:   "nimble",
+		Timeout: time.Second,
+	})
+
+	results, err := svc.Search(t.Context(), search.Entity[search.Value]{
+		Name: "Dmitry Yuryevich Khoroshev",
+		Type: search.EntityPerson,
+	}.Normalize(), SearchOpts{Limit: 3, MinMatch: 0.5})
+	require.NoError(t, err)
+	require.NotEmpty(t, results)
+	require.NotNil(t, results[0].Decision)
+	require.Equal(t, 0.93, results[0].Decision.SameEntity)
+	require.Equal(t, search.DecisionActionNeedsReview, results[0].Decision.Action)
+	require.Equal(t, "nimble", results[0].Decision.Model)
+	require.Greater(t, results[0].Match, 0.5)
+}
+
+func TestService_Search_DecisionsFailOpen(t *testing.T) {
+	t.Setenv("DECISIONS_ENABLED", "")
+	t.Setenv("DECISIONS_BASE_URL", "")
+	t.Setenv("DECISIONS_API_KEY", "")
+	t.Setenv("DECISIONS_MODEL", "")
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}))
+	t.Cleanup(server.Close)
+
+	svc := testServiceWithDecisions(t, decisions.Config{
+		Enabled: true,
+		BaseURL: server.URL,
+		Model:   "nimble",
+		Timeout: time.Second,
+	})
+
+	results, err := svc.Search(t.Context(), search.Entity[search.Value]{
+		Name: "Dmitry Yuryevich Khoroshev",
+		Type: search.EntityPerson,
+	}.Normalize(), SearchOpts{Limit: 3, MinMatch: 0.5})
+	require.NoError(t, err)
+	require.NotEmpty(t, results)
+	require.Nil(t, results[0].Decision)
+}
+
 func testService(tb testing.TB) Service {
 	tb.Helper()
+	return testServiceWithDecisions(tb, DefaultConfig().Decisions)
+}
+
+func testServiceWithDecisions(tb testing.TB, conf decisions.Config) Service {
+	tb.Helper()
+	if t, ok := tb.(*testing.T); ok {
+		t.Setenv("DECISIONS_ENABLED", "")
+		t.Setenv("DECISIONS_API_KEY", "")
+		t.Setenv("DECISIONS_BASE_URL", "")
+		t.Setenv("DECISIONS_MODEL", "")
+		t.Setenv("DECISIONS_TIMEOUT", "")
+		t.Setenv("DECISIONS_MAX_ENTITIES", "")
+		t.Setenv("DECISIONS_MIN_MATCH", "")
+	}
 
 	pkg, err := fshelp.FindPkgDir()
 	require.NoError(tb, err)
@@ -216,10 +313,9 @@ func testService(tb testing.TB) Service {
 	entities := ofac.GroupIntoEntities(ofacRecords.SDNs, ofacRecords.Addresses, ofacRecords.SDNComments, ofacRecords.AlternateIdentities)
 
 	logger := log.NewTestLogger()
-
-	indexedLists := index.NewLists(nil) // only in-mem
-
+	indexedLists := index.NewLists(nil)
 	searchConfig := DefaultConfig()
+	searchConfig.Decisions = conf
 	svc, err := NewService(logger, searchConfig, nil, indexedLists)
 	require.NoError(tb, err)
 

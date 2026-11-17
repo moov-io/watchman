@@ -174,6 +174,10 @@ func entityDetails(entity search.SearchedEntity[search.Value]) fyne.CanvasObject
 	score.Selectable = true
 	content.Add(score)
 
+	if entity.Decision != nil {
+		content.Add(decisionCard(*entity.Decision))
+	}
+
 	basic := widget.NewForm(
 		widget.NewFormItem("Name", wordWrappingLabel(entity.Name)),
 		widget.NewFormItem("Type", wordWrappingLabel(formatEntityType(entity.Type))),
@@ -235,6 +239,21 @@ func entityDetails(entity search.SearchedEntity[search.Value]) fyne.CanvasObject
 	}
 
 	return content
+}
+
+func decisionCard(decision search.EntityDecision) fyne.CanvasObject {
+	form := widget.NewForm()
+	if decision.Action != "" {
+		form.Append("Action", wordWrappingLabel(displayEnum(strings.ReplaceAll(decision.Action, "_", " "))))
+	}
+	form.Append("Same entity", wordWrappingLabel(formatMatch(decision.SameEntity)))
+	if decision.MatchQuality > 0 {
+		form.Append("Match quality", wordWrappingLabel(fmt.Sprintf("%.2f", decision.MatchQuality)))
+	}
+	if decision.Model != "" {
+		form.Append("Model", wordWrappingLabel(decision.Model))
+	}
+	return widget.NewCard("Decision", "Advisory from a decision model. Watchman match is unchanged.", form)
 }
 
 func selectableLabel(text string) *widget.Label {

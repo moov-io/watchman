@@ -3,7 +3,9 @@ package search
 import (
 	"runtime"
 	"testing"
+	"time"
 
+	"github.com/moov-io/watchman/internal/decisions"
 	"github.com/moov-io/watchman/internal/embeddings"
 	"github.com/moov-io/watchman/internal/index"
 
@@ -128,5 +130,47 @@ func TestNewService_EmbeddingsEnabledFromEnv(t *testing.T) {
 
 		require.Nil(t, newService(t, false).embeddings)
 		require.NotNil(t, newService(t, true).embeddings)
+	})
+}
+
+func TestNewService_DecisionsEnabledFromEnv(t *testing.T) {
+	newService := func(t *testing.T, yamlEnabled bool) *service {
+		t.Helper()
+
+		dec := decisions.DefaultConfig()
+		dec.Enabled = yamlEnabled
+		dec.BaseURL = "http://127.0.0.1:9"
+		dec.Model = "nimble"
+		dec.Timeout = time.Second
+
+		conf := Config{
+			Goroutines: DefaultConfig().Goroutines,
+			Decisions:  dec,
+		}
+		svc, err := NewService(log.NewTestLogger(), conf, nil, index.NewLists(nil))
+		require.NoError(t, err)
+
+		return svc.(*service)
+	}
+
+	t.Run("env enables", func(t *testing.T) {
+		t.Setenv("DECISIONS_ENABLED", "true")
+
+		svc := newService(t, false)
+		require.NotNil(t, svc.decisions)
+	})
+
+	t.Run("env disables", func(t *testing.T) {
+		t.Setenv("DECISIONS_ENABLED", "false")
+
+		svc := newService(t, true)
+		require.Nil(t, svc.decisions)
+	})
+
+	t.Run("no env keeps yaml", func(t *testing.T) {
+		t.Setenv("DECISIONS_ENABLED", "")
+
+		require.Nil(t, newService(t, false).decisions)
+		require.NotNil(t, newService(t, true).decisions)
 	})
 }

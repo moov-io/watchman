@@ -1197,6 +1197,43 @@ components:
             details:
               $ref: '#/components/schemas/SimilarityScore'
               description: Field-level scoring breakdown
+            decision:
+              $ref: '#/components/schemas/EntityDecision'
+              description: Optional advisory from a Jev-style decision model. Omitted when the model is disabled or the call failed. Does not change match.
+    EntityDecision:
+      description: Advisory from a Jev-style decision model (Ollama /v1/systemone or hosted TypeSafe-compatible API). Does not change match.
+      type: object
+      properties:
+        sameEntity:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Probability that this list record is the same real-world entity as the query
+        action:
+          type: string
+          enum:
+            - clear_hit
+            - needs_review
+            - likely_false_positive
+          description: Suggested review action
+        actionProbabilities:
+          type: object
+          additionalProperties:
+            type: number
+            format: float
+          description: Probability of each action
+        matchQuality:
+          type: number
+          format: float
+          description: Ordered identity-match score (0 is unrelated)
+        confidence:
+          type: number
+          format: float
+          description: Model confidence in action when provided
+        model:
+          type: string
+          description: Decision model that produced this advisory
     SearchResponse:
       properties:
         query:

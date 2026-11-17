@@ -82,6 +82,41 @@ func TestEntityDetailIncludesSwiftBIC(t *testing.T) {
 	require.Contains(t, joined, "HNRBBY2X")
 }
 
+func TestEntityDetailIncludesDecision(t *testing.T) {
+	test.NewApp()
+
+	root := entityDetails(search.SearchedEntity[search.Value]{
+		Entity: search.Entity[search.Value]{
+			Name:     "Dmitry Yuryevich KHOROSHEV",
+			Type:     search.EntityPerson,
+			Source:   search.SourceUSOFAC,
+			SourceID: "48603",
+			Person:   &search.Person{Name: "Dmitry Yuryevich KHOROSHEV"},
+		},
+		Match: 1.0,
+		Decision: &search.EntityDecision{
+			SameEntity:   0.97,
+			Action:       search.DecisionActionClearHit,
+			MatchQuality: 2.8,
+			Model:        "nimble",
+		},
+	})
+
+	var texts []string
+	walkObjects(root, func(object fyne.CanvasObject) {
+		label, ok := object.(*widget.Label)
+		if !ok || label.Text == "" {
+			return
+		}
+		texts = append(texts, label.Text)
+	})
+	joined := strings.Join(texts, "\n")
+	require.Contains(t, joined, "Dmitry Yuryevich KHOROSHEV")
+	require.Contains(t, joined, "Clear hit")
+	require.Contains(t, joined, "97.0%")
+	require.Contains(t, joined, "nimble")
+}
+
 func walkObjects(object fyne.CanvasObject, fn func(fyne.CanvasObject)) {
 	if object == nil {
 		return

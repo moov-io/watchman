@@ -7,12 +7,14 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/moov-io/watchman/internal/decisions"
 	"github.com/moov-io/watchman/internal/embeddings"
 )
 
 type Config struct {
 	Goroutines Goroutines
 	Embeddings embeddings.Config
+	Decisions  decisions.Config
 
 	// MaxInFlight bounds concurrent full-list searches (admission control).
 	// Zero means GOMAXPROCS. Override with SEARCH_MAX_IN_FLIGHT.
@@ -47,6 +49,7 @@ func DefaultConfig() Config {
 			Max:     cpus * 4,
 		},
 		Embeddings:  embeddings.DefaultConfig(),
+		Decisions:   decisions.DefaultConfig(),
 		MaxInFlight: inFlight,
 	}
 }

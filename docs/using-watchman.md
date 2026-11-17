@@ -49,6 +49,7 @@ The same name without an ID scores 0.767 and returns no rows at 0.80. Add date o
 | Catch designated parties | `type` + name + government IDs + DOB/address |
 | Keep the alert queue small | `minMatch=0.80` (try 0.59 if you would rather see more possible matches) |
 | Names in Arabic, Cyrillic, Chinese, etc. | Enable embeddings; keep `EMBEDDINGS_CROSS_SCRIPT_ONLY=true` |
+| Annotate hits with a decision model | Enable `Search.Decisions` (Ollama `nimble` or hosted Jev). `match` stays a Watchman score. |
 | One list only | `source=us_ofac` (faster) |
 | Exact SDN row | `sourceID=22790` |
 | Explain a hit | `debug=true` or `debug=0.80` |

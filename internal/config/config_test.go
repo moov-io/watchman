@@ -28,6 +28,11 @@ func TestLoadConfig(t *testing.T) {
 	require.Equal(t, "http://localhost:8000", conf.Deepparse.BaseURL)
 	require.Equal(t, "bpemb-attention", conf.Deepparse.Model)
 	require.Equal(t, 10*time.Second, conf.Deepparse.Timeout)
+	require.False(t, conf.Search.Decisions.Enabled, "decision model is opt-in")
+	require.Equal(t, "http://localhost:11434/v1", conf.Search.Decisions.BaseURL)
+	require.Equal(t, "nimble", conf.Search.Decisions.Model)
+	require.Equal(t, 5*time.Second, conf.Search.Decisions.Timeout)
+	require.Equal(t, 10, conf.Search.Decisions.MaxEntities)
 }
 
 func TestLoadConfig_Pprof(t *testing.T) {

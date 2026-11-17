@@ -14,6 +14,7 @@ import (
 
 	"github.com/moov-io/watchman/internal/concurrencychamp"
 	"github.com/moov-io/watchman/internal/db"
+	"github.com/moov-io/watchman/internal/decisions"
 	"github.com/moov-io/watchman/internal/download"
 	"github.com/moov-io/watchman/internal/embeddings"
 	"github.com/moov-io/watchman/internal/index"
@@ -58,12 +59,19 @@ func NewService(logger log.Logger, config Config, database db.DB, indexedLists i
 		return nil, fmt.Errorf("creating embeddings service: %w", err)
 	}
 
+	// Optional Jev-style decision model. Returns nil when disabled.
+	decisionsSvc, err := decisions.NewService(logger, config.Decisions)
+	if err != nil {
+		return nil, fmt.Errorf("creating decisions service: %w", err)
+	}
+
 	return &service{
 		logger:       logger,
 		config:       config,
 		indexedLists: indexedLists,
 		cm:           cm,
 		embeddings:   embeddingsSvc,
+		decisions:    decisionsSvc,
 		searchSem:    make(chan struct{}, getMaxInFlight(config)),
 	}, nil
 }
@@ -74,6 +82,7 @@ type service struct {
 
 	indexedLists index.Lists
 	embeddings   embeddings.Service
+	decisions    *decisions.Service
 
 	cm *concurrencychamp.ConcurrencyManager
 
@@ -98,25 +107,40 @@ func (s *service) Search(ctx context.Context, query search.Entity[search.Value],
 	))
 	defer span.End()
 
+	var (
+		out []search.SearchedEntity[search.Value]
+		err error
+	)
+
 	// Check if we should use embedding-based search for cross-script queries
 	if s.shouldUseEmbeddings(query.Name) {
 		span.SetAttributes(attribute.Bool("search.use_embeddings", true))
-		out, err := s.performEmbeddingSearch(ctx, query, opts)
+		out, err = s.performEmbeddingSearch(ctx, query, opts)
 		if err != nil {
 			// Fall back to Jaro-Winkler on embedding search failure
 			s.logger.Error().Logf("embedding search failed, falling back to Jaro-Winkler: %v", err)
-		} else {
-			return out, nil
+			span.SetAttributes(attribute.Bool("search.use_embeddings", false))
+			out, err = s.performSearch(ctx, query, opts)
 		}
+	} else {
+		span.SetAttributes(attribute.Bool("search.use_embeddings", false))
+		out, err = s.performSearch(ctx, query, opts)
 	}
-
-	span.SetAttributes(attribute.Bool("search.use_embeddings", false))
-	out, err := s.performSearch(ctx, query, opts)
 	if err != nil {
 		s.logger.Error().Logf("v2 search failed: %v", err)
 		return nil, fmt.Errorf("v2 search: %w", err)
 	}
+
+	span.SetAttributes(attribute.Bool("search.use_decisions", s.decisions != nil))
+	s.attachDecisions(ctx, query, out)
 	return out, nil
+}
+
+func (s *service) attachDecisions(ctx context.Context, query search.Entity[search.Value], results []search.SearchedEntity[search.Value]) {
+	if s.decisions == nil {
+		return
+	}
+	s.decisions.Annotate(ctx, query, results)
 }
 
 // shouldUseEmbeddings determines if the query should use embedding-based search.

@@ -29,6 +29,7 @@ The settings that matter most in production are **which lists you load**, **whic
 
 1. [TF-IDF Configuration](#tf-idf-configuration)
 1. [Cross Script Embeddings Configuration](#cross-script-embeddings-configuration)
+1. [Decision model](#decision-model)
 1. [Similarity Configuration](#similarity-configuration) (`SEARCH_MAX_IN_FLIGHT`, Jaro-Winkler flags, etc.)
 
 #### Source List Configuration
@@ -173,6 +174,9 @@ sum(rate(watchman_http_request_duration_seconds_count[5m])) by (route)
 
     Embeddings:
       Enabled: false # See below for Cross-Script Embeddings
+
+    Decisions:
+      Enabled: false # See below for Decision model
 ```
 
 See [Performance](/watchman/performance/) for how admission control, per-search workers, and candidate indexes interact under load.
@@ -371,6 +375,38 @@ YAML configuration (example with OpenAI):
       BatchSize: 32
       IndexBuildTimeout: "10m"
 ```
+
+### Decision model
+
+Watchman can send each search query and its top hits to a Jev-style decision model and attach an advisory on each returned entity. The model answers typed questions in one request (same-entity probability, review action, match quality). It does not change `match`. Disabled by default. Fail-open: if the API is down, search still returns scored hits without `decision`.
+
+The request body includes names, identifiers, dates of birth, and addresses from the query and those hits. Point `BaseURL` at a host you trust with that data.
+
+The client speaks the System One JSON API (`POST /v1/systemone`), which [Ollama 0.35+](https://ollama.com/blog/ollama-now-supports-jev-style-decision-models) and hosted TypeSafe Jev both serve. Local example: `ollama pull nimble`.
+
+| Environmental Variable   | Description                                                                 | Default |
+|--------------------------|-----------------------------------------------------------------------------|---------|
+| `DECISIONS_ENABLED`      | Enable decision-model annotation of search hits.                            | `false` |
+| `DECISIONS_BASE_URL`     | OpenAI-style `/v1` root. Ollama: `http://localhost:11434/v1`. Hosted: `https://api.typesafe.ai/v1`. | `http://localhost:11434/v1` |
+| `DECISIONS_API_KEY`      | Bearer token. Optional for local Ollama.                                    | Empty   |
+| `DECISIONS_MODEL`        | Model id (`nimble`, `tev1`, `jev-latest`, …).                               | `nimble` |
+| `DECISIONS_TIMEOUT`      | HTTP timeout for the decision request.                                      | `5s`    |
+| `DECISIONS_MAX_ENTITIES` | Annotate at most this many top hits (hard cap 25).                          | `10`    |
+| `DECISIONS_MIN_MATCH`    | Skip hits below this Watchman score.                                        | `0.00`  |
+
+```yaml
+  Search:
+    Decisions:
+      Enabled: true
+      BaseURL: "http://localhost:11434/v1"
+      APIKey: ""
+      Model: "nimble"
+      Timeout: "5s"
+      MaxEntities: 10
+      MinMatch: 0.00
+```
+
+See [Search Guide](search.md#decision-model).
 
 ### Similarity Configuration
 
