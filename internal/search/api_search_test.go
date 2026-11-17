@@ -13,6 +13,7 @@ import (
 
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/internal/api"
+	"github.com/moov-io/watchman/internal/decisions"
 	"github.com/moov-io/watchman/internal/index"
 	"github.com/moov-io/watchman/internal/ofactest"
 	"github.com/moov-io/watchman/pkg/search"
@@ -46,6 +47,7 @@ type testSetup struct {
 
 func testAPI(tb testing.TB) testSetup {
 	tb.Helper()
+	decisions.ClearTestEnv(tb.Setenv)
 
 	logger := log.NewTestLogger()
 

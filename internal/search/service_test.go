@@ -288,13 +288,7 @@ func testService(tb testing.TB) Service {
 
 func testServiceWithDecisions(tb testing.TB, conf decisions.Config) Service {
 	tb.Helper()
-	tb.Setenv("DECISIONS_ENABLED", "")
-	tb.Setenv("DECISIONS_API_KEY", "")
-	tb.Setenv("DECISIONS_BASE_URL", "")
-	tb.Setenv("DECISIONS_MODEL", "")
-	tb.Setenv("DECISIONS_TIMEOUT", "")
-	tb.Setenv("DECISIONS_MAX_ENTITIES", "")
-	tb.Setenv("DECISIONS_MIN_MATCH", "")
+	decisions.ClearTestEnv(tb.Setenv)
 
 	pkg, err := fshelp.FindPkgDir()
 	require.NoError(tb, err)

@@ -14,6 +14,7 @@ import (
 	"github.com/moov-io/watchman/internal/compress"
 	"github.com/moov-io/watchman/internal/config"
 	"github.com/moov-io/watchman/internal/db"
+	"github.com/moov-io/watchman/internal/decisions"
 	"github.com/moov-io/watchman/internal/index"
 	"github.com/moov-io/watchman/internal/ingest"
 	"github.com/moov-io/watchman/internal/search"
@@ -167,6 +168,7 @@ type ingestApiSetup struct {
 
 func setupIngestAPITest(t *testing.T, fn func(ingestApiSetup)) {
 	t.Helper()
+	decisions.ClearTestEnv(t.Setenv)
 
 	db.ForEachDatabase(t, func(db db.DB) {
 		logger := log.NewTestLogger()

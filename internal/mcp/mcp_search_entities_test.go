@@ -12,6 +12,7 @@ import (
 	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/moov-io/base/log"
 	"github.com/moov-io/watchman/internal/config"
+	"github.com/moov-io/watchman/internal/decisions"
 	"github.com/moov-io/watchman/internal/index"
 	"github.com/moov-io/watchman/internal/ofactest"
 	"github.com/moov-io/watchman/internal/search"
@@ -21,6 +22,7 @@ import (
 
 func newTestServer(t *testing.T) *Server {
 	t.Helper()
+	decisions.ClearTestEnv(t.Setenv)
 	logger := log.NewTestLogger()
 	indexedLists := index.NewLists(nil)
 	searchConfig := search.DefaultConfig()

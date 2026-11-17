@@ -46,7 +46,8 @@ type Config struct {
 
 	// MaxEntities is the maximum number of top search hits to annotate.
 	// Default 10. Hard cap 21 so 3 questions per hit stay within Ollama's
-	// 64-question System One limit.
+	// 64-question System One limit. Local Ollama also rejects requests over
+	// 64 KiB of text+schema; default 10 stays under that, the hard cap may not.
 	MaxEntities int `json:"maxEntities"`
 
 	// MinMatch skips hits below this Watchman score. Default 0 (annotate all
@@ -61,6 +62,24 @@ func DefaultConfig() Config {
 		Model:       defaultModel,
 		Timeout:     defaultTimeout,
 		MaxEntities: defaultMaxEntities,
+	}
+}
+
+var envKeys = []string{
+	"DECISIONS_ENABLED",
+	"DECISIONS_API_KEY",
+	"DECISIONS_BASE_URL",
+	"DECISIONS_MODEL",
+	"DECISIONS_TIMEOUT",
+	"DECISIONS_MAX_ENTITIES",
+	"DECISIONS_MIN_MATCH",
+}
+
+// ClearTestEnv unsets DECISIONS_* so tests using DefaultConfig do not
+// construct a live client from a developer shell.
+func ClearTestEnv(setenv func(key, value string)) {
+	for _, key := range envKeys {
+		setenv(key, "")
 	}
 }
 

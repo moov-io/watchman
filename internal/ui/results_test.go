@@ -114,7 +114,41 @@ func TestEntityDetailIncludesDecision(t *testing.T) {
 	require.Contains(t, joined, "Dmitry Yuryevich KHOROSHEV")
 	require.Contains(t, joined, "Clear hit")
 	require.Contains(t, joined, "97.0%")
+	require.Contains(t, joined, "2.80")
 	require.Contains(t, joined, "nimble")
+}
+
+func TestEntityDetailShowsZeroMatchQuality(t *testing.T) {
+	test.NewApp()
+
+	root := entityDetails(search.SearchedEntity[search.Value]{
+		Entity: search.Entity[search.Value]{
+			Name:     "Unrelated",
+			Type:     search.EntityPerson,
+			Source:   search.SourceUSOFAC,
+			SourceID: "1",
+		},
+		Match: 0.2,
+		Decision: &search.EntityDecision{
+			SameEntity:   0.05,
+			Action:       search.DecisionActionLikelyFalsePositive,
+			MatchQuality: 0,
+			Confidence:   0,
+			Model:        "nimble",
+		},
+	})
+
+	var texts []string
+	walkObjects(root, func(object fyne.CanvasObject) {
+		label, ok := object.(*widget.Label)
+		if !ok || label.Text == "" {
+			return
+		}
+		texts = append(texts, label.Text)
+	})
+	joined := strings.Join(texts, "\n")
+	require.Contains(t, joined, "0.00")
+	require.Contains(t, joined, "Likely false positive")
 }
 
 func walkObjects(object fyne.CanvasObject, fn func(fyne.CanvasObject)) {

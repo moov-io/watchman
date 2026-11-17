@@ -247,9 +247,7 @@ func decisionCard(decision search.EntityDecision) fyne.CanvasObject {
 		form.Append("Action", wordWrappingLabel(displayEnum(strings.ReplaceAll(decision.Action, "_", " "))))
 	}
 	form.Append("Same entity", wordWrappingLabel(formatMatch(decision.SameEntity)))
-	if decision.MatchQuality > 0 {
-		form.Append("Match quality", wordWrappingLabel(fmt.Sprintf("%.2f", decision.MatchQuality)))
-	}
+	form.Append("Match quality", wordWrappingLabel(fmt.Sprintf("%.2f", decision.MatchQuality)))
 	if decision.Model != "" {
 		form.Append("Model", wordWrappingLabel(decision.Model))
 	}

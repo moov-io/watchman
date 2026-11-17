@@ -16,13 +16,7 @@ import (
 
 func clearDecisionEnv(t *testing.T) {
 	t.Helper()
-	t.Setenv("DECISIONS_ENABLED", "")
-	t.Setenv("DECISIONS_API_KEY", "")
-	t.Setenv("DECISIONS_BASE_URL", "")
-	t.Setenv("DECISIONS_MODEL", "")
-	t.Setenv("DECISIONS_TIMEOUT", "")
-	t.Setenv("DECISIONS_MAX_ENTITIES", "")
-	t.Setenv("DECISIONS_MIN_MATCH", "")
+	ClearTestEnv(t.Setenv)
 }
 
 func TestNewService_Disabled(t *testing.T) {

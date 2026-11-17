@@ -77,13 +77,7 @@ func TestConfig_LoadFromEnv(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			t.Setenv("DECISIONS_ENABLED", "")
-			t.Setenv("DECISIONS_API_KEY", "")
-			t.Setenv("DECISIONS_BASE_URL", "")
-			t.Setenv("DECISIONS_MODEL", "")
-			t.Setenv("DECISIONS_TIMEOUT", "")
-			t.Setenv("DECISIONS_MAX_ENTITIES", "")
-			t.Setenv("DECISIONS_MIN_MATCH", "")
+			ClearTestEnv(t.Setenv)
 			for key, value := range tc.env {
 				t.Setenv(key, value)
 			}
