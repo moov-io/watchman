@@ -22,7 +22,7 @@ type screeningState struct {
 }
 
 type screeningEntity struct {
-	Index        int           `json:"index,omitempty"`
+	Index        *int          `json:"index,omitempty"`
 	Name         string        `json:"name,omitempty"`
 	Type         string        `json:"entityType,omitempty"`
 	Source       string        `json:"sourceList,omitempty"`
@@ -30,10 +30,13 @@ type screeningEntity struct {
 	Match        float64       `json:"match,omitempty"`
 	AltNames     []string      `json:"altNames,omitempty"`
 	BirthDate    string        `json:"birthDate,omitempty"`
+	Created      string        `json:"created,omitempty"`
+	Built        string        `json:"built,omitempty"`
 	IDs          []screeningID `json:"ids,omitempty"`
 	IMONumber    string        `json:"imoNumber,omitempty"`
 	MMSI         string        `json:"mmsi,omitempty"`
 	CallSign     string        `json:"callSign,omitempty"`
+	ICAOCode     string        `json:"icaoCode,omitempty"`
 	SerialNumber string        `json:"serialNumber,omitempty"`
 	SwiftBICs    []string      `json:"swiftBICs,omitempty"`
 	Addresses    []string      `json:"addresses,omitempty"`
@@ -68,7 +71,8 @@ func compactEntity(entity search.Entity[search.Value], index int, match float64)
 		SwiftBICs: capStrings(entity.SwiftBICs, maxIDs),
 	}
 	if index >= 0 {
-		out.Index = index
+		idx := index
+		out.Index = &idx
 		out.Match = match
 	}
 
@@ -79,19 +83,23 @@ func compactEntity(entity search.Entity[search.Value], index int, match float64)
 		out.IDs = compactIDs(entity.Person.GovernmentIDs)
 	case entity.Business != nil:
 		out.AltNames = capStrings(entity.Business.AltNames, maxAltNames)
+		out.Created = formatDate(entity.Business.Created)
 		out.IDs = compactIDs(entity.Business.GovernmentIDs)
 	case entity.Organization != nil:
 		out.AltNames = capStrings(entity.Organization.AltNames, maxAltNames)
+		out.Created = formatDate(entity.Organization.Created)
 		out.IDs = compactIDs(entity.Organization.GovernmentIDs)
 	case entity.Vessel != nil:
 		out.AltNames = capStrings(entity.Vessel.AltNames, maxAltNames)
 		out.IMONumber = entity.Vessel.IMONumber
 		out.MMSI = entity.Vessel.MMSI
 		out.CallSign = entity.Vessel.CallSign
+		out.Built = formatDate(entity.Vessel.Built)
 	case entity.Aircraft != nil:
 		out.AltNames = capStrings(entity.Aircraft.AltNames, maxAltNames)
 		out.SerialNumber = entity.Aircraft.SerialNumber
-		out.CallSign = entity.Aircraft.ICAOCode
+		out.ICAOCode = entity.Aircraft.ICAOCode
+		out.Built = formatDate(entity.Aircraft.Built)
 	}
 
 	if len(entity.Addresses) > 0 {

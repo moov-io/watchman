@@ -126,6 +126,8 @@ func TestAnnotate_AttachesDecisions(t *testing.T) {
 	require.NoError(t, err)
 	require.Contains(t, string(state), `"name":"Dmitry Khoroshev"`)
 	require.Contains(t, string(state), `"sourceID":"48603"`)
+	require.Contains(t, string(state), `"index":0`)
+	require.Contains(t, string(state), `"index":1`)
 	require.NotContains(t, string(state), "sourceData")
 
 	require.NotNil(t, results[0].Decision)
@@ -239,15 +241,52 @@ func TestCompactEntity_OmitsSourceData(t *testing.T) {
 
 	got := compactEntity(entity, 0, 0.81)
 	require.Equal(t, "Example Co", got.Name)
-	require.Equal(t, 0, got.Index)
+	require.NotNil(t, got.Index)
+	require.Equal(t, 0, *got.Index)
 	require.Equal(t, 0.81, got.Match)
 	require.Equal(t, []string{"Example"}, got.AltNames)
 	require.Contains(t, got.Addresses[0], "1 Main")
 
 	raw, err := json.Marshal(got)
 	require.NoError(t, err)
+	require.Contains(t, string(raw), `"index":0`)
 	require.NotContains(t, string(raw), "secret-row")
 	require.NotContains(t, string(raw), "sourceData")
+}
+
+func TestCompactEntity_QueryOmitsIndex(t *testing.T) {
+	got := compactEntity(search.Entity[search.Value]{Name: "Ada"}, -1, 0)
+	require.Nil(t, got.Index)
+	raw, err := json.Marshal(got)
+	require.NoError(t, err)
+	require.NotContains(t, string(raw), `"index"`)
+}
+
+func TestCompactEntity_AircraftICAOAndBuilt(t *testing.T) {
+	built := time.Date(2010, 1, 2, 0, 0, 0, 0, time.UTC)
+	got := compactEntity(search.Entity[search.Value]{
+		Name: "N123",
+		Aircraft: &search.Aircraft{
+			ICAOCode:     "B738",
+			SerialNumber: "12345",
+			Built:        &built,
+		},
+	}, 0, 0.9)
+	require.Equal(t, "B738", got.ICAOCode)
+	require.Empty(t, got.CallSign)
+	require.Equal(t, "12345", got.SerialNumber)
+	require.Equal(t, "2010-01-02", got.Built)
+}
+
+func TestCompactEntity_BusinessCreated(t *testing.T) {
+	created := time.Date(1998, 5, 6, 0, 0, 0, 0, time.UTC)
+	got := compactEntity(search.Entity[search.Value]{
+		Name:     "Co",
+		Business: &search.Business{Name: "Co", Created: &created},
+	}, 1, 0.5)
+	require.NotNil(t, got.Index)
+	require.Equal(t, 1, *got.Index)
+	require.Equal(t, "1998-05-06", got.Created)
 }
 
 func TestApplyAnswers_Missing(t *testing.T) {
