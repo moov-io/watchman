@@ -14,7 +14,10 @@ const (
 	defaultModel       = "nimble"
 	defaultTimeout     = 5 * time.Second
 	defaultMaxEntities = 10
-	hardMaxEntities    = 25
+	questionsPerHit    = 3
+	// Ollama System One caps questions at 64 (3 per hit → 21 entities).
+	ollamaMaxQuestions = 64
+	hardMaxEntities    = ollamaMaxQuestions / questionsPerHit
 )
 
 // Config controls the optional Jev-style decision model used to annotate
@@ -42,7 +45,8 @@ type Config struct {
 	Timeout time.Duration `json:"timeout"`
 
 	// MaxEntities is the maximum number of top search hits to annotate.
-	// Default 10.
+	// Default 10. Hard cap 21 so 3 questions per hit stay within Ollama's
+	// 64-question System One limit.
 	MaxEntities int `json:"maxEntities"`
 
 	// MinMatch skips hits below this Watchman score. Default 0 (annotate all

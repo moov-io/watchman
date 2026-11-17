@@ -55,7 +55,7 @@ func (s *Service) Annotate(ctx context.Context, query search.Entity[search.Value
 	ctx, span := telemetry.StartSpan(ctx, "search-decisions", trace.WithAttributes(
 		attribute.String("decisions.model", s.config.Model),
 		attribute.Int("decisions.entity_count", len(selected)),
-		attribute.Int("decisions.question_count", len(selected)*3),
+		attribute.Int("decisions.question_count", len(selected)*questionsPerHit),
 	))
 	defer span.End()
 
@@ -127,12 +127,11 @@ func applyAnswers(answers map[string]Answer, index int, model string) *search.En
 		out.Action = action.Choice
 		out.ActionProbabilities = action.Probabilities
 		out.Confidence = action.Confidence
+	} else if hasQuality {
+		out.Confidence = quality.Confidence
 	}
 	if hasQuality {
 		out.MatchQuality = quality.Score
-		if out.Confidence == 0 {
-			out.Confidence = quality.Confidence
-		}
 	}
 	return out
 }

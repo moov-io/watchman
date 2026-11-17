@@ -33,7 +33,8 @@ Each `/v2/search` request roughly follows this path:
 2. **Select candidates** from the in-memory corpus (downloaded lists, plus ingested files when those are loaded) using prebuilt indexes (see [Indexing](/watchman/indexing/)).
 3. **Admission control** (only when the candidate set is large — see below).
 4. **Score candidates** with Jaro-Winkler similarity (and optional TF-IDF weighting), in parallel when needed.
-5. **Keep a top-N heap** of the best matches above `minMatch` (by corpus index, then copy only those entities), then return JSON.
+5. **Keep a top-N heap** of the best matches above `minMatch` (by corpus index, then copy only those entities).
+6. **Optional decision model** (off by default). When `Search.Decisions` is enabled, Watchman POSTs the query and top hits to `/v1/systemone` after scoring, outside admission control, waits up to `Timeout`, then fail-opens and returns JSON.
 
 Candidate selection is **recall-safe relative to a full source/type partition scan**: if name tokens do not hit the inverted index (for example a pure typo with no shared tokens), Watchman falls back to scoring the entire matching partition rather than returning empty results.
 

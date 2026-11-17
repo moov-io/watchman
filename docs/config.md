@@ -380,7 +380,7 @@ YAML configuration (example with OpenAI):
 
 Watchman can send each search query and its top hits to a Jev-style decision model and attach an advisory on each returned entity. The model answers typed questions in one request (same-entity probability, review action, match quality). It does not change `match`. Disabled by default. Fail-open: if the API is down, search still returns scored hits without `decision`.
 
-The request body includes names, identifiers, dates of birth, and addresses from the query and those hits. Point `BaseURL` at a host you trust with that data.
+The request body includes names, identifiers, dates of birth, and addresses from the query and those hits. Point `BaseURL` at a host you trust with that data. When enabled, each search waits on this call after scoring, up to `Timeout`, then fail-opens.
 
 The client speaks the System One JSON API (`POST /v1/systemone`), which [Ollama 0.35+](https://ollama.com/blog/ollama-now-supports-jev-style-decision-models) and hosted TypeSafe Jev both serve. Local example: `ollama pull nimble`.
 
@@ -391,7 +391,7 @@ The client speaks the System One JSON API (`POST /v1/systemone`), which [Ollama 
 | `DECISIONS_API_KEY`      | Bearer token. Optional for local Ollama.                                    | Empty   |
 | `DECISIONS_MODEL`        | Model id (`nimble`, `tev1`, `jev-latest`, …).                               | `nimble` |
 | `DECISIONS_TIMEOUT`      | HTTP timeout for the decision request.                                      | `5s`    |
-| `DECISIONS_MAX_ENTITIES` | Annotate at most this many top hits (hard cap 25).                          | `10`    |
+| `DECISIONS_MAX_ENTITIES` | Annotate at most this many top hits (hard cap 21; 3 questions per hit, Ollama caps questions at 64). | `10`    |
 | `DECISIONS_MIN_MATCH`    | Skip hits below this Watchman score.                                        | `0.00`  |
 
 ```yaml

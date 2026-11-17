@@ -33,6 +33,7 @@ func TestLoadConfig(t *testing.T) {
 	require.Equal(t, "nimble", conf.Search.Decisions.Model)
 	require.Equal(t, 5*time.Second, conf.Search.Decisions.Timeout)
 	require.Equal(t, 10, conf.Search.Decisions.MaxEntities)
+	require.Equal(t, 0.0, conf.Search.Decisions.MinMatch)
 }
 
 func TestLoadConfig_Pprof(t *testing.T) {

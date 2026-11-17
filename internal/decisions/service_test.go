@@ -175,7 +175,7 @@ func TestAnnotate_RespectsMaxEntitiesAndMinMatch(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var req Request
 		require.NoError(t, json.NewDecoder(r.Body).Decode(&req))
-		n = len(req.Questions) / 3
+		n = len(req.Questions) / questionsPerHit
 		require.NoError(t, json.NewEncoder(w).Encode(Response{
 			Model: "nimble",
 			Answers: map[string]Answer{
@@ -259,4 +259,35 @@ func TestCompactEntity_OmitsSourceData(t *testing.T) {
 func TestApplyAnswers_Missing(t *testing.T) {
 	require.Nil(t, applyAnswers(nil, 0, "nimble"))
 	require.Nil(t, applyAnswers(map[string]Answer{"same_entity_1": {Noul: 0.9}}, 0, "nimble"))
+}
+
+func TestApplyAnswers_KeepsZeroActionConfidence(t *testing.T) {
+	got := applyAnswers(map[string]Answer{
+		"same_entity_0": {Type: "noul", Noul: 0.5},
+		"action_0": {
+			Type:       "choice",
+			Choice:     search.DecisionActionNeedsReview,
+			Confidence: 0,
+			Probabilities: map[string]float64{
+				search.DecisionActionClearHit:            1.0 / 3,
+				search.DecisionActionNeedsReview:         1.0 / 3,
+				search.DecisionActionLikelyFalsePositive: 1.0 / 3,
+			},
+		},
+		"quality_0": {Type: "score", Score: 1.2, Confidence: 0.9},
+	}, 0, "nimble")
+	require.NotNil(t, got)
+	require.Equal(t, 0.0, got.Confidence)
+	require.Equal(t, 1.2, got.MatchQuality)
+	require.Equal(t, search.DecisionActionNeedsReview, got.Action)
+}
+
+func TestApplyAnswers_QualityOnly(t *testing.T) {
+	got := applyAnswers(map[string]Answer{
+		"quality_0": {Type: "score", Score: 0, Confidence: 0.4},
+	}, 0, "nimble")
+	require.NotNil(t, got)
+	require.Equal(t, 0.0, got.MatchQuality)
+	require.Equal(t, 0.4, got.Confidence)
+	require.Empty(t, got.Action)
 }

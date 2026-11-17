@@ -190,7 +190,7 @@ Optional. Off by default. After Watchman scores hits, it can POST the query and 
 }
 ```
 
-`action` is one of `clear_hit`, `needs_review`, `likely_false_positive`. `sameEntity` is a 0–1 probability. Treat this as an advisory for review queues, not as a replacement for `minMatch`. Setup: [Decision model](/watchman/config/#decision-model).
+`action` is one of `clear_hit`, `needs_review`, `likely_false_positive`. `sameEntity` is a 0–1 probability. `matchQuality` is a 0–3 identity-match score (0 is unrelated), not a probability. `confidence` is peakedness of `action`; 0 means a uniform distribution (no favorite). Treat this as an advisory for review queues, not as a replacement for `minMatch`. Setup: [Decision model](/watchman/config/#decision-model).
 
 ## Name, alias, and address
 

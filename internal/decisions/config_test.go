@@ -133,7 +133,9 @@ func TestConfig_Validate(t *testing.T) {
 func TestConfig_MaxEntitiesCap(t *testing.T) {
 	require.Equal(t, 10, Config{}.maxEntitiesOrDefault())
 	require.Equal(t, 4, Config{MaxEntities: 4}.maxEntitiesOrDefault())
-	require.Equal(t, 25, Config{MaxEntities: 100}.maxEntitiesOrDefault())
+	require.Equal(t, hardMaxEntities, Config{MaxEntities: 100}.maxEntitiesOrDefault())
+	require.Equal(t, 21, hardMaxEntities)
+	require.LessOrEqual(t, hardMaxEntities*questionsPerHit, ollamaMaxQuestions)
 }
 
 func TestSystemOneURL(t *testing.T) {

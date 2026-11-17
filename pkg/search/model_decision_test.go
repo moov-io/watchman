@@ -40,4 +40,14 @@ func TestSearchedEntity_DecisionJSON(t *testing.T) {
 		require.Equal(t, DecisionActionNeedsReview, out.Decision.Action)
 		require.Equal(t, "nimble", out.Decision.Model)
 	})
+
+	t.Run("zero quality and confidence stay in JSON", func(t *testing.T) {
+		raw, err := json.Marshal(EntityDecision{
+			MatchQuality: 0,
+			Confidence:   0,
+		})
+		require.NoError(t, err)
+		require.Contains(t, string(raw), `"matchQuality":0`)
+		require.Contains(t, string(raw), `"confidence":0`)
+	})
 }

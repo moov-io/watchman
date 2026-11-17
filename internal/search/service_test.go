@@ -288,15 +288,13 @@ func testService(tb testing.TB) Service {
 
 func testServiceWithDecisions(tb testing.TB, conf decisions.Config) Service {
 	tb.Helper()
-	if t, ok := tb.(*testing.T); ok {
-		t.Setenv("DECISIONS_ENABLED", "")
-		t.Setenv("DECISIONS_API_KEY", "")
-		t.Setenv("DECISIONS_BASE_URL", "")
-		t.Setenv("DECISIONS_MODEL", "")
-		t.Setenv("DECISIONS_TIMEOUT", "")
-		t.Setenv("DECISIONS_MAX_ENTITIES", "")
-		t.Setenv("DECISIONS_MIN_MATCH", "")
-	}
+	tb.Setenv("DECISIONS_ENABLED", "")
+	tb.Setenv("DECISIONS_API_KEY", "")
+	tb.Setenv("DECISIONS_BASE_URL", "")
+	tb.Setenv("DECISIONS_MODEL", "")
+	tb.Setenv("DECISIONS_TIMEOUT", "")
+	tb.Setenv("DECISIONS_MAX_ENTITIES", "")
+	tb.Setenv("DECISIONS_MIN_MATCH", "")
 
 	pkg, err := fshelp.FindPkgDir()
 	require.NoError(tb, err)

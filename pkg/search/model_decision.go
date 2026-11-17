@@ -14,11 +14,12 @@ type EntityDecision struct {
 	// ActionProbabilities is the full choice distribution for Action.
 	ActionProbabilities map[string]float64 `json:"actionProbabilities,omitempty"`
 
-	// MatchQuality is an ordered identity-match score (0 is unrelated).
-	MatchQuality float64 `json:"matchQuality,omitempty"`
+	// MatchQuality is an ordered identity-match score on 0–3 (0 is unrelated).
+	MatchQuality float64 `json:"matchQuality"`
 
-	// Confidence is the decision model's confidence in Action, when provided.
-	Confidence float64 `json:"confidence,omitempty"`
+	// Confidence is the decision model's confidence in Action.
+	// 0 means the action distribution is uniform (no favorite).
+	Confidence float64 `json:"confidence"`
 
 	// Model is the decision model that produced this advisory.
 	Model string `json:"model,omitempty"`

@@ -7,7 +7,7 @@ import (
 )
 
 func screeningQuestions(n int) map[string]Question {
-	questions := make(map[string]Question, n*3)
+	questions := make(map[string]Question, n*questionsPerHit)
 	for i := 0; i < n; i++ {
 		questions[sameEntityKey(i)] = Question{
 			Type: "noul",

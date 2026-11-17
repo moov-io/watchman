@@ -1226,11 +1226,15 @@ components:
         matchQuality:
           type: number
           format: float
-          description: Ordered identity-match score (0 is unrelated)
+          minimum: 0
+          maximum: 3
+          description: Ordered identity-match score on 0–3 (0 is unrelated)
         confidence:
           type: number
           format: float
-          description: Model confidence in action when provided
+          minimum: 0
+          maximum: 1
+          description: Model confidence in action. 0 means the action distribution is uniform (no favorite).
         model:
           type: string
           description: Decision model that produced this advisory
