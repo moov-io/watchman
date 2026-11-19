@@ -17,7 +17,7 @@ import (
 func newTestRefreshController(t *testing.T, dl Downloader) (*mux.Router, *Refresher) {
 	t.Helper()
 
-	r := NewRefresher(context.Background(), log.NewTestLogger(), dl, nil, nil)
+	r := NewRefresher(context.Background(), log.NewTestLogger(), dl, nil, nil, nil)
 	ctrl := NewRefreshController(log.NewTestLogger(), r)
 
 	router := mux.NewRouter()

@@ -45,6 +45,10 @@ func main() {
 	}
 	fmt.Printf("loaded %d list(s): %v\n\n", len(info.Lists), info.Lists)
 
+	// Optional list history (requires a configured database). See docs/list-history.md.
+	// lists, err := client.Lists(ctx)
+	// diff, err := client.ListDiff(ctx, "us_ofac", search.ListDiffOpts{Detail: "summary"})
+
 	// Search using the unified entity query model (mirrors /v2/search)
 	birthDate := time.Date(1993, time.April, 17, 0, 0, 0, 0, time.UTC)
 	query := search.Entity[search.Value]{

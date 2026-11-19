@@ -77,6 +77,24 @@ type Client interface {
 	// background; poll RefreshStatus to observe progress and completion.
 	// It returns an error if a refresh is already running.
 	DataRefresh(ctx context.Context) (RefreshStatusResponse, error)
+
+	// Lists returns the latest stored snapshot of each downloaded list.
+	// Requires a configured database (HTTP 501 without one). A configured
+	// database with no snapshots returns an empty lists array.
+	Lists(ctx context.Context) (ListsResponse, error)
+
+	// ListRefs returns stored snapshots for one list, newest first.
+	ListRefs(ctx context.Context, listName string) (ListRefsResponse, error)
+
+	// ListEntities pages entities from a stored list snapshot (default ref is latest).
+	ListEntities(ctx context.Context, listName string, opts ListEntitiesOpts) (ListEntitiesResponse, error)
+
+	// ListEntity returns one entity from a stored list snapshot.
+	ListEntity(ctx context.Context, listName, sourceID string, ref string) (ListEntityRecord, error)
+
+	// ListDiff compares two stored snapshots of a list. An empty From uses the
+	// previous snapshot of To (default latest).
+	ListDiff(ctx context.Context, listName string, opts ListDiffOpts) (ListDiffResponse, error)
 }
 
 func NewClient(httpClient *http.Client, baseAddress string) Client {

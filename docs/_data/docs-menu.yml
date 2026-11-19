@@ -39,6 +39,8 @@
       link: /network/
     - name: Caching Data Files
       link: /cache-data-files/
+    - name: List history
+      link: /list-history/
     - name: Performance
       link: /performance/
 

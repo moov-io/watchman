@@ -49,7 +49,7 @@ func TestDownloader_setupPeriodicRefreshing(t *testing.T) {
 
 	indexedLists := index.NewLists(nil) // only in-memory
 
-	r := download.NewRefresher(ctx, logger, dl, indexedLists, nil)
+	r := download.NewRefresher(ctx, logger, dl, indexedLists, nil, nil)
 
 	go func() {
 		time.Sleep(500 * time.Millisecond)
@@ -117,7 +117,7 @@ func TestDownloader_setupPeriodicRefreshing_scheduledFailureKeepsRunning(t *test
 	conf := download.Config{
 		RefreshInterval: 20 * time.Millisecond,
 	}
-	r := download.NewRefresher(ctx, log.NewTestLogger(), dl, index.NewLists(nil), nil)
+	r := download.NewRefresher(ctx, log.NewTestLogger(), dl, index.NewLists(nil), nil, nil)
 
 	errs := make(chan error, 4)
 	err := setupPeriodicRefreshing(ctx, log.NewTestLogger(), errs, conf, r)

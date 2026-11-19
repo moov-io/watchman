@@ -8,7 +8,7 @@ menubar: docs-menu
 
 # Advanced Search Indexing for Superior Performance
 
-Downloaded lists (OFAC, EU, UK, UN, …) live in an in-memory corpus that rebuilds on each successful refresh. [Ingested files](/watchman/ingest/) use a second corpus with the same indexes. A per-source checksum from the database decides whether that corpus is still current, so search does not reread every ingested row on each query.
+Downloaded lists (OFAC, EU, UK, UN, …) live in an in-memory corpus that rebuilds on each successful refresh. [Ingested files](/watchman/ingest/) use a second corpus with the same indexes. A per-source checksum from the database decides whether that corpus is still current, so search does not reread every ingested row on each query. Optional [list history](/watchman/list-history/) is a separate store of refresh deltas; `/v2/search` does not read it.
 
 ## What is built on refresh
 

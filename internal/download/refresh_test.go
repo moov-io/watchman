@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/moov-io/base/log"
+	"github.com/moov-io/watchman/pkg/search"
 
 	"github.com/stretchr/testify/require"
 )
@@ -63,8 +64,42 @@ func (t *testStatsUpdater) Update(s Stats) { t.last = s }
 func newTestRefresher(t *testing.T, dl Downloader) (*Refresher, *testStatsUpdater) {
 	t.Helper()
 	up := &testStatsUpdater{}
-	r := NewRefresher(context.Background(), log.NewTestLogger(), dl, up, nil)
+	r := NewRefresher(context.Background(), log.NewTestLogger(), dl, up, nil, nil)
 	return r, up
+}
+
+type recordingHistory struct {
+	mu    sync.Mutex
+	calls int
+	stats Stats
+}
+
+func (r *recordingHistory) StoreRefreshAsync(_ context.Context, stats Stats) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.calls++
+	r.stats = stats
+}
+
+func TestRefresher_StoresListHistoryAfterIndexUpdate(t *testing.T) {
+	stats := okStats()
+	stats.Entities = []search.Entity[search.Value]{{
+		Name:     "Acme",
+		Type:     search.EntityBusiness,
+		Source:   search.SourceUSOFAC,
+		SourceID: "1",
+	}}
+	dl := &fakeDownloader{stats: stats}
+	hist := &recordingHistory{}
+	up := &testStatsUpdater{}
+	r := NewRefresher(context.Background(), log.NewTestLogger(), dl, up, nil, hist)
+
+	require.NoError(t, r.RefreshNow(context.Background(), TriggerStartup))
+	require.Equal(t, 1, hist.calls)
+	require.Equal(t, "abc", hist.stats.ListHashes["us_ofac"])
+	require.Len(t, hist.stats.Entities, 1)
+	require.Equal(t, map[string]int{"us_ofac": 3}, up.last.Lists)
+	require.Equal(t, "abc", up.last.ListHashes["us_ofac"])
 }
 
 func TestRefresher_RefreshNowSuccess(t *testing.T) {

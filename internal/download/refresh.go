@@ -53,6 +53,11 @@ type embeddingRebuilder interface {
 	RebuildEmbeddingIndex(ctx context.Context) error
 }
 
+// ListHistory stores a snapshot of refreshed list entities. Optional.
+type ListHistory interface {
+	StoreRefreshAsync(ctx context.Context, stats Stats)
+}
+
 // Refresher coordinates full data refreshes with single-flight semantics and status tracking.
 type Refresher struct {
 	baseCtx context.Context
@@ -61,19 +66,21 @@ type Refresher struct {
 	dl            Downloader
 	indexedLists  statsUpdater
 	searchService embeddingRebuilder
+	listHistory   ListHistory
 
 	mu      sync.Mutex
 	running bool
 	status  Status
 }
 
-func NewRefresher(baseCtx context.Context, logger log.Logger, dl Downloader, su statsUpdater, es embeddingRebuilder) *Refresher {
+func NewRefresher(baseCtx context.Context, logger log.Logger, dl Downloader, su statsUpdater, es embeddingRebuilder, history ListHistory) *Refresher {
 	return &Refresher{
 		baseCtx:       baseCtx,
 		logger:        logger,
 		dl:            dl,
 		indexedLists:  su,
 		searchService: es,
+		listHistory:   history,
 		status:        Status{State: StateIdle},
 	}
 }
@@ -158,10 +165,18 @@ func (r *Refresher) run(ctx context.Context) error {
 		entityCount, len(stats.Lists), stats.EndedAt.Sub(stats.StartedAt), getCurrentMemoryUsed())
 
 	if r.indexedLists != nil {
-		// Index takes ownership of the entity slice inside the corpus. Clear our
-		// local roots afterward so RefreshAll's return value does not keep the
-		// previous generation + new slice alive on this stack until run returns.
+		// Index takes ownership of the entity slice inside the corpus. Swap
+		// before history so a full store queue cannot block search.
 		r.indexedLists.Update(stats)
+	}
+	if r.listHistory != nil {
+		// Copy from stats still held on this stack. A full queue blocks here
+		// (single-flight) after the new corpus is live.
+		r.listHistory.StoreRefreshAsync(ctx, stats)
+	}
+	if r.indexedLists != nil {
+		// Drop RefreshAll's extra root so this stack does not keep the previous
+		// generation plus the live corpus until run returns.
 		stats.Entities = nil
 		stats.TFIDFIndex = nil
 	}

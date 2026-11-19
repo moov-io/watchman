@@ -43,6 +43,278 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Unexpected error
+  /v2/lists:
+    get:
+      summary: Latest stored snapshot of each downloaded list
+      description: |
+        Returns the latest stored ref for each downloaded list. Requires MySQL or
+        PostgreSQL. Search still uses the in-memory corpus; this is history only.
+        `lists` is empty when nothing has been stored yet.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListsResponse'
+          description: Latest ref per list
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Extra query parameters
+        "501":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: List history requires a configured database
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unexpected error
+  /v2/lists/{listName}/refs:
+    get:
+      summary: Stored snapshots for one list
+      description: Snapshots for one downloaded list, newest first.
+      parameters:
+        - name: listName
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-z0-9_-]{1,64}$'
+          description: List name (us_ofac, eu_csl, ...)
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListRefsResponse'
+          description: Snapshots, newest first
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid list name or extra query parameters
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: List was never stored
+        "501":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: List history requires a configured database
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unexpected error
+  /v2/lists/{listName}/entities:
+    get:
+      summary: Entities in a stored list snapshot
+      description: |
+        Pages entities from a stored snapshot. Default ref is latest. Filter `q`
+        is a case-insensitive substring on name or sourceID. This is not /v2/search
+        scoring.
+      parameters:
+        - name: listName
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-z0-9_-]{1,64}$'
+        - name: ref
+          in: query
+          schema:
+            type: string
+          description: List hash or latest (default latest)
+        - name: q
+          in: query
+          schema:
+            type: string
+          description: Case-insensitive substring on name or sourceID
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [person, business, organization, aircraft, vessel, unknown]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 100
+        - name: after
+          in: query
+          schema:
+            type: string
+          description: sourceID cursor from the previous page
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEntitiesResponse'
+          description: Page of entities at the requested ref
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid query
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unknown list or ref
+        "501":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: List history requires a configured database
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unexpected error
+  /v2/lists/{listName}/entities/{sourceID}:
+    get:
+      summary: One entity from a stored list snapshot
+      parameters:
+        - name: listName
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-z0-9_-]{1,64}$'
+        - name: sourceID
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: ref
+          in: query
+          schema:
+            type: string
+          description: List hash or latest (default latest)
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEntityRecord'
+          description: Entity at the requested ref
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid query
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unknown list, ref, or sourceID
+        "501":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: List history requires a configured database
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unexpected error
+  /v2/lists/{listName}/diff:
+    get:
+      summary: Diff two stored snapshots of a list
+      description: |
+        Compare two refs. An omitted `from` uses the previous snapshot of `to`
+        (default latest). If `to` is the first snapshot, from equals to and the
+        diff is empty. `counts` is the full diff; the arrays are the current page.
+      parameters:
+        - name: listName
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-z0-9_-]{1,64}$'
+        - name: from
+          in: query
+          schema:
+            type: string
+          description: Older ref. Default is the previous snapshot of to.
+        - name: to
+          in: query
+          schema:
+            type: string
+          description: Newer ref (default latest)
+        - name: detail
+          in: query
+          schema:
+            type: string
+            enum: [summary, full]
+            default: summary
+          description: summary returns ids and names; full includes entity bodies
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 500
+        - name: after
+          in: query
+          schema:
+            type: string
+          description: Cursor added:sourceID, changed:sourceID, or removed:sourceID
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListDiffResponse'
+          description: Diff page
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid query
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unknown list or ref
+        "501":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: List history requires a configured database
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unexpected error
   /v2/data/refresh:
     get:
       summary: Get the status of the data refresh
@@ -1046,6 +1318,120 @@ components:
           example: "v0.51.0"
           description: Version of the Watchman service
       type: object
+    ListRef:
+      type: object
+      properties:
+        listName:
+          type: string
+        ref:
+          type: string
+          description: SHA-256 of the downloaded list file
+        downloadedAt:
+          format: date-time
+          type: string
+        entityCount:
+          type: integer
+        addedCount:
+          type: integer
+        removedCount:
+          type: integer
+        changedCount:
+          type: integer
+    ListsResponse:
+      type: object
+      properties:
+        lists:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListRef'
+    ListRefsResponse:
+      type: object
+      properties:
+        listName:
+          type: string
+        refs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListRef'
+    ListEntityRecord:
+      type: object
+      properties:
+        sourceID:
+          type: string
+        name:
+          type: string
+        entityType:
+          type: string
+        entityHash:
+          type: string
+          description: SHA-256 of the public entity JSON
+        entity:
+          $ref: '#/components/schemas/Entity'
+    ListEntitiesResponse:
+      type: object
+      properties:
+        listName:
+          type: string
+        ref:
+          $ref: '#/components/schemas/ListRef'
+        entities:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListEntityRecord'
+        after:
+          type: string
+          description: sourceID cursor for the next page
+    ListChange:
+      type: object
+      properties:
+        changeType:
+          type: string
+          enum: [added, removed, changed]
+        sourceID:
+          type: string
+        name:
+          type: string
+        entityType:
+          type: string
+        before:
+          $ref: '#/components/schemas/Entity'
+        after:
+          $ref: '#/components/schemas/Entity'
+    ListDiffCounts:
+      type: object
+      properties:
+        added:
+          type: integer
+        removed:
+          type: integer
+        changed:
+          type: integer
+    ListDiffResponse:
+      type: object
+      properties:
+        listName:
+          type: string
+        from:
+          $ref: '#/components/schemas/ListRef'
+        to:
+          $ref: '#/components/schemas/ListRef'
+        counts:
+          $ref: '#/components/schemas/ListDiffCounts'
+        added:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListChange'
+        removed:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListChange'
+        changed:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListChange'
+        after:
+          type: string
+          description: Cursor for the next page (added|changed|removed:sourceID)
     RefreshStatusResponse:
       properties:
         state:

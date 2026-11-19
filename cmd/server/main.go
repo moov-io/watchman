@@ -26,6 +26,7 @@ import (
 	"github.com/moov-io/watchman/internal/geocoding"
 	"github.com/moov-io/watchman/internal/index"
 	"github.com/moov-io/watchman/internal/ingest"
+	"github.com/moov-io/watchman/internal/listhistory"
 	"github.com/moov-io/watchman/internal/mcp"
 	"github.com/moov-io/watchman/internal/metrics"
 	"github.com/moov-io/watchman/internal/postalpool"
@@ -126,7 +127,8 @@ func main() {
 		logger.Fatal().LogErrorf("problem setting up search service: %v", err)
 		os.Exit(1)
 	}
-	refreshManager := download.NewRefresher(ctx, logger, downloader, indexedLists, searchService)
+	listHistoryService := listhistory.NewService(logger, listhistory.NewRepository(database))
+	refreshManager := download.NewRefresher(ctx, logger, downloader, indexedLists, searchService, listHistoryService)
 	err = setupPeriodicRefreshing(ctx, logger, errs, conf.Download, refreshManager)
 	if err != nil {
 		logger.Fatal().LogErrorf("problem during initial download: %v", err)
@@ -173,6 +175,9 @@ func main() {
 
 	ingestController := ingest.NewController(logger, ingestService, conf.Ingest, indexedLists)
 	ingestController.AppendRoutes(router)
+
+	listHistoryController := listhistory.NewController(logger, listHistoryService)
+	listHistoryController.AppendRoutes(router)
 
 	// Add the Webui last
 	webuiController := webui.NewController(logger, conf.Webui)
@@ -244,6 +249,12 @@ func main() {
 	if err := <-errs; err != nil {
 		shutdownServer()
 		logger.LogErrorf("final exit: %v", err)
+	}
+
+	waitCtx, waitCancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer waitCancel()
+	if err := listHistoryService.Wait(waitCtx); err != nil {
+		logger.Warn().Log("list history store still in progress at shutdown")
 	}
 }
 
