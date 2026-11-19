@@ -56,7 +56,7 @@ Watchman integrates the following lists to help you maintain global compliance. 
 | US Government     | [Consolidated Screening List (CSL)](https://www.trade.gov/consolidated-screening-list), [FinCEN 311](https://home.treasury.gov/policy-issues/terrorism-and-illicit-finance/311-actions) |
 | US Treasury       | [Office of Foreign Assets Control (OFAC)](https://ofac.treasury.gov/sanctions-list-service) and Non-SDN list                                                                            |
 | United Kingdom    | [UK sanctions list](https://www.gov.uk/government/publications/the-uk-sanctions-list)                                                                                                    |
-| United Nations    | [Consolidated Sanctions List](https://www.un.org/sc/resources/sc-sanctions)                                                                                                             |
+| United Nations    | [Consolidated Sanctions List](https://main.un.org/securitycouncil/en/content/un-sc-consolidated-list)                                                                                   |
 
 Look for additional data sources in [moov-io/awesome-fintech](https://github.com/moov-io/awesome-fintech#compliance--sanctions).
 
@@ -93,7 +93,7 @@ The same name without an ID scores **0.767** and returns nothing at that cutoff.
 ```
 # Name only — below the screening line
 curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&minMatch=0.80&limit=1" | jq .entities
-# []
+# null
 
 # Name + date of birth
 curl -s "http://localhost:8084/v2/search?type=person&name=Dmitry+Khoroshev&birthDate=1993-04-17&minMatch=0.80&limit=1" \
@@ -108,6 +108,20 @@ Add `debug=true` to see which fields produced the score. Full recipe: [Using Wat
 Images: [`moov/watchman`](https://hub.docker.com/r/moov/watchman/) on Docker Hub, [`quay.io/moov/watchman`](https://quay.io/repository/moov/watchman?tab=tags) for OpenShift. `moov/watchman:v2-static` ships frozen 2019 files for fast local tests (not the live SDN). The WASM UI is at `/` on `:8084`.
 
 That `docker run` publishes only the business API (`:8084`). Do not expose Watchman on the public internet. See [Network access](#network-access). Each result in `entities` is the list record with a `match` field (0 to 1) on the same object.
+
+### Running from source or a release binary
+
+Linux and macOS GitHub release binaries are built with [libpostal](https://github.com/openvenues/libpostal) and need `libpostal.so.1` (or `libpostal.dylib`) plus its address-parsing models (about 3GB) at runtime. Without them the binary fails at startup (`libpostal.so.1: cannot open shared object file`). Install libpostal with `make install`, or use Docker.
+
+If you do not want to install libpostal, run from source. `go run` and `go build` (without `-tags libpostal`) use [usaddress](https://github.com/moov-io/watchman/tree/master/pkg/usaddress) instead:
+
+```
+git clone https://github.com/moov-io/watchman.git
+cd watchman
+INCLUDED_LISTS=us_ofac go run ./cmd/server
+```
+
+Scores can differ from Docker and from the Linux/macOS release binaries because the address parser is different. Windows `.exe` releases already use usaddress.
 
 ### Network access
 
@@ -147,7 +161,7 @@ OFAC requires [reporting of positive hits](https://ofac.treasury.gov/ofac-report
 - [OFAC Sanctions Search Page](https://sanctionssearch.ofac.treas.gov/)
 - [Subscribe for OFAC email updates](https://service.govdelivery.com/accounts/USTREAS/subscriber/new)
 - [When should I call the OFAC Hotline?](https://home.treasury.gov/policy-issues/financial-sanctions/contact-ofac/when-should-i-call-the-ofac-hotline#:~:text=If%20it's%20hitting%20against%20OFAC's,the%20match%20is%20hitting%20against.)
-- [BIS Denied Persons List with Denied US Export Privileges (DPL)](https://bis.data.commerce.gov/dataset/Denied-Persons-List-with-Denied-US-Export-Privileg/xwtd-wd7a/data)
+- [BIS Denied Persons List with Denied US Export Privileges (DPL)](https://www.bis.gov/licensing/end-user-guidance/denied-persons-list-dpl)
 - [BIS Entity List](https://www.bis.doc.gov/index.php/policy-guidance/lists-of-parties-of-concern/entity-list)
 - [Sectoral Sanctions Identifications (SSI)](https://home.treasury.gov/policy-issues/financial-sanctions/consolidated-sanctions-list/sectoral-sanctions-identifications-ssi-list)
 - [US Sanctions Search FAQ](https://home.treasury.gov/policy-issues/financial-sanctions/faqs#basic)

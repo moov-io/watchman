@@ -71,7 +71,7 @@ Download the [UK Sanctions List](https://www.gov.uk/government/publications/the-
 
 - `un_consolidated.xml` - UN Consolidated Sanctions List
 
-Download from [UN Sanctions](https://www.un.org/sc/resources/sc-sanctions)
+Download from [UN Sanctions](https://main.un.org/securitycouncil/en/content/un-sc-consolidated-list)
 
 **FinCEN 311 Special Measures**
 
