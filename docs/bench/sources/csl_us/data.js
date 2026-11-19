@@ -1,78 +1,8 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795034188449,
+  "lastUpdate": 1795120582824,
   "repoUrl": "https://github.com/moov-io/watchman",
   "entries": {
     "moov-io/watchman CSL US Benchmarks": [
-      {
-        "commit": {
-          "author": {
-            "name": "renovate[bot]",
-            "username": "renovate[bot]",
-            "email": "29139614+renovate[bot]@users.noreply.github.com"
-          },
-          "committer": {
-            "name": "GitHub",
-            "username": "web-flow",
-            "email": "noreply@github.com"
-          },
-          "id": "3c9bd53ea466c587b261b307137d1d8ed897457c",
-          "message": "fix(deps): update module github.com/openrouterteam/go-sdk to v0.9.69 (#981)\n\nCo-authored-by: renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>",
-          "timestamp": "2026-10-21T23:29:51Z",
-          "url": "https://github.com/moov-io/watchman/commit/3c9bd53ea466c587b261b307137d1d8ed897457c"
-        },
-        "date": 1792944512716,
-        "tool": "go",
-        "benches": [
-          {
-            "name": "BenchmarkRead",
-            "value": 49762773,
-            "unit": "ns/op\t58558216 B/op\t46933 allocs/op",
-            "extra": "24 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkRead - ns/op",
-            "value": 49762773,
-            "unit": "ns/op",
-            "extra": "24 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkRead - B/op",
-            "value": 58558216,
-            "unit": "B/op",
-            "extra": "24 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkRead - allocs/op",
-            "value": 46933,
-            "unit": "allocs/op",
-            "extra": "24 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkFindEntity",
-            "value": 5939139,
-            "unit": "ns/op\t2105580 B/op\t11483 allocs/op",
-            "extra": "201 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkFindEntity - ns/op",
-            "value": 5939139,
-            "unit": "ns/op",
-            "extra": "201 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkFindEntity - B/op",
-            "value": 2105580,
-            "unit": "B/op",
-            "extra": "201 times\n2 procs"
-          },
-          {
-            "name": "BenchmarkFindEntity - allocs/op",
-            "value": 11483,
-            "unit": "allocs/op",
-            "extra": "201 times\n2 procs"
-          }
-        ]
-      },
       {
         "commit": {
           "author": {
@@ -1750,6 +1680,76 @@ window.BENCHMARK_DATA = {
             "value": 11482,
             "unit": "allocs/op",
             "extra": "292 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Adam Shannon",
+            "username": "adamdecaf",
+            "email": "adamkshannon@gmail.com"
+          },
+          "committer": {
+            "name": "GitHub",
+            "username": "web-flow",
+            "email": "noreply@github.com"
+          },
+          "id": "9e24240f152e392eb0d9d24cddaf5ac60527761e",
+          "message": "feat(lists): store refresh history and expose snapshot APIs (#1018)\n\nOptional MySQL/Postgres storage of downloaded list snapshots after\neach successful refresh. A FIFO worker writes a per-list delta keyed\nby the list file hash from GET /v2/listinfo. Search still uses the\nin-memory corpus. Without a database the new endpoints return 501.\n\nGET /v2/lists, /refs, /entities, and /diff read any stored ref\n(default latest) and the change set between two refs.\n\nRefs #486",
+          "timestamp": "2026-11-19T20:23:07Z",
+          "url": "https://github.com/moov-io/watchman/commit/9e24240f152e392eb0d9d24cddaf5ac60527761e"
+        },
+        "date": 1795120582371,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "BenchmarkRead",
+            "value": 50788404,
+            "unit": "ns/op\t58558216 B/op\t46933 allocs/op",
+            "extra": "22 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkRead - ns/op",
+            "value": 50788404,
+            "unit": "ns/op",
+            "extra": "22 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkRead - B/op",
+            "value": 58558216,
+            "unit": "B/op",
+            "extra": "22 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkRead - allocs/op",
+            "value": 46933,
+            "unit": "allocs/op",
+            "extra": "22 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity",
+            "value": 5593545.5,
+            "unit": "ns/op\t2100704 B/op\t11479 allocs/op",
+            "extra": "216 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity - ns/op",
+            "value": 5593545.5,
+            "unit": "ns/op",
+            "extra": "216 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity - B/op",
+            "value": 2100704,
+            "unit": "B/op",
+            "extra": "216 times\n2 procs"
+          },
+          {
+            "name": "BenchmarkFindEntity - allocs/op",
+            "value": 11479,
+            "unit": "allocs/op",
+            "extra": "216 times\n2 procs"
           }
         ]
       }
