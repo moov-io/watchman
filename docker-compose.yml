@@ -72,7 +72,7 @@ services:
       - /var/lib/mysql
 
   postgres:
-    image: postgres:18
+    image: postgres:19
     restart: always
     shm_size: 128mb
     ports:
