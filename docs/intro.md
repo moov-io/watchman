@@ -33,7 +33,7 @@ A production query of OFAC SDN 48603 with a passport scores **1.0** at `minMatch
 | US Government | [CSL](https://www.trade.gov/consolidated-screening-list), [FinCEN 311](https://home.treasury.gov/policy-issues/terrorism-and-illicit-finance/311-actions) |
 | US Treasury | [OFAC](https://ofac.treasury.gov/sanctions-list-service) SDN and Non-SDN |
 | United Kingdom | [UK sanctions list](https://www.gov.uk/government/publications/the-uk-sanctions-list) |
-| United Nations | [UN consolidated list](https://www.un.org/sc/resources/sc-sanctions) |
+| United Nations | [UN consolidated list](https://main.un.org/securitycouncil/en/content/un-sc-consolidated-list) |
 
 Look for additional data sources in [moov-io/awesome-fintech](https://github.com/moov-io/awesome-fintech#compliance--sanctions).
 

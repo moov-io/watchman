@@ -14,11 +14,15 @@ Hashed blocking keys for your own database: [`pkg/recordlink`](https://pkg.go.de
 
 [![GoDoc](https://pkg.go.dev/badge/github.com/moov-io/watchman?utm_source=godoc)](https://pkg.go.dev/github.com/moov-io/watchman/pkg/search#Client)
 
-Start by running Watchman locally.
+Start by cloning the repository and running Watchman locally.
 
 ```
+git clone https://github.com/moov-io/watchman.git
+cd watchman
 INCLUDED_LISTS=us_ofac go run ./cmd/server
 ```
+
+`go run` uses [usaddress](https://github.com/moov-io/watchman/tree/master/pkg/usaddress) for address parsing rather than [libpostal](https://github.com/openvenues/libpostal) (which Docker and Linux/macOS release binaries use), so scores can differ from Docker.
 
 Then run this example code (e.g. `go run ./examples/search.go`).
 

@@ -274,7 +274,7 @@ Watchman integrates the following lists to help you maintain global compliance.
 | `eu_csl`          | EU Consolidated list of financial sanctions | [URL](https://data.europa.eu/data/datasets/consolidated-list-of-persons-groups-and-entities-subject-to-eu-financial-sanctions?locale=en) |
 | `opensanctions_*` | OpenSanctions Datasets                      | [URL](https://www.opensanctions.org/datasets/)                                                                                           |
 | `uk_csl`          | UK Sanctions List                           | [URL](https://www.gov.uk/government/publications/the-uk-sanctions-list)                                                                  |
-| `un_csl`          | United Nations Consolidated Sanctions List  | [URL](https://www.un.org/sc/resources/sc-sanctions)                                                                                      |
+| `un_csl`          | United Nations Consolidated Sanctions List  | [URL](https://main.un.org/securitycouncil/en/content/un-sc-consolidated-list)                                                                                      |
 | `us_csl`          | Consolidated Screening List (CSL)           | [URL](https://www.trade.gov/consolidated-screening-list)                                                                                 |
 | `us_fincen_311`   | US FinCEN 311 Actions                       | [URL](https://www.fincen.gov/resources/statutes-and-regulations/special-measures/)                                                       |
 | `us_non_sdn`      | US Office of Foreign Assets Control (OFAC)  | [URL](https://ofac.treasury.gov/sanctions-list-service)                                                                                  |

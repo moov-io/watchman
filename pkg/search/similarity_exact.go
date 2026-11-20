@@ -132,7 +132,7 @@ func comparePersonExactIDs(w io.Writer, query *Person, index *Person, weight flo
 		for _, qID := range query.GovernmentIDs {
 			for _, iID := range index.GovernmentIDs {
 				if strings.EqualFold(string(qID.Type), string(iID.Type)) &&
-					strings.EqualFold(qID.Country, iID.Country) &&
+					countriesEqual(qID.Country, iID.Country) &&
 					strings.EqualFold(normalizeIdentifier(qID.Identifier), normalizeIdentifier(iID.Identifier)) {
 					score += 15.0
 					hasMatch = true
@@ -181,7 +181,7 @@ func compareBusinessExactIDs(w io.Writer, query *Business, index *Business, weig
 			for _, iID := range index.GovernmentIDs {
 				// Exact match on all identifier fields
 				if strings.EqualFold(string(qID.Type), string(iID.Type)) &&
-					strings.EqualFold(qID.Country, iID.Country) &&
+					countriesEqual(qID.Country, iID.Country) &&
 					strings.EqualFold(normalizeIdentifier(qID.Identifier), normalizeIdentifier(iID.Identifier)) {
 					score += 15.0
 					hasMatch = true
@@ -230,7 +230,7 @@ func compareOrgExactIDs(w io.Writer, query *Organization, index *Organization, w
 			for _, iID := range index.GovernmentIDs {
 				// Exact match on all identifier fields
 				if strings.EqualFold(string(qID.Type), string(iID.Type)) &&
-					strings.EqualFold(qID.Country, iID.Country) &&
+					countriesEqual(qID.Country, iID.Country) &&
 					strings.EqualFold(normalizeIdentifier(qID.Identifier), normalizeIdentifier(iID.Identifier)) {
 					score += 15.0
 					hasMatch = true
@@ -529,11 +529,18 @@ func sameTypeIdentifierMatch(idType GovernmentIDType, queryIDs, indexIDs []Gover
 	return false
 }
 
+// countriesEqual reports whether two country values refer to the same country
+// after normalizing ISO 3166 codes and official names via norm.Country
+// (for example "RU" and "Russia"). Empty strings are equal only to each other.
+func countriesEqual(a, b string) bool {
+	return strings.EqualFold(norm.Country(a), norm.Country(b))
+}
+
 func countryCompatible(a, b string) bool {
 	if a == "" || b == "" {
 		return true
 	}
-	return strings.EqualFold(a, b)
+	return countriesEqual(a, b)
 }
 
 func conflictingVesselIDs(query, index *Vessel) bool {
@@ -601,8 +608,8 @@ func compareIdentifiers(queryID, indexID string, queryCountry, indexCountry stri
 		return idMatch{score: 0.9, found: true, exact: false, hasCountry: true}
 	}
 
-	// Both have country - check if they match
-	if strings.EqualFold(queryCountry, indexCountry) {
+	// Both have country - check if they match (ISO codes vs official names)
+	if countriesEqual(queryCountry, indexCountry) {
 		return idMatch{score: 1.0, found: true, exact: true, hasCountry: true}
 	}
 
