@@ -39,6 +39,7 @@ func TestClient_buildQueryParameters(t *testing.T) {
 					AltNames:  []string{"jon doe", "johnny doe"},
 					Gender:    "male",
 					BirthDate: ptr(time.Date(1998, time.April, 12, 10, 30, 0, 0, time.UTC)),
+					DeathDate: ptr(time.Date(2021, time.March, 3, 0, 0, 0, 0, time.UTC)),
 				},
 			},
 			opts: SearchOpts{
@@ -53,6 +54,7 @@ func TestClient_buildQueryParameters(t *testing.T) {
 				"altNames":  []string{"jon doe", "johnny doe"},
 				"gender":    []string{"male"},
 				"birthDate": []string{"1998-04-12"},
+				"deathDate": []string{"2021-03-03"},
 				"limit":     []string{"3"},
 				"minMatch":  []string{"0.90"},
 				"algorithm": []string{"soundex"},

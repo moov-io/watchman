@@ -412,6 +412,9 @@ func setPersonParameters(q url.Values, entity Entity[Value]) {
 	if entity.Person.BirthDate != nil {
 		q.Set("birthDate", entity.Person.BirthDate.Format(yyyymmdd))
 	}
+	if entity.Person.DeathDate != nil {
+		q.Set("deathDate", entity.Person.DeathDate.Format(yyyymmdd))
+	}
 	for _, title := range entity.Person.Titles {
 		q.Add("titles", title)
 	}
