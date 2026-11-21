@@ -370,18 +370,21 @@ func readGovernmentIDs(q *api.QueryParams) []search.GovernmentID {
 
 	var out []search.GovernmentID
 	for idx := range queryKeys {
-		parts := strings.Split(q.Get(queryKeys[idx]), ":")
-		if len(parts) <= 1 {
-			continue
-		}
+		// A type can be repeated, e.g. two passports: gov_passport=US:1&gov_passport=GB:2
+		for _, value := range q.GetAll(queryKeys[idx]) {
+			parts := strings.Split(value, ":")
+			if len(parts) <= 1 {
+				continue
+			}
 
-		g := search.GovernmentID{
-			Type:       search.GovernmentIDType(strings.TrimPrefix(queryKeys[idx], "gov_")),
-			Country:    parts[0],
-			Identifier: parts[1],
-		}
+			g := search.GovernmentID{
+				Type:       search.GovernmentIDType(strings.TrimPrefix(queryKeys[idx], "gov_")),
+				Country:    parts[0],
+				Identifier: parts[1],
+			}
 
-		out = append(out, g)
+			out = append(out, g)
+		}
 	}
 	return out
 }
