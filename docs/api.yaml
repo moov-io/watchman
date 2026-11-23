@@ -1690,6 +1690,17 @@ components:
       type: object
     SimilarityScore:
       properties:
+        rankedBy:
+          type: string
+          enum: [similarity, embeddings]
+          description: |
+            How /v2/search ranked the hit. `similarity` is Jaro-Winkler field scoring.
+            `embeddings` is cosine ranking; `finalScore` is then a Jaro-Winkler diagnostic
+            and can differ from `match`.
+        rankingScore:
+          type: number
+          format: float
+          description: Embedding cosine when rankedBy is embeddings. Omitted for similarity ranking.
         pieces:
           items:
             $ref: '#/components/schemas/ScorePiece'
@@ -1706,7 +1717,7 @@ components:
         finalScore:
           type: number
           format: float
-          description: Computed final match score
+          description: Jaro-Winkler similarity score. Same as match when rankedBy is similarity.
       type: object
     Vessel:
       properties:

@@ -116,6 +116,45 @@ func TestScoreBreakdownRendersNameDebug(t *testing.T) {
 	require.Contains(t, joined, "compared: Mohamed SALEM")
 }
 
+func TestScoreBreakdownLabelsEmbeddingSimilarityDiagnostic(t *testing.T) {
+	test.NewApp()
+
+	root := entityDetails(search.SearchedEntity[search.Value]{
+		Entity: search.Entity[search.Value]{
+			Name:     "Ada Lovelace",
+			Type:     search.EntityPerson,
+			Source:   search.SourceUSOFAC,
+			SourceID: "1",
+		},
+		Match: 0.91,
+		Details: search.SimilarityScore{
+			RankedBy:     search.RankedByEmbeddings,
+			RankingScore: 0.91,
+			FinalScore:   0.69,
+			Steps: []search.ScoreStep{
+				{Stage: "base", Score: 0.73},
+				{Stage: "name-only", Score: 0.69, Delta: -0.04, Reason: "name-only query"},
+			},
+			Pieces: []search.ScorePiece{
+				{PieceType: "name", Score: 0.73, Weight: 35, Matched: true, Required: true, FieldsCompared: 1},
+			},
+		},
+	})
+
+	var texts []string
+	walkObjects(root, func(object fyne.CanvasObject) {
+		label, ok := object.(*widget.Label)
+		if !ok || label.Text == "" {
+			return
+		}
+		texts = append(texts, label.Text)
+	})
+	joined := strings.Join(texts, "\n")
+	require.Contains(t, joined, "embeddings")
+	require.Contains(t, joined, "Similarity diagnostic")
+	require.Contains(t, joined, "Similarity trail")
+}
+
 func TestScoreBreakdownOmitsExactOnSubThresholdNamePiece(t *testing.T) {
 	test.NewApp()
 

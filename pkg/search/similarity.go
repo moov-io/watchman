@@ -284,15 +284,28 @@ func shouldExactOverride(pieces []ScorePiece) bool {
 	return false
 }
 
+const (
+	// RankedBySimilarity is Jaro-Winkler field scoring (the default /v2/search path).
+	RankedBySimilarity = "similarity"
+	// RankedByEmbeddings is cosine ranking from the embedding index.
+	RankedByEmbeddings = "embeddings"
+)
+
 // SimilarityScore gives detailed results of which fields matched and how they were scored against each other.
 //
 // The fields returned in SimilarityScore may change as the general similarity algorithm and scoring methodologies evolve.
 // There is no API stability guarantee for SimilarityScore.
 type SimilarityScore struct {
-	Pieces     []ScorePiece `json:"pieces,omitzero"`
-	Name       *NameDebug   `json:"name,omitempty"`
-	Steps      []ScoreStep  `json:"steps,omitempty"`
-	FinalScore float64      `json:"finalScore,omitzero"`
+	// RankedBy is how /v2/search ranked the hit: similarity or embeddings.
+	// Empty when SimilarityScore comes from Similarity/DebugSimilarity directly.
+	RankedBy string `json:"rankedBy,omitempty"`
+	// RankingScore is the embedding cosine when RankedBy is embeddings.
+	// FinalScore stays the Jaro-Winkler diagnostic in that case.
+	RankingScore float64      `json:"rankingScore,omitzero"`
+	Pieces       []ScorePiece `json:"pieces,omitzero"`
+	Name         *NameDebug   `json:"name,omitempty"`
+	Steps        []ScoreStep  `json:"steps,omitempty"`
+	FinalScore   float64      `json:"finalScore,omitzero"`
 }
 
 // ScorePiece is a partial scoring result from one comparison function

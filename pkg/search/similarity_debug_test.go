@@ -10,6 +10,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestSimilarityScore_StringEmbeddingRanking(t *testing.T) {
+	text := search.SimilarityScore{
+		RankedBy:     search.RankedByEmbeddings,
+		RankingScore: 0.91,
+		FinalScore:   0.69,
+	}.String()
+	require.Contains(t, text, "ranking  0.9100  embeddings")
+	require.Contains(t, text, "similarity  0.6900  Jaro-Winkler diagnostic")
+	require.NotContains(t, text, "match  0.6900")
+}
+
 func TestNameDebug_FromJSON(t *testing.T) {
 	query := readEntity(t, "1-query.json").Normalize()
 	index := readEntity(t, "1-index.json").Normalize()

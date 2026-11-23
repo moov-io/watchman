@@ -169,7 +169,11 @@ func resultMeta(entity search.SearchedEntity[search.Value]) string {
 func entityDetails(entity search.SearchedEntity[search.Value]) fyne.CanvasObject {
 	content := container.NewVBox()
 
-	score := widget.NewLabelWithStyle(formatMatch(entity.Match)+" match", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	scoreText := formatMatch(entity.Match) + " match"
+	if entity.Details.RankedBy == search.RankedByEmbeddings {
+		scoreText = formatMatch(entity.Match) + " embeddings"
+	}
+	score := widget.NewLabelWithStyle(scoreText, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 	score.Importance = matchImportance(entity.Match)
 	score.Selectable = true
 	content.Add(score)
@@ -412,11 +416,18 @@ func historicalCard(items []search.HistoricalInfo) fyne.CanvasObject {
 
 func scoreBreakdown(entity search.SearchedEntity[search.Value]) fyne.CanvasObject {
 	box := container.NewVBox()
+	if entity.Details.RankedBy == search.RankedByEmbeddings {
+		box.Add(wordWrappingLabel(fmt.Sprintf("Similarity diagnostic  %s", formatMatch(entity.Details.FinalScore))))
+	}
 	if entity.Details.Name != nil {
 		box.Add(nameDebugCard(*entity.Details.Name))
 	}
 	if len(entity.Details.Steps) > 0 {
-		box.Add(scoreStepsCard("Score trail", entity.Details.Steps))
+		trailTitle := "Score trail"
+		if entity.Details.RankedBy == search.RankedByEmbeddings {
+			trailTitle = "Similarity trail"
+		}
+		box.Add(scoreStepsCard(trailTitle, entity.Details.Steps))
 	}
 	for _, piece := range entity.Details.Pieces {
 		if piece.FieldsCompared == 0 && piece.Score == 0 && !piece.Matched {
