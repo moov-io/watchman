@@ -156,6 +156,33 @@ func TestNameDebug_UnmatchedTokens(t *testing.T) {
 	require.Contains(t, text, "unmatched index  adams")
 }
 
+func TestNameDebug_FewMatchingTermsReasonIsAggregate(t *testing.T) {
+	query := search.Entity[search.Value]{
+		Name: "John Smith",
+		Type: search.EntityPerson,
+	}.Normalize()
+	index := search.Entity[search.Value]{
+		Name: "John Smith Alpha Bravo Charlie Delta Echo Foxtrot Golf Hotel",
+		Type: search.EntityPerson,
+	}.Normalize()
+
+	got := search.DebugSimilarityWithOpts(nil, query, index, search.SimilarityOpts{})
+	require.InDelta(t, search.Similarity(query, index), got.FinalScore, 0.0001)
+	require.NotNil(t, got.Name)
+
+	var few *search.ScoreStep
+	for i := range got.Name.Steps {
+		if got.Name.Steps[i].Stage == "few-matching-terms" {
+			few = &got.Name.Steps[i]
+			break
+		}
+	}
+	require.NotNil(t, few, "unmatched index tokens should infer too few matching terms from the aggregate score")
+	require.Contains(t, few.Reason, "aggregate token-pair score")
+	require.NotContains(t, few.Reason, "term-match threshold")
+	require.Contains(t, got.String(), "few-matching-terms")
+}
+
 func TestNameDebug_IdentifierOnly(t *testing.T) {
 	query := search.Entity[search.Value]{
 		Type: search.EntityBusiness,

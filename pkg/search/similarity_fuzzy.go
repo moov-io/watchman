@@ -290,7 +290,7 @@ func explainName[Q any, I any](query Entity[Q], index Entity[I], match nameMatch
 		prev = match.afterHist
 	}
 	if match.afterQuality != prev {
-		debug.Steps = appendNameStep(debug.Steps, "few-matching-terms", "fewer than 2 terms above the term-match threshold", prev, match.afterQuality)
+		debug.Steps = appendNameStep(debug.Steps, "few-matching-terms", "inferred matching-term count is below 2 from the aggregate token-pair score", prev, match.afterQuality)
 		prev = match.afterQuality
 	}
 	if match.closeEnoughApplied {
