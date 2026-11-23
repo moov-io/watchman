@@ -156,6 +156,33 @@ func TestNameDebug_UnmatchedTokens(t *testing.T) {
 	require.Contains(t, text, "unmatched index  adams")
 }
 
+func TestNameDebug_RecastPreservesOriginalPrepareType(t *testing.T) {
+	query := search.Entity[search.Value]{
+		Name: "John Smith Limited",
+		Type: search.EntityPerson,
+		Person: &search.Person{
+			Name: "John Smith Limited",
+		},
+	}.Normalize()
+	index := search.Entity[search.Value]{
+		Name: "John Smith Limited",
+		Type: search.EntityBusiness,
+		Business: &search.Business{
+			Name: "John Smith Limited",
+		},
+	}.Normalize()
+
+	require.Contains(t, query.PreparedFields.Name, "limited")
+	require.NotContains(t, index.PreparedFields.Name, "limited")
+
+	got := search.DebugSimilarityWithOpts(nil, query, index, search.SimilarityOpts{})
+	require.InDelta(t, search.Similarity(query, index), got.FinalScore, 0.0001)
+	require.NotNil(t, got.Name)
+	require.Equal(t, query.PreparedFields.Name, got.Name.Query.Prepared)
+	require.NotContains(t, nameStages(got.Name.Query), "legal-forms")
+	require.Contains(t, nameStages(got.Name.Index), "legal-forms")
+}
+
 func TestNameDebug_FewMatchingTermsReasonIsAggregate(t *testing.T) {
 	query := search.Entity[search.Value]{
 		Name: "John Smith",

@@ -44,11 +44,11 @@ type nameMatch struct {
 }
 
 func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) ScorePiece {
-	piece, _ := compareNameWithTFIDF(w, query, index, weight, SimilarityOpts{}, false)
+	piece, _ := compareNameWithTFIDF(w, query, index, weight, SimilarityOpts{}, query.Type, false)
 	return piece
 }
 
-func compareNameWithTFIDF[Q any, I any](_ io.Writer, query Entity[Q], index Entity[I], weight float64, opts SimilarityOpts, explain bool) (ScorePiece, *NameDebug) {
+func compareNameWithTFIDF[Q any, I any](_ io.Writer, query Entity[Q], index Entity[I], weight float64, opts SimilarityOpts, queryNormalizeType EntityType, explain bool) (ScorePiece, *NameDebug) {
 	// Early return for empty query
 	if query.PreparedFields.Name == "" {
 		return ScorePiece{Score: 0, Weight: 0, FieldsCompared: 0, PieceType: "name"}, nil
@@ -78,7 +78,7 @@ func compareNameWithTFIDF[Q any, I any](_ io.Writer, query Entity[Q], index Enti
 		bestMatch.totalTerms = len(queryTerms)
 		var debug *NameDebug
 		if explain {
-			debug = explainName(query, index, bestMatch, opts, true)
+			debug = explainName(query, index, bestMatch, opts, queryNormalizeType, true)
 		}
 		return namePiece(bestMatch, weight), debug
 	}
@@ -205,7 +205,7 @@ func compareNameWithTFIDF[Q any, I any](_ io.Writer, query Entity[Q], index Enti
 
 	var debug *NameDebug
 	if explain {
-		debug = explainName(query, index, bestMatch, opts, false)
+		debug = explainName(query, index, bestMatch, opts, queryNormalizeType, false)
 	}
 	return namePiece(bestMatch, weight), debug
 }
@@ -249,14 +249,14 @@ func takeNameMatch(best *nameMatch, candidate nameMatch, historical bool, queryS
 	*best = candidate
 }
 
-func explainName[Q any, I any](query Entity[Q], index Entity[I], match nameMatch, opts SimilarityOpts, exactPrepared bool) *NameDebug {
+func explainName[Q any, I any](query Entity[Q], index Entity[I], match nameMatch, opts SimilarityOpts, queryNormalizeType EntityType, exactPrepared bool) *NameDebug {
 	debug := &NameDebug{
 		Score:      match.score,
 		Exact:      match.score >= exactMatchThreshold,
 		Historical: match.isHistorical,
 		QueryName:  match.querySide,
 		IndexName:  match.indexSide,
-		Query:      nameSideFrom(query.Name, match.queryOriginal, match.queryPrepared, match.queryTerms, query.Type),
+		Query:      nameSideFrom(query.Name, match.queryOriginal, match.queryPrepared, match.queryTerms, queryNormalizeType),
 		Index:      nameSideFrom(index.Name, match.indexOriginal, match.indexPrepared, match.indexTerms, index.Type),
 	}
 

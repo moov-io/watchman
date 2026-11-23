@@ -135,6 +135,7 @@ func DetailedSimilarityWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], ind
 // DetailedSimilarityWithOpts returns scoring details with optional TF-IDF weighting and algorithm.
 func DetailedSimilarityWithOpts[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], opts SimilarityOpts) SimilarityScore {
 	var out SimilarityScore
+	queryNormalizeType := query.Type
 
 	// Quick filters — these are free when the search service already partitioned,
 	// but remain here for direct Similarity() callers.
@@ -188,7 +189,7 @@ func DetailedSimilarityWithOpts[Q any, I any](w io.Writer, query Entity[Q], inde
 	}
 
 	// Name comparison (second highest weight) - use TF-IDF if provided
-	pieces[4], out.Name = compareNameWithTFIDF(w, query, index, nameWeight, opts, true)
+	pieces[4], out.Name = compareNameWithTFIDF(w, query, index, nameWeight, opts, queryNormalizeType, true)
 	pieces[5] = compareEntityTitlesFuzzy(w, query, index, nameWeight)
 
 	// Supporting information (lower weight)
@@ -240,7 +241,7 @@ func scoreSimilarityFast[Q any, I any](query Entity[Q], index Entity[I], opts Si
 		return 1.0
 	}
 
-	namePiece, _ := compareNameWithTFIDF(nil, query, index, nameWeight, opts, false)
+	namePiece, _ := compareNameWithTFIDF(nil, query, index, nameWeight, opts, query.Type, false)
 	pieces := [9]ScorePiece{
 		p0,
 		p1,
