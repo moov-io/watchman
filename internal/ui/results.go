@@ -424,7 +424,7 @@ func scoreBreakdown(entity search.SearchedEntity[search.Value]) fyne.CanvasObjec
 		}
 		label := wordWrappingLabel(fmt.Sprintf("%s  %s", piece.PieceType, formatMatch(piece.Score)))
 		label.Importance = matchImportance(piece.Score)
-		if piece.Exact {
+		if piece.Exact && piece.Score >= 0.99 {
 			label.SetText(label.Text + "  exact")
 		}
 		box.Add(label)

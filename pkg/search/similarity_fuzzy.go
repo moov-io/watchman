@@ -321,12 +321,14 @@ func matchIndexWeights[I any](index Entity[I], match nameMatch) []float64 {
 				return index.PreparedFields.AltNameWeights[i]
 			}
 		}
+		return nil
 	case nameAgainstHistorical:
 		for i, prepared := range index.PreparedFields.HistoricalNames {
 			if prepared == match.indexPrepared && i < len(index.PreparedFields.HistoricalNameWeights) {
 				return index.PreparedFields.HistoricalNameWeights[i]
 			}
 		}
+		return nil
 	}
 	return index.PreparedFields.NameWeights
 }

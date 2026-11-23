@@ -55,7 +55,8 @@ const (
 // NameDebug is the name-comparison breakdown: which names were compared, token pairs, and score steps.
 // There is no API stability guarantee.
 type NameDebug struct {
-	Score      float64     `json:"score"`
+	Score float64 `json:"score"`
+	// Exact is true when Score is at least 0.99 after historical / quality / close-enough penalties.
 	Exact      bool        `json:"exact,omitempty"`
 	Historical bool        `json:"historical,omitempty"`
 	QueryName  string      `json:"queryName,omitempty"` // primary or historical
@@ -192,7 +193,7 @@ func nameSideFrom(entityOriginal, comparedOriginal, prepared string, tokens []st
 		Original: original,
 		Prepared: prepared,
 		Tokens:   tokens,
-		Steps:    namePrepareTrace(original, typ),
+		Steps:    namePrepareTrace(original, comparedOriginal, typ),
 	}
 	if comparedOriginal != "" && !strings.EqualFold(strings.TrimSpace(comparedOriginal), strings.TrimSpace(original)) {
 		side.Compared = comparedOriginal
@@ -200,35 +201,42 @@ func nameSideFrom(entityOriginal, comparedOriginal, prepared string, tokens []st
 	return side
 }
 
-func namePrepareTrace(raw string, typ EntityType) []NameTransform {
-	if strings.TrimSpace(raw) == "" {
+func namePrepareTrace(display, scored string, typ EntityType) []NameTransform {
+	if strings.TrimSpace(display) == "" {
 		return nil
 	}
-	steps := []NameTransform{{Stage: "original", Value: raw}}
-	current := raw
+	steps := []NameTransform{{Stage: "original", Value: display}}
+	current := display
 	add := func(stage, v string) {
 		if v != current {
 			steps = append(steps, NameTransform{Stage: stage, Value: v})
 			current = v
 		}
 	}
+	prefix := func(raw string) string {
+		v := prepare.StripLeadingPartyLabels(raw)
+		add("party-labels", v)
+		primary, former := prepare.SplitExNames(v)
+		add("former-names", primary)
+		if len(former) > 0 {
+			steps = append(steps, NameTransform{Stage: "extracted", Value: strings.Join(former, "; ")})
+		}
+		return primary
+	}
 
-	v := prepare.StripLeadingPartyLabels(raw)
-	add("party-labels", v)
-
-	primary, former := prepare.SplitExNames(v)
-	add("former-names", primary)
-	if len(former) > 0 {
-		steps = append(steps, NameTransform{Stage: "extracted", Value: strings.Join(former, "; ")})
+	rest := prefix(display)
+	if scored != "" && !strings.EqualFold(strings.TrimSpace(scored), strings.TrimSpace(display)) {
+		current = scored
+		rest = prefix(scored)
 	}
 
 	if typ == EntityVessel {
-		next := prepare.StripTrailingVesselPlace(primary)
+		next := prepare.StripTrailingVesselPlace(rest)
 		add("vessel-place", next)
-		primary = next
+		rest = next
 	}
 
-	out := prepare.LowerAndRemovePunctuation(primary)
+	out := prepare.LowerAndRemovePunctuation(rest)
 	add("normalize", out)
 
 	if typ == EntityVessel {
@@ -315,7 +323,15 @@ func (t *scoreTrail) base(score float64) {
 }
 
 func (t *scoreTrail) apply(stage, reason string, score float64) {
-	if score == t.score {
+	t.applyStep(stage, reason, score, false)
+}
+
+func (t *scoreTrail) applyForced(stage, reason string, score float64) {
+	t.applyStep(stage, reason, score, true)
+}
+
+func (t *scoreTrail) applyStep(stage, reason string, score float64, force bool) {
+	if !force && score == t.score {
 		return
 	}
 	delta := score - t.score

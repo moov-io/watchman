@@ -104,7 +104,7 @@ name   0.9500  historical  query=historical index=primary
   query  Ocean Pioneer (ex-Cape Diamond)
          former-names   Ocean Pioneer
          extracted      Cape Diamond
-         normalize      ocean pioneer
+         normalize      cape diamond
          compared       Cape Diamond
          prepared       cape diamond
          tokens         [cape diamond]

@@ -26,6 +26,8 @@ func TestNameDebug_FromJSON(t *testing.T) {
 	require.Equal(t, []string{"mohamed", "salem"}, got.Name.Query.Tokens)
 	require.Equal(t, index.Name, got.Name.Index.Original)
 	require.Equal(t, "Mohamed SALEM", got.Name.Index.Compared)
+	require.Equal(t, "mohamed salem", nameStageValue(got.Name.Index, "normalize"))
+	require.NotContains(t, nameStageValue(got.Name.Index, "normalize"), "rahman")
 	require.NotEmpty(t, got.Name.Pairs)
 	require.NotEmpty(t, got.Name.Steps)
 	require.Equal(t, "token-pairs", got.Name.Steps[0].Stage)
@@ -92,6 +94,7 @@ func TestNameDebug_HistoricalAndPrepareTrace(t *testing.T) {
 
 	require.Contains(t, nameStages(got.Name.Query), "former-names")
 	require.Contains(t, nameStages(got.Name.Query), "extracted")
+	require.Equal(t, "cape diamond", nameStageValue(got.Name.Query, "normalize"))
 	text := got.String()
 	require.Contains(t, text, "historical")
 	require.Contains(t, text, "Cape Diamond")
@@ -153,10 +156,43 @@ func TestNameDebug_UnmatchedTokens(t *testing.T) {
 	require.Contains(t, text, "unmatched index  adams")
 }
 
+func TestNameDebug_IdentifierOnly(t *testing.T) {
+	query := search.Entity[search.Value]{
+		Type: search.EntityBusiness,
+		CryptoAddresses: []search.CryptoAddress{
+			{Currency: "XBT", Address: "12VrYZgS1nmf9KHHped24xBb1aLLRpV2cT"},
+		},
+	}.Normalize()
+	index := search.Entity[search.Value]{
+		Name: "SUEX OTC, S.R.O.",
+		Type: search.EntityBusiness,
+		CryptoAddresses: []search.CryptoAddress{
+			{Currency: "XBT", Address: "12VrYZgS1nmf9KHHped24xBb1aLLRpV2cT"},
+		},
+	}.Normalize()
+
+	got := search.DebugSimilarityWithOpts(nil, query, index, search.SimilarityOpts{})
+	require.InDelta(t, search.Similarity(query, index), got.FinalScore, 0.0001)
+	require.InDelta(t, 1.0, got.FinalScore, 0.0001)
+	require.Nil(t, got.Name)
+	require.NotEmpty(t, got.Steps)
+	require.Equal(t, "exact-override", got.Steps[len(got.Steps)-1].Stage)
+	require.NotContains(t, got.String(), "search.ScorePiece")
+}
+
 func nameStages(side search.NameSide) string {
 	var stages []string
 	for _, step := range side.Steps {
 		stages = append(stages, step.Stage)
 	}
 	return strings.Join(stages, ",")
+}
+
+func nameStageValue(side search.NameSide, stage string) string {
+	for _, step := range side.Steps {
+		if step.Stage == stage {
+			return step.Value
+		}
+	}
+	return ""
 }

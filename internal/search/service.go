@@ -210,9 +210,9 @@ type SearchOpts struct {
 	MinMatch float64
 
 	RequestID string
-	// Debug attaches field-level score pieces after ranking. When DebugMinMatch
-	// is 0, every returned hit is included. Otherwise only hits with Match at
-	// least DebugMinMatch get debug details.
+	// Debug attaches typed details and a plaintext debug trail after ranking.
+	// When DebugMinMatch is 0, every returned hit is included. Otherwise only
+	// hits with Match at least DebugMinMatch get debug details.
 	Debug          bool
 	DebugMinMatch  float64
 	DebugSourceIDs []string

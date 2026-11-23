@@ -368,7 +368,7 @@ func calculateFinalScore[Q any, I any](w io.Writer, pieces []ScorePiece, exactOv
 	applyPenaltiesAndBonuses(&trail, baseScore, coverage, fields)
 
 	if exactOverride {
-		trail.apply("exact-override", "unique identity key matched exactly", 1.0)
+		trail.applyForced("exact-override", "unique identity key matched exactly", 1.0)
 		return 1.0, trail.steps
 	}
 
@@ -381,7 +381,7 @@ func calculateFinalScore[Q any, I any](w io.Writer, pieces []ScorePiece, exactOv
 	}
 
 	if math.IsNaN(trail.score) {
-		trail.apply("nan-to-one", "score was NaN", 1.0)
+		trail.applyForced("nan-to-one", "score was NaN", 1.0)
 		return 1.0, trail.steps
 	}
 

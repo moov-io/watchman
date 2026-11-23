@@ -116,6 +116,44 @@ func TestScoreBreakdownRendersNameDebug(t *testing.T) {
 	require.Contains(t, joined, "compared: Mohamed SALEM")
 }
 
+func TestScoreBreakdownOmitsExactOnSubThresholdNamePiece(t *testing.T) {
+	test.NewApp()
+
+	root := entityDetails(search.SearchedEntity[search.Value]{
+		Entity: search.Entity[search.Value]{
+			Name:     "Cape Diamond",
+			Type:     search.EntityVessel,
+			Source:   search.SourceUSOFAC,
+			SourceID: "1",
+		},
+		Match: 0.81,
+		Details: search.SimilarityScore{
+			FinalScore: 0.81,
+			Name: &search.NameDebug{
+				Score:      0.95,
+				Historical: true,
+				Query:      search.NameSide{Original: "Ocean Pioneer (ex-Cape Diamond)", Compared: "Cape Diamond", Tokens: []string{"cape", "diamond"}},
+				Index:      search.NameSide{Original: "Cape Diamond", Tokens: []string{"cape", "diamond"}},
+			},
+			Pieces: []search.ScorePiece{
+				{PieceType: "name", Score: 0.95, Weight: 35, Matched: true, Required: true, Exact: true, FieldsCompared: 1},
+			},
+		},
+	})
+
+	var texts []string
+	walkObjects(root, func(object fyne.CanvasObject) {
+		label, ok := object.(*widget.Label)
+		if !ok || label.Text == "" {
+			return
+		}
+		texts = append(texts, label.Text)
+	})
+	joined := strings.Join(texts, "\n")
+	require.Contains(t, joined, "historical")
+	require.NotContains(t, joined, "exact")
+}
+
 func TestScoreBreakdownIdentifierOnlyOmitsDebugDump(t *testing.T) {
 	test.NewApp()
 
