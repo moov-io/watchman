@@ -59,6 +59,31 @@ func TestLowerAndRemovePunctuation(t *testing.T) {
 			input:    ".,!@#$%^&*()",
 			expected: "",
 		},
+		{
+			name:     "possessive apostrophe stays on the token",
+			input:    "GINO'S AUTO MART INC",
+			expected: "ginos auto mart inc",
+		},
+		{
+			name:     "curly possessive apostrophe",
+			input:    "GINO’S AUTO MART INC",
+			expected: "ginos auto mart inc",
+		},
+		{
+			name:     "O'Brien keeps a space at the apostrophe",
+			input:    "O'Brien",
+			expected: "o brien",
+		},
+		{
+			name:     "O'Doyle keeps a space at the apostrophe",
+			input:    "O'Doyle Grazing Co",
+			expected: "o doyle grazing co",
+		},
+		{
+			name:     "Ma'agan keeps a space at the apostrophe",
+			input:    "Ma'agan",
+			expected: "ma agan",
+		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {

@@ -26,12 +26,24 @@ var (
 // See: https://withblue.ink/2019/03/11/why-you-need-to-normalize-unicode-strings.html
 func LowerAndRemovePunctuation(s string) string {
 	trimmed := strings.TrimSpace(strings.ToLower(punctuationReplacer.Replace(s)))
+	chars := []rune(trimmed)
 
 	// Remove all punctuation and normalize whitespace
 	var normalized strings.Builder
 	lastWasSpace := true // Start with true to trim leading spaces
 
-	for _, r := range trimmed {
+	for i := 0; i < len(chars); i++ {
+		r := chars[i]
+		if isApostrophe(r) {
+			if isPossessiveS(chars, i) {
+				continue
+			}
+			if !lastWasSpace {
+				normalized.WriteRune(' ')
+				lastWasSpace = true
+			}
+			continue
+		}
 		if unicode.IsPunct(r) || unicode.IsSymbol(r) {
 			if !lastWasSpace {
 				normalized.WriteRune(' ')
@@ -60,6 +72,27 @@ func LowerAndRemovePunctuation(s string) string {
 
 	result, _, _ := transform.String(chain, strings.TrimSpace(normalized.String()))
 	return result
+}
+
+func isApostrophe(r rune) bool {
+	switch r {
+	case '\'', '\u2018', '\u2019', '\u02BC', '`':
+		return true
+	}
+	return false
+}
+
+func isPossessiveS(runes []rune, apostropheIdx int) bool {
+	// Elide only token-final 's so "GINO'S" matches "Ginos" while "O'Doyle" stays "o doyle".
+	i := apostropheIdx + 1
+	if i >= len(runes) || runes[i] != 's' {
+		return false
+	}
+	if i+1 >= len(runes) {
+		return true
+	}
+	next := runes[i+1]
+	return !unicode.IsLetter(next) && !unicode.IsNumber(next)
 }
 
 var (
