@@ -163,6 +163,8 @@ github.com/OpenRouterTeam/go-sdk v0.9.126 h1:3RpFuRQeclThiEuDWqQNMsKurO8Z063cXev
 github.com/OpenRouterTeam/go-sdk v0.9.126/go.mod h1:4a0ze9dCIvO81DQGO5ZmCZsHLCmglMwwp8pZfKkEicE=
 github.com/OpenRouterTeam/go-sdk v0.9.127 h1:2kBmOaVNmd9NarkQgJ8E5RyRCfTh1LI3kPJrQbMbnu4=
 github.com/OpenRouterTeam/go-sdk v0.9.127/go.mod h1:4a0ze9dCIvO81DQGO5ZmCZsHLCmglMwwp8pZfKkEicE=
+github.com/OpenRouterTeam/go-sdk v0.9.128 h1:Zlt0ntxLXnmAmWyrSD9x8xmey2VLdCbJh8O9x4xHU0o=
+github.com/OpenRouterTeam/go-sdk v0.9.128/go.mod h1:4a0ze9dCIvO81DQGO5ZmCZsHLCmglMwwp8pZfKkEicE=
 github.com/PhonoGrams/beider_morse v0.1.0 h1:hpTo1AsJepnBTQtsOrT+uOmzZgjs2XPDoqhMjWx/Hus=
 github.com/PhonoGrams/beider_morse v0.1.0/go.mod h1:BF/40oMl7N6USDv52u+agu2fCCi2WwlzQzStCvnQt1Y=
 github.com/PhonoGrams/double_metaphone v0.1.0 h1:Wcw771laul2qJ1EW/4a+9NHKvkEXsZUEgKINX+YpOP4=
