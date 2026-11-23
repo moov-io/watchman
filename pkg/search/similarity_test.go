@@ -29,9 +29,13 @@ func TestSimilarityDebug_FromJSON(t *testing.T) {
 	var buf bytes.Buffer
 	got := search.DebugSimilarity(&buf, query, index)
 	t.Logf("%.2f - %v (%v)", got, query.Name, index.Name)
-	fmt.Println(buf.String())
+	text := buf.String()
+	fmt.Println(text)
 
 	require.InDelta(t, got, 0.690, 0.001)
+	require.Contains(t, text, "match")
+	require.Contains(t, text, "token-pairs")
+	require.NotContains(t, text, "search.ScorePiece")
 }
 
 func TestSimilarity_SourceID(t *testing.T) {

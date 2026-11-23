@@ -337,13 +337,14 @@ func TestAPI_Search(t *testing.T) {
 
 		require.NotEmpty(t, response.Entities[0].Debug)
 		require.NotEmpty(t, response.Entities[1].Debug)
-
-		raw, err := base64.StdEncoding.DecodeString(response.Entities[0].Debug)
-		require.NoError(t, err)
-		require.NotEmpty(t, raw)
+		require.NotNil(t, response.Entities[0].Details.Name)
+		require.Contains(t, response.Entities[0].Debug, "match")
+		require.Contains(t, response.Entities[0].Debug, "name")
+		_, err = base64.StdEncoding.DecodeString(response.Entities[0].Debug)
+		require.Error(t, err, "debug should be plaintext, not base64")
 
 		if testing.Verbose() {
-			fmt.Println(string(raw))
+			fmt.Println(response.Entities[0].Debug)
 		}
 	})
 

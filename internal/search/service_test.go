@@ -2,7 +2,6 @@ package search
 
 import (
 	"context"
-	"encoding/base64"
 	"io"
 	"os"
 	"path/filepath"
@@ -140,8 +139,11 @@ func TestService_Search(t *testing.T) {
 			t.Logf("match: %.2f", results[0].Match)
 			t.Logf("%#v", results[0].Entity)
 
-			_, err := base64.StdEncoding.DecodeString(results[0].Debug)
-			require.NoError(t, err)
+			if results[0].Debug != "" {
+				require.Contains(t, results[0].Debug, "match")
+				require.NotEmpty(t, results[0].Details.Pieces)
+				require.NotEmpty(t, results[0].Details.Steps)
+			}
 		}
 		require.Greater(t, len(results), 0)
 

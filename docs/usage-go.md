@@ -70,7 +70,7 @@ func main() {
 	opts := search.SearchOpts{
 		Limit:         5,
 		MinMatch:      0.80,
-		DebugMinMatch: 0.80, // field-level pieces on hits at or above 0.80
+		DebugMinMatch: 0.80, // name pairs and score trail on hits at or above 0.80
 		// Algorithm: search.AlgorithmEditex, // optional; default is Jaro-Winkler.
 		// Also: AlgorithmSoundex, AlgorithmSoftBidist, AlgorithmSoftBisim,
 		// AlgorithmNSim, AlgorithmNSim3, AlgorithmDoubleMetaphone, AlgorithmBeiderMorse.

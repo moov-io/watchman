@@ -1,9 +1,7 @@
 package search
 
 import (
-	"bytes"
 	"context"
-	"encoding/base64"
 	"fmt"
 	"os"
 	"slices"
@@ -357,18 +355,14 @@ func attachDebugDetails(query search.Entity[search.Value], tfidfIndex *tfidf.Ind
 		Algorithm: opts.Algorithm,
 	}
 
-	var buf bytes.Buffer
-	buf.Grow(1700)
-
 	for i := range out {
 		if out[i].Match < opts.DebugMinMatch {
 			continue
 		}
 
-		buf.Reset()
-		scores := search.DebugSimilarityWithOpts(&buf, query, out[i].Entity, simOpts)
+		scores := search.DebugSimilarityWithOpts(nil, query, out[i].Entity, simOpts)
 		out[i].Details = scores
-		out[i].Debug = base64.StdEncoding.EncodeToString(buf.Bytes())
+		out[i].Debug = scores.String()
 	}
 }
 
@@ -402,17 +396,10 @@ func scoreEntities(
 		// DebugSourceIDs may not make the top-K; score them in detail so logs
 		// still explain a miss. This is a handful of IDs, not the candidate set.
 		if isDebugEntity && opts.Debug {
-			var buf bytes.Buffer
-			buf.Grow(1700)
-
-			scores := search.DebugSimilarityWithOpts(&buf, query, indexEntity, simOpts)
+			scores := search.DebugSimilarityWithOpts(nil, query, indexEntity, simOpts)
 			logger.Debug().With(log.Fields{
 				"debug_source_id": log.String(indexEntity.SourceID),
-			}).Logf("similarity score: %#v", scores)
-
-			logger.Debug().With(log.Fields{
-				"debug_source_id": log.String(indexEntity.SourceID),
-			}).Logf("scoring debug: %#v", buf.String())
+			}).Logf("scoring debug:\n%s", scores.String())
 		}
 
 		if isDebugEntity {

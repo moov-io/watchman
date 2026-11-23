@@ -66,10 +66,10 @@ func SimilarityWithOpts[Q any, I any](query Entity[Q], index Entity[I], opts Sim
 	return scoreSimilarityFast(query, index, opts)
 }
 
-// DebugSimilarity does the same as Similarity, but logs debug info to w.
+// DebugSimilarity does the same as Similarity, but writes SimilarityScore.String() to w.
 //
-// The format written to w is not machine readable and is intended for humans to read.
-// The format will evolve over time. No stability guarantee is given over what is written.
+// The text is intended for humans to read and will evolve over time. Prefer the
+// returned SimilarityScore (name, steps, pieces) for programmatic use.
 func DebugSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]) float64 {
 	return DebugSimilarityWithTFIDF(w, query, index, nil).FinalScore
 }
@@ -81,47 +81,21 @@ func DebugSimilarityWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index 
 
 // DebugSimilarityWithOpts does the same as DebugSimilarity, with scoring options.
 func DebugSimilarityWithOpts[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], opts SimilarityOpts) SimilarityScore {
-	details := DetailedSimilarityWithOpts(w, query, index, opts)
+	details := DetailedSimilarityWithOpts(nil, query, index, opts)
 
 	switch len(details.Pieces) {
 	case 0:
 		// No pieces, nothing to debug in terms of pieces
 	case 1:
-		// This likely indicates an exact SourceID match short-circuit
-		// The debug output below will print the single piece at index 0
-		// and empty pieces for the rest, which is acceptable for now.
+		// Exact SourceID match short-circuit
 	case 9:
-		// Full set of pieces, proceed with detailed debugging
+		// Full set of pieces
 	default:
 		panic(fmt.Sprintf("BUG: got an unexpected amount of %d ScorePieces", len(details.Pieces))) //nolint:forbidigo
 	}
 
 	if w != nil {
-		// If there's only one piece, it's likely an exact SourceID match
-		if len(details.Pieces) == 1 {
-			debug(w, "one score piece found: %#v\n", details.piece(0))
-		} else {
-			// Critical comparisons (exact matches)
-			debug(w, "Critical pieces\n")
-			debug(w, "  exact identifiers: %#v\n", details.piece(0))
-			debug(w, "  crypto addresses: %#v\n", details.piece(1))
-			debug(w, "  gov IDs: %#v\n", details.piece(2))
-			debug(w, "  contact info: %#v\n", details.piece(3))
-
-			// Name comparison (second highest weight)
-			debug(w, "name comparison\n")
-			debug(w, "  name: %#v\n", details.piece(4))
-			debug(w, "  titles: %#v\n", details.piece(5))
-
-			// Supporting information (lower weight)
-			debug(w, "supporting info\n")
-			debug(w, "  dates: %#v\n", details.piece(6))
-			debug(w, "  addresses: %#v\n", details.piece(7))
-			debug(w, "  supporting into: %#v\n", details.piece(8))
-		}
-
-		// Final Score
-		debug(w, "finalScore=%.2f", details.FinalScore)
+		fmt.Fprint(w, details.String())
 	}
 
 	return details
@@ -174,6 +148,7 @@ func DetailedSimilarityWithOpts[Q any, I any](w io.Writer, query Entity[Q], inde
 		if query.SourceID == index.SourceID {
 			out.FinalScore = 1.0
 			out.Pieces = exactScore
+			out.Steps = []ScoreStep{{Stage: "exact-source-id", Score: 1.0, Reason: "query sourceID matches the list row"}}
 		} else {
 			out.Pieces = emptyPieces
 		}
@@ -213,7 +188,7 @@ func DetailedSimilarityWithOpts[Q any, I any](w io.Writer, query Entity[Q], inde
 	}
 
 	// Name comparison (second highest weight) - use TF-IDF if provided
-	pieces[4] = compareNameWithTFIDF(w, query, index, nameWeight, opts)
+	pieces[4], out.Name = compareNameWithTFIDF(w, query, index, nameWeight, opts, true)
 	pieces[5] = compareEntityTitlesFuzzy(w, query, index, nameWeight)
 
 	// Supporting information (lower weight)
@@ -222,7 +197,7 @@ func DetailedSimilarityWithOpts[Q any, I any](w io.Writer, query Entity[Q], inde
 	pieces[8] = compareSupportingInfo(w, query, index, supportingInfoWeight)
 
 	pieceSlice := pieces[:]
-	out.FinalScore = calculateFinalScore(w, pieceSlice, shouldExactOverride(pieceSlice), query, index, hasIdentifierConflict(query, index))
+	out.FinalScore, out.Steps = calculateFinalScore(w, pieceSlice, shouldExactOverride(pieceSlice), query, index, hasIdentifierConflict(query, index), true)
 
 	// Only allocate a heap-backed Pieces slice when the caller needs details (debug writer)
 	// or when Exact override short pieces aren't used. Always copy for API stability of Details.
@@ -265,19 +240,21 @@ func scoreSimilarityFast[Q any, I any](query Entity[Q], index Entity[I], opts Si
 		return 1.0
 	}
 
+	namePiece, _ := compareNameWithTFIDF(nil, query, index, nameWeight, opts, false)
 	pieces := [9]ScorePiece{
 		p0,
 		p1,
 		p2,
 		p3,
-		compareNameWithTFIDF(nil, query, index, nameWeight, opts),
+		namePiece,
 		compareEntityTitlesFuzzy(nil, query, index, nameWeight),
 		compareEntityDates(nil, query, index, supportingInfoWeight),
 		compareAddresses(nil, query, index, addressWeight),
 		compareSupportingInfo(nil, query, index, supportingInfoWeight),
 	}
 
-	return calculateFinalScore(nil, pieces[:], shouldExactOverride(pieces[:]), query, index, hasIdentifierConflict(query, index))
+	score, _ := calculateFinalScore(nil, pieces[:], shouldExactOverride(pieces[:]), query, index, hasIdentifierConflict(query, index), false)
+	return score
 }
 
 func uniqueIdentityExact(p ScorePiece) bool {
@@ -312,16 +289,9 @@ func shouldExactOverride(pieces []ScorePiece) bool {
 // There is no API stability guarantee for SimilarityScore.
 type SimilarityScore struct {
 	Pieces     []ScorePiece `json:"pieces,omitzero"`
+	Name       *NameDebug   `json:"name,omitempty"`
+	Steps      []ScoreStep  `json:"steps,omitempty"`
 	FinalScore float64      `json:"finalScore,omitzero"`
-}
-
-func (ss SimilarityScore) piece(idx int) ScorePiece {
-	if idx < len(ss.Pieces) {
-		return ss.Pieces[idx]
-	}
-
-	var empty ScorePiece
-	return empty
 }
 
 // ScorePiece is a partial scoring result from one comparison function
@@ -385,53 +355,37 @@ type entityFields struct {
 	hasAddress  bool
 }
 
-func calculateFinalScore[Q any, I any](w io.Writer, pieces []ScorePiece, exactOverride bool, query Entity[Q], index Entity[I], idConflict bool) float64 {
+func calculateFinalScore[Q any, I any](w io.Writer, pieces []ScorePiece, exactOverride bool, query Entity[Q], index Entity[I], idConflict bool, collect bool) (float64, []ScoreStep) {
 	if len(pieces) == 0 {
-		return 0
+		return 0, nil
 	}
 
-	// Get field counts and critical field information
 	fields := countFieldsByImportance(pieces)
 	coverage := calculateCoverage(w, pieces, index)
-
-	// Calculate base score with weighted importance
 	baseScore := calculateBaseScore(pieces, fields)
 
-	// Apply coverage penalties
-	finalScore := applyPenaltiesAndBonuses(w, baseScore, coverage, fields)
+	trail := scoreTrail{collect: collect}
+	applyPenaltiesAndBonuses(&trail, baseScore, coverage, fields)
 
-	if w != nil {
-		debug(w, "calculateFinalScore:\n")
-		debug(w, "  exactOverride=%v\n", exactOverride)
-		debug(w, "  idConflict=%v\n", idConflict)
-		debug(w, "  fields=%#v\n", fields)
-		debug(w, "  coverage=%#v\n", coverage)
-		debug(w, "  baseScore=%v\n", baseScore)
-		debug(w, "  finalScore=%.2f (overridden: %v)\n", finalScore, exactOverride)
-	}
 	if exactOverride {
-		return 1.0
+		trail.apply("exact-override", "unique identity key matched exactly", 1.0)
+		return 1.0, trail.steps
 	}
 
 	if idConflict && idConflictPenaltyMultiplier > 0 && idConflictPenaltyMultiplier < 1 {
-		finalScore *= idConflictPenaltyMultiplier
-		if w != nil {
-			debug(w, "  id conflict penalty = %.2f\n", finalScore)
-		}
+		trail.apply("id-conflict", "same-type identifiers disagree", trail.score*idConflictPenaltyMultiplier)
 	}
 
 	if hasNameNumeralConflict(query, index) && nameNumeralConflictPenaltyMultiplier > 0 && nameNumeralConflictPenaltyMultiplier < 1 {
-		finalScore *= nameNumeralConflictPenaltyMultiplier
-		if w != nil {
-			debug(w, "  name numeral conflict penalty = %.2f\n", finalScore)
-		}
+		trail.apply("name-numeral-conflict", "prepared names have disagreeing numerals", trail.score*nameNumeralConflictPenaltyMultiplier)
 	}
 
-	if math.IsNaN(finalScore) {
-		return 1.0
+	if math.IsNaN(trail.score) {
+		trail.apply("nan-to-one", "score was NaN", 1.0)
+		return 1.0, trail.steps
 	}
 
-	return finalScore
+	return trail.score, trail.steps
 }
 
 func countFieldsByImportance(pieces []ScorePiece) entityFields {
@@ -522,58 +476,27 @@ type coverage struct {
 	criticalRatio float64 `json:"criticalRatio"`
 }
 
-func applyPenaltiesAndBonuses(w io.Writer, baseScore float64, cov coverage, fields entityFields) float64 {
-	score := baseScore
+func applyPenaltiesAndBonuses(trail *scoreTrail, baseScore float64, cov coverage, fields entityFields) {
+	trail.base(baseScore)
 
-	if w != nil {
-		debug(w, "applyPenaltiesAndBonuses\n")
-		debug(w, "  start: %.2f\n", score)
-	}
-
-	// Lighter coverage penalties
 	if cov.ratio < minCoverageThreshold {
-		score *= lowCoveragePenaltyMultiplier
-
-		if w != nil {
-			debug(w, "  cov.ratio < minCoverageThreshold = %.2f\n", score)
-		}
+		trail.apply("low-coverage", fmt.Sprintf("compared %.0f%% of index fields", cov.ratio*100), trail.score*lowCoveragePenaltyMultiplier)
 	}
 	if cov.criticalRatio < criticalCovThreshold {
-		score *= 0.90
-
-		if w != nil {
-			debug(w, "  cov.criticalRatio < criticalCovThreshold = %.2f\n", score)
-		}
+		trail.apply("critical-coverage", fmt.Sprintf("critical field coverage %.0f%%", cov.criticalRatio*100), trail.score*0.90)
 	}
 
-	// Lighter minimum fields requirement
 	if fields.required < 2 {
-		score *= minimumRequiredFieldsPenaltyMultiplier
-
-		if w != nil {
-			debug(w, "  fields.required < 2 = %.2f\n", score)
-		}
+		trail.apply("min-required-fields", "fewer than 2 required fields compared", trail.score*minimumRequiredFieldsPenaltyMultiplier)
 	}
 
-	// Reduced name-only match penalty
 	if !fields.hasID && !fields.hasAddress && fields.hasName {
-		score *= nameOnlyPenaltyMultiplier
-
-		if w != nil {
-			debug(w, "  reduced name-only match penalty = %.2f\n", score)
-		}
+		trail.apply("name-only", "name-only query", trail.score*nameOnlyPenaltyMultiplier)
 	}
 
-	// Perfect match requirements
-	if fields.hasName && fields.hasID && fields.hasCritical && cov.ratio > 0.70 && score > highConfidenceThreshold {
-		score = math.Min(1.0, score*perfectMatchBoost)
-
-		if w != nil {
-			debug(w, "  perfect match requirements = %.2f\n", score)
-		}
+	if fields.hasName && fields.hasID && fields.hasCritical && cov.ratio > 0.70 && trail.score > highConfidenceThreshold {
+		trail.apply("perfect-match", "name, unique ID, and high coverage", math.Min(1.0, trail.score*perfectMatchBoost))
 	}
-
-	return score
 }
 
 func countAvailableFields[I any](index Entity[I]) int {

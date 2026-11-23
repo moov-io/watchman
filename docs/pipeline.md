@@ -89,7 +89,42 @@ Query IDs are `gov_<type>=COUNTRY:IDENTIFIER` (for example `gov_passport=IR:Y539
 
 ## Debugging
 
-`debug=true` (or `debug=0.80`) on `/v2/search` returns **score pieces** (name, identifiers, dates, addresses), not a dump of these pipeline stages. If a name does not match, check type (`person` vs `business`), whether you sent the same fields as the list record, and the prepared tokens implied above.
+`debug=true` (or `debug=0.80`) on `/v2/search` returns a typed breakdown on `details` and a human-readable trail on `debug`:
+
+- `details.name` is the name score, the query vs list names (original, prepared, tokens), greedy token pairs, and the name-score steps with deltas (token-pairs, historical, close-enough). Name `steps` on each side are the Normalize() rewrites that actually changed the value (party labels, former names, legal forms, stopwords). `compared` is set when an AKA or former name won over the display name.
+- `details.steps` is the final-score trail (base, name-only, exact-override, ID conflict, numeral conflict).
+- `details.pieces` are the field-level scores (name, identifiers, dates, addresses).
+
+Prefer `details` for machines. `debug` is the same information as text, for example:
+
+```
+match  0.8122
+
+name   0.9500  historical  query=historical index=primary
+  query  Ocean Pioneer (ex-Cape Diamond)
+         former-names   Ocean Pioneer
+         extracted      Cape Diamond
+         normalize      ocean pioneer
+         compared       Cape Diamond
+         prepared       cape diamond
+         tokens         [cape diamond]
+  index  Cape Diamond
+         normalize      cape diamond
+         tokens         [cape diamond]
+  pairs
+    cape             ↔ cape              1.000
+    diamond          ↔ diamond           1.000
+  name steps
+    token-pairs             1.0000
+    historical              0.9500  -0.0500  former-name penalty 0.95
+
+score steps
+    base                    0.9500
+    min-required-fields     0.8550  -0.0950  fewer than 2 required fields compared
+    name-only               0.8122  -0.0428  name-only query
+```
+
+If a name does not match, check type (`person` vs `business`), whether you sent the same fields as the list record, and the prepared tokens on `details.name`.
 
 ## Related
 

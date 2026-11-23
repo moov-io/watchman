@@ -51,7 +51,7 @@ The same name without an ID scores 0.767 and returns no rows at 0.80. Add date o
 | Names in Arabic, Cyrillic, Chinese, etc. | Enable embeddings; keep `EMBEDDINGS_CROSS_SCRIPT_ONLY=true` |
 | One list only | `source=us_ofac` (faster) |
 | Exact SDN row | `sourceID=22790` |
-| Explain a hit | `debug=true` or `debug=0.80` |
+| Explain a hit | `debug=true` or `debug=0.80` — typed `details.name` / `details.steps`, plus a readable `debug` trail |
 
 Government IDs on the query string:
 
