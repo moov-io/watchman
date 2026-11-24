@@ -84,6 +84,31 @@ func TestLowerAndRemovePunctuation(t *testing.T) {
 			input:    "Ma'agan",
 			expected: "ma agan",
 		},
+		{
+			name:     "leading 's is not a possessive",
+			input:    "'s-Hertogenbosch",
+			expected: "s hertogenbosch",
+		},
+		{
+			name:     "trailing plural apostrophe",
+			input:    "Brothers'",
+			expected: "brothers",
+		},
+		{
+			name:     "plural apostrophe before a word",
+			input:    "Brothers' Trading",
+			expected: "brothers trading",
+		},
+		{
+			name:     "backtick possessive",
+			input:    "GINO`S",
+			expected: "ginos",
+		},
+		{
+			name:     "backtick keeps a space at the apostrophe",
+			input:    "O`Brien",
+			expected: "o brien",
+		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
