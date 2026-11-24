@@ -515,7 +515,7 @@ func applyPenaltiesAndBonuses(trail *scoreTrail, baseScore float64, cov coverage
 	}
 
 	if !fields.hasID && !fields.hasAddress && fields.hasName {
-		trail.apply("name-only", "name-only query", trail.score*nameOnlyPenaltyMultiplier)
+		trail.apply("name-only", "no matched unique ID or address", trail.score*nameOnlyPenaltyMultiplier)
 	}
 
 	if fields.hasName && fields.hasID && fields.hasCritical && cov.ratio > 0.70 && trail.score > highConfidenceThreshold {

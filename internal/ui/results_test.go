@@ -93,7 +93,7 @@ func TestScoreBreakdownRendersNameDebug(t *testing.T) {
 			},
 			Steps: []search.ScoreStep{
 				{Stage: "base", Score: 0.7735},
-				{Stage: "name-only", Score: 0.7348, Delta: -0.0387, Reason: "name-only query"},
+				{Stage: "name-only", Score: 0.7348, Delta: -0.0387, Reason: "no matched unique ID or address"},
 			},
 			Pieces: []search.ScorePiece{
 				{PieceType: "name", Score: 0.7735, Weight: 35, Matched: true, Required: true, FieldsCompared: 1},
@@ -134,7 +134,7 @@ func TestScoreBreakdownLabelsEmbeddingSimilarityDiagnostic(t *testing.T) {
 			FinalScore:   0.69,
 			Steps: []search.ScoreStep{
 				{Stage: "base", Score: 0.73},
-				{Stage: "name-only", Score: 0.69, Delta: -0.04, Reason: "name-only query"},
+				{Stage: "name-only", Score: 0.69, Delta: -0.04, Reason: "no matched unique ID or address"},
 			},
 			Pieces: []search.ScorePiece{
 				{PieceType: "name", Score: 0.73, Weight: 35, Matched: true, Required: true, FieldsCompared: 1},

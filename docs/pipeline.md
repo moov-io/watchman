@@ -122,7 +122,7 @@ name   0.9500  historical  query=historical index=primary
 score steps
     base                    0.9500
     min-required-fields     0.8550  -0.0950  fewer than 2 required fields compared
-    name-only               0.8122  -0.0428  name-only query
+    name-only               0.8122  -0.0428  no matched unique ID or address
 ```
 
 If a name does not match, check type (`person` vs `business`), whether you sent the same fields as the list record, and the prepared tokens on `details.name`.
