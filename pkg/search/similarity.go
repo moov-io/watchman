@@ -56,7 +56,7 @@ func Similarity[Q any, I any](query Entity[Q], index Entity[I]) float64 {
 
 // SimilarityWithTFIDF calculates a match score with optional TF-IDF weighting for name matching.
 // When tfidfIndex is nil or disabled, falls back to standard scoring.
-// This path avoids allocating the detailed ScorePiece slice returned by DebugSimilarity.
+// This path avoids allocating the detailed ScorePiece slice built by DebugSimilarityWithOpts.
 func SimilarityWithTFIDF[Q any, I any](query Entity[Q], index Entity[I], tfidfIndex *tfidf.Index) float64 {
 	return SimilarityWithOpts(query, index, SimilarityOpts{TFIDF: tfidfIndex})
 }
@@ -66,20 +66,20 @@ func SimilarityWithOpts[Q any, I any](query Entity[Q], index Entity[I], opts Sim
 	return scoreSimilarityFast(query, index, opts)
 }
 
-// DebugSimilarity does the same as Similarity, but writes SimilarityScore.String() to w.
-//
-// The text is intended for humans to read and will evolve over time. Prefer the
-// returned SimilarityScore (name, steps, pieces) for programmatic use.
+// DebugSimilarity writes a human-readable SimilarityScore.String() trail to w
+// and returns the final score. The text will evolve over time. Callers that
+// need the typed breakdown (name, steps, pieces) should use DebugSimilarityWithOpts.
 func DebugSimilarity[Q any, I any](w io.Writer, query Entity[Q], index Entity[I]) float64 {
 	return DebugSimilarityWithTFIDF(w, query, index, nil).FinalScore
 }
 
-// DebugSimilarityWithTFIDF does the same as DebugSimilarity, with optional TF-IDF weighting.
+// DebugSimilarityWithTFIDF is DebugSimilarityWithOpts with optional TF-IDF weighting.
 func DebugSimilarityWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], tfidfIndex *tfidf.Index) SimilarityScore {
 	return DebugSimilarityWithOpts(w, query, index, SimilarityOpts{TFIDF: tfidfIndex})
 }
 
-// DebugSimilarityWithOpts does the same as DebugSimilarity, with scoring options.
+// DebugSimilarityWithOpts scores like DebugSimilarity, with scoring options, and
+// returns the typed SimilarityScore. When w is non-nil it writes the plaintext trail.
 func DebugSimilarityWithOpts[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], opts SimilarityOpts) SimilarityScore {
 	details := DetailedSimilarityWithOpts(nil, query, index, opts)
 
@@ -297,7 +297,7 @@ const (
 // There is no API stability guarantee for SimilarityScore.
 type SimilarityScore struct {
 	// RankedBy is how /v2/search ranked the hit: similarity or embeddings.
-	// Empty when SimilarityScore comes from Similarity/DebugSimilarity directly.
+	// Empty when SimilarityScore comes from DebugSimilarityWithOpts rather than /v2/search.
 	RankedBy string `json:"rankedBy,omitempty"`
 	// RankingScore is the embedding cosine when RankedBy is embeddings.
 	// FinalScore stays the field-similarity diagnostic in that case.
