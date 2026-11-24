@@ -94,7 +94,7 @@ Query IDs are `gov_<type>=COUNTRY:IDENTIFIER` (for example `gov_passport=IR:Y539
 - `details.name` is the name score, the query vs list names (original, prepared, tokens), greedy token pairs, and the name-score steps with deltas (token-pairs, historical, close-enough). Name `steps` on each side are the Normalize() rewrites that actually changed the value (party labels, former names, legal forms, stopwords). `compared` is set when an AKA or former name won over the display name.
 - `details.steps` is the final-score trail (base, name-only, exact-override, ID conflict, numeral conflict).
 - `details.pieces` are the field-level scores (name, identifiers, dates, addresses).
-- `details.rankedBy` is `similarity` or `embeddings`. When embeddings ranked the hit, `debug` leads with the cosine ranking score and labels the rest as a Jaro-Winkler diagnostic.
+- `details.rankedBy` is `similarity` or `embeddings`. When embeddings ranked the hit, `debug` leads with the cosine ranking score and labels the rest as a similarity diagnostic.
 
 Prefer `details` for machines. `debug` is the same information as text, for example:
 

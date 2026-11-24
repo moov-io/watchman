@@ -72,7 +72,7 @@ func (ss SimilarityScore) String() string {
 	switch ss.RankedBy {
 	case RankedByEmbeddings:
 		fmt.Fprintf(&b, "ranking  %.4f  embeddings\n", ss.RankingScore)
-		fmt.Fprintf(&b, "similarity  %.4f  Jaro-Winkler diagnostic\n", ss.FinalScore)
+		fmt.Fprintf(&b, "similarity  %.4f  similarity diagnostic\n", ss.FinalScore)
 	default:
 		fmt.Fprintf(&b, "match  %.4f\n", ss.FinalScore)
 	}

@@ -196,7 +196,7 @@ GET /v2/search?type=person&name=maduro&minMatch=0.8
 Parameters:
 - `minMatch`: Minimum match score (0.0–1.0). Use **0.80** for a production-shaped queue; **~0.59** when missing a designation is costlier than extra review. See [Using Watchman](/watchman/using-watchman/).
 - `limit`: Maximum results (default 10, max 100)
-- `debug`: Include a typed score breakdown (`details`) and a human-readable trail (`debug`). `details.name` has the name score, query vs index tokens, token pairs, and per-step deltas. `details.steps` is the final-score trail. `details.rankedBy` is `similarity` or `embeddings`. When embeddings ranked the hit, `match` is cosine and `details.finalScore` is the Jaro-Winkler diagnostic. `true`/`yes`/`1` attaches debug to every returned hit. A number such as `0.80` attaches debug only when `match` is at least that score. Debug is computed after ranking, only for those hits.
+- `debug`: Include a typed score breakdown (`details`) and a human-readable trail (`debug`). `details.name` has the name score, query vs index tokens, token pairs, and per-step deltas. `details.steps` is the final-score trail. `details.rankedBy` is `similarity` or `embeddings`. When embeddings ranked the hit, `match` is cosine and `details.finalScore` is the similarity diagnostic. `true`/`yes`/`1` attaches debug to every returned hit. A number such as `0.80` attaches debug only when `match` is at least that score. Debug is computed after ranking, only for those hits.
 - `algorithm`: Per-request name metric (see above). Defaults to Jaro–Winkler.
 
 

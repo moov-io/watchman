@@ -19,7 +19,7 @@ type SearchedEntity[T any] struct {
 	// Details is the typed score breakdown: field pieces, name comparison
 	// (query vs index, token pairs, name-score steps), and the final-score trail.
 	// RankedBy names the ranker (similarity or embeddings). When embeddings
-	// ranked the hit, FinalScore is the Jaro-Winkler diagnostic and
+	// ranked the hit, FinalScore is the field-similarity diagnostic and
 	// RankingScore is the cosine used for match.
 	//
 	// The fields returned may change as the general similarity algorithm and scoring methodologies evolve.

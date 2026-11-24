@@ -285,7 +285,7 @@ func shouldExactOverride(pieces []ScorePiece) bool {
 }
 
 const (
-	// RankedBySimilarity is Jaro-Winkler field scoring (the default /v2/search path).
+	// RankedBySimilarity is field similarity scoring (the default /v2/search path).
 	RankedBySimilarity = "similarity"
 	// RankedByEmbeddings is cosine ranking from the embedding index.
 	RankedByEmbeddings = "embeddings"
@@ -300,7 +300,7 @@ type SimilarityScore struct {
 	// Empty when SimilarityScore comes from Similarity/DebugSimilarity directly.
 	RankedBy string `json:"rankedBy,omitempty"`
 	// RankingScore is the embedding cosine when RankedBy is embeddings.
-	// FinalScore stays the Jaro-Winkler diagnostic in that case.
+	// FinalScore stays the field-similarity diagnostic in that case.
 	RankingScore float64      `json:"rankingScore,omitzero"`
 	Pieces       []ScorePiece `json:"pieces,omitzero"`
 	Name         *NameDebug   `json:"name,omitempty"`

@@ -17,7 +17,8 @@ func TestSimilarityScore_StringEmbeddingRanking(t *testing.T) {
 		FinalScore:   0.69,
 	}.String()
 	require.Contains(t, text, "ranking  0.9100  embeddings")
-	require.Contains(t, text, "similarity  0.6900  Jaro-Winkler diagnostic")
+	require.Contains(t, text, "similarity  0.6900  similarity diagnostic")
+	require.NotContains(t, text, "Jaro-Winkler")
 	require.NotContains(t, text, "match  0.6900")
 }
 

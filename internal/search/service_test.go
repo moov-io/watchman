@@ -68,7 +68,8 @@ func TestAttachDebugDetails_EmbeddingRankedLabelsSimilarityDiagnostic(t *testing
 	require.InDelta(t, 0.91, out[0].Details.RankingScore, 0.0001)
 	require.NotEqual(t, out[0].Match, out[0].Details.FinalScore)
 	require.Contains(t, out[0].Debug, "ranking  0.9100  embeddings")
-	require.Contains(t, out[0].Debug, "Jaro-Winkler diagnostic")
+	require.Contains(t, out[0].Debug, "similarity diagnostic")
+	require.NotContains(t, out[0].Debug, "Jaro-Winkler")
 	require.NotContains(t, out[0].Debug, "match  ")
 }
 

@@ -211,7 +211,7 @@ type SearchOpts struct {
 
 	RequestID string
 	// Debug attaches typed details and a plaintext debug trail after ranking.
-	// Details are the Jaro-Winkler similarity diagnostic. When embeddings
+	// Details are the field-similarity diagnostic. When embeddings
 	// ranked the hit, details.rankedBy is embeddings and details.finalScore
 	// can differ from match. When DebugMinMatch is 0, every returned hit is
 	// included. Otherwise only hits with Match at least DebugMinMatch get
@@ -352,7 +352,7 @@ func (s *service) performSearch(ctx context.Context, query search.Entity[search.
 
 // attachDebugDetails runs the allocating debug scorer only for returned hits
 // that meet DebugMinMatch. Ranking already used the cheap Similarity path or
-// embedding cosine; details are always the Jaro-Winkler similarity diagnostic.
+// embedding cosine; details are always the field-similarity diagnostic.
 func attachDebugDetails(query search.Entity[search.Value], tfidfIndex *tfidf.Index, opts SearchOpts, out []search.SearchedEntity[search.Value], rankedBy string) {
 	simOpts := search.SimilarityOpts{
 		TFIDF:     tfidfIndex,
