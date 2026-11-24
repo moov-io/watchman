@@ -1,6 +1,7 @@
 package stringscore_test
 
 import (
+	"math"
 	"strings"
 	"testing"
 
@@ -72,6 +73,24 @@ func TestExplainBestPairCombinationZeroScoreKeepsUnmatchedPairs(t *testing.T) {
 	gotW, pairsW := stringscore.ExplainBestPairCombinationJaroWinklerWeighted(query, index, nil, []float64{1}, cfg)
 	require.InDelta(t, wantW, gotW, 1e-12)
 	require.NotEmpty(t, pairsW)
+}
+
+func TestBestPairCombinationIgnoresNaNScores(t *testing.T) {
+	t.Parallel()
+
+	cfg := stringscore.DefaultScoringConfig()
+	query := []string{"john", "x"}
+	index := []string{"john"}
+	score := stringscore.BestPairCombinationJaroWinklerWeightedWithConfig(
+		query, index, []float64{math.NaN(), 1}, []float64{1}, cfg,
+	)
+	require.False(t, math.IsNaN(score))
+
+	got, _ := stringscore.ExplainBestPairCombinationJaroWinklerWeighted(
+		query, index, []float64{math.NaN(), 1}, []float64{1}, cfg,
+	)
+	require.False(t, math.IsNaN(got))
+	require.InDelta(t, score, got, 1e-12)
 }
 
 func TestExplainBestPairCombinationWeightedMatchesScore(t *testing.T) {

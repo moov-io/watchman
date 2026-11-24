@@ -2,6 +2,13 @@ package stringscore
 
 import "math"
 
+func keepCombinationScore(score, maxScore float64, have bool) bool {
+	if math.IsNaN(score) {
+		return false
+	}
+	return !have || score > maxScore
+}
+
 // TokenPair is a greedy token alignment used to explain a BestPairs score.
 // An empty Search or Index means that token was unmatched.
 type TokenPair struct {
@@ -35,7 +42,7 @@ func bestPairCombinationJaroWinkler(searchTokens, indexedTokens []string, cfg Sc
 	for _, searchVariation := range searchCombinations {
 		for _, indexedVariation := range indexedCombinations {
 			score, pairs := bestPairsJaroWinkler(searchVariation, indexedVariation, cfg, collect)
-			if !have || score > maxScore {
+			if keepCombinationScore(score, maxScore, have) {
 				maxScore = score
 				bestPairs = pairs
 				have = true
@@ -62,7 +69,7 @@ func bestPairCombinationJaroWinklerWeighted(searchTokens, indexedTokens []string
 		for ii, indexedVariation := range indexedCombinations {
 			score, pairs := bestPairsJaroWinklerWeighted(searchVariation, indexedVariation,
 				searchWeightCombinations[si], indexWeightCombinations[ii], cfg, collect)
-			if !have || score > maxScore {
+			if keepCombinationScore(score, maxScore, have) {
 				maxScore = score
 				bestPairs = pairs
 				have = true
