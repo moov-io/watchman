@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestScoreTrail_ApplyfSkipsFormatWhenNotCollecting(t *testing.T) {
+func TestScoreTrail_CoverageReasonsOnlyWhenCollecting(t *testing.T) {
 	t.Parallel()
 
 	trail := scoreTrail{collect: false}

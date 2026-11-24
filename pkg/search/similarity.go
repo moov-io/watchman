@@ -494,10 +494,20 @@ func applyPenaltiesAndBonuses(trail *scoreTrail, baseScore float64, cov coverage
 	trail.base(baseScore)
 
 	if cov.ratio < minCoverageThreshold {
-		trail.applyf("low-coverage", trail.score*lowCoveragePenaltyMultiplier, "compared %.0f%% of index fields", cov.ratio*100)
+		next := trail.score * lowCoveragePenaltyMultiplier
+		reason := ""
+		if trail.collect {
+			reason = fmt.Sprintf("compared %.0f%% of index fields", cov.ratio*100)
+		}
+		trail.apply("low-coverage", reason, next)
 	}
 	if cov.criticalRatio < criticalCovThreshold {
-		trail.applyf("critical-coverage", trail.score*0.90, "critical field coverage %.0f%%", cov.criticalRatio*100)
+		next := trail.score * 0.90
+		reason := ""
+		if trail.collect {
+			reason = fmt.Sprintf("critical field coverage %.0f%%", cov.criticalRatio*100)
+		}
+		trail.apply("critical-coverage", reason, next)
 	}
 
 	if fields.required < 2 {

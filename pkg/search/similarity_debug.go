@@ -332,14 +332,6 @@ func (t *scoreTrail) apply(stage, reason string, score float64) {
 	t.applyStep(stage, reason, score, false)
 }
 
-func (t *scoreTrail) applyf(stage string, score float64, format string, args ...any) {
-	reason := ""
-	if t.collect {
-		reason = fmt.Sprintf(format, args...)
-	}
-	t.apply(stage, reason, score)
-}
-
 func (t *scoreTrail) applyForced(stage, reason string, score float64) {
 	t.applyStep(stage, reason, score, true)
 }
