@@ -167,6 +167,24 @@ func TestNameDebug_UnmatchedTokens(t *testing.T) {
 	require.Contains(t, text, "unmatched index  adams")
 }
 
+func TestNameDebug_SkipsEmptyExtractedFormerName(t *testing.T) {
+	query := search.Entity[search.Value]{
+		Name: "Ocean Pioneer (ex-!!!) (ex-Cape Diamond)",
+		Type: search.EntityVessel,
+	}.Normalize()
+	index := search.Entity[search.Value]{
+		Name: "Cape Diamond",
+		Type: search.EntityVessel,
+	}.Normalize()
+
+	got := search.DebugSimilarityWithOpts(nil, query, index, search.SimilarityOpts{})
+	require.InDelta(t, search.Similarity(query, index), got.FinalScore, 0.0001)
+	require.NotNil(t, got.Name)
+	require.Equal(t, "Cape Diamond", got.Name.Query.Compared)
+	require.Equal(t, "Cape Diamond", nameStageValue(got.Name.Query, "extracted"))
+	require.NotContains(t, nameStageValue(got.Name.Query, "extracted"), "!")
+}
+
 func TestNameDebug_RecastPreservesOriginalPrepareType(t *testing.T) {
 	query := search.Entity[search.Value]{
 		Name: "John Smith Limited",

@@ -6,6 +6,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestOriginalAltNamesLastTypeWins(t *testing.T) {
+	t.Parallel()
+
+	e := Entity[Value]{
+		Person: &Person{AltNames: []string{"from-person"}},
+		Vessel: &Vessel{AltNames: []string{"from-vessel"}},
+	}
+	require.Equal(t, []string{"from-vessel"}, originalAltNames(e))
+}
+
 func TestScoreTrail_CoverageReasonsOnlyWhenCollecting(t *testing.T) {
 	t.Parallel()
 

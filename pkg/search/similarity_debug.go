@@ -224,8 +224,15 @@ func namePrepareTrace(display, scored string, typ EntityType) []NameTransform {
 		add("party-labels", v)
 		primary, former := prepare.SplitExNames(v)
 		add("former-names", primary)
-		if len(former) > 0 {
-			steps = append(steps, NameTransform{Stage: "extracted", Value: strings.Join(former, "; ")})
+		var extracted []string
+		for _, name := range former {
+			if prepareEntityName(name, typ) == "" {
+				continue
+			}
+			extracted = append(extracted, name)
+		}
+		if len(extracted) > 0 {
+			steps = append(steps, NameTransform{Stage: "extracted", Value: strings.Join(extracted, "; ")})
 		}
 		return primary
 	}
@@ -266,19 +273,23 @@ func namePrepareTrace(display, scored string, typ EntityType) []NameTransform {
 }
 
 func originalAltNames[T any](e Entity[T]) []string {
-	switch {
-	case e.Person != nil:
-		return e.Person.AltNames
-	case e.Business != nil:
-		return e.Business.AltNames
-	case e.Organization != nil:
-		return e.Organization.AltNames
-	case e.Aircraft != nil:
-		return e.Aircraft.AltNames
-	case e.Vessel != nil:
-		return e.Vessel.AltNames
+	var alts []string
+	if e.Person != nil {
+		alts = e.Person.AltNames
 	}
-	return nil
+	if e.Business != nil {
+		alts = e.Business.AltNames
+	}
+	if e.Organization != nil {
+		alts = e.Organization.AltNames
+	}
+	if e.Aircraft != nil {
+		alts = e.Aircraft.AltNames
+	}
+	if e.Vessel != nil {
+		alts = e.Vessel.AltNames
+	}
+	return alts
 }
 
 func originalHistoricalNames[T any](e Entity[T]) []string {
@@ -289,7 +300,12 @@ func originalHistoricalNames[T any](e Entity[T]) []string {
 		}
 		out = append(out, hist.Value)
 	}
-	out = append(out, prepare.ExNames(e.Name)...)
+	for _, former := range prepare.ExNames(e.Name) {
+		if prepareEntityName(former, e.Type) == "" {
+			continue
+		}
+		out = append(out, former)
+	}
 	return out
 }
 
