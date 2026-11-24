@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"encoding/base64"
 	"strings"
 	"testing"
 	"time"
@@ -153,6 +154,40 @@ func TestScoreBreakdownLabelsEmbeddingSimilarityDiagnostic(t *testing.T) {
 	require.Contains(t, joined, "embeddings")
 	require.Contains(t, joined, "Similarity diagnostic")
 	require.Contains(t, joined, "Similarity trail")
+}
+
+func TestScoreBreakdownShowsLegacyDebugWithPieces(t *testing.T) {
+	test.NewApp()
+
+	encoded := base64.StdEncoding.EncodeToString([]byte("legacy exact-override trail"))
+	root := entityDetails(search.SearchedEntity[search.Value]{
+		Entity: search.Entity[search.Value]{
+			Name:     "SUEX OTC, S.R.O.",
+			Type:     search.EntityBusiness,
+			Source:   search.SourceUSOFAC,
+			SourceID: "36216",
+		},
+		Match: 1.0,
+		Debug: encoded,
+		Details: search.SimilarityScore{
+			FinalScore: 1.0,
+			Pieces: []search.ScorePiece{
+				{PieceType: "crypto-exact", Score: 1, Weight: 50, Matched: true, Exact: true, FieldsCompared: 1, UniqueIdentity: true},
+			},
+		},
+	})
+
+	var texts []string
+	walkObjects(root, func(object fyne.CanvasObject) {
+		label, ok := object.(*widget.Label)
+		if !ok || label.Text == "" {
+			return
+		}
+		texts = append(texts, label.Text)
+	})
+	joined := strings.Join(texts, "\n")
+	require.Contains(t, joined, "crypto-exact")
+	require.Contains(t, joined, "legacy exact-override trail")
 }
 
 func TestScoreBreakdownOmitsExactOnSubThresholdNamePiece(t *testing.T) {

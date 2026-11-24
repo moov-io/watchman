@@ -440,7 +440,7 @@ func scoreBreakdown(entity search.SearchedEntity[search.Value]) fyne.CanvasObjec
 		}
 		box.Add(label)
 	}
-	if len(box.Objects) == 0 {
+	if entity.Details.Name == nil && len(entity.Details.Steps) == 0 {
 		if text := decodeDebug(entity.Debug); text != "" {
 			log := wordWrappingLabel(text)
 			log.TextStyle = fyne.TextStyle{Monospace: true}
