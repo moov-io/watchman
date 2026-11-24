@@ -444,10 +444,13 @@ func countFieldsByImportance(pieces []ScorePiece) entityFields {
 
 		if piece.Required {
 			fields.required += piece.FieldsCompared
-		} else if piece.Matched && piece.Exact && isEvidencePiece(piece.PieceType) {
-			// One exact contact/identifier piece fills a required slot so name+phone
-			// is not a thin query. Count the piece once: a website plus extracted
-			// domain is still one contact match, not two required fields.
+		} else if piece.Matched && piece.Exact && piece.PieceType == "contact-exact" {
+			// An exact contact match (email, phone, fax, website or domain) fills one
+			// required slot so name+phone is not a thin query. Count the piece once:
+			// a website plus its extracted domain is one contact match, not two.
+			// Every compared contact type must match, so a partial match gets no slot.
+			// Government IDs and crypto addresses are not counted here because the
+			// "identifiers" piece already counts them as required.
 			fields.required++
 		}
 		if piece.Matched {
@@ -467,15 +470,6 @@ func countFieldsByImportance(pieces []ScorePiece) entityFields {
 	}
 
 	return fields
-}
-
-func isEvidencePiece(pieceType string) bool {
-	switch pieceType {
-	case "contact-exact", "identifiers", "gov-ids-exact", "crypto-exact":
-		return true
-	default:
-		return false
-	}
 }
 
 func calculateBaseScore(pieces []ScorePiece, fields entityFields) float64 {

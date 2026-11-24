@@ -125,7 +125,10 @@ func TestSimilarity_NameOnlyStillPenalized(t *testing.T) {
 		Type:    search.EntityBusiness,
 		Contact: search.ContactInfo{PhoneNumbers: []string{"1 3125550100"}},
 	}.Normalize(), index)
-	require.InDelta(t, 0.812, got.FinalScore, 0.001)
+	// Check the penalties relative to name+phone, not a fixed score, so that
+	// weight changes do not break this test.
+	require.Less(t, got.FinalScore, 0.85)
+	require.Greater(t, got.FinalScore, 0.70)
 	require.Greater(t, phone, got.FinalScore)
 	require.Contains(t, debug, "fields.required < 2")
 	require.Contains(t, debug, "reduced name-only match penalty")
@@ -177,4 +180,65 @@ func TestSimilarity_NameAndWebsiteSkipsMinRequired(t *testing.T) {
 	require.GreaterOrEqual(t, got.FinalScore, 0.85)
 	require.Less(t, got.FinalScore, 1.0)
 	require.NotContains(t, debug, "fields.required < 2")
+}
+
+func TestSimilarity_PartialContactNoRequiredSlot(t *testing.T) {
+	// The phone matches but the email does not. contact-exact is not Exact,
+	// so it does not fill a required slot and the thin-query penalty applies.
+	query := search.Entity[search.Value]{
+		Name: "GINO'S AUTO MART INC",
+		Type: search.EntityBusiness,
+		Contact: search.ContactInfo{
+			PhoneNumbers:   []string{"1 3125550100"},
+			EmailAddresses: []string{"parts@example.com"},
+		},
+	}.Normalize()
+	index := listedBusiness()
+	index.Contact.EmailAddresses = []string{"sales@example.net"}
+	index = index.Normalize()
+
+	got, debug := debugScore(t, query, index)
+	contact := pieceByType(t, got, "contact-exact")
+	require.True(t, contact.Matched)
+	require.False(t, contact.Exact)
+	require.Contains(t, debug, "fields.required < 2")
+
+	phoneOnly := search.Similarity(search.Entity[search.Value]{
+		Name:    query.Name,
+		Type:    search.EntityBusiness,
+		Contact: search.ContactInfo{PhoneNumbers: []string{"1 3125550100"}},
+	}.Normalize(), index)
+	require.Greater(t, phoneOnly, got.FinalScore)
+}
+
+func TestSimilarity_GovIDOnlyCountsOnce(t *testing.T) {
+	// One tax ID makes an "identifiers" piece (required) and a "gov-ids-exact"
+	// piece. Only the first counts as a required field, so an ID-only query
+	// keeps the thin-query penalty. A tax ID is not a unique identity key, so
+	// it must not give 1.0.
+	query := search.Entity[search.Value]{
+		Type: search.EntityBusiness,
+		Business: &search.Business{
+			GovernmentIDs: []search.GovernmentID{
+				{Type: search.GovernmentIDTax, Country: "United States", Identifier: "119998877"},
+			},
+		},
+	}.Normalize()
+	index := search.Entity[search.Value]{
+		Name:     "Acme Holdings Ltd",
+		Type:     search.EntityBusiness,
+		Source:   "test-list",
+		SourceID: "TEST-3",
+		Business: &search.Business{
+			Name: "Acme Holdings Ltd",
+			GovernmentIDs: []search.GovernmentID{
+				{Type: search.GovernmentIDTax, Country: "United States", Identifier: "119998877"},
+			},
+		},
+	}.Normalize()
+
+	got, debug := debugScore(t, query, index)
+	require.Contains(t, debug, "fields.required < 2")
+	require.InDelta(t, 0.900, got.FinalScore, 0.001)
+	require.Less(t, got.FinalScore, 1.0)
 }

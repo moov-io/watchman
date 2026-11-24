@@ -389,7 +389,7 @@ YAML configuration (example with OpenAI):
 | `ADJACENT_SIMILARITY_POSITIONS`    | How many nearby words to search for highest max similarly score.                                              | 3       |
 | `EXACT_MATCH_FAVORITISM`           | Extra weighting assigned to exact matches.                                                                    | 0.0     |
 | `FINAL_SCORE_LOW_COVERAGE_MULTIPLIER`        | Multiplier applied when a query compares against too little of the indexed entity's available data.              | 0.95    |
-| `FINAL_SCORE_MIN_REQUIRED_FIELDS_MULTIPLIER` | Multiplier applied when a search compares fewer than two required fields, such as a name-only query. An exact phone, email, or website match counts as one required field. | 0.90    |
+| `FINAL_SCORE_MIN_REQUIRED_FIELDS_MULTIPLIER` | Multiplier applied when a search compares fewer than two required fields, such as a name-only query. An exact contact match (email, phone, fax, website, or domain) counts as one required field. Every compared contact type must match. | 0.90    |
 | `FINAL_SCORE_NAME_ONLY_MULTIPLIER`           | Multiplier applied to name-only matches when no IDs or addresses are present in the query.                    | 0.95    |
 | `ID_CONFLICT_PENALTY_MULTIPLIER`             | Multiplier applied when both records populate the same ID type (and country, if both set) with different values. `1` disables. | 0.70    |
 | `NAME_NUMERAL_CONFLICT_PENALTY_MULTIPLIER`   | Multiplier applied when both prepared names contain a numeral (digit, roman I–XII, or spelled one–twenty) and they disagree. A missing numeral on one side is not a conflict. `1` disables. | 0.70    |
