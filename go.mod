@@ -5,8 +5,8 @@ go 1.26.10
 toolchain go1.27.4
 
 require (
-	fyne.io/fyne/v2 v2.8.2
-	github.com/OpenRouterTeam/go-sdk v0.9.133
+	fyne.io/fyne/v2 v2.8.3
+	github.com/OpenRouterTeam/go-sdk v0.9.137
 	github.com/PhonoGrams/beider_morse v0.1.0
 	github.com/PhonoGrams/double_metaphone v0.1.0
 	github.com/PhonoGrams/editex v0.1.0
@@ -18,7 +18,7 @@ require (
 	github.com/adamdecaf/merge v0.2.2
 	github.com/antchfx/htmlquery v1.3.7
 	github.com/bbalet/stopwords v1.0.0
-	github.com/ccoveille/go-safecast/v2 v2.0.1
+	github.com/ccoveille/go-safecast/v2 v2.1.0
 	github.com/dongri/phonenumber v0.1.13
 	github.com/felixge/httpsnoop v1.1.0
 	github.com/gorilla/mux v1.8.1
