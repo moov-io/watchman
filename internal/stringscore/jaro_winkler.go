@@ -198,59 +198,8 @@ func sortScorePairs(scores []scorePair) {
 
 // BestPairsJaroWinklerWithConfig is BestPairsJaroWinkler with an explicit scoring config.
 func BestPairsJaroWinklerWithConfig(searchTokens []string, indexedTokens []string, cfg ScoringConfig) float64 {
-	searchTokensLength := sumLength(searchTokens)
-	indexTokensLength := sumLength(indexedTokens)
-
-	skipPhonetic := disablePhoneticFiltering.Load()
-
-	scratch := getBestPairsScratch()
-	defer bestPairsPool.Put(scratch)
-	scratch.reset(pairScoreCapacity(len(searchTokens), len(indexedTokens), skipPhonetic), len(searchTokens), len(indexedTokens))
-
-	for searchIdx, searchToken := range searchTokens {
-		for indexIdx, indexedToken := range indexedTokens {
-			// Compare the first letters phonetically and only run jaro-winkler on those which are similar
-			if skipPhonetic || firstCharacterSoundexMatch(indexedToken, searchToken) {
-				scratch.scores = append(scratch.scores, scorePair{
-					score:          tokenSimilarity(indexedToken, searchToken, cfg),
-					searchTokenIdx: searchIdx,
-					indexTokenIdx:  indexIdx,
-				})
-			}
-		}
-	}
-	sortScorePairs(scratch.scores)
-
-	matchedIndexTokensLength := 0
-	totalWeightedScores := 0.0
-	for _, score := range scratch.scores {
-		if !scratch.matchedSearch[score.searchTokenIdx] && !scratch.matchedIndex[score.indexTokenIdx] {
-			searchToken := searchTokens[score.searchTokenIdx]
-			indexToken := indexedTokens[score.indexTokenIdx]
-			totalWeightedScores += score.score * float64(len(searchToken)+len(indexToken))
-
-			scratch.matchedSearch[score.searchTokenIdx] = true
-			scratch.matchedIndex[score.indexTokenIdx] = true
-			matchedIndexTokensLength += len(indexToken)
-		}
-	}
-	lengthWeightedAverageScore := totalWeightedScores / float64(searchTokensLength+matchedIndexTokensLength)
-	if math.IsNaN(lengthWeightedAverageScore) {
-		lengthWeightedAverageScore = 0.0
-	}
-
-	matchedIndexLength := 0
-	for i, str := range indexedTokens {
-		if scratch.matchedIndex[i] {
-			matchedIndexLength += len(str)
-		}
-	}
-	matchedFraction := float64(matchedIndexLength) / float64(indexTokensLength)
-	if math.IsNaN(matchedFraction) {
-		matchedFraction = 0.0
-	}
-
-	return lengthWeightedAverageScore * scalingFactor(matchedFraction, unmatchedIndexPenaltyWeight)
+	score, _ := bestPairsJaroWinkler(searchTokens, indexedTokens, cfg, false)
+	return score
 }
 
 func tokenSimilarity(s1 string, s2 string, cfg ScoringConfig) float64 {
@@ -517,22 +466,8 @@ func BestPairCombinationJaroWinkler(searchTokens []string, indexedTokens []strin
 
 // BestPairCombinationJaroWinklerWithConfig is BestPairCombinationJaroWinkler with an explicit scoring config.
 func BestPairCombinationJaroWinklerWithConfig(searchTokens []string, indexedTokens []string, cfg ScoringConfig) float64 {
-	// Generate variations with different word combinations
-	searchCombinations := GenerateWordCombinations(searchTokens)
-	indexedCombinations := GenerateWordCombinations(indexedTokens)
-
-	// Try all combinations and take the highest score
-	var maxScore float64
-	for _, searchVariation := range searchCombinations {
-		for _, indexedVariation := range indexedCombinations {
-			score := BestPairsJaroWinklerWithConfig(searchVariation, indexedVariation, cfg)
-			if score > maxScore {
-				maxScore = score
-			}
-		}
-	}
-
-	return maxScore
+	score, _ := bestPairCombinationJaroWinkler(searchTokens, indexedTokens, cfg, false)
+	return score
 }
 
 // BestPairsJaroWinklerWeighted compares a search query to an indexed term using TF-IDF weights.
@@ -547,64 +482,8 @@ func BestPairsJaroWinklerWeighted(searchTokens []string, indexedTokens []string,
 
 // BestPairsJaroWinklerWeightedWithConfig is BestPairsJaroWinklerWeighted with an explicit scoring config.
 func BestPairsJaroWinklerWeightedWithConfig(searchTokens []string, indexedTokens []string, searchWeights []float64, indexWeights []float64, cfg ScoringConfig) float64 {
-	// Validate weights - fall back to unweighted if invalid
-	if len(searchWeights) != len(searchTokens) || len(indexWeights) != len(indexedTokens) {
-		return BestPairsJaroWinklerWithConfig(searchTokens, indexedTokens, cfg)
-	}
-
-	skipPhonetic := disablePhoneticFiltering.Load()
-
-	scratch := getBestPairsScratch()
-	defer bestPairsPool.Put(scratch)
-	scratch.reset(pairScoreCapacity(len(searchTokens), len(indexedTokens), skipPhonetic), len(searchTokens), len(indexedTokens))
-
-	for searchIdx, searchToken := range searchTokens {
-		for indexIdx, indexedToken := range indexedTokens {
-			if skipPhonetic || firstCharacterSoundexMatch(indexedToken, searchToken) {
-				scratch.scores = append(scratch.scores, scorePair{
-					score:          tokenSimilarity(indexedToken, searchToken, cfg),
-					searchTokenIdx: searchIdx,
-					indexTokenIdx:  indexIdx,
-				})
-			}
-		}
-	}
-	sortScorePairs(scratch.scores)
-
-	var totalWeightedScores float64
-	var totalWeight float64
-
-	for _, score := range scratch.scores {
-		if !scratch.matchedSearch[score.searchTokenIdx] && !scratch.matchedIndex[score.indexTokenIdx] {
-			pairWeight := (searchWeights[score.searchTokenIdx] + indexWeights[score.indexTokenIdx]) / 2.0
-			totalWeightedScores += score.score * pairWeight
-			totalWeight += pairWeight
-
-			scratch.matchedSearch[score.searchTokenIdx] = true
-			scratch.matchedIndex[score.indexTokenIdx] = true
-		}
-	}
-
-	if totalWeight == 0 {
-		return 0.0
-	}
-
-	weightedAverageScore := totalWeightedScores / totalWeight
-
-	var matchedWeight, totalIndexWeight float64
-	for i := range indexedTokens {
-		totalIndexWeight += indexWeights[i]
-		if scratch.matchedIndex[i] {
-			matchedWeight += indexWeights[i]
-		}
-	}
-
-	if totalIndexWeight > 0 {
-		matchedFraction := matchedWeight / totalIndexWeight
-		return weightedAverageScore * scalingFactor(matchedFraction, unmatchedIndexPenaltyWeight)
-	}
-
-	return weightedAverageScore
+	score, _ := bestPairsJaroWinklerWeighted(searchTokens, indexedTokens, searchWeights, indexWeights, cfg, false)
+	return score
 }
 
 // BestPairCombinationJaroWinklerWeighted is like BestPairCombinationJaroWinkler but uses TF-IDF weights.
@@ -614,28 +493,8 @@ func BestPairCombinationJaroWinklerWeighted(searchTokens []string, indexedTokens
 
 // BestPairCombinationJaroWinklerWeightedWithConfig is BestPairCombinationJaroWinklerWeighted with an explicit scoring config.
 func BestPairCombinationJaroWinklerWeightedWithConfig(searchTokens []string, indexedTokens []string, searchWeights []float64, indexWeights []float64, cfg ScoringConfig) float64 {
-	// Generate variations with different word combinations
-	searchCombinations := GenerateWordCombinations(searchTokens)
-	indexedCombinations := GenerateWordCombinations(indexedTokens)
-
-	// For weighted scoring, we need to handle weight combinations too
-	// When tokens are combined, we sum their weights
-	searchWeightCombinations := generateWeightCombinations(searchTokens, searchWeights)
-	indexWeightCombinations := generateWeightCombinations(indexedTokens, indexWeights)
-
-	// Try all combinations and take the highest score
-	var maxScore float64
-	for si, searchVariation := range searchCombinations {
-		for ii, indexedVariation := range indexedCombinations {
-			score := BestPairsJaroWinklerWeightedWithConfig(searchVariation, indexedVariation,
-				searchWeightCombinations[si], indexWeightCombinations[ii], cfg)
-			if score > maxScore {
-				maxScore = score
-			}
-		}
-	}
-
-	return maxScore
+	score, _ := bestPairCombinationJaroWinklerWeighted(searchTokens, indexedTokens, searchWeights, indexWeights, cfg, false)
+	return score
 }
 
 // generateWeightCombinations generates weight arrays corresponding to GenerateWordCombinations output.

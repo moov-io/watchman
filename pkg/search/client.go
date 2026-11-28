@@ -279,7 +279,7 @@ func (s *SearchResponse) UnmarshalJSON(data []byte) error {
 type SearchOpts struct {
 	Limit    int
 	MinMatch float64
-	// Debug attaches field-level score pieces to every returned hit (?debug=yes).
+	// Debug attaches typed details and a plaintext debug trail to every returned hit (?debug=yes).
 	Debug bool
 	// DebugMinMatch attaches debug only to returned hits whose Match is at least
 	// this value (?debug=0.80). When set, it takes precedence over Debug.

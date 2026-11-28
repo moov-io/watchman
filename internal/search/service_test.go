@@ -2,7 +2,6 @@ package search
 
 import (
 	"context"
-	"encoding/base64"
 	"io"
 	"os"
 	"path/filepath"
@@ -34,7 +33,7 @@ func TestAttachDebugDetails_ThresholdInsideReturnedSet(t *testing.T) {
 		{Entity: query, Match: 0.91},
 	}
 
-	attachDebugDetails(query, nil, SearchOpts{Debug: true, DebugMinMatch: 0.80}, out)
+	attachDebugDetails(query, nil, SearchOpts{Debug: true, DebugMinMatch: 0.80}, out, search.RankedBySimilarity)
 
 	require.Empty(t, out[0].Debug)
 	require.Empty(t, out[0].Details.Pieces)
@@ -43,8 +42,35 @@ func TestAttachDebugDetails_ThresholdInsideReturnedSet(t *testing.T) {
 
 	require.NotEmpty(t, out[2].Debug)
 	require.NotEmpty(t, out[2].Details.Pieces)
+	require.Equal(t, search.RankedBySimilarity, out[2].Details.RankedBy)
+	require.Contains(t, out[2].Debug, "match")
 	require.NotEmpty(t, out[3].Debug)
 	require.NotEmpty(t, out[3].Details.Pieces)
+}
+
+func TestAttachDebugDetails_EmbeddingRankedLabelsSimilarityDiagnostic(t *testing.T) {
+	query := search.Entity[search.Value]{
+		Name: "Ada Lovelace",
+		Type: search.EntityPerson,
+		Person: &search.Person{
+			Name: "Ada Lovelace",
+		},
+	}.Normalize()
+
+	out := []search.SearchedEntity[search.Value]{
+		{Entity: query, Match: 0.91},
+	}
+
+	attachDebugDetails(query, nil, SearchOpts{Debug: true}, out, search.RankedByEmbeddings)
+
+	require.Equal(t, 0.91, out[0].Match)
+	require.Equal(t, search.RankedByEmbeddings, out[0].Details.RankedBy)
+	require.InDelta(t, 0.91, out[0].Details.RankingScore, 0.0001)
+	require.NotEqual(t, out[0].Match, out[0].Details.FinalScore)
+	require.Contains(t, out[0].Debug, "ranking  0.9100  embeddings")
+	require.Contains(t, out[0].Debug, "similarity diagnostic")
+	require.NotContains(t, out[0].Debug, "Jaro-Winkler")
+	require.NotContains(t, out[0].Debug, "match  ")
 }
 
 func TestService_Search(t *testing.T) {
@@ -140,8 +166,11 @@ func TestService_Search(t *testing.T) {
 			t.Logf("match: %.2f", results[0].Match)
 			t.Logf("%#v", results[0].Entity)
 
-			_, err := base64.StdEncoding.DecodeString(results[0].Debug)
-			require.NoError(t, err)
+			if results[0].Debug != "" {
+				require.Contains(t, results[0].Debug, "match")
+				require.NotEmpty(t, results[0].Details.Pieces)
+				require.NotEmpty(t, results[0].Details.Steps)
+			}
 		}
 		require.Greater(t, len(results), 0)
 

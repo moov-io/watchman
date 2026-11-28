@@ -1,6 +1,7 @@
 package search
 
 import (
+	"fmt"
 	"io"
 	"math"
 	"regexp"
@@ -22,51 +23,75 @@ const (
 
 // nameMatch tracks detailed matching information
 type nameMatch struct {
-	score         float64
-	matchingTerms int
-	totalTerms    int
-	isExact       bool
-	isHistorical  bool
+	score              float64
+	tokenScore         float64
+	afterHist          float64
+	afterQuality       float64
+	matchingTerms      int
+	totalTerms         int
+	isExact            bool
+	isHistorical       bool
+	closeEnoughApplied bool
+
+	querySide     string
+	indexSide     string
+	queryOriginal string
+	queryPrepared string
+	queryTerms    []string
+	indexOriginal string
+	indexPrepared string
+	indexTerms    []string
 }
 
 func compareName[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64) ScorePiece {
-	return compareNameWithTFIDF(w, query, index, weight, SimilarityOpts{})
+	piece, _ := compareNameWithTFIDF(w, query, index, weight, SimilarityOpts{}, query.Type, false)
+	return piece
 }
 
-func compareNameWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Entity[I], weight float64, opts SimilarityOpts) ScorePiece {
+func compareNameWithTFIDF[Q any, I any](_ io.Writer, query Entity[Q], index Entity[I], weight float64, opts SimilarityOpts, queryNormalizeType EntityType, explain bool) (ScorePiece, *NameDebug) {
 	// Early return for empty query
 	if query.PreparedFields.Name == "" {
-		return ScorePiece{Score: 0, Weight: 0, FieldsCompared: 0, PieceType: "name"}
-	}
-
-	// Exact match fast path
-	if query.PreparedFields.Name == index.PreparedFields.Name {
-		return ScorePiece{
-			Score:          1.0,
-			Weight:         weight,
-			Matched:        true,
-			Required:       true,
-			Exact:          true,
-			FieldsCompared: 1,
-			PieceType:      "name",
-		}
+		return ScorePiece{Score: 0, Weight: 0, FieldsCompared: 0, PieceType: "name"}, nil
 	}
 
 	queryTerms := query.PreparedFields.NameFields
 	queryWeights := query.PreparedFields.NameWeights
 	cfg := opts.Algorithm.scoringConfig()
 
-	// Check primary name
-	bestMatch := compareNameTermsWeighted(queryTerms, index.PreparedFields.NameFields, queryWeights, index.PreparedFields.NameWeights, opts.TFIDF, cfg)
+	bestMatch := nameMatch{
+		querySide:     nameAgainstPrimary,
+		indexSide:     nameAgainstPrimary,
+		queryOriginal: query.Name,
+		queryPrepared: query.PreparedFields.Name,
+		queryTerms:    queryTerms,
+		indexOriginal: index.Name,
+		indexPrepared: index.PreparedFields.Name,
+		indexTerms:    index.PreparedFields.NameFields,
+	}
 
-	take := func(candidate nameMatch, historical bool) {
-		if historical {
-			candidate.score *= 0.95
-			candidate.isHistorical = true
+	// Exact match fast path
+	if query.PreparedFields.Name == index.PreparedFields.Name {
+		bestMatch.score = 1.0
+		bestMatch.tokenScore = 1.0
+		bestMatch.isExact = true
+		bestMatch.matchingTerms = len(queryTerms)
+		bestMatch.totalTerms = len(queryTerms)
+		var debug *NameDebug
+		if explain {
+			debug = explainName(query, index, bestMatch, opts, queryNormalizeType, true)
 		}
-		if candidate.score > bestMatch.score {
-			bestMatch = candidate
-		}
+		return namePiece(bestMatch, weight), debug
+	}
+
+	// Check primary name
+	primary := compareNameTermsWeighted(queryTerms, index.PreparedFields.NameFields, queryWeights, index.PreparedFields.NameWeights, opts.TFIDF, cfg)
+	takeNameMatch(&bestMatch, primary, false, nameAgainstPrimary, nameAgainstPrimary, query.Name, query.PreparedFields.Name, queryTerms, index.Name, index.PreparedFields.Name, index.PreparedFields.NameFields)
+
+	var altOriginals, histOriginals, queryHistOriginals []string
+	if explain {
+		altOriginals = originalAltNames(index)
+		histOriginals = originalHistoricalNames(index)
+		queryHistOriginals = originalHistoricalNames(query)
 	}
 
 	// Check alternate names unless the primary is already an exact-quality match.
@@ -76,7 +101,12 @@ func compareNameWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Enti
 			if idx < len(index.PreparedFields.AltNameWeights) {
 				indexWeights = index.PreparedFields.AltNameWeights[idx]
 			}
-			take(compareNameTermsWeighted(queryTerms, index.PreparedFields.AltNameFields[idx], queryWeights, indexWeights, opts.TFIDF, cfg), false)
+			orig := pickName(altOriginals, idx)
+			if orig == "" {
+				orig = pickName(index.PreparedFields.AltNames, idx)
+			}
+			prep := pickName(index.PreparedFields.AltNames, idx)
+			takeNameMatch(&bestMatch, compareNameTermsWeighted(queryTerms, index.PreparedFields.AltNameFields[idx], queryWeights, indexWeights, opts.TFIDF, cfg), false, nameAgainstPrimary, nameAgainstAlt, query.Name, query.PreparedFields.Name, queryTerms, orig, prep, index.PreparedFields.AltNameFields[idx])
 			if bestMatch.score >= exactMatchThreshold {
 				break
 			}
@@ -90,7 +120,12 @@ func compareNameWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Enti
 			if idx < len(index.PreparedFields.HistoricalNameWeights) {
 				indexWeights = index.PreparedFields.HistoricalNameWeights[idx]
 			}
-			take(compareNameTermsWeighted(queryTerms, index.PreparedFields.HistoricalNameFields[idx], queryWeights, indexWeights, opts.TFIDF, cfg), true)
+			orig := pickName(histOriginals, idx)
+			if orig == "" {
+				orig = pickName(index.PreparedFields.HistoricalNames, idx)
+			}
+			prep := pickName(index.PreparedFields.HistoricalNames, idx)
+			takeNameMatch(&bestMatch, compareNameTermsWeighted(queryTerms, index.PreparedFields.HistoricalNameFields[idx], queryWeights, indexWeights, opts.TFIDF, cfg), true, nameAgainstPrimary, nameAgainstHistorical, query.Name, query.PreparedFields.Name, queryTerms, orig, prep, index.PreparedFields.HistoricalNameFields[idx])
 			if bestMatch.score >= exactMatchThreshold {
 				break
 			}
@@ -106,7 +141,13 @@ func compareNameWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Enti
 				qHistWeights = query.PreparedFields.HistoricalNameWeights[qIdx]
 			}
 			qHistTerms := query.PreparedFields.HistoricalNameFields[qIdx]
-			take(compareNameTermsWeighted(qHistTerms, index.PreparedFields.NameFields, qHistWeights, index.PreparedFields.NameWeights, opts.TFIDF, cfg), true)
+			qOrig := pickName(queryHistOriginals, qIdx)
+			if qOrig == "" {
+				qOrig = pickName(query.PreparedFields.HistoricalNames, qIdx)
+			}
+			qPrep := pickName(query.PreparedFields.HistoricalNames, qIdx)
+
+			takeNameMatch(&bestMatch, compareNameTermsWeighted(qHistTerms, index.PreparedFields.NameFields, qHistWeights, index.PreparedFields.NameWeights, opts.TFIDF, cfg), true, nameAgainstHistorical, nameAgainstPrimary, qOrig, qPrep, qHistTerms, index.Name, index.PreparedFields.Name, index.PreparedFields.NameFields)
 			if bestMatch.score >= exactMatchThreshold {
 				break
 			}
@@ -115,7 +156,12 @@ func compareNameWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Enti
 				if idx < len(index.PreparedFields.AltNameWeights) {
 					indexWeights = index.PreparedFields.AltNameWeights[idx]
 				}
-				take(compareNameTermsWeighted(qHistTerms, index.PreparedFields.AltNameFields[idx], qHistWeights, indexWeights, opts.TFIDF, cfg), true)
+				orig := pickName(altOriginals, idx)
+				if orig == "" {
+					orig = pickName(index.PreparedFields.AltNames, idx)
+				}
+				prep := pickName(index.PreparedFields.AltNames, idx)
+				takeNameMatch(&bestMatch, compareNameTermsWeighted(qHistTerms, index.PreparedFields.AltNameFields[idx], qHistWeights, indexWeights, opts.TFIDF, cfg), true, nameAgainstHistorical, nameAgainstAlt, qOrig, qPrep, qHistTerms, orig, prep, index.PreparedFields.AltNameFields[idx])
 				if bestMatch.score >= exactMatchThreshold {
 					break
 				}
@@ -128,7 +174,12 @@ func compareNameWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Enti
 				if idx < len(index.PreparedFields.HistoricalNameWeights) {
 					indexWeights = index.PreparedFields.HistoricalNameWeights[idx]
 				}
-				take(compareNameTermsWeighted(qHistTerms, index.PreparedFields.HistoricalNameFields[idx], qHistWeights, indexWeights, opts.TFIDF, cfg), true)
+				orig := pickName(histOriginals, idx)
+				if orig == "" {
+					orig = pickName(index.PreparedFields.HistoricalNames, idx)
+				}
+				prep := pickName(index.PreparedFields.HistoricalNames, idx)
+				takeNameMatch(&bestMatch, compareNameTermsWeighted(qHistTerms, index.PreparedFields.HistoricalNameFields[idx], qHistWeights, indexWeights, opts.TFIDF, cfg), true, nameAgainstHistorical, nameAgainstHistorical, qOrig, qPrep, qHistTerms, orig, prep, index.PreparedFields.HistoricalNameFields[idx])
 				if bestMatch.score >= exactMatchThreshold {
 					break
 				}
@@ -140,20 +191,146 @@ func compareNameWithTFIDF[Q any, I any](w io.Writer, query Entity[Q], index Enti
 	if bestMatch.isHistorical && termCount < minMatchingTerms {
 		termCount = bestMatch.totalTerms
 	}
-	bestMatch.score = adjustScoreBasedOnQuality(bestMatch, termCount)
-	if !bestMatch.isHistorical && !isNameCloseEnough(query.PreparedFields, index.PreparedFields) {
+
+	afterHist := bestMatch.score
+	afterQuality := adjustScoreBasedOnQuality(bestMatch, termCount)
+	bestMatch.score = afterQuality
+	closeEnough := bestMatch.isHistorical || isNameCloseEnough(query.PreparedFields, index.PreparedFields)
+	if !closeEnough {
 		bestMatch.score *= 0.85
 	}
+	bestMatch.afterHist = afterHist
+	bestMatch.afterQuality = afterQuality
+	bestMatch.closeEnoughApplied = !closeEnough
 
+	var debug *NameDebug
+	if explain {
+		debug = explainName(query, index, bestMatch, opts, queryNormalizeType, false)
+	}
+	return namePiece(bestMatch, weight), debug
+}
+
+func namePiece(match nameMatch, weight float64) ScorePiece {
 	return ScorePiece{
-		Score:          bestMatch.score,
+		Score:          match.score,
 		Weight:         weight,
-		Matched:        bestMatch.score > 0.6,
+		Matched:        match.score > 0.6,
 		Required:       true,
-		Exact:          bestMatch.isExact,
+		Exact:          match.isExact,
 		FieldsCompared: 1,
 		PieceType:      "name",
 	}
+}
+
+func pickName(names []string, idx int) string {
+	if idx < len(names) {
+		return names[idx]
+	}
+	return ""
+}
+
+func takeNameMatch(best *nameMatch, candidate nameMatch, historical bool, querySide, indexSide, queryOrig, queryPrep string, queryTerms []string, indexOrig, indexPrep string, indexTerms []string) {
+	candidate.tokenScore = candidate.score
+	if historical {
+		candidate.score *= 0.95
+		candidate.isHistorical = true
+	}
+	if candidate.score <= best.score {
+		return
+	}
+	candidate.querySide = querySide
+	candidate.indexSide = indexSide
+	candidate.queryOriginal = queryOrig
+	candidate.queryPrepared = queryPrep
+	candidate.queryTerms = queryTerms
+	candidate.indexOriginal = indexOrig
+	candidate.indexPrepared = indexPrep
+	candidate.indexTerms = indexTerms
+	*best = candidate
+}
+
+func explainName[Q any, I any](query Entity[Q], index Entity[I], match nameMatch, opts SimilarityOpts, queryNormalizeType EntityType, exactPrepared bool) *NameDebug {
+	debug := &NameDebug{
+		Score:      match.score,
+		Exact:      match.score >= exactMatchThreshold,
+		Historical: match.isHistorical,
+		QueryName:  match.querySide,
+		IndexName:  match.indexSide,
+		Query:      nameSideFrom(query.Name, match.queryOriginal, match.queryPrepared, match.queryTerms, queryNormalizeType),
+		Index:      nameSideFrom(index.Name, match.indexOriginal, match.indexPrepared, match.indexTerms, index.Type),
+	}
+
+	if exactPrepared {
+		debug.Pairs = identityTokenPairs(match.queryTerms)
+		debug.Steps = []ScoreStep{{Stage: "exact-prepared", Score: 1.0, Reason: "prepared names are identical"}}
+		return debug
+	}
+
+	cfg := opts.Algorithm.scoringConfig()
+	queryWeights := matchQueryWeights(query, match)
+	indexWeights := matchIndexWeights(index, match)
+	useWeighted := len(queryWeights) == len(match.queryTerms) && len(indexWeights) == len(match.indexTerms)
+	if !useWeighted && opts.TFIDF != nil && opts.TFIDF.Enabled() {
+		queryWeights = opts.TFIDF.GetWeights(match.queryTerms)
+		indexWeights = opts.TFIDF.GetWeights(match.indexTerms)
+		useWeighted = len(queryWeights) == len(match.queryTerms) && len(indexWeights) == len(match.indexTerms)
+	}
+	if useWeighted {
+		_, pairs := stringscore.ExplainBestPairCombinationJaroWinklerWeighted(match.queryTerms, match.indexTerms, queryWeights, indexWeights, cfg)
+		debug.Pairs = tokenPairsFromExplain(pairs)
+	} else {
+		_, pairs := stringscore.ExplainBestPairCombinationJaroWinkler(match.queryTerms, match.indexTerms, cfg)
+		debug.Pairs = tokenPairsFromExplain(pairs)
+	}
+
+	prev := match.tokenScore
+	debug.Steps = appendNameStep(debug.Steps, "token-pairs", "", 0, match.tokenScore)
+	if match.isHistorical {
+		debug.Steps = appendNameStep(debug.Steps, "historical", "former-name penalty 0.95", prev, match.afterHist)
+		prev = match.afterHist
+	}
+	if match.afterQuality != prev {
+		debug.Steps = appendNameStep(debug.Steps, "few-matching-terms", "inferred matching-term count is below 2 from the aggregate token-pair score", prev, match.afterQuality)
+		prev = match.afterQuality
+	}
+	if match.closeEnoughApplied {
+		qCount := strings.Count(query.PreparedFields.Name, " ") + 1
+		iCount := strings.Count(index.PreparedFields.Name, " ") + 1
+		debug.Steps = appendNameStep(debug.Steps, "close-enough", fmt.Sprintf("primary name term counts %d vs %d", qCount, iCount), prev, match.score)
+	}
+	return debug
+}
+
+func matchQueryWeights[Q any](query Entity[Q], match nameMatch) []float64 {
+	if match.querySide == nameAgainstHistorical {
+		for i, prepared := range query.PreparedFields.HistoricalNames {
+			if prepared == match.queryPrepared && i < len(query.PreparedFields.HistoricalNameWeights) {
+				return query.PreparedFields.HistoricalNameWeights[i]
+			}
+		}
+		return nil
+	}
+	return query.PreparedFields.NameWeights
+}
+
+func matchIndexWeights[I any](index Entity[I], match nameMatch) []float64 {
+	switch match.indexSide {
+	case nameAgainstAlt:
+		for i, prepared := range index.PreparedFields.AltNames {
+			if prepared == match.indexPrepared && i < len(index.PreparedFields.AltNameWeights) {
+				return index.PreparedFields.AltNameWeights[i]
+			}
+		}
+		return nil
+	case nameAgainstHistorical:
+		for i, prepared := range index.PreparedFields.HistoricalNames {
+			if prepared == match.indexPrepared && i < len(index.PreparedFields.HistoricalNameWeights) {
+				return index.PreparedFields.HistoricalNameWeights[i]
+			}
+		}
+		return nil
+	}
+	return index.PreparedFields.NameWeights
 }
 
 // compareNameFields performs detailed term-by-term comparison

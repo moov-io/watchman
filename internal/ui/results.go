@@ -169,7 +169,11 @@ func resultMeta(entity search.SearchedEntity[search.Value]) string {
 func entityDetails(entity search.SearchedEntity[search.Value]) fyne.CanvasObject {
 	content := container.NewVBox()
 
-	score := widget.NewLabelWithStyle(formatMatch(entity.Match)+" match", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	scoreText := formatMatch(entity.Match) + " match"
+	if entity.Details.RankedBy == search.RankedByEmbeddings {
+		scoreText = formatMatch(entity.Match) + " embeddings"
+	}
+	score := widget.NewLabelWithStyle(scoreText, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
 	score.Importance = matchImportance(entity.Match)
 	score.Selectable = true
 	content.Add(score)
@@ -412,26 +416,122 @@ func historicalCard(items []search.HistoricalInfo) fyne.CanvasObject {
 
 func scoreBreakdown(entity search.SearchedEntity[search.Value]) fyne.CanvasObject {
 	box := container.NewVBox()
+	if entity.Details.RankedBy == search.RankedByEmbeddings {
+		box.Add(wordWrappingLabel(fmt.Sprintf("Similarity diagnostic  %s", formatMatch(entity.Details.FinalScore))))
+	}
+	if entity.Details.Name != nil {
+		box.Add(nameDebugCard(*entity.Details.Name))
+	}
+	if len(entity.Details.Steps) > 0 {
+		trailTitle := "Score trail"
+		if entity.Details.RankedBy == search.RankedByEmbeddings {
+			trailTitle = "Similarity trail"
+		}
+		box.Add(scoreStepsCard(trailTitle, entity.Details.Steps))
+	}
 	for _, piece := range entity.Details.Pieces {
 		if piece.FieldsCompared == 0 && piece.Score == 0 && !piece.Matched {
 			continue
 		}
 		label := wordWrappingLabel(fmt.Sprintf("%s  %s", piece.PieceType, formatMatch(piece.Score)))
 		label.Importance = matchImportance(piece.Score)
-		if piece.Exact {
+		if piece.Exact && piece.Score >= 0.99 {
 			label.SetText(label.Text + "  exact")
 		}
 		box.Add(label)
 	}
-	if text := decodeDebug(entity.Debug); text != "" {
-		log := wordWrappingLabel(text)
-		log.TextStyle = fyne.TextStyle{Monospace: true}
-		box.Add(log)
+	if entity.Details.Name == nil && len(entity.Details.Steps) == 0 {
+		if text := decodeDebug(entity.Debug); text != "" {
+			log := wordWrappingLabel(text)
+			log.TextStyle = fyne.TextStyle{Monospace: true}
+			box.Add(log)
+		}
 	}
 	if len(box.Objects) == 0 {
 		return nil
 	}
 	return widget.NewAccordion(widget.NewAccordionItem("Score breakdown", box))
+}
+
+func nameDebugCard(name search.NameDebug) fyne.CanvasObject {
+	box := container.NewVBox()
+
+	title := fmt.Sprintf("Name  %s", formatMatch(name.Score))
+	if name.Exact {
+		title += "  exact"
+	}
+	if name.Historical {
+		title += "  historical"
+	}
+	if name.QueryName != "" || name.IndexName != "" {
+		title += fmt.Sprintf("  query %s · index %s", name.QueryName, name.IndexName)
+	}
+	head := wordWrappingLabel(title)
+	head.Importance = matchImportance(name.Score)
+	box.Add(head)
+
+	box.Add(nameSideLabel("Query", name.Query))
+	box.Add(nameSideLabel("Index", name.Index))
+
+	for _, pair := range name.Pairs {
+		line := fmt.Sprintf("%s  ↔  %s  %s", emptyName(pair.Query), emptyName(pair.Index), formatMatch(pair.Score))
+		label := wordWrappingLabel(line)
+		label.Importance = matchImportance(pair.Score)
+		box.Add(label)
+	}
+	for _, step := range name.Steps {
+		box.Add(scoreStepLabel(step))
+	}
+	return box
+}
+
+func nameSideLabel(kind string, side search.NameSide) *widget.Label {
+	text := kind + ": " + emptyName(side.Original)
+	for _, step := range side.Steps {
+		if step.Stage == "original" {
+			continue
+		}
+		text += "\n" + step.Stage + ": " + step.Value
+	}
+	if side.Compared != "" {
+		text += "\ncompared: " + side.Compared
+	}
+	if side.Prepared != "" && !strings.EqualFold(strings.TrimSpace(side.Original), side.Prepared) {
+		text += "\nprepared: " + side.Prepared
+	}
+	if len(side.Tokens) > 0 {
+		text += "\ntokens: " + strings.Join(side.Tokens, " ")
+	}
+	return wordWrappingLabel(text)
+}
+
+func scoreStepsCard(title string, steps []search.ScoreStep) fyne.CanvasObject {
+	box := container.NewVBox()
+	box.Add(wordWrappingLabel(title))
+	for _, step := range steps {
+		box.Add(scoreStepLabel(step))
+	}
+	return box
+}
+
+func scoreStepLabel(step search.ScoreStep) *widget.Label {
+	text := fmt.Sprintf("%s  %s", step.Stage, formatMatch(step.Score))
+	if step.Delta != 0 {
+		text += fmt.Sprintf("  %+.1f%%", step.Delta*100)
+	}
+	if step.Reason != "" {
+		text += "  " + step.Reason
+	}
+	label := wordWrappingLabel(text)
+	label.Importance = matchImportance(step.Score)
+	return label
+}
+
+func emptyName(s string) string {
+	if s == "" {
+		return "—"
+	}
+	return s
 }
 
 func decodeDebug(encoded string) string {

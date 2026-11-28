@@ -45,7 +45,7 @@ type SearchEntitiesRequest struct {
 	Limit    *int     `json:"limit,omitempty" jsonschema:"Maximum number of results to return (default 10)"`
 	MinMatch *float64 `json:"minMatch,omitempty" jsonschema:"Minimum match score threshold (default 0.0)"`
 
-	IncludeDetails *bool `json:"includeDetails,omitempty" jsonschema:"Include field-level match score breakdown per result (names, addresses, IDs, etc.)"`
+	IncludeDetails *bool `json:"includeDetails,omitempty" jsonschema:"Include typed score breakdown per result (name token pairs, step deltas, field pieces)"`
 
 	Algorithm *string `json:"algorithm,omitempty" jsonschema:"String matching algorithm: jaro-winkler (default), soundex, soft-bidist, soft-bisim, editex, nsim, nsim-3, double-metaphone, or beider-morse"`
 }

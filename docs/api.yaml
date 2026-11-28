@@ -449,7 +449,9 @@ paths:
         - name: debug
           in: query
           description: |
-            Include field-level score pieces on returned hits.
+            Include a typed score breakdown (`details`) and a human-readable trail (`debug`) on returned hits.
+            `details.name` has the name score, query vs index tokens, token pairs, and per-step deltas.
+            `details.steps` is the final-score trail (base, name-only, override, conflicts).
             `true`/`yes`/`1` attaches debug to every returned result.
             A number such as `0.80` attaches debug only when match is at least that score.
             Debug is computed after ranking, only for those hits.
@@ -1564,7 +1566,97 @@ components:
         pieceType:
           type: string
           description: Type of comparison this piece represents (e.g., "identifiers", "name")
+        uniqueIdentity:
+          type: boolean
+          description: Whether the matched identifier is unique to one legal person or asset (passport, IMO, crypto, SWIFT/BIC)
       type: object
+    ScoreStep:
+      type: object
+      description: One adjustment on a score trail. There is no API stability guarantee.
+      properties:
+        stage:
+          type: string
+          description: Name of this step (token-pairs, historical, name-only, exact-override, …)
+        score:
+          type: number
+          format: float
+          description: Score after this step (0-1)
+        delta:
+          type: number
+          format: float
+          description: Change from the previous step
+        reason:
+          type: string
+          description: Why this step fired
+    NameTransform:
+      type: object
+      description: One Normalize() rewrite of a name when the value changed
+      properties:
+        stage:
+          type: string
+        value:
+          type: string
+    NameSide:
+      type: object
+      description: One side of a name comparison. original is the entity display name; compared is the winning AKA or former name when it differs.
+      properties:
+        original:
+          type: string
+          description: Entity display name
+        compared:
+          type: string
+          description: Winning name when it differs from original (AKA or former name)
+        prepared:
+          type: string
+          description: Normalized form that was scored
+        tokens:
+          type: array
+          items:
+            type: string
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/NameTransform'
+    TokenPair:
+      type: object
+      description: Greedy query-token to index-token alignment. An empty query or index means unmatched.
+      properties:
+        query:
+          type: string
+        index:
+          type: string
+        score:
+          type: number
+          format: float
+    NameDebug:
+      type: object
+      description: Name-comparison breakdown. There is no API stability guarantee.
+      properties:
+        score:
+          type: number
+          format: float
+        exact:
+          type: boolean
+        historical:
+          type: boolean
+        queryName:
+          type: string
+          description: Which query name was compared (primary or historical)
+        indexName:
+          type: string
+          description: Which list name was compared (primary, alt, or historical)
+        query:
+          $ref: '#/components/schemas/NameSide'
+        index:
+          $ref: '#/components/schemas/NameSide'
+        pairs:
+          type: array
+          items:
+            $ref: '#/components/schemas/TokenPair'
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScoreStep'
     SearchedEntity:
       description: An Entity returned from a search, with match score and optional scoring details
       allOf:
@@ -1579,10 +1671,13 @@ components:
               description: Match score for this entity against the query
             debug:
               type: string
-              description: Base64-encoded field-level match details (set when ?debug=true or ?debug meets the match threshold)
+              description: |
+                Human-readable score trail (name comparison, token pairs, step deltas).
+                Prefer `details` for programmatic use. Format is not stable.
+                Set when ?debug=true or ?debug meets the match threshold.
             details:
               $ref: '#/components/schemas/SimilarityScore'
-              description: Field-level scoring breakdown
+              description: Typed score breakdown (pieces, name comparison, final-score steps)
     SearchResponse:
       properties:
         query:
@@ -1595,15 +1690,34 @@ components:
       type: object
     SimilarityScore:
       properties:
+        rankedBy:
+          type: string
+          enum: [similarity, embeddings]
+          description: |
+            How /v2/search ranked the hit. `similarity` is field similarity scoring.
+            `embeddings` is cosine ranking; `finalScore` is then a similarity diagnostic
+            and can differ from `match`.
+        rankingScore:
+          type: number
+          format: float
+          description: Embedding cosine when rankedBy is embeddings. Omitted for similarity ranking.
         pieces:
           items:
             $ref: '#/components/schemas/ScorePiece'
           type: array
           description: Per-comparison score breakdown
+        name:
+          $ref: '#/components/schemas/NameDebug'
+          description: Name comparison with token pairs and per-step score deltas
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScoreStep'
+          description: Final-score trail (base, coverage, name-only, override, conflicts)
         finalScore:
           type: number
           format: float
-          description: Computed final match score
+          description: Field similarity score from the selected name algorithm. Same as match when rankedBy is similarity.
       type: object
     Vessel:
       properties:

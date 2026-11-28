@@ -41,7 +41,7 @@ On 472,477 labeled people, companies, and vessels ([OpenSanctions Pairs](https:/
 - **Structured search** — `type` (person, business, organization, vessel, aircraft), name, aliases, government IDs, dates, addresses, crypto, contact
 - **How IDs work** — a matching passport, IMO number, SWIFT/BIC, or crypto address (with country) scores 1.0; a matching tax number or email raises the score; two national IDs that disagree lower the score
 - **You set the cutoff** — `minMatch` is policy (0.80 screening, ~0.59 high recall)
-- **Explainable hits** — `debug=true` returns field-level score pieces
+- **Explainable hits** — `debug=true` returns a typed name comparison, token pairs, and per-step score deltas
 - **Fast candidate search** — source/type partitions, name-token and ID indexes, parallel scoring ([Performance](https://moov-io.github.io/watchman/performance/), [Indexing](https://moov-io.github.io/watchman/indexing/))
 - **Optional** — TF-IDF, cross-script embeddings, geocoding, deepparse, Senzing request/response format, MCP. Docker images and Linux/macOS GitHub releases parse addresses with libpostal; Windows `.exe` and `go run` use usaddress; any build can enable deepparse.
 
