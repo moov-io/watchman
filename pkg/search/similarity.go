@@ -444,6 +444,14 @@ func countFieldsByImportance(pieces []ScorePiece) entityFields {
 
 		if piece.Required {
 			fields.required += piece.FieldsCompared
+		} else if piece.Matched && piece.Exact && piece.PieceType == "contact-exact" {
+			// An exact contact match (email, phone, fax, website or domain) fills one
+			// required slot so name+phone is not a thin query. Count the piece once:
+			// a website plus its extracted domain is one contact match, not two.
+			// Every compared contact type must match, so a partial match gets no slot.
+			// Government IDs and crypto addresses are not counted here because the
+			// "identifiers" piece already counts them as required.
+			fields.required++
 		}
 		if piece.Matched {
 			if piece.PieceType == "name" {

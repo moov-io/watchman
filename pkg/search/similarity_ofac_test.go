@@ -62,7 +62,9 @@ func TestSimilarity_OFAC_SDN_Person(t *testing.T) {
 					EmailAddresses: []string{"khoroshev1@icloud.com"},
 				},
 			},
-			expected: 0.806,
+			// Exact email counts as a required field (skips the thin-query 0.90)
+			// but is not a unique identity key, so name-only 0.95 still applies.
+			expected: 0.896,
 		},
 		{
 			name: "Name match only",

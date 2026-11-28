@@ -34,7 +34,7 @@ After `Normalize()` (case, punctuation, stopwords, phones, addresses), `Similari
 | Dates | 15 | Birth, death, incorporation, dissolution |
 | Supporting | 15 | Sanctions programs, historical names |
 
-Empty query fields are not compared. The blended score is a coverage-aware weighted average (`FINAL_SCORE_*` multipliers). Name-only queries are down-ranked (`FINAL_SCORE_NAME_ONLY_MULTIPLIER`, default 0.95).
+Empty query fields are not compared. The blended score is a coverage-aware weighted average (`FINAL_SCORE_*` multipliers). Name-only queries are down-ranked (`FINAL_SCORE_NAME_ONLY_MULTIPLIER`, default 0.95). An exact contact match (email, phone, fax, website, or domain) counts as one required field, so name+phone is not treated as a thin query under `FINAL_SCORE_MIN_REQUIRED_FIELDS_MULTIPLIER`. Every contact type in both records must match; name+phone with a different email still takes the penalty. The name-only 0.95 still applies unless a unique ID or address also matches.
 
 ### When a match is 1.0
 
